@@ -1,440 +1,598 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './epistemology4Script';
-import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
-  stageAnswered,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
-import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import {
+  tree, treeAt, outsideGround, wall, desk, paperRail, sun, OUTSIDE, TREE, WALL_X, HOLE, PAPER, DESK, SHEET, CORD,
+} from './epistemology4Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// epistemology-knowledge-4, "Where Does Knowledge Come From?" — A DARK CLOSET WITH
+// ONE OPENING, which is Locke's own picture of the understanding.
+//
+// Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
+// laid across its voiced line in stages (pace.ts, line lengths from the manifest).
+//
+//   b0   he stands before a blank sheet of white paper; EXPERIENCE and REASON go up.
+//   b1   he points at the blank paper, goes to the shutter in the wall and opens it:
+//        the tree outside falls onto the paper, upside down; then he taps his head.
+//   b3   the red apple outside lands on the paper as a red mark; he feels the warmth
+//        of the beam with his hand; a red mark, a round and a stem slide together
+//        into an apple.
+//   b5   he closes the shutter and goes to his desk.
+//   b6   with a compass he draws a perfect circle.
+//   b7   from the other end of the desk he lays four triangles into the doubled
+//        square, a question mark rising at each.
+//   b8   the outline of the doubled square was there before he began; it glows.
+//   b9   Q1: four names pinned on the white paper.
+//   b10  he goes back and opens the shutter again: the image returns.
+//   b11  he pulls the cord by the paper and a grid comes down over the image:
+//        SPACE · TIME · CAUSE.
+//
+// COMPOSITION, in stage units: outside 0–62; the wall 62–76, its opening at (76, 440);
+// the paper 282–392 × 356–438; the desk 176–244 with its sheet at 180–240; the cord at
+// 268. He stands at 96 at the shutter, 150 in the room, 164 and 270 at the ends of
+// the desk, 250 at the cord. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('epistemology');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const LEAF = stageToneOf(TEAL);
+const TR = 0.85;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A LABELLED FLOW DIAGRAM standing over the two arguers.
-//
-//   LEFT PANEL  (y 196–278)   [eye] ──•••──▸ [slate]      experience writes it in
-//   RIGHT PANEL (y 196–278)   a mind that already holds 2+2=4, A=A, no square circles
-//   KANT BOX    (y 286–342)   both panels feed down into one: DATA + FORMS = EXPERIENCE
-//   THE ARGUERS (y 354–500)   empiricist facing right, rationalist facing left
-//
-// On the question beat the panels give way to four big name plates, so Q1 is answered
-// by tapping the stage. The camera is identity, so these constants ARE final stage
-// coordinates and the band can be read straight off them.
-//
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Four taps held one frame. Each now draws what it names, in the empty row under the
-// panels (y 288…342) that Kant's box does not use until beat 10:
-//   · "this view is called empiricism" — EMPIRICISM under the left panel (x 14…100)
-//   · "is called a priori" — A PRIORI under the right one (x 300…386)
-//   · "how to double a square" — the boy's square, and on "the soul already knew
-//     these truths" the square on its diagonal and KNOWN BEFORE BIRTH (`meno`,
-//     x 106…296). Meno's figure: four cells of 24, and the square through their
-//     diagonals, which is exactly twice one cell (33.94² = 1152 = 2 × 576).
-//   · Kant's box arrives with SENSE DATA alone on "the content … comes through the
-//     senses", and completes — + MIND'S FORMS, = KNOWLEDGE, the second feeder — on
-//     "the mind orders that content through its own forms … Knowledge needs both"
-//     (`forms`). It read = EXPERIENCE; the sentence it stands under says knowledge.
-// Both figures' skulls top out at y ≈ 396, far below all of it.
-// ─────────────────────────────────────────────────────────────────────────────
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, epistemology-knowledge-4. */
+const LINES = [7.72, 8.16, 5.64, 9.2, 0, 6.44, 7.96, 10.76, 5.4, 0, 5.88, 6.88, 0, 0];
 
-const E_X = 96;
-const R_X = 296;
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_E = K_FIG * 0.82;
 
-const PAN_T = 196;
-const PAN_H = 82;
-const PAN_W = 176;
-const PAN_L = 14;
-const PAN_R = 210;
+const X = BEATS.map((b) => b.x ?? 250);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_BLANK = is('blank');
+const A_OPEN = is('open');
+const A_FED = is('fed');
+const A_SIMPLE = is('simple');
+const A_SHUT = is('shut');
+const A_COMPASS = is('compass');
+const A_MENO = is('meno');
+const A_RECALL = is('recall');
+const A_KANT = is('kant');
+const A_FORMS = is('forms');
+const flag = (k: keyof (typeof BEATS)[number]) => BEATS.map((b) => (b[k] ? 1 : 0));
+const LIT = flag('lit');
+const APPLE = flag('apple');
+const CIRCLE = flag('circle');
+const TILES = flag('tiles');
+const GRID = flag('grid');
+const NAMES = flag('names');
+const EXP_ON = BEATS.map((b) => ((b.plates ?? 0) >= 1 ? 1 : 0));
+/** The sort is being answered: the paper shows how much of it reason supplies (R7c). */
+const SORT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+/** How much of the paper reason's grid claims, in the bins' own order: none, some, all. */
+const REASON_SHARE = [0, 0.5, 1];
+/** Which way he faces once a beat settles. */
+const DIR = BEATS.map((b) => (b.act === 'open' || b.act === 'kant' || b.act === 'meno' || b.act === 'recall' ? -1 : 1));
 
-// left panel internals
-const EYE = { x: 24, y: 222, w: 42, h: 26 };
-const FLOW = { y: 234, x0: 72, x1: 106 };
-const FLOW_RUN = FLOW.x1 - FLOW.x0 - 6;      // how far a sensation travels the arrow
-const SLATE = { x: 112, y: 218, w: 70, h: 52 };
-const MARKS = [0.15, 0.38, 0.6, 0.82];       // a slate line lands as fill crosses each
-
-// right panel internals
-const AXIOMS = ['2 + 2 = 4', 'A = A', 'NO SQUARE CIRCLES'];
-
-// ── the scene-answered question (Q1): four name plates, 176 × 44 each ───────
-const PLATES = [
-  { id: 'locke', label: 'JOHN LOCKE', x: PAN_L, y: 220, correct: true },
-  { id: 'desc', label: 'DESCARTES', x: PAN_R, y: 220, correct: false },
-  { id: 'plato', label: 'PLATO', x: PAN_L, y: 274, correct: false },
-  { id: 'leib', label: 'LEIBNIZ', x: PAN_R, y: 274, correct: false },
+const NAME_Q = [
+  { id: 'locke', label: 'LOCKE', x: 309, y: 366, correct: true },
+  { id: 'descartes', label: 'DESCARTES', x: 365, y: 366, correct: false },
+  { id: 'plato', label: 'PLATO', x: 309, y: 402, correct: false },
+  { id: 'leibniz', label: 'LEIBNIZ', x: 365, y: 402, correct: false },
 ];
+const CARD_W = 54;
+const CARD_H = 24;
+/** The compass circle and the doubled square, on the desk's sheet. */
+const CIRC = { x: 192, y: 439, r: 8 };
+const SQ = { x: 229, y: 439, r: 10 };
 
-const E_CODE = BEATS.map((b) => b.e ?? 0);
-const R_CODE = BEATS.map((b) => b.r ?? 0);
-const FILL = BEATS.map((b) => b.fill ?? 0);
-const GLOW = BEATS.map((b) => b.glow ?? 0);
-const BRIDGE = BEATS.map((b) => b.bridge ?? 0);
-const SCHOOL = BEATS.map((b) => b.school ?? 0);
-const APRIORI = BEATS.map((b) => b.apriori ?? 0);
-const MENO = BEATS.map((b) => b.meno ?? 0);
-const FORMS = BEATS.map((b) => b.forms ?? 0);
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_E, dir: dir < 0 ? -1 : 1 }, 1, tx, ty, w);
+}
+/**
+ * A walk between stops inside one beat: each leg is [to, start-seconds], walked at the
+ * pace its distance needs. Returns where he is and how far into the current leg.
+ */
+function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x: number; from: number; to: number; u: number } {
+  'worklet';
+  let from = x0;
+  for (let k = 0; k < legs.length; k++) {
+    const to = legs[k][0];
+    const start = legs[k][1];
+    const dur = moveTr(from, to, TR);
+    if (b < start) return { x: from, from, to: from, u: 1 };
+    if (b < start + dur) {
+      const u = ease01((b - start) / dur);
+      return { x: lerp(from, to, u), from, to, u };
+    }
+    from = to;
+  }
+  return { x: from, from, to: from, u: 1 };
+}
+/** b5: close the shutter, then to the desk. */
+const SHUT_LEGS = [[164, 0.9]];
+/** b7: round to the far end of the desk. */
+const MENO_LEGS = [[270, 0.3]];
+/** b10: back to the shutter. */
+const KANT_LEGS = [[96, 0.2]];
+/** b11: across to the cord by the paper. */
+const FORMS_LEGS = [[250, 0.2]];
 
-// Meno's figure: a 2 × 2 grid of 24-unit cells, the boy's square the top-left one.
-const MENO_L = 106;
-const MENO_T = 290;
-const CELL = 24;
-const DIAG = CELL * Math.SQRT2;              // the side of the doubled square
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology'));
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on.
-// Two figures at 96 and 296, so the track is the point BETWEEN them (196) — following
-// either one alone would frame the other out, and here the pair is the subject.
-const X = BEATS.map((b) => b.x ?? 196);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('epistemology4'));
-
-export default function Epistemology4Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldE = useHeld();
-  const cv = useCarry(7);
-  const heldR = useHeld();
-  const cur = BEATS[i];
-  const answered = picked !== null;
-  // ONLY THE QUESTION ASKED ON THE STAGE mounts its targets (E41). It was
-  // `!!cur.interact`, so on the second question — a control answered below the
-  // figure — the stage swapped its diagram for the first question's cards, and the
-  // diagram the control moves (R7c) could not be seen at all.
-  const asking = stageAnswered(cur);
-  // The instruction retires once answered: the chosen card lifts into its line.
-  const spent = useAnswerSpent(picked);
-
+export default function Epistemology4Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(23);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const e = keepHeld(heldE, mixStance(carryFrom(heldE, n, emoteHold(E_CODE[p], t)), emoteLive(E_CODE[n], t, bt.value), tr));
-    const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const legs = A_SHUT[n] ? SHUT_LEGS : A_MENO[n] ? MENO_LEGS : A_KANT[n] ? KANT_LEGS : A_FORMS[n] ? FORMS_LEGS : null;
+    const leg = legs ? legAt(b, xp, legs) : null;
+    const walking = !leg && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const tx = leg ? leg.x : xn;
+    const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : leg ? 1 : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    const moving = leg ? leg.u < 1 && leg.to !== leg.from : false;
+    if (leg && moving) s = travelStance(leg.from, leg.to, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
+
+    // facing: the way he walks, then what the beat is about
+    let dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    if (A_SIMPLE[n]) dirV = 1 - 2 * sec(2.7, 2.95) + 2 * sec(4.9, 5.15);
+    if (A_SHUT[n]) dirV = lerp(facing(DIR[p], -1, b), 1, sec(0.8, 1.0));
+    if (leg && !A_SHUT[n]) {
+      const tv = leg.to !== leg.from ? (leg.to > leg.from ? 1 : -1) : DIR[n];
+      dirV = moving ? tv : lerp(tv, DIR[n], sec(0.0, 0.01));
+      if (A_MENO[n]) dirV = lerp(facing(DIR[p], 1, b), -1, sec(2.05, 2.35));
+      if (A_KANT[n]) dirV = facing(DIR[p], -1, b);
+      if (A_FORMS[n]) dirV = facing(DIR[p], 1, b);
+    }
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── b1: pointing at the blank paper, the shutter, a tap to his head ─────
+    const pointPaper = A_OPEN[n] ? 0 : A_BLANK[n] ? pulse(1.0, 1.6, 3.4) : 0;
+    s = handOn(s, x, dir, PAPER.x0 + 20, 420, pointPaper);
+    const shutterHand = (A_OPEN[n] ? pulse(2.2, 2.6, 3.2) : 0) + (A_SHUT[n] ? pulse(0.05, 0.35, 0.75) : 0) + (A_KANT[n] ? pulse(3.2, 3.55, 4.1) : 0);
+    s = handOn(s, x, dir, HOLE.x + 4, HOLE.y - 2, shutterHand);
+    const tapHead = A_OPEN[n] ? pulse(6.3, 6.7, 7.8) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 4, y: -70 } }, tapHead);
+    // ── b3: the hand held into the warm beam, and pulled back ───────────────
+    const warm = A_SIMPLE[n] ? pulse(3.0, 3.35, 4.7) : 0;
+    s = handOn(s, x, dir, HOLE.x + 12, HOLE.y, warm);
+    const flinch = A_SIMPLE[n] ? pulse(4.0, 4.2, 4.7) : 0;
+    s = { ...s, tilt: s.tilt + 0.1 * flinch };
+    // ── b6: the compass round the circle ────────────────────────────────────
+    const drawing = A_COMPASS[n] ? sec(0.8, 1.2) * (1 - sec(6.2, 6.6)) : 0;
+    const ang = A_COMPASS[n] ? 2 * Math.PI * sec(1.4, 5.6) : 0;
+    s = handOn(s, x, dir, CIRC.x + CIRC.r * Math.cos(ang), CIRC.y - 8 + CIRC.r * 0.5 * Math.sin(ang), drawing);
+    // ── b7: four triangles laid, one after another ─────────────────────────
+    const layAt = [3.0, 4.6, 6.2, 7.8];
+    let lay = 0;
+    for (let k = 0; k < 4; k++) lay += A_MENO[n] ? pulse(layAt[k] - 0.5, layAt[k], layAt[k] + 0.4) : 0;
+    s = handOn(s, x, dir, SQ.x + 4, SQ.y - 2, lay);
+    // ── b11: the cord pulled ────────────────────────────────────────────────
+    const cordHand = A_FORMS[n] ? pulse(3.2, 3.5, 4.6) : 0;
+    s = handOn(s, x, dir, CORD.x, CORD.handle + 6 * sec(3.5, 4.0), cordHand);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the room ─────────────────────────────────────────────────────────────
+    const lit = A_OPEN[n] ? sec(2.6, 3.2) : A_SHUT[n] ? 1 - sec(0.35, 0.75) : A_KANT[n] ? sec(3.55, 4.1) : LIT[n];
+    const image = A_OPEN[n] ? sec(2.9, 4.2) : A_SHUT[n] ? 1 - sec(0.4, 1.0) : A_KANT[n] ? sec(3.8, 4.8) : LIT[n];
+    const red = A_SIMPLE[n] ? sec(0.6, 1.4) : APPLE[n] || A_FED[n] ? 0 : 0;
+    const join = A_SIMPLE[n] ? sec(5.6, 7.6) : APPLE[n];
+    const exp = A_BLANK[n] ? sec(5.2, 5.8) : EXP_ON[n];
+    const reason = A_BLANK[n] ? sec(5.9, 6.5) : EXP_ON[n];
+    const glowExp = A_FED[n] ? pulse(0.4, 1.0, 5.0) : 0;
+    const glowReason = A_SHUT[n] ? pulse(1.0, 1.6, 5.5) : 0;
+    const circle = A_COMPASS[n] ? sec(1.4, 5.6) : CIRCLE[n];
+    const tiles = A_MENO[n] ? layAt.map((a) => sec(a - 0.1, a + 0.2)) : [TILES[n], TILES[n], TILES[n], TILES[n]];
+    const asks = A_MENO[n] ? layAt.map((a) => pulse(a - 0.3, a + 0.2, a + 1.3)) : [0, 0, 0, 0];
+    const outline = A_MENO[n] ? 0.35 : A_RECALL[n] ? 0.35 + 0.65 * pulse(0.6, 1.6, 4.8) : TILES[n] ? 0.35 : 0;
+    const grid = A_FORMS[n] ? sec(3.5, 4.8) : GRID[n];
+    const share = SORT[n] ? pickAt(REASON_SHARE, pickPos.value) : 1;
+
     return {
-      e: reactPose(e, E_X, 500, K_FIG, 1, 1),
-      r: pose(r, R_X, 500, K_FIG, -1, 1),
-      fill: carry(cv, 0, n, FILL[p], FILL[n], tr),
-      // R7b — the knob raises the innate glow. The rail runs from none of it comes
-      // before experience to all of it, and the rationalist's light on the slate rises
-      // with it, so the reader sees the claim they are settling on.
-      glow: carry(cv, 1, n, GLOW[p], reacting ? pickPos.value : GLOW[n], tr),
-      bridge: carry(cv, 2, n, BRIDGE[p], BRIDGE[n], tr),
-      school: carry(cv, 3, n, SCHOOL[p], SCHOOL[n], ease01((bt.value - 0.2) / 0.6)),
-      apriori: carry(cv, 4, n, APRIORI[p], APRIORI[n], ease01((bt.value - 0.9) / 0.6)),
-      meno: carry(cv, 5, n, MENO[p], MENO[n], ease01((bt.value - 0.3) / 1.0)),
-      forms: carry(cv, 6, n, FORMS[p], FORMS[n], ease01((bt.value - 0.4) / 0.8)),
+      fig: lookPose(fig, x, GROUND, K_E, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      lit: carry(cv, 1, n, LIT[p], lit, tr),
+      image: carry(cv, 2, n, LIT[p], image, tr),
+      red: carry(cv, 3, n, 0, red, tr),
+      join: carry(cv, 4, n, APPLE[p], join, tr),
+      exp: carry(cv, 5, n, EXP_ON[p], exp, tr),
+      reason: carry(cv, 6, n, EXP_ON[p], reason, tr),
+      glowExp: carry(cv, 7, n, 0, glowExp, tr),
+      glowReason: carry(cv, 8, n, 0, glowReason, tr),
+      circle: carry(cv, 9, n, CIRCLE[p], circle, tr),
+      tiles: [carry(cv, 10, n, TILES[p], tiles[0], tr), carry(cv, 16, n, TILES[p], tiles[1], tr),
+        carry(cv, 17, n, TILES[p], tiles[2], tr), carry(cv, 18, n, TILES[p], tiles[3], tr)],
+      asks: [carry(cv, 19, n, 0, asks[0], tr), carry(cv, 20, n, 0, asks[1], tr), carry(cv, 21, n, 0, asks[2], tr), carry(cv, 22, n, 0, asks[3], tr)],
+      outline: carry(cv, 11, n, TILES[p] ? 0.35 : 0, outline, tr),
+      grid: carry(cv, 12, n, GRID[p], grid, tr),
+      names: carry(cv, 13, n, NAMES[p], NAMES[n], tr),
+      share: carry(cv, 14, n, 1, share, tr),
+      compass: carry(cv, 15, n, 0, drawing, tr),
       t,
     };
   });
 
-  const DE = useDerivedValue<Bundle>(() => SCENE.value.e);
-  const DR = useDerivedValue<Bundle>(() => SCENE.value.r);
-  const auraStyle = useAnimatedStyle(() => {
-    const g = SCENE.value.glow, pulse = 0.72 + 0.28 * Math.sin(SCENE.value.t * 2.6);
-    return { opacity: g * 0.85 * pulse };
-  });
-  const kantStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.bridge,
-    transform: [{ translateY: (1 - SCENE.value.bridge) * -8 }],
-  }));
-  // Kant's second term, its sum and the rationalist's feeder: one value, one style each.
-  const formsTerm = useAnimatedStyle(() => ({ opacity: SCENE.value.forms }));
-  const formsSum = useAnimatedStyle(() => ({
-    opacity: SCENE.value.forms,
-    transform: [{ translateY: (1 - SCENE.value.forms) * 4 }],
-  }));
-  const formsFeed = useAnimatedStyle(() => ({ opacity: SCENE.value.forms }));
-  const schoolStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.school,
-    transform: [{ translateY: (1 - SCENE.value.school) * -5 }],
-  }));
-  const aprioriStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.apriori,
-    transform: [{ translateY: (1 - SCENE.value.apriori) * -5 }],
-  }));
-  // Meno's figure clears the row for Kant's box, which arrives in the same place.
-  const menoCell = useAnimatedStyle(() => {
-    const u = clamp01(SCENE.value.meno * 2);
-    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ scale: 0.8 + 0.2 * u }] };
-  });
-  const menoGrid = useAnimatedStyle(() => ({
-    opacity: clamp01(SCENE.value.meno * 2 - 1) * (1 - SCENE.value.bridge),
-  }));
-  const menoDiag = useAnimatedStyle(() => {
-    const u = clamp01(SCENE.value.meno * 2 - 1);
-    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ rotate: '45deg' }, { scale: 0.6 + 0.4 * u }] };
-  });
-  const menoCap = useAnimatedStyle(() => {
-    const u = clamp01(SCENE.value.meno * 3 - 2);
-    return { opacity: u * (1 - SCENE.value.bridge), transform: [{ translateX: (1 - u) * -8 }] };
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const compass = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: SCENE.value.compass, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
   });
 
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── the diagram: two schools, then Kant's join ─────────────────────── */}
-      {!asking && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          {/* LEFT — experience writes it in */}
-          <View style={[styles.panel, { left: PAN_L }]}>
-            <Text style={styles.panHdr}>THE MIND: BLANK PAPER</Text>
-          </View>
-          <View style={[styles.eye, { left: PAN_L + EYE.x, top: EYE.y }]}><View style={styles.pupil} /></View>
-          <Text style={[styles.tiny, { left: PAN_L + EYE.x - 4, top: EYE.y + EYE.h + 4, width: EYE.w + 8 }]}>SENSES</Text>
-          <View style={[styles.flowLine, { left: PAN_L + FLOW.x0, top: FLOW.y, width: FLOW.x1 - FLOW.x0 }]} />
-          <View style={[styles.flowHead, { left: PAN_L + FLOW.x1 - 5, top: FLOW.y - 3 }]} />
-          {[0, 1, 2].map((k) => <Drop key={k} S={SCENE} k={k} />)}
-          <View style={[styles.slate, { left: PAN_L + SLATE.x, top: SLATE.y }]}>
-            {MARKS.map((th, k) => <Mark key={th} S={SCENE} th={th} idx={k} />)}
-          </View>
-
-          {/* RIGHT — reason already holds it */}
-          <View style={[styles.panel, { left: PAN_R }]}>
-            <Text style={styles.panHdr}>REASON ALONE GETS THERE</Text>
-          </View>
-          <Animated.View style={[styles.aura, { left: PAN_R + 6, top: 216 }, auraStyle]} />
-          <View style={[styles.mind, { left: PAN_R + 12, top: 219 }]}>
-            {AXIOMS.map((a, k) => <Axiom key={a} S={SCENE} text={a} k={k} />)}
-          </View>
-
-          {/* the two schools, named under their panels */}
-          <Animated.Text style={[styles.schoolLbl, { left: PAN_L }, schoolStyle]} numberOfLines={1}>EMPIRICISM</Animated.Text>
-          <Animated.Text style={[styles.schoolLbl, { left: PAN_R + PAN_W - 86 }, aprioriStyle]} numberOfLines={1}>A PRIORI</Animated.Text>
-
-          {/* MENO — the boy's square, then the square on its diagonal */}
-          <Animated.View style={[styles.menoFrame, menoGrid]}>
-            <View style={styles.menoMidV} />
-            <View style={styles.menoMidH} />
-          </Animated.View>
-          <Animated.View style={[styles.menoCell, menoCell]} />
-          <Animated.View style={[styles.menoDiag, menoDiag]} />
-          <Animated.Text style={[styles.menoCap, menoCap]} numberOfLines={1}>KNOWN BEFORE BIRTH</Animated.Text>
-
-          {/* KANT — both feed one box */}
-          <Animated.View style={[StyleSheet.absoluteFill, kantStyle]}>
-            <View style={[styles.feeder, { left: 120 }]} />
-            <Animated.View style={[styles.feeder, { left: 280 }, formsFeed]} />
-            <View style={styles.kant}>
-              <Text style={styles.kantTag}>KANT’S TRUCE</Text>
-              <View style={styles.kantRow}>
-                <Text style={styles.kantA}>SENSE DATA</Text>
-                <Animated.Text style={[styles.kantA, formsTerm]}>  +  MIND’S FORMS</Animated.Text>
-              </View>
-              <Animated.Text style={[styles.kantB, formsSum]}>=  KNOWLEDGE</Animated.Text>
-            </View>
-          </Animated.View>
-        </View>
-      )}
-
-      {/* ── the two arguers ───────────────────────────────────────────────── */}
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.room} pointerEvents="none" />
+      <View style={styles.sky} pointerEvents="none" />
+      <ObjectArt parts={SUN_ART} tone={WOOD} />
+      <ObjectArt parts={GROUND_ART} tone={LEAF} />
+      <ObjectArt parts={TREE_ART} tone={LEAF} />
+      <View style={styles.treeApple} pointerEvents="none" />
+      <ObjectArt parts={WALL_ART} tone={WALL} />
+      <Shutter S={SCENE} />
+      <Plates S={SCENE} on={on} />
+      <Beam S={SCENE} />
+      <ObjectArt parts={RAIL_ART} tone={WOOD} />
+      <Paper S={SCENE} on={on} />
+      <Cord />
+      <ObjectArt parts={DESK_ART} tone={WOOD} />
+      <Sheet S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DE} k={K_FIG} />
-      <Stickman role="second" D={DR} k={K_FIG} />
-
-      {/* ── Q1 answered in the scene: tap the blank-slate thinker ─────────── */}
-      {asking && (
-        <>
-          <Animated.Text style={[styles.askLabel, spent]}>TAP THE BLANK-SLATE THINKER</Animated.Text>
-          {PLATES.map((pl) => (
-            <Target id={pl.id} correct={pl.correct} picked={picked} onPick={onPick}
-              key={pl.id} style={[styles.plateHit, { left: pl.x, top: pl.y }]} disabled={answered}>
-              <View
-                style={[
-                  styles.plate,
-                  answered && pl.correct && styles.plateRight,
-                  answered && picked === pl.id && !pl.correct && styles.plateWrong,
-                ]}
-              >
-                <Text style={[styles.plateT, answered && pl.correct && styles.plateTOn]}>{pl.label}</Text>
-              </View>
-            </Target>
-          ))}
-        </>
-      )}
-    </Animated.View>
+      <Stickman D={DF} k={K_E} />
+      <Animated.View style={[styles.rider, compass]} pointerEvents="none">
+        <View style={[styles.compassLeg, { transform: [{ rotate: '18deg' }] }]} />
+        <View style={[styles.compassLeg, { transform: [{ rotate: '-18deg' }] }]} />
+      </Animated.View>
+      {NAMES[i] ? <Names picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
   );
 }
 
-/** A sensation travelling the arrow from the eye into the slate. */
-function Drop({ S, k }: { S: SharedValue<any>; k: number }) {
-  const st = useAnimatedStyle(() => {
-    const active = clamp01(S.value.fill * 3);
-    const frac = ((S.value.t * 0.62 + k * 0.34) % 1 + 1) % 1;
-    return {
-      opacity: active * Math.sin(Math.PI * frac),
-      transform: [{ translateX: FLOW_RUN * frac }],
-    };
-  });
-  return <Animated.View style={[styles.drop, { left: PAN_L + FLOW.x0 + 2, top: FLOW.y - 2 }, st]} />;
+const TREE_ART = tree();
+const GROUND_ART = outsideGround();
+/** The image on the paper: the same tree, small, laid out in the paper's own units. */
+const IMG = { x: 30, y: 44 };
+const IMG_ART = treeAt(IMG.x, IMG.y, 0.72);
+const WALL_ART = wall();
+const DESK_ART = desk();
+const RAIL_ART = paperRail();
+const SUN_ART = sun();
+
+// ── the shutter over the opening ────────────────────────────────────────────
+
+function Shutter({ S }: { S: SharedValue<any> }) {
+  // hinged at its top edge, it swings up and out of the way
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${-80 * S.value.lit}deg` }] }));
+  return <Animated.View style={[styles.shutter, st]} pointerEvents="none" />;
 }
 
-/** A line written onto Locke's white paper once the fill passes its threshold. */
-function Mark({ S, th, idx }: { S: SharedValue<any>; th: number; idx: number }) {
-  const st = useAnimatedStyle(() => {
-    const on = clamp01((S.value.fill - th) / 0.12);
-    return { opacity: on, transform: [{ scaleX: on }] };
-  });
-  return <Animated.View style={[styles.mark, { top: 9 + idx * 10 }, st]} />;
-}
+// ── EXPERIENCE over the opening, REASON over the desk ───────────────────────
 
-/** One item of the mind's a-priori furniture, assembling as the glow comes up. */
-function Axiom({ S, text, k }: { S: SharedValue<any>; text: string; k: number }) {
-  const st = useAnimatedStyle(() => {
-    const on = clamp01((S.value.glow - k * 0.12) / 0.5);
-    return { opacity: on, transform: [{ translateY: (1 - on) * 6 }] };
-  });
+function Plates({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const exp = useAnimatedStyle(() => ({ opacity: S.value.exp, transform: [{ scale: 1 + 0.1 * S.value.glowExp }] }));
+  const reason = useAnimatedStyle(() => ({ opacity: S.value.reason, transform: [{ scale: 1 + 0.1 * S.value.glowReason }] }));
+  const expFill = useAnimatedStyle(() => ({ opacity: S.value.glowExp }));
+  const reasonFill = useAnimatedStyle(() => ({ opacity: S.value.glowReason }));
+  if (!on(EXP_ON)) return null;
   return (
-    <Animated.View style={[styles.axRow, { top: 3 + k * 14 }, st]}>
-      <Text style={styles.axT}>{text}</Text>
+    <>
+      <Animated.View style={[styles.plate, { left: 82, width: 76 }, exp]} pointerEvents="none">
+        <Animated.View style={[StyleSheet.absoluteFill, styles.plateGlow, expFill]} />
+        <Text style={styles.plateText} numberOfLines={1}>EXPERIENCE</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, { left: 178, width: 62 }, reason]} pointerEvents="none">
+        <Animated.View style={[StyleSheet.absoluteFill, styles.plateGlow, reasonFill]} />
+        <Text style={styles.plateText} numberOfLines={1}>REASON</Text>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the beam through the opening ─────────────────────────────────────────────
+
+const BEAM_UP = { len: Math.hypot(PAPER.x0 - HOLE.x, PAPER.top - HOLE.y + 4), deg: (Math.atan2(PAPER.top - HOLE.y + 4, PAPER.x0 - HOLE.x) * 180) / Math.PI };
+const BEAM_DN = { len: Math.hypot(PAPER.x0 - HOLE.x, PAPER.bottom - HOLE.y - 4), deg: (Math.atan2(PAPER.bottom - HOLE.y - 4, PAPER.x0 - HOLE.x) * 180) / Math.PI };
+function Beam({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ opacity: 0.55 * S.value.lit }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
+      <View style={[styles.beam, { width: BEAM_UP.len, top: HOLE.y - 4, transform: [{ rotate: `${BEAM_UP.deg}deg` }] }]} />
+      <View style={[styles.beam, { width: BEAM_DN.len, top: HOLE.y + 4, transform: [{ rotate: `${BEAM_DN.deg}deg` }] }]} />
     </Animated.View>
   );
 }
+
+// ── the white paper, the image on it, and the grid that comes down over it ──
+
+function Paper({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const image = useAnimatedStyle(() => ({ opacity: S.value.image }));
+  const red = useAnimatedStyle(() => ({ opacity: S.value.red * (1 - S.value.join) }));
+  const parts = useAnimatedStyle(() => ({ opacity: (1 - S.value.join) * S.value.red }));
+  const whole = useAnimatedStyle(() => ({ opacity: S.value.join, transform: [{ scale: 0.6 + 0.4 * S.value.join }] }));
+  const slideL = useAnimatedStyle(() => ({ transform: [{ translateX: 22 * S.value.join }] }));
+  const slideR = useAnimatedStyle(() => ({ transform: [{ translateX: -22 * S.value.join }] }));
+  const grid = useAnimatedStyle(() => ({
+    opacity: Math.min(1, S.value.grid * 3),
+    transform: [{ translateY: -(1 - S.value.grid) * 70 }],
+  }));
+  const share = useAnimatedStyle(() => ({ width: (PAPER.x1 - PAPER.x0) * S.value.share }));
+  return (
+    <View style={styles.paper} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, image]}>
+        {/* the tree outside, upside down, as a camera obscura throws it */}
+        <View style={styles.imgGround} />
+        <View style={styles.flip}>
+          <ObjectArt parts={IMG_ART} tone={LEAF} />
+          <Animated.View style={[styles.imgRed, red]} />
+        </View>
+      </Animated.View>
+      <Animated.View style={[styles.partsRow, parts]}>
+        <Animated.View style={[styles.redMark, slideL]} />
+        <View style={styles.roundMark} />
+        <Animated.View style={[styles.stemMark, slideR]} />
+      </Animated.View>
+      <Animated.View style={[styles.wholeApple, whole]}>
+        <View style={styles.wholeBody} />
+        <View style={styles.wholeStem} />
+      </Animated.View>
+      {on(GRID) ? (
+        <Animated.View style={[styles.grid, grid]}>
+          <Animated.View style={[styles.gridClip, share]}>
+            {[1, 2].map((k) => <View key={`v${k}`} style={[styles.gridV, { left: (k * (PAPER.x1 - PAPER.x0)) / 3 }]} />)}
+            {[1, 2].map((k) => <View key={`h${k}`} style={[styles.gridH, { top: 14 + (k * (PAPER.bottom - PAPER.top - 14)) / 3 }]} />)}
+          </Animated.View>
+          <View style={styles.gridLabel}>
+            <Text style={styles.gridText} numberOfLines={1}>SPACE · TIME · CAUSE</Text>
+          </View>
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+function Cord() {
+  return (
+    <>
+      <View style={styles.cord} pointerEvents="none" />
+      <View style={styles.cordHandle} pointerEvents="none" />
+    </>
+  );
+}
+
+// ── the drafting sheet: the compass circle and the doubled square ───────────
+
+function Sheet({ S }: { S: SharedValue<any> }) {
+  const circle = useAnimatedStyle(() => ({ opacity: S.value.circle, transform: [{ scale: 0.4 + 0.6 * S.value.circle }] }));
+  const outline = useAnimatedStyle(() => ({ opacity: S.value.outline }));
+  return (
+    <View style={styles.sheet} pointerEvents="none">
+      <Animated.View style={[styles.circle, circle]} />
+      <Animated.View style={[styles.outline, outline]} />
+      {[0, 1, 2, 3].map((k) => <Tile key={k} S={S} k={k} />)}
+      {[0, 1, 2, 3].map((k) => <Ask key={k} S={S} k={k} />)}
+    </View>
+  );
+}
+function Tile({ S, k }: { S: SharedValue<any>; k: number }) {
+  // four right triangles, each laid with its long side on the doubled square's edge
+  const st = useAnimatedStyle(() => ({ opacity: S.value.tiles[k], transform: [{ rotate: `${45 + 90 * k}deg` }, { scale: 0.7 + 0.3 * S.value.tiles[k] }] }));
+  return (
+    <Animated.View style={[styles.tileWrap, st]}>
+      <View style={styles.tile} />
+    </Animated.View>
+  );
+}
+function Ask({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.asks[k], transform: [{ translateY: -14 * S.value.asks[k] }] }));
+  return <Animated.Text style={[styles.ask, { left: SQ.x - SHEET.x0 - 3 + (k - 1.5) * 6 }, st]}>?</Animated.Text>;
+}
+
+// ── Q1: four names pinned on the white paper ────────────────────────────────
+
+function Names({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.names, transform: [{ translateY: (1 - S.value.names) * -8 }] }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {NAME_Q.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          disabled={answered} sealAt="tr"
+          style={[styles.card, { left: q.x - CARD_W / 2, top: q.y }]}
+        >
+          <View style={[styles.cardFace, answered && q.correct && styles.cardRight]}>
+            <Text style={[styles.cardText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            <View style={styles.pin} />
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+const PW = PAPER.x1 - PAPER.x0;
+const PH = PAPER.bottom - PAPER.top;
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 24, top: 500, height: 1.5, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  room: {
+    position: 'absolute', left: WALL_X.x1, top: 292, right: 0, height: GROUND - 292, backgroundColor: WALL.STONE,
+    borderTopRightRadius: 2,
+  },
+  sky: {
+    position: 'absolute', left: 0, top: 292, width: OUTSIDE.x1, height: GROUND - 292, backgroundColor: PAPER_LIT,
+    borderTopLeftRadius: 2,
+  },
+  treeApple: {
+    position: 'absolute', left: TREE.x + 4, top: TREE.y - 18, width: 8, height: 8, borderRadius: 4,
+    backgroundColor: EMBER, borderWidth: 1, borderColor: INK,
+  },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
-  // values and no depth, which is the flat case `check:shade` exists to find.
-  // The structural mass takes STONE, a secondary surface takes RULE, and what
-  // carries the message stays PAPER, so the picture has things at different
-  // values rather than everything a shade darker. See cinematicKit's ramp.
-  panel: {
-    position: 'absolute', top: PAN_T, width: PAN_W, height: PAN_H,
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 5, backgroundColor: RULE,
+  shutter: {
+    position: 'absolute', left: HOLE.x, top: HOLE.y - 11, width: 7, height: 22, borderRadius: 1.5,
+    backgroundColor: WOOD.SHADE, borderWidth: 1.2, borderColor: INK, transformOrigin: '50% 0%',
   },
-  // Sits at 201–214. The rationalist's aura ring starts at 216, so the ring no longer
-  // slices through the header the way it did at top 212.
-  panHdr: {
-    marginTop: 5, textAlign: 'center', lineHeight: 13,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
-  },
-  tiny: {
-    position: 'absolute', textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
-  },
-
-  eye: {
-    position: 'absolute', width: EYE.w, height: EYE.h, borderWidth: 2, borderColor: INK,
-    borderRadius: EYE.h / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER,
-  },
-  pupil: { width: 10, height: 10, borderRadius: 5, backgroundColor: INK },
-  flowLine: { position: 'absolute', height: 1.5, backgroundColor: RULE },
-  flowHead: {
-    position: 'absolute', width: 0, height: 0,
-    borderTopWidth: 4, borderBottomWidth: 4, borderLeftWidth: 6,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: SOFT,
-  },
-  drop: { position: 'absolute', width: 6, height: 6, borderRadius: 3, backgroundColor: INK },
-
-  slate: {
-    position: 'absolute', width: SLATE.w, height: SLATE.h,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
-  },
-  mark: { position: 'absolute', left: 8, width: SLATE.w - 20, height: 3, backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%' },
-
-  aura: {
-    position: 'absolute', width: PAN_W - 12, height: 58,
-    borderWidth: 2, borderColor: INK, borderRadius: 30,
-  },
-  mind: {
-    position: 'absolute', width: PAN_W - 24, height: 52,
-    borderWidth: 2, borderColor: INK, borderRadius: 26, backgroundColor: STONE, boxShadow: LIP,
-  },
-  axRow: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  // 3 / 17 / 31 with a 14-unit line: the last axiom ends at 45, inside the pill's
-  // 48 units of interior, so nothing is clipped off the bottom.
-  axT: { fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-
-  feeder: { position: 'absolute', top: 278, width: 2, height: 10, backgroundColor: INK },
-  // Three stacked lines in a fixed-height box, so every one carries an explicit
-  // lineHeight and includeFontPadding:false — Android's hidden font padding is what
-  // silently eats the last line of a box like this. 4+11+3+13+3+15 = 49, inside the
-  // 51 units of interior.
-  kant: {
-    position: 'absolute', left: 100, top: 286, width: 200, height: 56,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center',
-  },
-  kantTag: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 1.6, color: INK, includeFontPadding: false },
-  // The first line is two pieces now, so the second term can arrive a beat after
-  // the first. Laid out whole from the start, so nothing reflows when it does.
-  kantRow: { flexDirection: 'row' },
-  kantA: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 13, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  kantB: { marginTop: 3, fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-
-  // Under the panels, outside Kant's box (100…300): 71 and 52 units of type in 86.
-  schoolLbl: {
-    position: 'absolute', top: 290, width: 86, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.4, color: INK,
-    includeFontPadding: false,
-  },
-  menoFrame: {
-    position: 'absolute', left: MENO_L, top: MENO_T, width: CELL * 2, height: CELL * 2,
-    borderWidth: 1.5, borderColor: SOFT,
-  },
-  // The cell boundaries sit 24 in from the frame's outer edge, 22.5 inside its border.
-  menoMidV: { position: 'absolute', left: CELL - 1.5 - 0.75, top: 0, bottom: 0, width: 1.5, backgroundColor: SOFT },
-  menoMidH: { position: 'absolute', top: CELL - 1.5 - 0.75, left: 0, right: 0, height: 1.5, backgroundColor: SOFT },
-  menoCell: {
-    position: 'absolute', left: MENO_L, top: MENO_T, width: CELL, height: CELL,
-    borderWidth: 2, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-  },
-  menoDiag: {
-    position: 'absolute', left: MENO_L + CELL - DIAG / 2, top: MENO_T + CELL - DIAG / 2, width: DIAG, height: DIAG,
-    borderWidth: 2, borderColor: INK,
-  },
-  // Right of the figure, on the grid's middle line; 130 units of type ending at 294.
-  menoCap: {
-    position: 'absolute', left: MENO_L + CELL * 2 + 10, top: MENO_T + CELL - 6,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 1.2, color: INK,
-    includeFontPadding: false,
-  },
-
-  askLabel: {
-    position: 'absolute', left: 0, right: 0, top: 198, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-  plateHit: { position: 'absolute', width: PAN_W },
   plate: {
-    height: 44, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
+    position: 'absolute', top: 316, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
-  plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT },
-  plateT: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  plateTOn: { color: PAPER },
+  plateGlow: { backgroundColor: SAGE },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  },
+  beam: {
+    position: 'absolute', left: HOLE.x, height: 1.6, borderRadius: 0.8, backgroundColor: PAPER_LIT,
+    transformOrigin: '0% 50%',
+  },
+
+  paper: {
+    position: 'absolute', left: PAPER.x0, top: PAPER.top, width: PW, height: PH, borderRadius: 2,
+    backgroundColor: PAPER_LIT, borderWidth: 1.2, borderColor: WALL.SHADE, overflow: 'hidden',
+  },
+  imgGround: { position: 'absolute', left: 0, right: 0, top: 0, height: 6, backgroundColor: LEAF.STONE },
+  flip: {
+    position: 'absolute', left: 0, top: 6, width: 64, height: 76, transformOrigin: `${IMG.x}px ${IMG.y}px`,
+    transform: [{ scaleY: -1 }],
+  },
+  imgRed: {
+    position: 'absolute', left: IMG.x + 3, top: IMG.y - 18, width: 7, height: 7, borderRadius: 3.5, backgroundColor: EMBER,
+    borderWidth: 1, borderColor: INK,
+  },
+  partsRow: { position: 'absolute', left: 58, top: 30, width: 50, height: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  redMark: { width: 9, height: 9, borderRadius: 2, backgroundColor: EMBER },
+  roundMark: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderColor: INK },
+  stemMark: { width: 2, height: 9, borderRadius: 1, backgroundColor: INK },
+  wholeApple: { position: 'absolute', left: 74, top: 28, width: 20, height: 22 },
+  wholeBody: { position: 'absolute', left: 3, top: 6, width: 14, height: 14, borderRadius: 7, backgroundColor: EMBER, borderWidth: 1.2, borderColor: INK },
+  wholeStem: { position: 'absolute', left: 9, top: 0, width: 2, height: 7, borderRadius: 1, backgroundColor: INK },
+  grid: {
+    position: 'absolute', left: 0, top: 0, width: PW, height: PH, borderWidth: 1.5, borderColor: DEEP, borderRadius: 2,
+  },
+  gridClip: { position: 'absolute', left: 0, top: 0, bottom: 0, overflow: 'hidden' },
+  gridV: { position: 'absolute', top: 14, bottom: 0, width: 1, backgroundColor: DEEP, opacity: 0.6 },
+  gridH: { position: 'absolute', left: 0, width: PW, height: 1, backgroundColor: DEEP, opacity: 0.6 },
+  gridLabel: {
+    position: 'absolute', left: 0, right: 0, top: 0, height: 13, backgroundColor: DEEP, alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: PAPER_LIT, includeFontPadding: false,
+  },
+  cord: { position: 'absolute', left: CORD.x - 0.7, top: CORD.top + 8, width: 1.4, height: CORD.handle - CORD.top - 8, borderRadius: 0.7, backgroundColor: INK },
+  cordHandle: {
+    position: 'absolute', left: CORD.x - 3, top: CORD.handle - 2, width: 6, height: 10, borderRadius: 3,
+    backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK,
+  },
+
+  sheet: {
+    position: 'absolute', left: SHEET.x0, top: SHEET.top, width: SHEET.x1 - SHEET.x0, height: SHEET.bottom - SHEET.top,
+    borderRadius: 1.5, backgroundColor: PLATE_FACE, borderWidth: 1, borderColor: INK, overflow: 'visible',
+  },
+  circle: {
+    position: 'absolute', left: CIRC.x - SHEET.x0 - CIRC.r, top: CIRC.y - SHEET.top - CIRC.r, width: 2 * CIRC.r,
+    height: 2 * CIRC.r, borderRadius: CIRC.r, borderWidth: 1.5, borderColor: INK,
+  },
+  outline: {
+    position: 'absolute', left: SQ.x - SHEET.x0 - SQ.r, top: SQ.y - SHEET.top - SQ.r, width: 2 * SQ.r, height: 2 * SQ.r,
+    borderWidth: 1, borderColor: DEEP, borderStyle: 'dashed', transform: [{ rotate: '45deg' }],
+  },
+  tileWrap: {
+    position: 'absolute', left: SQ.x - SHEET.x0 - 7, top: SQ.y - SHEET.top - 7, width: 14, height: 14,
+  },
+  tile: {
+    position: 'absolute', left: 0, top: 0, width: 0, height: 0, borderRightWidth: 7, borderTopWidth: 7,
+    borderRightColor: 'transparent', borderTopColor: TEAL,
+  },
+  ask: {
+    position: 'absolute', top: -12, fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, color: INK, includeFontPadding: false,
+  },
+  compassLeg: {
+    position: 'absolute', left: -0.8, top: -2, width: 1.6, height: 12, borderRadius: 0.8, backgroundColor: INK,
+    transformOrigin: '50% 0%',
+  },
+
+  card: { position: 'absolute', width: CARD_W, height: CARD_H },
+  cardFace: {
+    flexGrow: 1, borderRadius: 2, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cardRight: { backgroundColor: INK },
+  cardText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
+  pin: { position: 'absolute', top: -3, width: 6, height: 6, borderRadius: 3, backgroundColor: EMBER, borderWidth: 1, borderColor: INK },
+  onInk: { color: PAPER_LIT },
 });
 
-// The band. Highest ink: the question label at y 198 and the panels at 196. Lowest:
-// the ground rule at 500 plus the figures' ankle joints, whose 7.4-unit radius reaches
-// ≈ 507. The arguers' crowns sit at y ≈ 354 even on their bounciest gesture (the shrug
-// on beat 1), so the Kant box (bottom 342) never meets them. The four name plates run
-// 220–318. The school labels (290–302) and Meno's figure (290–338) share Kant's row.
-// 328 units instead of 560 renders everything at ~2×.
 export function Epistemology4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[186, 514]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Epistemology4Scene} band={[288, 514]} camera={CAM} />;
 }

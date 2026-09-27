@@ -1,528 +1,716 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle, type Stance } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './ethics3Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
-  stageAnswered,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import {
+  leverFrame, balanceStand, table, weightBox, lectern, ruleBook, mirror, lamps, handleAt,
+  BOARD, LINE_Y, LINE_X0, POINTS_X, MAIN_X1, BRANCH_Y, BRANCH_UP, FIVE_X, ONE_X, TRAIN_STOP,
+  LEVERS, LEVER_LEN, LEVER_REST, LEVER_PULLED, TABLE, BALANCE, WEIGHT_BOX, LECTERN, BOOK, MIRROR, MIRROR_PLATE,
+  LAMPS, LAMP_R,
+} from './ethics3Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// ethics-ethics-3, "What Makes an Action Good?" — A SIGNAL BOX.
+//
+// Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
+// laid across its voiced line in stages (pace.ts, line lengths from the manifest).
+// A grave lesson (N11): nothing in it is a gag, and the runaway's lamp on the diagram
+// stops short of the points, so it never reaches the five or the one.
+//
+//   b0   the track diagram lights, and he looks up at it.
+//   b1   the three plates take their names: MILL, KANT, ARISTOTLE.
+//   b2   the runaway's lamp comes down the line and holds short of the points; he puts
+//        a hand on the points lever.
+//   b3   the branch to the one is marked on the diagram.
+//   b4   he lets go; the three plates light one after another.
+//   b5   Mill: he takes the lever in both hands and pulls it over, leaning back; the
+//        points swing to the branch.
+//   b6   one weight sits on the far pan. He goes behind the table to the weight box,
+//        lifts out five, carries them back to the near end and sets them on the near
+//        pan; the beam swings over and goes down on the side of the five.
+//   b7   Kant: he walks back and pushes the lever home, then goes to the lectern.
+//   b8   he opens the rule book, and a page turns under his hand. DIGNITY.
+//   b9   Aristotle: he walks to the mirror, and there he is in it.   b10  PHRONESIS.
+//   b12  Q1: odd one out, ringed where it is in the room.   b13  Q2: TRUE or FALSE lamp.
+//
+// COMPOSITION, in stage units: the diagram 100–300 × 300–360 on the wall; the lamps at
+// 30 and 72, y 318; the lever frame 20–60 with the points lever at 60; the table
+// 100–180 at 470 with the balance at 122 and the weight box at 164; the lectern 244–290
+// at 458; the mirror 336–392 × 380–456. He stands at 78 by the lever, 158 behind the
+// table at the box, 84 by the balance, 226 at the lectern and 318 at the mirror.
+// Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('ethics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
-
-// The trolley problem, staged as a schematic.
-//
-//   · THE LINE — a sleepered rail running the width of the stage, a points lever
-//     the decider actually stands at, and a branch that inks up when the lever is
-//     thrown. Five figures wait on the main line, one on the branch, each labelled.
-//   · THE VERDICT BOARD (top) — three columns, thinker · lens · ruling:
-//        MILL · CONSEQUENCES · PULL      KANT · DUTY · NEVER
-//        ARISTOTLE · CHARACTER · WHO AM I?
-//     Each column inks as its philosopher speaks, so the three theories sit side by
-//     side as one comparison instead of three paragraphs in a row.
-//
-// On the true/false beat the board clears and two large TRUE / FALSE plates take
-// its place — the question is answered by tapping in the scene.
-//
-// No camera transform: the art is authored straight into stage space, so the band
-// below is exact. The decider's widest reach ends at x ≈ 116 and the plates start
-// at x = 128, so the figure can never cover a target.
-
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
-const FIG_X = 58;
-const LEVER_X = 112;
-
-// ── the line ─────────────────────────────────────────────────────────────────
-const JUNCTION = 256;
-// THE ONE STANDS APART FROM THE FIVE. The branch used to climb at 40° for 88 units,
-// which put the one at x 303 — behind the first of the five, so the six read as one
-// crowd and ONE was printed across two of their heads. At 55° for 50 units the branch
-// ends at (285, 459), short of the five, and the one stands on it at x 276: his feet
-// and tied hands 13 units clear of the first head (x 292), his own head at 262–290.
-const BR_ANGLE = 55;
-const BR_LEN = 50;                 // branch, 55° up-right → ends at (285, 459)
-// THE PEOPLE ON THE TRACK ARE PEOPLE, AND HAVE TO READ AS PEOPLE.
-//
-// They were 40 units tall beside a 150-unit decider — barely a quarter his height,
-// which reads as a row of bollards, not as five human beings whose lives are the
-// entire moral weight of the lesson. 72 is as large as the composition allows: the
-// five have to fit between the junction and the right edge, and five figures at the
-// decider's true scale would need roughly 500 stage units of width where only 90
-// exist. So the row stays a SCHEMATIC of five people — but a legible one.
-//
-// ── AND A SCHEMATIC IS NOT A LOLLIPOP ───────────────────────────────────────
-//
-// Making them 72 tall did not make them people. They were still `Peg`: a circle,
-// a rectangle and two rectangles rotated ±7°, drawn as plain Views. No arms at
-// all, no joints, and — the part that really shows — NO MOTION, standing beside a
-// fully articulated figure that breathes. That is why they "don't even look like
-// stickmen": they aren't. They are bollards with heads.
-//
-// They are solved by the rig now, at k = 0.70, in a bound stance: ankles together,
-// both fists behind the back, and a slow uneven struggle so five people roped to a
-// rail are not five statues (rule A6 — everything alive stays alive). Each gets
-// its own seed, because the rig's own note is that figures sharing a motion read
-// as one figure duplicated rather than as a crowd.
-const PEG_K = 0.70;                // 103 × 0.70 ≈ 72, the height the row was already using
-const FIVE = [306, 326, 346, 366, 386];
-const ONE = { x: 276, y: GROUND - (276 - JUNCTION) * Math.tan((BR_ANGLE * Math.PI) / 180) };  // ON the branch, y ≈ 471
-const SLEEPERS = [24, 50, 76, 102, 128, 154, 180, 206, 232, 258, 284, 310, 336, 362, 388];
-
-// ── the verdict board ────────────────────────────────────────────────────────
-const CARD_TOP = 232;
-const CARD_W = 118;
-// 8 pad + 17 name + 15 lens + 6 gap + 24 ruling chip = 70, plus a 2 border top and
-// bottom = 74. At 76 that left one unit of slack inside an `overflow: hidden` box —
-// one stray unit of Android font padding and the ruling chip loses its bottom edge.
-// 80 gives 6, and the column still ends at 312, well clear of the crown at 348.
-const CARD_H = 80;
-const CARD_X = [12, 145, 278];
-
-const LENSES = [
-  { who: 'MILL', lens: 'CONSEQUENCES', rule: 'PULL' },
-  { who: 'KANT', lens: 'DUTY', rule: 'NEVER' },
-  { who: 'ARISTOTLE', lens: 'CHARACTER', rule: 'WHO AM I?' },
-];
-
-// ── the true/false plates (the scene-answered question) ──────────────────────
-const BAL_L = 128;
-const BAL_W = 260;
-const BAL_H = 54;
-const PLATES = [
-  { id: 't', title: 'TRUE', correct: false },
-  { id: 'f', title: 'FALSE', correct: true },
-];
-
-const D_CODE = BEATS.map((b) => b.d ?? 0);
-const TX = BEATS.map((b) => b.tx ?? 132);
-const PULL = BEATS.map((b) => b.pull ?? 0);
-const LENS = BEATS.map((b) => b.lens ?? 0);
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const IRON = stageToneOf(DEEP);
 const TR = 0.85;
 
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Five taps used to hold a frame. Each now adds exactly what its sentence says,
-// and nothing here moves for effect — this is the trolley lesson, so the events are
-// words and lines, kept sober:
-//   · "yet their verdicts differ" — the three ruling chips, empty until now, are
-//     written in: PULL · NEVER · WHO AM I?;
-//   · "if you pull it, the trolley switches to a side track" — the branch is marked
-//     as a route, dash by dash from the points, before anyone has pulled;
-//   · "five lives saved outweigh one lost" — Mill's column gains its gloss,
-//     5 LIVES > 1 LIFE; "what Kant calls dignity" — DIGNITY under Kant's; "Aristotle
-//     calls this wisdom phronesis" — PHRONESIS under Aristotle's.
-// The glosses belong to the board and leave with it when a question clears it.
-function latch(vals: number[]): number[] {
-  const first = vals.findIndex((v) => v > 0);
-  return vals.map((_, k) => (first >= 0 && k >= first ? 1 : 0));
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, ethics-ethics-3. */
+const LINES = [3.44, 3.0, 5.32, 5.32, 6.04, 8.0, 7.68, 6.08, 7.6, 5.16, 6.52, 0, 0, 0, 0];
+
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+
+const X = BEATS.map((b) => b.x ?? 318);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_POWER = is('power');
+const A_NAMES = is('names');
+const A_RUN = is('run');
+const A_ROUTE = is('route');
+const A_ASK = is('ask');
+const A_PULL = is('pull');
+const A_WEIGH = is('weigh');
+const A_RESET = is('reset');
+const A_READ = is('read');
+const A_MIRROR = is('mirror');
+const A_WISE = is('wise');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const LIT = flag((b) => b.board);
+const NAMES = flag((b) => b.names);
+const RUNAWAY = flag((b) => b.runaway);
+const ROUTE = flag((b) => b.route);
+const PULLED = flag((b) => b.pulled);
+const WEIGHTS = flag((b) => b.weights);
+const OPEN = flag((b) => b.open);
+const REFLECT = flag((b) => b.reflect);
+const LAMPS_ON = flag((b) => b.lamps);
+const GLOSS = BEATS.map((b) => b.gloss ?? 0);
+/** The odd-one-out is being answered: a ring finds each thing in the room as it is picked (R7c). */
+const ODD = flag((b) => b.interact?.odd);
+/** Where each tile's thing is, in the tiles' own order: good, harm, how many, the rule. */
+const PICK_X = [BALANCE.x - BALANCE.arm, BALANCE.x + BALANCE.arm, 258, BOOK.x];
+const PICK_Y = [456, 450, LINE_Y - 12, BOOK.y];
+const PICK_R = [14, 14, 30, 20];
+/** Which way he faces once each beat settles: the lever is to his left; everything else to his right. */
+const DIR = BEATS.map((b) => ((b.x ?? 318) === 78 ? -1 : 1));
+
+/** b6: to the weight box behind the table, then back to the near end of the balance. */
+const BOX_AT = 0.4 + moveTr(78, 158, TR);
+const BACK = BOX_AT + 1.1;
+const A6 = BACK + moveTr(158, 84, TR);
+const WEIGH_LEGS = [[158, 0.4], [84, BACK]];
+const A7 = 0.3 + moveTr(84, 78, TR);
+const W7 = A7 + 1.6;
+/** b7: the step back to the lever, then along behind the table to the lectern. */
+const RESET_LEGS = [[78, 0.3], [226, W7]];
+
+const TF_Q = [
+  { id: 'true', label: 'TRUE', x: LAMPS[0].x, correct: false },
+  { id: 'false', label: 'FALSE', x: LAMPS[1].x, correct: true },
+];
+
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
 }
-/** The highest value set so far: a count that only ever grows. */
-function runningMax(vals: number[]): number[] {
-  let m = 0;
-  return vals.map((v) => { m = Math.max(m, v); return m; });
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
 }
-const SAID = latch(BEATS.map((b) => b.said ?? 0));
-const ROUTE = latch(BEATS.map((b) => b.route ?? 0));
-const GLOSS = runningMax(BEATS.map((b) => b.gloss ?? 0));
-const GLOSSES = ['5 LIVES > 1 LIFE', 'DIGNITY', 'PHRONESIS'];
-// The board clears on EVERY graded beat — neither answer may be read off it — but
-// the TRUE / FALSE plates belong only to the one answered on the stage. On the
-// split below the figure the stage shows the line and its lever, nothing else.
-const BOARD_ON = BEATS.map((b) => (b.interact ? 0 : 1));
-const DASHES = [2, 9, 16, 23, 30, 37, 44];
-const DASH_N = 7;
+function handOn(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
+function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x: number; from: number; to: number; u: number } {
+  'worklet';
+  let from = x0;
+  for (let k = 0; k < legs.length; k++) {
+    const to = legs[k][0];
+    const start = legs[k][1];
+    const dur = moveTr(from, to, TR);
+    if (b < start) return { x: from, from, to: from, u: 1 };
+    if (b < start + dur) {
+      const u = ease01((b - start) / dur);
+      return { x: lerp(from, to, u), from, to, u };
+    }
+    from = to;
+  }
+  return { x: from, from, to: from, u: 1 };
+}
+/** A facing that turns at each key, through a profile, over 0.3 seconds. */
+function turnAt(b: number, d0: number, keys: readonly (readonly number[])[]): number {
+  'worklet';
+  let d = d0;
+  for (let k = 0; k < keys.length; k++) d = lerp(d, keys[k][1], ease01(clamp01((b - keys[k][0]) / 0.3)));
+  return d;
+}
+/** The two pans' hanging points, off a beam turned by `deg` (negative: the left end down). */
+function panAt(deg: number, side: -1 | 1): { x: number; y: number } {
+  'worklet';
+  const a = (deg * Math.PI) / 180;
+  return { x: BALANCE.x + side * BALANCE.arm * Math.cos(a), y: BALANCE.beamY + side * BALANCE.arm * Math.sin(a) };
+}
+/** The beam's angle: the one on the far pan from the start, then the five on the near pan (wv 0→1). */
+function beamDeg(wv: number): number {
+  'worklet';
+  return -14 * ((5 * clamp01(wv) - 1) / 5);
+}
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
-const X = BEATS.map((b) => b.x ?? FIG_X);
+/** b6: turn to walk to the box, round to carry the weights back, round again to the pan. */
+const WEIGH_KEYS = [[0.1, 1], [BOX_AT + 0.8, -1], [A6 - 0.05, 1]];
+/** b7: turn to walk back to the lever, and round again for the lectern once it is home. */
+const RESET_KEYS = [[0, -1], [W7 - 0.25, 1]];
 
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics3'));
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-export default function Ethics3Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldD = useHeld();
-  const cv = useCarry(7);
-  const cur = BEATS[i];
-  // Only the question answered ON the stage mounts the plates (E41: one beat, one
-  // place to answer — the split is answered below the figure).
-  const showPick = stageAnswered(cur);
-  const answered = picked !== null;
-
+export default function Ethics3Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(26);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    const b = bt.value;
     const t = clock.value;
-    const grow = ease01(bt.value / 0.55);
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const d = keepHeld(heldD, mixStance(carryFrom(heldD, n, emoteHold(D_CODE[p], t)), emoteLive(D_CODE[n], t, bt.value), tr));
-    const lens = carry(cv, 0, n, LENS[p], LENS[n], tr);
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const legs = A_WEIGH[n] ? WEIGH_LEGS : A_RESET[n] ? RESET_LEGS : null;
+    const leg = legs ? legAt(b, xp, legs) : null;
+    const walking = !leg && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const tx = leg ? leg.x : xn;
+    const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : leg ? 1 : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    if (leg && leg.u < 1 && leg.to !== leg.from) {
+      s = travelStance(leg.from, leg.to, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
+    }
+    const was = facing(DIR[p], DIR[p], b);
+    let dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    if (A_WEIGH[n]) dirV = turnAt(b, was, WEIGH_KEYS);
+    if (A_RESET[n]) dirV = turnAt(b, was, RESET_KEYS);
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── the points lever: a hand on it (b2–b4), pulled (b5), pushed home (b7) ──
+    const lever = A_PULL[n] ? sec(1.2, 2.6) : A_RESET[n] ? 1 - sec(A7 + 0.4, A7 + 1.2) : PULLED[n];
+    const handle = handleAt(lerp(LEVER_REST, LEVER_PULLED, lever));
+    const rest = A_RUN[n] ? sec(1.0, 1.6) : A_ROUTE[n] ? 1 : A_ASK[n] ? 1 - sec(0.2, 0.6) : 0;
+    s = handOn(s, x, dir, 1, handle.x, handle.y, rest);
+    const grip = A_PULL[n] ? sec(0.3, 0.8) : A_WEIGH[n] ? 1 - sec(0.1, 0.35) : A_RESET[n] ? pulse(A7 + 0.05, A7 + 0.35, A7 + 1.55) : 0;
+    s = handOn(s, x, dir, 1, handle.x, handle.y - 1, grip);
+    s = handOn(s, x, dir, -1, handle.x + 3, handle.y + 3, grip);
+    // leaning back into the pull, forward into the push
+    const lean = (A_PULL[n] ? pulse(1.2, 2.2, 4.2) : 0) - (A_RESET[n] ? pulse(A7 + 0.4, A7 + 0.9, A7 + 1.4) : 0);
+    s = { ...s, tilt: s.tilt + 0.1 * lean };
+    // looking up at the diagram as it lights (b0)
+    s = { ...s, neck: s.neck + 0.22 * (A_POWER[n] ? pulse(0.3, 1.0, 3.2) : 0) };
+
+    // ── the weights (b6): five out of the box, carried back and set on the near pan ──
+    const wv = A_WEIGH[n] ? sec(A6 + 0.5, A6 + 0.65) : WEIGHTS[n];
+    const left = panAt(beamDeg(wv), -1);
+    const box = { x: WEIGHT_BOX.x, y: WEIGHT_BOX.top + 2 };
+    const take = A_WEIGH[n] ? sec(BOX_AT + 0.05, BOX_AT + 0.3) * (1 - sec(BOX_AT + 0.55, BOX_AT + 0.8)) : 0;
+    s = handOn(s, x, dir, 1, box.x, box.y - 6 * sec(BOX_AT + 0.35, BOX_AT + 0.6), take);
+    const set = A_WEIGH[n] ? sec(A6 + 0.1, A6 + 0.35) * (1 - sec(A6 + 0.7, A6 + 1.0)) : 0;
+    s = handOn(s, x, dir, 1, left.x, left.y + BALANCE.string - 4, set);
+    const h5 = A_WEIGH[n] ? sec(BOX_AT + 0.3, BOX_AT + 0.4) * (1 - sec(A6 + 0.5, A6 + 0.55)) : 0;
+
+    // ── the rule book (b8): the cover lifted, then a hand on the page ────────
+    const lift = A_READ[n] ? pulse(0.5, 0.9, 1.4) : 0;
+    s = handOn(s, x, dir, 1, lerp(BOOK.x - 12, BOOK.x - 4, sec(0.8, 1.3)), BOOK.y - 4 - 6 * sec(0.8, 1.05), lift);
+    const onPage = A_READ[n] ? sec(1.4, 1.8) * (1 - sec(6.4, 6.9)) : 0;
+    s = handOn(s, x, dir, 1, BOOK.x - 6 + 4 * pulse(3.2, 3.6, 4.0), BOOK.y - 3, onPage);
+    // ── a hand to his chest before the mirror (b10) ─────────────────────────
+    const heart = A_WISE[n] ? pulse(2.0, 2.6, 5.4) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 5, y: -30 } }, heart);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the diagram ──────────────────────────────────────────────────────────
+    const lit = A_POWER[n] ? sec(0.3, 1.2) : LIT[n];
+    const run = A_RUN[n] ? sec(0.8, 3.4) : RUNAWAY[n];
+    const runShow = A_RUN[n] ? sec(0.3, 0.7) : RUNAWAY[n];
+    const route = A_ROUTE[n] ? st(0.1, 0.35) : ROUTE[n];
+    const blade = A_PULL[n] ? sec(2.0, 2.5) : A_RESET[n] ? 1 - sec(A7 + 0.8, A7 + 1.2) : PULLED[n];
+    const one = A_ROUTE[n] ? pulse(1.6, 2.2, 3.6) : 0;
+
+    // ── the plates ───────────────────────────────────────────────────────────
+    const n0 = A_NAMES[n] ? sec(0.2, 0.8) : NAMES[n];
+    const n1 = A_NAMES[n] ? sec(0.9, 1.5) : NAMES[n];
+    const n2 = A_NAMES[n] ? sec(1.6, 2.2) : NAMES[n];
+    const g0 = A_WEIGH[n] ? sec(A6 + 1.1, A6 + 1.6) : GLOSS[n] >= 1 ? 1 : 0;
+    const g1 = A_READ[n] ? sec(2.4, 2.9) : GLOSS[n] >= 2 ? 1 : 0;
+    const g2 = A_WISE[n] ? sec(1.0, 1.5) : GLOSS[n] >= 3 ? 1 : 0;
+    const glow0 = A_ASK[n] ? pulse(0.8, 1.3, 2.1) : A_PULL[n] ? pulse(3.0, 3.6, 5.0) : 0;
+    const glow1 = A_ASK[n] ? pulse(2.3, 2.8, 3.6) : A_RESET[n] ? pulse(W7 + 0.5, W7 + 1.0, W7 + 1.6) : 0;
+    const glow2 = A_ASK[n] ? pulse(3.8, 4.3, 5.1) : A_MIRROR[n] ? pulse(2.4, 3.0, 3.8) : 0;
+
+    // ── the book, the mirror ────────────────────────────────────────────────
+    const open = A_READ[n] ? sec(0.85, 1.3) : OPEN[n];
+    const page = A_READ[n] ? sec(3.2, 4.0) : 0;
+    const reflect = A_MIRROR[n] ? sec(1.4, 2.3) : REFLECT[n];
+    const glint = A_WISE[n] ? sec(3.0, 4.4) : 0;
+
     return {
-      fig: reactPose(d, FIG_X, GROUND, K, 1, 1),
-      tx: carry(cv, 1, n, TX[p], TX[n], tr),
-      // R7b — the seam throws the lever. Slide toward WHAT HAPPENS NEXT and the
-      // points switch: a consequentialist acts on the outcome, and the reader is the
-      // one acting. Handed over THROUGH carry so it eases in rather than swapping on
-      // the frame the beat opens (R7).
-      pull: carry(cv, 2, n, PULL[p], reacting ? pickPos.value : PULL[n], tr),
-      wheel: (t * 200) % 360,
-      // The verdict board and the plates cross-fade, so neither ever pops.
-      board: carry(cv, 3, n, BOARD_ON[p], BOARD_ON[n], grow),
-      ballot: showPick ? grow : 0,
-      said: carry(cv, 4, n, SAID[p], SAID[n], tr),
-      route: carry(cv, 5, n, ROUTE[p], ROUTE[n], tr),
-      gloss: carry(cv, 6, n, GLOSS[p], GLOSS[n], tr),
-      l1: clamp01(lens) - clamp01(lens - 1),
-      l2: clamp01(lens - 1) - clamp01(lens - 2),
-      l3: clamp01(lens - 2),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      lit: carry(cv, 1, n, LIT[p], lit, tr),
+      n0: carry(cv, 2, n, NAMES[p], n0, tr),
+      n1: carry(cv, 3, n, NAMES[p], n1, tr),
+      n2: carry(cv, 4, n, NAMES[p], n2, tr),
+      run: carry(cv, 5, n, RUNAWAY[p], run, tr),
+      runShow: carry(cv, 6, n, RUNAWAY[p], runShow, tr),
+      route: carry(cv, 7, n, ROUTE[p], route, tr),
+      lever: carry(cv, 8, n, PULLED[p], lever, tr),
+      blade: carry(cv, 9, n, PULLED[p], blade, tr),
+      blink: carry(cv, 10, n, A_ROUTE[p] || A_ASK[p] ? 1 : 0, A_ROUTE[n] || A_ASK[n] ? 1 : 0, tr),
+      wv: carry(cv, 11, n, WEIGHTS[p], wv, tr),
+      h5: carry(cv, 12, n, 0, h5, tr),
+      open: carry(cv, 14, n, OPEN[p], open, tr),
+      page: carry(cv, 15, n, 0, page, tr),
+      reflect: carry(cv, 16, n, REFLECT[p], reflect, tr),
+      g0: carry(cv, 17, n, GLOSS[p] >= 1 ? 1 : 0, g0, tr),
+      g1: carry(cv, 18, n, GLOSS[p] >= 2 ? 1 : 0, g1, tr),
+      g2: carry(cv, 19, n, GLOSS[p] >= 3 ? 1 : 0, g2, tr),
+      glow0: carry(cv, 20, n, 0, glow0, tr),
+      glow1: carry(cv, 21, n, 0, glow1, tr),
+      glow2: carry(cv, 22, n, 0, glow2, tr),
+      one: carry(cv, 23, n, 0, one, tr),
+      glint: carry(cv, 24, n, 0, glint, tr),
+      ring: carry(cv, 25, n, 0, ODD[n], tr),
+      lamps: carry(cv, 13, n, LAMPS_ON[p], LAMPS_ON[n], tr),
+      ringX: ODD[n] ? pickAt(PICK_X, pickPos.value) : PICK_X[0],
+      ringY: ODD[n] ? pickAt(PICK_Y, pickPos.value) : PICK_Y[0],
+      ringR: ODD[n] ? pickAt(PICK_R, pickPos.value) : PICK_R[0],
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const trolleyStyle = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.tx }] }));
-  const wheelStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${SCENE.value.wheel}deg` }] }));
-  const leverStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${14 - 36 * SCENE.value.pull}deg` }] }));
-  const branchOnStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.pull }));
-  const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
-  const ballotStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.ballot,
-    transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
-  }));
-  const lens1 = useAnimatedStyle(() => ({ opacity: SCENE.value.l1 }));
-  const lens2 = useAnimatedStyle(() => ({ opacity: SCENE.value.l2 }));
-  const lens3 = useAnimatedStyle(() => ({ opacity: SCENE.value.l3 }));
-  const lensStyles = [lens1, lens2, lens3];
 
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── the line ────────────────────────────────────────────────────────── */}
-      {SLEEPERS.map((x) => <View key={x} style={[styles.sleeper, { left: x }]} pointerEvents="none" />)}
-      <View style={styles.rail} pointerEvents="none" />
-      <View style={styles.branch} pointerEvents="none" />
-      <View style={styles.routeWrap} pointerEvents="none">
-        {DASHES.map((d, j) => <RouteDash key={d} S={SCENE} j={j} at={d} />)}
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.wall} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
       </View>
-      <Animated.View style={[styles.branch, styles.branchOn, branchOnStyle]} pointerEvents="none" />
-
-      {/* the points lever the decider stands at */}
-      <View style={styles.leverBase} pointerEvents="none" />
-      <Animated.View style={[styles.leverArm, leverStyle]} pointerEvents="none">
-        <View style={styles.leverKnob} />
-      </Animated.View>
-
-      {/* the five on the main line, the one up the branch */}
-      {FIVE.map((x, i) => <Bound key={x} x={x} y={GROUND} seed={i * 1.7 + 0.4} clock={clock} />)}
-      <Bound x={ONE.x} y={ONE.y} seed={4.9} clock={clock} />
-      <Text style={styles.fiveLab}>FIVE</Text>
-      <Text style={styles.oneLab}>ONE</Text>
-
-      {/* the trolley, rolling toward the junction */}
-      <Animated.View style={[styles.trolley, trolleyStyle]} pointerEvents="none">
-        <View style={styles.roof} />
-        <View style={styles.car} />
-        <View style={[styles.window, { left: 12 }]} />
-        <View style={[styles.window, { left: 51 }]} />
-        <Animated.View style={[styles.wheel, { left: 7 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
-        <Animated.View style={[styles.wheel, { right: 7 }, wheelStyle]}><View style={styles.spoke} /></Animated.View>
-      </Animated.View>
-
-      <Stickman D={DF} k={K} />
-
-      {/* ── the verdict board ───────────────────────────────────────────────── */}
-      <Animated.View style={[styles.board, boardStyle]} pointerEvents="none">
-        {LENSES.map((v, k) => (
-          <View key={v.who} style={[styles.card, { left: CARD_X[k] }]}>
-            <Animated.View style={[styles.cardOn, lensStyles[k]]} />
-            {/* Both pinned to one line: a wrap here would push the ruling chip out
-                of the card's clipped box and the verdict would vanish. */}
-            <Text style={styles.who} numberOfLines={1}>{v.who}</Text>
-            <Text style={styles.lens} numberOfLines={1}>{v.lens}</Text>
-            {/* the speaking philosopher's RULING stamps solid, the word reversed out
-                in paper — a grey wash read as "greyed out" rather than "this one" */}
-            <View style={styles.rule}>
-              <Animated.View style={[styles.ruleOn, lensStyles[k]]} />
-              <Ruling S={SCENE} k={k} word={v.rule} />
-              <Animated.Text style={[styles.ruleT, styles.ruleTOn, lensStyles[k]]}>{v.rule}</Animated.Text>
-            </View>
-          </View>
-        ))}
-        {GLOSSES.map((g, k) => <Gloss key={g} S={SCENE} k={k} text={g} />)}
-      </Animated.View>
-
-      {/* ── the TRUE / FALSE plates: the question is answered here ──────────── */}
-      {showPick ? (
-        <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
-          <Text style={styles.ballotHdr}>TAP TRUE OR FALSE</Text>
-          {PLATES.map((c, k) => {
-            const chosen = picked === c.id;
-            return (
-              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
-              key={c.id} style={[styles.plateSlot, { top: 20 + k * 62 }]} disabled={answered}>
-                <View
-                  style={[
-                    styles.plate,
-                    answered && c.correct && styles.plateRight,
-                    answered && chosen && !c.correct && styles.plateWrong,
-                  ]}
-                >
-                  <Text style={[styles.plateT, answered && c.correct && styles.plateTOn]}>{c.title}</Text>
-                </View>
-              </Target>
-            );
-          })}
-        </Animated.View>
-      ) : null}
-    </Animated.View>
+      <Diagram S={SCENE} />
+      <ObjectArt parts={LAMPS_ART} tone={IRON} />
+      <Lamps S={SCENE} />
+      {on(NAMES) ? <WallPlate S={SCENE} /> : null}
+      <ObjectArt parts={MIRROR_ART} tone={WOOD} />
+      <Glass S={SCENE} />
+      <ObjectArt parts={FRAME_ART} tone={IRON} />
+      <PointsLever S={SCENE} />
+      <ObjectArt parts={LECTERN_ART} tone={WOOD} />
+      <Book S={SCENE} />
+      <View style={styles.ground} pointerEvents="none" />
+      <Stickman D={DF} k={K_M} />
+      <ObjectArt parts={TABLE_ART} tone={WOOD} />
+      <ObjectArt parts={STAND_ART} tone={IRON} />
+      <Balance S={SCENE} DF={DF} />
+      <ObjectArt parts={BOX_ART} tone={WOOD} />
+      {on(NAMES) ? <StandPlates S={SCENE} /> : null}
+      {LAMPS_ON[i] ? <TrueFalse picked={picked} onPick={onPick} S={SCENE} /> : null}
+      {on(ODD) ? <PickRing S={SCENE} /> : null}
+    </View>
   );
 }
 
-/** One dash of the side track's route, drawn in order from the points outward. */
-function RouteDash({ S, j, at }: { S: SharedValue<any>; j: number; at: number }) {
-  const st = useAnimatedStyle(() => ({ opacity: clamp01(S.value.route * DASH_N - j) }));
-  return <Animated.View style={[styles.dash, { left: at }, st]} />;
+const LAMPS_ART = lamps();
+const MIRROR_ART = mirror();
+const FRAME_ART = leverFrame();
+const LECTERN_ART = lectern();
+const TABLE_ART = table();
+const STAND_ART = balanceStand();
+const BOX_ART = weightBox();
+const BOOK_ART = ruleBook();
+
+// ── the track diagram ─────────────────────────────────────────────────────────
+
+/** A straight piece of track on the diagram, from one point to another. */
+function seg(x0: number, y0: number, x1: number, y1: number) {
+  const len = Math.hypot(x1 - x0, y1 - y0);
+  const deg = (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI;
+  return {
+    left: (x0 + x1) / 2 - len / 2 - BOARD.x0, top: (y0 + y1) / 2 - 1 - BOARD.top, width: len,
+    transform: [{ rotate: `${deg}deg` }],
+  };
+}
+const SEG_IN = seg(LINE_X0, LINE_Y, POINTS_X, LINE_Y);
+const SEG_MAIN = seg(POINTS_X + 12, LINE_Y, MAIN_X1, LINE_Y);
+const SEG_UP = seg(BRANCH_UP.x0, LINE_Y - 4, BRANCH_UP.x1, BRANCH_Y);
+const SEG_BRANCH = seg(BRANCH_UP.x1, BRANCH_Y, MAIN_X1, BRANCH_Y);
+
+function Diagram({ S }: { S: SharedValue<any> }) {
+  const lines = useAnimatedStyle(() => ({ opacity: 0.3 + 0.7 * S.value.lit }));
+  const main = useAnimatedStyle(() => ({ opacity: 1 - 0.55 * S.value.blade }));
+  const branch = useAnimatedStyle(() => ({ opacity: 0.45 + 0.55 * S.value.blade }));
+  // it blinks while it is being pointed out (b3, b4), and holds steady after that
+  const route = useAnimatedStyle(() => ({ opacity: S.value.route * (1 - S.value.blade) * (0.75 + 0.25 * S.value.blink * Math.sin(S.value.t * 4)) }));
+  const blade = useAnimatedStyle(() => ({ transform: [{ rotate: `${-40 * S.value.blade}deg` }] }));
+  const runaway = useAnimatedStyle(() => ({
+    opacity: S.value.runShow * (0.7 + 0.3 * Math.sin(S.value.t * 6)),
+    transform: [{ translateX: lerp(LINE_X0, TRAIN_STOP, S.value.run) - BOARD.x0 - 5 }],
+  }));
+  const one = useAnimatedStyle(() => ({ transform: [{ scale: 1 + 0.5 * S.value.one }] }));
+  return (
+    <View style={styles.board} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, lines]}>
+        <View style={[styles.track, SEG_IN]} />
+        <Animated.View style={[styles.track, SEG_MAIN, main]} />
+        <Animated.View style={[styles.track, SEG_UP, branch]} />
+        <Animated.View style={[styles.track, SEG_BRANCH, branch]} />
+        <Animated.View style={[styles.bladeArm, blade]} />
+        {FIVE_X.map((fx) => <View key={fx} style={[styles.dot, { left: fx - 3 - BOARD.x0, top: LINE_Y - 3 - BOARD.top }]} />)}
+        <Animated.View style={[styles.dot, { left: ONE_X - 3 - BOARD.x0, top: BRANCH_Y - 3 - BOARD.top }, one]} />
+        <Text style={[styles.boardText, { left: FIVE_X[2] - 10 - BOARD.x0, top: LINE_Y + 4 - BOARD.top }]} numberOfLines={1}>5</Text>
+        <Text style={[styles.boardText, { left: ONE_X - 10 - BOARD.x0, top: BRANCH_Y - 15 - BOARD.top }]} numberOfLines={1}>1</Text>
+      </Animated.View>
+      <Animated.View style={[styles.routeMark, SEG_UP, route]} />
+      <Animated.View style={[styles.routeMark, SEG_BRANCH, route]} />
+      <Animated.View style={[styles.runaway, runaway]} />
+    </View>
+  );
 }
 
-/**
- * A ruling chip's word. Until the verdicts are said the chip holds a question mark;
- * the three words are then written in left to right, handing over through a gap so
- * the "?" and the word never sit on each other at half strength.
- */
-function Ruling({ S, k, word }: { S: SharedValue<any>; k: number; word: string }) {
-  const wordStyle = useAnimatedStyle(() => {
-    const u = clamp01((S.value.said - k * 0.25) / 0.5);
-    return { opacity: clamp01(u * 2 - 1) };
-  });
-  const askStyle = useAnimatedStyle(() => {
-    const u = clamp01((S.value.said - k * 0.25) / 0.5);
-    return { opacity: 1 - clamp01(u * 2) };
-  });
+// ── the two repeater lamps ────────────────────────────────────────────────────
+
+function Lamps({ S }: { S: SharedValue<any> }) {
+  const lens = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * S.value.lamps }));
   return (
     <>
-      <Animated.Text style={[styles.ruleT, wordStyle]}>{word}</Animated.Text>
-      <Animated.Text style={[styles.ruleT, styles.ruleAsk, askStyle]}>?</Animated.Text>
+      {LAMPS.map((l) => (
+        <Animated.View key={l.x} style={[styles.lens, { left: l.x - LAMP_R + 3, top: l.y - LAMP_R + 3 }, lens]} pointerEvents="none" />
+      ))}
     </>
   );
 }
 
-/** One column's one-line gloss, hung under its card on the beat that states it. */
-function Gloss({ S, k, text }: { S: SharedValue<any>; k: number; text: string }) {
-  const st = useAnimatedStyle(() => {
-    const u = clamp01(S.value.gloss - k);
-    return { opacity: u, transform: [{ translateY: (1 - u) * -4 }] };
+// ── the points lever ─────────────────────────────────────────────────────────
+
+function PointsLever({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${lerp(LEVER_REST, LEVER_PULLED, S.value.lever)}deg` }] }));
+  return (
+    <Animated.View style={[styles.lever, st]} pointerEvents="none">
+      <View style={styles.leverHandle} />
+    </Animated.View>
+  );
+}
+
+// ── the balance, and the weights in his hand or on its pans ──────────────────
+
+function Balance({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  const beam = useAnimatedStyle(() => ({ transform: [{ rotate: `${beamDeg(S.value.wv)}deg` }] }));
+  const panL = useAnimatedStyle(() => {
+    const e = panAt(beamDeg(S.value.wv), -1);
+    return { transform: [{ translateX: e.x }, { translateY: e.y }] };
   });
-  return <Animated.Text style={[styles.gloss, { left: CARD_X[k] }, st]}>{text}</Animated.Text>;
+  const panR = useAnimatedStyle(() => {
+    const e = panAt(beamDeg(S.value.wv), 1);
+    return { transform: [{ translateX: e.x }, { translateY: e.y }] };
+  });
+  const five = useAnimatedStyle(() => {
+    const e = panAt(beamDeg(S.value.wv), -1);
+    const w = DF.value.wrR;
+    const h = S.value.h5;
+    return {
+      opacity: Math.max(h, clamp01(S.value.wv)),
+      transform: [
+        { translateX: lerp(e.x, w[0].translateX, h) },
+        { translateY: lerp(e.y + BALANCE.string, w[1].translateY + 4, h) },
+      ],
+    };
+  });
+  const single = useAnimatedStyle(() => {
+    const e = panAt(beamDeg(S.value.wv), 1);
+    return { transform: [{ translateX: e.x }, { translateY: e.y + BALANCE.string }] };
+  });
+  return (
+    <>
+      <Animated.View style={[styles.beam, beam]} pointerEvents="none" />
+      <Animated.View style={[styles.rider, panL]} pointerEvents="none">
+        <View style={styles.string} />
+        <View style={styles.pan} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, panR]} pointerEvents="none">
+        <View style={styles.string} />
+        <View style={styles.pan} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, five]} pointerEvents="none">
+        {[0, 1, 2].map((k) => <View key={k} style={[styles.weight, { left: -9 + k * 6, top: -5 }]} />)}
+        {[0, 1].map((k) => <View key={k} style={[styles.weight, { left: -6 + k * 6, top: -10 }]} />)}
+      </Animated.View>
+      <Animated.View style={[styles.rider, single]} pointerEvents="none">
+        <View style={[styles.weight, { left: -3, top: -5 }]} />
+      </Animated.View>
+    </>
+  );
 }
 
-/** One waiting figure — head, body, two legs — planted with its feet at (x, y). */
-/**
- * Someone roped to the rail: ankles together, both hands behind the back, and a
- * struggle that never repeats — two incommensurable sines, the same trick the rig
- * uses for idle, so five of these side by side never fall into step.
- */
-function boundStance(t: number, seed: number): Stance {
-  'worklet';
-  const w = Math.sin(t * 2.3 + seed) * 0.58 + Math.sin(t * 1.47 + seed * 2.7) * 0.42;
-  const v = Math.sin(t * 2.2 + seed * 1.9) * 0.6 + Math.sin(t * 1.4 + seed) * 0.4;
-  return {
-    // THE STRUGGLE HAS TO READ (N21): at ±0.06 of lean and a unit of hand a roped
-    // figure moved less than a standing one breathes, so five of them were statues
-    // while the decider talked. Straining against the rope is the lean and the pull.
-    tilt: 0.03 + w * 0.17,
-    neck: -0.03 + v * 0.16,                 // head turning to look for the trolley
-    // FLAT (AL1). `v` used to ride the pelvis too, so every bound figure drifted
-    // 1.8 units up and down on a clock. The strain is the lean, the feet and the
-    // hands; a body rising with nothing lifting it is the wobble a reader named.
-    bob: 0,
-    // Bound at the ankles: the feet stay together and shift weight rather than step.
-    footL: { x: -3.4 + w * 0.5, y: 0 },
-    footR: { x: 3.4 + w * 0.5, y: 0 },
-    // Both fists BEHIND the pelvis (in his own frame), which is what reads as
-    // "hands tied" from a silhouette with no rope drawn.
-    fistL: { x: -11 - v * 3.4, y: 5 + w * 4.2 },
-    fistR: { x: -13 + v * 3.4, y: 6 - w * 4.2 },
-    adv: 0,
-  };
+// ── the rule book, closed and then open ──────────────────────────────────────
+
+function Book({ S }: { S: SharedValue<any> }) {
+  const closed = useAnimatedStyle(() => ({ opacity: 1 - S.value.open }));
+  const opened = useAnimatedStyle(() => ({ opacity: S.value.open }));
+  const leaf = useAnimatedStyle(() => ({
+    opacity: S.value.page > 0.02 && S.value.page < 0.98 ? 1 : 0,
+    transform: [{ scaleX: Math.cos(Math.PI * S.value.page) }],
+  }));
+  return (
+    <>
+      <Animated.View style={[styles.closedBook, closed]} pointerEvents="none" />
+      <Animated.View style={[StyleSheet.absoluteFill, opened]} pointerEvents="none">
+        <ObjectArt parts={BOOK_ART} tone={WOOD} />
+      </Animated.View>
+      <Animated.View style={[styles.leaf, leaf]} pointerEvents="none" />
+    </>
+  );
 }
 
-// N21 — facing LEFT, toward the lever and the one deciding: a row of five facing
-// empty stage were five people with nobody to plead with.
-function Bound({ x, y, seed, clock }: { x: number; y: number; seed: number; clock: SharedValue<number> }) {
-  const D = useDerivedValue<Bundle>(() => pose(boundStance(clock.value, seed), x, y, PEG_K, -1, 1));
-  return <Stickman role="second" D={D} k={PEG_K} />;
+// ── the mirror's glass, and him in it ────────────────────────────────────────
+
+function Glass({ S }: { S: SharedValue<any> }) {
+  const me = useAnimatedStyle(() => ({ opacity: 0.6 * S.value.reflect }));
+  const glint = useAnimatedStyle(() => ({
+    opacity: Math.sin(Math.PI * S.value.glint) * 0.8,
+    transform: [{ translateX: -30 + 90 * S.value.glint }, { rotate: '25deg' }],
+  }));
+  return (
+    <View style={styles.glass} pointerEvents="none">
+      <Animated.View style={[StyleSheet.absoluteFill, me]}>
+        <View style={styles.likenessCrown} />
+        <View style={styles.likenessShoulders} />
+      </Animated.View>
+      <Animated.View style={[styles.glint, glint]} />
+    </View>
+  );
 }
+
+// ── the three plates: on the wall over the balance, on the lectern, under the mirror ──
+
+function PlateRows({ S, k, name, gloss }: { S: SharedValue<any>; k: 0 | 1 | 2; name: string; gloss: string }) {
+  const nameSt = useAnimatedStyle(() => {
+    const g = k === 0 ? S.value.g0 : k === 1 ? S.value.g1 : S.value.g2;
+    return { transform: [{ translateY: 5 * (1 - g) }] };
+  });
+  const glossSt = useAnimatedStyle(() => ({ opacity: k === 0 ? S.value.g0 : k === 1 ? S.value.g1 : S.value.g2 }));
+  return (
+    <>
+      <Animated.Text style={[styles.plateName, nameSt]} numberOfLines={1}>{name}</Animated.Text>
+      <Animated.Text style={[styles.plateGloss, glossSt]} numberOfLines={1}>{gloss}</Animated.Text>
+    </>
+  );
+}
+function WallPlate({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.n0, transform: [{ scale: 1 + 0.08 * S.value.glow0 }] }));
+  return (
+    <Animated.View style={[styles.plate, styles.millPlate, st]} pointerEvents="none">
+      <PlateRows S={S} k={0} name="MILL" gloss="5 LIVES > 1" />
+    </Animated.View>
+  );
+}
+function StandPlates({ S }: { S: SharedValue<any> }) {
+  const kant = useAnimatedStyle(() => ({ opacity: S.value.n1, transform: [{ scale: 1 + 0.08 * S.value.glow1 }] }));
+  const aris = useAnimatedStyle(() => ({ opacity: S.value.n2, transform: [{ scale: 1 + 0.08 * S.value.glow2 }] }));
+  return (
+    <>
+      <Animated.View style={[styles.plate, styles.kantPlate, kant]} pointerEvents="none">
+        <PlateRows S={S} k={1} name="KANT" gloss="DIGNITY" />
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.arisPlate, aris]} pointerEvents="none">
+        <PlateRows S={S} k={2} name="ARISTOTLE" gloss="PHRONESIS" />
+      </Animated.View>
+    </>
+  );
+}
+
+// ── Q1: the thing picked is ringed where it is in the room ──────────────────
+
+function PickRing({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const r = S.value.ringR;
+    return {
+      opacity: S.value.ring * (0.75 + 0.25 * Math.sin(S.value.t * 4)),
+      width: 2 * r, height: 2 * r, borderRadius: r,
+      transform: [{ translateX: S.value.ringX - r }, { translateY: S.value.ringY - r }],
+    };
+  });
+  return <Animated.View style={[styles.pickRing, st]} pointerEvents="none" />;
+}
+
+// ── Q2: the two lamps, TRUE and FALSE ───────────────────────────────────────
+
+function TrueFalse({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.lamps }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {TF_Q.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered} sealAt="tr"
+          style={[styles.tf, { left: q.x - 20, top: LAMPS[0].y - LAMP_R - 2 }]}
+        >
+          <View style={styles.tfFill}>
+            <View style={[styles.tfTag, answered && q.correct && styles.tagRight]}>
+              <Text style={[styles.tfText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            </View>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+const MIRROR_W = MIRROR.x1 - MIRROR.x0;
+const MIRROR_H = MIRROR.bottom - MIRROR.top;
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: GROUND - 292, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
+  },
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  // ── line ──────────────────────────────────────────────────────────────────
-  rail: { position: 'absolute', left: 16, right: 6, top: GROUND, height: 3, backgroundColor: INK },
-  sleeper: { position: 'absolute', top: GROUND + 3, width: 3.5, height: 7, backgroundColor: SOFT, borderRadius: 1 },
-  branch: {
-    position: 'absolute', left: JUNCTION, top: GROUND, width: BR_LEN, height: 2.5, backgroundColor: RULE,
-    transformOrigin: '0% 50%', transform: [{ rotate: `-${BR_ANGLE}deg` }],
+  board: {
+    position: 'absolute', left: BOARD.x0, top: BOARD.top, width: BOARD.x1 - BOARD.x0, height: BOARD.bottom - BOARD.top,
+    borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: DEEP, boxShadow: LIP, overflow: 'hidden',
   },
-  branchOn: { backgroundColor: INK },
-  // The route: a box on the branch's own pivot (JUNCTION, GROUND + 1.25) and angle,
-  // carrying seven dashes that lie exactly on the grey branch line, so the thrown
-  // lever's solid ink later covers them rather than doubling them.
-  routeWrap: {
-    position: 'absolute', left: JUNCTION, top: GROUND - 3.75, width: BR_LEN, height: 10,
-    transformOrigin: '0% 50%', transform: [{ rotate: `-${BR_ANGLE}deg` }],
+  track: { position: 'absolute', height: 2, borderRadius: 1, backgroundColor: PAPER_LIT },
+  routeMark: { position: 'absolute', height: 4, borderRadius: 2, backgroundColor: EMBER, marginTop: -1 },
+  bladeArm: {
+    position: 'absolute', left: POINTS_X - BOARD.x0, top: LINE_Y - 1 - BOARD.top, width: 12, height: 2, borderRadius: 1,
+    backgroundColor: PAPER_LIT, transformOrigin: '0% 50%',
   },
-  dash: { position: 'absolute', top: 3.75, width: 4.5, height: 2.5, borderRadius: 1, backgroundColor: INK },
-
-  leverBase: {
-    position: 'absolute', left: LEVER_X - 11, top: GROUND - 9, width: 22, height: 9,
-    borderWidth: 2, borderColor: INK, backgroundColor: INK, borderRadius: 2,
+  dot: { position: 'absolute', width: 6, height: 6, borderRadius: 3, backgroundColor: PAPER_LIT },
+  boardText: {
+    position: 'absolute', width: 20, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: PAPER_LIT, includeFontPadding: false,
   },
-  leverArm: {
-    position: 'absolute', left: LEVER_X - 2, top: GROUND - 44, width: 4, height: 36,
-    backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 100%', alignItems: 'center',
-  },
-  leverKnob: { position: 'absolute', top: -6, width: 11, height: 11, borderRadius: 6, backgroundColor: INK },
-
-  // Both labels moved UP clear of the taller figures: the five now reach y 428 and
-  // the one on the branch reaches 388, so the old positions sat on top of them.
-  fiveLab: {
-    position: 'absolute', left: 310, top: 392, width: 72, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
-  },
-  oneLab: {
-    // Below 368, NOT at 348: the two TRUE / FALSE plates fill y 252…368 across the
-    // whole width when the question opens, so at 348 this label was printed UNDER
-    // the second plate on both of the beats it matters (D31). And BESIDE his head,
-    // not over the five: at x 276, y 430 it lay across two of their heads. His head
-    // is x 262–290 at y 399–427; the label ends 6 short of it, 32 below the plates
-    // and 11 above the parked trolley's roof (x 176–260 from y 426).
-    position: 'absolute', left: 200, top: 400, width: 56, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 15, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
+  runaway: {
+    position: 'absolute', left: 0, top: LINE_Y - 5 - BOARD.top, width: 10, height: 10, borderRadius: 5,
+    backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK,
   },
 
-  // A TRAM IS TALLER THAN THE PEOPLE IT IS ABOUT TO HIT. It was 54×48, which left it
-  // shorter than the five once they were drawn at a readable 72 — a runaway tram you
-  // could step over. The ordering that has to hold is people (72) < tram (74) <
-  // decider (111), so the thing bearing down reads as heavy without upstaging him.
-  // It can afford the room now: `left` is only the base, and `translateX` parks it at
-  // x 118 and up, well clear of the decider's x 20–96.
-  trolley: { position: 'absolute', left: 0, top: GROUND - 74, width: 84, height: 74 },
-  roof: { position: 'absolute', left: 9, top: 6, width: 65, height: 9, backgroundColor: INK, borderRadius: 3 },
-  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
-  // values and no depth, which is the flat case `check:shade` exists to find.
-  // The structural mass takes STONE, a secondary surface takes RULE, and what
-  // carries the message stays PAPER, so the picture has things at different
-  // values rather than everything a shade darker. See cinematicKit's ramp.
-  car: {
-    position: 'absolute', left: 0, top: 16, width: 84, height: 47,
-    borderWidth: 3, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-  },
-  window: {
-    position: 'absolute', top: 25, width: 20, height: 17,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: PAPER,
-  },
-  wheel: {
-    position: 'absolute', bottom: -5, width: 25, height: 25, borderRadius: 13,
-    borderWidth: 3.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
-  },
-  spoke: { width: 3.5, height: 15, backgroundColor: INK },
-
-  // ── verdict board ─────────────────────────────────────────────────────────
-  board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  card: {
-    position: 'absolute', top: CARD_TOP, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    paddingHorizontal: 7, paddingTop: 8, overflow: 'hidden',
-  },
-  cardOn: { position: 'absolute', left: 0, top: 0, right: 0, height: 4, backgroundColor: INK },
-  who: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  // D30 — CONSEQUENCES is the longest word on the board, in 100 units of inner width
-  // (CARD_W 118, less two 2-unit borders and two 7 of padding).
-  //
-  // The previous note here put it at "~88 in 100, which nothing can wrap". It actually
-  // measured 98 — a 2% margin. The missing 9.6 is exactly its twelve characters of 0.8
-  // tracking: TRACKING IS CHARGED PER CHARACTER, including after the last one, and an
-  // estimate that forgets it under-counts by the whole of it, which here was the whole
-  // of the margin. 88.4 is the glyphs alone.
-  //
-  // At 0.2 the word measures 90.8 in 100 — 9.2% — and numberOfLines={1} on the label
-  // means it cannot break even if Android's metrics run wider than the browser's.
-  // INK, not SOFT: the seam drives the verdict board, so these rest part-faded
-  // and SOFT does not survive it (D35, R7c).
-  lens: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 15, letterSpacing: 0.2, color: INK, includeFontPadding: false },
-  rule: {
-    marginTop: 6, height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 3,
-    alignItems: 'center', justifyContent: 'center', backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden',
-  },
-  ruleOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
-  ruleT: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, lineHeight: 15, letterSpacing: 1,
-    color: INK, textAlign: 'center', includeFontPadding: false,
-  },
-  // The chip is 24 tall with a 1.5 border inside it, so a 15-tall line centres at
-  // (24 − 3 − 15) / 2 = 3 — the reversed copy must land exactly on the base word.
-  ruleTOn: { position: 'absolute', left: 0, right: 0, top: 3, color: PAPER },
-  // The question mark that holds a chip before its verdict is said, on the word's line.
-  ruleAsk: { position: 'absolute', left: 0, right: 0, top: 3 },
-  // Under each card (the card and its lip end at 315), centred on it; the widest,
-  // 5 LIVES > 1 LIFE, measures 85 at 9.5px in the card's 118. The decider's hands
-  // never rise above y 406 and the five's label starts at 392, so 318…330 is clear.
-  gloss: {
-    position: 'absolute', top: CARD_TOP + CARD_H + 6, width: CARD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
+  lens: {
+    position: 'absolute', width: 2 * LAMP_R - 6, height: 2 * LAMP_R - 6, borderRadius: LAMP_R - 3,
+    backgroundColor: PAPER_LIT, borderWidth: 1.2, borderColor: INK,
   },
 
-  // ── plates ────────────────────────────────────────────────────────────────
-  ballot: { position: 'absolute', left: BAL_L, top: CARD_TOP, width: BAL_W, height: 148 },
-  ballotHdr: {
-    position: 'absolute', left: 0, top: 0, width: BAL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  lever: {
+    position: 'absolute', left: LEVERS[2] - 1.75, top: GROUND - 4 - LEVER_LEN, width: 3.5, height: LEVER_LEN, borderRadius: 1.5,
+    backgroundColor: DEEP, borderWidth: 0.8, borderColor: INK, transformOrigin: '50% 100%',
   },
-  // Tap target: 260 × 54 stage units carrying one 20px word — the biggest plate in
-  // any of these lessons, because a true/false call should be unmissable.
-  plateSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
+  leverHandle: {
+    position: 'absolute', left: -2.25, top: -4, width: 8, height: 7, borderRadius: 2, backgroundColor: EMBER,
+    borderWidth: 1.2, borderColor: INK,
+  },
+
+  beam: {
+    position: 'absolute', left: BALANCE.x - BALANCE.arm - 2, top: BALANCE.beamY - 1.5, width: 2 * BALANCE.arm + 4, height: 3,
+    borderRadius: 1.5, backgroundColor: IRON.SHADE, borderWidth: 0.8, borderColor: INK,
+  },
+  string: { position: 'absolute', left: -0.6, top: 0, width: 1.2, height: BALANCE.string, borderRadius: 0.6, backgroundColor: INK },
+  pan: {
+    position: 'absolute', left: -10, top: BALANCE.string - 1, width: 20, height: 5, borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10, backgroundColor: IRON.SHADE, borderWidth: 1.2, borderColor: INK,
+  },
+  weight: {
+    position: 'absolute', width: 6, height: 5, borderRadius: 1, backgroundColor: DEEP, borderWidth: 0.8, borderColor: INK,
+  },
+
+  closedBook: {
+    position: 'absolute', left: BOOK.x - 13, top: BOOK.y + 2, width: 26, height: 6, borderRadius: 1.5,
+    backgroundColor: WOOD.SHADE, borderWidth: 1.2, borderColor: INK,
+  },
+  leaf: {
+    position: 'absolute', left: BOOK.x, top: BOOK.y - 7, width: 13, height: 11, borderRadius: 1,
+    backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK, transformOrigin: '0% 50%',
+  },
+
+  glass: {
+    position: 'absolute', left: MIRROR.x0 + 4, top: MIRROR.top + 4, width: MIRROR_W - 8, height: MIRROR_H - 8,
+    borderRadius: 2, backgroundColor: stageToneOf(TEAL).STONE, overflow: 'hidden',
+  },
+  likenessCrown: { position: 'absolute', left: 9, top: 22, width: 26, height: 26, borderRadius: 13, backgroundColor: INK },
+  likenessShoulders: { position: 'absolute', left: 2, top: 50, width: 44, height: 40, borderRadius: 16, backgroundColor: INK },
+  glint: { position: 'absolute', left: 0, top: -10, width: 8, height: 100, borderRadius: 4, backgroundColor: PAPER_LIT },
+
   plate: {
-    // PAPER, NOT A TONE — this is one of the two answer plates, so it CARRIES THE
-    // MESSAGE and T2 says it stays white. Toning it also put a solid ground over
-    // the ONE label on the branch, which `check:readable` reported as UNDER the
-    // moment the fill changed. The car is the mass in this picture; a card the
-    // reader is being asked to read is not.
-    width: BAL_W, height: BAL_H, borderWidth: 2.5, borderColor: INK, borderRadius: 8,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', height: 26, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', paddingTop: 3,
   },
-  plateRight: { backgroundColor: INK, borderColor: INK },
-  plateWrong: { borderColor: SOFT },
-  plateT: { fontFamily: 'Inter_700Bold', fontSize: 20, letterSpacing: 3, color: INK, includeFontPadding: false },
-  plateTOn: { color: PAPER },
+  millPlate: { left: BALANCE.x - 31, top: 370, width: 62 },
+  kantPlate: { left: LECTERN.x0 + 1, top: 468, width: LECTERN.x1 - LECTERN.x0 - 2 },
+  arisPlate: { left: MIRROR_PLATE.x0, top: MIRROR_PLATE.top, width: MIRROR_PLATE.x1 - MIRROR_PLATE.x0 },
+  plateName: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.3, color: INK, includeFontPadding: false,
+  },
+  plateGloss: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+  },
+
+  pickRing: { position: 'absolute', left: 0, top: 0, borderWidth: 2.5, borderColor: EMBER },
+
+  tf: { position: 'absolute', width: 40, height: 2 * LAMP_R + 20 },
+  tfFill: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  tfTag: {
+    paddingHorizontal: 3, height: 13, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, justifyContent: 'center',
+  },
+  tagRight: { backgroundColor: INK },
+  tfText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+  },
+  onInk: { color: PAPER_LIT },
 });
 
-// BAND. Topmost ink is the verdict board at 232 (its columns now end at 312); the lowest is the sleeper row under
-// the rail, 500 + 3 (rail) + 7 (sleeper) = 510. Everything else sits inside that: the
-// TRUE/FALSE plates finish at 368, the branch line climbs to 459, the ONE peg reaches
-// 399 and its label 400, the five reach 428 and their label 392, the lever knob to
-// ~446, the trolley's wheels to 504, the figure's crown to
-// 350. So [224, 518] holds every extreme with 8 units of margin at each end, and the
-// scene renders about 90% larger than the letterboxed full-height fit.
 export function Ethics3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics3Scene} band={[224, 518]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics3Scene} band={[288, 514]} camera={CAM} />;
 }

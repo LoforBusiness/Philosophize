@@ -1,543 +1,619 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
+import { oEll, oRect, oTri, oBar } from './objects';
 import { BEATS } from './political3Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import {
+  doorway, plinth, cushion, charter, declFrame, ballotStand,
+  DOORWAY, SHADOW, CUSHION, HOOK, CHARTER, INKPOT, SIGN, LINE2, DECL, BOX, SLOT,
+  AT_PLINTH, AT_CHARTER,
+} from './political3Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
-const TONE = stageTone('political-philosophy');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
-
-// The right to rule, drawn as a CIRCUIT and a COMPARISON.
+// ─────────────────────────────────────────────────────────────────────────────
+// political-political-3, "What Makes a Government Legitimate?" — A COUNCIL ROOM.
 //
-// MIDDLE — one corridor that holds two opposite diagrams, on exactly the same two
-// rails. On the hook it is BARE FORCE: a heavy arrow driven DOWN the top rail from
-// ruler to ruled, and on the bottom rail a struck-out return arrow — nothing is
-// owed back. From the contract beat that is replaced, rail for rail, by the
-// CIRCUIT: a scroll of consent travels UP the top rail from the ruled to the
-// ruler, and protected rights flow back along the bottom one. Because the two
-// diagrams share their geometry, the swap itself teaches the beat's distinction —
-// power compels, legitimacy is owed. On the Locke beat the whole exchange is then
-// stamped HELD IN TRUST, struck on at an angle like a clerk's seal.
+// Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
+// laid across its voiced line in stages (pace.ts, line lengths from the manifest). The
+// gunman is only ever a shadow on the wall, and nobody is hurt in it (N11).
 //
-// TOP — the comparison, two panels either side of a VS divider. It first holds
-// POWER (makes you obey) against LEGITIMACY (makes you owe), then swaps to
-// Rousseau's split: the WILL OF ALL drawn as arrows pulling every which way, the
-// GENERAL WILL as the same arrows in rank.
+//   b0   a gunman's shadow falls through the doorway; he puts his hands up.
+//   b1   the shadow goes; POWER on the doorway's plate, LEGITIMACY on the plinth's.
+//   b2   he lifts the crown off its cushion; the shadow comes back: STATE OF WAR.
+//   b3   he signs the charter with the quill, walks back and sets the crown down again.
+//   b4   he takes the keys from his pocket and hangs them on the plinth: IN TRUST.
+//   b5   he walks under the Declaration and it lights: 1776.
+//   b7   at the ballot box he drops his slip in: GENERAL WILL, WILL OF ALL.
+//   b8   back at the charter he adds a line, a law he gives himself.
+//   b9   Q1 on the stage: the keys or the ballot box.
+//   b10  Q2: the order control strings the ballot box to the charter as it moves (R7c).
 //
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Four taps of this opener used to hold one frame, and one put the whole Hobbes-
-// to-Locke circuit up on a sentence about the state of nature. Now each sentence
-// brings what it names: the POWER / LEGITIMACY panel on the sentence that defines
-// them; on "a condition with no government … a state of war" the crown lifts off
-// the ruler and the corridor holds two arrows meeting head on; on "escape the war by
-// covenant … set up a sovereign" the consent scroll travels and the crown comes
-// back; the RIGHTS PROTECTED return arrives with Locke, who is the one that says
-// it; the 1776 Declaration is pinned up on the sentence about it, in the panel
-// corridor Rousseau's panel then takes over; and GENERAL WILL is struck in ink on
-// "citizens who obey the general will". Everything that shares a corridor hands
-// over with the same staggered gate the force diagram and the circuit already use.
-//
-// COMPOSITION / OCCLUSION CONTRACT
-//   · Subject at x = 66 (spans ~18–114), ruler at x = 334 (spans ~286–382), both
-//     on GROUND = 500 with crowns near y 361.
-//   · Every corridor part — both diagrams — lives in x 122–278 between them, and
-//     every panel sits at y 240–322, above both crowns.
-//   · The ruler's crown is the one prop that sits over a figure, at y 326–346 —
-//     deliberately, and still 15 units clear of the head.
-//   · The force diagram and the circuit hand over with a STAGGERED gate rather
-//     than a cross-fade, so the corridor never shows both at half opacity.
-//   · Nothing is drawn above y 222 or below the ankle joints at y ≈ 507.4, hence
-//     band [214, 512].
+// COMPOSITION, in stage units: the doorway 10–50 from 404; the plinth at 110 with the
+// crown on its cushion at 446 and the hook at 124; the charter 170–226 × 390–452 with
+// the inkpot at 178; the Declaration 250–296 × 336–386; the ballot box 322–358 ×
+// 440–470. He stands at 132, 160, 232 and 310. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
 
-const SUB_X = 66;
-const R_X = 334;
+const TONE = stageTone('political');
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const METAL = stageToneOf(EMBER);
+const IRON = stageToneOf(DEEP);
+const TR = 0.85;
 
-const BOX_W = 172;
-const BOX_H = 82;
-const BOX_T = 240;
-const BOX_L = [14, 214];
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, political-political-3. */
+const LINES = [4.52, 7.04, 8.76, 5.24, 8.96, 6.56, 0, 7.72, 7.08, 0, 0, 0];
 
-const COR_L = 122;                 // the corridor between the two figures
-const COR_W = 156;
-const UP_Y = 389;                  // the consent arrow
-const DOWN_Y = 458;                // the protection arrow
-const SCROLL_W = 32;
-const CLASH_GAP = 6;               // between the two arrowheads of the state of war
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
 
-// The Declaration, pinned in the panel corridor (x 134..266, y 240..316): the
-// panels are down on both beats it is up, and it is gone before Rousseau's arrive.
-const DECL_L = 134;
-const DECL_T = 240;
-const DECL_W = 132;
-const DECL_H = 76;
+const X = BEATS.map((b) => b.x ?? AT_CHARTER);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_GUNMAN = is('gunman');
+const A_POWER = is('power');
+const A_NATURE = is('nature');
+const A_COVENANT = is('covenant');
+const A_TRUST = is('trust');
+const A_DECL = is('decl');
+const A_ROUSSEAU = is('rousseau');
+const A_OWN = is('own');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const NAMED = flag((b) => b.named);
+const WAR = flag((b) => b.war);
+const SIGNED = flag((b) => b.signed);
+const KEYS = flag((b) => b.keys);
+const DECL_ON = flag((b) => b.decl);
+const BALLOT = flag((b) => b.ballot);
+const LINE2_ON = flag((b) => b.line2);
+const Q1 = flag((b) => b.q1);
+/** The order control is being answered: a cord runs from the box to the charter as it moves (R7c). */
+const ORDER = flag((b) => b.interact?.order);
+const LINK_AT = [0.15, 0.6, 1];
+/** He holds the crown from the moment he lifts it (b2) until he sets it back (b3). */
+const CROWN_HELD = BEATS.map((b) => (b.act === 'nature' ? 1 : 0));
+/** Which way he faces once each beat settles: the doorway and the plinth to his left, then right. */
+const DIR = BEATS.map((_, k) => (k <= 4 ? -1 : 1));
 
-// Mode 1 sets power against legitimacy; mode 2 is Rousseau's split. The panels
-// keep their geometry and swap only their words, so nothing ever reflows.
-interface Panel {
-  title: string;
-  left: { name: string; sub: string };
-  right: { name: string; sub: string };
-}
-const PANELS: (Panel | null)[] = [
-  null,
-  {
-    title: 'TWO DIFFERENT THINGS',
-    left: { name: 'POWER', sub: 'makes you obey' },
-    right: { name: 'LEGITIMACY', sub: 'makes you owe' },
-  },
-  {
-    title: 'ROUSSEAU SPLITS THEM',
-    left: { name: 'WILL OF ALL', sub: 'the sum of private wants' },
-    right: { name: 'GENERAL WILL', sub: 'what serves everyone' },
-  },
+/** b3: over to the charter to sign, and back to set the crown down. */
+const COV_LEGS = [[AT_CHARTER, 0.2], [AT_PLINTH, 3.4]];
+const COV_KEYS = [[0, 1], [3.1, -1]];
+
+const Q1_T = [
+  { id: 'rights', label: 'RIGHTS\nBREACHED', x: 88, y: 404, w: 54, h: 88, correct: true },
+  { id: 'election', label: 'ELECTION\nLOST', x: 314, y: 400, w: 52, h: 74, correct: false },
 ];
 
-// Six arrows per panel: scattered on the left (private wants pulling apart),
-// in rank on the right (one direction that serves the whole).
-const SCATTER = ['-38deg', '22deg', '-12deg', '44deg', '-55deg', '14deg'];
-const ALIGNED = ['0deg', '0deg', '0deg', '0deg', '0deg', '0deg'];
+/** The crown, the keys and the quill, each drawn about its own origin so it can ride a hand. */
+const CROWN_ART = [
+  oTri('mass', -6, -6, 6, 8, 'up'),
+  oTri('mass', 0, -7, 6, 9, 'up'),
+  oTri('mass', 6, -6, 6, 8, 'up'),
+  oRect('mass', 0, 0, 20, 6, 0, 1.5),
+  oEll('dark', 0, 0, 4, 3),
+];
+const KEYS_ART = [
+  oEll('line', 0, 0, 7, 7),
+  oBar('mass', 1, 3, 3, 13, 2.2),
+  oBar('mass', -2, 3, -4, 11, 2.2),
+  oRect('mass', 4, 12, 4, 2, 0, 0.5),
+  oRect('mass', -5, 10, 4, 2, 0, 0.5),
+];
+const QUILL_ART = [oEll('lit', 0, -9, 4, 16, 18), oBar('line', 1, -2, 2, 4, 1.2)];
 
-const SUB_CODE = BEATS.map((b) => b.sub ?? 0);
-const R_CODE = BEATS.map((b) => b.r ?? 0);
-const SCROLL = BEATS.map((b) => b.scroll ?? 0);
-const FORCE = BEATS.map((b) => b.force ?? 0);
-const FLOW = BEATS.map((b) => b.flow ?? 0);
-const SEAL = BEATS.map((b) => b.seal ?? 0);
-const NAT = BEATS.map((b) => b.nat ?? 0);
-const CROWN = BEATS.map((b) => b.crown ?? 1);
-const RIGHTS = BEATS.map((b) => b.rights ?? 0);
-const DECL = BEATS.map((b) => b.decl ?? 0);
-const WILL = BEATS.map((b) => b.will ?? 0);
-const PAIR_ON = BEATS.map((b) => ((b.pair ?? 0) > 0 ? 1 : 0));
-// A beat that shows no panel still remembers the last one, so the fade-OUT keeps
-// the words it was showing instead of blanking mid-transition.
-const PAIR_MODE = (() => {
-  let last = 1;
-  return BEATS.map((b) => {
-    if ((b.pair ?? 0) > 0) last = b.pair as number;
-    return last;
-  });
-})();
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
+function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x: number; from: number; to: number; u: number } {
+  'worklet';
+  let from = x0;
+  for (let k = 0; k < legs.length; k++) {
+    const to = legs[k][0];
+    const start = legs[k][1];
+    const dur = moveTr(from, to, TR);
+    if (b < start) return { x: from, from, to: from, u: 1 };
+    if (b < start + dur) {
+      const u = ease01((b - start) / dur);
+      return { x: lerp(from, to, u), from, to, u };
+    }
+    from = to;
+  }
+  return { x: from, from, to: from, u: 1 };
+}
+function turnAt(b: number, d0: number, keys: readonly (readonly number[])[]): number {
+  'worklet';
+  let d = d0;
+  for (let k = 0; k < keys.length; k++) d = lerp(d, keys[k][1], ease01(clamp01((b - keys[k][0]) / 0.3)));
+  return d;
+}
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on.
-// Two figures at 66 and 334, so the track is the point BETWEEN them (200) — following
-// either one alone would frame the other out, and here the pair is the subject.
-const X = BEATS.map((b) => b.x ?? 200);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
 
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political3'));
-
-export default function Political3Scene({ clock, bt, bi, i, dragPos, pickPos }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldSub = useHeld();
-  const cv = useCarry(10);
-  const heldR = useHeld();
-  const mode = PAIR_MODE[i];
-  const panel = PANELS[mode] ?? PANELS[1]!;
-  const rots = mode === 2 ? SCATTER : null;
-
+export default function Political3Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(21);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const sub = keepHeld(heldSub, mixStance(carryFrom(heldSub, n, emoteHold(SUB_CODE[p], t)), emoteLive(SUB_CODE[n], t, bt.value), tr));
-    const r = keepHeld(heldR, mixStance(carryFrom(heldR, n, emoteHold(R_CODE[p], t)), emoteLive(R_CODE[n], t, bt.value), tr));
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const leg = A_COVENANT[n] ? legAt(b, xp, COV_LEGS) : null;
+    const walking = !leg && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const tx = leg ? leg.x : xn;
+    const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : leg ? 1 : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    if (leg && leg.u < 1 && leg.to !== leg.from) {
+      s = travelStance(leg.from, leg.to, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
+    }
+    const was = facing(DIR[p], DIR[p], b);
+    let dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    if (A_COVENANT[n]) dirV = turnAt(b, was, COV_KEYS);
+    const dir = dirV < 0 ? -1 : 1;
+    const arrive = walking ? walkDur : 0;
+
+    // ── hands up to the shadow (b0), and down again (b1) ─────────────────────
+    const up = A_GUNMAN[n] ? sec(0.6, 1.1) : A_POWER[n] ? 1 - sec(0.4, 1.0) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 14, y: -76 }, fistL: { x: -8, y: -76 } }, up);
+
+    // ── the crown: lifted off in the left hand (b2), carried, set back (b3) ──
+    const lift = A_NATURE[n] ? pulse(0.8, 1.2, 1.6) : 0;
+    s = handOn(s, x, dir, -1, CUSHION.x, CUSHION.y - 6 - 10 * sec(1.2, 1.5), lift);
+    const setDown = A_COVENANT[n] ? pulse(4.35, 4.75, 5.1) : 0;
+    const holdCrown = A_NATURE[n] ? sec(1.2, 1.3) : A_COVENANT[n] ? 1 - sec(4.75, 4.85) : 0;
+    s = mixStance(s, { ...s, fistL: { x: 16, y: -24 } }, holdCrown * (1 - lift) * (1 - setDown));
+    s = handOn(s, x, dir, -1, CUSHION.x, CUSHION.y - 6, setDown);
+
+    // ── the quill: taken from the inkpot, a signature (b3) or a line (b8), put back ──
+    const penAt = A_COVENANT[n] ? 1.1 : A_OWN[n] ? arrive + 0.2 : 99;
+    const penLine = A_COVENANT[n] ? SIGN : LINE2;
+    const writeU = sec(penAt + 0.4, penAt + 1.3);
+    const writing = sec(penAt + 0.35, penAt + 0.45) * (1 - sec(penAt + 1.3, penAt + 1.4));
+    const penX = lerp(INKPOT.x, lerp(penLine.x0, penLine.x1, writeU), writing);
+    const penY = lerp(INKPOT.top - 4, penLine.y + 1.5 * Math.sin(b * 24) * writing, writing);
+    const pen = sec(penAt, penAt + 0.25) * (1 - sec(penAt + 1.5, penAt + 1.75));
+    s = handOn(s, x, dir, 1, penX, penY, pen);
+    const quillHeld = sec(penAt + 0.2, penAt + 0.3) * (1 - sec(penAt + 1.5, penAt + 1.6));
+
+    // ── the keys: out of his pocket, onto the plinth's hook (b4) ────────────
+    const pocket = A_TRUST[n] ? pulse(0.5, 0.8, 1.1) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 4, y: -6 } }, pocket);
+    const hang = A_TRUST[n] ? pulse(1.2, 1.7, 2.4) : 0;
+    s = handOn(s, x, dir, 1, HOOK.x, HOOK.y - 2, hang);
+    const keysHeld = A_TRUST[n] ? sec(0.75, 0.85) * (1 - sec(1.65, 1.75)) : 0;
+
+    // ── a slip into the ballot box (b7) ─────────────────────────────────────
+    const vote = A_ROUSSEAU[n] ? pulse(arrive + 0.3, arrive + 0.8, arrive + 1.4) : 0;
+    s = handOn(s, x, dir, 1, SLOT.x, SLOT.y - 3 + 4 * sec(arrive + 0.8, arrive + 1.0), vote);
+    const slipHeld = A_ROUSSEAU[n] ? sec(arrive + 0.2, arrive + 0.3) * (1 - sec(arrive + 0.95, arrive + 1.05)) : 0;
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the room ─────────────────────────────────────────────────────────────
+    // the shadow comes back for the state of war, and is gone again once the line is over
+    const shadow = A_GUNMAN[n] ? sec(0.1, 0.7) : A_POWER[n] ? 1 - sec(0.3, 1.1) : A_NATURE[n] ? st(0.72, 0.8) * (1 - sec(L + 0.6, L + 1.2)) : 0;
+    const power = A_POWER[n] ? sec(0.8, 1.3) : NAMED[n];
+    const legit = A_POWER[n] ? st(0.5, 0.58) : NAMED[n];
+    const warRow = A_NATURE[n] ? st(0.78, 0.86) : WAR[n];
+    const crownOff = A_NATURE[n] ? sec(1.2, 1.3) : A_COVENANT[n] ? 1 - sec(4.75, 4.85) : 0;
+    const sign = A_COVENANT[n] ? sec(penAt + 0.4, penAt + 1.3) : SIGNED[n];
+    const cov = A_COVENANT[n] ? sec(2.5, 3.0) : SIGNED[n];
+    const keysOn = A_TRUST[n] ? sec(1.65, 1.75) : KEYS[n];
+    const trust = A_TRUST[n] ? st(0.6, 0.68) : KEYS[n];
+    const glint = A_TRUST[n] ? pulse(L * 0.88, L * 0.92, L * 0.98) : 0;
+    const decl = A_DECL[n] ? sec(arrive + 0.2, arrive + 1.0) : DECL_ON[n];
+    const slips = A_ROUSSEAU[n] ? sec(arrive + 0.95, arrive + 1.3) : BALLOT[n];
+    const general = A_ROUSSEAU[n] ? st(0.3, 0.38) : BALLOT[n];
+    const allRow = A_ROUSSEAU[n] ? st(0.8, 0.88) : BALLOT[n];
+    const line2 = A_OWN[n] ? sec(penAt + 0.4, penAt + 1.3) : LINE2_ON[n];
+    const link = ORDER[n] ? pickAt(LINK_AT, pickPos.value) : 0;
+
     return {
-      sub: reactPose(sub, SUB_X, GROUND, K_FIG, 1, 1),
-      ruler: pose(r, R_X, GROUND, K_FIG, -1, 1),
-      // The scroll's journey is DELAYED into the back half of the transition, so it
-      // is still near the subject's end of the rail at the moment the circuit
-      // becomes visible — otherwise it would pop into view already delivered.
-      scroll: ease01(clamp01((carry(cv, 0, n, SCROLL[p], SCROLL[n], tr) - 0.45) / 0.55)),
-      // R7c — the HELD IN TRUST stamp is exactly what the drag is about: at 'they are
-      // the same thing' it is struck across the circuit, and it lifts as the reader
-      // says a vote reaches less and less of the general will.
-      seal: carry(cv, 1, n, SEAL[p], reacting ? 1 - pickPos.value : SEAL[n], tr),
-      // The panels share their corridor with the Declaration, so they take the same
-      // staggered gate as the two diagrams below: off by 45%, on from 55%.
-      pair: ease01(clamp01((carry(cv, 2, n, PAIR_ON[p], PAIR_ON[n], tr) - 0.55) / 0.45)),
-      // The corridor's two diagrams hand over in stages: force is off the rails by
-      // 45% of the transition, the circuit goes up from 55%, and the corridor is
-      // briefly — deliberately — empty between them. Cross-fading them left both at
-      // half opacity on top of each other, which on a phone reads as a smudge.
-      force: ease01(clamp01((carry(cv, 3, n, FORCE[p], FORCE[n], tr) - 0.55) / 0.45)),
-      flow: ease01(clamp01((carry(cv, 4, n, FLOW[p], FLOW[n], tr) - 0.55) / 0.45)),
-      // The state of nature is the third tenant of that corridor, on the same gate.
-      nat: ease01(clamp01((carry(cv, 5, n, NAT[p], NAT[n], tr) - 0.55) / 0.45)),
-      crown: carry(cv, 6, n, CROWN[p], CROWN[n], tr),
-      // The return half only ever arrives onto a circuit that is already up.
-      rights: carry(cv, 7, n, RIGHTS[p], RIGHTS[n], tr),
-      decl: ease01(clamp01((carry(cv, 8, n, DECL[p], DECL[n], tr) - 0.55) / 0.45)),
-      will: carry(cv, 9, n, WILL[p], WILL[n], tr),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      shadow: carry(cv, 1, n, 0, shadow, tr),
+      power: carry(cv, 2, n, NAMED[p], power, tr),
+      legit: carry(cv, 3, n, NAMED[p], legit, tr),
+      warRow: carry(cv, 4, n, WAR[p], warRow, tr),
+      crownOff: carry(cv, 5, n, CROWN_HELD[p], crownOff, tr),
+      sign: carry(cv, 6, n, SIGNED[p], sign, tr),
+      cov: carry(cv, 7, n, SIGNED[p], cov, tr),
+      keysOn: carry(cv, 8, n, KEYS[p], keysOn, tr),
+      keysHeld: carry(cv, 9, n, 0, keysHeld, tr),
+      trust: carry(cv, 10, n, KEYS[p], trust, tr),
+      glint: carry(cv, 11, n, 0, glint, tr),
+      decl: carry(cv, 12, n, DECL_ON[p], decl, tr),
+      slips: carry(cv, 13, n, BALLOT[p], slips, tr),
+      slipHeld: carry(cv, 14, n, 0, slipHeld, tr),
+      general: carry(cv, 15, n, BALLOT[p], general, tr),
+      allRow: carry(cv, 16, n, BALLOT[p], allRow, tr),
+      line2: carry(cv, 17, n, LINE2_ON[p], line2, tr),
+      quillHeld: carry(cv, 18, n, 0, quillHeld, tr),
+      q1: carry(cv, 19, n, Q1[p], Q1[n], tr),
+      link: carry(cv, 20, n, 0, link, tr),
       t,
     };
   });
 
-  const DS = useDerivedValue<Bundle>(() => SCENE.value.sub);
-  const DR = useDerivedValue<Bundle>(() => SCENE.value.ruler);
-
-  const forceStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.force }));
-  const flowStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flow }));
-  const scrollStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.flow,
-    transform: [{ translateX: lerp(0, COR_W - SCROLL_W - 18, SCENE.value.scroll) }],
-  }));
-  // The seal lands like a stamp: oversized, then driven down onto the page.
-  const sealStyle = useAnimatedStyle(() => {
-    const u = ease01(SCENE.value.seal);
-    return { opacity: clamp01(SCENE.value.seal * 2), transform: [{ rotate: '-5deg' }, { scale: 1 + 0.55 * (1 - u) }] };
-  });
-  const pairStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.pair,
-    transform: [{ translateY: (1 - SCENE.value.pair) * -8 }],
-  }));
-  const natStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.nat }));
-  // No government: the crown lifts clear of the ruler and goes; the covenant sets it back down.
-  const crownStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.crown,
-    transform: [{ translateY: (1 - SCENE.value.crown) * -14 }],
-  }));
-  // Protection flows back from the ruler's end, so the arrow arrives travelling left.
-  // It rides the circuit's gate too, so the summary takes both halves down together.
-  const rightsStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.rights * SCENE.value.flow,
-    transform: [{ translateX: (1 - SCENE.value.rights) * 14 }],
-  }));
-  const declStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.decl,
-    transform: [{ translateY: (1 - SCENE.value.decl) * -8 }, { rotate: '-2deg' }],
-  }));
-  // The GENERAL WILL panel is struck, not tinted: its ink face comes up as its
-  // stone face's words go, so no ink word ever sits under the ink plate.
-  const willStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.will }));
-  const willOffStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.will }));
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── the comparison panels ────────────────────────────────────────────── */}
-      <Animated.View style={[StyleSheet.absoluteFill, pairStyle]} pointerEvents="none">
-        <Text style={styles.title}>{panel.title}</Text>
-
-        <View style={[styles.box, { left: BOX_L[0] }]}>
-          <Text style={styles.boxName}>{panel.left.name}</Text>
-          <Text style={styles.boxSub}>{panel.left.sub}</Text>
-          {rots ? <ArrowRow rots={SCATTER} /> : null}
-        </View>
-
-        <View style={[styles.box, { left: BOX_L[1] }]}>
-          <Animated.View style={[StyleSheet.absoluteFill, willOffStyle]}>
-            <Text style={styles.boxName}>{panel.right.name}</Text>
-            <Text style={styles.boxSub}>{panel.right.sub}</Text>
-            {rots ? <ArrowRow rots={ALIGNED} /> : null}
-          </Animated.View>
-        </View>
-        {/* the same panel, struck in ink — only Rousseau's split ever strikes it */}
-        {rots ? (
-          <Animated.View style={[styles.boxOn, { left: BOX_L[1] }, willStyle]}>
-            <Text style={[styles.boxName, styles.onInk]}>{panel.right.name}</Text>
-            <Text style={[styles.boxSub, styles.onInk]}>{panel.right.sub}</Text>
-            <ArrowRow rots={ALIGNED} color={PAPER} />
-          </Animated.View>
-        ) : null}
-
-        <View style={styles.divider} />
-        <View style={styles.chip}><Text style={styles.chipText}>VS</Text></View>
-      </Animated.View>
-
-      {/* ── the Declaration of 1776, pinned where the panels were ───────────── */}
-      <Animated.View style={[styles.decl, declStyle]} pointerEvents="none">
-        <Text style={styles.declTitle} numberOfLines={1}>DECLARATION</Text>
-        <Text style={styles.declSub} numberOfLines={1}>OF INDEPENDENCE</Text>
-        <View style={styles.declRule} />
-        <Text style={styles.declYear} numberOfLines={1}>1776</Text>
-        <Text style={styles.declIdeas} numberOfLines={1}>CONSENT · RIGHTS</Text>
-      </Animated.View>
-
-      {/* ── the crown, riding above the ruler ────────────────────────────────── */}
-      <Animated.View style={[styles.crown, crownStyle]} pointerEvents="none">
-        <View style={[styles.crownPt, { left: 1 }]} />
-        <View style={[styles.crownPt, { left: 14 }]} />
-        <View style={[styles.crownPt, { left: 27 }]} />
-        <View style={styles.crownBand} />
-      </Animated.View>
-
-      {/* ── the state of nature: no government, and two wills meeting head on ── */}
-      <Animated.View style={[StyleSheet.absoluteFill, natStyle]} pointerEvents="none">
-        <Text style={styles.natLabel}>STATE OF NATURE</Text>
-        <View style={[styles.clashShaft, { left: COR_L, width: COR_W / 2 - CLASH_GAP / 2 - 12 }]} />
-        <View style={[styles.clashHeadR, { left: COR_L + COR_W / 2 - CLASH_GAP / 2 - 13 }]} />
-        <View style={[styles.clashShaft, { left: COR_L + COR_W / 2 + CLASH_GAP / 2 + 12, width: COR_W / 2 - CLASH_GAP / 2 - 12 }]} />
-        <View style={[styles.clashHeadL, { left: COR_L + COR_W / 2 + CLASH_GAP / 2 }]} />
-        <Text style={styles.warLabel}>A STATE OF WAR</Text>
-      </Animated.View>
-
-      {/* ── bare force: one heavy arrow down, and nothing owed back ──────────── */}
-      <Animated.View style={[StyleSheet.absoluteFill, forceStyle]} pointerEvents="none">
-        <Text style={styles.forceLabel}>FORCE</Text>
-        <View style={styles.forceShaft} />
-        <View style={styles.forceHead} />
-        <View style={styles.oweShaft} />
-        <View style={styles.oweHead} />
-        <View style={styles.oweCross}>
-          <View style={[styles.oweCrossBar, { transform: [{ rotate: '45deg' }] }]} />
-          <View style={[styles.oweCrossBar, { transform: [{ rotate: '-45deg' }] }]} />
-        </View>
-        <Text style={styles.oweLabel}>NOTHING OWED</Text>
-      </Animated.View>
-
-      {/* ── the circuit: consent up, protected rights back down ──────────────── */}
-      <Animated.View style={[StyleSheet.absoluteFill, flowStyle]} pointerEvents="none">
-        <Text style={styles.upLabel}>CONSENT</Text>
-        <View style={styles.upShaft} />
-        <View style={styles.upHead} />
-      </Animated.View>
-      <Animated.View style={[StyleSheet.absoluteFill, rightsStyle]} pointerEvents="none">
-        <View style={styles.downShaft} />
-        <View style={styles.downHead} />
-        <Text style={styles.downLabel}>RIGHTS PROTECTED</Text>
-      </Animated.View>
-
-      {/* the scroll of consent, travelling the top arrow */}
-      <Animated.View style={[styles.scroll, scrollStyle]} pointerEvents="none">
-        <View style={styles.scrollBody} />
-        <View style={[styles.scrollCap, { left: -2 }]} />
-        <View style={[styles.scrollCap, { right: -2 }]} />
-      </Animated.View>
-
-      {/* the stamp Locke's whole argument hangs on */}
-      <Animated.View style={[styles.seal, sealStyle]} pointerEvents="none">
-        <Text style={styles.sealText}>HELD IN TRUST</Text>
-      </Animated.View>
-
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.wall} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
+      </View>
+      <View style={styles.dayOutside} pointerEvents="none" />
+      <Shadows S={SCENE} />
+      <ObjectArt parts={DOORWAY_ART} tone={WOOD} />
+      <Charter S={SCENE} />
+      <ObjectArt parts={CHARTER_ART} tone={WOOD} />
+      <ObjectArt parts={DECL_ART} tone={WOOD} />
+      <Declaration S={SCENE} />
+      <ObjectArt parts={PLINTH_ART} tone={IRON} />
+      <ObjectArt parts={CUSHION_ART} tone={stageToneOf(TEAL)} />
+      <Ballot S={SCENE} />
+      <ObjectArt parts={STAND_ART} tone={WOOD} />
+      {on(ORDER) ? <Link S={SCENE} /> : null}
+      <Plates S={SCENE} on={on} />
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DS} k={K_FIG} />
-      <Stickman role="second" D={DR} k={K_FIG} />
-    </Animated.View>
-  );
-}
-
-/** Six little arrows — scattered for the will of all, in rank for the general will. */
-function ArrowRow({ rots, color = INK }: { rots: string[]; color?: string }) {
-  return (
-    <View style={styles.arrowRow} pointerEvents="none">
-      {rots.map((rot, k) => (
-        <View key={k} style={[styles.arrow, { left: k * 25, transform: [{ rotate: rot }] }]}>
-          <View style={[styles.arrowShaft, { backgroundColor: color }]} />
-          <View style={[styles.arrowHead, { borderLeftColor: color }]} />
-        </View>
-      ))}
+      <Stickman D={DF} k={K_M} />
+      <Held S={SCENE} DF={DF} />
+      {Q1[i] ? <Answers picked={picked} onPick={onPick} S={SCENE} /> : null}
     </View>
   );
 }
 
+const DOORWAY_ART = doorway();
+const PLINTH_ART = plinth();
+const CUSHION_ART = cushion();
+const CHARTER_ART = charter();
+const DECL_ART = declFrame();
+const STAND_ART = ballotStand();
+
+// ── the gunman's shadow on the wall, thrown in through the doorway ────────────
+
+function Shadows({ S }: { S: SharedValue<any> }) {
+  const one = useAnimatedStyle(() => ({ opacity: 0.24 * S.value.shadow, transform: [{ translateX: -10 * (1 - S.value.shadow) }] }));
+  return (
+    <Animated.View style={[styles.shade, { left: SHADOW.x - 16 }, one]} pointerEvents="none">
+      <View style={styles.shadeCrown} />
+      <View style={styles.shadeTrunk} />
+      <View style={[styles.shadeArm, { left: 18, transform: [{ rotate: '-8deg' }] }]} />
+      <View style={[styles.shadeLeg, { left: 12, transform: [{ rotate: '8deg' }] }]} />
+      <View style={[styles.shadeLeg, { left: 18, transform: [{ rotate: '-8deg' }] }]} />
+    </Animated.View>
+  );
+}
+
+// ── the charter on the wall, the signature and the added line ────────────────
+
+function Charter({ S }: { S: SharedValue<any> }) {
+  const sig = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.sign }] }));
+  const line2 = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.line2 }] }));
+  return (
+    <View style={styles.sheet} pointerEvents="none">
+      {[0, 1, 2, 3].map((k) => <View key={k} style={[styles.rule, { top: 8 + k * 7, width: k === 3 ? 28 : 40 }]} />)}
+      <Animated.View style={[styles.ink, { top: SIGN.y - CHARTER.top - 2, left: SIGN.x0 - CHARTER.x0 - 2, width: SIGN.x1 - SIGN.x0 }, sig]} />
+      <Animated.View style={[styles.ink, { top: LINE2.y - CHARTER.top - 2, left: LINE2.x0 - CHARTER.x0 - 2, width: LINE2.x1 - LINE2.x0 }, line2]} />
+    </View>
+  );
+}
+
+// ── the Declaration, lit when it is named ───────────────────────────────────
+
+function Declaration({ S }: { S: SharedValue<any> }) {
+  // the paper is there all along, dim; its date is legible or absent, never a smear (D35)
+  const lit = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * S.value.decl }));
+  const date = useAnimatedStyle(() => ({ opacity: S.value.decl > 0.5 ? S.value.decl : 0 }));
+  return (
+    <>
+      <Animated.View style={[styles.declPaper, lit]} pointerEvents="none">
+        {[0, 1, 2].map((k) => <View key={k} style={[styles.rule, { top: 22 + k * 6, left: 6, width: 26 }]} />)}
+      </Animated.View>
+      <Animated.View style={[styles.declPaper, styles.declClear, date]} pointerEvents="none">
+        <Text style={styles.declText} numberOfLines={1}>1776</Text>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the glass ballot box and the slips in it ─────────────────────────────────
+
+function Ballot({ S }: { S: SharedValue<any> }) {
+  const mine = useAnimatedStyle(() => ({ opacity: S.value.slips, transform: [{ translateY: -12 * (1 - S.value.slips) }] }));
+  return (
+    <View style={styles.glass} pointerEvents="none">
+      {[0, 1, 2, 3, 4].map((k) => (
+        <View key={k} style={[styles.slip, { left: 3 + k * 6, bottom: 1 + (k % 2) * 2, transform: [{ rotate: `${(k % 3) * 12 - 12}deg` }] }]} />
+      ))}
+      <Animated.View style={[styles.slip, { left: 14, bottom: 6 }, mine]} />
+    </View>
+  );
+}
+
+// ── what he holds: the crown, the quill, the keys, a slip ────────────────────
+
+function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  const crown = useAnimatedStyle(() => {
+    const w = DF.value.wrL;
+    const h = S.value.crownOff;
+    return {
+      transform: [
+        { translateX: lerp(CUSHION.x, w[0].translateX, h) },
+        { translateY: lerp(CUSHION.y - 8, w[1].translateY - 6, h) },
+      ],
+    };
+  });
+  const quill = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const h = S.value.quillHeld;
+    return {
+      transform: [
+        { translateX: lerp(INKPOT.x + 1, w[0].translateX, h) },
+        { translateY: lerp(INKPOT.top - 2, w[1].translateY, h) },
+      ],
+    };
+  });
+  const keys = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const h = S.value.keysHeld;
+    return {
+      opacity: Math.max(h, S.value.keysOn),
+      transform: [
+        { translateX: lerp(HOOK.x + 1, w[0].translateX, h) },
+        { translateY: lerp(HOOK.y + 2, w[1].translateY + 1, h) },
+        { rotate: `${6 * S.value.glint * Math.sin(S.value.t * 9)}deg` },
+      ],
+    };
+  });
+  const slip = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: S.value.slipHeld, transform: [{ translateX: w[0].translateX - 3 }, { translateY: w[1].translateY - 8 }] };
+  });
+  return (
+    <>
+      <Animated.View style={[styles.rider, crown]} pointerEvents="none">
+        <ObjectArt parts={CROWN_ART} tone={METAL} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, quill]} pointerEvents="none">
+        <ObjectArt parts={QUILL_ART} tone={WOOD} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, keys]} pointerEvents="none">
+        <ObjectArt parts={KEYS_ART} tone={METAL} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, slip]} pointerEvents="none">
+        <View style={[styles.slip, { left: 0, top: 0 }]} />
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the plates: POWER and STATE OF WAR by the doorway, LEGITIMACY and IN TRUST over
+// the crown, COVENANT and GENERAL WILL over the charter, WILL OF ALL by the box ──
+
+function Row({ v, text, first }: { v: SharedValue<number>; text: string; first?: boolean }) {
+  const st = useAnimatedStyle(() => ({ opacity: v.value }));
+  return <Animated.Text style={[styles.plateText, first ? null : styles.second, st]} numberOfLines={1}>{text}</Animated.Text>;
+}
+function Plates({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const power = useDerivedValue(() => S.value.power);
+  const war = useDerivedValue(() => S.value.warRow);
+  const legit = useDerivedValue(() => S.value.legit);
+  const trust = useDerivedValue(() => S.value.trust);
+  const cov = useDerivedValue(() => S.value.cov);
+  const general = useDerivedValue(() => S.value.general);
+  const all = useDerivedValue(() => S.value.allRow * (1 - S.value.q1));
+  const doorPlate = useAnimatedStyle(() => ({ opacity: S.value.power }));
+  const crownPlate = useAnimatedStyle(() => ({ opacity: S.value.legit }));
+  const charterPlate = useAnimatedStyle(() => ({ opacity: S.value.cov }));
+  const boxPlate = useAnimatedStyle(() => ({ opacity: S.value.allRow * (1 - S.value.q1) }));
+  return (
+    <>
+      {on(NAMED) ? (
+        <>
+          <Animated.View style={[styles.plate, styles.doorPlate, doorPlate]} pointerEvents="none">
+            <Row v={power} text="POWER" first />
+            <Row v={war} text="STATE OF WAR" />
+          </Animated.View>
+          <Animated.View style={[styles.plate, styles.crownPlate, crownPlate]} pointerEvents="none">
+            <Row v={legit} text="LEGITIMACY" first />
+            <Row v={trust} text="IN TRUST" />
+          </Animated.View>
+        </>
+      ) : null}
+      {on(SIGNED) ? (
+        <Animated.View style={[styles.plate, styles.charterPlate, charterPlate]} pointerEvents="none">
+          <Row v={cov} text="COVENANT" first />
+          <Row v={general} text="GENERAL WILL" />
+        </Animated.View>
+      ) : null}
+      {on(BALLOT) ? (
+        <Animated.View style={[styles.plate, styles.boxPlate, boxPlate]} pointerEvents="none">
+          <Row v={all} text="WILL OF ALL" first />
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
+
+// ── Q2: a cord from the ballot box to the charter, as far as the answer trusts a vote ──
+
+function Link({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      {[0, 1, 2, 3, 4, 5, 6].map((k) => <Dash key={k} S={S} k={k} />)}
+    </>
+  );
+}
+const LINK_FROM = { x: CHARTER.x1 + 4, y: 424 };
+const LINK_TO = { x: BOX.x0 - 2, y: BOX.top + 4 };
+function Dash({ S, k }: { S: SharedValue<any>; k: number }) {
+  const u = (k + 0.5) / 7;
+  const x = lerp(LINK_FROM.x, LINK_TO.x, u);
+  const y = lerp(LINK_FROM.y, LINK_TO.y, u);
+  const deg = (Math.atan2(LINK_TO.y - LINK_FROM.y, LINK_TO.x - LINK_FROM.x) * 180) / Math.PI;
+  const st = useAnimatedStyle(() => ({ opacity: clamp01((S.value.link - u * 0.85) * 6) }));
+  return <Animated.View style={[styles.dash, { left: x - 5, top: y - 1, transform: [{ rotate: `${deg}deg` }] }, st]} pointerEvents="none" />;
+}
+
+// ── Q1: the keys held in trust, or the ballot box ───────────────────────────
+
+function Answers({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {Q1_T.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered} sealAt="tr"
+          style={[styles.answer, { left: q.x, top: q.y, width: q.w, height: q.h }]}
+        >
+          <View style={styles.answerFill}>
+            <View style={[styles.answerTag, answered && q.correct && styles.tagRight]}>
+              <Text style={[styles.answerText, answered && q.correct && styles.onInk]} numberOfLines={2}>{q.label}</Text>
+            </View>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+const DOOR_W = DOORWAY.x1 - DOORWAY.x0;
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
-
-  title: {
-    position: 'absolute', left: 0, top: 222, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13.5, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: GROUND - 292, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
   },
-  box: {
-    position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-  },
-  boxName: {
-    position: 'absolute', left: 0, top: 9, width: BOX_W - 4, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
-  },
-  boxSub: {
-    position: 'absolute', left: 8, top: 29, width: BOX_W - 20, textAlign: 'center',
-    fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 13, letterSpacing: 0.2, color: INK,
-    includeFontPadding: false,
-  },
-  // The struck GENERAL WILL: the box's own rectangle, border and all, in ink.
-  boxOn: {
-    position: 'absolute', top: BOX_T, width: BOX_W, height: BOX_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 5, backgroundColor: INK,
-  },
-  onInk: { color: PAPER },
-  divider: { position: 'absolute', left: 199.25, top: 250, width: 1.5, height: 62, backgroundColor: RULE },
-  chip: {
-    position: 'absolute', left: 185, top: 271, width: 30, height: 20, borderRadius: 3,
-    borderWidth: 1.5, borderColor: SOFT, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  chipText: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1, color: INK, includeFontPadding: false },
-
-  arrowRow: { position: 'absolute', left: 9, top: 56, width: BOX_W - 22, height: 18 },
-  arrow: { position: 'absolute', top: 3, width: 21, height: 12 },
-  arrowShaft: { position: 'absolute', left: 0, top: 4.75, width: 13, height: 2.5, backgroundColor: INK },
-  arrowHead: {
-    position: 'absolute', left: 12, top: 0.5, width: 0, height: 0,
-    borderTopWidth: 5.5, borderBottomWidth: 5.5, borderLeftWidth: 9,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  rider: { position: 'absolute', left: 0, top: 0 },
+  dayOutside: {
+    position: 'absolute', left: DOORWAY.x0, top: DOORWAY.top, width: DOOR_W, height: GROUND - DOORWAY.top, borderRadius: 1,
+    backgroundColor: PAPER_LIT,
   },
 
-  crown: { position: 'absolute', left: R_X - 18, top: 326, width: 36, height: 20 },
-  crownPt: {
-    position: 'absolute', top: 0, width: 0, height: 0,
-    borderLeftWidth: 4, borderRightWidth: 4, borderBottomWidth: 10,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
-  },
-  crownBand: { position: 'absolute', top: 10, width: 36, height: 8, backgroundColor: INK, borderRadius: 2 },
+  shade: { position: 'absolute', top: SHADOW.top, width: 44, height: GROUND - SHADOW.top - 6 },
+  shadeCrown: { position: 'absolute', left: 8, top: 0, width: 20, height: 20, borderRadius: 10, backgroundColor: INK },
+  shadeTrunk: { position: 'absolute', left: 14, top: 18, width: 8, height: 44, borderRadius: 4, backgroundColor: INK },
+  shadeArm: { position: 'absolute', top: 26, width: 26, height: 5, borderRadius: 2.5, backgroundColor: INK, transformOrigin: '0% 50%' },
+  shadeLeg: { position: 'absolute', top: 58, width: 6, height: 42, borderRadius: 3, backgroundColor: INK, transformOrigin: '50% 0%' },
 
-  // ── bare force: the same two rails, run the other way ───────────────────────
-  // Deliberately heavier than the consent arrow (5 units of shaft against 2.5, a
-  // 13-unit head against 11): power is the loud one, and it points DOWN at the
-  // ruled rather than up from them.
-  forceLabel: {
-    position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
-    includeFontPadding: false,
+  sheet: {
+    position: 'absolute', left: CHARTER.x0, top: CHARTER.top + 4, width: CHARTER.x1 - CHARTER.x0, height: CHARTER.bottom - CHARTER.top - 8,
+    borderRadius: 1, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK,
   },
-  forceShaft: { position: 'absolute', left: COR_L + 12, top: UP_Y - 1.25, width: COR_W - 12, height: 5, backgroundColor: INK },
-  forceHead: {
-    position: 'absolute', left: COR_L, top: UP_Y - 6.75, width: 0, height: 0,
-    borderTopWidth: 8, borderBottomWidth: 8, borderRightWidth: 13,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
+  rule: { position: 'absolute', left: 7, height: 1.2, borderRadius: 0.6, backgroundColor: INK, opacity: 0.35 },
+  ink: { position: 'absolute', height: 2, borderRadius: 1, backgroundColor: DEEP, transformOrigin: '0% 50%' },
+
+  declPaper: {
+    position: 'absolute', left: DECL.x0 + 4, top: DECL.top + 4, width: DECL.x1 - DECL.x0 - 8, height: DECL.bottom - DECL.top - 8,
+    borderRadius: 1, backgroundColor: PAPER_LIT, alignItems: 'center',
   },
-  oweShaft: { position: 'absolute', left: COR_L, top: DOWN_Y, width: COR_W - 12, height: 2.5, backgroundColor: SOFT },
-  oweHead: {
-    position: 'absolute', left: COR_L + COR_W - 12, top: DOWN_Y - 4.75, width: 0, height: 0,
-    borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 11,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: SOFT,
-  },
-  // Struck across the return arrow: obedience is taken, nothing flows back.
-  oweCross: {
-    position: 'absolute', left: COR_L + COR_W / 2 - 17, top: DOWN_Y - 15.75, width: 34, height: 34,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  oweCrossBar: { position: 'absolute', width: 34, height: 3.5, backgroundColor: INK, borderRadius: 2 },
-  oweLabel: {
-    position: 'absolute', left: COR_L, top: 476, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
+  declClear: { backgroundColor: 'transparent' },
+  declText: {
+    marginTop: 5, fontFamily: 'Inter_700Bold', fontSize: 9.6, lineHeight: 11, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 
-  // ── the state of nature: the force diagram's weight, pointed at each other ──
-  // Caption at 362 (where FORCE and CONSENT sit), the two heads meeting at x 200
-  // on the top rail, and the consequence under them at 404 — the stamp's slot,
-  // which is empty on the one beat this is up.
-  natLabel: {
-    position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
-    includeFontPadding: false,
+  glass: {
+    position: 'absolute', left: BOX.x0, top: BOX.top + 1, width: BOX.x1 - BOX.x0, height: BOX.bottom - BOX.top - 1,
+    borderRadius: 2, borderWidth: 1.5, borderColor: INK, backgroundColor: stageToneOf(TEAL).STONE, overflow: 'hidden',
   },
-  clashShaft: { position: 'absolute', top: UP_Y - 1.25, height: 5, backgroundColor: INK },
-  clashHeadR: {
-    position: 'absolute', top: UP_Y - 6.75, width: 0, height: 0,
-    borderTopWidth: 8, borderBottomWidth: 8, borderLeftWidth: 13,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
-  },
-  clashHeadL: {
-    position: 'absolute', top: UP_Y - 6.75, width: 0, height: 0,
-    borderTopWidth: 8, borderBottomWidth: 8, borderRightWidth: 13,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: INK,
-  },
-  warLabel: {
-    position: 'absolute', left: COR_L, top: 404, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: INK,
-    includeFontPadding: false,
-  },
+  slip: { position: 'absolute', width: 8, height: 5, borderRadius: 1, backgroundColor: PAPER_LIT, borderWidth: 0.8, borderColor: INK },
+  dash: { position: 'absolute', width: 10, height: 2, borderRadius: 1, backgroundColor: EMBER },
 
-  // ── the Declaration ───────────────────────────────────────────────────────
-  decl: {
-    position: 'absolute', left: DECL_L, top: DECL_T, width: DECL_W, height: DECL_H,
-    backgroundColor: PAPER, borderWidth: 2, borderColor: INK, borderRadius: 8,
-    alignItems: 'center', paddingTop: 6,
+  plate: {
+    position: 'absolute', height: 26, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', paddingTop: 3,
   },
-  declTitle: {
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: INK,
-    includeFontPadding: false,
+  doorPlate: { left: 4, top: 368, width: 80 },
+  crownPlate: { left: 74, top: 338, width: 72 },
+  charterPlate: { left: 160, top: 360, width: 78 },
+  boxPlate: { left: 330, top: 408, width: 66, height: 15, paddingTop: 2 },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  declSub: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 12, letterSpacing: 0.6, color: INK,
-    includeFontPadding: false,
-  },
-  declRule: { width: 84, height: 1.5, backgroundColor: SOFT, marginTop: 3, marginBottom: 2 },
-  declYear: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 15, lineHeight: 18, color: INK,
-    includeFontPadding: false,
-  },
-  declIdeas: {
-    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 12, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
-  },
+  second: { marginTop: 0 },
 
-  upLabel: {
-    position: 'absolute', left: COR_L, top: 362, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.6, color: INK,
-    includeFontPadding: false,
+  answer: { position: 'absolute' },
+  answerFill: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 2 },
+  answerTag: {
+    paddingHorizontal: 3, paddingVertical: 1, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, justifyContent: 'center',
   },
-  upShaft: { position: 'absolute', left: COR_L, top: UP_Y, width: COR_W - 10, height: 2.5, backgroundColor: INK },
-  upHead: {
-    position: 'absolute', left: COR_L + COR_W - 11, top: UP_Y - 4.75, width: 0, height: 0,
-    borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 11,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
+  tagRight: { backgroundColor: INK },
+  answerText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    textAlign: 'center',
   },
-  downShaft: { position: 'absolute', left: COR_L + 10, top: DOWN_Y, width: COR_W - 10, height: 2.5, backgroundColor: SOFT },
-  downHead: {
-    position: 'absolute', left: COR_L, top: DOWN_Y - 4.75, width: 0, height: 0,
-    borderTopWidth: 6, borderBottomWidth: 6, borderRightWidth: 11,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderRightColor: SOFT,
-  },
-  downLabel: {
-    position: 'absolute', left: COR_L, top: 468, width: COR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-
-  scroll: { position: 'absolute', left: COR_L + 4, top: UP_Y - 5, width: SCROLL_W, height: 13 },
-  scrollBody: { position: 'absolute', left: 4, width: SCROLL_W - 8, height: 13, backgroundColor: PAPER, borderWidth: 1.5, borderColor: INK, borderRadius: 2 },
-  scrollCap: { position: 'absolute', top: -1.5, width: 6, height: 16, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PAPER },
-
-  seal: {
-    position: 'absolute', left: 142, top: 406, width: 116, height: 40,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  sealText: { fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 1, color: INK, includeFontPadding: false },
+  onInk: { color: PAPER_LIT },
 });
 
-// MEASURED BAND, top and bottom.
-//   TOP    the panel title at y 222. The ruler's crown prop tops out at 326 and
-//          both crowns sit near 361, so nothing on any beat is drawn higher.
-//   BOTTOM the ground line is at 501.5, but the true extreme is the ankle JOINTS:
-//          circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on GROUND, so
-//          ink reaches y = 507.4. The lowest prop is the force diagram's NOTHING
-//          OWED caption at 489.
-// [214, 512] therefore holds the stamp, both diagrams, the crown and both figures
-// on every beat with 8 units of margin at the top and 4.6 at the foot, and renders
-// the scene ~2.17× instead of the letterboxed 1.15×. The seal is scaled up to 1.55×
-// as it lands, but it grows about its own CENTRE (406→446 becomes 395→457), so the
-// stamp is comfortably inside the band at its largest.
 export function Political3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[214, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political3Scene} band={[288, 514]} camera={CAM} />;
 }

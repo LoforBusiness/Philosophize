@@ -1,544 +1,563 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './valid3Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, lookPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
-import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf } from './pace';
+import {
+  machine, panel, stand as standArt, rack,
+  BODY, HOPPERS, HOPPER_MOUTH, CARD_BOX, CRANK, OUT as SLOT_OUT, LAMPS, GEAR, BOARD, STAND, RACK,
+} from './valid3Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// logic-arguments-3, "Valid vs Sound" — AN ARGUMENT MACHINE IN A WORKSHOP.
+//
+// Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
+// laid across its voiced line in seconds (line lengths from the narration manifest).
+// He works the machine from its two ends, standing in front of it: the card box and
+// the first hopper from the left end, the second hopper and the crank from the right,
+// so his hands meet everything they touch and the lamps between stay in full view.
+//
+//   b0   he turns the crank; the gear in the window turns.
+//   b1   the two lamps are labelled VALID and SOUND; he points to VALID.
+//   b2   he points to SOUND.
+//   b3   he takes the two premise cards from the pocket and drops one in each hopper;
+//        each is written on the board as it goes in.
+//   b4   he turns the crank; the conclusion rises out of the slot on top, and onto the
+//        board; VALID lights.
+//   b5   he comes round to the stand and holds up the toaster, which is not gold:
+//        FALSE is stamped on each line, and SOUND stays dark.
+//   b7   Q1: three rubber stamps on the wall.
+//   b8   he sets the toaster down, goes back to the machine's left end and pulls the first
+//        premise out of its hopper; the conclusion is struck through.
+//
+// COMPOSITION, in stage units: the machine 150–262 × 454–500 with hoppers at 158 and
+// 264, the crank at 270, the out-slot at 212 on top; the board 60–330 × 320–384;
+// the stand at 342; the stamp rack 334–398 from 338. He stands clear of the machine, at
+// 132 by its left end and 290 by its right, and at 316 by the toaster. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('logic');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
-
-// The argument pinned up as a FORM the inspector reads, stage right.
-//
-//   · three fixed boxes — premise, premise, ∴ conclusion — whose WORDS swap from
-//     the abstract skeleton to the toaster argument without the boxes moving, so
-//     "same form, different content" is something you watch rather than are told;
-//   · a two-box CHECKLIST beneath — FORM VALID? · PREMISES TRUE? — each cycling
-//     from "?" to ✓ or ✗. That checklist is the lesson: two tests, never confused;
-//   · a rubber VALID stamp that lands on the form, and strike-throughs plus a
-//     FALSE tag when the premises turn out untrue;
-//   · stage left, THE FORBIDDEN PAIRING — "premises true / conclusion false" in a
-//     box that gets struck out with a drawn-on ✗ and stamped IMPOSSIBLE. That is
-//     the definition of validity as a picture, and it fills the column beside the
-//     inspector that used to be blank paper.
-//
-// On the graded beat the form clears and four VERDICT CARDS take the board — the
-// question is answered by tapping one of them, not by reading a list.
-//
-// THE CHECKLIST IS WRITTEN UP AS IT IS TAUGHT, so no tap of the opening leaves the
-// board as it was: FORM VALID? arrives with validity's definition, PREMISES TRUE?
-// with soundness's, and a bracket to their right names the pair SOUND (`tests`).
-// The toaster premises fill in before the conclusion does (`form` 1 → 2), the VALID
-// stamp comes down on "so the argument is valid", and when the premises are struck
-// false the word SOUND is struck with them — the checklist then reads ✓ ✗, and
-// "valid but not sound" is on the board rather than only in the deck.
-//
-// No camera transform: everything is authored straight into stage space, so the
-// band below is exact. The inspector's widest reach ends at x ≈ 118, the board
-// frame starts at x = 126 and the ballot at x = 130, so the figure can never
-// cover a card.
-
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
-const FIG_X = 60;                  // widest reach lands at x ≈ 118
-
-// ── the form ─────────────────────────────────────────────────────────────────
-const FR_L = 126;                  // frame 126..302
-const FR_W = 176;
-const BX = 136;                    // rows 136..300
-const BW = 164;
-const P1_Y = 266;
-const P2_Y = 312;
-const ROW_H = 42;
-const DIV_Y = 362;
-const C_Y = 374;
-const C_H = 44;
-
-// ── the checklist ────────────────────────────────────────────────────────────
-const CK1_Y = 436;
-const CK2_Y = 468;
-const CK_BOX = 28;
-// The bracket that joins the two tests: from the first label's top to the second's foot.
-const BRACE_X = 304;
-const BRACE_T = CK1_Y + 5;         // 441
-const BRACE_H = 50;                // 441..491
-
-// ── the "what VALID forbids" block, stage left ───────────────────────────────
-// Validity's definition, drawn: the ONE pairing a valid form can never produce —
-// all premises true and the conclusion false — struck through as impossible. It
-// fills the empty column beside the inspector and is the picture of beat 2's
-// sentence. It occupies 236..341, and the figure's crown sits at 350, so it can
-// never collide with the body; it is clear of the ballot (x ≥ 130) too.
-const VD_L = 8;
-const VD_W = 116;
-const VD_TOP = 236;
-const VD_BOX_T = 15;
-const VD_BOX_H = 72;
-// The strike bars run corner to corner: hypot(116, 72) = 136.5, trimmed to 136 so
-// the PAINTED diagonal (136·cos31.8° = 115.6 wide) stays inside the 116-wide block
-// and no platform's child-clipping can ever bite off its tip.
-const VD_DIAG = 136;
-
-// ── the verdict ballot (the scene-answered question) ─────────────────────────
-const BAL_L = 130;
-const BAL_W = 258;
-const BAL_TOP = 296;
-const BAL_H = 44;
-const BAL_STEP = 50;               // 296 · 346 · 396 · 446 → ends at 490
-
-const FORMS = [
-  ['All A are B', 'All B are C', 'So all A are C'],
-  ['All toasters are gold', 'All gold things are time machines', 'So all toasters are time machines'],
-];
-
-const CARDS = [
-  { id: 'a', title: 'SOUND', sub: 'the conclusion is guaranteed', correct: true },
-  { id: 'b', title: 'VALID ONLY', sub: 'conclusion could still be false', correct: false },
-  { id: 'c', title: 'PROBABLE', sub: 'only likely, like a guess', correct: false },
-  { id: 'd', title: 'INCOMPLETE', sub: 'still missing evidence', correct: false },
-];
-
-const P_CODE = BEATS.map((b) => b.p ?? 0);
-const LINK = BEATS.map((b) => b.link ?? 0);
-const STAMP = BEATS.map((b) => b.stamp ?? 0);
-const FLAW = BEATS.map((b) => b.flaw ?? 0);
-const TESTS = BEATS.map((b) => b.tests ?? 0);
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const STEEL = stageToneOf(TEAL);
+const WOOD = stageToneOf(OLIVE);
 const TR = 0.85;
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
-const X = BEATS.map((b) => b.x ?? FIG_X);
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, logic-arguments-3. */
+const LINES = [6.28, 7.64, 3.56, 6.04, 7.6, 7.8, 0, 0, 9.28, 0, 0];
 
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-// A sort as well as a poll. The grass-and-sky question became a sort on 13 Sep 2026: a
-// classification has nobody to name as its holder (R17), and the bins keep the order below.
-const REACT = BEATS.map((b) => (b.interact?.poll || b.interact?.sort ? 1 : 0));
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_L = K_FIG * 0.82;
 
-// WHAT THE MACHINE READS AT EACH BIN, in the order the SORT DECLARES them (never the
-// shuffled order on screen — see SceneApi.pickPos). This question was a pad and then
-// a poll, and each row below is read straight off one bin's own words.
-// VALID is stamped on the bins that say GOOD FORM
-const POLL_STAMP = [0, 1, 1, 0];
-// the premises are struck on the bins that say FALSE PREMISE
-const POLL_FLAW = [0, 0, 1, 1];
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('valid3'));
+const X = BEATS.map((b) => b.x ?? 196);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_RUN = is('run');
+const A_VALID = is('valid');
+const A_SOUND = is('sound');
+const A_LOAD = is('load');
+const A_CRANK = is('crank');
+const A_TOASTER = is('toaster');
+const A_REJECT = is('reject');
+const flag = (k: keyof (typeof BEATS)[number]) => BEATS.map((b) => (b[k] ? 1 : 0));
+const LAMPS_ON = flag('lamps');
+const OUT = flag('out');
+const VALID = flag('valid');
+const FALSIFIED = flag('falsified');
+const TOASTER = flag('toaster');
+const PULLED = flag('pulled');
+const STAMPS = flag('stamps');
+const FED = BEATS.map((b) => b.fed ?? 0);
+const P1_ON = FED.map((v) => (v >= 1 ? 1 : 0));
+const P2_ON = FED.map((v) => (v >= 2 ? 1 : 0));
+/** The sort is being answered: the lamps show the bin being weighed (R7c). */
+const SORT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
+/** Per bin, in the sort's own order: invalid · sound · valid, unsound · both faults. */
+const SORT_VALID = [0, 1, 1, 0];
+const SORT_SOUND = [0, 1, 0, 0];
+/** Which way he faces once a beat settles: the crank and the toaster to his right, the hoppers to his left. */
+/** Which way he faces once a beat settles: the machine is to his right from the left end, to his left from the right end. */
+const DIR = BEATS.map((b) => ((b.x ?? 132) >= 282 && (b.x ?? 0) < 300 ? -1 : 1));
 
-export default function Valid3Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldInsp = useHeld();
-  const cv = useCarry(5);
-  const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-  const showPick = !!cur.interact;
-  const leaving = !!prev?.interact && !cur.interact;
-  const answered = picked !== null;
-  // The stage's own instruction, spent the moment the answer lands (S11).
-  const spent = useAnswerSpent(picked);
+const LINES_TEXT = [
+  { tag: 'P1', text: 'ALL TOASTERS ARE GOLD' },
+  { tag: 'P2', text: 'ALL GOLD THINGS ARE TIME MACHINES' },
+  { tag: '∴', text: 'ALL TOASTERS ARE TIME MACHINES' },
+];
+const STAMP_Q = [
+  { id: 'sound', label: 'SOUND', y: 346, correct: true },
+  { id: 'valid', label: 'VALID ONLY', y: 368, correct: false },
+  { id: 'probable', label: 'PROBABLE', y: 390, correct: false },
+];
 
-  // The words only re-animate on the beat that CHANGES them, so the form does not
-  // flicker every time the reader taps forward. The premises fill in on the beat
-  // that names them (form 1) and the conclusion on the beat after (form 2), so the
-  // two halves swap — and re-animate — separately.
-  const premOf = (b?: typeof cur) => ((b?.form ?? 0) >= 1 ? 1 : 0);
-  const conclOf = (b?: typeof cur) => ((b?.form ?? 0) >= 2 ? 1 : 0);
-  const swappedP = premOf(cur) !== premOf(prev);
-  const swappedC = conclOf(cur) !== conclOf(prev);
-  const premLines = FORMS[premOf(cur)];
-  const conclLine = FORMS[conclOf(cur)][2];
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_L, dir: dir < 0 ? -1 : 1 }, 1, tx, ty, w);
+}
+function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x: number; from: number; to: number; u: number } {
+  'worklet';
+  let from = x0;
+  for (let k = 0; k < legs.length; k++) {
+    const to = legs[k][0];
+    const start = legs[k][1];
+    const dur = moveTr(from, to, TR);
+    if (b < start) return { x: from, from, to: from, u: 1 };
+    if (b < start + dur) {
+      const u = ease01((b - start) / dur);
+      return { x: lerp(from, to, u), from, to, u };
+    }
+    from = to;
+  }
+  return { x: from, from, to: from, u: 1 };
+}
+/** b3: to the first hopper, then to the second. */
+const LOAD_LEGS = [[290, 1.2]];
+/** b8: the toaster set down, then back behind the machine. */
+const REJECT_LEGS = [[132, 1.0]];
 
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic'));
+
+export default function Valid3Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(20);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    const b = bt.value;
     const t = clock.value;
-    const grow = ease01(bt.value / 0.55);
+    const tr = ease01(b / TR);
+    lineOf(LINES, n);
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const insp = keepHeld(heldInsp, mixStance(carryFrom(heldInsp, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const legs = A_LOAD[n] ? LOAD_LEGS : A_REJECT[n] ? REJECT_LEGS : null;
+    const leg = legs ? legAt(b, xp, legs) : null;
+    const walking = !leg && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const tx = leg ? leg.x : xn;
+    const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : leg ? 1 : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    const moving = leg ? leg.u < 1 && leg.to !== leg.from : false;
+    if (leg && moving) s = travelStance(leg.from, leg.to, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
+    let dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    if (legs && leg) {
+      // before the walk he faces what he is doing; walking, the way he goes; then the beat's way
+      const start = legs[0][1];
+      const tv = xn > xp ? 1 : -1;
+      const arrive = start + moveTr(xp, xn, TR);
+      const was = facing(DIR[p], DIR[p], b);
+      const then = facing(DIR[n], DIR[n], b);
+      dirV = b < start - 0.25 ? was : b < arrive ? lerp(was, tv, sec(start - 0.25, start)) : lerp(tv, then, sec(arrive, arrive + 0.3));
+    }
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── the crank (b0, b4): his hand goes round with the handle ─────────────
+    const cranking = (A_RUN[n] ? sec(0.6, 0.9) * (1 - sec(4.2, 4.5)) : 0) + (A_CRANK[n] ? sec(0.9, 1.2) * (1 - sec(3.0, 3.3)) : 0);
+    const turns = A_RUN[n] ? 1.6 * sec(0.8, 4.2) : A_CRANK[n] ? 1.6 * sec(1.1, 3.0) : 0;
+    const ang = 2 * Math.PI * turns;
+    const handle = { x: CRANK.x + CRANK.r * Math.cos(ang), y: CRANK.y + CRANK.r * Math.sin(ang) };
+    s = handOn(s, x, dir, handle.x, handle.y, cranking);
+    // ── pointing at the lamps (b1, b2) ──────────────────────────────────────
+    const pointV = A_VALID[n] ? sec(2.4, 2.9) * (1 - sec(6.4, 6.9)) : 0;
+    s = handOn(s, x, dir, LAMPS.valid, LAMPS.y - 2, pointV);
+    const pointS = A_SOUND[n] ? sec(0.5, 0.9) * (1 - sec(3.0, 3.4)) : 0;
+    // pointed high, over the machine, so the hand never crosses the VALID plate on its way
+    s = handOn(s, x, dir, LAMPS.sound + 4, LAMPS.y - 28, pointS);
+    // ── the cards (b3): from the box, into each hopper ──────────────────────
+    const takeCards = A_LOAD[n] ? pulse(0.05, 0.25, 0.45) : 0;
+    s = handOn(s, x, dir, CARD_BOX.x, CARD_BOX.y - 4, takeCards);
+    const drop1 = A_LOAD[n] ? pulse(0.55, 0.8, 1.1) : 0;
+    s = handOn(s, x, dir, HOPPERS[0] - 4, HOPPER_MOUTH - 4, drop1);
+    const drop2 = A_LOAD[n] ? pulse(3.8, 4.05, 4.4) : 0;
+    s = handOn(s, x, dir, HOPPERS[1] + 4, HOPPER_MOUTH - 4, drop2);
+    // ── the toaster (b5): picked up off the stand and held up to look at ───
+    const pickT = A_TOASTER[n] ? pulse(0.9, 1.25, 1.6) : 0;
+    s = handOn(s, x, dir, STAND.x - 2, STAND.top - 8, pickT);
+    const holdT = A_TOASTER[n] ? sec(1.3, 1.45) : A_REJECT[n] ? 1 - sec(0.5, 0.6) : TOASTER[n];
+    // held out in front of his chest, clear of his head, to look at
+    s = mixStance(s, { ...s, fistR: { x: 31, y: -12 } }, holdT * (A_TOASTER[n] ? sec(1.4, 2.0) : 1));
+    const setT = A_REJECT[n] ? pulse(0.1, 0.45, 0.75) : 0;
+    s = handOn(s, x, dir, STAND.x - 2, STAND.top - 8, setT);
+    // ── pulling the first premise back out (b8) ─────────────────────────────
+    const pull = A_REJECT[n] ? pulse(5.6, 6.0, 7.2) : 0;
+    s = handOn(s, x, dir, HOPPERS[0] - 2, HOPPER_MOUTH - 4 - 14 * sec(6.0, 6.6), pull);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the machine ──────────────────────────────────────────────────────────
+    const p1 = A_LOAD[n] ? sec(0.9, 1.7) : P1_ON[n];
+    const p2 = A_LOAD[n] ? sec(4.1, 4.9) : P2_ON[n];
+    const concl = A_CRANK[n] ? sec(2.4, 3.2) : OUT[n];
+    const card = A_CRANK[n] ? sec(2.2, 2.9) : OUT[n];
+    const validLit = A_CRANK[n] ? sec(6.2, 6.6) : SORT[n] ? pickAt(SORT_VALID, pickPos.value) : VALID[n];
+    const soundLit = SORT[n] ? pickAt(SORT_SOUND, pickPos.value) : 0;
+    const soundNo = A_TOASTER[n] ? sec(5.4, 5.8) : FALSIFIED[n] && !SORT[n] ? 1 : 0;
+    const f1 = A_TOASTER[n] ? sec(1.2, 1.4) : FALSIFIED[n];
+    const f2 = A_TOASTER[n] ? sec(1.6, 1.8) : FALSIFIED[n];
+    const f3 = A_TOASTER[n] ? sec(2.6, 2.8) : FALSIFIED[n];
+    const struck = A_REJECT[n] ? sec(6.7, 7.3) : PULLED[n];
+    const lampsOn = A_VALID[n] ? sec(0.3, 1.0) : LAMPS_ON[n];
+    const gearGlow = A_VALID[n] ? sec(3.0, 3.6) * (1 - sec(6.6, 7.2)) : A_REJECT[n] ? sec(0.2, 0.8) * (1 - sec(2.2, 2.8)) : 0;
+    const premGlow = A_REJECT[n] ? sec(2.4, 2.9) * (1 - sec(5.0, 5.5)) : 0;
+    const carrying = A_LOAD[n] ? sec(0.25, 0.35) * (1 - sec(4.0, 4.1)) : 0;
+    const cardUp = A_REJECT[n] ? sec(6.0, 6.1) : PULLED[n];
+
     return {
-      fig: lookPose(insp, FIG_X, GROUND, K, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      link: carry(cv, 0, n, LINK[p], LINK[n], tr),
-      // R7b — the pad stamps the argument. Across, from a broken form to a good one,
-      // the VALID stamp comes down.
-      stamp: carry(cv, 1, n, STAMP[p], reacting ? pickAt(POLL_STAMP, pickPos.value) : STAMP[n], tr),
-      // And down the y axis, toward a false conclusion, the false-premise mark
-      // appears: good form with a false ending has to have a bad premise somewhere.
-      // Two axes, and the reader finds the corner where truth and validity come apart.
-      flaw: carry(cv, 2, n, FLAW[p], reacting ? pickAt(POLL_FLAW, pickPos.value) : FLAW[n], tr),
-      // CARRIED for the reason group L gives: a value that snaps back to 1 the beat
-      // after it changed is a cut, even when the thing it drives is only a word's
-      // opacity.
-      wordsP: carry(cv, 4, n, 1, 1, swappedP ? grow : 1),
-      wordsC: swappedC ? grow : 1,
-      // The checklist is written up test by test; the SOUND bracket closes it.
-      tests: carry(cv, 3, n, TESTS[p], TESTS[n], tr),
-      // The form and the ballot cross-fade: the form dissolves as the cards land,
-      // and fades back in on the beat after, so neither ever pops.
-      board: showPick ? 1 - grow : leaving ? grow : 1,
-      ballot: showPick ? grow : 0,
+      fig: lookPose(fig, x, GROUND, K_L, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      turns: carry(cv, 1, n, 0, turns, tr),
+      p1: carry(cv, 2, n, P1_ON[p], p1, tr),
+      p2: carry(cv, 3, n, P2_ON[p], p2, tr),
+      concl: carry(cv, 4, n, OUT[p], concl, tr),
+      card: carry(cv, 5, n, OUT[p], card, tr),
+      validLit: carry(cv, 6, n, VALID[p], validLit, tr),
+      soundLit: carry(cv, 7, n, 0, soundLit, tr),
+      soundNo: carry(cv, 8, n, FALSIFIED[p], soundNo, tr),
+      f1: carry(cv, 9, n, FALSIFIED[p], f1, tr),
+      f2: carry(cv, 10, n, FALSIFIED[p], f2, tr),
+      f3: carry(cv, 11, n, FALSIFIED[p], f3, tr),
+      struck: carry(cv, 12, n, PULLED[p], struck, tr),
+      lamps: carry(cv, 13, n, LAMPS_ON[p], lampsOn, tr),
+      gearGlow: carry(cv, 14, n, 0, gearGlow, tr),
+      premGlow: carry(cv, 15, n, 0, premGlow, tr),
+      holdT: carry(cv, 16, n, TOASTER[p], holdT, tr),
+      carrying: carry(cv, 17, n, 0, carrying, tr),
+      cardUp: carry(cv, 18, n, PULLED[p], cardUp, tr),
+      stamps: carry(cv, 19, n, STAMPS[p], STAMPS[n], tr),
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const boardStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.board }));
-  const linkStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link * SCENE.value.board }));
-  const wordPStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.wordsP,
-    transform: [{ translateX: (1 - SCENE.value.wordsP) * -8 }],
-  }));
-  const wordCStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.wordsC,
-    transform: [{ translateX: (1 - SCENE.value.wordsC) * -8 }],
-  }));
-  const test1Style = useAnimatedStyle(() => {
-    const a = clamp01(SCENE.value.tests);
-    return { opacity: a, transform: [{ translateX: (1 - a) * -8 }] };
+  const toaster = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const h = SCENE.value.holdT;
+    return {
+      transform: [
+        { translateX: lerp(STAND.x, w[0].translateX, h) },
+        { translateY: lerp(STAND.top - 8, w[1].translateY - 6, h) },
+      ],
+    };
   });
-  const test2Style = useAnimatedStyle(() => {
-    const a = clamp01(SCENE.value.tests - 1);
-    return { opacity: a, transform: [{ translateX: (1 - a) * -8 }] };
+  const cards = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: SCENE.value.carrying, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
   });
-  // The bracket draws DOWN from the first test to the second, then names them.
-  const braceStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleY: Math.max(0.001, clamp01((SCENE.value.tests - 2) * 1.6)) }],
-  }));
-  const soundStyle = useAnimatedStyle(() => {
-    const a = clamp01((SCENE.value.tests - 2.5) * 2);
-    return { opacity: a, transform: [{ translateX: (1 - a) * -6 }] };
+  const pulled = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: SCENE.value.cardUp, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
   });
-  // False premises break soundness: the name the bracket gives the pair is struck
-  // with them, on the same track, and lifts with them on the summary.
-  const soundStrikeStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.flaw,
-    transform: [{ rotate: '-10deg' }, { scaleX: Math.max(0.001, SCENE.value.flaw) }],
-  }));
-  const stampStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.stamp * SCENE.value.board,
-    transform: [{ rotate: '-13deg' }, { scale: 0.72 + 0.28 * SCENE.value.stamp }],
-  }));
-  const flawStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flaw * SCENE.value.board }));
-  const okStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.stamp }));
-  const okQStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.stamp }));
-  const badStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.flaw }));
-  const badQStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.flaw }));
-  const ballotStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.ballot,
-    transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
-  }));
-  // The forbidden-pairing block rides `link` alone (not `board`), so it stays on
-  // stage through the question beat and keeps that column from going empty.
-  const vdStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.link }));
-  // Rotation and scale must live in the SAME animated transform array — an
-  // animated `transform` replaces the static one rather than merging with it, so a
-  // rotate left in StyleSheet would simply be dropped.
-  const cross1Style = useAnimatedStyle(() => ({
-    transform: [{ rotate: '31.8deg' }, { scaleX: Math.max(0.001, SCENE.value.link) }],
-  }));
-  const cross2Style = useAnimatedStyle(() => ({
-    transform: [{ rotate: '-31.8deg' }, { scaleX: Math.max(0.001, SCENE.value.link) }],
-  }));
 
   return (
-    <Animated.View style={styles.scene}>
+    <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.wall} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5].map((k) => <View key={k} style={[styles.course, { top: 20 + k * 32 }]} />)}
+      </View>
+      <Board S={SCENE} on={on} />
+      <ObjectArt parts={RACK_ART} tone={WOOD} />
+      <ObjectArt parts={STAND_ART} tone={WOOD} />
+      <Animated.View style={[styles.rider, toaster]} pointerEvents="none">
+        <View style={styles.toaster}>
+          <View style={[styles.slot, { left: 5 }]} />
+          <View style={[styles.slot, { left: 15 }]} />
+          <View style={styles.lever} />
+        </View>
+      </Animated.View>
       <View style={styles.ground} pointerEvents="none" />
-
-      {/* ── the argument, pinned up as a form ───────────────────────────────── */}
-      <Animated.View style={[styles.board, boardStyle]} pointerEvents="none">
-        <View style={styles.frame} />
-        <Text style={styles.frameLab}>THE ARGUMENT</Text>
-
-        <View style={[styles.row, { top: P1_Y }]}>
-          <Animated.Text style={[styles.rowT, wordPStyle]}>{premLines[0]}</Animated.Text>
-        </View>
-        <View style={[styles.row, { top: P2_Y }]}>
-          <Animated.Text style={[styles.rowT, wordPStyle]}>{premLines[1]}</Animated.Text>
-        </View>
-
-        <Animated.View style={[styles.divider, linkStyle]} />
-        <Animated.Text style={[styles.therefore, linkStyle]}>∴</Animated.Text>
-        <Animated.View style={[styles.row, styles.concl, { top: C_Y, height: C_H }, linkStyle]}>
-          <Animated.Text style={[styles.rowT, styles.conclT, wordCStyle]}>{conclLine}</Animated.Text>
-        </Animated.View>
-
-        {/* The false-premise strikes and their tag. `nativeID` is not decoration:
-            check-cover treats ink over a word as a defect unless the scene DECLARES
-            it an annotation, which is what these are (D33). */}
-        <Animated.View nativeID="strike-premise-1" style={[styles.strike, { top: P1_Y + ROW_H / 2 - 1.25 }, flawStyle]} />
-        <Animated.View nativeID="strike-premise-2" style={[styles.strike, { top: P2_Y + ROW_H / 2 - 1.25 }, flawStyle]} />
-        <Animated.View style={[styles.falseTag, flawStyle]}>
-          <Text style={styles.falseTagT}>FALSE</Text>
-        </Animated.View>
+      <ObjectArt parts={MACHINE_ART} tone={STEEL} />
+      <ObjectArt parts={PANEL_ART} tone={STEEL} />
+      <Gear S={SCENE} />
+      <Lamps S={SCENE} on={on} />
+      <Crank S={SCENE} />
+      <OutCard S={SCENE} />
+      <Stickman D={DF} k={K_L} />
+      <Animated.View style={[styles.rider, cards]} pointerEvents="none">
+        <View style={[styles.card, { transform: [{ rotate: '-8deg' }] }]} />
+        <View style={[styles.card, { left: -3, top: -8, transform: [{ rotate: '6deg' }] }]} />
       </Animated.View>
-
-      {/* ── what "VALID" forbids, struck out as it is stated ────────────────── */}
-      <Animated.View style={[styles.vd, vdStyle]} pointerEvents="none">
-        <Text style={styles.vdCap}>VALID MEANS</Text>
-        <View style={styles.vdBox}>
-          <Text style={styles.vdLine}>PREMISES TRUE</Text>
-          <View style={styles.vdRule} />
-          <Text style={styles.vdLine}>{'CONCLUSION\nFALSE'}</Text>
-        </View>
-        <Animated.View nativeID="crossout-impossible-1" style={[styles.vdCross, { top: VD_BOX_T }, cross1Style]} />
-        <Animated.View nativeID="crossout-impossible-2" style={[styles.vdCross, { top: VD_BOX_T + VD_BOX_H }, cross2Style]} />
-        <Text style={styles.vdVerdict}>IMPOSSIBLE</Text>
+      <Animated.View style={[styles.rider, pulled]} pointerEvents="none">
+        <View style={[styles.card, { transform: [{ rotate: '-12deg' }] }]} />
       </Animated.View>
+      {STAMPS[i] ? <Stamps picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
+  );
+}
 
-      {/* the rubber stamp on the form */}
-      <Animated.View style={[styles.stamp, stampStyle]} pointerEvents="none">
-        <Text style={styles.stampT}>VALID</Text>
+const MACHINE_ART = machine();
+const PANEL_ART = panel();
+const STAND_ART = standArt();
+const RACK_ART = rack();
+
+// ── the board: premises, conclusion, FALSE, and the strike ──────────────────
+
+function Board({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  return (
+    <View style={styles.board} pointerEvents="none">
+      <BoardLine S={S} k={0} show={on(P1_ON)} />
+      <BoardLine S={S} k={1} show={on(P2_ON)} />
+      <BoardLine S={S} k={2} show={on(OUT)} />
+    </View>
+  );
+}
+function BoardLine({ S, k, show }: { S: SharedValue<any>; k: number; show: boolean }) {
+  const line = useAnimatedStyle(() => {
+    const v = k === 0 ? S.value.p1 : k === 1 ? S.value.p2 : S.value.concl;
+    return { opacity: Math.min(1, v * 3), width: 214 * v };
+  });
+  const glow = useAnimatedStyle(() => ({ opacity: k < 2 ? S.value.premGlow : 0 }));
+  const stamp = useAnimatedStyle(() => {
+    const f = k === 0 ? S.value.f1 : k === 1 ? S.value.f2 : S.value.f3;
+    return { opacity: f, transform: [{ scale: 1.6 - 0.6 * f }, { rotate: '-7deg' }] };
+  });
+  const strike = useAnimatedStyle(() => ({ width: 176 * (k === 2 ? S.value.struck : 0) }));
+  if (!show) return null;
+  return (
+    <View style={[styles.lineRow, { top: 8 + k * 19 }]}>
+      <Animated.View style={[styles.lineGlow, glow]} />
+      <Text style={styles.lineTag} numberOfLines={1}>{LINES_TEXT[k].tag}</Text>
+      <Animated.View style={[styles.lineClip, line]}>
+        <Text style={styles.lineText} numberOfLines={1}>{LINES_TEXT[k].text}</Text>
       </Animated.View>
+      <Animated.View style={[styles.falseStamp, stamp]}>
+        <Text style={styles.falseText} numberOfLines={1}>FALSE</Text>
+      </Animated.View>
+      {k === 2 ? <Animated.View nativeID="strike-conclusion" style={[styles.strike, strike]} /> : null}
+    </View>
+  );
+}
 
-      {/* ── the two tests, as a checklist ───────────────────────────────────── */}
-      <Animated.View style={[styles.check, boardStyle]} pointerEvents="none">
-        <Animated.View style={[StyleSheet.absoluteFill, test1Style]}>
-          <View style={[styles.ckBox, { top: CK1_Y }]}>
-            <Animated.Text style={[styles.ckMark, okQStyle]}>?</Animated.Text>
-            <Animated.Text style={[styles.ckMark, styles.ckOn, okStyle]}>✓</Animated.Text>
+// ── the machine's moving parts ───────────────────────────────────────────────
+
+function Gear({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.turns * 360}deg` }] }));
+  const glow = useAnimatedStyle(() => ({ opacity: S.value.gearGlow }));
+  return (
+    <>
+      <Animated.View style={[styles.gearGlow, glow]} pointerEvents="none" />
+      <Animated.View style={[styles.gear, st]} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5].map((k) => (
+          <View key={k} style={[styles.tooth, { transform: [{ rotate: `${k * 30}deg` }] }]} />
+        ))}
+        <View style={styles.hub} />
+      </Animated.View>
+    </>
+  );
+}
+function Lamps({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const valid = useAnimatedStyle(() => ({ opacity: Math.max(S.value.validLit, 0.15) }));
+  const sound = useAnimatedStyle(() => ({ opacity: Math.max(S.value.soundLit, 0.15) }));
+  const no = useAnimatedStyle(() => ({ opacity: S.value.soundNo }));
+  const labels = useAnimatedStyle(() => ({ opacity: S.value.lamps }));
+  return (
+    <>
+      <Animated.View style={[styles.lamp, { left: LAMPS.valid - 6 }, valid]} pointerEvents="none" />
+      <Animated.View style={[styles.lamp, { left: LAMPS.sound - 6 }, sound]} pointerEvents="none" />
+      <Animated.Text style={[styles.lampNo, no]} pointerEvents="none">✕</Animated.Text>
+      {on(LAMPS_ON) ? (
+        <Animated.View style={[StyleSheet.absoluteFill, labels]} pointerEvents="none">
+          <View style={[styles.lampPlate, { left: LAMPS.valid - 19 }]}>
+            <Text style={styles.lampText} numberOfLines={1}>VALID</Text>
           </View>
-          <Text style={[styles.ckLab, { top: CK1_Y + 5 }]}>FORM VALID?</Text>
-        </Animated.View>
-
-        <Animated.View style={[StyleSheet.absoluteFill, test2Style]}>
-          <View style={[styles.ckBox, { top: CK2_Y }]}>
-            <Animated.Text style={[styles.ckMark, badQStyle]}>?</Animated.Text>
-            <Animated.Text style={[styles.ckMark, styles.ckOn, badStyle]}>✗</Animated.Text>
+          <View style={[styles.lampPlate, { left: LAMPS.sound - 19 }]}>
+            <Text style={styles.lampText} numberOfLines={1}>SOUND</Text>
           </View>
-          <Text style={[styles.ckLab, { top: CK2_Y + 5 }]}>PREMISES TRUE?</Text>
-        </Animated.View>
-
-        {/* both tests, bracketed: that pair is what SOUND means */}
-        <Animated.View style={[styles.brace, braceStyle]}>
-          <View style={styles.braceBar} />
-          <View style={[styles.braceTick, { top: 0 }]} />
-          <View style={[styles.braceTick, { bottom: 0 }]} />
-          <View style={styles.braceSpur} />
-        </Animated.View>
-        <Animated.View style={[styles.sound, soundStyle]}>
-          <Text style={styles.soundT} numberOfLines={1}>SOUND</Text>
-          <Animated.View nativeID="strike-sound" style={[styles.soundStrike, soundStrikeStyle]} />
-        </Animated.View>
-      </Animated.View>
-
-      <Stickman D={DF} k={K} />
-
-      {/* ── the verdict ballot: the question is answered here ───────────────── */}
-      {showPick ? (
-        <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
-          <View style={styles.given} pointerEvents="none">
-            <Text style={styles.givenT}>VALID FORM ✓   PREMISES TRUE ✓</Text>
-          </View>
-          <Animated.Text style={[styles.ballotHdr, spent]}>TAP THE VERDICT</Animated.Text>
-
-          {CARDS.map((c, k) => {
-            const chosen = picked === c.id;
-            // THE BALLOT ANSWERS ONLY ITS OWN QUESTION. It stays mounted on the grass-and-sky
-            // sort as well, and keyed on `picked` alone it struck SOUND correct the moment
-            // that sort was answered, for an argument whose form is broken.
-            const ownPick = CARDS.some((x) => x.id === picked) ? picked : null;
-            const own = ownPick !== null;
-            return (
-              <Target id={c.id} correct={c.correct} picked={ownPick} onPick={onPick}
-              key={c.id} style={[styles.balSlot, { top: BAL_TOP - 236 + k * BAL_STEP }]} disabled={answered}>
-                <View
-                  style={[
-                    styles.balCard,
-                    own && c.correct && styles.balRight,
-                    own && chosen && !c.correct && styles.balWrong,
-                  ]}
-                >
-                  <Text style={[styles.balTitle, own && c.correct && styles.balTitleOn]}>{c.title}</Text>
-                  <Text style={[styles.balSub, own && c.correct && styles.balSubOn]}>{c.sub}</Text>
-                </View>
-              </Target>
-            );
-          })}
         </Animated.View>
       ) : null}
+    </>
+  );
+}
+function Crank({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.turns * 360}deg` }] }));
+  return (
+    <Animated.View style={[styles.crankArm, st]} pointerEvents="none">
+      <View style={styles.crankBar} />
+      <View style={styles.crankKnob} />
+    </Animated.View>
+  );
+}
+function OutCard({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: Math.min(1, S.value.card * 4),
+    // the conclusion rises out of the slot on top, the way toast comes up
+    transform: [{ translateY: -13 * S.value.card }],
+  }));
+  return <Animated.View style={[styles.outCard, st]} pointerEvents="none" />;
+}
+
+// ── Q1: three rubber stamps on the wall ─────────────────────────────────────
+
+function Stamps({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.stamps, transform: [{ translateX: (1 - S.value.stamps) * 10 }] }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {STAMP_Q.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          disabled={answered} sealAt="tr"
+          style={[styles.stampTarget, { top: q.y }]}
+        >
+          <View style={styles.stampFill}>
+            <View style={[styles.stampFace, answered && q.correct && styles.faceRight]}>
+              <Text style={[styles.stampText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            </View>
+            <View style={styles.stampKnob} />
+          </View>
+        </Target>
+      ))}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 12, right: 12, top: GROUND, height: 2, backgroundColor: RULE },
-  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
-  // figure and everything it is looking at standing on bare page;
-  // political7 and political8 both stand their subject on a filled mass.
   floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: GROUND - 292, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
+  },
+  course: { position: 'absolute', left: 0, right: 0, height: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  board: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  frame: {
-    position: 'absolute', left: FR_L, top: 236, width: FR_W, height: 190,
-    borderWidth: 1.5, borderColor: RULE, borderRadius: 5,
+  board: {
+    position: 'absolute', left: BOARD.x0, top: BOARD.top, width: BOARD.x1 - BOARD.x0, height: BOARD.bottom - BOARD.top,
+    borderRadius: 4, borderWidth: 2, borderColor: INK, backgroundColor: DEEP, boxShadow: lipOf(WOOD),
   },
-  frameLab: {
-    position: 'absolute', left: BX, top: 245,
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: SOFT, includeFontPadding: false,
+  lineRow: { position: 'absolute', left: 6, right: 6, height: 16, flexDirection: 'row', alignItems: 'center' },
+  lineGlow: { position: 'absolute', left: -3, right: -3, top: 0, bottom: 0, borderRadius: 3, backgroundColor: TEAL },
+  lineTag: {
+    marginRight: 6, fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, color: SAGE, includeFontPadding: false,
   },
+  lineClip: { overflow: 'hidden', height: 12 },
+  lineText: {
+    width: 214, fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 12, letterSpacing: 0, color: PAPER_LIT,
+    includeFontPadding: false,
+  },
+  falseStamp: {
+    position: 'absolute', right: 0, top: 1, paddingHorizontal: 3, height: 13, borderRadius: 2, borderWidth: 1.5,
+    borderColor: EMBER, backgroundColor: DEEP, justifyContent: 'center',
+  },
+  falseText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: PAPER_LIT, includeFontPadding: false,
+  },
+  strike: { position: 'absolute', left: 16, top: 6.5, height: 1.8, borderRadius: 0.9, backgroundColor: EMBER },
 
-  row: {
-    position: 'absolute', left: BX, width: BW, height: ROW_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    justifyContent: 'center', paddingHorizontal: 10,
+  toaster: {
+    position: 'absolute', left: -14, top: -12, width: 28, height: 18, borderRadius: 5, backgroundColor: STEEL.STONE,
+    borderWidth: 1.5, borderColor: INK,
   },
-  concl: { borderWidth: 2.5 },
-  rowT: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, color: INK, includeFontPadding: false },
-  conclT: { fontSize: 13 },
-
-  divider: { position: 'absolute', left: BX + 18, top: DIV_Y, width: BW - 18, height: 2, backgroundColor: INK },
-  therefore: {
-    position: 'absolute', left: BX, top: DIV_Y - 12,
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK, includeFontPadding: false,
-  },
-
-  // ── the forbidden pairing ─────────────────────────────────────────────────
-  vd: { position: 'absolute', left: VD_L, top: VD_TOP, width: VD_W, overflow: 'visible' },
-  vdCap: {
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4,
-    color: SOFT, textAlign: 'center', includeFontPadding: false,
-  },
-  vdBox: {
-    marginTop: 1, height: VD_BOX_H, borderWidth: 2, borderColor: INK, borderRadius: 4,
-    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6,
-  },
-  vdLine: {
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 15, color: INK,
-    textAlign: 'center', includeFontPadding: false,
-  },
-  vdRule: { width: 84, height: 1.5, backgroundColor: RULE, marginVertical: 5 },
-  vdCross: {
-    position: 'absolute', left: 0, width: VD_DIAG, height: 2,
-    backgroundColor: INK, transformOrigin: '0% 50%',
-  },
-  vdVerdict: {
-    marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 11.5, lineHeight: 14, letterSpacing: 1.6,
-    color: INK, textAlign: 'center', includeFontPadding: false,
+  slot: { position: 'absolute', top: 2, width: 8, height: 2.5, borderRadius: 1, backgroundColor: INK },
+  lever: { position: 'absolute', right: -3, top: 6, width: 4, height: 6, borderRadius: 1, backgroundColor: INK },
+  card: {
+    position: 'absolute', left: -6, top: -10, width: 14, height: 10, borderRadius: 1.5, backgroundColor: PAPER_LIT,
+    borderWidth: 1, borderColor: INK,
   },
 
-  // ── A STRIKE-THROUGH HAS TO COMMIT (D33) ───────────────────────────────────
-  //
-  // This was 172 wide at −4°, which is the worst available answer. −4° over that
-  // length drifts twelve units vertically, and the second premise — "All gold
-  // things are time machines" — WRAPS to two lines inside a 42-unit row. So the
-  // bar entered at the height of the lower line and left at the height of the
-  // upper one, slicing the tops of some letters and the bottoms of others without
-  // ever reading as a strike. A reader described the result as a word "being
-  // intersected … cut off", and called it cheap; they were right.
-  //
-  // Corner to corner instead: atan(42/164) = 14.4°, a bar of 168 whose painted
-  // extent is 168·cos = 163 wide by 168·sin = 42 tall — exactly the row. That
-  // reads as crossed out whether the text runs to one line or two, and it is the
-  // SAME device this scene already uses for the impossible pairing twenty lines
-  // above, so the lesson says "struck out" one way rather than two.
-  strike: {
-    position: 'absolute', left: BX - 2, width: 168, height: 2.5,
-    backgroundColor: INK, transform: [{ rotate: '-14.4deg' }],
+  gearGlow: {
+    position: 'absolute', left: GEAR.x - GEAR.r - 5, top: GEAR.y - GEAR.r - 5, width: 2 * GEAR.r + 10,
+    height: 2 * GEAR.r + 10, borderRadius: GEAR.r + 5, backgroundColor: SAGE,
   },
-  falseTag: {
-    position: 'absolute', left: 240, top: 240, borderWidth: 2, borderColor: INK, backgroundColor: INK,
-    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 3, transform: [{ rotate: '-7deg' }],
-  },
-  falseTagT: { fontFamily: 'Inter_700Bold', fontSize: 10, color: PAPER, letterSpacing: 1.4, includeFontPadding: false },
-
-  // 300..388 × 344..388 unrotated; the -13° tilt widens that to 296..392 × 335..397
-  stamp: {
-    position: 'absolute', left: 300, top: 344, width: 88, height: 44,
-    borderWidth: 3, borderColor: INK, borderRadius: 5,
-    alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 50%',
-  },
-  stampT: { fontFamily: 'Inter_700Bold', fontSize: 18, color: INK, letterSpacing: 2.5, includeFontPadding: false },
-
-  check: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  ckBox: {
-    position: 'absolute', left: FR_L, width: CK_BOX, height: CK_BOX,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
+  gear: {
+    position: 'absolute', left: GEAR.x - GEAR.r, top: GEAR.y - GEAR.r, width: 2 * GEAR.r, height: 2 * GEAR.r,
+    borderRadius: GEAR.r, backgroundColor: STEEL.STONE, borderWidth: 1.5, borderColor: INK,
     alignItems: 'center', justifyContent: 'center',
   },
-  ckMark: {
-    position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 17, lineHeight: 22, color: INK, includeFontPadding: false,
+  tooth: { position: 'absolute', width: 2 * GEAR.r + 6, height: 4, borderRadius: 1, backgroundColor: STEEL.STONE, borderWidth: 1, borderColor: INK },
+  hub: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: INK },
+  lamp: {
+    position: 'absolute', top: LAMPS.y - 6, width: 12, height: 12, borderRadius: 6, backgroundColor: SAGE,
+    borderWidth: 1.5, borderColor: INK,
   },
-  ckOn: { color: INK },
-  ckLab: {
-    position: 'absolute', left: FR_L + CK_BOX + 12,
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 18, letterSpacing: 0.6, color: INK, includeFontPadding: false,
+  lampNo: {
+    position: 'absolute', left: LAMPS.sound - 5, top: LAMPS.y - 8, fontFamily: 'Inter_700Bold', fontSize: 12,
+    lineHeight: 14, color: EMBER, includeFontPadding: false,
+  },
+  lampPlate: {
+    position: 'absolute', top: LAMPS.y + 9, width: 38, height: 13, borderRadius: 2, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
+  },
+  lampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.3, color: INK, includeFontPadding: false,
+  },
+  crankArm: { position: 'absolute', left: CRANK.x - 1, top: CRANK.y - 1, width: 2, height: 2 },
+  crankBar: {
+    position: 'absolute', left: 0, top: -1.5, width: CRANK.r + 2, height: 3, borderRadius: 1.5, backgroundColor: INK,
+    transformOrigin: '0% 50%',
+  },
+  crankKnob: {
+    position: 'absolute', left: CRANK.r - 2, top: -3.5, width: 7, height: 7, borderRadius: 3.5, backgroundColor: WOOD.SHADE,
+    borderWidth: 1, borderColor: INK,
+  },
+  outCard: {
+    position: 'absolute', left: SLOT_OUT.x - 7, top: SLOT_OUT.y - 2, width: 14, height: 12, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK,
   },
 
-  // ── the SOUND bracket ─────────────────────────────────────────────────────
-  // PREMISES TRUE? ends near x 295, so the bracket stands at 304, spanning the two
-  // label rows (441..491), and the name sits right of its spur at 316..380 — below
-  // the tilted VALID stamp (which ends at 397) and clear of the floor at 500.
-  brace: {
-    position: 'absolute', left: BRACE_X - 6, top: BRACE_T, width: 14, height: BRACE_H,
-    transformOrigin: '50% 0%',
+  stampTarget: { position: 'absolute', left: RACK.x0, width: RACK.x1 - RACK.x0, height: 20 },
+  stampFill: { flexGrow: 1, flexDirection: 'row', alignItems: 'center' },
+  stampFace: {
+    flexGrow: 1, height: 16, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  braceBar: { position: 'absolute', left: 6, top: 0, width: 2, height: BRACE_H, backgroundColor: INK },
-  braceTick: { position: 'absolute', left: 0, width: 8, height: 2, backgroundColor: INK },
-  braceSpur: { position: 'absolute', left: 6, top: BRACE_H / 2 - 1, width: 8, height: 2, backgroundColor: INK },
-  sound: { position: 'absolute', left: BRACE_X + 12, top: BRACE_T + BRACE_H / 2 - 9, width: 66, height: 18 },
-  soundT: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 18, letterSpacing: 1.2, color: INK, includeFontPadding: false,
+  faceRight: { backgroundColor: INK },
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.3, color: INK, includeFontPadding: false,
   },
-  // A pen stroke across the word (D33 — declared by its nativeID).
-  soundStrike: {
-    position: 'absolute', left: -3, top: 12, width: 60, height: 2.5,
-    backgroundColor: INK, transformOrigin: '0% 50%',
-  },
-
-  // ── ballot ────────────────────────────────────────────────────────────────
-  ballot: { position: 'absolute', left: BAL_L, top: 236, width: BAL_W, height: 258 },
-  // 38, not 32: the givens line measures ~228 of the 254 of inner width, so a wide
-  // ✓ glyph from a fallback font could tip it onto a second 16-tall line. At 32 that
-  // second line was clipped; at 38 it simply wraps, and the header below still
-  // starts at 42. Sits above the cards, never over them.
-  given: {
-    position: 'absolute', left: 0, top: 0, width: BAL_W, height: 38,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 4, alignItems: 'center', justifyContent: 'center',
-  },
-  givenT: { fontFamily: 'Inter_700Bold', fontSize: 12.5, lineHeight: 16, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-  ballotHdr: {
-    position: 'absolute', left: 0, top: 42, width: BAL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
-  },
-  // Tap target: 258 × 44 stage units, a 14px title over a 12px gloss.
-  balSlot: { position: 'absolute', left: 0, width: BAL_W, height: BAL_H },
-  balCard: {
-    width: BAL_W, height: BAL_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
-    backgroundColor: STONE, boxShadow: LIP, justifyContent: 'center', paddingHorizontal: 12,
-  },
-  balRight: { backgroundColor: INK, borderColor: INK },
-  balWrong: { borderColor: SOFT },
-  balTitle: { fontFamily: 'Inter_700Bold', fontSize: 14.5, lineHeight: 17, letterSpacing: 0.4, color: INK, includeFontPadding: false },
-  balTitleOn: { color: PAPER },
-  balSub: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 15, color: INK, includeFontPadding: false },
-  balSubOn: { color: RULE },
+  stampKnob: { marginLeft: 2, width: 8, height: 12, borderRadius: 3, backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK },
+  onInk: { color: PAPER_LIT },
 });
 
-// BAND. Topmost ink is the form's frame and the forbidden-pairing caption, both at
-// 236 (the tilted FALSE tag reaches 236.6); the lowest is the ground line at 500 +
-// 2 thick. Everything else finishes above it: the ballot's last card at 490, the
-// checklist at 496, the tilted VALID stamp at 397, the figure's crown at 350. So
-// [228, 512] holds every extreme with 8 units of margin top and 10 bottom, and the
-// scene renders about twice the size of the letterboxed full-height fit.
 export function Valid3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[228, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Valid3Scene} band={[288, 514]} camera={CAM} />;
 }

@@ -107,6 +107,13 @@ export const HANDS_ON_PROP = new Set([
   // he wipes a slate, turns a portrait and closes shutters; he stacks books on a bench
   'epistemology-knowledge-3',
   'epistemology-knowledge-2',
+  // the third lessons: he climbs stairs, sits on a stool, handles the apple and the sticks
+  'metaphysics-being-3',
+  'epistemology-knowledge-4',
+  'logic-arguments-3',
+  'ethics-ethics-3',
+  'aesthetics-aesthetics-3',
+  'political-political-3',
 ]);
 
 const RIG_BOUND = new Set([

@@ -2,76 +2,71 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic logic-arguments-3, "Valid vs Sound".
-// An inspector reads an argument pinned up as a form: two premises, a ∴ rule, a
-// conclusion, and a two-box CHECKLIST underneath — "FORM VALID?" and "PREMISES
-// TRUE?" — which is the whole lesson as a diagram. A VALID stamp lands when the
-// form holds; the words inside the boxes then swap from the abstract skeleton to
-// the toaster argument WITHOUT the boxes moving, so the reader watches the form
-// stay put while the content changes. A ✗ strikes the premises: valid, not sound.
+// Theme: AN ARGUMENT MACHINE, TWO HOPPERS AND A CRANK, AND A TOASTER THAT IS NOT GOLD.
 //
-// The first graded question is answered IN the scene (four verdict cards); the
-// second stays a deck question, so the two never feel identical.
+// A machine in a workshop takes premises in at two hoppers and turns out a
+// conclusion when the crank is turned. Its two lamps are the two tests: VALID, for a
+// form that cannot turn true premises into a false conclusion, and SOUND, for that
+// and true premises too. He feeds it "all toasters are gold" and "all gold things are
+// time machines", turns the crank, and out comes "all toasters are time machines":
+// VALID lights. Then he picks up a real toaster, which is not gold, and every line is
+// stamped FALSE; SOUND stays dark. To reject the conclusion, he pulls a premise out.
 //
-// Every tap of the opening puts on the board what its sentence names: the two
-// tests are written up as they are defined (FORM VALID? with validity, PREMISES
-// TRUE? with soundness, bracketed together as SOUND); the toaster premises fill in
-// before the conclusion does; the VALID stamp comes down on the sentence that
-// says "so the argument is valid"; and when the premises are shown false, the
-// SOUND bracket is struck along with them.
-//
-// Graded questions are the two from data/.../valid-vs-sound.ts.
+// Redrawn 2026-09-26, the third lesson of the branch in reading order. Every line,
+// citation, quotation and summary point is copied from the previous script by a
+// generator, word for word and beat for beat.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Valid3Beat extends BaseBeat {
-  /** Inspector gesture (emote code). */ p?: number;
-  /** Conclusion + ∴ rule shown (0/1). */ link?: number;
-  /** VALID stamp shown (0/1). */ stamp?: number;
-  /** False-premise ✗ shown (0/1). */ flaw?: number;
-  /** Which words fill the form: 0 the abstract skeleton · 1 the toasters in the premises · 2 the toasters throughout. */ form?: number;
-  /** How much of the checklist is written up: 1 FORM VALID? · 2 + PREMISES TRUE? · 3 + the bracket naming the pair SOUND. */ tests?: number;
+  /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands: 132 clear of the machine's left end · 290 clear of its right end, at the crank · 316 by the toaster. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'run' | 'valid' | 'sound' | 'load' | 'crank' | 'toaster' | 'reject';
+  /** The lamps are labelled VALID and SOUND. */ lamps?: boolean;
+  /** How many premise cards are in: 0 · 1 · 2. */ fed?: number;
+  /** The conclusion has come out of the chute. */ out?: boolean;
+  /** The VALID lamp is lit. */ valid?: boolean;
+  /** Every line on the board is stamped FALSE. */ falsified?: boolean;
+  /** He is holding the toaster. */ toaster?: boolean;
+  /** The first premise has been pulled back out. */ pulled?: boolean;
+  /** Q1 on the stage: three rubber stamps on the wall. */ stamps?: boolean;
 }
 
 export const BEATS: Valid3Beat[] = [
   {
-    p: 2, link: 0, stamp: 0, flaw: 0, form: 0, tests: 0,
+    p: 158, x: 290, act: 'run',
     text: 'An argument can have a flawless logical form and still reach a false conclusion, if its premises are false.',
     dur: 3.6,
   },
   {
-    // "two tests. An argument is valid when …" — the first test is written up.
-    p: 459, link: 1, form: 0, tests: 1,
+    p: 167, x: 132, act: 'valid', lamps: true,
     text: 'Logic distinguishes two tests. An argument is valid when its form makes it impossible for true premises to yield a false conclusion.',
     cite: 'Validity vs Soundness',
     dur: 3.2,
   },
   {
-    // "sound when it's valid and all its premises are true" — the second test, and
-    // the bracket that makes the pair of them SOUND.
-    p: 459, link: 1, form: 0, tests: 3,
+    p: 158, x: 132, act: 'sound', lamps: true,
     text: 'An argument is sound when it’s valid and all its premises are true.',
     dur: 1.8,
   },
   {
-    // "whose premises are …" — the premises fill in; the conclusion waits.
-    p: 276, link: 1, stamp: 0, form: 1, tests: 3,
+    p: 158, x: 290, act: 'load', lamps: true, fed: 2,
     text: 'Consider an argument whose premises are that all toasters are gold and all gold things are time machines.',
     cite: 'Valid but absurd',
     dur: 2,
   },
   {
-    // "Its conclusion is … so the argument is valid" — the conclusion fills in and
-    // the stamp comes down.
-    p: 276, link: 1, stamp: 1, form: 2, tests: 3,
+    p: 158, x: 290, act: 'crank', lamps: true, fed: 2, out: true, valid: true,
     text: 'Its conclusion is that all toasters are time machines. If the premises were true, the conclusion would have to be true, so the argument is valid.',
     dur: 2.6,
   },
   {
-    p: 38, link: 1, stamp: 1, flaw: 1, form: 2, tests: 3,
+    p: 158, x: 316, act: 'toaster', lamps: true, fed: 2, out: true, valid: true, falsified: true, toaster: true,
     text: 'Both premises are false, and so is the conclusion. Valid form, false premises: the argument is valid but not sound.',
     dur: 4.2,
   },
   {
-    p: 139, link: 1, stamp: 1, flaw: 1, form: 2, tests: 3,
+    p: 263, x: 316, lamps: true, fed: 2, out: true, valid: true, falsified: true, toaster: true,
     quote: {
       id: 'lq-logic-arguments-3',
       text: 'Mathematics may be defined as the subject in which we never know what we are talking about, nor whether what we are saying is true.',
@@ -81,26 +76,24 @@ export const BEATS: Valid3Beat[] = [
       era: '1901',
       branchSlugs: ['logic'],
     },
-    dur: 3.0,
+    dur: 3,
   },
   {
-    p: 21, link: 1, stamp: 1, form: 2, tests: 3,
-    // Answered ON the board: the form clears and four verdict cards take its place.
+    p: 260, x: 316, lamps: true, fed: 2, out: true, valid: true, falsified: true, toaster: true, stamps: true,
     interact: {
       prompt: 'What do you call a valid argument whose premises are all true?',
-      explain:
-        'Sound. A valid argument with true premises is sound, so its conclusion must be true. “Valid only” fits an argument whose premises may be false, and “probable” describes inductive support.',
+      explain: 'Sound. A valid argument with true premises is sound, so its conclusion must be true. “Valid only” fits an argument whose premises may be false, and “probable” describes inductive support.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
-    p: 383, link: 1, stamp: 1, flaw: 1, form: 2, tests: 3,
+    p: 158, x: 132, act: 'reject', lamps: true, fed: 2, out: true, valid: true, falsified: true, pulled: true,
     text: 'Validity concerns only the form, while soundness also concerns the truth of the premises. To reject the conclusion of a valid argument, you must reject a premise.',
-    dur: 4.0,
+    dur: 4,
   },
   {
-    p: 4, link: 1, stamp: 0, flaw: 0, form: 0, tests: 3,
+    p: 260, x: 132, lamps: true, fed: 2, out: true, valid: true, falsified: true, pulled: true,
     interact: {
       prompt: 'How should the argument “Grass is green, so the sky is blue” be classified?',
       sort: {
@@ -115,10 +108,10 @@ export const BEATS: Valid3Beat[] = [
       explain: 'Invalid. Both claims are true, but the colour of grass does nothing to make the sky blue. The form guarantees nothing, so the true conclusion is luck.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
-    tests: 3,
+    lamps: true, fed: 2, out: true, valid: true, falsified: true, pulled: true,
     summary: {
       title: 'Validity and Soundness',
       points: [

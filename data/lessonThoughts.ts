@@ -118,15 +118,15 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'That is a bigger claim.', 'They do differ.', 'Right because they say so?', 'That’s the slide.', null, null, 'Some things hold anyway.', 'Differing isn’t equal.', 'Every society, the same few.', null, 'A shared floor.', null, null, null],
   },
   'ethics-ethics-3': {
-    at: [null, null, null, [82, 379, 3, 58], null, [82, 379, 3, 58], null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, null, null, null, [226, 406, 2, 226], null, null, [318, 406, 3, 318], null, [318, 406, 3, 318], [318, 406, 3, 318], null],
     say: [null, 'Same goal. They split.', null, 'One instead of five.', null, 'Five outweigh one.', null, 'Not a sum, then.', 'Duty, whatever follows.', 'Who do I become?', 'What would a wise one do?', null, null, null, null],
   },
   'epistemology-knowledge-4': {
-    at: [null, [96, 379, 3, 96], null, null, null, null, [96, 380, 3, 96], null, null, [96, 379, 1, 96], null, null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, [202, 397, 2, 250], null],
     say: [null, 'Blank paper.', null, 'Burned, then I know hot.', null, 'Never had to be shown.', 'Before any burn.', 'The boy already knew.', 'Learning is remembering?', null, 'Both half right.', 'The mind has shapes.', null, null],
   },
   'metaphysics-being-3': {
-    at: [null, null, null, null, null, [132, 389, 1, 132], null, [132, 389, 1, 132], null, [132, 388, 1, 132], [132, 388, 1, 132], null],
+    at: [null, null, [196, 408, 3, 196], null, null, null, null, [196, 407, 2, 196], null, null, [196, 408, 2, 196], null],
     say: [null, 'You can’t step in twice.', 'So he split the world.', 'Becoming never holds.', 'Shadows for the real thing.', 'The wall is where we live.', null, 'Never quite equal.', 'The copy is only good.', null, null, null],
   },
   'epistemology-knowledge-5': {
@@ -138,7 +138,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'Thinking it makes it a thing.', 'Every grab turns it real.', null, 'It can’t be said at all.', null, 'Then nothing can change.', 'Motion as illusion.', null, null, null],
   },
   'aesthetics-aesthetics-3': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, [274, 398, 1, 274], null],
     say: [null, 'Not one, anywhere.', 'It hurts and I go anyway.', 'He never says what.', 'Nobody looks away.', 'Drawn well, I can look.', null, 'It never argues.', 'Dangerous, then.', null, null, null],
   },
   'aesthetics-aesthetics-4': {
@@ -146,7 +146,7 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'So what makes it art?', 'Copy the world, then.', 'Or carry a feeling.', 'He just signed it.', 'The maker chose it.', 'Choosing was the work.', null, 'It fits neither.', 'Asking is already the work.', null, null, null],
   },
   'political-political-3': {
-    at: [null, [78, 384, 3, 66], null, [108, 384, 3, 66], null, null, null, null, null, [78, 384, 3, 66], [78, 384, 3, 66], null],
+    at: [null, null, [144, 394, 1, 132], null, null, null, null, null, null, null, null, null],
     say: [null, 'Compelled, or owed.', 'No rules at all.', 'So they covenant.', 'Only while it guards them.', null, null, 'What everyone truly shares.', 'Rules I gave myself.', null, null, null],
   },
   'logic-arguments-6': {

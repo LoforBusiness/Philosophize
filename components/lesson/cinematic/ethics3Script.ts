@@ -2,100 +2,99 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic ethics-ethics-3, "What Makes an Action Good?" — the trolley problem.
-// A runaway trolley rolls toward five; a lever would divert it onto one. A decider
-// stands at the lever while three philosophers pass three different verdicts:
-// Mill (pull — five outweigh one), Kant (never — dignity is not arithmetic),
-// Aristotle (what would a person of character do?). The decider's body shifts with
-// each verdict — grips the lever, then crosses the arms in refusal, then a hand to
-// the heart — so one figure carries all three stances.
+// Theme: A SIGNAL BOX, A POINTS LEVER, A BALANCE, A RULE BOOK AND A MIRROR.
 //
-// Above the track sits a three-column VERDICT BOARD — thinker · lens · ruling —
-// and each column inks up as its philosopher speaks, so the three theories are a
-// comparison you can read at a glance rather than three paragraphs in a row.
+// He works a signal box. On the track diagram a runaway's lamp comes down the line
+// towards five; the points lever in the floor would send it up a branch towards one.
+// Mill's balance is on a desk, Kant's rule book is on a lectern, and a mirror hangs on
+// the wall for Aristotle. He pulls the lever with both hands for Mill, and five weights
+// outweigh one on the balance; he pushes it back for Kant and opens the rule book; he
+// turns to the mirror for Aristotle. The runaway's lamp never reaches anyone.
 //
-// The true/false question is answered IN the scene: the board clears and two big
-// TRUE / FALSE plates take its place. The first graded question stays a deck
-// question, so the two never feel identical.
-//
-// Graded questions are the two from data/.../what-makes-an-action-good.ts.
+// Redrawn 2026-09-26, the third lesson of the branch in reading order. Every line,
+// citation, quotation and summary point is copied from the previous script by a
+// generator, word for word and beat for beat.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Ethics3Beat extends BaseBeat {
-  /** Decider gesture (emote code). */ d?: number;
-  /** Trolley position along the track. */ tx?: number;
-  /** Lever thrown, switching the points to the branch (0/1). */ pull?: number;
-  /** Which verdict column is inked: 0 none · 1 Mill · 2 Kant · 3 Aristotle. */ lens?: number;
-  //
-  // The next three are LATCHES: set on the beat where the thing arrives; the scene
-  // holds it from there, so the opening builds the picture and never takes it back.
-  //
-  /** The three rulings are written into their chips — PULL · NEVER · WHO AM I? */ said?: number;
-  /** The side track is marked as the trolley's other route, before anyone pulls. */ route?: number;
-  /** How many columns carry their one-line gloss (5 LIVES > 1 LIFE · DIGNITY · PHRONESIS), 0→3. */ gloss?: number;
+  /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands: 78 at the points lever · 84 at the end of the balance · 226 at the lectern · 318 at the mirror. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'power' | 'names' | 'run' | 'route' | 'ask' | 'pull' | 'weigh' | 'reset' | 'read' | 'mirror' | 'wise';
+  /** The track diagram is lit. */ board?: boolean;
+  /** The three names are on their plates: the desk, the lectern, the mirror. */ names?: boolean;
+  /** The runaway's lamp is on the line, stopped short of the points. */ runaway?: boolean;
+  /** The branch to the one is marked on the diagram. */ route?: boolean;
+  /** The points lever is pulled and the points set for the branch. */ pulled?: boolean;
+  /** Five weights and one are on the balance's pans. */ weights?: boolean;
+  /** The rule book is open. */ open?: boolean;
+  /** His reflection is in the mirror. */ reflect?: boolean;
+  /** How many plates carry their second line: 1 5 LIVES > 1 · 2 DIGNITY · 3 PHRONESIS. */ gloss?: number;
+  /** Q2 on the stage: the two lamps are labelled TRUE and FALSE. */ lamps?: boolean;
 }
 
 export const BEATS: Ethics3Beat[] = [
   {
-    d: 2, tx: 132, pull: 0, lens: 0,
+    p: 158, x: 78, act: 'power', board: true,
     text: 'Consider one moral choice, judged by three philosophers.',
     dur: 1.8,
   },
   {
-    d: 266, tx: 132, pull: 0, lens: 0, said: 1,
+    p: 167, x: 78, act: 'names', board: true, names: true,
     text: 'All three seek the right action, yet their verdicts differ.',
     dur: 2.4,
   },
   {
-    d: 13, tx: 154, lens: 0,
+    p: 158, x: 78, act: 'run', board: true, names: true, runaway: true,
     text: 'Suppose a runaway trolley is heading towards five people on the track. You stand beside a lever.',
     cite: 'Foot, 1967 · Thomson, 1976',
     dur: 2.5,
   },
   {
-    d: 266, tx: 154, lens: 0, route: 1,
+    p: 158, x: 78, act: 'route', board: true, names: true, runaway: true, route: true,
     text: 'If you pull it, the trolley switches to a side track, where it will kill one person instead.',
     dur: 2.5,
   },
   {
-    d: 168, tx: 176, lens: 0,
+    p: 167, x: 78, act: 'ask', board: true, names: true, runaway: true, route: true,
     text: 'Three major ethical theories address the case. Each asks the same question: what makes an action good?',
     dur: 4.2,
   },
   {
-    d: 432, tx: 176, pull: 1, lens: 1,
+    p: 158, x: 78, act: 'pull', board: true, names: true, runaway: true, route: true, pulled: true,
     text: 'John Stuart Mill’s utilitarianism says to pull the lever. For Mill, the right act produces the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
     dur: 2.3,
   },
   {
-    d: 266, tx: 176, pull: 1, lens: 1, gloss: 1,
+    p: 158, x: 84, act: 'weigh', board: true, names: true, runaway: true, route: true, pulled: true, weights: true, gloss: 1,
     text: 'Five lives saved outweigh one lost. Judging acts by outcomes is consequentialism, and Mill’s version is utilitarianism.',
     dur: 2.3,
   },
   {
-    d: 458, tx: 176, pull: 0, lens: 2,
+    p: 158, x: 226, act: 'reset', board: true, names: true, runaway: true, route: true, weights: true, gloss: 1,
     text: 'Immanuel Kant’s ethics rejects the trade. It holds that the one person has a worth no arithmetic can outweigh.',
     cite: 'Deontology — the duty',
     dur: 3.8,
   },
   {
-    d: 458, tx: 176, pull: 0, lens: 2, gloss: 2,
+    p: 158, x: 226, act: 'read', board: true, names: true, runaway: true, route: true, weights: true, open: true, gloss: 2,
     text: 'This worth is what Kant calls dignity. In deontology, the ethics of duty, a duty binds whatever the consequences.',
     dur: 1.8,
   },
   {
-    d: 22, tx: 176, lens: 3,
+    p: 158, x: 318, act: 'mirror', board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 2,
     text: 'Aristotle shifts the question from the act to the agent. Who does this choice make you?',
     cite: 'Virtue ethics — the character',
     dur: 2.9,
   },
   {
-    d: 170, tx: 176, lens: 3, gloss: 3,
+    p: 158, x: 318, act: 'wise', board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
     text: 'In virtue ethics, the guide is what a practically wise person would do. Aristotle calls this wisdom phronesis.',
     dur: 1.8,
   },
   {
-    d: 141, tx: 176, lens: 0,
+    p: 263, x: 318, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
     quote: {
       id: 'lq-ethics-ethics-3-1',
       text: 'Act only according to that maxim whereby you can at the same time will that it should become a universal law.',
@@ -108,7 +107,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 3.2,
   },
   {
-    d: 380, tx: 176, lens: 0,
+    p: 260, x: 318, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
     interact: {
       prompt: 'Which of these does a consequentialist not weigh?',
       odd: {
@@ -123,20 +122,19 @@ export const BEATS: Ethics3Beat[] = [
       explain: 'The rule it followed. A consequentialist reads everything off the outcome. Keeping a promise and breaking one count only through what each brings about. That\'s the whole quarrel with a theory of duties.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
-    d: 165, tx: 176, lens: 0,
-    // Answered ON the board: it clears and two big TRUE / FALSE plates take its place.
+    p: 260, x: 318, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3, lamps: true,
     interact: {
       prompt: 'Is it true that utilitarians and Kant both hold that the end justifies the means?',
-      explain:
-        'False. A utilitarian may let a good end justify the means. Kant forbids it: a person must never be treated merely as a means, whatever the consequences.',
+      explain: 'False. A utilitarian may let a good end justify the means. Kant forbids it: a person must never be treated merely as a means, whatever the consequences.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
+    board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
     summary: {
       title: 'Three Lenses on Moral Action',
       points: [

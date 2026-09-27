@@ -1,546 +1,540 @@
-import {
-  View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './aesthetics3Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import {
+  theatre, cord, frame, paintedShip, urn, piano,
+  THEATRE, CORD, MASK, STAGE_LAMP, PAINTING, URN, TAP, BASIN, PIANO, KEYS, AT_CORD, AT_PIANO,
+} from './aesthetics3Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// aesthetics-aesthetics-3, "Why Humans Love Music and Stories" — A MUSIC ROOM WITH A
+// PUPPET THEATRE.
+//
+// Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
+// laid across its voiced line in stages (pace.ts, line lengths from the manifest). A
+// grave word is in it (N11), so nothing in it is a gag.
+//
+//   b0   he plays two notes on the piano, then turns to look at the theatre.
+//   b1   he walks to the theatre and pulls its cord; the curtains open on a tragic mask.
+//   b2   back at the urn, it fills with pity and fear; he opens the tap and they run
+//        out into the basin.
+//   b3   the urn's plate reads CATHARSIS.
+//   b4   he pulls the cord again and the stage lamp lights the mask: RECOGNITION.
+//   b5   he turns to the storm on the wall, lightning in it.
+//   b6   Q1 on the stage: the urn or the painting.
+//   b7   at the piano, he plays; notes rise, and he goes sad for no reason. THE WILL.
+//   b8   he lowers the fallboard halfway over the keys.
+//   b10  Q2: the order control lifts and lowers the fallboard as the answer moves (R7c).
+//
+// COMPOSITION, in stage units: the theatre 10–110 from 344, its cord at 114; the
+// painting 150–206 × 340–392; the urn at 236 with its tap at 253 and the basin under
+// it; the piano 300–392 from 420, its keys at 286–302. He stands at 130 by the cord
+// and at 274 between the tap and the keys. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('aesthetics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const CLOTH = stageToneOf(TEAL);
+const CLAY = stageToneOf(EMBER);
+const TR = 0.85;
 
-// Three charts and a figure caught between them.
-//
-// TOP (Aristotle's beats) — THE TRAGIC ARC. A real line graph of pity and fear
-// over the length of a play: six segments that draw themselves left to right, a
-// ringed peak marked RECOGNITION, and the long fall labelled KATHARSIS. It lives
-// entirely above y = 356, so it can never collide with the figure.
-//
-// TOP (the music beats) — SCHOPENHAUER'S LADDER. The graph steps aside and its
-// slot is taken by a two-rung diagram: the OTHER ARTS copy the Ideas; MUSIC copies
-// the will itself. Same geometry, opposite half of the lesson — so the upper third
-// is never empty, and the quote card's claim is on the wall before it is read.
-//
-// BOTTOM-LEFT — THE MODES. A live bar meter of the five Greek modes on a ruled
-// baseline, each bar dancing on its own frequency so the meter reads as music
-// rather than a static chart. On the Plato beat the three soft modes sink and are
-// stamped out with an ink cross while Dorian and Phrygian keep playing: regulated,
-// not banned.
-//
-// COMPOSITION / OCCLUSION CONTRACT
-//   · Figure at x = 344 on GROUND = 500 → spans about x 296–392, crown ~361.
-//   · Arc and ladder both stop at y 344, a clear 17 units above that crown.
-//   · The meter owns x 20–218 and the tragic MASK x 134–218; they are mutually
-//     exclusive (mask only on the Aristotle beats, meter only on the music ones),
-//     so they share the lower-left quarter and neither half of the stage is ever
-//     blank. Nothing but the ground line is drawn right of x = 384.
-//   · Both shared slots hand over with a STAGGERED gate rather than a cross-fade —
-//     see the occupancy tracks below — so two occupants are never on screen at
-//     half opacity together.
-//   · Art runs y 226 (the peak label) → 507.4 (the ankle joints), hence band
-//     [218, 512]: a ~2.20× render instead of the letterboxed 1.15×.
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, aesthetics-aesthetics-3. */
+const LINES = [6.88, 6.16, 5.2, 6.8, 10.48, 5.76, 0, 9.48, 7.64, 0, 0, 0];
 
-const FIG_X = 344;
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
 
-// ── the tragic arc ────────────────────────────────────────────────────────────
-const AX_L = 52;
-const AX_R = 372;
-const BASE_Y = 336;
-const TOP_Y = 250;
+const X = BEATS.map((b) => b.x ?? AT_PIANO);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_MUSIC = is('music');
+const A_CURTAIN = is('curtain');
+const A_FILL = is('fill');
+const A_NAMED = is('named');
+const A_RECOG = is('recognise');
+const A_IMAGE = is('image');
+const A_WILL = is('will');
+const A_PLATO = is('plato');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const OPEN = flag((b) => b.open);
+const DRAINED = flag((b) => b.drained);
+const NAMED = flag((b) => b.named);
+const LIT = flag((b) => b.lit);
+const Q1 = flag((b) => b.q1);
+const WILL = flag((b) => b.will);
+const LID = BEATS.map((b) => b.lid ?? 0);
+/** The order control is being answered: the fallboard follows it (R7c) — open, halfway, shut. */
+const ORDER = flag((b) => b.interact?.order);
+const LID_AT = [0, 0.5, 1];
+/** Which way he faces once each beat settles: the tap and the theatre to his left, then right. */
+const DIR = BEATS.map((b, k) => (k <= 4 ? -1 : 1));
 
-// t = how far through the play, v = how high pity and fear have climbed.
-const CURVE: [number, number][] = [
-  [0, 0.06], [0.16, 0.18], [0.34, 0.34], [0.52, 0.62], [0.68, 1], [0.82, 0.42], [1, 0.12],
-];
-const PTS = CURVE.map(([t, v]) => ({ x: AX_L + t * (AX_R - AX_L), y: BASE_Y - v * (BASE_Y - TOP_Y) }));
-
-// Precomputed on the JS side: each segment is one rotated bar whose scaleX draws
-// it in. No worklet ever does trigonometry on the curve.
-const SEGS = PTS.slice(0, -1).map((a, k) => {
-  const b = PTS[k + 1];
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  return { x: a.x, y: a.y, len: Math.hypot(dx, dy), rot: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` };
-});
-const SEG_N = SEGS.length;
-const PEAK = PTS[4];
-
-// ── the mode meter ────────────────────────────────────────────────────────────
-const BAR_W = 30;
-const BAR_GAP = 12;
-const BAR_L0 = 20;
-const BAR_BASE = 470;
-const BAR_H = 78;
-const MODES = ['DOR', 'PHR', 'LYD', 'MIX', 'ION'];
-// Republic 398e–399a: Socrates keeps the Dorian and the Phrygian and throws out
-// the mixolydian and the slack lydian and ionian. Two survive — hence "regulated".
-const CUT = [false, false, true, true, true];
-const BAR_X = MODES.map((_, k) => BAR_L0 + k * (BAR_W + BAR_GAP));
-const BAR_SPAN = MODES.length * BAR_W + (MODES.length - 1) * BAR_GAP;   // 198
-
-// ── Schopenhauer's ladder ─────────────────────────────────────────────────────
-// Two rungs sharing the arc's slot. Rung 0 is the ordinary case (arts copy the
-// Ideas); rung 1 is the exception the quote is about (music copies the will), so
-// it carries the ink fill and the heavier frame.
-const RUNG_T = [248, 300];
-const RUNG_H = 44;
-const FROM_L = 16;
-const FROM_W = 148;
-const TO_L = 210;
-const TO_W = 174;
-const RUNGS = [
-  { from: 'THE OTHER ARTS', to: 'COPY THE IDEAS' },
-  { from: 'MUSIC', to: 'COPIES THE WILL' },
+const Q1_T = [
+  { id: 'catharsis', label: 'CATHARSIS', x: 206, y: 394, w: 60, h: 68, correct: true },
+  { id: 'mimesis', label: 'MIMESIS', x: PAINTING.x0 - 2, y: PAINTING.top - 2, w: 56, h: PAINTING.bottom - PAINTING.top + 14, correct: false },
 ];
 
-const P_CODE = BEATS.map((b) => b.p ?? 0);
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
+/** The fallboard's free edge, for a lid 0 (standing up against the case) to 1 (down over the keys). */
+function lidEdge(lid: number): { x: number; y: number } {
+  'worklet';
+  const a = (Math.PI / 2) * (1 - lid);
+  return { x: KEYS.x1 - 16 * Math.cos(a), y: KEYS.y - 4.5 - 16 * Math.sin(a) };
+}
 
-// TWO SHARED SLOTS, ONE CLEAN HAND-OVER.
-// The arc and the ladder share the upper third; the mask and the mode meter share
-// the lower left. Cross-fading them straight against each other left BOTH occupants
-// sitting at half opacity through the middle of every swap — on a phone that reads
-// as a smudge, not a transition. So each prop now carries an OCCUPANCY track (0/1)
-// which the scene turns into a staggered gate: the outgoing prop is gone by 45% of
-// the transition, the incoming one starts at 55%, and the slot is briefly — and
-// deliberately — empty in between.
-const ARC_ON = BEATS.map((b) => ((b.arc ?? 0) > 0 ? 1 : 0));
-const MASK_ON = BEATS.map((b) => ((b.mask ?? 0) > 0 ? 1 : 0));
-const METER_ON = BEATS.map((b) => ((b.modes ?? 0) > 0 ? 1 : 0));
-const WILL_ON = BEATS.map((b) => ((b.will ?? 0) > 0 ? 1 : 0));
-// The arc's VALUE track HOLDS its last drawn amount rather than falling back to 0
-// when the ladder takes the slot, so the curve never un-draws itself on its way
-// out — it simply stops being there.
-const ARC = (() => {
-  let last = 0;
-  return BEATS.map((b) => { const v = b.arc ?? 0; if (v > 0) last = v; return last; });
-})();
-const CUTB = BEATS.map((b) => b.cut ?? 0);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
-// ── EVERY TAP OF THE OPENING CHANGES THE PICTURE ────────────────────────────
-// Four taps used to hold a frame. Each now writes its own words onto a chart:
-//   · "Why would people seek out stories that make them suffer?" — the graph asks
-//     WHY SUFFER? in its empty upper left, and keeps asking while Aristotle answers;
-//   · "katharsis, a term Aristotle never explained" — the fall's label arrives as
-//     KATHARSIS ?, and trades the question mark for its arrow once the fall is drawn;
-//   · "people enjoy accurate images of painful things" — a frame closes round the
-//     mask, and its caption becomes IMAGE OF PAIN;
-//   · "music shapes character before reason develops" — the meter's caption,
-//     MUSIC ARRIVES BEFORE REASON, writes in on the beat that says it.
-// And the meter no longer prints REGULATED — NOT BANNED over the question that asks
-// exactly that (group O): it waits for the answer.
-const WHY = BEATS.map((b) => b.why ?? 0);
-const NAMED = BEATS.map((b) => b.named ?? 0);
-const FRAMED = BEATS.map((b) => b.framed ?? 0);
-const EARLY = BEATS.map((b) => b.early ?? 0);
-/** The graded drag about Plato's regulation — its caption is the scene's own verdict. */
-const CUT_Q = BEATS.findIndex((b) => !!b.interact?.drag);
-
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
-const X = BEATS.map((b) => b.x ?? FIG_X);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics3'));
-
-export default function Aesthetics3Scene({ clock, bt, bi, i, qv, dragPos, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldS = useHeld();
-  const cv = useCarry(10);
-
+export default function Aesthetics3Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(13);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const walking = Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, walking ? walkU : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    let dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
+    // b0 opens at the piano, facing its keys, and turns to the theatre as the line reaches stories
+    if (n === 0) dirV = lerp(1, DIR[0], ease01(clamp01((b - 4.3) / 0.3)));
+    const dir = dirV < 0 ? -1 : 1;
+    const arrive = walking ? walkDur : 0;
+
+    // ── at the piano: both hands on the keys, pressing (b0, b7), then off them ──
+    const keys = A_MUSIC[n] ? sec(0.5, 0.9) * (1 - sec(3.7, 4.1)) : A_WILL[n] ? sec(arrive + 0.2, arrive + 0.6) : A_PLATO[n] ? 1 - sec(0.2, 0.5) : 0;
+    const press = 1.6 * Math.abs(Math.sin(t * 5));
+    s = handOn(s, x, dir, 1, KEYS.x0 + 10, KEYS.y - 3 + press, keys);
+    s = handOn(s, x, dir, -1, KEYS.x0 + 5, KEYS.y - 3 + 1.6 - press, keys);
+    // the fallboard lowered halfway, a hand on its edge (b8)
+    const lid = A_PLATO[n] ? 0.5 * sec(1.3, 2.6) : ORDER[n] ? pickAt(LID_AT, pickPos.value) : LID[n];
+    const edge = lidEdge(lid);
+    const lower = A_PLATO[n] ? pulse(0.9, 1.3, 3.0) : 0;
+    s = handOn(s, x, dir, 1, edge.x, edge.y, lower);
+    // sad for no reason (b7): the head goes down while he plays
+    s = { ...s, neck: s.neck - 0.2 * (A_WILL[n] ? sec(arrive + 2.0, arrive + 3.0) : 0) };
+
+    // ── the theatre's cord (b1, b4) ─────────────────────────────────────────
+    const cordAt = A_CURTAIN[n] || A_RECOG[n] ? arrive + 0.25 : 99;
+    const pull = pulse(cordAt, cordAt + 0.3, cordAt + 0.95);
+    const tug = 8 * pulse(cordAt + 0.3, cordAt + 0.5, cordAt + 0.8);
+    s = handOn(s, x, dir, 1, CORD.x, CORD.handle + tug, pull);
+
+    // ── the urn's tap (b2) ──────────────────────────────────────────────────
+    const tapT = A_FILL[n] ? arrive + 0.35 : 99;
+    const turn = pulse(tapT, tapT + 0.3, tapT + 1.3);
+    s = handOn(s, x, dir, 1, TAP.x + 2, TAP.y - 3 + 2 * Math.sin(Math.PI * sec(tapT + 0.3, tapT + 0.7)), turn);
+
+    // ── a hand out to the storm on the wall (b5), and a tilt of the head at the word (b3) ──
+    s = { ...s, tilt: s.tilt + 0.06 * (A_NAMED[n] ? pulse(1.6, 2.2, 4.4) : 0) };
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the room ─────────────────────────────────────────────────────────────
+    const open = A_CURTAIN[n] ? sec(cordAt + 0.45, cordAt + 1.5) : OPEN[n];
+    const level = A_FILL[n] ? sec(0.6, arrive + 0.3) * (1 - sec(tapT + 0.55, tapT + 2.0)) : 0;
+    const stream = A_FILL[n] ? sec(tapT + 0.45, tapT + 0.6) * (1 - sec(tapT + 1.9, tapT + 2.1)) : 0;
+    const basin = A_FILL[n] ? sec(tapT + 0.6, tapT + 2.0) : DRAINED[n];
+    const named = A_NAMED[n] ? sec(0.4, 1.0) : NAMED[n];
+    const lit = A_RECOG[n] ? sec(cordAt + 0.5, cordAt + 1.3) : LIT[n];
+    const recog = A_RECOG[n] ? st(0.58, 0.66) : LIT[n];
+    const flash = A_IMAGE[n] ? pulse(1.4, 1.5, 1.9) + pulse(2.6, 2.7, 3.1) : 0;
+    const will = A_WILL[n] ? st(0.7, 0.78) : WILL[n];
+    const notes = A_MUSIC[n] ? sec(0.9, 1.2) * (1 - sec(3.8, 4.4)) : A_WILL[n] ? sec(arrive + 0.6, arrive + 1.0) : A_PLATO[n] ? 1 - sec(0.2, 1.0) : 0;
+
     return {
-      fig: lookPose(s, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      arc: carry(cv, 0, n, ARC[p], ARC[n], tr),
-      // R7b — the knob takes the modes away. Drag from left it alone toward banned
-      // every note and the soft modes fall off the meter one by one, so the reader
-      // performs the regulation instead of reading about it.
-      cut: carry(cv, 1, n, CUTB[p], reacting ? pickPos.value : CUTB[n], tr),
-      // The staggered slot gates: out by 45%, in from 55%, never both at once.
-      arcOn: ease01(clamp01((carry(cv, 2, n, ARC_ON[p], ARC_ON[n], tr) - 0.55) / 0.45)),
-      maskOn: ease01(clamp01((carry(cv, 3, n, MASK_ON[p], MASK_ON[n], tr) - 0.55) / 0.45)),
-      meterOn: ease01(clamp01((carry(cv, 4, n, METER_ON[p], METER_ON[n], tr) - 0.55) / 0.45)),
-      willOn: ease01(clamp01((carry(cv, 5, n, WILL_ON[p], WILL_ON[n], tr) - 0.55) / 0.45)),
-      why: carry(cv, 6, n, WHY[p], WHY[n], tr),
-      named: carry(cv, 7, n, NAMED[p], NAMED[n], tr),
-      framed: carry(cv, 8, n, FRAMED[p], FRAMED[n], tr),
-      early: carry(cv, 9, n, EARLY[p], EARLY[n], tr),
-      // REGULATED — NOT BANNED is the answer to the drag, so it arrives only once
-      // the drag is answered, and stays for the summary that follows.
-      reg: n === CUT_Q ? ease01(clamp01(qv.value)) : n > CUT_Q && CUT_Q >= 0 ? 1 : 0,
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      open: carry(cv, 1, n, OPEN[p], open, tr),
+      level: carry(cv, 2, n, 0, level, tr),
+      stream: carry(cv, 3, n, 0, stream, tr),
+      basin: carry(cv, 4, n, DRAINED[p], basin, tr),
+      named: carry(cv, 5, n, NAMED[p], named, tr),
+      lit: carry(cv, 6, n, LIT[p], lit, tr),
+      recog: carry(cv, 7, n, LIT[p], recog, tr),
+      flash: carry(cv, 8, n, 0, flash, tr),
+      q1: carry(cv, 9, n, Q1[p], Q1[n], tr),
+      will: carry(cv, 10, n, WILL[p], will, tr),
+      lid: carry(cv, 11, n, LID[p], lid, tr),
+      notes: carry(cv, 12, n, 0, notes, tr),
       t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
 
-  const axisStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.arcOn }));
-  const peakStyle = useAnimatedStyle(() => ({
-    opacity: ease01(clamp01((SCENE.value.arc - 0.72) / 0.2)) * SCENE.value.arcOn,
-  }));
-  // KATHARSIS is named before its fall is drawn; the word stays, and its "?" hands
-  // over to the arrow once the curve has actually come down.
-  const kathWord = useAnimatedStyle(() => {
-    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
-    return { opacity: Math.max(tail, SCENE.value.named) * SCENE.value.arcOn };
-  });
-  const kathAsk = useAnimatedStyle(() => {
-    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
-    return { opacity: SCENE.value.named * (1 - clamp01(tail * 2)) * SCENE.value.arcOn };
-  });
-  const tailStyle = useAnimatedStyle(() => {
-    const tail = ease01(clamp01((SCENE.value.arc - 0.85) / 0.13));
-    return { opacity: clamp01(tail * 2 - 1) * SCENE.value.arcOn };
-  });
-  const whyStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.why * SCENE.value.arcOn,
-    transform: [{ translateY: (1 - SCENE.value.why) * -5 }],
-  }));
-  const maskStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.maskOn,
-    transform: [{ translateY: (1 - SCENE.value.maskOn) * 10 }],
-  }));
-  // The frame settles onto the mask from slightly larger, the way a frame is lowered
-  // over a picture; the caption hands over through a gap, never a blend.
-  const frameStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.framed,
-    transform: [{ scale: 1.06 - 0.06 * SCENE.value.framed }],
-  }));
-  const capMask = useAnimatedStyle(() => ({ opacity: 1 - clamp01(SCENE.value.framed * 2) }));
-  const capImage = useAnimatedStyle(() => ({ opacity: clamp01(SCENE.value.framed * 2 - 1) }));
-  const meterStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.meterOn }));
-  const earlyStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.meterOn * SCENE.value.early * (1 - clamp01(SCENE.value.reg * 2)),
-    transform: [{ translateX: (1 - SCENE.value.early) * -8 }],
-  }));
-  const regStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.meterOn * clamp01(SCENE.value.reg * 2 - 1),
-  }));
-  const willStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.willOn }));
-
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── THE TRAGIC ARC ───────────────────────────────────────────────────── */}
-      <Animated.View style={[styles.axisY, axisStyle]} pointerEvents="none" />
-      <Animated.View style={[styles.axisX, axisStyle]} pointerEvents="none" />
-      <Animated.Text style={[styles.axisLabel, axisStyle]}>{'PITY & FEAR ↑'}</Animated.Text>
-      <Animated.Text style={[styles.footL, axisStyle]}>{'THE PLAY →'}</Animated.Text>
-
-      {SEGS.map((_, k) => <Seg key={k} S={SCENE} k={k} />)}
-
-      <Animated.View style={[styles.peakGuide, peakStyle]} pointerEvents="none" />
-      <Animated.View style={[styles.peakRing, peakStyle]} pointerEvents="none" />
-      <Animated.Text style={[styles.peakLabel, peakStyle]}>RECOGNITION</Animated.Text>
-      <Animated.Text style={[styles.footR, kathWord]}>KATHARSIS</Animated.Text>
-      <Animated.Text style={[styles.footMark, kathAsk]}>?</Animated.Text>
-      <Animated.Text style={[styles.footMark, tailStyle]}>↓</Animated.Text>
-      <Animated.Text style={[styles.whyTag, whyStyle]}>WHY SUFFER?</Animated.Text>
-
-      {/* ── SCHOPENHAUER'S LADDER (the arc's slot, on the music beats) ───────── */}
-      <Animated.View style={[styles.willWrap, willStyle]} pointerEvents="none">
-        <Text style={styles.willTitle}>WHAT EACH ART COPIES</Text>
-        {/* absoluteFill on the row wrapper, so each child keeps STAGE coordinates
-            instead of being measured against a zero-height flex box. */}
-        {RUNGS.map((r, k) => (
-          <View key={r.from} style={StyleSheet.absoluteFill}>
-            <View style={[styles.fromBox, { top: RUNG_T[k] }, k === 1 && styles.fromBoxOn]}>
-              <Text style={[styles.fromText, k === 1 && styles.fromTextOn]}>{r.from}</Text>
-            </View>
-            <View style={[styles.willShaft, { top: RUNG_T[k] + RUNG_H / 2 - 1.5 }]} />
-            <View style={[styles.willHead, { top: RUNG_T[k] + RUNG_H / 2 - 6.5 }]} />
-            <View style={[styles.toBox, { top: RUNG_T[k] }, k === 1 && styles.toBoxOn]}>
-              <Text style={[styles.toText, k === 1 && styles.toTextOn]}>{r.to}</Text>
-            </View>
-          </View>
-        ))}
-      </Animated.View>
-
-      {/* ── THE MODE METER ───────────────────────────────────────────────────── */}
-      <Animated.Text style={[styles.meterTitle, meterStyle]}>THE MODES</Animated.Text>
-      {MODES.map((m, k) => <Bar key={m} S={SCENE} k={k} label={m} />)}
-      <Animated.View style={[styles.meterBase, meterStyle]} pointerEvents="none" />
-      <Animated.Text style={[styles.meterFoot, earlyStyle]}>MUSIC ARRIVES BEFORE REASON</Animated.Text>
-      <Animated.Text style={[styles.meterFoot, regStyle]}>REGULATED — NOT BANNED</Animated.Text>
-
-      {/* ── the tragic mask, in the meter's slot on the Aristotle beats ──────── */}
-      <Animated.View style={[styles.maskWrap, maskStyle]} pointerEvents="none">
-        <Animated.Text style={[styles.maskCap, capMask]}>THE TRAGIC MASK</Animated.Text>
-        <Animated.Text style={[styles.maskCap, capImage]}>IMAGE OF PAIN</Animated.Text>
-        <Animated.View style={[styles.maskFrame, frameStyle]}>
-          <View style={styles.maskFrameInner} />
-        </Animated.View>
-        <View style={styles.mask}>
-          <View style={[styles.maskBrow, { left: 12, transform: [{ rotate: '15deg' }] }]} />
-          <View style={[styles.maskBrow, { right: 12, transform: [{ rotate: '-15deg' }] }]} />
-          <View style={[styles.maskEye, { left: 15 }]} />
-          <View style={[styles.maskEye, { right: 15 }]} />
-          <View style={styles.maskMouth} />
-          <View style={styles.maskTear} />
-        </View>
-      </Animated.View>
-
+    <View style={styles.scene}>
+      <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.wall} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
+      </View>
+      <ObjectArt parts={FRAME_ART} tone={WOOD} />
+      <Painting S={SCENE} />
+      <Stage S={SCENE} />
+      <ObjectArt parts={THEATRE_ART} tone={WOOD} />
+      <Curtains S={SCENE} />
+      <ObjectArt parts={CORD_ART} tone={CLOTH} />
+      <Urn S={SCENE} />
+      <ObjectArt parts={PIANO_ART} tone={WOOD} />
+      <View style={styles.keyboard} pointerEvents="none">
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <View key={k} style={[styles.blackKey, { left: 3 + k * 7 }]} />)}
+      </View>
+      <Fallboard S={SCENE} />
+      <Plates S={SCENE} on={on} />
       <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DF} k={K_FIG} />
+      <Stickman D={DF} k={K_M} />
+      <Notes S={SCENE} />
+      {Q1[i] ? <Answers picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
+  );
+}
+
+const THEATRE_ART = theatre();
+const CORD_ART = cord();
+const FRAME_ART = frame();
+const SHIP_ART = paintedShip();
+const URN_ART = urn();
+const PIANO_ART = piano();
+
+// ── the storm on the wall ────────────────────────────────────────────────────
+
+function Painting({ S }: { S: SharedValue<any> }) {
+  const bolt = useAnimatedStyle(() => ({ opacity: S.value.flash }));
+  const sky = useAnimatedStyle(() => ({ opacity: 0.35 * S.value.flash }));
+  const rock = useAnimatedStyle(() => ({ transform: [{ rotate: `${4 * Math.sin(S.value.t * 1.3)}deg` }] }));
+  return (
+    <View style={styles.canvas} pointerEvents="none">
+      <Animated.View style={[styles.skyFlash, sky]} />
+      <Animated.View style={[StyleSheet.absoluteFill, rock]}>
+        <ObjectArt parts={SHIP_ART} tone={WOOD} />
+      </Animated.View>
+      <View style={styles.sea} />
+      <View style={[styles.wave, { left: 4 }]} />
+      <View style={[styles.wave, { left: 26 }]} />
+      <Animated.View style={[styles.bolt, bolt]}>
+        <View style={[styles.boltBar, { left: 0, top: 0, transform: [{ rotate: '20deg' }] }]} />
+        <View style={[styles.boltBar, { left: 3, top: 8, transform: [{ rotate: '-25deg' }] }]} />
+      </Animated.View>
+    </View>
+  );
+}
+
+// ── the little stage: the mask, the lamp over it, and the curtains ───────────
+
+function Stage({ S }: { S: SharedValue<any> }) {
+  const dim = useAnimatedStyle(() => ({ opacity: 0.55 * (1 - S.value.lit) }));
+  const glow = useAnimatedStyle(() => ({ opacity: 0.4 * S.value.lit }));
+  const bulb = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * S.value.lit }));
+  return (
+    <View style={styles.opening} pointerEvents="none">
+      <Animated.View style={[styles.cone, glow]} />
+      <View style={styles.mask}>
+        <View style={[styles.eye, { left: 5 }]} />
+        <View style={[styles.eye, { right: 5 }]} />
+        <View style={styles.mouth} />
+      </View>
+      <Animated.View style={[styles.dim, dim]} />
+      <Animated.View style={[styles.bulb, bulb]} />
+    </View>
+  );
+}
+function Curtains({ S }: { S: SharedValue<any> }) {
+  const left = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.78 * S.value.open }] }));
+  const right = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.78 * S.value.open }] }));
+  return (
+    <>
+      <Animated.View style={[styles.curtain, styles.curtainL, left]} pointerEvents="none" />
+      <Animated.View style={[styles.curtain, styles.curtainR, right]} pointerEvents="none" />
+    </>
+  );
+}
+
+// ── the urn, its water, the stream from the tap, and the basin ──────────────
+
+function Urn({ S }: { S: SharedValue<any> }) {
+  const water = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - S.value.level) * (URN.bottom - URN.top) }] }));
+  const stream = useAnimatedStyle(() => ({ opacity: S.value.stream, transform: [{ scaleY: S.value.stream }] }));
+  const basin = useAnimatedStyle(() => ({
+    opacity: S.value.basin,
+    transform: [{ scaleX: 0.9 + 0.1 * Math.sin(S.value.t * 3) * S.value.basin }],
+  }));
+  return (
+    <>
+      <ObjectArt parts={URN_ART} tone={CLAY} />
+      <View style={styles.urnInside} pointerEvents="none">
+        <Animated.View style={[styles.urnWater, water]} />
+      </View>
+      <Animated.View style={[styles.stream, stream]} pointerEvents="none" />
+      <Animated.View style={[styles.basinWater, basin]} pointerEvents="none" />
+    </>
+  );
+}
+
+// ── the fallboard over the keys ─────────────────────────────────────────────
+
+function Fallboard({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${90 * (1 - S.value.lid)}deg` }] }));
+  return <Animated.View style={[styles.fallboard, st]} pointerEvents="none" />;
+}
+
+// ── the notes that rise from the piano ──────────────────────────────────────
+
+function Notes({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      {[0, 1, 2, 3].map((k) => <Note key={k} S={S} k={k} />)}
+    </>
+  );
+}
+function Note({ S, k }: { S: SharedValue<any>; k: number }) {
+  const st = useAnimatedStyle(() => {
+    // each note rises for 2.4 seconds on its own phase, drifting as it goes, and is gone
+    const u = ((S.value.t + k * 0.6) % 2.4) / 2.4;
+    return {
+      opacity: S.value.notes * Math.sin(Math.PI * u),
+      transform: [{ translateX: 306 + 22 * u + 4 * Math.sin(u * 6 + k) }, { translateY: 432 - 60 * u }],
+    };
+  });
+  return (
+    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+      <View style={styles.noteStem} />
+      <View style={styles.noteHead} />
     </Animated.View>
   );
 }
 
-/** One segment of the arc: a bar rotated to the chord and stretched into being. */
-function Seg({ S, k }: { S: SharedValue<any>; k: number }) {
-  const rot = SEGS[k].rot;
-  const st = useAnimatedStyle(() => {
-    const on = ease01(clamp01(S.value.arc * SEG_N - k));
-    return { opacity: on * S.value.arcOn, transform: [{ rotate: rot }, { scaleX: on }] };
-  });
-  return (
-    <Animated.View
-      style={[
-        styles.seg,
-        { left: SEGS[k].x, top: SEGS[k].y - 1.5, width: SEGS[k].len },
-        st,
-      ]}
-      pointerEvents="none"
-    />
-  );
-}
+// ── the plates: CATHARSIS over the urn, RECOGNITION on the theatre, THE WILL on the piano ──
 
-/** One mode: a bar that dances on its own frequency until Plato takes it out. */
-function Bar({ S, k, label }: { S: SharedValue<any>; k: number; label: string }) {
-  const cut = CUT[k];
-  const f = 2.1 + k * 0.37;
-  const ph = k * 1.31;
-  const st = useAnimatedStyle(() => {
-    const live = 0.26 + 0.74 * (0.5 + 0.5 * Math.sin(S.value.t * f + ph));
-    const c = cut ? S.value.cut : 0;
-    return {
-      opacity: S.value.meterOn * (1 - 0.7 * c),
-      transform: [{ scaleY: lerp(live, 0.16, ease01(c)) }],
-    };
-  });
-  const labelStyle = useAnimatedStyle(() => ({
-    // 0.45, not 0.55, and the label is INK below: a mode Plato REGULATED still has
-    // to be named, and at 0.45 with SOFT type it reached the reader at 1.9:1 —
-    // the cross through it is the signal, not an unreadable word (D35).
-    opacity: S.value.meterOn * (1 - 0.45 * (cut ? S.value.cut : 0)),
-  }));
-  const crossStyle = useAnimatedStyle(() => ({
-    opacity: cut ? S.value.meterOn * ease01(S.value.cut) : 0,
-    transform: [{ scale: 0.7 + 0.3 * ease01(cut ? S.value.cut : 0) }],
-  }));
+function Plates({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const cath = useAnimatedStyle(() => ({ opacity: S.value.named * (1 - S.value.q1), transform: [{ translateY: (1 - S.value.named) * -5 }] }));
+  const recog = useAnimatedStyle(() => ({ opacity: S.value.recog }));
+  const will = useAnimatedStyle(() => ({ opacity: S.value.will }));
   return (
     <>
-      <Animated.View style={[styles.bar, { left: BAR_X[k] }, st]} pointerEvents="none" />
-      <Animated.Text style={[styles.barLabel, { left: BAR_X[k] }, labelStyle]}>{label}</Animated.Text>
-      {cut ? (
-        <Animated.View style={[styles.cross, { left: BAR_X[k] + BAR_W / 2 - 14 }, crossStyle]} pointerEvents="none">
-          <View style={[styles.crossBar, { transform: [{ rotate: '45deg' }] }]} />
-          <View style={[styles.crossBar, { transform: [{ rotate: '-45deg' }] }]} />
+      {on(NAMED) ? (
+        <Animated.View style={[styles.plate, styles.cathPlate, cath]} pointerEvents="none">
+          <Text style={styles.plateText} numberOfLines={1}>CATHARSIS</Text>
+        </Animated.View>
+      ) : null}
+      {on(LIT) ? (
+        <Animated.View style={[styles.plate, styles.recogPlate, recog]} pointerEvents="none">
+          <Text style={styles.plateText} numberOfLines={1}>RECOGNITION</Text>
+        </Animated.View>
+      ) : null}
+      {on(WILL) ? (
+        <Animated.View style={[styles.plate, styles.willPlate, will]} pointerEvents="none">
+          <Text style={styles.plateText} numberOfLines={1}>THE WILL</Text>
         </Animated.View>
       ) : null}
     </>
   );
 }
 
+// ── Q1: the urn, or the painting ────────────────────────────────────────────
+
+function Answers({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {Q1_T.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered} sealAt="tr"
+          style={[styles.answer, { left: q.x, top: q.y, width: q.w, height: q.h }]}
+        >
+          <View style={q.id === 'catharsis' ? styles.answerTop : styles.answerFoot}>
+            <View style={[styles.answerTag, answered && q.correct && styles.tagRight]}>
+              <Text style={[styles.answerText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+            </View>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+const OPEN_W = THEATRE.open.x1 - THEATRE.open.x0;
+const OPEN_H = THEATRE.open.bottom - THEATRE.open.top;
+const CANVAS_W = PAINTING.x1 - PAINTING.x0 - 8;
+const CANVAS_H = PAINTING.bottom - PAINTING.top - 8;
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 20, right: 14, top: GROUND, height: 1.5, backgroundColor: RULE },
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 292, width: STAGE_W, height: GROUND - 292, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
+  },
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  axisY: { position: 'absolute', left: AX_L, top: TOP_Y - 4, width: 1.5, height: BASE_Y - TOP_Y + 4, backgroundColor: SOFT },
-  axisX: { position: 'absolute', left: AX_L, top: BASE_Y, width: AX_R - AX_L, height: 1.5, backgroundColor: SOFT },
-  axisLabel: {
-    position: 'absolute', left: 20, top: 229, width: 140,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
+  canvas: {
+    position: 'absolute', left: PAINTING.x0 + 4, top: PAINTING.top + 4, width: CANVAS_W, height: CANVAS_H,
+    backgroundColor: DEEP, overflow: 'hidden', borderRadius: 1,
   },
-  footL: {
-    position: 'absolute', left: AX_L, top: 342, width: 126,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
+  skyFlash: { position: 'absolute', left: 0, top: 0, right: 0, height: CANVAS_H * 0.6, backgroundColor: PAPER_LIT },
+  sea: { position: 'absolute', left: 0, right: 0, top: CANVAS_H * 0.66, bottom: 0, backgroundColor: TEAL },
+  wave: {
+    position: 'absolute', top: CANVAS_H * 0.66 - 3, width: 18, height: 6, borderRadius: 3, backgroundColor: TEAL,
+    borderTopWidth: 1.5, borderColor: PAPER_LIT,
   },
-  // KATHARSIS (72.5 wide) ends at 358, and its mark — "?" while the word is only a
-  // name, "↓" once the fall is drawn — sits in its own 12-wide box after it, where
-  // the old single string "KATHARSIS ↓" put its arrow.
-  footR: {
-    position: 'absolute', left: 234, top: 342, width: 124, textAlign: 'right',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.2, color: INK,
-    includeFontPadding: false,
-  },
-  footMark: {
-    position: 'absolute', left: 360, top: 342, width: 12,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, color: INK,
-    includeFontPadding: false,
-  },
-  // The graph's question, in its empty upper left: under the axis label (229…242),
-  // right of the y axis (52) and far above the curve, which is below y 290 until
-  // x 200. WHY SUFFER? measures 77 at 9.5px.
-  whyTag: {
-    position: 'absolute', left: 62, top: 254, width: 96,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
-  },
+  bolt: { position: 'absolute', left: 8, top: 3, width: 10, height: 18 },
+  boltBar: { position: 'absolute', width: 2.2, height: 10, borderRadius: 1, backgroundColor: PAPER_LIT },
 
-  seg: { position: 'absolute', height: 3, backgroundColor: INK, borderRadius: 1.5, transformOrigin: '0% 50%' },
-  peakGuide: { position: 'absolute', left: PEAK.x, top: PEAK.y, width: 1, height: BASE_Y - PEAK.y, backgroundColor: RULE },
-  peakRing: {
-    position: 'absolute', left: PEAK.x - 8, top: PEAK.y - 8, width: 16, height: 16,
-    borderRadius: 8, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+  opening: {
+    position: 'absolute', left: THEATRE.open.x0, top: THEATRE.open.top, width: OPEN_W, height: OPEN_H,
+    backgroundColor: DEEP, overflow: 'hidden',
   },
-  peakLabel: {
-    position: 'absolute', left: PEAK.x - 74, top: 226, width: 148, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.4, color: INK,
-    includeFontPadding: false,
-  },
-
-  // ── Schopenhauer's ladder ────────────────────────────────────────────────────
-  // A full-stage wrapper so every child can be authored in stage coordinates.
-  willWrap: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  willTitle: {
-    position: 'absolute', left: 0, top: 227, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13.5, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
-  },
-  fromBox: {
-    position: 'absolute', left: FROM_L, width: FROM_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  fromBoxOn: { borderWidth: 2.5, borderColor: INK, backgroundColor: INK },
-  fromText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 0.6, color: INK,
-    includeFontPadding: false,
-  },
-  fromTextOn: { color: PAPER, fontSize: 15, letterSpacing: 1.6 },
-  willShaft: { position: 'absolute', left: 172, width: 22, height: 3, backgroundColor: INK },
-  willHead: {
-    position: 'absolute', left: 192, width: 0, height: 0,
-    borderTopWidth: 6.5, borderBottomWidth: 6.5, borderLeftWidth: 11,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: INK,
-  },
-  toBox: {
-    position: 'absolute', left: TO_L, width: TO_W, height: RUNG_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  toBoxOn: { borderWidth: 2.5, borderColor: INK },
-  toText: {
-    fontFamily: 'Inter_700Bold', fontSize: 12.5, letterSpacing: 0.4, color: INK,
-    includeFontPadding: false,
-  },
-  toTextOn: { color: INK, fontSize: 13.5, letterSpacing: 0.8 },
-
-  meterTitle: {
-    position: 'absolute', left: BAR_L0, top: 373, width: 200,
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13.5, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-  // Full-height bars anchored at the baseline; only scaleY animates, so the meter
-  // never triggers layout.
-  bar: {
-    position: 'absolute', top: BAR_BASE - BAR_H, width: BAR_W, height: BAR_H,
-    backgroundColor: INK, borderRadius: 2, transformOrigin: '50% 100%',
-  },
-  // A ruled baseline turns five floating bars into a chart.
-  meterBase: { position: 'absolute', left: BAR_L0, top: BAR_BASE, width: BAR_SPAN, height: 1.5, backgroundColor: SOFT },
-  // ── THE LABEL ROW AND THE CAPTION WERE INSIDE EACH OTHER (D33) ─────────────
-  //
-  // barLabel ran 474..486.5 (top 474, lineHeight 12.5) and meterFoot began at 485,
-  // so the two overlapped by a unit and a half and the caption's capitals sat on
-  // the mode labels' baseline. Five words — DOR PHR LYD MIX ION — each measured
-  // 9-11% covered by "MUSIC ARRIVES BEFORE REASON".
-  //
-  // There is no room BELOW: the caption already bottomed out 4 units above the
-  // ground rule at 501.5, and pushing it down would put a rule through it, which
-  // is the same defect wearing the other hat. So the leading comes in instead —
-  // 12.5 to 11 on both, which these two 10.5/10pt capital-only lines can spare —
-  // and that buys the 4 units of air between them.
-  barLabel: {
-    position: 'absolute', top: BAR_BASE + 4, width: BAR_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 11, letterSpacing: 0.6, color: INK,
-    includeFontPadding: false,
-  },
-  cross: { position: 'absolute', top: 426, width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
-  crossBar: { position: 'absolute', width: 28, height: 3.5, backgroundColor: INK, borderRadius: 2 },
-  meterFoot: {
-    position: 'absolute', left: BAR_L0, top: 489, width: 250,
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 11, letterSpacing: 0.9, color: SOFT,
-    includeFontPadding: false,
-  },
-
-  // ── the tragic mask ──────────────────────────────────────────────────────────
-  // Big enough to read as a carved object (84 × 100) and drawn properly: raised
-  // brows, hollow eyes, a downturned mouth and a painted tear-line.
-  maskWrap: { position: 'absolute', left: 116, top: 366, width: 120, height: 132 },
-  maskCap: {
-    position: 'absolute', left: 0, top: 0, width: 120, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
+  cone: {
+    position: 'absolute', left: STAGE_LAMP.x - THEATRE.open.x0 - 22, top: 6, width: 44, height: OPEN_H - 6,
+    borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: PAPER_LIT,
   },
   mask: {
-    position: 'absolute', left: 18, top: 18, width: 84, height: 100,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-    borderTopLeftRadius: 42, borderTopRightRadius: 42,
-    borderBottomLeftRadius: 38, borderBottomRightRadius: 38,
+    position: 'absolute', left: MASK.x - THEATRE.open.x0 - 11, top: MASK.y - THEATRE.open.top - 14, width: 22, height: 28,
+    borderRadius: 11, backgroundColor: PAPER_LIT, borderWidth: 1.5, borderColor: INK,
   },
-  // A picture frame lowered round the mask: 8 units clear of it on each side and 4
-  // above, under the caption (which ends at 12.5) and 6 above the wrap's floor.
-  // Stage x 126…226, y 380…492 — the figure starts at x 296.
-  maskFrame: {
-    position: 'absolute', left: 10, top: 14, width: 100, height: 112,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 3,
+  eye: { position: 'absolute', top: 8, width: 4, height: 5, borderRadius: 2, backgroundColor: INK },
+  mouth: {
+    position: 'absolute', left: 6, top: 18, width: 10, height: 5, borderTopLeftRadius: 5, borderTopRightRadius: 5,
+    borderTopWidth: 1.6, borderLeftWidth: 1.6, borderRightWidth: 1.6, borderColor: INK,
   },
-  maskFrameInner: {
-    position: 'absolute', left: 2, top: 2, right: 2, bottom: 2,
-    borderWidth: 1, borderColor: RULE, borderRadius: 2,
+  dim: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
+  bulb: {
+    position: 'absolute', left: STAGE_LAMP.x - THEATRE.open.x0 - 3.5, top: 2, width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: EMBER, borderWidth: 1, borderColor: INK,
   },
-  maskBrow: { position: 'absolute', top: 26, width: 22, height: 3, backgroundColor: INK, borderRadius: 2 },
-  maskEye: { position: 'absolute', top: 36, width: 14, height: 14, borderRadius: 7, backgroundColor: INK },
-  maskTear: { position: 'absolute', top: 53, left: 21, width: 3, height: 14, borderRadius: 1.5, backgroundColor: SOFT },
-  maskMouth: {
-    position: 'absolute', bottom: 16, alignSelf: 'center', width: 36, height: 16,
-    borderBottomWidth: 3.5, borderColor: INK,
-    borderBottomLeftRadius: 18, borderBottomRightRadius: 18, transform: [{ rotate: '180deg' }],
+  curtain: {
+    position: 'absolute', top: THEATRE.open.top, width: OPEN_W / 2, height: OPEN_H, backgroundColor: CLOTH.SHADE,
+    borderWidth: 1.2, borderColor: INK, borderBottomLeftRadius: 4, borderBottomRightRadius: 4,
   },
+  curtainL: { left: THEATRE.open.x0, transformOrigin: '0% 50%' },
+  curtainR: { left: THEATRE.open.x0 + OPEN_W / 2, transformOrigin: '100% 50%' },
+
+  urnInside: {
+    position: 'absolute', left: URN.x - URN.r + 4, top: URN.top + 4, width: 2 * URN.r - 8, height: URN.bottom - URN.top - 4,
+    borderRadius: URN.r - 4, overflow: 'hidden',
+  },
+  urnWater: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 2, backgroundColor: TEAL },
+  stream: {
+    position: 'absolute', left: TAP.x + 2, top: TAP.y + 6, width: 2, height: BASIN.top - TAP.y - 4, borderRadius: 1,
+    backgroundColor: TEAL, transformOrigin: '50% 0%',
+  },
+  basinWater: {
+    position: 'absolute', left: BASIN.x0 + 4, top: BASIN.top + 1, width: BASIN.x1 - BASIN.x0 - 8, height: 4, borderRadius: 2,
+    backgroundColor: TEAL,
+  },
+
+  // the keys, seen from the front of the case: a white run with its black keys over it
+  keyboard: {
+    position: 'absolute', left: PIANO.x0 + 10, top: KEYS.y - 20, width: 60, height: 9, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT, borderWidth: 1.2, borderColor: INK, overflow: 'hidden',
+  },
+  blackKey: { position: 'absolute', top: 0, width: 3.5, height: 5, borderRadius: 0.5, backgroundColor: INK },
+  fallboard: {
+    position: 'absolute', left: KEYS.x1 - 16, top: KEYS.y - 6, width: 16, height: 3, borderRadius: 1.5,
+    backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK, transformOrigin: '100% 50%',
+  },
+
+  noteStem: { position: 'absolute', left: 3, top: -9, width: 1.4, height: 9, borderRadius: 0.7, backgroundColor: INK },
+  noteHead: {
+    position: 'absolute', left: -1, top: -2, width: 6, height: 4.5, borderRadius: 2.5, backgroundColor: INK,
+    transform: [{ rotate: '-20deg' }],
+  },
+
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  },
+  cathPlate: { left: 206, top: 396, width: 60 },
+  recogPlate: { left: THEATRE.x0 + 10, top: THEATRE.top + 2, width: THEATRE.x1 - THEATRE.x0 - 20 },
+  willPlate: { left: PIANO.x0 + 10, top: PIANO.top + 1, width: 60 },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+  },
+
+  answer: { position: 'absolute' },
+  answerTop: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 2 },
+  answerFoot: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  answerTag: {
+    paddingHorizontal: 3, height: 13, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, justifyContent: 'center',
+  },
+  tagRight: { backgroundColor: INK },
+  answerText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+  },
+  onInk: { color: PAPER_LIT },
 });
 
-// MEASURED BAND, top and bottom.
-//   TOP    the RECOGNITION label at y 226 (the ladder's title sits at 227, the axis
-//          label at 229, the peak ring at 242). Nothing on any beat is drawn higher.
-//   BOTTOM the true extreme is NOT the ground line at 501.5 but the figure's ankle
-//          JOINTS: circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly on
-//          GROUND, so ink reaches y = 507.4. The meter's caption bottoms out at
-//          500 (489 + an 11-unit line, moved down 4 to clear the mode labels — D33)
-//          and the mask at 484 (its picture frame, on beats 5–6, at 492).
-// The figure stands on GROUND = 500 with its crown near 361, and nothing is drawn
-// right of x 386. [218, 512] therefore holds every extreme on every beat with 8
-// units of margin at the top and 4.6 at the foot, and renders the scene ~2.20×
-// instead of the letterboxed 1.15× — within 5% of the width-limited ceiling of
-// 2.31×, so there is nothing left to win by cropping harder.
 export function Aesthetics3Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics3Scene} band={[218, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics3Scene} band={[288, 514]} camera={CAM} />;
 }
