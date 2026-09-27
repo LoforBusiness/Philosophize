@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Path, Circle, Line as SvgLine, G } from 'react-native-svg';
+import Svg, { Path, Line as SvgLine, G } from 'react-native-svg';
 import Animated, {
   useSharedValue, useAnimatedProps, useAnimatedStyle, withTiming, withDelay, withSequence, runOnJS, Easing,
 } from 'react-native-reanimated';
@@ -12,7 +12,6 @@ import { useUserDataStore, type XpEvent } from '@/stores/userDataStore';
 import { useSeen, NO_VIEW, type InView } from '@/lib/utils/useInView';
 
 const APath = Animated.createAnimatedComponent(Path);
-const AG = Animated.createAnimatedComponent(G);
 // The counter — a TextInput whose `text` is written from the UI thread — moved to
 // components/shared/ACounter.tsx when the Insights ghost needed the same trick.
 // The reasoning that produced it lives there; this is now just a consumer.
@@ -76,7 +75,11 @@ const AG = Animated.createAnimatedComponent(G);
  *     thing here gets its depth, and it draws in with the line;
  *   · the area under it is a FLAT tint of that metal, not a gradient into tan
  *     (§7, "no gold surfaces");
- *   · each thing earned is a drawn node, landing with the head;
+ *   · NO NODE ON EACH THING EARNED. A white ring per event was tried and
+ *     taken out at the owner's word (2026-09-27): a reader with a busy band
+ *     has dozens of events, and the rings fused into a chain that buried the
+ *     line. The clean struck line is what reads — the steps in it already say
+ *     each thing was a different size;
  *   · the two dots are the two PINS — the one you hold at the foot of the climb,
  *     the one you are climbing to, locked, at the top — so the chart and the
  *     ladder beside it say the same thing in the same objects;
@@ -301,7 +304,6 @@ export default function RankClimbChart({
 
   const lineProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
   const ledgeProps = useAnimatedProps(() => ({ strokeDashoffset: (1 - draw.value) * geo.len }));
-  const nodeProps = useAnimatedProps(() => ({ opacity: mark.value }));
   const countProps = useAnimatedProps(() => ({ text: `+${Math.round(draw.value * gained)} XP` }) as never);
   const areaProps = useAnimatedProps(() => ({ opacity: draw.value * 0.9 }));
   const headStyle = useAnimatedStyle(() => ({
@@ -356,14 +358,6 @@ export default function RankClimbChart({
             />
           )}
 
-          {/* Each thing earned, as a drawn node — they land with the head. */}
-          {geo.pts.length > 2 && geo.pts.length <= 40 && (
-            <AG animatedProps={nodeProps}>
-              {geo.pts.slice(1, -1).map((p, i) => (
-                <Circle key={i} cx={p.x} cy={p.y} r={3.4} fill={PAPER_LIT} stroke={LEDGE_C} strokeWidth={2} />
-              ))}
-            </AG>
-          )}
         </Svg>
 
         {/* THE TWO PINS: the rank you hold at the foot of the climb, the one you
