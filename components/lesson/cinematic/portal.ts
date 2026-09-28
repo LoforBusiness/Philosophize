@@ -72,9 +72,13 @@ export function portalAt(b: number): { out: number; world: number; into: number 
 }
 
 /** How big a set is drawn `k` of the way into a zoom that goes `z` deep. */
-export function portalScale(k: number, z: number = PORTAL_Z): number {
+export function portalScale(k: number, z?: number): number {
   'worklet';
-  return Math.pow(z, k);
+  // NO DEFAULT PARAMETER. A worklet's closure is unpacked at the top of its BODY
+  // (`const { PORTAL_Z } = this.__closure`), and a default is evaluated before the
+  // body runs — so `z = PORTAL_Z` threw on the phone's UI thread on every frame and
+  // greyed out all six lessons, while a browser (one thread, a real closure) was fine.
+  return Math.pow(z === undefined ? PORTAL_Z : z, k);
 }
 
 /**
@@ -89,9 +93,9 @@ export function portalScale(k: number, z: number = PORTAL_Z): number {
  * at their deepest, and the cross-dissolve between them cannot be seen: the push into
  * the painting simply becomes the place.
  */
-export function portalXf(k: number, fx: number, fy: number, cx: number, cy: number, z: number = PORTAL_Z) {
+export function portalXf(k: number, fx: number, fy: number, cx: number, cy: number, z?: number) {
   'worklet';
-  const s = portalScale(k, z);
+  const s = portalScale(k, z === undefined ? PORTAL_Z : z);
   return {
     transform: [
       { translateX: fx * (1 - s) + k * (cx - fx) },

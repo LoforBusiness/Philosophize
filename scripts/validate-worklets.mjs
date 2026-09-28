@@ -399,6 +399,70 @@ for (const file of files) {
   }
 }
 
+// ── 4. a worklet whose DEFAULT PARAMETER names something outside it ──────────
+//
+// The plugin hands a worklet its closure by unpacking it at the top of the BODY —
+// `function f(k, z = PORTAL_Z) { const { PORTAL_Z } = this.__closure; … }` — and a
+// default is evaluated BEFORE the body runs, so on the UI thread the name does not
+// exist and every call throws. A browser has one thread and a real closure, so the
+// same function is perfect there, and tsc is happy either way.
+//
+// Real instance: `portalScale(k, z = PORTAL_Z)` and `portalXf(…, z = PORTAL_Z)` in
+// portal.ts. Every scene-change lesson called them on its first frame, and all six
+// fourth lessons opened to a grey screen on the phone while every browser check was
+// green. A literal default (`mul = 1`) is fine; a NAME is not — read it in the body.
+const GLOBAL_OK = /^(true|false|null|undefined|Infinity|NaN|Math|Number)$/;
+function paramsBefore(src, braceAt) {
+  // walk back from the body's `{` over an optional `: ReturnType` and `=>` to `)`
+  let j = braceAt - 1, depth = 0;
+  while (j >= 0 && src[j] !== ')') {
+    if (/[;{}]/.test(src[j]) && depth === 0) return null;
+    j--;
+  }
+  if (j < 0) return null;
+  const close = j;
+  for (; j >= 0; j--) {
+    if (src[j] === ')') depth++;
+    else if (src[j] === '(') { depth--; if (depth === 0) return src.slice(j + 1, close); }
+  }
+  return null;
+}
+function topLevelSplit(s) {
+  const out = []; let depth = 0, cur = '';
+  for (const c of s) {
+    if ('([{<'.includes(c)) depth++;
+    else if (')]}>'.includes(c)) depth--;
+    if (c === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += c;
+  }
+  if (cur.trim()) out.push(cur);
+  return out;
+}
+for (const file of files) {
+  const raw = fs.readFileSync(file, 'utf8');
+  if (!raw.includes('worklet')) continue;
+  const src = strip(raw);
+  const re = /\{\s*(['"])worklet\1/g;
+  let m;
+  while ((m = re.exec(src))) {
+    const params = paramsBefore(src, m.index);
+    if (!params) continue;
+    for (const p of topLevelSplit(params)) {
+      const eq = p.search(/=(?!>)/);
+      if (eq < 0) continue;
+      const rhs = p.slice(eq + 1).replace(/(['"`])(?:\\.|(?!\1).)*\1/g, ' ');
+      const names = (rhs.match(/[A-Za-z_$][\w$]*/g) || []).filter((n) => !GLOBAL_OK.test(n));
+      if (!names.length) continue;
+      const line = src.slice(0, m.index).split('\n').length;
+      errs.push(
+        `${rel(file)}: the worklet near line ${line} has a default parameter \`${p.trim()}\` ` +
+        `that names \`${names[0]}\`. A worklet's closure is unpacked in its BODY, after the ` +
+        `defaults run, so this THROWS on the phone's UI thread and is fine in a browser. ` +
+        `Make the parameter optional and read \`${names[0]}\` in the body.`
+      );
+    }
+  }
+}
+
 console.log('');
 for (const e of errs) console.log(`✗ ${e}`);
 if (errs.length) {
