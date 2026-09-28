@@ -49,7 +49,7 @@ export const BEATS: Meta4Beat[] = [
     dur: 1.8,
   },
   {
-    p: 158, x: 196, act: 'enter', open: true, orb: true, road: true, tour: [],
+    p: 158, x: 150, act: 'enter', open: true, orb: true, road: true, tour: [],
     text: 'Parmenides of Elea described two ways of inquiry. One holds that it is, and the other that it is not.',
     cite: 'Parmenides, On Nature',
     dur: 1.8,

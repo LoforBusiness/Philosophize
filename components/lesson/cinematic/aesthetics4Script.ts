@@ -63,7 +63,7 @@ export const BEATS: Aes4Beat[] = [
     dur: 2.2,
   },
   {
-    p: 158, x: 250, act: 'enter', bare: true, ask: true, mim: true, exp: true, signed: true, hall: true, refused: true, tour: [],
+    p: 158, x: 290, act: 'enter', bare: true, ask: true, mim: true, exp: true, signed: true, hall: true, refused: true, tour: [],
     text: 'The exhibition’s board refused to display the work. An unsigned defence argued that whether Mutt made it with his own hands had no importance.',
     dur: 1.9,
   },

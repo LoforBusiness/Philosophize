@@ -5,13 +5,15 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
+import { attendAt } from './attend';
 import { BEATS } from './ethics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -21,9 +23,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
-  globeStand, mapFrame, desk, tent, roundHut, pagoda, cottage, signPosts,
+  globeStand, mapFrame, desk, igloo, tent, roundHut, pagoda, cottage, signPosts,
   GLOBE, MAP, PINS, DESK, BOOK, HOME_GROUND, HOMES, SIGNS,
 } from './ethics4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
@@ -70,6 +72,8 @@ const LINES = [3.8, 5.92, 5.44, 6.72, 4.44, 6.92, 0, 6.32, 6.6, 6.52, 4.56, 4.6,
 /** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
 const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt() - PORTAL.swapFor / 2;
 /** Out of the globe's ocean into the village's sky: a point of open sky. */
 const SKY_AT = { x: 200, y: 336 };
 /** The pins' colours: every culture its own. */
@@ -137,7 +141,7 @@ export default function Ethics4Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(19);
+  const cv = useCarry(22);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -171,13 +175,13 @@ export default function Ethics4Scene({
     const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
-    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const swapU = pt.swapU;
     const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
     const dirV = A_ENTER[n]
-      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      ? facing(DIR[p], DIR[n], b - SWAP_FROM)
       : walking
         ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
         : facing(DIR[p], DIR[n], b);
@@ -217,8 +221,26 @@ export default function Ethics4Scene({
     const found = A_FOUND[n] ? st(0.15, 0.65) : FOUND[n];
     const crack = ORDER[n] ? pickAt(CRACK_AT, pickPos.value) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts): at each thing as it happens ───────────────
+    const door = (k: number) => HOMES[k] + 12;
+    const LK = A_PINS[n] ? [0.3, 172, 350, 1, L * 0.3, 222, 346, 1, L * 0.55, 268, 352, 1, L * 0.8, 0, 0, 0]
+      : A_STRONGER[n] ? [arrive + 0.1, 230, 336, 1, L * 0.9, 0, 0, 0]
+      : A_DESCR[n] ? [L * 0.25, 196, 398, 1, L * 0.9, 0, 0, 0]
+      : A_MORAL[n] ? [L * 0.15, 250, 398, 1, L * 0.9, 0, 0, 0]
+      : A_ERROR[n] ? [0.1, 200, 398, 1, L * 0.2, 246, 398, 1, L * 0.5, 223, 398, 1, L * 0.9, 0, 0, 0]
+      : A_BENE[n] ? [arrive + 0.1, BOOK.x, BOOK.y, 1, arrive + 0.7, x + 16 * dir, 452, 1]
+      : ACT[n] === '' && BOOK_HELD[n] ? [0.1, x + 16 * dir, 452, 0.9]
+      : A_OBJ[n] ? [0.2, BOOK.x, BOOK.y, 1, 1.4, 0, 0, 0]
+      : A_GLOBE[n] ? [arrive + 0.05, GLOBE.x, GLOBE.y, 1, arrive + 2.8, 0, 0, 0]
+      : A_ENTER[n] ? [PORTAL.outTo, HOMES[1], HOME_GROUND - 20, 0.9, PORTAL.outTo + 0.9, HOMES[3], HOME_GROUND - 24, 0.9]
+      : A_GIFTS[n] ? [L * 0.08, door(0), HOME_GROUND - 6, 1, L * 0.24, door(1), HOME_GROUND - 6, 1, L * 0.38, door(2), HOME_GROUND - 6, 1, L * 0.52, door(3), HOME_GROUND - 6, 1, L * 0.66, door(4), HOME_GROUND - 6, 1, L * 0.9, 0, 0, 0]
+      : A_FOUND[n] ? [L * 0.12, 200, 480, 1, L * 0.7, 300, 480, 0.8]
+      : ORDER[n] ? [0.3, 206, 480, 0.8]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: hideLeadWhile(lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 19, n, lk.x, lk.x, tr), carry(cv, 20, n, lk.y, lk.y, tr), carry(cv, 21, n, 0, lk.w, tr)), A_ENTER[n] === 1 && b < PORTAL.outTo + 0.2),
       world: carry(cv, 1, n, VILLAGE[p], world, A_ENTER[n] ? 1 : tr),
       kStudy: carry(cv, 2, n, VILLAGE[p], kStudy, A_ENTER[n] ? 1 : tr),
       kVillage: carry(cv, 3, n, 1 - VILLAGE[p], kVillage, A_ENTER[n] ? 1 : tr),
@@ -254,7 +276,7 @@ export default function Ethics4Scene({
     const inVillage = SCENE.value.world >= 0.5;
     const k = inVillage ? SCENE.value.kVillage : SCENE.value.kStudy;
     const xf = inVillage ? portalXf(k, SKY_AT.x, SKY_AT.y, MID.x, MID.y) : portalXf(k, GLOBE.x, GLOBE.y, MID.x, MID.y);
-    return { opacity: figureAt(portalScale(k)), ...xf };
+    return { opacity: 1, ...xf };
   });
   const villageWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kVillage) : 0));
   const studyWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudy));
@@ -294,8 +316,9 @@ export default function Ethics4Scene({
 const MAP_ART = mapFrame();
 const DESK_ART = desk();
 const STAND_ART = globeStand();
-/** The four homes drawn from parts; the igloo is drawn as Views, since it is white snow blocks. */
-const HOME_ART = [tent(HOMES[1]), roundHut(HOMES[2]), pagoda(HOMES[3]), cottage(HOMES[4])];
+/** The five homes, each in its own material: snow, felt, stone and thatch, red lacquer, whitewash. */
+const HOME_ART = [igloo(HOMES[0]), tent(HOMES[1]), roundHut(HOMES[2]), pagoda(HOMES[3]), cottage(HOMES[4])];
+const HOME_TONE = [stageToneOf(DEEP), stageToneOf(SAGE), stageToneOf(OLIVE), stageToneOf(EMBER), stageToneOf(OLIVE)];
 const POST_ART = signPosts();
 
 // ── the study ────────────────────────────────────────────────────────────────
@@ -392,8 +415,7 @@ function Village({ S }: { S: SharedValue<any> }) {
       <View style={styles.sky} />
       <View style={styles.hillsFar} />
       <Foundation S={S} />
-      <Igloo />
-      {HOME_ART.map((art, k) => <ObjectArt key={k} parts={art} tone={WOOD} />)}
+      {HOME_ART.map((art, k) => <SetArt key={k} parts={art} tone={HOME_TONE[k]} />)}
       {HOMES.map((hx, k) => <Gift key={hx} S={S} k={k} x={hx} />)}
       <View style={styles.villageFloor} />
     </>

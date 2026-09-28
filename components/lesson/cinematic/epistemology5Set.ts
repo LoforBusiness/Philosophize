@@ -1,4 +1,6 @@
 import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SETS OF epistemology-knowledge-5 — A STUDY AT NIGHT, AND THE HILL UNDER ITS MOON.
@@ -55,6 +57,27 @@ export function ladder(): ObjPart[] {
   }
   return parts;
 }
+/**
+ * AN ARMCHAIR, where he reads (owner: *"if the stick man is like waiting, he can pull
+ * up a chair"* — set furniture first). A Windsor chair in side view, facing left to
+ * the table: its seat at a quarter of his height, back legs rising into the back with
+ * three spindles, the front legs splayed. He sits in it to read Aristotle.
+ */
+export const CHAIR = { x: 232, seat: 470 };
+export function armchair(): SetPart[] {
+  const { x, seat } = CHAIR;
+  return [
+    oBar('mass', x - 10, seat + 2, x - 13, 500, 2.4),
+    oBar('mass', x + 10, seat + 2, x + 12, 500, 2.4),
+    oBar('mass', x + 11, seat, x + 15, seat - 38, 2.6),
+    oBar('mass', x + 15, seat - 38, x + 13, seat - 40, 3.4),
+    oBar('mass', x + 12, seat - 4, x + 14, seat - 30, 1.4),
+    oBar('mass', x - 12, seat - 12, x + 12, seat - 14, 2.2),
+    oBar('mass', x - 12, seat - 12, x - 12, seat, 2),
+    oRect('mass', x, seat + 1, 28, 4, 0, 1.5),
+    oRect('face', x + 2, seat + 2.4, 24, 1.2),
+  ];
+}
 export function sideTable(): ObjPart[] {
   const { x0, x1, top } = TABLE;
   return [
@@ -77,25 +100,78 @@ export function windowFrame(): ObjPart[] {
 
 /** The moon over the hill, twice the window's, which is where the change comes out. */
 export const MOON = { x: 96, y: 336, r: 14 };
-export const MILL = { x: 332, top: 404, base: 478, hub: 404 };
+/**
+ * A TOWER MILL on the crest of the far hill (reference: the Hemingford Grey tower
+ * mill and the Great Gransden post mill, Wikimedia Commons). The tower tapers from
+ * 26 at the foot to 16 under the cap; the cap is a dome; a reefing stage rings the
+ * tower a third of the way up; the sails turn on a hub at the FRONT of the cap —
+ * the first drawing hung them from a point twelve units off to one side, so they
+ * swung round empty air. The foot sits ON the hill's crest (the hill's top at x 332
+ * is y 451), not buried inside it.
+ */
+export const MILL = { x: 332, top: 414, base: 452, hub: 411, sail: 34 };
 /** Stars scattered over the sky, and the ones that join into a question mark. */
 export const STARS = [
   [30, 306], [58, 380], [150, 300], [190, 350], [262, 312], [300, 360], [370, 306], [388, 350], [128, 404], [230, 404],
 ];
 export const ASK = [[176, 322], [190, 310], [206, 314], [212, 330], [202, 344], [192, 354], [192, 368], [192, 384]];
 
-export function hills(): ObjPart[] {
+/**
+ * THE HILL, REDRAWN 2026-09-28 (owner: the second scene's objects *"seem to be more
+ * cheap"*). It was two ovals. Now, as a moonlit landscape reads (reference: the
+ * Saxtead Green post mill under the moon; the Mykonos mills at night, Commons): the
+ * sky the darkest thing, the land lighter than it, in layers — the far downs rolling
+ * across, the mill's own hill with its crest where the mill stands, and the near
+ * field he stands in with a footpath through it that climbs away toward the mill.
+ */
+export function farDowns(): SetPart[] {
+  return [oPoly('mass', [0, 470, 0, 440, 60, 430, 130, 440, 200, 432, 260, 446, 300, 452, 360, 450, 400, 444, 400, 470])];
+}
+export function millHill(): SetPart[] {
   return [
-    oEll('mass', 330, 486, 240, 70),
-    oEll('mass', 70, 494, 260, 60),
+    oPoly('mass', [180, 480, 230, 468, 280, 456, 320, 451, 350, 452, 380, 458, 400, 462, 400, 480]),
+    oPoly('face', [350, 452, 380, 458, 400, 462, 400, 480, 360, 480]),
+  ];
+}
+export function nearField(): SetPart[] {
+  return [oPoly('mass', [0, 516, 0, 472, 80, 466, 170, 470, 260, 478, 400, 476, 400, 516])];
+}
+/** The footpath he stands on, running the width of the field. */
+export function footpath(): SetPart[] {
+  return [
+    oPoly('mass', [0, 490, 140, 488, 230, 492, 400, 490, 400, 516, 0, 516]),
+  ];
+}
+export function tufts(): SetPart[] {
+  return [
+    oPoly('face', [30, 488, 34, 478, 38, 488]), oPoly('face', [36, 488, 41, 480, 44, 488]),
+    oPoly('face', [360, 488, 364, 479, 368, 488]), oPoly('face', [120, 487, 123, 479, 127, 487]),
   ];
 }
 export function mill(): ObjPart[] {
   const { x, top, base } = MILL;
+  const h = base - top;
+  const y = top + h / 2;
+  const narrow = 16;
+  const flank = (26 - narrow) / 2;
   return [
-    oTri('mass', x, (top + base) / 2, 26, base - top, 'up'),
-    oRect('mass', x, base - 2, 30, 6, 0, 1.5),
-    oTri('mass', x, top - 4, 20, 10, 'up'),
-    oRect('dark', x, base - 14, 6, 10, 0, 1),
+    // the tower, tapering: a column with a sloped flank either side
+    oRect('mass', x, y, narrow, h),
+    oTri('mass', x - narrow / 2, y, flank * 2, h, 'up'),
+    oTri('mass', x + narrow / 2, y, flank * 2, h, 'up'),
+    // its shaded side, away from the moon on the left
+    oRect('face', x + narrow / 4 + 1, y + 2, narrow / 2 - 2, h - 4),
+    // the footing it stands on
+    oRect('mass', x, base - 1.5, 30, 3, 0, 1),
+    // the reefing stage, a third of the way up, where the miller sets the sails
+    oRect('mass', x, top + h * 0.38, 32, 2.5, 0, 1),
+    oBar('dark', x - 15, top + h * 0.38 + 1, x - 12, top + h * 0.38 + 7, 1),
+    oBar('dark', x + 15, top + h * 0.38 + 1, x + 12, top + h * 0.38 + 7, 1),
+    // the domed cap, and the finial on it
+    oEll('mass', x, top - 1, 22, 12),
+    oRect('face', x + 4, top + 1, 9, 3, 0, 1.5),
+    oBar('mass', x, top - 7, x, top - 11, 1.4),
+    // the door at the foot, arched
+    oRect('dark', x - 2, base - 7, 7, 12, 0, 3.5),
   ];
 }

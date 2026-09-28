@@ -112,7 +112,8 @@ export function massFills(src) {
   // lit body and, by `check:objects`' own rules, at most a handful of shaded planes
   // on it. Counting its real part list would make a ship worth eight masses and let
   // one object carry a whole scene, which is not what the ratchet is for.
-  for (const m of body.matchAll(/<ObjectArt\b/g)) {
+  // SetArt is ObjectArt plus polygons (the sets redrawn 2026-09-28), and counts the same.
+  for (const m of body.matchAll(/<(?:ObjectArt|SetArt)\b/g)) {
     void m;
     used.set('STONE', (used.get('STONE') ?? 0) + 1);
     used.set('SHADE', (used.get('SHADE') ?? 0) + 1);

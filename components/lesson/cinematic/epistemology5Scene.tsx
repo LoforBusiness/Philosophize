@@ -5,13 +5,15 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
+import { attendAt } from './attend';
 import { BEATS } from './epistemology5Script';
 import {
-  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, seated, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -21,12 +23,12 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
-  bookcase, ladder, sideTable, windowFrame, hills, mill,
-  RUNG_Y, BOOK, WINDOW, LATCH, MOON_WIN, MOON, MILL, STARS, ASK,
+  bookcase, ladder, sideTable, windowFrame, mill, farDowns, millHill, nearField, footpath, tufts, armchair,
+  RUNG_Y, BOOK, WINDOW, LATCH, MOON_WIN, MOON, MILL, STARS, ASK, CHAIR,
 } from './epistemology5Set';
-import { DEEP, EMBER, OLIVE, SAGE, PAPER_LIT } from '@/components/shared/tone';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // epistemology-knowledge-5, "Why Are Humans Driven to Know?" — A STUDY AT NIGHT, AND
@@ -59,6 +61,10 @@ const LIP = lipOf(TONE);
 const WALL = stageToneOf(SAGE);
 const WOOD = stageToneOf(OLIVE);
 const TR = 0.85;
+/** The land at night: lighter than the sky. The far downs in the teal's shade, the near field in sage. */
+const FAR = { ...stageToneOf(TEAL), STONE: stageToneOf(TEAL).SHADE, SHADE: DEEP };
+const NEAR = stageToneOf(SAGE);
+const PATH = { ...NEAR, STONE: NEAR.RULE };
 
 /** Seconds each beat's line is voiced for — lib/narration/manifest.ts, epistemology-knowledge-5. */
 const LINES = [7.28, 5.32, 7.24, 6.56, 5.96, 7.68, 7.84, 7, 8.76, 6.2, 0, 0, 0, 0];
@@ -69,6 +75,8 @@ const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
 /** The study's moon is half the hill's, so the study is pushed in twice as deep and they meet. */
 const Z_STUDY = PORTAL_Z * (MOON.r / MOON_WIN.r);
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(Z_STUDY) - PORTAL.swapFor / 2;
 /** The ladder's rungs, bottom to top. */
 const RUNGS = ['SENSATION', 'MEMORY', 'EXPERIENCE', 'SCIENCE', 'WISDOM'];
 
@@ -129,7 +137,7 @@ export default function Epistemology5Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(21);
+  const cv = useCarry(24);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -152,7 +160,7 @@ export default function Epistemology5Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, Z_STUDY);
     const world = A_ENTER[n] ? pt.world : HILL[n];
     const kStudy = A_ENTER[n] ? pt.out : HILL[n];
     const kHill = A_ENTER[n] ? pt.into : 1 - HILL[n];
@@ -163,13 +171,13 @@ export default function Epistemology5Scene({
     const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
-    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const swapU = pt.swapU;
     const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
     const dirV = A_ENTER[n]
-      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      ? facing(DIR[p], DIR[n], b - SWAP_FROM)
       : walking
         ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
         : facing(DIR[p], DIR[n], b);
@@ -192,6 +200,11 @@ export default function Epistemology5Scene({
     // looking up: at the moon (b4), under the question mark (b7)
     s = { ...s, neck: s.neck + 0.14 * sill + 0.2 * (A_ASK[n] ? pulse(0.4, 1.2, 6.2) : 0) };
 
+    // ── the armchair: he sits once he has the book, reads, and gets up to set it down
+    const sit = A_READ[n] ? sec(1.5, 2.3) : A_PAGES[n] ? 1 : A_LADDER[n] ? 1 - sec(0.05, 0.55) : 0;
+    s = mixStance(s, { ...seated(SEAT_H, t), neck: -0.32 }, sit);
+    s = mixStance(s, { ...s, fistR: { x: 17, y: -8 }, fistL: { x: 11, y: -6 } }, sit * holding);
+
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
     // ── the study ────────────────────────────────────────────────────────────
@@ -212,8 +225,30 @@ export default function Epistemology5Scene({
     const rise1 = PLOT[n] ? pickAt(RISE_AT[1], pickPos.value) : 0.5;
     const rise2 = PLOT[n] ? pickAt(RISE_AT[2], pickPos.value) : 0.5;
 
+    // ── WHERE HE LOOKS (attend.ts): at what happens, when it happens ────────────
+    const bookX = x - 16;
+    const LK = A_READ[n] ? [0.3, BOOK.x, BOOK.y, 1, 1.0, bookX, 468, 1, L * 0.6, bookX, 474, 1]
+      : A_PAGES[n] ? [0.1, bookX, 474, 1]
+      : A_LADDER[n] ? [0.2, BOOK.x, BOOK.y, 1, 1.2, 60, RUNG_Y[1], 1, L * 0.35, 60, RUNG_Y[3], 1, L * 0.62, 60, RUNG_Y[4], 1, L * 0.95, 0, 0, 0]
+      : A_FREE[n] ? [0.2, LATCH.x, LATCH.y, 1, arrive + 1.3, WINDOW.x0 + 60, WINDOW.top + 10, 1, arrive + 2.4, WINDOW.x1, WINDOW.top - 20, 0.9, L * 0.8, 180, RUNG_Y[4], 0.8]
+      : A_GAZE[n] ? [0.2, MOON_WIN.x, MOON_WIN.y, 1]
+      : A_SENSE[n] ? [0.4, MOON_WIN.x, MOON_WIN.y, 1, L * 0.6, 60, RUNG_Y[0], 1, L * 0.95, 0, 0, 0]
+      : A_ENTER[n] ? [PORTAL.outTo, MOON.x, MOON.y, 1]
+      : A_ASK[n] ? [0.3, ASK[0][0], ASK[0][1], 1, L * 0.45, 200, 330, 1, L * 0.75, ASK[7][0], ASK[7][1], 1]
+      : A_MILL[n] ? [0.2, MILL.x, MILL.top, 1]
+      : ACT[n] === 'compare' ? [0.2, MOON.x, MOON.y, 1, L * 0.5, MILL.x, MILL.top, 1]
+      : PLOT[n] ? [0.3, 262, 330, 1]
+      : Q2[n] ? [0.3, 200, 380, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+    // seated, the book is under his chin: the head bows (the pose's own neck) and the
+    // generated lean would tip the whole spine back off the chair, so the look hands over
+    const lw = lk.w * (1 - sit);
+    // and he sits IN the chair, not in front of it: the pelvis goes back over the seat
+    const xs = x + (CHAIR.x - 3 - x) * sit;
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: hideLeadWhile(lookPose(fig, xs, GROUND, K_M, dirV, 1, carry(cv, 21, n, lk.x, lk.x, tr), carry(cv, 22, n, lk.y, lk.y, tr), carry(cv, 23, n, 0, lw, tr)), A_ENTER[n] === 1 && b < PORTAL.outTo + 0.2),
       world: carry(cv, 1, n, HILL[p], world, A_ENTER[n] ? 1 : tr),
       kStudy: carry(cv, 2, n, HILL[p], kStudy, A_ENTER[n] ? 1 : tr),
       kHill: carry(cv, 3, n, 1 - HILL[p], kHill, A_ENTER[n] ? 1 : tr),
@@ -254,7 +289,7 @@ export default function Epistemology5Scene({
     const xf = onHill
       ? portalXf(k, MOON.x, MOON.y, MID.x, MID.y)
       : portalXf(k, MOON_WIN.x, MOON_WIN.y, MID.x, MID.y, Z_STUDY);
-    return { opacity: figureAt(s), ...xf };
+    return { opacity: 1, ...xf };
   });
   const hillWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kHill) : 0));
   const studyWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudy));
@@ -273,6 +308,7 @@ export default function Epistemology5Scene({
         <ObjectArt parts={CASE_ART} tone={WOOD} />
         <ObjectArt parts={LADDER_ART} tone={WOOD} />
         <ObjectArt parts={TABLE_ART} tone={WOOD} />
+        <SetArt parts={CHAIR_ART} tone={WOOD} />
         <Casement S={SCENE} />
         <ObjectArt parts={WINDOW_ART} tone={WOOD} />
         <Bird S={SCENE} />
@@ -294,10 +330,17 @@ export default function Epistemology5Scene({
 }
 
 const CASE_ART = bookcase();
+const CHAIR_ART = armchair();
+const FAR_ART = farDowns();
+const MILLHILL_ART = millHill();
+const NEAR_ART = nearField();
+const PATH_ART = footpath();
+const TUFT_ART = tufts();
+/** How far down he sinks into the armchair, in his own units. */
+const SEAT_H = (GROUND - CHAIR.seat) / K_M;
 const LADDER_ART = ladder();
 const TABLE_ART = sideTable();
 const WINDOW_ART = windowFrame();
-const HILLS_ART = hills();
 const MILL_ART = mill();
 
 // ── the study ────────────────────────────────────────────────────────────────
@@ -407,11 +450,15 @@ function Hill({ S }: { S: SharedValue<any> }) {
       {STARS.map(([sx, sy], k) => <Star key={k} S={S} x={sx} y={sy} k={k} />)}
       <Question S={S} />
       <PlotStars S={S} />
-      <ObjectArt parts={HILLS_ART} tone={stageToneOf(SAGE)} />
-      <Sails S={S} />
+      <SetArt parts={FAR_ART} tone={FAR} line={1.4} />
+      <SetArt parts={MILLHILL_ART} tone={stageToneOf(TEAL)} line={1.8} />
       <ObjectArt parts={MILL_ART} tone={WOOD} />
       <MillWindow S={S} />
+      <Sails S={S} />
+      <SetArt parts={NEAR_ART} tone={NEAR} />
       <View style={styles.hillFloor} />
+      <SetArt parts={PATH_ART} tone={PATH} line={1.4} />
+      <SetArt parts={TUFT_ART} tone={NEAR} line={0} />
     </>
   );
 }
@@ -453,17 +500,29 @@ function PlotStars({ S }: { S: SharedValue<any> }) {
     </>
   );
 }
+/**
+ * Four common sails, as on every mill in the references: a STOCK running out from
+ * the hub, and a lattice frame carried on one side of it — the leading side, so the
+ * frames trail the way the sails turn. The whole set turns about the hub, which
+ * sits on the front of the cap. The rotor is a zero-size View AT the hub, and each
+ * stock is laid from its own left end, so every part turns about the one point.
+ */
 function Sails({ S }: { S: SharedValue<any> }) {
   // the wind turns the sails all night; Bacon's point is what the mill does with it
-  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${(S.value.t * 40) % 360}deg` }] }));
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${(S.value.t * 34) % 360}deg` }] }));
   return (
-    <Animated.View style={[styles.hub, st]}>
-      {[0, 90, 180, 270].map((d) => (
-        <View key={d} style={[styles.sailArm, { transform: [{ rotate: `${d}deg` }, { translateX: 14 }] }]}>
-          <View style={styles.sail} />
-        </View>
-      ))}
-    </Animated.View>
+    <>
+      <Animated.View style={[styles.rotor, st]}>
+        {[0, 90, 180, 270].map((d) => (
+          <View key={d} style={[styles.stock, { transform: [{ rotate: `${d}deg` }] }]}>
+            <View style={styles.lattice}>
+              {[0, 1, 2, 3].map((k) => <View key={k} style={[styles.bay, { left: 4 + k * 5.6 }]} />)}
+            </View>
+          </View>
+        ))}
+      </Animated.View>
+      <View style={styles.boss} />
+    </>
   );
 }
 function MillWindow({ S }: { S: SharedValue<any> }) {
@@ -573,14 +632,23 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 360, width: 6, height: 6, borderRadius: 3, backgroundColor: EMBER,
     borderWidth: 1, borderColor: PAPER_LIT,
   },
-  hub: { position: 'absolute', left: MILL.x - 2, top: MILL.hub - 2, width: 4, height: 4, borderRadius: 2, backgroundColor: INK },
-  sailArm: { position: 'absolute', left: -12, top: 1, width: 28, height: 2, borderRadius: 1, backgroundColor: INK, transformOrigin: '0% 50%' },
-  sail: {
-    position: 'absolute', left: 6, top: -8, width: 20, height: 8, borderRadius: 1, backgroundColor: PAPER_LIT,
-    borderWidth: 1, borderColor: INK,
+  rotor: { position: 'absolute', left: MILL.x, top: MILL.hub, width: 0, height: 0 },
+  stock: {
+    position: 'absolute', left: 0, top: -0.8, width: MILL.sail, height: 1.6, borderRadius: 0.8, backgroundColor: INK,
+    transformOrigin: '0% 50%',
+  },
+  lattice: {
+    position: 'absolute', left: 9, top: -7, width: MILL.sail - 8, height: 7, borderRadius: 0.5,
+    borderWidth: 1, borderColor: INK, backgroundColor: PAPER_LIT, overflow: 'hidden',
+  },
+  bay: { position: 'absolute', top: 0, bottom: 0, width: 0.8, backgroundColor: INK },
+  boss: {
+    position: 'absolute', left: MILL.x - 2.5, top: MILL.hub - 2.5, width: 5, height: 5, borderRadius: 2.5,
+    backgroundColor: INK, borderWidth: 1, borderColor: WOOD.STONE,
   },
   millLight: {
-    position: 'absolute', left: MILL.x - 3, top: MILL.base - 19, width: 6, height: 10, borderRadius: 1, backgroundColor: EMBER,
+    position: 'absolute', left: MILL.x - 2.5, top: MILL.top + 22, width: 5, height: 7, borderTopLeftRadius: 2.5,
+    borderTopRightRadius: 2.5, borderBottomLeftRadius: 0.5, borderBottomRightRadius: 0.5, backgroundColor: EMBER,
   },
   hillFloor: floorStyle(TONE, GROUND),
 

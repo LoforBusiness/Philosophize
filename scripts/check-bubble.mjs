@@ -84,6 +84,12 @@ const WATCH_MS = +(process.env.BUBBLE_WATCH || 4200);
 // Bright, dark and bright again inside this is a blink rather than a transition:
 // an exit takes 340ms to reach nothing and the next thought is 620ms behind it.
 const BLINK_MS = 450;
+// OFFHEAD's reach, in multiples of the head's own drawn width so it holds at any
+// stage scale: the box may lean past the head by this many px either side (the
+// trail can lean 51 units, which the box width already covers), the trail's foot
+// may overlap the crown by a sliver, and may hang no more than a head and a half
+// above it — AB10's own worst is 20 units against a 40-unit head.
+const OFF = { side: 14, over: 0.25, below: 1.5 };
 
 const FLOORS = {
   // Zero, and it can be zero: a sentence changing in front of the reader is the
@@ -282,12 +288,24 @@ const INSTALL = `(()=>{
       if (!bx) continue;
       const r = w.getBoundingClientRect();
       if (r.width < 0.5) continue;
+      const br = bx.getBoundingClientRect();
       bubs.push({
         id: wid,
         x: +(r.x + r.width / 2).toFixed(2),
+        x0: +br.x.toFixed(1),
+        x1: +(br.x + br.width).toFixed(1),
+        bot: +(r.y + r.height).toFixed(1),
         op: +(+getComputedStyle(bx).opacity || 0).toFixed(3),
         text: (w.innerText || '').replace(/[\\s]+/g, ' ').trim(),
       });
+    }
+    const heads = [];
+    for (const f of document.querySelectorAll('[data-testid="figure"]')) {
+      const h = f.querySelector('[data-testid="head"]');
+      if (!h) continue;
+      const hr = h.getBoundingClientRect();
+      if (hr.width < 1 || +getComputedStyle(f).opacity === 0) continue;
+      heads.push([+(hr.x + hr.width / 2).toFixed(1), +hr.y.toFixed(1), +hr.width.toFixed(1)]);
     }
     const fxs = [];
     for (const parts of limbs) {
@@ -300,7 +318,7 @@ const INSTALL = `(()=>{
       }
       fxs.push(x1 > x0 ? +((x0 + x1) / 2).toFixed(2) : null);
     }
-    window.__bubLog.push({ t: +(performance.now() - t0).toFixed(1), b: bubs, f: fxs });
+    window.__bubLog.push({ t: +(performance.now() - t0).toFixed(1), b: bubs, f: fxs, h: heads });
     window.__bubTick = requestAnimationFrame(tick);
   };
   window.__bubTick = requestAnimationFrame(tick);
@@ -317,7 +335,9 @@ async function watch(tab, id) {
   const { evalJs } = tab;
   await tab.send('Page.navigate', { url: 'about:blank' });
   await new Promise((r) => setTimeout(r, 120));
-  await tab.send('Page.navigate', { url: `http://localhost:${WEB}/${SLUG}?id=${id}&notour=1` });
+  // BUBBLE_TOUR=1 lets the camera run, which is what the phone does: a bubble placed
+  // for one framing can hang over empty paper once the camera has pushed in.
+  await tab.send('Page.navigate', { url: `http://localhost:${WEB}/${SLUG}?id=${id}${process.env.BUBBLE_TOUR ? '' : '&notour=1'}` });
   for (let k = 0; k < STAGE_TRIES; k++) {
     if (await evalJs(`!!${STAGE}`)) break;
     await new Promise((r) => setTimeout(r, 1000));
@@ -326,6 +346,7 @@ async function watch(tab, id) {
 
   const cuts = [];
   const blinks = [];
+  const offhead = [];
   let gaps = 0;
   let teleport = 0;
   let snap = 0;
@@ -460,6 +481,30 @@ async function watch(tab, id) {
       }
     }
 
+    // ── OFFHEAD · a bubble with nobody under it ─────────────────────────────
+    //
+    // Owner, 2026-09-28: *"the bubble of the stick man … a lot of times, is not in
+    // the right place. It'll be in a place when the stick man is not actually
+    // there."* Every rule above picks the figure NEAREST the bubble and measures
+    // against him, so a bubble hanging over empty paper with the only man on stage
+    // sixty units away was judged against that man and passed. This asks the
+    // question directly, on every readable frame after the box has settled: is
+    // some head within reach of its trail — under the box, not beside it, and
+    // close below it rather than a body-length down?
+    for (const f of readable.slice(Math.floor(readable.length / 3))) {
+      const bub = bubOf(f);
+      if (!bub || bub.op < 0.8 || !f.h || !f.h.length) continue;
+      let best = Infinity; let why = '';
+      for (const [hx, hy, hw] of f.h) {
+        const side = hx < bub.x0 - OFF.side ? bub.x0 - OFF.side - hx : hx > bub.x1 + OFF.side ? hx - bub.x1 - OFF.side : 0;
+        const gap = hy - bub.bot;
+        const vert = gap < -OFF.over * hw ? -OFF.over * hw - gap : gap > OFF.below * hw ? gap - OFF.below * hw : 0;
+        const d = side + vert;
+        if (d < best) { best = d; why = `head at x ${hx.toFixed(0)}, box ${bub.x0.toFixed(0)}–${bub.x1.toFixed(0)}, ${gap.toFixed(0)}px from the trail's foot to the crown`; }
+      }
+      if (best > 0) { offhead.push(`beat ${b}: "${bub.text.slice(0, 28)}" — ${why}`); break; }
+    }
+
     if (process.env.BUBBLE_TRACE) {
       const w = vis.length >= 2 ? Math.abs(fxOf(vis[vis.length - 1]) - fxOf(vis[0])) : -1;
       console.log(`      beat ${b}: ${frames.length} frames, ${readable.length} readable, lead ${lead}, walked ${w.toFixed(1)}px, last act ${acts[acts.length - 1] || '-'}`);
@@ -479,6 +524,7 @@ async function watch(tab, id) {
     cuts,
     blinks,
     gaps,
+    offhead,
     teleport: +teleport.toFixed(1),
     snap: +snap.toFixed(2),
     snapAt,
@@ -560,7 +606,7 @@ export default function PreviewBubble() {
         results.push(r); done += 1;
         const tag = r.skip
           ? r.skip
-          : `${String(r.seen).padStart(2)} beat(s) with a readable box · cuts ${String(r.cuts.length).padStart(2)} · blinks ${String(r.blinks.length).padStart(2)} · snap ${r.snap.toFixed(2)} · teleport ${String(r.teleport).padStart(5)}px · the box moved ${r.kept === null ? ' n/a' : `${r.kept.toFixed(0)}px`}`;
+          : `${String(r.seen).padStart(2)} beat(s) with a readable box · off-head ${r.offhead.length} · cuts ${String(r.cuts.length).padStart(2)} · blinks ${String(r.blinks.length).padStart(2)} · snap ${r.snap.toFixed(2)} · teleport ${String(r.teleport).padStart(5)}px · the box moved ${r.kept === null ? ' n/a' : `${r.kept.toFixed(0)}px`}`;
         console.log(`  ${String(done).padStart(3)}/${ids.length}  ${r.id.padEnd(28)} ${tag}`);
       }
     }));
@@ -572,6 +618,7 @@ export default function PreviewBubble() {
   const unmeasured = results.filter((r) => r.threw);
   const cut = judged.filter((r) => r.cuts.length > FLOORS.cut);
   const tele = judged.filter((r) => r.teleport > FLOORS.teleport);
+  const off = judged.filter((r) => r.offhead && r.offhead.length);
   const ad = judged.filter((r) => r.kept !== null && r.kept < FLOORS.move);
   const boxesSeen = judged.reduce((a, r) => a + r.seen, 0);
   const blink = judged.filter((r) => r.blinks.length > FLOORS.blink);
@@ -596,6 +643,11 @@ export default function PreviewBubble() {
     no(`${cut.length} lesson(s) change the sentence in front of the reader`, `budget ${FLOORS.cut}`);
     for (const r of cut.slice(0, 4)) for (const c of r.cuts.slice(0, 2)) console.log(`          ${r.id}  ${c}`);
   } else ok('no bubble swaps its words while it can be read');
+
+  if (off.length) {
+    no(`${off.length} lesson(s) show a bubble with no head under it`, 'budget 0');
+    for (const r of off.slice(0, 12)) for (const c of r.offhead.slice(0, 3)) console.log(`          ${r.id}  ${c}`);
+  } else ok('every readable bubble hangs over a head');
 
   if (tele.length) {
     no(`${tele.length} lesson(s) jump the box while the figure stands still`, `worst ${Math.max(...tele.map((r) => r.teleport))}px, budget ${FLOORS.teleport}px`);

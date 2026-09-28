@@ -50,7 +50,7 @@ import {
   Fade, Choices, InteractPanel, QuoteCard, SummaryCard, gates, stageAnswered, styles,
   XpPill, TapNudge,
   COMPLETION_XP, XFADE, STAGE_W, STAGE_H, BAND_T, BAND_B, GROUND, INK,
-  type BaseBeat, REACT, WANDER, VISIT, wanderReset, Thought, useCarry, carry,} from './cinematicKit';
+  type BaseBeat, REACT, LEAD_HEAD, WANDER, VISIT, wanderReset, Thought, useCarry, carry,} from './cinematicKit';
 import { ease01, moveTr } from './rig';
 import { quipFor, visitorSays } from './quips';
 import { THOUGHTS } from '@/data/lessonThoughts';
@@ -505,7 +505,9 @@ export default function CinematicPlayer({
   // The movement layer is a module-level singleton, like `REACT` — one lesson plays
   // at a time — so it is put back to standing when a player goes. On the way IN it
   // is reset in the beat block above, where it cannot race the first plan.
-  useEffect(() => () => { wanderReset(); chairReset(EMPTY_PLAN); }, []);
+  // The lead's published head (LEAD_HEAD) is the same kind of singleton, and a scene
+  // that never poses its lead through lookPose must not inherit the last lesson's.
+  useEffect(() => () => { wanderReset(); chairReset(EMPTY_PLAN); LEAD_HEAD.value = [0, 0, 0]; }, []);
   const figCarry = useCarry(1);
   const figX = useDerivedValue(() => {
     const t = walkSv.value;
@@ -1485,12 +1487,12 @@ export default function CinematicPlayer({
                       style={[{ width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' }, camStyle]}
                     >
                       <TargetCountProvider onCount={setTargetCount} onBox={onBox} host={camHost} live={stageLive}>
-                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}{stageMarks}</WardrobeProvider>
+                        <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} live={B.key[0] !== 'v'} />)}{stageMarks}</WardrobeProvider>
                       </TargetCountProvider>
                     </Animated.View>
                   ) : (
                     <TargetCountProvider onCount={setTargetCount} live={stageLive}>
-                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} />)}{stageMarks}</WardrobeProvider>
+                      <WardrobeProvider lessonId={lesson.id}><Scene clock={clock} bt={bt} bi={bi} si={si} qv={qv} dragPos={dragPos} dragPos2={dragPos2} pickPos={pickPos} gazeX={gazeX} gazeY={gazeY} gazeOn={gazeOn} i={i} beat={beat} picked={picked} pickedOk={pickedOk} sound={sounded} onPick={(id, ok) => { if (stageLive) choose(id, ok, true); }} />{visitorCue ? <Visitor cue={visitorCue} clock={clock} bt={bt} bi={bi} /> : null}{bubbles.map((B) => <Thought key={B.key} text={B.text} kind={B.kind} x={B.at[0]} anchorY={B.at[1]} discs={B.at[2]} headX={B.at[3]} show={B.show} figX={B.refX === undefined ? undefined : figX} refX={B.refX ?? 0} settle={B.refX === undefined ? undefined : figTr} probeId={`${B.key[0] === 'v' ? 'thought-vis' : 'thought-lead'}${B.show ? '' : '-out'}`} live={B.key[0] !== 'v'} />)}{stageMarks}</WardrobeProvider>
                     </TargetCountProvider>
                   )}
                   {/* CHROME: stage coordinates, band-clipped, fit-scaled — and no

@@ -1,4 +1,6 @@
 import { oEll, oRect, oBar, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SETS OF aesthetics-aesthetics-4 — A STUDIO, AND THE EXHIBITION HALL OF 1917.
@@ -55,23 +57,74 @@ export const PIECE_PLINTH = { x: 196, base: PLINTH.top };
 export const FRAMES = [{ x0: 20, x1: 76, top: 340, bottom: 392 }, { x0: 318, x1: 380, top: 336, bottom: 394 }];
 export const WINDOWS = [120, 272];
 
-export function plinth(): ObjPart[] {
+// ── THE HALL, REDRAWN 2026-09-28 against references ─────────────────────────
+//
+// Owner: the second scene's objects *"seem to be more cheap"*. The plinth was one box,
+// the frames two plain rectangles, the windows two rounded boxes, the rope a red bar.
+// Now (references: a statue pedestal's three parts — base, die, cap; a gilt picture
+// frame's moulding; a museum's brass stanchions and velvet rope; a gallery's tall
+// arched windows with glazing bars):
+
+/** The pedestal: a stepped base, the die, and a moulded cap. */
+export function plinth(): SetPart[] {
   const { x, top } = PLINTH;
   return [
-    oRect('mass', x, (top + GROUND) / 2, 54, GROUND - top, 0, 1.5),
-    oRect('mass', x, top + 2, 62, 5, 0, 1.5),
-    oRect('mass', x, GROUND - 3, 62, 6, 0, 1.5),
+    oRect('mass', x, GROUND - 4, 70, 8, 0, 1),
+    oRect('mass', x, GROUND - 10, 62, 5, 0, 1),
+    oRect('mass', x, (top + 8 + GROUND - 12) / 2, 52, GROUND - 12 - top - 8, 0, 0.5),
+    oRect('mass', x, top + 5, 60, 5, 0, 1),
+    oRect('mass', x, top + 1.5, 66, 4, 0, 1),
+    oRect('face', x + 16, (top + 8 + GROUND - 12) / 2, 14, GROUND - 22 - top - 8),
+    oRect('face', x, top + 7.5, 60, 1.2),
   ];
 }
-export function frames(): ObjPart[] {
-  return FRAMES.map((f) => oRect('mass', (f.x0 + f.x1) / 2, (f.top + f.bottom) / 2, f.x1 - f.x0, f.bottom - f.top, 0, 2));
+/** Two paintings in gilt frames: an outer moulding and a recessed inner edge. */
+export function frames(): SetPart[] {
+  return FRAMES.flatMap((f) => {
+    const cx = (f.x0 + f.x1) / 2;
+    const cy = (f.top + f.bottom) / 2;
+    const w = f.x1 - f.x0;
+    const h = f.bottom - f.top;
+    return [
+      oRect('mass', cx, cy, w + 6, h + 6, 0, 1.5),
+      oRect('face', cx + 1, cy + 1, w + 1, h + 1, 0, 1),
+      oRect('dark', cx, cy, w - 2, h - 2, 0, 0.5),
+    ];
+  });
+}
+/** Tall arched windows with a sill and glazing bars. */
+export function windows(): SetPart[] {
+  return WINDOWS.flatMap((wx) => [
+    oRect('mass', wx, 424, 48, 6, 0, 1),
+    oPoly('lit', [wx - 18, 420, wx - 18, 338, wx - 15, 330, wx - 8, 324, wx, 322, wx + 8, 324, wx + 15, 330, wx + 18, 338, wx + 18, 420]),
+    oRect('line', wx, 372, 1.6, 96),
+    oRect('line', wx, 356, 36, 1.6),
+    oRect('line', wx, 392, 36, 1.6),
+  ]);
+}
+/** The wall's rails: a picture rail high up and a dado rail with panelling below it. */
+export function rails(): SetPart[] {
+  return [
+    oRect('face', 200, 332, 400, 2.4),
+    oRect('mass', 200, 438, 400, 4, 0, 0),
+    ...[30, 110, 290, 370].map((px) => oRect('face', px, 446, 60, 1.2)),
+  ];
 }
 /** Posts for the velvet rope in front of the plinth. */
-export function ropePosts(): ObjPart[] {
+export function ropePosts(): SetPart[] {
+  const post = (x: number): SetPart[] => [
+    oEll('mass', x, GROUND - 1.5, 14, 4),
+    oBar('mass', x, GROUND - 3, x, 474, 3),
+    oEll('mass', x, 472, 7, 7),
+  ];
   return [
-    oBar('mass', 158, 474, 158, GROUND - 2, 3),
-    oEll('mass', 158, 472, 7, 7),
-    oBar('mass', 234, 474, 234, GROUND - 2, 3),
-    oEll('mass', 234, 472, 7, 7),
+    ...post(158),
+    ...post(234),
+  ];
+}
+/** The velvet rope, sagging between the two posts. */
+export function rope(): SetPart[] {
+  return [
+    oPoly('dark', [160, 474, 176, 481, 196, 484, 216, 481, 232, 474, 232, 477, 216, 484.5, 196, 487.5, 176, 484.5, 160, 477]),
   ];
 }

@@ -59,7 +59,7 @@ import crypto from 'node:crypto';
  * draws the animals from part lists, so a change to how a part is sized resizes the
  * animal in every scene that imports it. It has no StyleSheet, so it hashes whole.
  */
-const SHARED = ['Target.tsx', 'Silhouette.tsx', 'ObjectArt.tsx'];
+const SHARED = ['Target.tsx', 'Silhouette.tsx', 'ObjectArt.tsx', 'SetArt.tsx', 'setShapes.ts'];
 
 /**
  * ONLY THE PART OF A SHARED COMPONENT THAT DECIDES LAYOUT.
@@ -168,7 +168,12 @@ function proselessScript(file) {
 export function stampFiles(dir, comp) {
   const base = comp.replace(/Lesson$/, '');
   const lower = `${base[0].toLowerCase()}${base.slice(1)}`;
-  const own = [`${lower}Scene.tsx`, `${lower}Script.ts`, `${comp}.tsx`]
+  // THE SET FILE TOO (2026-09-28). The redesigned lessons draw their objects from a
+  // `<name>Set.ts` of part lists, and a scene's art is sized there as surely as in the
+  // scene itself: redrawing a set left every stamp matching while the boxes described
+  // the old drawing. `SetArt` and `setShapes` join SHARED for the same reason, and
+  // are looked for in the set file as well as the scene, since the set imports them.
+  const own = [`${lower}Scene.tsx`, `${lower}Script.ts`, `${lower}Set.ts`, `${comp}.tsx`]
     .map((f) => path.join(dir, f))
     .filter((p) => fs.existsSync(p));
   const src = own.map((p) => fs.readFileSync(p, 'utf8')).join('\n');

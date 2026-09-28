@@ -1,4 +1,6 @@
 import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SETS OF logic-arguments-4 — A LECTURE ROOM, AND A GREEK BANQUET BY THE SEA.
@@ -62,32 +64,67 @@ export const LEDGE = { x0: 60, x1: 330, y: 420 };
 export const SHARDS = [84, 132, 180, 228];
 export const AMPHORAE = [20, 36, 52];
 
-export function terrace(): ObjPart[] {
+// ── REDRAWN 2026-09-28, against references ──────────────────────────────────
+//
+// Owner: the second scene's objects *"seem to be more cheap"*. The terrace was two
+// plain posts and a bar, the table a board on sticks with ovals for plates, each
+// amphora an egg on a peg. Now (references: the Parthenon's Doric order, the Elgin
+// amphora in the British Museum, Attic cups on a foot, Wikimedia Commons):
+
+/** Two Doric columns under an architrave, and a low parapet whose coping is the LEDGE. */
+export function terrace(): SetPart[] {
+  const column = (x: number): SetPart[] => {
+    const top = 314;
+    const p: SetPart[] = [
+      oRect('mass', x, GROUND - 3, 30, 6, 0, 0.5),
+      oPoly('mass', [x - 11, GROUND - 6, x - 9, top + 12, x + 9, top + 12, x + 11, GROUND - 6]),
+      oPoly('mass', [x - 9, top + 12, x - 14, top + 6, x + 14, top + 6, x + 9, top + 12]),
+      oRect('mass', x, top + 3, 30, 6, 0, 0.5),
+      oPoly('face', [x + 3, top + 12, x + 9, top + 12, x + 11, GROUND - 6, x + 4, GROUND - 6]),
+    ];
+    for (const f of [-6, -2, 2]) p.push(oPoly('line', [x + f, top + 14, x + f + 0.7, top + 14, x + f * 1.15 + 0.7, GROUND - 8, x + f * 1.15, GROUND - 8]));
+    return p;
+  };
+  const { x0, x1, y } = LEDGE;
   return [
-    oRect('mass', 20, 416, 18, 168, 0, 2),
-    oRect('mass', 20, 332, 26, 8, 0, 2),
-    oRect('mass', 380, 416, 18, 168, 0, 2),
-    oRect('mass', 380, 332, 26, 8, 0, 2),
-    oRect('mass', (LEDGE.x0 + LEDGE.x1) / 2, LEDGE.y + 3, LEDGE.x1 - LEDGE.x0, 6, 0, 2),
+    oRect('mass', (x0 + x1) / 2, (y + 474) / 2, x1 - x0 - 8, 474 - y, 0, 0.5),
+    oRect('mass', (x0 + x1) / 2, y + 2, x1 - x0 + 6, 5, 0, 1),
+    oRect('face', (x0 + x1) / 2, y + 6, x1 - x0 - 8, 2),
+    oRect('face', (x0 + x1) / 2, 447, x1 - x0 - 8, 1.2),
+    oRect('mass', 200, 304, 400, 12),
+    oRect('face', 200, 309, 400, 2),
+    ...column(22),
+    ...column(378),
   ];
 }
-export function banquetTable(): ObjPart[] {
+/** The low banquet table: its board, a cloth over the front, three turned legs, the cups. */
+export function banquetTable(): SetPart[] {
   const { x0, x1, top } = TABLE;
-  const parts: ObjPart[] = [
-    oBar('mass', x0 + 8, top + 4, x0 + 8, GROUND, 4),
-    oBar('mass', (x0 + x1) / 2, top + 4, (x0 + x1) / 2, GROUND, 4),
-    oBar('mass', x1 - 8, top + 4, x1 - 8, GROUND, 4),
-    oRect('mass', (x0 + x1) / 2, top + 2, x1 - x0, 5, 0, 1.5),
+  const parts: SetPart[] = [
+    oRect('mass', (x0 + x1) / 2, top + 2, x1 - x0 + 6, 5, 0, 1),
+    ...[x0 + 10, (x0 + x1) / 2, x1 - 10].flatMap((lx) => [
+      oRect('mass', lx, top + 14, 5, 12, 0, 1),
+      oEll('mass', lx, top + 21, 7, 4),
+      oRect('mass', lx, (top + 23 + GROUND) / 2, 4, GROUND - top - 23, 0, 1),
+    ]),
+    oPoly('lit', [x0 + 4, top + 4, x1 - 4, top + 4, x1 - 4, top + 10, x1 - 16, top + 12, x1 - 34, top + 10, (x0 + x1) / 2, top + 12, x0 + 34, top + 10, x0 + 16, top + 12, x0 + 4, top + 10]),
   ];
-  for (const px of PLATES) parts.push(oEll('mass', px, top - 2, 22, 5));
-  parts.push(oEll('mass', DISH.x, top - 2, 26, 5));
+  // the cups: shallow bowls on a short foot
+  for (const px of PLATES) parts.push(oPoly('mass', [px - 10, top - 5, px + 10, top - 5, px + 7, top - 1.5, px + 2, top - 0.5, px - 2, top - 0.5, px - 7, top - 1.5]), oRect('mass', px, top - 0.3, 6, 1.4, 0, 0.5));
   return parts;
 }
 /** One amphora standing at ax, drawn on its own so it can rock on its foot. */
-export function amphora(ax: number): ObjPart[] {
+export function amphora(ax: number): SetPart[] {
+  const g = GROUND;
   return [
-    oEll('mass', ax, GROUND - 13, 13, 20),
-    oRect('mass', ax, GROUND - 25, 6, 6, 0, 1),
-    oTri('mass', ax, GROUND - 2, 7, 5, 'down'),
+    oEll('mass', ax, g - 16, 16, 22),
+    oPoly('mass', [ax - 5, g - 24, ax - 3, g - 33, ax + 3, g - 33, ax + 5, g - 24]),
+    oRect('mass', ax, g - 34, 10, 3, 0, 1.5),
+    oPoly('mass', [ax - 3, g - 6, ax + 3, g - 6, ax + 4, g, ax - 4, g]),
+    oBar('mass', ax - 4, g - 31, ax - 8.5, g - 29, 1.8), oBar('mass', ax - 8.5, g - 29, ax - 7, g - 23, 1.8),
+    oBar('mass', ax + 4, g - 31, ax + 8.5, g - 29, 1.8), oBar('mass', ax + 8.5, g - 29, ax + 7, g - 23, 1.8),
+    oPoly('face', [ax + 2, g - 26, ax + 7, g - 21, ax + 8, g - 15, ax + 6, g - 9, ax + 2, g - 7]),
+    oPoly('line', [ax - 7.4, g - 18, ax + 7.4, g - 18, ax + 7.4, g - 16.8, ax - 7.4, g - 16.8]),
+    oPoly('line', [ax - 6.2, g - 11, ax + 6.2, g - 11, ax + 6.2, g - 10, ax - 6.2, g - 10]),
   ];
 }

@@ -9,24 +9,49 @@
 // A scene that uses it draws TWO sets, each in its own full-stage wrapper, and on the
 // change beat:
 //
-//   1. the first set zooms INTO its object, accelerating, about ninefold, the object
-//      drifting to the middle of the band as it grows;
+//   1. the first set zooms INTO its object, the object drifting to the middle of the
+//      band as it grows;
 //   2. at the deepest point the two sets cross-dissolve, both close in on their own
 //      object — a close-up of one piano becoming a close-up of the other;
-//   3. the second set pulls back OUT from its object, decelerating, to scale 1.
+//   3. the second set pulls back OUT from its object to scale 1.
 //
-// That order is the design. Growing ACCELERATES because a push-in that starts slow and
-// lands fast is what a lens does; the pull-back DECELERATES because it lands on a set
-// the reader has to take in. A single linear zoom through both reads as a slide
-// transition. The scale is exponential in its driver (Z to the power k) so each tenth
-// of the move looks like the same amount of zoom — a linear scale spends almost the
-// whole of the move on the last, fastest doubling.
+// SLOWER, AND SMOOTH THROUGH THE SWITCH (owner, 2026-09-28: "it needs to not be as
+// fast and it needs to have a smoother transition … transitions are so important so
+// they must look very good"). The first version pushed in ACCELERATING for a second and
+// pulled out decelerating for another, 2.35s all told, and hit the cut at full speed —
+// the textbook match cut. Two things were wrong with it, and the second only showed on
+// film:
 //
-// WHAT THE CHANGE BEAT MUST DO, because the harnesses read every beat from its settled
-// frames (measure-must at ~0.9, 1.9, 3.1 and 5.9s; check-readable once the stage stops
-// moving): finish by about 2.6s into the beat, show no words while zoomed, and bring
-// the new set's words on only after it has landed. A word half way through a zoom is
-// a word the size of the screen.
+//   - it was FAST: the push reached about 4 nats of log-scale a second;
+//   - it REVERSED at full speed. Zooming in and then zooming out is a change of
+//     direction, and doing it at peak velocity is a jolt however quickly it happens.
+//     A draft that ran one eased curve through both halves (fastest AT the cut) filmed
+//     worse still: at the moment of the dissolve the two sets were at different depths
+//     and the moon doubled into a disc and a ghost ring beside it.
+//
+// So the camera does what a person with a camera does: EASES INTO the object, arrives,
+// and the two sets dissolve while it is all but still — both at their deepest, so they
+// line up exactly — then EASES back OUT of the new one. The whole change is 4.2s, each
+// half a smoothstep in DEPTH rather than in scale (van Wijk & Nuij, "Smooth and
+// efficient zooming and panning", 2003: the perceived speed of a zoom is the rate of
+// change of log scale, so a 9x zoom has to be exponential in time to look even), and
+// each half is given time in proportion to how deep it goes, so a seamless miniature
+// (36x) spends longer going in than an ordinary 9x.
+
+// STAND CLEAR, AND NEVER FADE HIM (owner, 2026-09-28: "I dont want to be able to see
+// the stickman appear or disappear in any of the scenes"). He was faded out as the push
+// began and back in on the pull-out, because a figure beside the object would otherwise
+// fill the screen as a black shape at the deepest point — measured on film at 8x to 25x
+// in four of the six lessons, two of them because the object was IN HIS HAND. The fade
+// is gone; he is solid throughout, and the staging does the work instead: before the
+// push he sets the object down or steps back from it, and after the pull-out he lands a
+// few paces from it, so the camera carries him out of frame while he is still his own
+// size and brings him back in from the edge. `delay` on portalAt is the time he needs.
+//
+// WHAT THE CHANGE BEAT MUST DO: every change-beat line in the six lessons runs 6.3s or
+// longer, so a landing at 4.6s leaves the new set at least 1.7s in view before the
+// reader is invited to tap. Words show on neither set while it is zoomed, and the new
+// set's words come on after it has landed.
 //
 // Zero imports, like rig.ts: a scene imports this, and a sheet can too, in plain Node.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,16 +62,11 @@ export const PORTAL_Z = 9;
 /** When the change runs inside its beat, in seconds from the beat's start. */
 export const PORTAL = {
   /** the first set starts to push in */
-  inFrom: 0.25,
-  /** …and is at its deepest */
-  inTo: 1.3,
-  /** the two sets cross over, both at their deepest */
-  swapFrom: 1.2,
-  swapTo: 1.45,
-  /** the second set pulls back out from its deepest… */
-  outFrom: 1.4,
-  /** …and has landed */
-  outTo: 2.6,
+  inFrom: 0.4,
+  /** the second set has landed */
+  outTo: 4.6,
+  /** how long the two sets take to cross over, centred on the deepest point */
+  swapFor: 0.44,
 };
 
 function clamp01(v: number): number {
@@ -54,20 +74,46 @@ function clamp01(v: number): number {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
-/**
- * The three tracks of a change, at `b` seconds into its beat: how deep the first set
- * is (0..1, accelerating), how far the second has taken over (0..1), and how deep the
- * second still is (1..0, decelerating).
- */
-export function portalAt(b: number): { out: number; world: number; into: number } {
+function smooth(t: number): number {
   'worklet';
-  const u = clamp01((b - PORTAL.inFrom) / (PORTAL.inTo - PORTAL.inFrom));
-  const w = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
-  const v = clamp01((b - PORTAL.outFrom) / (PORTAL.outTo - PORTAL.outFrom));
+  return t * t * (3 - 2 * t);
+}
+
+/**
+ * The beat time at which a change from a set zoomed `zOut` deep into one zoomed `zIn`
+ * deep reaches its deepest point — where the sets dissolve. Each half gets time in
+ * proportion to its depth, so an ordinary change swaps in the middle.
+ */
+export function portalSwapAt(zOut?: number, zIn?: number, delay?: number): number {
+  'worklet';
+  const a = Math.log(zOut === undefined ? PORTAL_Z : zOut);
+  const c = Math.log(zIn === undefined ? PORTAL_Z : zIn);
+  return (delay === undefined ? 0 : delay) + PORTAL.inFrom + (a / (a + c)) * (PORTAL.outTo - PORTAL.inFrom);
+}
+
+/**
+ * The tracks of a change, at `b` seconds into its beat: how deep the first set is
+ * (`out`, 0..1), how far the second has taken over (`world`, 0..1), how deep the
+ * second still is (`into`, 1..0), and `swapU`, 0..1 across the dissolve — the window
+ * in which anything the reader must not see move (the figure changing place, turning
+ * round) should move. Pass the two sets' depths when they are not PORTAL_Z.
+ */
+export function portalAt(
+  b0: number, zOut?: number, zIn?: number, delay?: number,
+): { out: number; world: number; into: number; swapU: number } {
+  'worklet';
+  // `delay` holds the camera still for that long first — for a scene whose figure has
+  // to step clear of the thing being zoomed into (see STAND CLEAR, above)
+  const b = b0 - (delay === undefined ? 0 : delay);
+  const at = portalSwapAt(zOut, zIn);
+  const u = clamp01((b - PORTAL.inFrom) / (at - PORTAL.inFrom));
+  const v = clamp01((b - at) / (PORTAL.outTo - at));
+  const w = clamp01((b - (at - PORTAL.swapFor / 2)) / PORTAL.swapFor);
   return {
-    out: u * u,
-    world: w * w * (3 - 2 * w),
-    into: (1 - v) * (1 - v),
+    out: smooth(u),
+    world: smooth(w),
+    into: 1 - smooth(v),
+    swapU: w,
   };
 }
 
@@ -105,18 +151,6 @@ export function portalXf(k: number, fx: number, fy: number, cx: number, cy: numb
   };
 }
 
-/**
- * How much of the figure shows when his set is drawn at scale `s`: none of him past
- * 2.4 times, all of him from double down. A figure standing near the object would
- * otherwise fill the screen as a black shape at the deepest point. The fade is kept
- * short and early on purpose: a slow one left him half-transparent, a large grey ghost,
- * for most of the pull-back (seen twice, 2026-09-27). Large and solid reads as the
- * camera pulling back off a man; see-through reads as a fault.
- */
-export function figureAt(s: number): number {
-  'worklet';
-  return clamp01((2.4 - s) / 0.4);
-}
 
 /** How much of a set's WORDS show at a depth `k`: gone as soon as the zoom starts. */
 export function wordsAt(k: number): number {

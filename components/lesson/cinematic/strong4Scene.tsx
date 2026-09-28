@@ -5,13 +5,15 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
+import { attendAt } from './attend';
 import { BEATS } from './strong4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -21,7 +23,7 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
   board, desk, bowl, terrace, banquetTable, amphora,
   BOARD, BOWL, LOCK, TABLE, PLATES, EMPTY_PLATE, DISH, OLIVE_PLATE, LEDGE, SHARDS, AMPHORAE,
@@ -70,9 +72,25 @@ const MID = { x: STAGE_W / 2, y: 401 };
 /** The olive in his hand is the larger, so the room is pushed in less deep and they meet. */
 const OLIVE_HAND_R = 3.5;
 const Z_ROOM = PORTAL_Z * (OLIVE_PLATE.r / OLIVE_HAND_R);
+/**
+ * How long the camera holds before it pushes in on the change beat: time for him to
+ * step clear of the thing it goes into, so he leaves the frame at his own size
+ * rather than being faded out while he is large (portal.ts, STAND CLEAR).
+ */
+const DELAY = 1.3;
+/** Where he sets the olive down on the desk, beside the bowl — the camera goes into it there. */
+const OLIVE_REST = { x: 246, y: 463 };
+/** Where he steps back to before the push: the far end of the board, clear of the olive. */
+const ROOM_BACK = 332;
+/** When he steps back: after setting the olive down, before the camera moves. */
+const BACK_AT = 0.7;
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(Z_ROOM, undefined, DELAY) - PORTAL.swapFor / 2;
 /** Where he walks in at the banquet, and when he sets off. */
-const FEAST_IN = 70;
-const FEAST_GO = PORTAL.outTo + 0.4;
+// lands well along the table from the plate the camera pulls back from, so the pull-out
+// brings him in from the edge at his own size (portal.ts, STAND CLEAR)
+const FEAST_IN = 184;
+const FEAST_GO = (PORTAL.outTo + DELAY) + 0.4;
 
 const X = BEATS.map((b) => b.x ?? 280);
 const P = BEATS.map((b) => b.p ?? 0);
@@ -130,7 +148,7 @@ export default function Strong4Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(19);
+  const cv = useCarry(22);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -153,7 +171,7 @@ export default function Strong4Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, Z_ROOM, undefined, DELAY);
     const world = A_ENTER[n] ? pt.world : FEAST[n];
     const kRoom = A_ENTER[n] ? pt.out : FEAST[n];
     const kFeast = A_ENTER[n] ? pt.into : 1 - FEAST[n];
@@ -167,14 +185,27 @@ export default function Strong4Scene({
     const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
-    const target = A_ENTER[n] ? (world < 0.5 ? xp : lerp(FEAST_IN, xn, feastU)) : xn;
+    // THE CHANGE, STAGED (portal.ts, STAND CLEAR): he sets the olive down, steps back to
+    // the far end of the board, and only then does the camera push into the olive — so
+    // the push carries him out of frame at his own size instead of fading him out.
+    const backDur = moveTr(xp, ROOM_BACK, TR);
+    const backU = A_ENTER[n] ? ease01(clamp01((b - BACK_AT) / backDur)) : 0;
+    const backWalk = A_ENTER[n] && world < 0.5 && backU > 0 && backU < 1;
+    const target = A_ENTER[n] ? (world < 0.5 ? lerp(xp, ROOM_BACK, backU) : lerp(FEAST_IN, xn, feastU)) : xn;
     const x = n === 0 ? xn : carry(cv, 0, n, xp, target, A_ENTER[n] ? 1 : walking ? walkU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : feastWalk
         ? travelStance(FEAST_IN, xn, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), feastU, WALK, 0)
-        : hLive(P[n], t, b);
-    const dirV = A_ENTER[n] ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom) : facing(DIR[p], DIR[n], b);
+        : backWalk
+          ? travelStance(xp, ROOM_BACK, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), backU, WALK, 0)
+          : hLive(P[n], t, b);
+    // stepping back he faces the way he walks, and turns round to the board when he gets there
+    const dirV = A_ENTER[n]
+      ? (world < 0.5
+        ? lerp(facing(DIR[p], 1, b - BACK_AT), DIR[p], clamp01((b - BACK_AT - backDur) / 0.3))
+        : facing(DIR[p], DIR[n], b - SWAP_FROM))
+      : facing(DIR[p], DIR[n], b);
     const dir = dirV < 0 ? -1 : 1;
 
     // ── pointing up at the board's two columns (b0), and at the lock (b4) ───
@@ -185,8 +216,12 @@ export default function Strong4Scene({
     // ── the olive: taken from the bowl (b5), held up, into the change (b6) ──
     const take = A_FORM[n] ? pulse(1.7, 2.1, 2.5) : 0;
     s = handOn(s, x, dir, BOWL.x, BOWL.y - 4, take);
-    const hold = A_FORM[n] ? sec(2.3, 2.9) : A_ENTER[n] ? 1 - clamp01(world * 2) : 0;
-    s = mixStance(s, { ...s, fistR: { x: 18, y: -44 } }, hold * (1 - take));
+    // on the change beat he lowers it to the desk and lets go
+    const setDown = A_ENTER[n] ? pulse(0.05, 0.35, 0.65) : 0;
+    const placed = A_ENTER[n] ? sec(0.3, 0.38) : 0;
+    const hold = A_FORM[n] ? sec(2.3, 2.9) : A_ENTER[n] ? 1 - placed : 0;
+    s = mixStance(s, { ...s, fistR: { x: 18, y: -44 } }, hold * (1 - take) * (1 - setDown));
+    s = handOn(s, x, dir, OLIVE_REST.x, OLIVE_REST.y - 2, setDown);
     // ── the cover off Socrates' dish (b7) ────────────────────────────────────
     const lift = A_DISH[n] ? pulse(0.3, 0.8, 1.6) : 0;
     s = handOn(s, x, dir, DISH.x, DISH.y - 6 - 12 * sec(0.8, 1.2), lift);
@@ -213,12 +248,29 @@ export default function Strong4Scene({
     const rock1 = SORT[n] ? pickAt(ROCK_AT[1], pickPos.value) : 0;
     const rock2 = SORT[n] ? pickAt(ROCK_AT[2], pickPos.value) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts): at what he points to, holds or uncovers ────
+    const colL = (BOARD.x0 + BOARD.mid) / 2;
+    const colR = (BOARD.mid + BOARD.x1) / 2;
+    const LK = A_HEADS[n] ? [0.3, colL, BOARD.top + 16, 1, 2.5, colR, BOARD.top + 16, 1, 4.8, 0, 0, 0]
+      : ACT[n] === 'both' ? [0.3, BOARD.mid, BOARD.top + 30, 0.7, L * 0.8, 0, 0, 0]
+      : A_VALID[n] ? [L * 0.25, colL, BOARD.top + 50, 1, L * 0.72, colL, BOARD.top + 70, 1, L * 0.97, 0, 0, 0]
+      : A_STRONG[n] ? [L * 0.25, colR, BOARD.top + 50, 1, L * 0.72, colR, BOARD.top + 70, 1, L * 0.97, 0, 0, 0]
+      : A_SYL[n] ? [L * 0.08, colL, BOARD.top + 40, 1, L * 0.5, colL, BOARD.top + 76, 1, L * 0.7, LOCK.x, LOCK.y, 1]
+      : A_FORM[n] ? [0.2, colL, BOARD.top + 60, 1, 1.5, BOWL.x, BOWL.y, 1, 2.4, x + 16 * dir, 424, 1]
+      : A_ENTER[n] ? [(PORTAL.outTo + DELAY), x + 40 * dir, TABLE.top - 4, 0.9, (PORTAL.outTo + DELAY) + 1.4, DISH.x, DISH.y - 6, 1]
+      : A_DISH[n] ? [0.1, DISH.x, DISH.y - 6, 1, 1.2, DISH.x - 10, DISH.y - 20, 1, L * 0.8, DISH.x, DISH.y - 4, 0.8]
+      : Q1[n] ? [0.3, (LEDGE.x0 + LEDGE.x1) / 2, LEDGE.y, 0.7]
+      : SORT[n] ? [0.3, AMPHORAE[1], GROUND - 18, 0.8]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: hideLeadWhile(lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 19, n, lk.x, lk.x, tr), carry(cv, 20, n, lk.y, lk.y, tr), carry(cv, 21, n, 0, lk.w, tr)), A_ENTER[n] === 1 && b < (PORTAL.outTo + DELAY) + 0.2),
       world: carry(cv, 1, n, FEAST[p], world, A_ENTER[n] ? 1 : tr),
       kRoom: carry(cv, 2, n, FEAST[p], kRoom, A_ENTER[n] ? 1 : tr),
       kFeast: carry(cv, 3, n, 1 - FEAST[p], kFeast, A_ENTER[n] ? 1 : tr),
       hold: carry(cv, 4, n, 0, hold, tr),
+      placed: A_ENTER[n] && world < 0.5 ? placed : 0,
       hd: carry(cv, 5, n, HEADS[p], hd, tr),
       hi: carry(cv, 6, n, HEADS[p], hi, tr),
       va: carry(cv, 7, n, VALID[p], va, tr),
@@ -242,9 +294,10 @@ export default function Strong4Scene({
   // the room goes in towards the olive where his hand holds it
   const roomXf = useAnimatedStyle(() => {
     const w = DF.value.wrR;
+    const u = SCENE.value.placed;
     return {
       opacity: 1 - SCENE.value.world,
-      ...portalXf(SCENE.value.kRoom, w[0].translateX, w[1].translateY - 3, MID.x, MID.y, Z_ROOM),
+      ...portalXf(SCENE.value.kRoom, lerp(w[0].translateX, OLIVE_REST.x, u), lerp(w[1].translateY - 3, OLIVE_REST.y, u), MID.x, MID.y, Z_ROOM),
     };
   });
   const feastXf = useAnimatedStyle(() => ({
@@ -258,8 +311,8 @@ export default function Strong4Scene({
     const s = atFeast ? portalScale(k) : portalScale(k, Z_ROOM);
     const xf = atFeast
       ? portalXf(k, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y)
-      : portalXf(k, w[0].translateX, w[1].translateY - 3, MID.x, MID.y, Z_ROOM);
-    return { opacity: figureAt(s), ...xf };
+      : portalXf(k, lerp(w[0].translateX, OLIVE_REST.x, SCENE.value.placed), lerp(w[1].translateY - 3, OLIVE_REST.y, SCENE.value.placed), MID.x, MID.y, Z_ROOM);
+    return { opacity: 1, ...xf };
   });
   const feastWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kFeast) : 0));
   const roomWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kRoom));
@@ -359,7 +412,11 @@ function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
   // the change goes into it, while he himself fades
   const st = useAnimatedStyle(() => {
     const w = DF.value.wrR;
-    return { opacity: S.value.hold > 0.02 ? 1 : 0, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY - 3 }] };
+    const u = S.value.placed;
+    return {
+      opacity: S.value.hold > 0.02 || u > 0.5 ? 1 : 0,
+      transform: [{ translateX: lerp(w[0].translateX, OLIVE_REST.x, u) }, { translateY: lerp(w[1].translateY - 3, OLIVE_REST.y, u) }],
+    };
   });
   return (
     <Animated.View style={[styles.rider, st]}>
@@ -378,8 +435,8 @@ function Feast({ S }: { S: SharedValue<any> }) {
       <View style={styles.sea} />
       <View style={styles.island} />
       <View style={styles.stone} />
-      <ObjectArt parts={TERRACE_ART} tone={MARBLE} />
-      <ObjectArt parts={TABLE_ART} tone={WOOD} />
+      <SetArt parts={TERRACE_ART} tone={MARBLE} />
+      <SetArt parts={TABLE_ART} tone={WOOD} />
       {PLATES.map((px, k) => (k === EMPTY_PLATE ? null : <Olives key={px} x={px} />))}
       <Dish S={S} />
       {AMPHORAE.map((ax, k) => <Amphora key={ax} S={S} ax={ax} k={k} />)}
@@ -417,7 +474,7 @@ function Amphora({ S, ax, k }: { S: SharedValue<any>; ax: number; k: number }) {
   });
   return (
     <Animated.View style={[styles.set, { transformOrigin: `${ax}px ${GROUND}px` }, st]}>
-      <ObjectArt parts={art} tone={CLAY} />
+      <SetArt parts={art} tone={CLAY} />
     </Animated.View>
   );
 }
@@ -501,10 +558,10 @@ const styles = StyleSheet.create({
   },
 
   // ── the banquet ───────────────────────────────────────────────────────────
-  dusk: { position: 'absolute', left: 0, right: 0, top: 288, height: 150, backgroundColor: stageToneOf(EMBER).STONE },
-  sun: { position: 'absolute', left: 250, top: 408, width: 30, height: 30, borderRadius: 15, backgroundColor: EMBER },
-  sea: { position: 'absolute', left: 0, right: 0, top: 428, height: 24, backgroundColor: TEAL },
-  island: { position: 'absolute', left: 60, top: 420, width: 90, height: 16, borderTopLeftRadius: 45, borderTopRightRadius: 45, backgroundColor: stageToneOf(TEAL).SHADE },
+  dusk: { position: 'absolute', left: 0, right: 0, top: 288, height: 112, backgroundColor: stageToneOf(EMBER).STONE },
+  sun: { position: 'absolute', left: 250, top: 380, width: 30, height: 30, borderRadius: 15, backgroundColor: EMBER },
+  sea: { position: 'absolute', left: 0, right: 0, top: 398, height: 28, backgroundColor: TEAL },
+  island: { position: 'absolute', left: 60, top: 390, width: 90, height: 16, borderTopLeftRadius: 45, borderTopRightRadius: 45, backgroundColor: stageToneOf(TEAL).SHADE },
   stone: { position: 'absolute', left: 0, right: 0, top: 452, height: 48, borderRadius: 1, backgroundColor: MARBLE.STONE },
   bread: {
     position: 'absolute', left: DISH.x - 8, top: TABLE.top - 10, width: 16, height: 8, borderRadius: 4,

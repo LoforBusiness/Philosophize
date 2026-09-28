@@ -892,6 +892,44 @@ export function pickAt(table: readonly number[], u: number): number {
  */
 export const REACT = makeMutable(0);
 
+/**
+ * WHERE THE LEAD'S HEAD IS, THIS FRAME — `[x, top, on]` in stage units.
+ *
+ * Owner, 2026-09-28: *"the bubble of the stick man … a lot of times, is not in the
+ * right place. It'll be in a place when the stick man is not actually there."*
+ * Found on `ethics-ethics-3` beat 7: the placement table puts him at the beat's END
+ * x, 226, and the scene keeps him at the lever on the far left while the line is
+ * spoken — so "Not a sum, then." hung over empty floor in the middle of the stage.
+ * The table was right about where he ends up and silent about when; a scene is free
+ * to stage him anywhere, and no table read ahead of time can know.
+ *
+ * So `lookPose` — the call every scene makes for the lead — writes his head here on
+ * every frame, and a thought reads it: it only shows while he is under the spot it
+ * was placed for, and rides him while it does (`Thought`'s `live`). `on` stays 0
+ * in a scene that never poses its lead through `lookPose`, and those keep the old
+ * behaviour. The player zeroes it when a lesson mounts.
+ */
+export const LEAD_HEAD = makeMutable<readonly number[]>([0, 0, 0]);
+
+/**
+ * THE LEAD IS NOT ON SCREEN, WHATEVER HIS POSE SAYS — `on` goes to −1.
+ *
+ * `lookPose` knows where his head is in his OWN set, and nothing about what is done
+ * to that set afterwards. During a scene change (portal.ts) the set is scaled nine
+ * times over and he is faded out, so the head it reports is exactly where the bubble
+ * was placed while he is nowhere to be seen — and the first film of the change showed
+ * the beat's thought hanging over the zoom. A scene that moves him out of sight wraps
+ * the bundle in this; a thought never shows while `on` is −1.
+ */
+export function hideLeadWhile(b: Bundle, hidden: boolean): Bundle {
+  'worklet';
+  if (hidden) {
+    const L = LEAD_HEAD.value;
+    LEAD_HEAD.value = [L[0], L[1], -1];
+  }
+  return b;
+}
+
 // ── AND WHETHER HE IS MOVING AROUND (wander.ts, group AF) ────────────────────
 //
 // The same seam as `REACT`, for the same reason, and it is the whole reason the
@@ -1133,7 +1171,14 @@ export function lookPose(
         cf.chair.front, cf.mug.on, cf.mug.steam, WANDER.now.value],
     };
   };
-  if (gw <= 0) return withProp(pose(reacted(cs, r), wx, groundY, k, wdir, opacity));
+  const publish = (b: Bundle): Bundle => {
+    'worklet';
+    const hx = b.head[0].translateX;
+    const hy = b.head[1].translateY;
+    LEAD_HEAD.value = [hx, hy - 20 * k, 1];
+    return b;
+  };
+  if (gw <= 0) return publish(withProp(pose(reacted(cs, r), wx, groundY, k, wdir, opacity)));
   const g = gazeAt(cs, wx, groundY, k, wdir, gx, gy, gw);
   // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
   //
@@ -1150,7 +1195,7 @@ export function lookPose(
   // total comes to about 0.6 of the gaze angle, so a figure craning up at a
   // machine above him moves his head some sixteen units rather than five.
   const lean = (g.neck - cs.neck) * 0.5;
-  return withProp(pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity));
+  return publish(withProp(pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity)));
 }
 
 /**
@@ -1425,6 +1470,24 @@ function where(x: number, figX: SharedValue<number> | undefined, refX: number, s
  * that has to arrive at his head. Clamped all the same: a disc that chases him
  * without limit is a dotted line across the stage rather than a thought.
  */
+/**
+ * HOW MUCH OF A LIVE THOUGHT SHOWS, from where his head is against where it was
+ * placed. Full within 12 units sideways, gone by 26; and gone if his crown has
+ * dropped more than a head below the trail's foot (he has sat, or crouched), since
+ * a bubble floating a body-length over a seated man is the fault it exists to stop.
+ */
+const NEAR = 26;
+const NEAR_FADE = 14;
+const DROP = 30;
+function headGate(L: readonly number[], headX: number, anchorY: number) {
+  'worklet';
+  const dx = Math.abs(L[0] - headX);
+  const side = Math.max(0, Math.min(1, (NEAR - dx) / NEAR_FADE));
+  const gap = L[1] - anchorY;
+  const down = Math.max(0, Math.min(1, (DROP + 14 - gap) / 14));
+  return side * down;
+}
+
 const THINK_FAN = [0.25, 0.58, 1];
 const THINK_REACH = 18;
 /**
@@ -1461,11 +1524,13 @@ function leanTo(
   // Before layout there is no box to measure a lean against, and half of nothing
   // turns the clamp inside out.
   if (half <= 0) return 0;
-  const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, where(x, figX, refX, settle)));
+  const Lh = LEAD_HEAD.value;
+  const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, Lh[2] !== 0 ? x + (Lh[0] - headX) : where(x, figX, refX, settle)));
   // POINTING AT HIM, LIVE. `headX` is the head the placement was measured against
   // and is the right answer when there is no walk track to do better with; where
   // there is one, his own position is the head this came out of.
-  const head = figX ? figX.value : headX;
+  const L = LEAD_HEAD.value;
+  const head = L[2] !== 0 ? L[0] : figX ? figX.value : headX;
   const cap = half + THINK_REACH;
   return Math.max(-cap, Math.min(cap, head - cx)) * frac;
 }
@@ -1496,8 +1561,16 @@ const THINK_IN = 520;
 const THINK_OUT = 340;
 
 export function Thought({
-  text, x, headX, anchorY, discs, show, figX, refX = 0, settle, kind = 'think', probeId = 'thought',
+  text, x, headX, anchorY, discs, show, figX, refX = 0, settle, kind = 'think', probeId = 'thought', live = false,
 }: {
+  /**
+   * THE LEAD'S THOUGHT: follow his LIVE head (`LEAD_HEAD`) rather than trust the
+   * table alone. It shows only while his head is within `NEAR` of the `headX` it
+   * was placed against and no more than `DROP` below the crown it was placed over,
+   * fading in as he arrives and out if he leaves; while it shows, the box and the
+   * trail ride his head. False for the second figure, who is delivered standing.
+   */
+  live?: boolean;
   text: string;
   /**
    * Stage x the box centres on, and the stage x of HIS OWN centre.
@@ -1631,9 +1704,12 @@ export function Thought({
   // correct there, because a mount and a first frame are not the same instant.
   const wrap = useAnimatedStyle(() => {
     const half = w.value / 2;
-    const want = where(x, figX, refX, settle);
+    const L = LEAD_HEAD.value;
+    const follow = live && L[2] !== 0;
+    const want = follow ? x + (L[0] - headX) : where(x, figX, refX, settle);
     const cx = half > 0 ? Math.max(half + 10, Math.min(STAGE_W - half - 10, want)) : want;
-    return { transform: [{ translateX: cx - STAGE_W / 2 }] };
+    const gate = !follow ? 1 : L[2] < 0 ? 0 : headGate(L, headX, anchorY);
+    return { opacity: gate, transform: [{ translateX: cx - STAGE_W / 2 }] };
   });
 
   // The trail leans back toward him when the box has been clamped, so it still

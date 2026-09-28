@@ -4,13 +4,15 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
+import { attendAt } from './attend';
 import { BEATS } from './aesthetics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -20,9 +22,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
-  workTable, easel, plinth, frames, ropePosts,
+  workTable, easel, plinth, frames, ropePosts, rope, windows, rails,
   PIECE_TABLE, EASELS, CANVAS_Y, PLINTH, PIECE_PLINTH, FRAMES, WINDOWS,
 } from './aesthetics4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
@@ -65,6 +67,14 @@ const LINES = [7.68, 4.8, 7.68, 8, 7.24, 7.6, 7, 0, 9.08, 5.88, 0, 0, 0];
 /** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
 const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
+/**
+ * How long the camera holds before it pushes in on the change beat: time for him to
+ * step clear of the thing it goes into, so he leaves the frame at his own size
+ * rather than being faded out while he is large (portal.ts, STAND CLEAR).
+ */
+const DELAY = 1.2;
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(undefined, undefined, DELAY) - PORTAL.swapFor / 2;
 /** The urinal's box, upright; on its back it is the same box turned a quarter. */
 const PIECE = { w: 26, h: 30 };
 /** Into the signed urinal on the table, out of it on the plinth: its middle, lying down. */
@@ -124,7 +134,7 @@ export default function Aesthetics4Scene({
   clock, bt, bi, i, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(16);
+  const cv = useCarry(20);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -147,7 +157,7 @@ export default function Aesthetics4Scene({
     };
 
     // ── the change (b5), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, undefined, undefined, DELAY);
     const world = A_ENTER[n] ? pt.world : HALL[n];
     const kStudio = A_ENTER[n] ? pt.out : HALL[n];
     const kHall = A_ENTER[n] ? pt.into : 1 - HALL[n];
@@ -155,15 +165,19 @@ export default function Aesthetics4Scene({
     // ── where he is ──────────────────────────────────────────────────────────
     const xp = X[p];
     const xn = X[n];
-    const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
+    // on the change beat he walks clear of the piece BEFORE the camera moves (DELAY), so
+    // the push carries him out of frame at his own size — he is never faded (portal.ts)
+    const walking = Math.abs(xn - xp) > 1;
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
-    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
-    const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
+    const swapU = pt.swapU;
+    const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, walking ? walkU : A_ENTER[n] ? swapU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
-    const dirV = facing(DIR[p], DIR[n], b);
+    const dirV = walking
+      ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(DIR[p], DIR[n], b);
     const dir = dirV < 0 ? -1 : 1;
 
     // ── the cloth pulled off (b0) ────────────────────────────────────────────
@@ -176,8 +190,16 @@ export default function Aesthetics4Scene({
     const turnHands = A_SIGN[n] ? pulse(0.5, 0.9, 2.4) : 0;
     s = handOn(s, x, dir, 1, PIECE_TABLE.x + 12, PIECE_TABLE.base - 18, turnHands);
     s = handOn(s, x, dir, -1, PIECE_TABLE.x + 10, PIECE_TABLE.base - 8, turnHands);
+    // THE SIGNING IS WRITING (owner: *"if he grabs something to write on, he needs to
+    // look down, visibly write on it"*). The brush comes up in his hand, he leans over the
+    // piece, and the hand travels down the mark at the pace the paint goes on — a small
+    // stroke-by-stroke wobble, not a wave.
     const signing = A_SIGN[n] ? pulse(3.0, 3.4, 5.4) : 0;
-    s = handOn(s, x, dir, 1, PIECE_TABLE.x + 10 - 6 * Math.sin(b * 9) * signing, PIECE_TABLE.base - 12, signing);
+    const wrote = A_SIGN[n] ? sec(3.4, 5.0) : 0;
+    s = handOn(s, x, dir, 1, PIECE_TABLE.x + 11 + 1.6 * Math.sin(b * 16) * signing, PIECE_TABLE.base - 19 + 12 * wrote, signing);
+    s = { ...s, tilt: s.tilt - 0.12 * signing };
+
+    const brush = A_SIGN[n] ? sec(2.6, 3.0) * (1 - sec(5.4, 5.9)) : 0;
 
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
@@ -190,14 +212,28 @@ export default function Aesthetics4Scene({
     const sig = A_SIGN[n] ? sec(3.4, 5.0) : SIGNED[n];
 
     // ── the hall ─────────────────────────────────────────────────────────────
-    const screen = A_ENTER[n] ? sec(PORTAL.outTo + 0.4, PORTAL.outTo + 1.6) : A_TITLE[n] ? 1 - sec(0.4, 1.6) : 0;
-    const refused = A_ENTER[n] ? sec(PORTAL.outTo + 1.8, PORTAL.outTo + 2.1) : 0;
+    const screen = A_ENTER[n] ? sec((PORTAL.outTo + DELAY) + 0.4, (PORTAL.outTo + DELAY) + 1.6) : A_TITLE[n] ? 1 - sec(0.4, 1.6) : 0;
+    const refused = A_ENTER[n] ? sec((PORTAL.outTo + DELAY) + 1.8, (PORTAL.outTo + DELAY) + 2.1) : 0;
     const spot = A_TITLE[n] ? sec(1.4, 2.4) : TITLED[n];
     const title = A_TITLE[n] ? st(0.62, 0.72) : TITLED[n];
     const banner = A_ART[n] ? st(0.62, 0.8) : ART[n];
 
+    // ── WHERE HE LOOKS (attend.ts): at what he handles and what appears ───────
+    const LK = A_UNVEIL[n] ? [0.6, PIECE_TABLE.x, PIECE_TABLE.base - 16, 1, L * 0.85, PIECE_TABLE.x, PIECE_TABLE.base - 16, 0.6]
+      : A_ASK[n] ? [0.2, PIECE_TABLE.x, PIECE_TABLE.base - 20, 1, L * 0.3, PIECE_TABLE.x, PIECE_TABLE.base - 44, 1, L * 0.9, 0, 0, 0]
+      : A_MIM[n] ? [0.3, PIECE_TABLE.x, PIECE_TABLE.base - 16, 0.6, 2.4, EASELS[0].x, CANVAS_Y.top + 16, 1, L * 0.9, 0, 0, 0]
+      : A_EXP[n] ? [0.4, EASELS[1].x, CANVAS_Y.top + 16, 1, L * 0.9, 0, 0, 0]
+      : A_SIGN[n] ? [0.3, PIECE_TABLE.x + 10, PIECE_TABLE.base - 14, 1, 3.3, PIECE_TABLE.x + 11, PIECE_TABLE.base - 16, 1, 4.2, PIECE_TABLE.x + 11, PIECE_TABLE.base - 9, 1, 5.6, PIECE_TABLE.x - 20, 424, 0.8]
+      : A_ENTER[n] ? [(PORTAL.outTo + DELAY), PLINTH.x, PLINTH.top - 8, 1]
+      : A_TITLE[n] ? [0.4, PLINTH.x, PLINTH.top - 4, 1, L * 0.6, PLINTH.x, PLINTH.top + 26, 1]
+      : A_ART[n] ? [L * 0.2, 196, 310, 1, L * 0.9, 0, 0, 0]
+      : SORT[n] ? [0.3, 200, 380, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      brush: carry(cv, 16, n, 0, brush, tr),
+      fig: hideLeadWhile(lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 17, n, lk.x, lk.x, tr), carry(cv, 18, n, lk.y, lk.y, tr), carry(cv, 19, n, 0, lk.w, tr)), A_ENTER[n] === 1 && b < (PORTAL.outTo + DELAY) + 0.2),
       world: carry(cv, 1, n, HALL[p], world, A_ENTER[n] ? 1 : tr),
       kStudio: carry(cv, 2, n, HALL[p], kStudio, A_ENTER[n] ? 1 : tr),
       kHall: carry(cv, 3, n, 1 - HALL[p], kHall, A_ENTER[n] ? 1 : tr),
@@ -233,7 +269,7 @@ export default function Aesthetics4Scene({
     const inHall = SCENE.value.world >= 0.5;
     const k = inHall ? SCENE.value.kHall : SCENE.value.kStudio;
     const f = inHall ? FOCUS_HALL : FOCUS_STUDIO;
-    return { opacity: figureAt(portalScale(k)), ...portalXf(k, f.x, f.y, MID.x, MID.y) };
+    return { opacity: 1, ...portalXf(k, f.x, f.y, MID.x, MID.y) };
   });
   const hallWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kHall) : 0));
   const studioWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudio));
@@ -262,6 +298,7 @@ export default function Aesthetics4Scene({
       <HallWords S={SCENE} words={hallWords} on={on} />
       <StudioWords S={SCENE} words={studioWords} />
       <Animated.View style={[styles.set, figXf]} pointerEvents="none">
+        <Brush S={SCENE} DF={DF} />
         <Stickman D={DF} k={K_M} />
       </Animated.View>
       {on(SORT) ? <PickRing S={SCENE} /> : null}
@@ -274,6 +311,12 @@ const EASEL_ART = EASELS.map((e) => easel(e.x));
 const PLINTH_ART = plinth();
 const FRAME_ART = frames();
 const ROPE_ART = ropePosts();
+const VELVET_ART = rope();
+const WINDOW_ART = windows();
+const RAIL_ART = rails();
+/** Gilt is the olive at its deepest; the rope is velvet, the ember's shade. */
+const GILT = stageToneOf(OLIVE);
+const VELVET = { ...stageToneOf(EMBER), SHADE: EMBER };
 
 // ── the urinal: upright in the studio until it is turned onto its back ───────
 
@@ -288,13 +331,32 @@ function Piece({ x, base, back, lying }: { x: number; base: number; back?: Share
       ],
     };
   });
-  const sig = useAnimatedStyle(() => ({ opacity: lying ? 1 : back ? back.value.sig : 0 }));
+  const sig = useAnimatedStyle(() => {
+    const v = lying ? 1 : back ? back.value.sig : 0;
+    return { opacity: v > 0.01 ? 1 : 0, transform: [{ scaleX: v }] };
+  });
   return (
     <Animated.View style={[styles.piece, st]}>
       <View style={styles.pieceRim} />
       <View style={styles.basin} />
       <View style={styles.drain} />
       <Animated.View style={[styles.paint, sig]} />
+    </Animated.View>
+  );
+}
+/** The brush, in his right hand while he signs, pointing down at the piece. */
+function Brush({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  const st = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return {
+      opacity: S.value.brush,
+      transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }, { rotate: `${-24 * DF.value.dir}deg` }],
+    };
+  });
+  return (
+    <Animated.View style={[styles.rider, st]}>
+      <View style={styles.brush} />
+      <View style={styles.bristle} />
     </Animated.View>
   );
 }
@@ -347,13 +409,14 @@ function StudioWords({ S, words }: { S: SharedValue<any>; words: SharedValue<num
 // ── the hall ─────────────────────────────────────────────────────────────────
 
 function Hall({ S }: { S: SharedValue<any> }) {
-  const screen = useAnimatedStyle(() => ({ transform: [{ translateX: lerp(-120, 0, S.value.screen) }] }));
+  const screen = useAnimatedStyle(() => ({ transform: [{ translateX: lerp(-240, 0, S.value.screen) }] }));
   const spot = useAnimatedStyle(() => ({ opacity: 0.3 * S.value.spot }));
   return (
     <>
       <View style={styles.hallWall} />
-      {WINDOWS.map((wx) => <View key={wx} style={[styles.window, { left: wx - 20 }]} />)}
-      <ObjectArt parts={FRAME_ART} tone={WOOD} />
+      <SetArt parts={RAIL_ART} tone={MARBLE} line={1.4} />
+      <SetArt parts={WINDOW_ART} tone={WOOD} />
+      <SetArt parts={FRAME_ART} tone={GILT} />
       <View style={[styles.painting, { left: FRAMES[0].x0 + 4, top: FRAMES[0].top + 4, width: FRAMES[0].x1 - FRAMES[0].x0 - 8, height: FRAMES[0].bottom - FRAMES[0].top - 8 }]}>
         <View style={styles.paintSea} />
         <View style={styles.paintSun} />
@@ -364,10 +427,10 @@ function Hall({ S }: { S: SharedValue<any> }) {
       </View>
       <View style={styles.marble} />
       <Animated.View style={[styles.spot, spot]} />
-      <ObjectArt parts={PLINTH_ART} tone={MARBLE} />
+      <SetArt parts={PLINTH_ART} tone={MARBLE} />
       <Piece x={PIECE_PLINTH.x} base={PIECE_PLINTH.base} lying />
-      <View style={styles.rope} />
-      <ObjectArt parts={ROPE_ART} tone={WOOD} />
+      <SetArt parts={ROPE_ART} tone={GILT} />
+      <SetArt parts={VELVET_ART} tone={VELVET} />
       <Animated.View style={[styles.screen, screen]}>
         {[0, 1, 2].map((k) => <View key={k} style={[styles.screenPanel, { left: k * 22 }]} />)}
       </Animated.View>
@@ -451,7 +514,10 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: INK,
   },
   drain: { position: 'absolute', left: PIECE.w / 2 - 4.5, top: 18, width: 3, height: 3, borderRadius: 1.5, backgroundColor: INK },
-  paint: { position: 'absolute', left: 4, bottom: 3, width: 12, height: 2, borderRadius: 1, backgroundColor: INK },
+  paint: { position: 'absolute', left: 4, bottom: 3, width: 12, height: 2, borderRadius: 1, backgroundColor: INK, transformOrigin: '0% 50%' },
+  rider: { position: 'absolute', left: 0, top: 0 },
+  brush: { position: 'absolute', left: -0.9, top: -1, width: 1.8, height: 11, borderRadius: 0.9, backgroundColor: INK, transformOrigin: '50% 0%' },
+  bristle: { position: 'absolute', left: -1.6, top: 9, width: 3.2, height: 4, borderRadius: 1.6, backgroundColor: INK },
   cloth: {
     position: 'absolute', left: PIECE_TABLE.x - 17, top: PIECE_TABLE.base - PIECE.h - 4, width: 34, height: PIECE.h + 4,
     borderTopLeftRadius: 14, borderTopRightRadius: 14, borderRadius: 3, backgroundColor: OLIVE, borderWidth: 1.2, borderColor: INK,

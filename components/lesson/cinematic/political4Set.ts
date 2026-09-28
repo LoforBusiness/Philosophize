@@ -1,4 +1,6 @@
 import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SETS OF political-political-4 — A FENCED GARDEN, AND A VILLAGE SCHOOLROOM.
@@ -77,27 +79,60 @@ export const DESKS = [104, 166];
 export const SHELF = { x0: 356, x1: 396, top: 410 };
 export const HOOK = { x: 76, y: 424 };
 
-export function desks(): ObjPart[] {
+// ── THE SCHOOLROOM, REDRAWN 2026-09-28 against references ───────────────────
+//
+// Owner: the second scene's objects *"seem to be more cheap"*. It was a bare wall, two
+// small tables on sticks, a door frame of three bars and a box. Now (references: the
+// Victorian schoolroom at Allerford Museum and at Sevington, Wikimedia Commons): a
+// panelled WAINSCOT to dado height with its rail, long wooden DESKS with a sloped lid
+// on a shelf and a bench in front, a panelled DOOR in its moulded frame, a BOOKCASE
+// with a cornice and three shelves.
+
+/** The wainscot: panelling from the floor to a dado rail. */
+export function wainscot(): SetPart[] {
+  const parts: SetPart[] = [
+    oRect('mass', 200, 471, 400, 58),
+    oRect('mass', 200, 442, 404, 4, 0, 1),
+  ];
+  for (const px of [96, 150, 212, 262]) parts.push(oRect('face', px, 472, 40, 1.2), oRect('face', px - 20, 472, 1.2, 42), oRect('face', px + 20, 472, 1.2, 42));
+  return parts;
+}
+/** Two long school desks: a sloped lid on a shelf, end frames, and a bench in front. */
+export function desks(): SetPart[] {
   return DESKS.flatMap((x) => [
-    oBar('mass', x - 14, 470, x - 14, GROUND, 3),
-    oBar('mass', x + 14, 470, x + 14, GROUND, 3),
-    oRect('mass', x, 466, 36, 6, -6, 1.5),
-    oRect('mass', x + 26, 482, 16, 4, 0, 1),
-    oBar('mass', x + 32, 484, x + 32, GROUND, 2.4),
+    oBar('mass', x - 15, 470, x - 17, GROUND, 3),
+    oBar('mass', x + 15, 470, x + 17, GROUND, 3),
+    oBar('mass', x - 16, 488, x + 16, 488, 2),
+    oRect('mass', x, 474, 30, 8, 0, 1),
+    oPoly('mass', [x - 20, 468, x + 20, 462, x + 20, 466, x - 20, 472]),
+    oRect('face', x, 476, 26, 3),
+    oRect('mass', x + 28, 482, 18, 4, 0, 1),
+    oBar('mass', x + 21, 484, x + 21, GROUND, 2.4),
+    oBar('mass', x + 35, 484, x + 35, GROUND, 2.4),
   ]);
 }
-export function doorway(): ObjPart[] {
+/** The door: a moulded frame round a four-panelled leaf, standing open. */
+export function doorway(): SetPart[] {
   const { x0, x1, top } = DOOR;
   return [
-    oBar('mass', x0, top, x0, GROUND, 4),
-    oBar('mass', x1, top, x1, GROUND, 4),
-    oBar('mass', x0 - 2, top, x1 + 2, top, 5),
-    oRect('mass', x1 + 6, (top + GROUND) / 2, 8, GROUND - top - 4, 0, 1.5),
+    oBar('mass', x0, top, x0, GROUND, 5),
+    oBar('mass', x1, top, x1, GROUND, 5),
+    oRect('mass', (x0 + x1) / 2, top - 1, x1 - x0 + 12, 7, 0, 1),
+    oRect('mass', x1 + 7, (top + GROUND) / 2 + 1, 10, GROUND - top - 2, 0, 1),
+    oRect('face', x1 + 7, top + 22, 6, 30, 0, 0.5),
+    oRect('face', x1 + 7, top + 70, 6, 36, 0, 0.5),
+    oEll('dark', x1 + 10, top + 54, 2.4, 2.4),
   ];
 }
-export function bookshelf(): ObjPart[] {
+export function bookshelf(): SetPart[] {
   const { x0, x1, top } = SHELF;
-  const parts: ObjPart[] = [oRect('mass', (x0 + x1) / 2, (top + GROUND) / 2, x1 - x0, GROUND - top, 0, 2)];
-  for (const y of [436, 466]) parts.push(oRect('dark', (x0 + x1) / 2, y + 10, x1 - x0 - 8, 22, 0, 1));
-  return parts;
+  const cx = (x0 + x1) / 2;
+  const w = x1 - x0;
+  return [
+    oRect('mass', cx, (top + GROUND) / 2, w, GROUND - top, 0, 1),
+    oRect('mass', cx, top - 2, w + 6, 5, 0, 1),
+    oRect('mass', cx, GROUND - 3, w + 4, 6, 0, 1),
+    ...[438, 466].map((y) => oRect('dark', cx, y + 1, w - 6, 24, 0, 0.5)),
+    ...[450, 478].map((y) => oRect('mass', cx, y + 2, w - 4, 3)),
+  ];
 }

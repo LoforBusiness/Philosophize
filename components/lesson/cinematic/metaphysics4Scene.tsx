@@ -4,13 +4,14 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './metaphysics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -20,10 +21,11 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { attendAt } from './attend';
+import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
-  desk, box, bust, frame, mountains, hillGate, signpost, fallRocks, onCanvas,
-  DESK, BOX, BUST, CANVAS, MINI, ARM_IS, ARM_NOT, LANTERN, GATE, FALL, ACORN, FOCUS_ROAD,
+  desk, box, bust, frame, range, hill, meadow, road, roadNot, ruts, gate, cliff, water, post, onCanvas,
+  DESK, BOX, BUST, CANVAS, MINI, ARM_IS, ARM_NOT, LANTERN, GATE, FALL, ACORN, FOCUS_ROAD, POST,
 } from './metaphysics4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -51,7 +53,7 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // COMPOSITION, in stage units. The study: the desk 56–146 at 466 with the box at 126
 // and the bust at 76; the painting 238–350 × 340–408. The road: the signpost at 250
 // with its arms over 212–306 at 386–412, the gate on its hill at 64, the waterfall at
-// 360, the acorn at 186. He stands at 150 in the study; 196, 110 and 146 on the road.
+// 360, the acorn at 186. He stands at 150 in the study and lands at 150 on the road (clear of the fork the camera pulls back from), then 110 and 146.
 // Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,9 @@ const LIP = lipOf(TONE);
 const WALL = stageToneOf(SAGE);
 const WOOD = stageToneOf(OLIVE);
 const STONEWARE = stageToneOf(DEEP);
+const GRASS = stageToneOf(SAGE);
+/** Rock is olive-grey, not the pale teal — drawn in the sky's tone the cliff read as a block of ice. */
+const ROCK = { RULE: WOOD.RULE, STONE: WOOD.STONE, SHADE: WOOD.SHADE, EDGE: WOOD.EDGE };
 const SKY = stageToneOf(TEAL);
 const TR = 0.85;
 
@@ -74,6 +79,8 @@ const MID = { x: STAGE_W / 2, y: 401 };
 /** Into the painting: where the fork is on the canvas, and how deep the push goes. */
 const FOCUS_STUDY = onCanvas(FOCUS_ROAD.x, FOCUS_ROAD.y);
 const Z_STUDY = PORTAL_Z / MINI;
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(Z_STUDY) - PORTAL.swapFor / 2;
 
 const X = BEATS.map((b) => b.x ?? 146);
 const P = BEATS.map((b) => b.p ?? 0);
@@ -126,7 +133,7 @@ export default function Metaphysics4Scene({
   clock, bt, bi, i, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(20);
+  const cv = useCarry(23);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -149,7 +156,7 @@ export default function Metaphysics4Scene({
     };
 
     // ── the change (b3), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, Z_STUDY);
     const world = A_ENTER[n] ? pt.world : ROAD[n];
     const kStudy = A_ENTER[n] ? pt.out : ROAD[n];
     const kRoad = A_ENTER[n] ? pt.into : 1 - ROAD[n];
@@ -161,13 +168,13 @@ export default function Metaphysics4Scene({
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
     // across the change he is moved while he cannot be seen, and turned the same way
-    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const swapU = pt.swapU;
     const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
     const dirV = A_ENTER[n]
-      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      ? facing(DIR[p], DIR[n], b - SWAP_FROM)
       : walking
         ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
         : facing(DIR[p], DIR[n], b);
@@ -205,8 +212,23 @@ export default function Metaphysics4Scene({
     const fieldV = ORDER[n] ? pickAt(FIELD_AT, pickPos.value) : 0;
     const goneV = ORDER[n] ? pickAt(GONE_AT, pickPos.value) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening, when it happens — and at nothing (weight 0, his pose's
+    // own head) when nothing is. The generated gaze aimed every beat at the middle of
+    // the picture, which on this set is the sky over the mountains.
+    const LK = A_BOX[n] ? [0.3, BOX.x, DESK.top - 10, 1, L * 0.55, BUST.x, 440, 0.85, L * 0.85, 0, 0, 0]
+      : A_THINK[n] ? [0.6, BOX.x, DESK.top - 8, 1, 1.0, BOX.x, lerp(DESK.top - 6, 440, rise), 1, 4.2, BOX.x, 440, 0.7, 6.0, 0, 0, 0]
+      : A_TAKE[n] ? [0.1, BOX.x, 440, 1, 1.3, x - 22, 446, 1, 2.4, 110, 392, 0.8, 4.0, x - 22, 446, 0.8]
+      : A_ENTER[n] ? [PORTAL.outTo, POST.x, ARM_IS.y, 1, PORTAL.outTo + 1.2, 0, 0, 0]
+      : A_REJECT[n] ? [0.2, GATE.x + 8, 408, 1, L * 0.42, 330, 460, 0.9, L * 0.62, GATE.x + 8, 408, 1, L * 0.95, 0, 0, 0]
+      : A_FREEZE[n] ? [L * 0.06, FALL.x, 452, 1, L * 0.3, 166, 428, 0.9, L * 0.55, FALL.x, 452, 0.8, L * 0.9, 0, 0, 0]
+      : A_GROW[n] ? [arrive + 0.1, ACORN.x, GROUND - 6, 1, L * 0.55, ACORN.x, 470, 1, L * 0.8, ACORN.x, 452, 1, L * 0.95, FALL.x, 452, 0.6]
+      : ORDER[n] ? [0.3, LANTERN.x, LANTERN.y, 1]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: hideLeadWhile(lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 20, n, lk.x, lk.x, tr), carry(cv, 21, n, lk.y, lk.y, tr), carry(cv, 22, n, 0, lk.w, tr)), A_ENTER[n] === 1 && b < PORTAL.outTo + 0.2),
       world: carry(cv, 1, n, ROAD[p], world, A_ENTER[n] ? 1 : tr),
       kStudy: carry(cv, 2, n, ROAD[p], kStudy, A_ENTER[n] ? 1 : tr),
       kRoad: carry(cv, 3, n, 1 - ROAD[p], kRoad, A_ENTER[n] ? 1 : tr),
@@ -248,7 +270,7 @@ export default function Metaphysics4Scene({
     const xf = inRoad
       ? portalXf(k, FOCUS_ROAD.x, FOCUS_ROAD.y, MID.x, MID.y)
       : portalXf(k, FOCUS_STUDY.x, FOCUS_STUDY.y, MID.x, MID.y, Z_STUDY);
-    return { opacity: figureAt(s), ...xf };
+    return { opacity: 1, ...xf };
   });
   const roadWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kRoad) : 0));
   const studyWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudy));
@@ -293,10 +315,18 @@ const DESK_ART = desk();
 const BOX_ART = box();
 const BUST_ART = bust();
 const FRAME_ART = frame();
-const MOUNT_ART = mountains();
-const HILL_ART = hillGate();
-const POST_ART = signpost();
-const ROCK_ART = fallRocks();
+const RANGE_ART = range();
+const HILL_ART = hill();
+const MEADOW_ART = meadow();
+const ROAD_ART = road();
+const ROAD_NOT_ART = roadNot();
+const RUT_ART = ruts();
+const GATE_ART = gate();
+const CLIFF_ART = cliff();
+const WATER_ART = water();
+const POST_ART = post();
+/** The road is dirt: the olive's palest tone for the surface, its shade for the ruts. */
+const DIRT = { RULE: WOOD.RULE, STONE: WOOD.RULE, SHADE: WOOD.SHADE, EDGE: WOOD.EDGE };
 
 // ── the study: the box's lid, and the thought that becomes a thing ───────────
 
@@ -358,27 +388,32 @@ function Road({ S }: { S: SharedValue<any> }) {
   return (
     <>
       <View style={styles.sky} />
+      <View style={styles.haze} />
       <Animated.View style={[styles.sun, sun]} />
-      <ObjectArt parts={MOUNT_ART} tone={SKY} />
-      <View style={styles.meadow} />
-      <ObjectArt parts={HILL_ART} tone={WOOD} />
-      <View style={[styles.path, styles.pathIs]} />
-      <Animated.View style={[styles.path, styles.pathNot, notRoad]} />
+      <SetArt parts={RANGE_ART} tone={SKY} line={1.6} />
+      <SetArt parts={HILL_ART} tone={GRASS} />
+      <SetArt parts={MEADOW_ART} tone={GRASS} />
+      <View style={styles.roadFloor} />
+      <SetArt parts={ROAD_ART} tone={DIRT} line={1.6} />
+      <Animated.View style={[StyleSheet.absoluteFill, notRoad]}>
+        <SetArt parts={ROAD_NOT_ART} tone={DIRT} line={1.6} />
+      </Animated.View>
+      <SetArt parts={RUT_ART} tone={DIRT} line={0} />
+      <SetArt parts={GATE_ART} tone={WOOD} line={1.6} />
       <Animated.View style={[styles.fog, fog]} />
-      <ObjectArt parts={ROCK_ART} tone={SKY} />
+      <SetArt parts={CLIFF_ART} tone={ROCK} />
+      <SetArt parts={WATER_ART} tone={SKY} line={1.6} />
       <Water S={S} />
       <Leaf S={S} />
       <Sapling S={S} />
-      <ObjectArt parts={POST_ART} tone={WOOD} />
+      <SetArt parts={POST_ART} tone={WOOD} />
       <Lantern S={S} />
-      <View style={styles.roadFloor} />
     </>
   );
 }
 function Water({ S }: { S: SharedValue<any> }) {
   return (
     <>
-      <View style={styles.fall} />
       {[0, 1, 2].map((k) => <Streak key={k} S={S} k={k} />)}
     </>
   );
@@ -496,18 +531,11 @@ const styles = StyleSheet.create({
   // ── the road ──────────────────────────────────────────────────────────────
   sky: { position: 'absolute', left: 0, right: 0, top: ROAD_TOP, height: 170, backgroundColor: SKY.STONE },
   sun: { position: 'absolute', left: GATE.x - 13, top: 344, width: 26, height: 26, borderRadius: 13, backgroundColor: EMBER },
-  meadow: { position: 'absolute', left: 0, right: 0, top: 436, height: 64, backgroundColor: stageToneOf(SAGE).SHADE },
-  path: { position: 'absolute', height: 10, borderRadius: 5, backgroundColor: PAPER_LIT, transformOrigin: '0% 50%' },
-  pathIs: { left: FOCUS_ROAD.x, top: 494, width: 176, transform: [{ rotate: '-162deg' }] },
-  pathNot: { left: FOCUS_ROAD.x + 10, top: 494, width: 170, transform: [{ rotate: '-8deg' }] },
+  haze: { position: 'absolute', left: 0, right: 0, top: 392, height: 70, backgroundColor: SKY.RULE, opacity: 0.7 },
   fog: {
     position: 'absolute', left: 280, top: 438, width: 150, height: 44, borderRadius: 22, backgroundColor: PAPER_LIT,
   },
-  fall: {
-    position: 'absolute', left: FALL.x - 11, top: FALL.top + 2, width: 20, height: FALL.bottom - FALL.top - 2, borderRadius: 4,
-    backgroundColor: TEAL,
-  },
-  streak: { position: 'absolute', top: FALL.top + 4, width: 2, height: 10, borderRadius: 1, backgroundColor: PAPER_LIT },
+  streak: { position: 'absolute', top: FALL.top + 4, width: 1.6, height: 10, borderRadius: 0.8, backgroundColor: SKY.SHADE },
   leaf: {
     position: 'absolute', left: -4, top: -2.5, width: 8, height: 5, borderRadius: 2.5, backgroundColor: OLIVE,
     borderWidth: 0.8, borderColor: INK,

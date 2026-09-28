@@ -4,13 +4,15 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
+import { attendAt } from './attend';
 import { BEATS } from './political4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -20,9 +22,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
-  fence, soapbox, gardenTable, well, desks, doorway, bookshelf,
+  fence, soapbox, gardenTable, well, desks, doorway, bookshelf, wainscot,
   FENCE, SOAPBOX, CAKE, PRIMER, WELL, CHART, CHART_A, PAGE_A_H, DOOR, DESKS, HOOK,
 } from './political4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
@@ -69,6 +71,20 @@ const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
 /** The page's A is smaller than the chart's by this, so the garden is pushed in that much deeper. */
 const Z_GARDEN = PORTAL_Z * (CHART_A.h / PAGE_A_H);
+/**
+ * How long the camera holds before it pushes in on the change beat: time for him to
+ * step clear of the thing it goes into, so he leaves the frame at his own size
+ * rather than being faded out while he is large (portal.ts, STAND CLEAR).
+ */
+const DELAY = 1.3;
+/** Where he stands the open primer on the garden table — the camera goes into its A there. */
+const PRIMER_REST = { x: 224, y: 464 };
+/** Where he steps back to before the push: toward the gate, clear of the primer. */
+const GARDEN_BACK = 302;
+/** When he steps back: once the primer is standing, before the camera moves. */
+const BACK_AT = 0.6;
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(Z_GARDEN, undefined, DELAY) - PORTAL.swapFor / 2;
 /** The primer, held open: where the page's A sits from his hand. */
 const A_FROM_HAND = { x: -8, y: -9 };
 /** b0: in from outside the fence. b3: across to the soapbox. b4: across to the gate. */
@@ -135,7 +151,7 @@ export default function Political4Scene({
   clock, bt, bi, i, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(14);
+  const cv = useCarry(17);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -158,7 +174,7 @@ export default function Political4Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, Z_GARDEN, undefined, DELAY);
     const world = A_SCHOOL[n] ? pt.world : SCHOOL[n];
     const kGarden = A_SCHOOL[n] ? pt.out : SCHOOL[n];
     const kSchool = A_SCHOOL[n] ? pt.into : 1 - SCHOOL[n];
@@ -170,12 +186,19 @@ export default function Political4Scene({
     const walking = !leg && !A_SCHOOL[n] && Math.abs(xn - xp) > 1;
     const walkDur = moveTr(xp, xn, TR);
     const walkU = walking ? ease01(b / walkDur) : 1;
-    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
-    const target = leg ? leg.x : xn;
-    const x = n === 0 ? target : carry(cv, 0, n, xp, target, A_SCHOOL[n] ? swapU : leg ? 1 : walking ? walkU : tr);
+    const swapU = pt.swapU;
+    // THE CHANGE, STAGED (portal.ts, STAND CLEAR): he stands the primer open on the table,
+    // steps back toward the gate, and only then does the camera push into its A — so the
+    // push carries him out of frame at his own size instead of fading him out.
+    const backDur = moveTr(xp, GARDEN_BACK, TR);
+    const backU = A_SCHOOL[n] ? ease01(clamp01((b - BACK_AT) / backDur)) : 0;
+    const backWalk = A_SCHOOL[n] && world < 0.5 && backU > 0 && backU < 1;
+    const target = A_SCHOOL[n] ? (world < 0.5 ? lerp(xp, GARDEN_BACK, backU) : xn) : leg ? leg.x : xn;
+    const x = n === 0 ? target : carry(cv, 0, n, xp, target, A_SCHOOL[n] ? 1 : leg ? 1 : walking ? walkU : tr);
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
+    if (backWalk) s = travelStance(xp, GARDEN_BACK, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), backU, WALK, 0);
     if (leg && leg.u > 0 && leg.u < 1) {
       const from = A_ENTER[n] ? IN_FROM : xp;
       s = travelStance(from, xn, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
@@ -187,8 +210,9 @@ export default function Political4Scene({
     const stepLift = A_OWN[n] ? pulse(arriveBox + 0.15, arriveBox + 0.35, arriveBox + 0.55) : A_OTHERS[n] ? pulse(0.15, 0.35, 0.55) : 0;
     s = { ...s, footR: { x: s.footR.x + 4 * stepLift, y: s.footR.y - 10 * stepLift } };
     const was = facing(DIR[p], DIR[p], b);
+    // stepping back toward the gate he turns the way he walks, and keeps facing it
     let dirV = A_SCHOOL[n]
-      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      ? facing(DIR[p], DIR[n], b - BACK_AT)
       : walking
         ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
         : facing(DIR[p], DIR[n], b);
@@ -209,8 +233,12 @@ export default function Political4Scene({
     // ── the primer (b5): off the table, held open ───────────────────────────
     const pick = A_PRIMER[n] ? pulse(1.0, 1.4, 1.8) : 0;
     s = handOn(s, x, gy, dir, PRIMER.x, PRIMER.y - 2, pick);
-    const holding = A_PRIMER[n] ? sec(1.7, 2.2) : A_SCHOOL[n] ? 1 - clamp01(world * 2) : HOLDING[n];
-    s = mixStance(s, { ...s, fistR: { x: 18, y: -32 }, fistL: { x: 12, y: -30 } }, holding * (1 - pick));
+    const setDown = A_SCHOOL[n] ? pulse(0.05, 0.35, 0.6) : 0;
+    const placed = A_SCHOOL[n] ? sec(0.3, 0.38) : 0;
+    const holding = A_PRIMER[n] ? sec(1.7, 2.2) : A_SCHOOL[n] ? 1 - placed : HOLDING[n];
+    s = mixStance(s, { ...s, fistR: { x: 18, y: -32 }, fistL: { x: 12, y: -30 } }, holding * (1 - pick) * (1 - setDown));
+    // on the change beat he stands it open on the table and lets go
+    s = handOn(s, x, gy, dir, PRIMER_REST.x, PRIMER_REST.y - 6, setDown);
     // ── at the chart in the schoolroom (b7) ─────────────────────────────────
     const chart = A_STATE[n] ? pulse(1.2, 1.7, 4.6) : 0;
     s = handOn(s, x, gy, dir, CHART.x0 + 6, 396, chart);
@@ -227,11 +255,25 @@ export default function Political4Scene({
     const primerHeld = A_PRIMER[n] ? sec(1.35, 1.45) : HOLDING[n] || A_SCHOOL[n] ? 1 : 0;
 
     // ── the schoolroom ───────────────────────────────────────────────────────
-    const positive = A_SCHOOL[n] ? sec(PORTAL.outTo + 0.2, PORTAL.outTo + 0.6) : SCHOOL[n];
+    const positive = A_SCHOOL[n] ? sec((PORTAL.outTo + DELAY) + 0.2, (PORTAL.outTo + DELAY) + 0.6) : SCHOOL[n];
     const state = A_STATE[n] ? st(0.28, 0.4) : STATE[n];
 
+    // ── WHERE HE LOOKS (attend.ts): at the thing in hand, the thing lighting up ──
+    const page = x + 14 * dir;
+    const LK = A_ENTER[n] ? [1.0, 180, 462, 0.7, 3.0, 0, 0, 0]
+      : A_NEG[n] ? [L * 0.15, 150, 452, 1, L * 0.8, 0, 0, 0]
+      : A_HARM[n] ? [L * 0.26, 60, 452, 1, L * 0.36, 180, 452, 1, L * 0.48, 290, 452, 1, L * 0.85, 0, 0, 0]
+      : A_OWN[n] ? [0.2, CAKE.x, CAKE.y, 1, 1.0, 0, 0, 0, arriveBox + 0.6, 200, 440, 0.5, arriveBox + 3.4, 0, 0, 0]
+      : A_OTHERS[n] ? [TO_GATE + 1.0, WELL.x, WELL.top + 16, 1, L * 0.9, WELL.x, WELL.top + 16, 0.6]
+      : A_PRIMER[n] ? [0.6, PRIMER.x, PRIMER.y, 1, 1.8, page, gy - 38, 1]
+      : A_SCHOOL[n] ? [(PORTAL.outTo + DELAY), CHART_A.x, CHART_A.y, 1]
+      : A_STATE[n] ? [0.4, CHART_A.x, CHART_A.y, 1, L * 0.26, (DOOR.x0 + DOOR.x1) / 2, DOOR.top - 12, 1, L * 0.8, 0, 0, 0]
+      : ODD[n] ? [0.3, 160, 430, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, gy, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: hideLeadWhile(lookPose(fig, x, gy, K_M, dirV, 1, carry(cv, 14, n, lk.x, lk.x, tr), carry(cv, 15, n, lk.y, lk.y, tr), carry(cv, 16, n, 0, lk.w, tr)), A_SCHOOL[n] === 1 && b < (PORTAL.outTo + DELAY) + 0.2),
       world: carry(cv, 1, n, SCHOOL[p], world, A_SCHOOL[n] ? 1 : tr),
       kGarden: carry(cv, 2, n, SCHOOL[p], kGarden, A_SCHOOL[n] ? 1 : tr),
       kSchool: carry(cv, 3, n, 1 - SCHOOL[p], kSchool, A_SCHOOL[n] ? 1 : tr),
@@ -242,6 +284,7 @@ export default function Political4Scene({
       inHand: carry(cv, 8, n, 0, inHand, tr),
       others: carry(cv, 9, n, OTHERS[p], others, tr),
       primerHeld: carry(cv, 10, n, HOLDING[p], primerHeld, tr),
+      placed: A_SCHOOL[n] && world < 0.5 ? placed : 0,
       positive: carry(cv, 11, n, SCHOOL[p], positive, tr),
       state: carry(cv, 12, n, STATE[p], state, tr),
       ring: carry(cv, 13, n, 0, ODD[n], tr),
@@ -258,7 +301,7 @@ export default function Political4Scene({
     const w = DF.value.wrR;
     return {
       opacity: 1 - SCENE.value.world,
-      ...portalXf(SCENE.value.kGarden, w[0].translateX + A_FROM_HAND.x, w[1].translateY + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN),
+      ...portalXf(SCENE.value.kGarden, lerp(w[0].translateX, PRIMER_REST.x, SCENE.value.placed) + A_FROM_HAND.x, lerp(w[1].translateY, PRIMER_REST.y, SCENE.value.placed) + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN),
     };
   });
   const schoolXf = useAnimatedStyle(() => ({
@@ -272,8 +315,8 @@ export default function Political4Scene({
     const s = inSchool ? portalScale(k) : portalScale(k, Z_GARDEN);
     const xf = inSchool
       ? portalXf(k, CHART_A.x, CHART_A.y, MID.x, MID.y)
-      : portalXf(k, w[0].translateX + A_FROM_HAND.x, w[1].translateY + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN);
-    return { opacity: figureAt(s), ...xf };
+      : portalXf(k, lerp(w[0].translateX, PRIMER_REST.x, SCENE.value.placed) + A_FROM_HAND.x, lerp(w[1].translateY, PRIMER_REST.y, SCENE.value.placed) + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN);
+    return { opacity: 1, ...xf };
   });
   const schoolWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kSchool) : 0));
   const gardenWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kGarden));
@@ -308,6 +351,9 @@ const WELL_ART = well();
 const DESK_ART = desks();
 const DOOR_ART = doorway();
 const SHELF_ART = bookshelf();
+const WAINSCOT_ART = wainscot();
+/** The wainscot is painted wood, a shade deeper than the wall above it. */
+const PANEL = { ...stageToneOf(TEAL), STONE: stageToneOf(TEAL).STONE };
 
 /** A capital A drawn in strokes, not type, so a zoom through it is a picture, not a word. */
 function LetterA({ h, x, y, color }: { h: number; x: number; y: number; color: string }) {
@@ -385,7 +431,11 @@ function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
   });
   const primer = useAnimatedStyle(() => {
     const w = DF.value.wrR;
-    return { opacity: S.value.primerHeld, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
+    const u = S.value.placed;
+    return {
+      opacity: S.value.primerHeld,
+      transform: [{ translateX: lerp(w[0].translateX, PRIMER_REST.x, u) }, { translateY: lerp(w[1].translateY, PRIMER_REST.y, u) }],
+    };
   });
   return (
     <>
@@ -410,21 +460,24 @@ function School({ S }: { S: SharedValue<any> }) {
   return (
     <>
       <View style={styles.schoolWall} />
+      <SetArt parts={WAINSCOT_ART} tone={PANEL} />
       <View style={styles.outside} />
-      <ObjectArt parts={DOOR_ART} tone={WOOD} />
+      <SetArt parts={DOOR_ART} tone={WOOD} />
       <View style={styles.hook} />
       <View style={styles.satchel} />
       <View style={styles.chart}>
         {[0, 1, 2, 3].map((k) => <View key={k} style={[styles.chartRule, { top: 14 + k * 11 }]} />)}
       </View>
       <LetterA h={CHART_A.h} x={CHART_A.x} y={CHART_A.y} color={INK} />
-      <ObjectArt parts={DESK_ART} tone={WOOD} />
+      <SetArt parts={DESK_ART} tone={WOOD} />
       <View style={styles.paper} />
-      <ObjectArt parts={SHELF_ART} tone={WOOD} />
+      <SetArt parts={SHELF_ART} tone={WOOD} />
       <View style={styles.books}>
         {[0, 1, 2, 3, 4].map((k) => <View key={k} style={[styles.bookSpine, { left: 3 + k * 6, height: 14 + (k % 3) * 3 }]} />)}
       </View>
-      <Animated.View style={[styles.lamp, lamp]} />
+      <View style={styles.cord} />
+      <View style={styles.globe} />
+      <Animated.View style={[styles.glow, lamp]} />
       <View style={styles.schoolFloor} />
     </>
   );
@@ -521,7 +574,12 @@ const styles = StyleSheet.create({
   },
   books: { position: 'absolute', left: 360, top: 424, width: 34, height: 22 },
   bookSpine: { position: 'absolute', bottom: 0, width: 5, borderRadius: 1, backgroundColor: EMBER, borderWidth: 0.8, borderColor: INK },
-  lamp: { position: 'absolute', left: 190, top: 296, width: 14, height: 10, borderBottomLeftRadius: 7, borderBottomRightRadius: 7, backgroundColor: EMBER },
+  cord: { position: 'absolute', left: 196.4, top: 288, width: 1.2, height: 18, backgroundColor: INK },
+  globe: {
+    position: 'absolute', left: 190, top: 305, width: 14, height: 14, borderRadius: 7, backgroundColor: PAPER_LIT,
+    borderWidth: 1.4, borderColor: INK,
+  },
+  glow: { position: 'absolute', left: 193, top: 308, width: 8, height: 8, borderRadius: 4, backgroundColor: EMBER },
   schoolFloor: floorStyle(TONE, GROUND),
   pickRing: { position: 'absolute', left: 0, top: 0, borderWidth: 2.5, borderColor: EMBER },
 
@@ -533,8 +591,9 @@ const styles = StyleSheet.create({
   plateText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  negPlate: { left: 40, top: 420, width: 106 },
-  harmPlate: { left: 40, top: 402, width: 98 },
+  // high in the sky over the fence: on the soapbox his head stands where they used to be
+  negPlate: { left: 18, top: 358, width: 106 },
+  harmPlate: { left: 18, top: 340, width: 98 },
   othersPlate: { left: 306, top: 404, width: 92 },
   posPlate: { left: 96, top: 330, width: 104 },
   signPlate: { left: 4, top: 378, width: 88 },
