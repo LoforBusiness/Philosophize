@@ -3,432 +3,510 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './aesthetics4Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, pickAt, reactPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import { PORTAL, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import {
+  workTable, easel, plinth, frames, ropePosts,
+  PIECE_TABLE, EASELS, CANVAS_Y, PLINTH, PIECE_PLINTH, FRAMES, WINDOWS,
+} from './aesthetics4Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// aesthetics-aesthetics-4, "Can Anything Be Art?" — A STUDIO, AND THE EXHIBITION HALL
+// OF 1917.
+//
+// Redrawn 2026-09-27: the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). Every act is laid across its voiced line in stages.
+//
+//   b0   he pulls the cloth off a factory-made urinal on the work table.
+//   b1   ART? stands over it.
+//   b2   MIMESIS over the first easel: a painted apple beside a real one.
+//   b3   EXPRESSION over the second: a painting of a feeling.
+//   b4   he turns the urinal onto its back and signs it: R. MUTT 1917.
+//   b5   THE CHANGE: into the signed urinal, out of the same urinal on a plinth in an
+//        exhibition hall. A screen slides in front of it: REFUSED.
+//   b6   the screen goes, a spotlight comes on, and its plate reads FOUNTAIN.
+//   b8   a banner unrolls over the hall: THE ARTWORLD.
+//   b11  Q2: a ring finds the title plate, a painting, or the banner, bin by bin (R7c).
+//
+// COMPOSITION, in stage units. The studio: the work table 130–214 with the urinal at
+// 194, the easels at 44 and 98. The hall: the plinth at 196, the paintings 20–76 and
+// 318–380, arched windows at 120 and 272, the rope's posts at 158 and 234. He stands
+// at 232 in the studio and 250 in the hall. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('aesthetics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const MARBLE = stageToneOf(TEAL);
+const TR = 0.85;
 
-// A gallery that is also a scorecard.
-//
-// TOP — one pinned slot that changes its mind. On the hook it holds a single wide
-// wall card asking IS THIS ART?; from the second beat that card is taken down and
-// THREE TESTS FOR ART are pinned in its place: MIMESIS, EXPRESSION, ARTWORLD. Two
-// of them are the old answers; the third arrives with Danto and Dickie. When the
-// verdict lands, an ink cross is struck through the two the urinal defeats and a
-// tick is drawn on the one that explains it. That row of marks IS the lesson,
-// drawn rather than told — and the slot is never empty, so the hook beat no longer
-// opens on a blank upper third.
-//
-// BOTTOM — the readymade on its plinth, signed R. Mutt, with the artworld's ART
-// placard conferred on the plinth face. The fixture is drawn 96 units across so
-// the object the whole lesson argues about reads at a glance.
-//
-// COMPOSITION / OCCLUSION CONTRACT
-//   · Artist at x = 104 (spans ~56–152), viewer at x = 334 (spans ~286–382), both
-//     on GROUND = 500 with crowns near y 361. The artist's signing hand reaches
-//     the plinth's left edge without ever crossing in front of it.
-//   · The plinth column owns x 142–258 — the clear gap between the two figures.
-//   · The pinned slot sits at y 232–310 (tack included), entirely ABOVE both
-//     crowns, so a figure can never cover a verdict, and 6 units clear of the
-//     readymade's top edge at 316.
-//   · Nothing is drawn above y 224 or below the ankle joints at y ≈ 507.4, hence
-//     band [214, 512].
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, aesthetics-aesthetics-4. */
+const LINES = [7.68, 4.8, 7.68, 8, 7.24, 7.6, 7, 0, 9.08, 5.88, 0, 0, 0];
 
-const A_X = 104;
-const V_X = 334;
-const PED_X = 200;
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+const MID = { x: STAGE_W / 2, y: 401 };
+/** The urinal's box, upright; on its back it is the same box turned a quarter. */
+const PIECE = { w: 26, h: 30 };
+/** Into the signed urinal on the table, out of it on the plinth: its middle, lying down. */
+const FOCUS_STUDIO = { x: PIECE_TABLE.x, y: PIECE_TABLE.base - PIECE.w / 2 };
+const FOCUS_HALL = { x: PIECE_PLINTH.x, y: PIECE_PLINTH.base - PIECE.w / 2 };
 
-const CARD_W = 122;
-const CARD_H = 70;
-const CARD_T = 240;
-const CARD_L = [14, 141, 268];
-/** Headroom above each card for its tack, so nothing is drawn outside the wrapper. */
-const TACK_H = 8;
+const X = BEATS.map((b) => b.x ?? 250);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_UNVEIL = is('unveil');
+const A_ASK = is('ask');
+const A_MIM = is('mimesis');
+const A_EXP = is('express');
+const A_SIGN = is('sign');
+const A_ENTER = is('enter');
+const A_TITLE = is('title');
+const A_ART = is('artworld');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const BARE = flag((b) => b.bare);
+const ASKED = flag((b) => b.ask);
+const MIM = flag((b) => b.mim);
+const EXP = flag((b) => b.exp);
+const SIGNED = flag((b) => b.signed);
+const HALL = flag((b) => b.hall);
+const TITLED = flag((b) => b.titled);
+const ART = flag((b) => b.art);
+/** The sort is being answered: a ring finds each bin's thing in the hall (R7c). */
+const SORT = flag((b) => b.interact?.sort);
+/** Each bin's thing, in the bins' own order: saying so (the title plate), skilled craft (a painting), the artworld (the banner). */
+const PICK_X = [PLINTH.x, (FRAMES[0].x0 + FRAMES[0].x1) / 2, 196];
+const PICK_Y = [PLINTH.top + 26, (FRAMES[0].top + FRAMES[0].bottom) / 2, 308];
+const PICK_R = [30, 34, 34];
+/** Which way he faces once each beat settles: the table, the plinth and the easels are on his left. */
+const DIR = BEATS.map(() => -1);
 
-/** The hook's wall card fills the same slot the three test cards will take. */
-const ASK_L = 62;
-const ASK_W = 276;
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
 
-const TESTS = [
-  { id: 'mimesis', name: 'MIMESIS', sub: 'skilled imitation', pass: false },
-  { id: 'express', name: 'EXPRESSION', sub: 'feeling conveyed', pass: false },
-  { id: 'world', name: 'ARTWORLD', sub: 'institutions confer', pass: true },
-];
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
 
-const A_CODE = BEATS.map((b) => b.a ?? 0);
-const V_CODE = BEATS.map((b) => b.v ?? 0);
-const ASK = BEATS.map((b) => b.ask ?? 0);
-const TEST = BEATS.map((b) => b.test ?? 0);
-const VERD = BEATS.map((b) => b.verdict ?? 0);
-const SIGNED = BEATS.map((b) => b.signed ?? 0);
-const ART = BEATS.map((b) => b.art ?? 0);
-const OWN = BEATS.map((b) => b.own ?? 0);
-
-// ── the three tap events (group AH) ─────────────────────────────────────────
-// The ask card's own caption, once beat 1 restates the case as a question.
-const ASK_SUBS = ['NOT CARVED · NOT PAINTED · CHOSEN', 'A QUESTION OF DEFINITION'];
-// The plinth's status tag: the board's rejection, then the defence's new title.
-const STATUS_LABELS = ['', 'REFUSED', 'FOUNTAIN'];
-
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on.
-// Two figures at 104 and 334, so the track is the point BETWEEN them (219) — following
-// either one alone would frame the other out, and here the pair is the subject.
-const X = BEATS.map((b) => b.x ?? 219);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
-
-// WHERE THE PLACARD IS, in the SORT'S OWN ORDER: saying so · real skill · the art
-// world. `pickPos` runs across the bins as the author wrote them and rests on the
-// middle one before the reader moves the chip, so read straight off it the placard
-// sat at half opacity and nine-tenths size under "real skill": CONFERRED at 7.9px
-// and 0.5 (D35), on the one setting the comment in SCENE says cannot confer it (A1).
-const ART_AT = [0, 0, 1];
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics4'));
-
-export default function Aesthetics4Scene({ clock, bt, bi, pickPos, i }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldA = useHeld();
-  const cv = useCarry(7);
-  const heldV = useHeld();
-  const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-  // Three small labels that only re-fade on the beat that actually changes them
-  // (C20c) — the ask card's caption, the plinth's status tag, and the viewer's
-  // own-verdict prompt.
-  const askvFade = (cur.askv ?? 0) !== (prev?.askv ?? 0);
-  const statusFade = (cur.status ?? 0) !== (prev?.status ?? 0);
+export default function Aesthetics4Scene({
+  clock, bt, bi, i, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(16);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
-    const grow = ease01(bt.value / 0.55);
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
-    const v = keepHeld(heldV, mixStance(carryFrom(heldV, n, emoteHold(V_CODE[p], t)), emoteLive(V_CODE[n], t, bt.value), tr));
-    // ONE SLOT, TWO OCCUPANTS. The question card and the row of tests share the
-    // pinned strip, so they hand over in stages rather than cross-fading: the card
-    // is off the wall by 45% of the transition and the tests go up from 55%. A
-    // straight cross-fade left both sitting at half opacity on top of each other,
-    // which on a phone reads as a smudge.
-    const ask = carry(cv, 0, n, ASK[p], ASK[n], tr);
+    // ── the change (b5), and which set he is in otherwise ───────────────────
+    const pt = portalAt(b);
+    const world = A_ENTER[n] ? pt.world : HALL[n];
+    const kStudio = A_ENTER[n] ? pt.out : HALL[n];
+    const kHall = A_ENTER[n] ? pt.into : 1 - HALL[n];
+
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    const dirV = facing(DIR[p], DIR[n], b);
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── the cloth pulled off (b0) ────────────────────────────────────────────
+    const pull = A_UNVEIL[n] ? pulse(1.0, 1.4, 2.6) : 0;
+    s = handOn(s, x, dir, 1, PIECE_TABLE.x + 12 + 8 * sec(1.4, 2.2), PIECE_TABLE.base - 20 + 6 * sec(1.4, 2.2), pull);
+    // pointing to the easels (b2, b3)
+    const point = A_MIM[n] ? pulse(2.6, 3.2, 6.4) : A_EXP[n] ? pulse(0.6, 1.2, 5.2) : 0;
+    s = handOn(s, x, dir, 1, A_EXP[n] ? EASELS[1].x : EASELS[0].x, CANVAS_Y.top + 10, point);
+    // ── turned onto its back, and signed (b4) ───────────────────────────────
+    const turnHands = A_SIGN[n] ? pulse(0.5, 0.9, 2.4) : 0;
+    s = handOn(s, x, dir, 1, PIECE_TABLE.x + 12, PIECE_TABLE.base - 18, turnHands);
+    s = handOn(s, x, dir, -1, PIECE_TABLE.x + 10, PIECE_TABLE.base - 8, turnHands);
+    const signing = A_SIGN[n] ? pulse(3.0, 3.4, 5.4) : 0;
+    s = handOn(s, x, dir, 1, PIECE_TABLE.x + 10 - 6 * Math.sin(b * 9) * signing, PIECE_TABLE.base - 12, signing);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the studio ───────────────────────────────────────────────────────────
+    const bare = A_UNVEIL[n] ? sec(1.4, 2.4) : BARE[n];
+    const ask = A_ASK[n] ? st(0.3, 0.45) : ASKED[n];
+    const mim = A_MIM[n] ? st(0.4, 0.52) : MIM[n];
+    const exp = A_EXP[n] ? st(0.12, 0.25) : EXP[n];
+    const back = A_SIGN[n] ? sec(0.9, 2.0) : SIGNED[n];
+    const sig = A_SIGN[n] ? sec(3.4, 5.0) : SIGNED[n];
+
+    // ── the hall ─────────────────────────────────────────────────────────────
+    const screen = A_ENTER[n] ? sec(PORTAL.outTo + 0.4, PORTAL.outTo + 1.6) : A_TITLE[n] ? 1 - sec(0.4, 1.6) : 0;
+    const refused = A_ENTER[n] ? sec(PORTAL.outTo + 1.8, PORTAL.outTo + 2.1) : 0;
+    const spot = A_TITLE[n] ? sec(1.4, 2.4) : TITLED[n];
+    const title = A_TITLE[n] ? st(0.62, 0.72) : TITLED[n];
+    const banner = A_ART[n] ? st(0.62, 0.8) : ART[n];
+
     return {
-      a: pose(a, A_X, GROUND, K_FIG, 1, 1),
-      v: reactPose(v, V_X, GROUND, K_FIG, -1, 1),
-      test: carry(cv, 1, n, TEST[p], TEST[n], tr),
-      verdict: carry(cv, 2, n, VERD[p], VERD[n], tr),
-      signed: carry(cv, 3, n, SIGNED[p], SIGNED[n], tr),
-      // R7b — the arm hangs the ART placard. Only the far setting can put it there:
-      // saying the word does not, and skill does not, and the placard appears exactly
-      // when the reader reaches the artworld.
-      art: carry(cv, 4, n, ART[p], reacting ? pickAt(ART_AT, pickPos.value) : ART[n], tr),
-      askOn: ease01(clamp01((ask - 0.55) / 0.45)),
-      testsOn: ease01(clamp01((1 - ask - 0.55) / 0.45)),
-      // The ask card's caption and the plinth's status tag both swap their WORD on
-      // the beat that changes them, so each dips through zero rather than cross-
-      // fading two overlapping strings (the same trick as `fact`/`concl` above).
-      askv: carry(cv, 6, n, 1, 1, askvFade ? grow : 1),
-      status: (cur.status ?? 0) > 0 ? (statusFade ? grow : 1) : 0,
-      // The viewer's own-verdict tag is a plain presence, so it carries smoothly
-      // in and back out rather than popping (R5) — there is no label to protect.
-      own: carry(cv, 5, n, OWN[p], OWN[n], tr),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      world: carry(cv, 1, n, HALL[p], world, A_ENTER[n] ? 1 : tr),
+      kStudio: carry(cv, 2, n, HALL[p], kStudio, A_ENTER[n] ? 1 : tr),
+      kHall: carry(cv, 3, n, 1 - HALL[p], kHall, A_ENTER[n] ? 1 : tr),
+      bare: carry(cv, 4, n, BARE[p], bare, tr),
+      ask: carry(cv, 5, n, ASKED[p], ask, tr),
+      mim: carry(cv, 6, n, MIM[p], mim, tr),
+      exp: carry(cv, 7, n, EXP[p], exp, tr),
+      back: carry(cv, 8, n, SIGNED[p], back, tr),
+      sig: carry(cv, 9, n, SIGNED[p], sig, tr),
+      screen: carry(cv, 10, n, 0, screen, tr),
+      refused: carry(cv, 11, n, 0, refused, tr),
+      spot: carry(cv, 12, n, TITLED[p], spot, tr),
+      title: carry(cv, 13, n, TITLED[p], title, tr),
+      banner: carry(cv, 14, n, ART[p], banner, tr),
+      ring: carry(cv, 15, n, 0, SORT[n], tr),
+      ringX: SORT[n] ? pickAt(PICK_X, pickPos.value) : PICK_X[0],
+      ringY: SORT[n] ? pickAt(PICK_Y, pickPos.value) : PICK_Y[0],
+      ringR: SORT[n] ? pickAt(PICK_R, pickPos.value) : PICK_R[0],
+      t,
     };
   });
 
-  const DA = useDerivedValue<Bundle>(() => SCENE.value.a);
-  const DV = useDerivedValue<Bundle>(() => SCENE.value.v);
-
-  const titleStyle = useAnimatedStyle(() => ({
-    opacity: clamp01(SCENE.value.test * 2) * SCENE.value.testsOn,
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const studioXf = useAnimatedStyle(() => ({
+    opacity: 1 - SCENE.value.world,
+    ...portalXf(SCENE.value.kStudio, FOCUS_STUDIO.x, FOCUS_STUDIO.y, MID.x, MID.y),
   }));
-  const askStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.askOn,
-    transform: [{ translateY: (1 - SCENE.value.askOn) * -8 }],
+  const hallXf = useAnimatedStyle(() => ({
+    opacity: SCENE.value.world > 0.001 ? 1 : 0,
+    ...portalXf(SCENE.value.kHall, FOCUS_HALL.x, FOCUS_HALL.y, MID.x, MID.y),
   }));
-  const sigStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.signed }));
-  const artStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.art,
-    transform: [{ scale: 0.8 + 0.2 * ease01(SCENE.value.art) }],
-  }));
-  const askvStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.askv }));
-  const statusStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.status }));
-  const ownStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.own,
-    transform: [{ translateY: (1 - SCENE.value.own) * 6 }],
-  }));
+  const figXf = useAnimatedStyle(() => {
+    const inHall = SCENE.value.world >= 0.5;
+    const k = inHall ? SCENE.value.kHall : SCENE.value.kStudio;
+    const f = inHall ? FOCUS_HALL : FOCUS_STUDIO;
+    return { opacity: figureAt(portalScale(k)), ...portalXf(k, f.x, f.y, MID.x, MID.y) };
+  });
+  const hallWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kHall) : 0));
+  const studioWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudio));
 
   return (
-    <Animated.View style={styles.scene}>
-      {/* ── the hook's question, pinned in the slot the tests will take ──────── */}
-      <Animated.View style={[styles.askWrap, askStyle]} pointerEvents="none">
-        <View style={[styles.tack, { left: 44 }]} />
-        <View style={[styles.tack, { left: ASK_W - 55 }]} />
-        <View style={styles.askCard}>
-          <Text style={styles.askText} numberOfLines={1}>IS THIS ART?</Text>
-          <Animated.Text style={[styles.askSub, askvStyle]} numberOfLines={1}>{ASK_SUBS[cur.askv ?? 0]}</Animated.Text>
+    <View style={styles.scene}>
+      <Animated.View style={[styles.set, hallXf]} pointerEvents="none">
+        <Hall S={SCENE} />
+      </Animated.View>
+      <Animated.View style={[styles.set, studioXf]} pointerEvents="none">
+        <View style={styles.floor} />
+        <View style={styles.wall}>
+          {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
         </View>
+        {EASEL_ART.map((art, k) => <ObjectArt key={k} parts={art} tone={WOOD} />)}
+        <Canvases />
+        <ObjectArt parts={TABLE_ART} tone={WOOD} />
+        <Piece x={PIECE_TABLE.x} base={PIECE_TABLE.base} back={SCENE} />
+        <Cloth S={SCENE} />
+        <View style={styles.ground} />
       </Animated.View>
-
-      {/* ── the three tests, pinned above the gallery floor ──────────────────── */}
-      <Animated.Text style={[styles.title, titleStyle]}>THREE TESTS FOR ART</Animated.Text>
-      {TESTS.map((tst, k) => (
-        <Card key={tst.id} S={SCENE} k={k} name={tst.name} sub={tst.sub} pass={tst.pass} />
-      ))}
-
-      {/* the viewer's own-verdict prompt, under the ARTWORLD card, beat 9 only */}
-      <Animated.View style={[styles.ownWrap, ownStyle]} pointerEvents="none">
-        <Text style={styles.ownText}>YOUR VERDICT?</Text>
+      {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
+          word inside a transparent plate, and a set still nine times over on the change
+          beat puts that hidden word far off the stage (check:space). A word only shows
+          once its set has landed at scale 1, so over the sets is where it belongs. */}
+      <HallWords S={SCENE} words={hallWords} on={on} />
+      <StudioWords S={SCENE} words={studioWords} />
+      <Animated.View style={[styles.set, figXf]} pointerEvents="none">
+        <Stickman D={DF} k={K_M} />
       </Animated.View>
-
-      {/* ── the readymade, its plinth and the status conferred on it ─────────── */}
-      <View style={styles.readymade} pointerEvents="none">
-        <View style={styles.rim} />
-        <View style={styles.drain} />
-      </View>
-      <Animated.Text style={[styles.sig, sigStyle]}>R. Mutt 1917</Animated.Text>
-      <View style={styles.plinthTop} pointerEvents="none" />
-      <View style={styles.plinth} pointerEvents="none" />
-      {/* the board's rejection, then the defence's new title, on the plinth face */}
-      <Animated.View style={[styles.statusTag, statusStyle]} pointerEvents="none">
-        <Text style={styles.statusText}>{STATUS_LABELS[cur.status ?? 0]}</Text>
-      </Animated.View>
-      <Animated.View style={[styles.placard, artStyle]} pointerEvents="none">
-        <Text style={styles.placardT}>ART</Text>
-        <Text style={styles.placardS}>CONFERRED</Text>
-      </Animated.View>
-
-      <View style={styles.ground} pointerEvents="none" />
-      <Stickman role="second" D={DA} k={K_FIG} />
-      <Stickman D={DV} k={K_FIG} />
-    </Animated.View>
+      {on(SORT) ? <PickRing S={SCENE} /> : null}
+    </View>
   );
 }
 
-/**
- * One theory card. It fades up when its beat pins it to the wall, then takes its
- * mark: a struck cross if Fountain defeats it, a drawn tick if it survives.
- */
-function Card({
-  S, k, name, sub, pass,
-}: { S: SharedValue<any>; k: number; name: string; sub: string; pass: boolean }) {
-  const wrap = useAnimatedStyle(() => {
-    const on = ease01(clamp01(S.value.test - k));
-    // Once the verdict is in, the failing tests recede and the surviving one stays
-    // full strength — the row reads as an answer, not three equal options.
-    // 0.28, not 0.42. A failing row still has to be READ — it is what the verdict
-    // is a verdict about — and at 0.58 its wording landed at 2.3:1 (D35).
-    const fade = pass ? 1 : 1 - 0.28 * ease01(S.value.verdict);
-    return { opacity: on * fade * S.value.testsOn, transform: [{ translateY: (1 - on) * -8 }] };
+const TABLE_ART = workTable();
+const EASEL_ART = EASELS.map((e) => easel(e.x));
+const PLINTH_ART = plinth();
+const FRAME_ART = frames();
+const ROPE_ART = ropePosts();
+
+// ── the urinal: upright in the studio until it is turned onto its back ───────
+
+function Piece({ x, base, back, lying }: { x: number; base: number; back?: SharedValue<any>; lying?: boolean }) {
+  const st = useAnimatedStyle(() => {
+    const u = lying ? 1 : back ? back.value.back : 0;
+    return {
+      transform: [
+        { translateX: x - PIECE.w / 2 },
+        { translateY: base - PIECE.h + lerp(0, (PIECE.h - PIECE.w) / 2, u) - 5 * Math.sin(Math.PI * u) },
+        { rotate: `${-90 * u}deg` },
+      ],
+    };
   });
-  const box = useAnimatedStyle(() => ({
-    borderColor: pass && S.value.verdict > 0.5 ? INK : SOFT,
-  }));
-  const mark = useAnimatedStyle(() => {
-    const on = ease01(clamp01(S.value.verdict * 1.6 - k * 0.28));
-    return { opacity: on, transform: [{ scale: 0.55 + 0.45 * on }] };
-  });
+  const sig = useAnimatedStyle(() => ({ opacity: lying ? 1 : back ? back.value.sig : 0 }));
   return (
-    <Animated.View style={[styles.cardWrap, { left: CARD_L[k] }, wrap]} pointerEvents="none">
-      <View style={styles.tack} />
-      <Animated.View style={[styles.card, box]}>
-        <Text style={styles.cardName}>{name}</Text>
-        <Text style={styles.cardSub} numberOfLines={1}>{sub}</Text>
-        <Animated.View style={[styles.mark, mark]}>
-          {pass ? (
-            <>
-              <View style={styles.tickShort} />
-              <View style={styles.tickLong} />
-            </>
-          ) : (
-            <>
-              <View style={[styles.crossBar, { transform: [{ rotate: '45deg' }] }]} />
-              <View style={[styles.crossBar, { transform: [{ rotate: '-45deg' }] }]} />
-            </>
-          )}
-        </Animated.View>
-      </Animated.View>
+    <Animated.View style={[styles.piece, st]}>
+      <View style={styles.pieceRim} />
+      <View style={styles.basin} />
+      <View style={styles.drain} />
+      <Animated.View style={[styles.paint, sig]} />
     </Animated.View>
   );
 }
+function Cloth({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: 1 - S.value.bare,
+    transform: [{ translateX: 14 * S.value.bare }, { translateY: 10 * S.value.bare }, { rotate: `${12 * S.value.bare}deg` }],
+  }));
+  return <Animated.View style={[styles.cloth, st]} />;
+}
+function Canvases() {
+  return (
+    <>
+      <View style={[styles.canvas, { left: EASELS[0].x - 17 }]}>
+        <View style={styles.paintedApple} />
+        <View style={styles.paintedLeaf} />
+      </View>
+      <View style={styles.realApple} />
+      <View style={[styles.canvas, { left: EASELS[1].x - 17 }]}>
+        <View style={styles.wave1} />
+        <View style={styles.wave2} />
+        <View style={styles.tearSun} />
+      </View>
+    </>
+  );
+}
+function StudioWords({ S, words }: { S: SharedValue<any>; words: SharedValue<number> }) {
+  const ask = useAnimatedStyle(() => ({ opacity: S.value.ask * words.value * (1 - S.value.sig) }));
+  const mim = useAnimatedStyle(() => ({ opacity: S.value.mim * words.value }));
+  const exp = useAnimatedStyle(() => ({ opacity: S.value.exp * words.value }));
+  const sig = useAnimatedStyle(() => ({ opacity: S.value.sig * words.value }));
+  return (
+    <>
+      <Animated.View style={[styles.plate, styles.askPlate, ask]}>
+        <Text style={styles.plateText} numberOfLines={1}>ART?</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.mimPlate, mim]}>
+        <Text style={styles.plateText} numberOfLines={1}>MIMESIS</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.expPlate, exp]}>
+        <Text style={styles.plateText} numberOfLines={1}>EXPRESSION</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.sigPlate, sig]}>
+        <Text style={styles.plateText} numberOfLines={1}>R. MUTT 1917</Text>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the hall ─────────────────────────────────────────────────────────────────
+
+function Hall({ S }: { S: SharedValue<any> }) {
+  const screen = useAnimatedStyle(() => ({ transform: [{ translateX: lerp(-120, 0, S.value.screen) }] }));
+  const spot = useAnimatedStyle(() => ({ opacity: 0.3 * S.value.spot }));
+  return (
+    <>
+      <View style={styles.hallWall} />
+      {WINDOWS.map((wx) => <View key={wx} style={[styles.window, { left: wx - 20 }]} />)}
+      <ObjectArt parts={FRAME_ART} tone={WOOD} />
+      <View style={[styles.painting, { left: FRAMES[0].x0 + 4, top: FRAMES[0].top + 4, width: FRAMES[0].x1 - FRAMES[0].x0 - 8, height: FRAMES[0].bottom - FRAMES[0].top - 8 }]}>
+        <View style={styles.paintSea} />
+        <View style={styles.paintSun} />
+      </View>
+      <View style={[styles.painting, { left: FRAMES[1].x0 + 4, top: FRAMES[1].top + 4, width: FRAMES[1].x1 - FRAMES[1].x0 - 8, height: FRAMES[1].bottom - FRAMES[1].top - 8 }]}>
+        <View style={styles.sitterCrown} />
+        <View style={styles.sitterCoat} />
+      </View>
+      <View style={styles.marble} />
+      <Animated.View style={[styles.spot, spot]} />
+      <ObjectArt parts={PLINTH_ART} tone={MARBLE} />
+      <Piece x={PIECE_PLINTH.x} base={PIECE_PLINTH.base} lying />
+      <View style={styles.rope} />
+      <ObjectArt parts={ROPE_ART} tone={WOOD} />
+      <Animated.View style={[styles.screen, screen]}>
+        {[0, 1, 2].map((k) => <View key={k} style={[styles.screenPanel, { left: k * 22 }]} />)}
+      </Animated.View>
+      <View style={styles.hallFloor} />
+    </>
+  );
+}
+/** The hall's words: the stamp on the screen (it rides the screen), the title, the banner. */
+function HallWords({ S, words, on }: { S: SharedValue<any>; words: SharedValue<number>; on: (a: readonly number[]) => boolean }) {
+  const stamp = useAnimatedStyle(() => ({
+    opacity: S.value.refused * words.value,
+    transform: [{ translateX: lerp(-120, 0, S.value.screen) }, { scale: 1.3 - 0.3 * S.value.refused }, { rotate: '-8deg' }],
+  }));
+  const title = useAnimatedStyle(() => ({ opacity: S.value.title * words.value }));
+  const banner = useAnimatedStyle(() => ({ transform: [{ scaleY: Math.max(0.02, S.value.banner) }], opacity: S.value.banner > 0.01 ? 1 : 0 }));
+  const bannerText = useAnimatedStyle(() => ({ opacity: clamp01(S.value.banner * 2 - 1) * words.value }));
+  return (
+    <>
+      {on(ART) ? (
+        <Animated.View style={[styles.banner, banner]}>
+          <Animated.Text style={[styles.plateText, bannerText]} numberOfLines={1}>THE ARTWORLD</Animated.Text>
+        </Animated.View>
+      ) : null}
+      <Animated.View style={[styles.stamp, stamp]}>
+        <Text style={styles.stampText} numberOfLines={1}>REFUSED</Text>
+      </Animated.View>
+      {on(TITLED) ? (
+        <Animated.View style={[styles.plate, styles.titlePlate, title]}>
+          <Text style={styles.plateText} numberOfLines={1}>FOUNTAIN</Text>
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
+function PickRing({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const r = S.value.ringR;
+    return {
+      opacity: S.value.ring * (0.75 + 0.25 * Math.sin(S.value.t * 4)),
+      width: 2 * r, height: 2 * r, borderRadius: r,
+      transform: [{ translateX: S.value.ringX - r }, { translateY: S.value.ringY - r }],
+    };
+  });
+  return <Animated.View style={[styles.pickRing, st]} pointerEvents="none" />;
+}
+
+const CANVAS_H = CANVAS_Y.bottom - CANVAS_Y.top;
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 16, right: 16, top: GROUND, height: 1.5, backgroundColor: RULE },
+  set: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
 
-  title: {
-    position: 'absolute', left: 0, top: 224, width: STAGE_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 13, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
+  // ── the studio ────────────────────────────────────────────────────────────
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 288, width: STAGE_W, height: GROUND - 288, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
   },
-  // The wrapper carries TACK_H of headroom so the pin is drawn INSIDE its bounds —
-  // a child at a negative top can be clipped on Android.
-  cardWrap: { position: 'absolute', top: CARD_T - TACK_H, width: CARD_W, height: CARD_H + TACK_H },
-
-  // ── the hook's wall card: the exact slot the three tests take over ──────────
-  askWrap: { position: 'absolute', left: ASK_L, top: CARD_T - TACK_H, width: ASK_W, height: CARD_H + TACK_H },
-  askCard: {
-    position: 'absolute', left: 0, top: TACK_H, width: ASK_W, height: CARD_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  canvas: {
+    position: 'absolute', top: CANVAS_Y.top, width: 34, height: CANVAS_H, borderRadius: 1, backgroundColor: PAPER_LIT,
+    borderWidth: 1.5, borderColor: WOOD.SHADE, overflow: 'hidden',
   },
-  askText: {
-    fontFamily: 'Inter_700Bold', fontSize: 26, lineHeight: 31, letterSpacing: 2, color: INK,
-    includeFontPadding: false,
+  paintedApple: { position: 'absolute', left: 9, top: 12, width: 14, height: 13, borderRadius: 7, backgroundColor: EMBER },
+  paintedLeaf: { position: 'absolute', left: 16, top: 8, width: 7, height: 4, borderRadius: 2, backgroundColor: OLIVE },
+  realApple: {
+    position: 'absolute', left: EASELS[0].x - 6, top: CANVAS_Y.bottom - 11, width: 11, height: 10, borderRadius: 5.5,
+    backgroundColor: EMBER, borderWidth: 1, borderColor: INK,
   },
-  askSub: {
-    marginTop: 6,
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12.5, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
+  wave1: { position: 'absolute', left: -4, top: 18, width: 42, height: 10, borderRadius: 5, backgroundColor: DEEP },
+  wave2: { position: 'absolute', left: -4, top: 26, width: 42, height: 12, borderRadius: 6, backgroundColor: TEAL },
+  tearSun: { position: 'absolute', left: 18, top: 5, width: 9, height: 9, borderRadius: 4.5, backgroundColor: EMBER },
+  piece: {
+    position: 'absolute', left: 0, top: 0, width: PIECE.w, height: PIECE.h, borderRadius: 6, borderBottomLeftRadius: 13,
+    borderBottomRightRadius: 13, backgroundColor: PAPER_LIT, borderWidth: 1.5, borderColor: INK, transformOrigin: '50% 50%',
   },
-  tack: {
-    position: 'absolute', left: CARD_W / 2 - 5.5, top: 2, width: 11, height: 11,
-    borderRadius: 5.5, borderWidth: 2.5, borderColor: INK, backgroundColor: PAPER,
+  pieceRim: { position: 'absolute', left: 3, top: 3, right: 3, height: 3, borderRadius: 1.5, backgroundColor: MARBLE.SHADE },
+  basin: {
+    position: 'absolute', left: 5, top: 10, width: PIECE.w - 13, height: 14, borderRadius: 7, backgroundColor: MARBLE.STONE,
+    borderWidth: 1, borderColor: INK,
   },
-  card: {
-    position: 'absolute', left: 0, top: TACK_H, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: SOFT, borderRadius: 5, backgroundColor: STONE, boxShadow: LIP,
-  },
-  cardName: {
-    position: 'absolute', left: 0, top: 7, width: CARD_W - 4, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 0.8, color: INK,
-    includeFontPadding: false,
-  },
-  cardSub: {
-    position: 'absolute', left: 0, top: 26, width: CARD_W - 4, textAlign: 'center',
-    // INK, not SOFT: a failing card fades to 0.72 once the verdict is in, and SOFT
-    // is only 5.3:1 on paper to begin with — 2.9:1 there, which is the smear D35 is
-    // about. The card still has to be READ; it is what the verdict is about.
-    fontFamily: 'Inter_400Regular', fontSize: 9.5, lineHeight: 12, letterSpacing: 0.2, color: INK,
-    includeFontPadding: false,
-  },
-  mark: {
-    position: 'absolute', left: (CARD_W - 4) / 2 - 13, top: 38, width: 26, height: 26,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  crossBar: { position: 'absolute', width: 26, height: 3.5, backgroundColor: INK, borderRadius: 2 },
-  // Two strokes anchored end-to-end: a short down-right, then a long up-right.
-  tickShort: {
-    position: 'absolute', left: 3, top: 12, width: 12, height: 3.5,
-    backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%',
-    transform: [{ rotate: '45deg' }],
-  },
-  tickLong: {
-    position: 'absolute', left: 11.5, top: 20.5, width: 20, height: 3.5,
-    backgroundColor: INK, borderRadius: 2, transformOrigin: '0% 50%',
-    transform: [{ rotate: '-50deg' }],
+  drain: { position: 'absolute', left: PIECE.w / 2 - 4.5, top: 18, width: 3, height: 3, borderRadius: 1.5, backgroundColor: INK },
+  paint: { position: 'absolute', left: 4, bottom: 3, width: 12, height: 2, borderRadius: 1, backgroundColor: INK },
+  cloth: {
+    position: 'absolute', left: PIECE_TABLE.x - 17, top: PIECE_TABLE.base - PIECE.h - 4, width: 34, height: PIECE.h + 4,
+    borderTopLeftRadius: 14, borderTopRightRadius: 14, borderRadius: 3, backgroundColor: OLIVE, borderWidth: 1.2, borderColor: INK,
   },
 
-  // The readymade itself: outer silhouette, the bowl's inner lip drawn as a second
-  // outline, and the drain — three strokes, so it reads as a fixture rather than a
-  // rounded blob.
-  readymade: {
-    position: 'absolute', left: PED_X - 48, top: 316, width: 96, height: 72,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
-    borderTopLeftRadius: 48, borderTopRightRadius: 48,
-    borderBottomLeftRadius: 11, borderBottomRightRadius: 11,
+  // ── the hall ──────────────────────────────────────────────────────────────
+  hallWall: { position: 'absolute', left: 0, right: 0, top: 288, height: GROUND - 288, backgroundColor: MARBLE.STONE },
+  window: {
+    position: 'absolute', top: 322, width: 40, height: 96, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: PAPER_LIT, borderWidth: 1.5, borderColor: INK,
   },
-  rim: {
-    position: 'absolute', left: 9, top: 6, width: 78, height: 48,
-    borderWidth: 1.5, borderColor: SOFT,
-    borderTopLeftRadius: 39, borderTopRightRadius: 39,
-    borderBottomLeftRadius: 9, borderBottomRightRadius: 9,
+  painting: { position: 'absolute', backgroundColor: PAPER_LIT, overflow: 'hidden', borderRadius: 1 },
+  paintSea: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 18, backgroundColor: TEAL },
+  paintSun: { position: 'absolute', left: 30, top: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: EMBER },
+  sitterCrown: { position: 'absolute', left: 20, top: 8, width: 14, height: 16, borderRadius: 7, backgroundColor: OLIVE },
+  sitterCoat: { position: 'absolute', left: 12, top: 24, width: 30, height: 30, borderRadius: 12, backgroundColor: DEEP },
+  marble: { position: 'absolute', left: 0, right: 0, top: 452, height: 48, backgroundColor: MARBLE.SHADE },
+  spot: {
+    position: 'absolute', left: PLINTH.x - 44, top: 288, width: 88, height: PLINTH.top - 288, borderBottomLeftRadius: 44,
+    borderBottomRightRadius: 44, backgroundColor: PAPER_LIT,
   },
-  drain: {
-    position: 'absolute', left: 37, top: 26, width: 22, height: 12, borderRadius: 6,
-    borderWidth: 1.5, borderColor: SOFT,
+  rope: { position: 'absolute', left: 158, top: 476, width: 76, height: 3, borderRadius: 1.5, backgroundColor: EMBER },
+  banner: {
+    position: 'absolute', left: 120, top: 298, width: 152, height: 20, borderRadius: 2, backgroundColor: PLATE_FACE,
+    borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center', transformOrigin: '50% 0%',
   },
-  // Sits clear BELOW the bowl's inner lip (which ends at y 370), so the scrawl and
-  // the rim stroke never cross each other.
-  sig: {
-    position: 'absolute', left: PED_X - 48, top: 370, width: 96, textAlign: 'center',
-    fontFamily: 'Inter_500Medium', fontStyle: 'italic', fontSize: 11, lineHeight: 14, color: INK,
-    includeFontPadding: false,
+  screen: { position: 'absolute', left: PLINTH.x - 33, top: 396, width: 66, height: 60 },
+  screenPanel: {
+    position: 'absolute', top: 0, width: 22, height: 60, borderRadius: 2, backgroundColor: WOOD.SHADE, borderWidth: 1.2, borderColor: INK,
   },
-  // ── the two tap events (group AH) ──────────────────────────────────────────
-  //
-  // The prompt sits UNDER the ARTWORLD card, which is the one test the readymade
-  // passes, so the question arrives beside the answer it is about. A tile that
-  // carries a word takes the kit: white face, ink border, its own ledge.
-  ownWrap: {
-    position: 'absolute', left: CARD_L[2], top: CARD_T + CARD_H + 8, width: CARD_W,
-    height: 24, borderWidth: 1.5, borderColor: INK, borderRadius: 8,
-    backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
+  stamp: {
+    position: 'absolute', left: PLINTH.x - 27, top: 418, width: 54, height: 15, borderRadius: 2, borderWidth: 1.5, borderColor: EMBER,
+    backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
   },
-  ownText: {
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK,
-    includeFontPadding: false,
+  stampText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
-  // The status the institution confers, printed ON the plinth face — REFUSED first,
-  // then FOUNTAIN — because the plinth is what does the conferring.
-  statusTag: {
-    position: 'absolute', left: PED_X - 40, top: 408, width: 80, height: 20,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 6, backgroundColor: PLATE_FACE,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  statusText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1.1, color: INK,
-    includeFontPadding: false,
-  },
+  hallFloor: floorStyle(TONE, GROUND),
+  pickRing: { position: 'absolute', left: 0, top: 0, borderWidth: 2.5, borderColor: EMBER },
 
-  plinthTop: {
-    position: 'absolute', left: PED_X - 58, top: 388, width: 116, height: 13,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: RULE,
+  // ── the words ─────────────────────────────────────────────────────────────
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
-  // values and no depth, which is the flat case `check:shade` exists to find.
-  // The structural mass takes STONE, a secondary surface takes RULE, and what
-  // carries the message stays PAPER, so the picture has things at different
-  // values rather than everything a shade darker. See cinematicKit's ramp.
-  plinth: {
-    position: 'absolute', left: PED_X - 44, top: 401, width: 88, height: GROUND - 401,
-    borderWidth: 2.5, borderColor: INK, backgroundColor: STONE, boxShadow: LIP,
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  placard: {
-    position: 'absolute', left: PED_X - 38, top: 428, width: 76, height: 44,
-    borderWidth: 2, borderColor: INK, borderRadius: 3, backgroundColor: INK,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  placardT: {
-    fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 19, letterSpacing: 2.4, color: PAPER,
-    includeFontPadding: false,
-  },
-  placardS: {
-    // INK, not RULE: RULE is the hairline colour, 1.15:1 on paper. It is legible
-    // only on an INK fill; on paper it is a line pretending to be a word (D35).
-    fontFamily: 'Inter_500Medium', fontSize: 9, lineHeight: 11, letterSpacing: 0.8, color: INK,
-    marginTop: 2, includeFontPadding: false,
-  },
+  askPlate: { left: PIECE_TABLE.x - 58, top: 414, width: 36 },
+  mimPlate: { left: EASELS[0].x - 26, top: 360, width: 52 },
+  expPlate: { left: EASELS[1].x - 32, top: 342, width: 64 },
+  sigPlate: { left: PIECE_TABLE.x - 70, top: 420, width: 72 },
+  titlePlate: { left: PLINTH.x - 28, top: PLINTH.top + 20, width: 56 },
 });
 
-// MEASURED BAND, top and bottom.
-//   TOP    the pinned title at y 224 (the tacks on the cards and on the hook's wall
-//          card both start at 234). Nothing on any beat is drawn higher.
-//   BOTTOM the plinth reaches the ground line at 501.5, but the true extreme is the
-//          ankle JOINTS: circles of radius STR.limb·K_FIG/2 = 7.43 centred exactly
-//          on GROUND, so ink reaches y = 507.4. The ART placard bottoms out at 472.
-// [214, 512] therefore holds every card, the plinth and both figures on every beat
-// with 10 units of margin at the top and 4.6 at the foot, and renders the scene
-// ~2.17× instead of the letterboxed 1.15×.
 export function Aesthetics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} band={[214, 512]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Aesthetics4Scene} band={[288, 514]} camera={CAM} />;
 }

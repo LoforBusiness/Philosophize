@@ -3,415 +3,543 @@ import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'r
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './political4Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import {
+  fence, soapbox, gardenTable, well, desks, doorway, bookshelf,
+  FENCE, SOAPBOX, CAKE, PRIMER, WELL, CHART, CHART_A, PAGE_A_H, DOOR, DESKS, HOOK,
+} from './political4Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
-const TONE = stageTone('political-philosophy');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
-
-// A figure walled in by interference, drawn as an information graphic rather than a
-// mood piece:
+// ─────────────────────────────────────────────────────────────────────────────
+// political-political-4, "Freedom vs. Control" — A FENCED GARDEN, AND A SCHOOLROOM.
 //
-//   · TWO COMPARISON CARDS up top — NEGATIVE LIBERTY / POSITIVE LIBERTY — one of
-//     which STAMPS (an ink wipe left-to-right, labels flipping to paper) on the beat
-//     that is about it. That is the lesson's spine, always on screen.
-//   · A DIMENSION LINE between the walls, capped and captioned "ROOM TO MOVE", which
-//     literally measures negative liberty: it is invisible when the walls press in and
-//     grows to full width as they retreat.
-//   · MILL'S TEST — a four-cell tally that occupies the same strip as the dimension
-//     line and cross-fades with it: three acts marked YOUR CALL, one stamped in solid
-//     ink as the case where POWER MAY ACT. That is the harm principle, tallied.
-//   · The HARM LINE — a dashed boundary with another person standing beyond it — the
-//     single line Mill says power may cross.
+// Redrawn 2026-09-27: the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). Every act is laid across its voiced line in stages.
 //
-// The camera is IDENTITY, so design coordinates are final stage coordinates and the
-// band below can be read straight off these constants. Everything the scene can ever
-// draw lives between y=222 (card tops) and y=501.5 (the ground rule).
+//   b0   he walks into his own garden past the end of its fence.
+//   b1   NEGATIVE LIBERTY: the garden inside the fence is his.
+//   b2   HARM PRINCIPLE: the top of the fence lights along its whole line.
+//   b3   his own business: he eats the slice of cake off the table, then gets up on
+//        the soapbox and speaks.
+//   b4   he steps down and goes to the gate; the well is outside it: HARM TO OTHERS.
+//   b5   on the quote he takes the reading primer off the table and opens it.
+//   b6   THE CHANGE: into the big A on the primer's page, out of the big A on a
+//        schoolroom's wall chart. POSITIVE LIBERTY.
+//   b7   PUBLIC SCHOOL lights over the door.
+//   b9   Q2: a ring finds the open door, the newspaper, the satchel, the chart (R7c).
+//
+// COMPOSITION, in stage units. The garden: the fence 34–300 from 452, the soapbox at
+// 120, the table 196–240 with the cake at 230 and the primer at 212, the well at 354.
+// The schoolroom: the open door 16–56, the satchel on its hook at 76, desks at 104 and
+// 166, the wall chart 272–344 × 336–404, the bookshelf 356–396. He stands at 250, 120
+// (on the soapbox), 262 and 236 in the garden, and 250 in the schoolroom.
+// Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
 
-const FIG_X = 196;
+const TONE = stageTone('political');
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const STONE = stageToneOf(TEAL);
+const TR = 0.85;
 
-// ── the walls of interference ────────────────────────────────────────────────
-// 16 units wide, not 10: at 10 they read as bars rather than masonry. They grow
-// OUTWARD from the same inner faces, so the gap the figure stands in is unchanged.
-const WALL_W = 16;
-const WALL_L = 144;                       // left wall's left edge  (inner face 160)
-const WALL_R = 242;                       // right wall's left edge (inner face 242)
-const WALL_T = 336;
-const WALL_H = GROUND - WALL_T;           // 164 — taller than the figure, so it looms
-const WALL_OUT = 44;                      // how far each wall retreats at walls = 0
-const COURSES = [26, 52, 78, 104, 130, 156];
-const JOINTS = [0, 26, 52, 78, 104, 130, 156];   // staggered vertical brick joints
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, political-political-4. */
+const LINES = [7.56, 6.72, 7.24, 9.08, 8, 0, 10.36, 5.52, 0, 0, 0];
 
-// ── Mill's test: the tally that shares the dimension line's strip ────────────
-const TEST_T = 298;
-const TEST_H = 36;
-const TESTS = [
-  { act: 'EAT BADLY', verdict: 'YOUR CALL', left: 20, w: 78, harm: false },
-  { act: 'TAKE RISKS', verdict: 'YOUR CALL', left: 104, w: 78, harm: false },
-  { act: 'SPEAK OUT', verdict: 'YOUR CALL', left: 188, w: 78, harm: false },
-  { act: 'THROW A PUNCH', verdict: 'POWER MAY ACT', left: 272, w: 108, harm: true },
-];
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+const MID = { x: STAGE_W / 2, y: 401 };
+/** The page's A is smaller than the chart's by this, so the garden is pushed in that much deeper. */
+const Z_GARDEN = PORTAL_Z * (CHART_A.h / PAGE_A_H);
+/** The primer, held open: where the page's A sits from his hand. */
+const A_FROM_HAND = { x: -8, y: -9 };
+/** b0: in from outside the fence. b3: across to the soapbox. b4: across to the gate. */
+const IN_FROM = 318;
+const TO_BOX = 2.6;
+const TO_GATE = 0.8;
+const BOX_RISE = (GROUND - SOAPBOX.top);
 
-// ── the comparison cards ─────────────────────────────────────────────────────
-const CARD_T = 222;
-const CARD_H = 64;
-const CARD_W = 176;
-const CARD_AL = 20;
-const CARD_BL = 204;
+const X = BEATS.map((b) => b.x ?? 250);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_ENTER = is('enter');
+const A_NEG = is('negative');
+const A_HARM = is('harm');
+const A_OWN = is('own');
+const A_OTHERS = is('others');
+const A_PRIMER = is('primer');
+const A_SCHOOL = is('school');
+const A_STATE = is('state');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const NEG = flag((b) => b.neg);
+const HARM = flag((b) => b.harm);
+const CAKE_GONE = flag((b) => b.cake);
+const OTHERS = flag((b) => b.others);
+const HOLDING = BEATS.map((b) => (b.primer && !b.school ? 1 : 0));
+const SCHOOL = flag((b) => b.school);
+const STATE = flag((b) => b.state);
+/** The odd-one-out is being answered: a ring finds each tile's thing in the schoolroom (R7c). */
+const ODD = flag((b) => b.interact?.odd);
+/** In the tiles' own order: not imprisoned (the open door), not censored (the newspaper), not searched (the satchel), taught to read (the chart). */
+const PICK_X = [(DOOR.x0 + DOOR.x1) / 2, DESKS[0], HOOK.x, (CHART.x0 + CHART.x1) / 2];
+const PICK_Y = [446, 458, HOOK.y + 8, (CHART.top + CHART.bottom) / 2];
+const PICK_R = [30, 16, 14, 40];
+/** Which way he faces once each beat settles. */
+const DIR = [-1, -1, -1, 1, 1, -1, 1, 1, 1, 1, 1];
 
-// ── the dimension line that measures the gap ─────────────────────────────────
-const MEAS_LABEL_T = 298;
-const MEAS_Y = 324;
-const MEAS_L = WALL_L + WALL_W;                    // 160, the left wall's inner face
-const MEAS_W = WALL_R - MEAS_L;                    // 82 at full squeeze
-const MEAS_MAX = MEAS_W + WALL_OUT * 2;            // 170 once both walls retreat
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, gy: number, dir: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: gy, k: K_M, dir: dir < 0 ? -1 : 1 }, 1, tx, ty, w);
+}
+function legAt(b: number, from: number, to: number, start: number): { x: number; u: number } {
+  'worklet';
+  const dur = moveTr(from, to, TR);
+  const u = ease01(clamp01((b - start) / dur));
+  return { x: lerp(from, to, u), u };
+}
 
-// ── the harm boundary ────────────────────────────────────────────────────────
-const HARM_X = 326;
-const DASH_T = WALL_T;                    // the boundary runs the walls' full height
-const DASHES = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 152];
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
 
-const P_CODE = BEATS.map((b) => b.p ?? 0);
-const WALLS = BEATS.map((b) => b.walls ?? 0);
-const HARM = BEATS.map((b) => b.harm ?? 0);
-const TEST = BEATS.map((b) => b.test ?? 0);
-const EDGE = BEATS.map((b) => b.edge ?? 0);
-const ONLY = BEATS.map((b) => b.only ?? 0);
-const ROLE = BEATS.map((b) => b.role ?? 0);
-
-// The role bar runs under the POSITIVE LIBERTY card, from its left edge, and stops
-// short of the card's right so it reads as a MEASURE of the role rather than as a
-// second card. Read off the card's own geometry so moving the card moves the bar.
-const ROLE_T = CARD_T + CARD_H + 7;
-const ROLE_W = CARD_W - 18;
-const NEG = BEATS.map((b) => ((b.panel ?? 0) === 1 ? 1 : 0));
-const POS = BEATS.map((b) => ((b.panel ?? 0) === 2 ? 1 : 0));
-
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
-const X = BEATS.map((b) => b.x ?? FIG_X);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.odd ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political4'));
-
-export default function Political4Scene({ clock, bt, bi, dragPos, pickPos, i, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldS = useHeld();
-  const cv = useCarry(8);
+export default function Political4Scene({
+  clock, bt, bi, i, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(14);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
+    // ── the change (b6), and which set he is in otherwise ───────────────────
+    const pt = portalAt(b);
+    const world = A_SCHOOL[n] ? pt.world : SCHOOL[n];
+    const kGarden = A_SCHOOL[n] ? pt.out : SCHOOL[n];
+    const kSchool = A_SCHOOL[n] ? pt.into : 1 - SCHOOL[n];
+
+    // ── where he is, and what he stands on ───────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const leg = A_ENTER[n] ? legAt(b, IN_FROM, xn, 0.6) : A_OWN[n] ? legAt(b, xp, xn, TO_BOX) : A_OTHERS[n] ? legAt(b, xp, xn, TO_GATE) : null;
+    const walking = !leg && !A_SCHOOL[n] && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const target = leg ? leg.x : xn;
+    const x = n === 0 ? target : carry(cv, 0, n, xp, target, A_SCHOOL[n] ? swapU : leg ? 1 : walking ? walkU : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    if (leg && leg.u > 0 && leg.u < 1) {
+      const from = A_ENTER[n] ? IN_FROM : xp;
+      s = travelStance(from, xn, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), leg.u, WALK, 0);
+    }
+    // up onto the soapbox at the end of b3, down off it at the start of b4
+    const arriveBox = TO_BOX + moveTr(250, SOAPBOX.x, TR);
+    const onBox = A_OWN[n] ? sec(arriveBox + 0.15, arriveBox + 0.55) : A_OTHERS[n] ? 1 - sec(0.15, 0.55) : 0;
+    const gy = GROUND - BOX_RISE * onBox;
+    const stepLift = A_OWN[n] ? pulse(arriveBox + 0.15, arriveBox + 0.35, arriveBox + 0.55) : A_OTHERS[n] ? pulse(0.15, 0.35, 0.55) : 0;
+    s = { ...s, footR: { x: s.footR.x + 4 * stepLift, y: s.footR.y - 10 * stepLift } };
+    const was = facing(DIR[p], DIR[p], b);
+    let dirV = A_SCHOOL[n]
+      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      : walking
+        ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+        : facing(DIR[p], DIR[n], b);
+    // b3 eats facing the table, walks left to the box, and turns to speak from it
+    if (A_OWN[n]) dirV = lerp(lerp(was, -1, sec(TO_BOX - 0.3, TO_BOX)), 1, sec(arriveBox + 0.6, arriveBox + 0.9));
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── the cake (b3): off the table, eaten ─────────────────────────────────
+    const take = A_OWN[n] ? pulse(0.4, 0.8, 1.2) : 0;
+    s = handOn(s, x, gy, dir, CAKE.x, CAKE.y - 2, take);
+    const eat = A_OWN[n] ? pulse(1.1, 1.6, 2.3) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 10, y: -52 } }, eat);
+    // ── speaking from the soapbox (b3), pointing to the well (b4) ───────────
+    const speak = A_OWN[n] ? pulse(arriveBox + 0.9, arriveBox + 1.4, arriveBox + 3.6) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 14, y: -74 } }, speak);
+    const point = A_OTHERS[n] ? pulse(TO_GATE + 2.7, TO_GATE + 3.1, TO_GATE + 5.4) : 0;
+    s = handOn(s, x, gy, dir, WELL.x - 14, WELL.top + 10, point);
+    // ── the primer (b5): off the table, held open ───────────────────────────
+    const pick = A_PRIMER[n] ? pulse(1.0, 1.4, 1.8) : 0;
+    s = handOn(s, x, gy, dir, PRIMER.x, PRIMER.y - 2, pick);
+    const holding = A_PRIMER[n] ? sec(1.7, 2.2) : A_SCHOOL[n] ? 1 - clamp01(world * 2) : HOLDING[n];
+    s = mixStance(s, { ...s, fistR: { x: 18, y: -32 }, fistL: { x: 12, y: -30 } }, holding * (1 - pick));
+    // ── at the chart in the schoolroom (b7) ─────────────────────────────────
+    const chart = A_STATE[n] ? pulse(1.2, 1.7, 4.6) : 0;
+    s = handOn(s, x, gy, dir, CHART.x0 + 6, 396, chart);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the garden ───────────────────────────────────────────────────────────
+    const neg = A_NEG[n] ? st(0.18, 0.3) : NEG[n];
+    const line = A_HARM[n] ? st(0.3, 0.5) : HARM[n];
+    const harm = A_HARM[n] ? st(0.28, 0.38) : HARM[n];
+    const eaten = A_OWN[n] ? sec(0.75, 0.85) : CAKE_GONE[n];
+    const inHand = A_OWN[n] ? sec(0.75, 0.85) * (1 - sec(2.1, 2.2)) : 0;
+    const others = A_OTHERS[n] ? st(0.42, 0.52) : OTHERS[n];
+    const primerHeld = A_PRIMER[n] ? sec(1.35, 1.45) : HOLDING[n] || A_SCHOOL[n] ? 1 : 0;
+
+    // ── the schoolroom ───────────────────────────────────────────────────────
+    const positive = A_SCHOOL[n] ? sec(PORTAL.outTo + 0.2, PORTAL.outTo + 0.6) : SCHOOL[n];
+    const state = A_STATE[n] ? st(0.28, 0.4) : STATE[n];
+
     return {
-      fig: lookPose(s, FIG_X, GROUND, K_FIG, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      walls: carry(cv, 0, n, WALLS[p], WALLS[n], tr),
-      harm: carry(cv, 1, n, HARM[p], HARM[n], tr),
-      test: carry(cv, 2, n, TEST[p], TEST[n], tr),
-      // R7b — the seam trades the two liberties against each other. Give the bar to
-      // A CORE OF NEGATIVE LIBERTY and the space nobody may enter grows…
-      neg: carry(cv, 3, n, NEG[p], reacting ? pickPos.value : NEG[n], tr),
-      // …and positive liberty takes what is left. Berlin's warning is that the second
-      // one eats the first when a state is holding it, and the bar is the only place
-      // in the lesson where the reader can watch that happen to them.
-      pos: carry(cv, 4, n, POS[p], reacting ? 1 - pickPos.value : POS[n], tr),
-      edge: carry(cv, 5, n, EDGE[p], EDGE[n], tr),
-      only: carry(cv, 6, n, ONLY[p], ONLY[n], tr),
-      role: carry(cv, 7, n, ROLE[p], ROLE[n], tr),
+      fig: lookPose(fig, x, gy, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      world: carry(cv, 1, n, SCHOOL[p], world, A_SCHOOL[n] ? 1 : tr),
+      kGarden: carry(cv, 2, n, SCHOOL[p], kGarden, A_SCHOOL[n] ? 1 : tr),
+      kSchool: carry(cv, 3, n, 1 - SCHOOL[p], kSchool, A_SCHOOL[n] ? 1 : tr),
+      neg: carry(cv, 4, n, NEG[p], neg, tr),
+      line: carry(cv, 5, n, HARM[p], line, tr),
+      harm: carry(cv, 6, n, HARM[p], harm, tr),
+      eaten: carry(cv, 7, n, CAKE_GONE[p], eaten, tr),
+      inHand: carry(cv, 8, n, 0, inHand, tr),
+      others: carry(cv, 9, n, OTHERS[p], others, tr),
+      primerHeld: carry(cv, 10, n, HOLDING[p], primerHeld, tr),
+      positive: carry(cv, 11, n, SCHOOL[p], positive, tr),
+      state: carry(cv, 12, n, STATE[p], state, tr),
+      ring: carry(cv, 13, n, 0, ODD[n], tr),
+      ringX: ODD[n] ? pickAt(PICK_X, pickPos.value) : PICK_X[0],
+      ringY: ODD[n] ? pickAt(PICK_Y, pickPos.value) : PICK_Y[0],
+      ringR: ODD[n] ? pickAt(PICK_R, pickPos.value) : PICK_R[0],
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-
-  // Walls slide OUTWARD (away from the figure) and fade as liberty grows, so they
-  // never cover the body.
-  const wallLStyle = useAnimatedStyle(() => ({
-    opacity: 0.25 + 0.75 * SCENE.value.walls,
-    transform: [{ translateX: -(1 - SCENE.value.walls) * WALL_OUT }],
+  // the garden goes in towards the A on the page he holds open
+  const gardenXf = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return {
+      opacity: 1 - SCENE.value.world,
+      ...portalXf(SCENE.value.kGarden, w[0].translateX + A_FROM_HAND.x, w[1].translateY + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN),
+    };
+  });
+  const schoolXf = useAnimatedStyle(() => ({
+    opacity: SCENE.value.world > 0.001 ? 1 : 0,
+    ...portalXf(SCENE.value.kSchool, CHART_A.x, CHART_A.y, MID.x, MID.y),
   }));
-  const wallRStyle = useAnimatedStyle(() => ({
-    opacity: 0.25 + 0.75 * SCENE.value.walls,
-    transform: [{ translateX: (1 - SCENE.value.walls) * WALL_OUT }],
-  }));
-
-  // The measure: zero when the walls press in, full when they are gone — and it
-  // yields the strip entirely to Mill's tally on the beats that tally.
-  const measStyle = useAnimatedStyle(() => ({ opacity: (1 - SCENE.value.walls) * (1 - SCENE.value.test) }));
-  const measBarStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleX: (MEAS_W + (1 - SCENE.value.walls) * WALL_OUT * 2) / MEAS_W }],
-  }));
-  const capLStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -(1 - SCENE.value.walls) * WALL_OUT }] }));
-  const capRStyle = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - SCENE.value.walls) * WALL_OUT }] }));
-
-  const harmStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.harm }));
-
-  // THE BOUNDARY, BEFORE THE PERSON IT PROTECTS. `harm` brings the whole apparatus —
-  // the line, the label and the other person — and this beat's sentence only marks
-  // where the area ENDS, so the line draws on its own and hands over when `harm`
-  // arrives: the two never both carry it.
-  const edgeStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.edge * (1 - SCENE.value.harm),
-    transform: [{ scaleY: 0.4 + 0.6 * SCENE.value.edge }],
-  }));
-  // …and the role the positive card backs, as a bar that grows out of it.
-  const roleStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.role }));
-  const roleBarStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.role }] }));
-  // A WASH OF THE GROUND, NOT A DIM. Dropping the three cells' own opacity would take
-  // their words with them, and they are still the reader's own call — §17's rule is
-  // that emphasis goes on the live one and is never taken from the others. So the
-  // ground is laid back over them at 0.62, which quiets the cell without touching any
-  // type's contrast on the beats where nothing is being singled out.
-  // THE VEIL MAY PUSH THE CELLS BACK, NOT BURY THEIR WORDS (D35).
-  //
-  // This is a PAPER box laid OVER each of the three quiet cells, and it was 0.62
-  // deep. Ink under 62% paper, on a card under 62% paper, comes out about 2.2:1 —
-  // check:readable found all four words UNDER it, pixel-confirmed. The intent is
-  // right and stays: the three are still the reader's own call, so they go quiet
-  // rather than away. It was the depth that was wrong. 0.3 is the push-back this
-  // app already uses (Target dims an untaken option to 0.7, which is 1 − 0.3) and
-  // leaves the words near 5.3:1 while the harming act still stands clear.
-  const quietStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.only * 0.3 }));
+  const figXf = useAnimatedStyle(() => {
+    const inSchool = SCENE.value.world >= 0.5;
+    const k = inSchool ? SCENE.value.kSchool : SCENE.value.kGarden;
+    const w = DF.value.wrR;
+    const s = inSchool ? portalScale(k) : portalScale(k, Z_GARDEN);
+    const xf = inSchool
+      ? portalXf(k, CHART_A.x, CHART_A.y, MID.x, MID.y)
+      : portalXf(k, w[0].translateX + A_FROM_HAND.x, w[1].translateY + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN);
+    return { opacity: figureAt(s), ...xf };
+  });
+  const schoolWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kSchool) : 0));
+  const gardenWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kGarden));
 
   return (
     <View style={styles.scene}>
-      {/* ── the two liberty cards, one of which stamps ─────────────────────── */}
-      <Card left={CARD_AL} title="NEGATIVE LIBERTY" sub="no one blocks you" S={SCENE} which="neg" />
-      <Card left={CARD_BL} title="POSITIVE LIBERTY" sub="you can actually act" S={SCENE} which="pos" />
-
-      {/* ── the dimension line measuring the gap between the walls ─────────── */}
-      <Animated.View style={[styles.measWrap, measStyle]} pointerEvents="none">
-        <Text style={styles.measLabel}>ROOM TO MOVE</Text>
-        <Animated.View style={[styles.measBar, measBarStyle]} />
-        <Animated.View style={[styles.measCap, { left: MEAS_L - 1 }, capLStyle]} />
-        <Animated.View style={[styles.measCap, { left: WALL_R - 1 }, capRStyle]} />
+      <Animated.View style={[styles.set, schoolXf]} pointerEvents="none">
+        <School S={SCENE} />
       </Animated.View>
-
-      {/* ── Mill's test, tallied in the same strip as the measure ──────────── */}
-      {TESTS.map((c, k) => <TestCell key={c.act} c={c} k={k} S={SCENE} />)}
-
-      {/* Only the harming act may be coerced: the other three go quiet rather than
-          away, because they are still the reader's own call and still on the strip. */}
-      {TESTS.map((c, k) => (c.harm ? null : (
-        <Animated.View key={`q${c.act}`} style={[styles.quiet, { left: c.left, width: c.w }, quietStyle]} pointerEvents="none" />
-      )))}
-
-      {/* The boundary of the area, drawn before the person it protects. */}
-      <Animated.View style={[styles.edge, edgeStyle]} pointerEvents="none" />
-
-      {/* The role the positive card backs. */}
-      <Animated.View style={[styles.roleWrap, roleStyle]} pointerEvents="none">
-        <Animated.View style={[styles.roleBar, roleBarStyle]} />
-        <Text style={styles.roleLabel}>A BIGGER ROLE</Text>
+      <Animated.View style={[styles.set, gardenXf]} pointerEvents="none">
+        <Garden S={SCENE} />
+        <Held S={SCENE} DF={DF} />
       </Animated.View>
-
-      {/* ── the walls of interference, coursed like brick ──────────────────── */}
-      <Animated.View style={[styles.wall, { left: WALL_L }, wallLStyle]} pointerEvents="none">
-        {COURSES.map((c) => <View key={`c${c}`} style={[styles.course, { top: c }]} />)}
-        {JOINTS.map((j, k) => <View key={`j${j}`} style={[styles.joint, { top: j, left: k % 2 ? 4 : 10 }]} />)}
+      {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
+          word inside a transparent plate, and a set still nine times over on the change
+          beat puts that hidden word far off the stage (check:space). A word only shows
+          once its set has landed at scale 1, so over the sets is where it belongs. */}
+      <SchoolWords S={SCENE} words={schoolWords} on={on} />
+      <GardenWords S={SCENE} words={gardenWords} />
+      <Animated.View style={[styles.set, figXf]} pointerEvents="none">
+        <Stickman D={DF} k={K_M} />
       </Animated.View>
-      <Animated.View style={[styles.wall, { left: WALL_R }, wallRStyle]} pointerEvents="none">
-        {COURSES.map((c) => <View key={`c${c}`} style={[styles.course, { top: c }]} />)}
-        {JOINTS.map((j, k) => <View key={`j${j}`} style={[styles.joint, { top: j, left: k % 2 ? 10 : 4 }]} />)}
-      </Animated.View>
-
-      {/* ── the harm boundary + the person it protects ─────────────────────── */}
-      <Animated.View style={[styles.harmWrap, harmStyle]} pointerEvents="none">
-        {DASHES.map((d) => <View key={d} style={[styles.dash, { top: DASH_T + d }]} />)}
-        <Text style={styles.harmLabel}>HARM LINE</Text>
-        <View style={styles.otherHead} />
-        <View style={styles.otherSpine} />
-        <View style={[styles.otherArm, styles.otherArmL]} />
-        <View style={[styles.otherArm, styles.otherArmR]} />
-        <View style={[styles.otherLeg, styles.otherLegL]} />
-        <View style={[styles.otherLeg, styles.otherLegR]} />
-      </Animated.View>
-
-      <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DF} k={K_FIG} />
+      {on(ODD) ? <PickRing S={SCENE} /> : null}
     </View>
   );
 }
 
-/**
- * One comparison card. The ink fill wipes in from the left and the ink-coloured label
- * cross-fades to a paper one, so the card reads as being STAMPED on its beat.
- */
-function Card({
-  left, title, sub, S, which,
-}: {
-  left: number; title: string; sub: string;
-  S: SharedValue<any>; which: 'neg' | 'pos';
-}) {
-  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: which === 'neg' ? S.value.neg : S.value.pos }] }));
-  const offStyle = useAnimatedStyle(() => ({ opacity: 1 - (which === 'neg' ? S.value.neg : S.value.pos) }));
-  const onStyle = useAnimatedStyle(() => ({ opacity: which === 'neg' ? S.value.neg : S.value.pos }));
+const FENCE_ART = fence();
+const BOX_ART = soapbox();
+const TABLE_ART = gardenTable();
+const WELL_ART = well();
+const DESK_ART = desks();
+const DOOR_ART = doorway();
+const SHELF_ART = bookshelf();
+
+/** A capital A drawn in strokes, not type, so a zoom through it is a picture, not a word. */
+function LetterA({ h, x, y, color }: { h: number; x: number; y: number; color: string }) {
+  const w = h * 0.84;
+  const len = Math.hypot(w / 2, h);
+  const deg = (Math.atan2(h, w / 2) * 180) / Math.PI;
+  const t = Math.max(1.4, h * 0.13);
   return (
-    <View style={[styles.card, { left }]} pointerEvents="none">
-      <Animated.View style={[styles.cardFill, fillStyle]} />
-      <Animated.View style={[styles.cardText, offStyle]}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardSub}>{sub}</Text>
-      </Animated.View>
-      <Animated.View style={[styles.cardText, onStyle]}>
-        <Text style={[styles.cardTitle, styles.onPaper]}>{title}</Text>
-        <Text style={[styles.cardSub, styles.onPaper]}>{sub}</Text>
-      </Animated.View>
+    <View style={{ position: 'absolute', left: x - w / 2, top: y - h / 2, width: w, height: h }}>
+      <View style={{ position: 'absolute', left: w / 2 - len / 2, top: h / 2 - t / 2, width: len, height: t, borderRadius: t / 2, backgroundColor: color, transform: [{ translateX: -w / 4 }, { rotate: `${-deg}deg` }] }} />
+      <View style={{ position: 'absolute', left: w / 2 - len / 2, top: h / 2 - t / 2, width: len, height: t, borderRadius: t / 2, backgroundColor: color, transform: [{ translateX: w / 4 }, { rotate: `${deg}deg` }] }} />
+      <View style={{ position: 'absolute', left: w * 0.27, top: h * 0.6, width: w * 0.46, height: t, borderRadius: t / 2, backgroundColor: color }} />
     </View>
   );
 }
 
-/**
- * One cell of Mill's test. The four deal in one after another (a staggered fade and
- * rise) so the tally reads as being counted out rather than appearing at once.
- */
-function TestCell({
-  c, k, S,
-}: {
-  c: { act: string; verdict: string; left: number; w: number; harm: boolean };
-  k: number; S: SharedValue<any>;
-}) {
-  const st = useAnimatedStyle(() => {
-    const u = clamp01(S.value.test * 1.6 - k * 0.16);
-    return { opacity: u, transform: [{ translateY: (1 - u) * 9 }] };
-  });
+// ── the garden ───────────────────────────────────────────────────────────────
+
+function Garden({ S }: { S: SharedValue<any> }) {
+  const plot = useAnimatedStyle(() => ({ opacity: 0.45 * S.value.neg }));
+  const line = useAnimatedStyle(() => ({ opacity: S.value.line, transform: [{ scaleX: S.value.line }] }));
+  const cake = useAnimatedStyle(() => ({ opacity: 1 - S.value.eaten }));
+  const primer = useAnimatedStyle(() => ({ opacity: 1 - S.value.primerHeld }));
   return (
-    <Animated.View
-      style={[styles.testCell, c.harm && styles.testHarm, { left: c.left, width: c.w }, st]}
-      pointerEvents="none"
-    >
-      <Text style={[styles.testAct, c.harm && styles.onPaper]}>{c.act}</Text>
-      <Text style={[styles.testVerdict, c.harm && styles.onPaper]}>{c.verdict}</Text>
+    <>
+      <View style={styles.sky} />
+      <View style={styles.grass} />
+      <Animated.View style={[styles.plot, plot]} />
+      <ObjectArt parts={FENCE_ART} tone={WOOD} />
+      <Animated.View style={[styles.fenceLine, line]} />
+      <ObjectArt parts={WELL_ART} tone={STONE} />
+      <Bucket S={S} />
+      <ObjectArt parts={BOX_ART} tone={WOOD} />
+      <ObjectArt parts={TABLE_ART} tone={WOOD} />
+      <Animated.View style={[styles.cake, { left: CAKE.x - 6, top: CAKE.y - 6 }, cake]}>
+        <View style={styles.icing} />
+      </Animated.View>
+      <Animated.View style={[styles.primerShut, primer]} />
+      <View style={styles.gardenFloor} />
+    </>
+  );
+}
+/** The garden's words. */
+function GardenWords({ S, words }: { S: SharedValue<any>; words: SharedValue<number> }) {
+  const neg = useAnimatedStyle(() => ({ opacity: S.value.neg * words.value }));
+  const harm = useAnimatedStyle(() => ({ opacity: S.value.harm * words.value }));
+  const others = useAnimatedStyle(() => ({ opacity: S.value.others * words.value }));
+  return (
+    <>
+      <Animated.View style={[styles.plate, styles.negPlate, neg]}>
+        <Text style={styles.plateText} numberOfLines={1}>NEGATIVE LIBERTY</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.harmPlate, harm]}>
+        <Text style={styles.plateText} numberOfLines={1}>HARM PRINCIPLE</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.othersPlate, others]}>
+        <Text style={styles.plateText} numberOfLines={1}>HARM TO OTHERS</Text>
+      </Animated.View>
+    </>
+  );
+}
+function Bucket({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${6 * Math.sin(S.value.t * 1.4)}deg` }] }));
+  return (
+    <Animated.View style={[styles.bucketRope, st]}>
+      <View style={styles.bucket} />
     </Animated.View>
   );
+}
+function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  // the slice of cake on its way to his mouth (b3), and the primer held open (b5, b6)
+  const cake = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: S.value.inHand, transform: [{ translateX: w[0].translateX - 5 }, { translateY: w[1].translateY - 6 }] };
+  });
+  const primer = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: S.value.primerHeld, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
+  });
+  return (
+    <>
+      <Animated.View style={[styles.rider, cake]}>
+        <View style={styles.cakeSlice} />
+      </Animated.View>
+      <Animated.View style={[styles.rider, primer]}>
+        <View style={styles.pageL} />
+        <View style={styles.pageR}>
+          {[0, 1, 2].map((k) => <View key={k} style={[styles.pageRule, { top: 4 + k * 4 }]} />)}
+        </View>
+        <LetterA h={PAGE_A_H} x={A_FROM_HAND.x} y={A_FROM_HAND.y} color={INK} />
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the schoolroom ───────────────────────────────────────────────────────────
+
+function School({ S }: { S: SharedValue<any> }) {
+  const lamp = useAnimatedStyle(() => ({ opacity: 0.4 + 0.6 * S.value.state }));
+  return (
+    <>
+      <View style={styles.schoolWall} />
+      <View style={styles.outside} />
+      <ObjectArt parts={DOOR_ART} tone={WOOD} />
+      <View style={styles.hook} />
+      <View style={styles.satchel} />
+      <View style={styles.chart}>
+        {[0, 1, 2, 3].map((k) => <View key={k} style={[styles.chartRule, { top: 14 + k * 11 }]} />)}
+      </View>
+      <LetterA h={CHART_A.h} x={CHART_A.x} y={CHART_A.y} color={INK} />
+      <ObjectArt parts={DESK_ART} tone={WOOD} />
+      <View style={styles.paper} />
+      <ObjectArt parts={SHELF_ART} tone={WOOD} />
+      <View style={styles.books}>
+        {[0, 1, 2, 3, 4].map((k) => <View key={k} style={[styles.bookSpine, { left: 3 + k * 6, height: 14 + (k % 3) * 3 }]} />)}
+      </View>
+      <Animated.View style={[styles.lamp, lamp]} />
+      <View style={styles.schoolFloor} />
+    </>
+  );
+}
+/** The schoolroom's words. */
+function SchoolWords({ S, words, on }: { S: SharedValue<any>; words: SharedValue<number>; on: (a: readonly number[]) => boolean }) {
+  const positive = useAnimatedStyle(() => ({ opacity: S.value.positive * words.value }));
+  const sign = useAnimatedStyle(() => ({ opacity: S.value.state * words.value }));
+  return (
+    <>
+      {on(SCHOOL) ? (
+        <Animated.View style={[styles.plate, styles.posPlate, positive]}>
+          <Text style={styles.plateText} numberOfLines={1}>POSITIVE LIBERTY</Text>
+        </Animated.View>
+      ) : null}
+      {on(STATE) ? (
+        <Animated.View style={[styles.plate, styles.signPlate, sign]}>
+          <Text style={styles.plateText} numberOfLines={1}>PUBLIC SCHOOL</Text>
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
+function PickRing({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const r = S.value.ringR;
+    return {
+      opacity: S.value.ring * (0.75 + 0.25 * Math.sin(S.value.t * 4)),
+      width: 2 * r, height: 2 * r, borderRadius: r,
+      transform: [{ translateX: S.value.ringX - r }, { translateY: S.value.ringY - r }],
+    };
+  });
+  return <Animated.View style={[styles.pickRing, st]} pointerEvents="none" />;
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 24, top: GROUND, height: 1.5, backgroundColor: RULE },
+  set: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  // ── comparison cards ───────────────────────────────────────────────────────
-  card: {
-    position: 'absolute', top: CARD_T, width: CARD_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP, overflow: 'hidden',
+  // ── the garden ────────────────────────────────────────────────────────────
+  sky: { position: 'absolute', left: 0, right: 0, top: 288, height: 170, backgroundColor: stageToneOf(TEAL).STONE },
+  grass: { position: 'absolute', left: 0, right: 0, top: 452, height: 48, backgroundColor: stageToneOf(SAGE).SHADE },
+  plot: { position: 'absolute', left: FENCE.x0, top: 452, width: FENCE.x1 - FENCE.x0, height: 48, backgroundColor: PAPER_LIT },
+  fenceLine: {
+    position: 'absolute', left: FENCE.x0 - 4, top: FENCE.top - 6, width: FENCE.x1 - FENCE.x0 + 8, height: 3, borderRadius: 1.5,
+    backgroundColor: EMBER, transformOrigin: '0% 50%',
   },
-  cardFill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK, transformOrigin: '0% 50%' },
-  cardText: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-  cardTitle: { fontFamily: 'Inter_700Bold', fontSize: 15, letterSpacing: 0.6, color: INK, includeFontPadding: false },
-  cardSub: { fontFamily: 'Inter_400Regular', fontSize: 11.5, color: INK, marginTop: 4, includeFontPadding: false },
-  onPaper: { color: PAPER },
+  bucketRope: { position: 'absolute', left: WELL.x - 0.6, top: WELL.top - 16, width: 1.2, height: 18, backgroundColor: INK, transformOrigin: '50% 0%' },
+  bucket: { position: 'absolute', left: -4, top: 16, width: 9, height: 7, borderRadius: 1.5, backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK },
+  cake: {
+    position: 'absolute', width: 12, height: 8, borderRadius: 1.5, backgroundColor: stageToneOf(OLIVE).STONE,
+    borderWidth: 1, borderColor: INK, overflow: 'hidden',
+  },
+  icing: { position: 'absolute', left: 0, right: 0, top: 0, height: 3, backgroundColor: EMBER },
+  cakeSlice: {
+    position: 'absolute', left: 0, top: 0, width: 10, height: 7, borderRadius: 1.5, backgroundColor: stageToneOf(OLIVE).STONE,
+    borderTopWidth: 3, borderTopColor: EMBER, borderWidth: 1, borderColor: INK,
+  },
+  primerShut: {
+    position: 'absolute', left: PRIMER.x - 9, top: PRIMER.y - 1, width: 18, height: 5, borderRadius: 1, backgroundColor: DEEP,
+    borderWidth: 1, borderColor: INK,
+  },
+  pageL: {
+    position: 'absolute', left: A_FROM_HAND.x - 10, top: A_FROM_HAND.y - 11, width: 18, height: 22, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK,
+  },
+  pageR: {
+    position: 'absolute', left: A_FROM_HAND.x + 8, top: A_FROM_HAND.y - 11, width: 16, height: 22, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK,
+  },
+  pageRule: { position: 'absolute', left: 3, width: 9, height: 1, borderRadius: 0.5, backgroundColor: INK, opacity: 0.4 },
+  gardenFloor: floorStyle(TONE, GROUND),
 
-  // ── the measure ────────────────────────────────────────────────────────────
-  measWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  measLabel: {
-    position: 'absolute', left: 0, right: 0, top: MEAS_LABEL_T, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
+  // ── the schoolroom ────────────────────────────────────────────────────────
+  schoolWall: { position: 'absolute', left: 0, right: 0, top: 288, height: GROUND - 288, backgroundColor: WALL.STONE },
+  outside: {
+    position: 'absolute', left: DOOR.x0, top: DOOR.top, width: DOOR.x1 - DOOR.x0, height: GROUND - DOOR.top, borderRadius: 1,
+    backgroundColor: PAPER_LIT,
   },
-  measBar: {
-    position: 'absolute', left: MEAS_L, top: MEAS_Y, width: MEAS_W, height: 2,
-    backgroundColor: INK, transformOrigin: '50% 50%',
+  hook: { position: 'absolute', left: HOOK.x - 1.5, top: HOOK.y - 4, width: 3, height: 5, borderRadius: 1, backgroundColor: INK },
+  satchel: {
+    position: 'absolute', left: HOOK.x - 7, top: HOOK.y, width: 14, height: 14, borderRadius: 3, backgroundColor: WOOD.SHADE,
+    borderWidth: 1.2, borderColor: INK,
   },
-  measCap: { position: 'absolute', top: MEAS_Y - 8, width: 2, height: 18, backgroundColor: INK },
+  chart: {
+    position: 'absolute', left: CHART.x0, top: CHART.top, width: CHART.x1 - CHART.x0, height: CHART.bottom - CHART.top,
+    borderRadius: 1.5, backgroundColor: PAPER_LIT, borderWidth: 1.5, borderColor: INK, overflow: 'hidden',
+  },
+  chartRule: { position: 'absolute', left: 52, width: 14, height: 1.2, borderRadius: 0.6, backgroundColor: INK, opacity: 0.4 },
+  paper: {
+    position: 'absolute', left: DESKS[0] - 10, top: 456, width: 16, height: 6, borderRadius: 1, backgroundColor: PAPER_LIT,
+    borderWidth: 1, borderColor: INK, transform: [{ rotate: '-6deg' }],
+  },
+  books: { position: 'absolute', left: 360, top: 424, width: 34, height: 22 },
+  bookSpine: { position: 'absolute', bottom: 0, width: 5, borderRadius: 1, backgroundColor: EMBER, borderWidth: 0.8, borderColor: INK },
+  lamp: { position: 'absolute', left: 190, top: 296, width: 14, height: 10, borderBottomLeftRadius: 7, borderBottomRightRadius: 7, backgroundColor: EMBER },
+  schoolFloor: floorStyle(TONE, GROUND),
+  pickRing: { position: 'absolute', left: 0, top: 0, borderWidth: 2.5, borderColor: EMBER },
 
-  // ── Mill's test ────────────────────────────────────────────────────────────
-  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
-  // values and no depth, which is the flat case `check:shade` exists to find.
-  // The structural mass takes STONE, a secondary surface takes RULE, and what
-  // carries the message stays PAPER, so the picture has things at different
-  // values rather than everything a shade darker. See cinematicKit's ramp.
-  testCell: {
-    position: 'absolute', top: TEST_T, height: TEST_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 4, backgroundColor: RULE,
-    alignItems: 'center', justifyContent: 'center',
+  // ── the words ─────────────────────────────────────────────────────────────
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  testHarm: { backgroundColor: INK },
-  testAct: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.2, color: INK, includeFontPadding: false },
-  testVerdict: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, letterSpacing: 1, color: SOFT,
-    marginTop: 3, includeFontPadding: false,
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-
-  // ── the walls ──────────────────────────────────────────────────────────────
-  wall: {
-    position: 'absolute', top: WALL_T, width: WALL_W, height: WALL_H,
-    backgroundColor: INK, borderRadius: 2, overflow: 'hidden',
-  },
-  course: { position: 'absolute', left: 0, width: WALL_W, height: 1.5, backgroundColor: STONE, opacity: 0.55 },
-  joint: { position: 'absolute', width: 1.5, height: 26, backgroundColor: PAPER, opacity: 0.4 },
-
-  // ── the harm boundary + the other person ───────────────────────────────────
-  harmWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  dash: { position: 'absolute', left: HARM_X, width: 2, height: 9, backgroundColor: SOFT },
-
-  // ── the three tap events (group AH) ────────────────────────────────────────
-  //
-  // The boundary is the same 2-unit rule the harm line is drawn from and sits at
-  // the same x, so when `harm` arrives the reader is watching the line they have
-  // already been shown gain its label and the person behind it.
-  edge: {
-    position: 'absolute', left: HARM_X, top: DASH_T, width: 2, height: 160,
-    backgroundColor: SOFT, transformOrigin: '50% 100%',
-  },
-  quiet: {
-    position: 'absolute', top: TEST_T, height: TEST_H, backgroundColor: PAPER,
-    borderRadius: 6,
-  },
-  roleWrap: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
-  roleBar: {
-    position: 'absolute', left: CARD_BL + 9, top: ROLE_T, width: ROLE_W, height: 5,
-    backgroundColor: INK, borderRadius: 2.5, transformOrigin: '0% 50%',
-  },
-  roleLabel: {
-    position: 'absolute', left: CARD_BL, top: ROLE_T + 9, width: CARD_W, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: SOFT,
-    includeFontPadding: false,
-  },
-  harmLabel: {
-    position: 'absolute', left: 296, top: 340, width: 108, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-  // Drawn at roughly three-quarters of the main figure's height with the same
-  // limb weight, so the person beyond the line reads as a PERSON rather than the
-  // lollipop of head-plus-sticks it was.
-  otherHead: { position: 'absolute', left: 346, top: 396, width: 25, height: 25, borderRadius: 13, backgroundColor: INK },
-  otherSpine: { position: 'absolute', left: 356, top: 420, width: 5, height: 44, backgroundColor: INK, borderRadius: 3 },
-  otherArm: { position: 'absolute', top: 430, width: 22, height: 4.5, backgroundColor: INK, borderRadius: 3 },
-  otherArmL: { left: 336, transformOrigin: '100% 50%', transform: [{ rotate: '-20deg' }] },
-  otherArmR: { left: 359, transformOrigin: '0% 50%', transform: [{ rotate: '20deg' }] },
-  otherLeg: { position: 'absolute', top: 462, width: 5, height: 38, backgroundColor: INK, borderRadius: 3 },
-  otherLegL: { left: 352, transformOrigin: '50% 0%', transform: [{ rotate: '6deg' }] },
-  otherLegR: { left: 361, transformOrigin: '50% 0%', transform: [{ rotate: '-6deg' }] },
+  negPlate: { left: 40, top: 420, width: 106 },
+  harmPlate: { left: 40, top: 402, width: 98 },
+  othersPlate: { left: 306, top: 404, width: 92 },
+  posPlate: { left: 96, top: 330, width: 104 },
+  signPlate: { left: 4, top: 378, width: 88 },
 });
 
-// Everything this scene can draw sits between the card tops (222) and the ground rule
-// (501.5): cards 222–286, the measure / Mill's tally sharing the strip at 298–334,
-// walls 336–500, the harm dashes 336–497, the person beyond the line 396–500, and the
-// figure's crown ≈357 down to its feet at 500. Nothing moves vertically — the walls
-// and the tally only translate sideways or fade — so those are the true extremes, and
-// cropping to [214, 510] renders the stage at ~2.19× instead of the letterboxed 1.15×.
 export function Political4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political4Scene} band={[214, 510]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Political4Scene} band={[288, 514]} camera={CAM} />;
 }

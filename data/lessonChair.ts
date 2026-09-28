@@ -5,7 +5,7 @@
 // crossedIn, mugIn, …]`. Kinds: CH_SETUP 10, CH_PUTAWAY 11, CH_MUG_STAND 12, and the
 // seated parts SEAT_CROSS 1 · SEAT_MUG 2 · SEAT_DRUM 3 · SEAT_SIP 4 · SEAT_REST 5.
 export const CHAIR_PLANS: Record<string, readonly number[]> = {
-  'logic-arguments-4': [6, 12, 0, 0],
+  'logic-arguments-5': [3, 12, 0, 0],
   'logic-arguments-6': [1, 10, 0, 0, 1, 2, 0, 0, 2, 1, 0, 1, 2, 11, 1, 1],
   'logic-arguments-8': [9, 12, 0, 0],
   'logic-arguments-10': [6, 12, 0, 0],
@@ -24,7 +24,6 @@ export const CHAIR_PLANS: Record<string, readonly number[]> = {
   'ethics-ethics-34': [2, 10, 0, 0, 3, 2, 0, 0, 3, 3, 0, 1, 4, 1, 0, 1, 4, 11, 1, 1],
   'ethics-ethics-36': [0, 12, 0, 0],
   'ethics-ethics-41': [3, 12, 0, 0],
-  'epistemology-knowledge-5': [6, 12, 0, 0],
   'epistemology-knowledge-7': [2, 12, 0, 0],
   'epistemology-knowledge-10': [2, 10, 0, 0, 2, 2, 0, 0, 3, 11, 0, 1],
   'epistemology-knowledge-13': [0, 12, 0, 0],
@@ -36,7 +35,7 @@ export const CHAIR_PLANS: Record<string, readonly number[]> = {
   'epistemology-knowledge-32': [0, 10, 0, 0, 1, 2, 0, 0, 2, 5, 0, 1, 3, 11, 0, 1],
   'epistemology-knowledge-36': [4, 10, 0, 0, 5, 3, 0, 0, 5, 2, 0, 0, 6, 4, 0, 1, 7, 11, 0, 1],
   'epistemology-knowledge-38': [1, 12, 0, 0],
-  'metaphysics-being-4': [7, 12, 0, 0],
+  'metaphysics-being-5': [0, 12, 0, 0],
   'metaphysics-being-6': [4, 10, 0, 0, 5, 3, 0, 0, 5, 1, 0, 0, 6, 11, 1, 0],
   'metaphysics-being-8': [8, 12, 0, 0],
   'metaphysics-being-9': [0, 10, 0, 0, 1, 3, 0, 0, 1, 11, 0, 0],

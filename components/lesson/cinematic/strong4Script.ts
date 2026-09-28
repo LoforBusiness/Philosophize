@@ -1,83 +1,84 @@
 import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cinematic logic-arguments-4, "Strong vs Weak".
+// Cinematic logic-arguments-4, "Strong Arguments vs Weak Arguments".
+// Theme: A CHALKBOARD WITH A PADLOCK, AN OLIVE, AND A GREEK BANQUET BY THE SEA.
 //
-// The stage is an instrument panel. A CERTAINTY GAUGE with a needle and a 0–100%
-// scale reads the argument: for a DEDUCTION the needle pins at 100%, a lock snaps
-// shut and the banner stamps GUARANTEED; for an INDUCTION the needle falls back
-// off certainty, dice roll out and the banner reads LIKELY. Underneath, two
-// labelled RULER CARDS spell out the two yardsticks side by side —
-//   DEDUCTIVE · guarantee · valid/invalid · sound
-//   INDUCTIVE · likely    · strong/weak   · cogent
-// — and the active one inks up as the presenter talks about it. That card pair is
-// the lesson's whole point ("wrong ruler, wrong verdict") as a diagram.
+// In a lecture room a chalkboard splits into DEDUCTIVE and INDUCTIVE, each with its
+// own standard. The Socrates syllogism goes up under a padlock that shuts on it, and
+// its words turn into letters while the lock stays shut: the form does the work. He
+// takes an olive from a bowl and holds it up; the camera goes into the olive and comes
+// out of an olive on a plate at a banquet on a terrace over the sea. He walks the long
+// table, where most plates have olives, and lifts the cover at Socrates' place: bread.
+// The premises were true and the conclusion was not, so it was only ever probable.
 //
-// The first graded question is answered IN the scene: the cards clear and four
-// verdict chips take their place. The second stays a deck question.
-//
-// Graded questions are the two from data/.../strong-vs-weak-arguments.ts.
+// Redrawn 2026-09-27, the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). Every line, citation, quotation and summary point is copied from
+// the previous script by a generator, word for word and beat for beat.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Strong4Beat extends BaseBeat {
-  /** Presenter gesture (emote code). */ p?: number;
-  /** Gauge needle 0..1. */ fill?: number;
-  /** Lock snapped shut — guaranteed (0/1). */ lock?: number;
-  /** Dice shown and wobbling — probable (0/1). */ dice?: number;
-  /** Banner: 0 blank · 1 LIKELY · 2 GUARANTEED. */ verdict?: number;
-  /** Which ruler card is inked: 0 neither · 1 deductive · 2 inductive. */ lens?: number;
-  /** 1 = a dashed rule draws between the two ruler cards — each family gets its own separate standard. */ divide?: number;
-  /** 1 = a check mark lands on the inductive card's COGENT line. */ tick?: number;
-  /** 1 = a token travels once from the lock down to the deductive card's VALID/INVALID line, tying the guarantee to the argument's form. */ link?: number;
-  /** 1 = a stroke crosses out the deductive card's VALID/INVALID line — the wrong standard for judging this argument. */ strike?: number;
+  /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands: 262 by the desk in the room · 280 at Socrates' place at the banquet. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'heads' | 'both' | 'valid' | 'strong' | 'syllogism' | 'form' | 'enter' | 'dish';
+  /** The board is headed DEDUCTIVE and INDUCTIVE. */ heads?: boolean;
+  /** VALID · SOUND is under DEDUCTIVE. */ valid?: boolean;
+  /** STRONG · COGENT is under INDUCTIVE. */ strong?: boolean;
+  /** The Socrates syllogism is on the board and the padlock is shut on it. */ syl?: boolean;
+  /** Its words have become letters: the form alone. */ form?: boolean;
+  /** He is at the banquet, not in the room (the scene change is the beat that sets it). */ feast?: boolean;
+  /** The cover is off Socrates' dish: bread, not olives. PROBABLE. */ lifted?: boolean;
+  /** Q1 on the stage: four clay voting shards on the ledge. */ q1?: boolean;
+  /** This beat's camera tour, over the generated one (K10); [] holds the whole set, which the scene change needs. */ tour?: readonly (readonly number[])[];
 }
 
 export const BEATS: Strong4Beat[] = [
   {
-    p: 2, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0,
+    p: 158, x: 262, act: 'heads', heads: true,
     text: 'Some arguments aim to guarantee a conclusion. Others aim only to make the conclusion probable.',
     dur: 1.8,
   },
   {
-    p: 266, fill: 0.55, lock: 0, dice: 0, verdict: 0, lens: 0, divide: 1,
+    p: 167, x: 262, act: 'both', heads: true,
     text: 'Both kinds of argument are legitimate, and each has its own standard of assessment.',
     dur: 2.1,
   },
   {
-    p: 459, fill: 0.55, verdict: 0, lens: 0, divide: 1,
+    p: 158, x: 262, act: 'valid', heads: true, valid: true,
     text: 'A deductive argument aims to guarantee its conclusion. It’s judged valid or invalid, and a valid one with true premises is sound.',
     cite: 'Two families of argument',
     dur: 1.8,
   },
   {
-    p: 459, fill: 0.55, verdict: 0, lens: 0, divide: 1, tick: 1,
+    p: 158, x: 262, act: 'strong', heads: true, valid: true, strong: true,
     text: 'An inductive argument aims only to make its conclusion likely, so it’s judged strong or weak. A strong one with true premises is cogent.',
     dur: 3.5,
   },
   {
-    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1, divide: 1, tick: 1,
+    p: 158, x: 262, act: 'syllogism', heads: true, valid: true, strong: true, syl: true,
     text: 'Consider the argument “all men are mortal, Socrates is a man, so Socrates is mortal”. If both premises are true, the conclusion can’t be false.',
     cite: 'Deduction — guaranteed',
     dur: 3.4,
   },
   {
-    p: 274, fill: 1, lock: 1, dice: 0, verdict: 2, lens: 1, divide: 1, tick: 1, link: 1,
+    p: 158, x: 262, act: 'form', heads: true, valid: true, strong: true, syl: true, form: true,
     text: 'That certainty comes from the argument’s form, not from its subject matter.',
     dur: 1.8,
   },
   {
-    p: 173, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1,
+    p: 158, x: 280, act: 'enter', heads: true, valid: true, strong: true, syl: true, form: true, feast: true, tour: [],
     text: 'Now consider the argument “most Greeks eat olives, Socrates is Greek, so he eats olives”. The premises could be true and the conclusion false.',
     cite: 'Induction — likely',
     dur: 3.1,
   },
   {
-    p: 398, fill: 0.78, lock: 0, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1, strike: 1,
+    p: 158, x: 280, act: 'dish', heads: true, valid: true, strong: true, syl: true, form: true, feast: true, lifted: true,
     text: 'So the conclusion is only probable. Judging such an argument by the standard of validity is a mistake.',
     dur: 1.8,
   },
   {
-    p: 147, fill: 0.78, dice: 1, verdict: 1, lens: 2, divide: 1, tick: 1, strike: 1,
+    p: 263, x: 280, heads: true, valid: true, strong: true, syl: true, form: true, feast: true, lifted: true,
     quote: {
       id: 'lq-logic-arguments-4',
       text: 'Custom, then, is the great guide of human life.',
@@ -87,22 +88,19 @@ export const BEATS: Strong4Beat[] = [
       era: '1748',
       branchSlugs: ['logic'],
     },
-    dur: 3.0,
+    dur: 3,
   },
   {
-    p: 380, fill: 0.78, dice: 1, verdict: 1, lens: 2,
-    // Answered ON the panel: the ruler cards clear and four verdict chips take
-    // their place, so the reader grades the argument instead of reading a list.
+    p: 260, x: 280, heads: true, valid: true, strong: true, syl: true, form: true, feast: true, lifted: true, q1: true,
     interact: {
       prompt: 'If premises make a conclusion likely but not certain, which verdict fits the argument?',
-      explain:
-        'Strong. Premises that make a conclusion likely give an inductive argument strength. Calling it invalid applies the deductive standard, which it never aimed to meet. With true premises, a strong inductive argument is cogent.',
+      explain: 'Strong. Premises that make a conclusion likely give an inductive argument strength. Calling it invalid applies the deductive standard, which it never aimed to meet. With true premises, a strong inductive argument is cogent.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
-    p: 165, fill: 0.78, dice: 1, verdict: 1, lens: 2,
+    p: 260, x: 280, heads: true, valid: true, strong: true, syl: true, form: true, feast: true, lifted: true,
     interact: {
       prompt: 'How does the standard of validity bear on a strong inductive argument?',
       sort: {
@@ -116,9 +114,10 @@ export const BEATS: Strong4Beat[] = [
       explain: 'Validity is the wrong standard for assessing it. An inductive argument aims only at likelihood, so failing to guarantee its conclusion isn’t a flaw. Nor is it weak, since its premises make the conclusion likely.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
+    heads: true, valid: true, strong: true, syl: true, form: true, feast: true, lifted: true,
     summary: {
       title: 'Deductive and Inductive Standards',
       points: [

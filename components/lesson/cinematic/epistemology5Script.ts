@@ -1,92 +1,95 @@
 import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cinematic epistemology-knowledge-5, "Why Are Humans Driven to Know Things?".
-// A figure under a night sky watches Aristotle's own ladder build itself rung by
-// rung — sensation, memory, experience, science, and at the top wisdom, with the
-// star of understanding burning over it (Metaphysics I). Then Bacon runs a line
-// down off the top rung to a box marked KNOWLEDGE → POWER: same ladder, new purpose.
+// Cinematic epistemology-knowledge-5, "Why Are Humans Driven to Know?"
+// Theme: A STUDY AT NIGHT, A LADDER OF KNOWLEDGE, A WINDOW, AND THE HILL UNDER THE MOON.
 //
-// Q1 is the deck's four-option question. Q2 is answered IN THE SCENE — the ladder
-// gives way to four name plates and the reader taps who said it.
+// In a study at night he reads Aristotle's book, and the library ladder by the
+// bookcase takes the names of its rungs, WISDOM at the top. He opens the window and a
+// bird on the sill flies off into the night; he leans on the sill for the joy of
+// seeing, and SENSATION lights on the bottom rung. Then the camera goes into the moon
+// in the window and comes out of it over a hill: under the stars wonder turns to
+// perplexity and the stars join into a question mark, and for Bacon a windmill on the
+// far hill starts to turn.
 //
-// Graded questions are the two from data/.../why-humans-seek-knowledge.ts.
+// Redrawn 2026-09-27, the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). Every line, citation, quotation and summary point is copied from
+// the previous script by a generator, word for word and beat for beat.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Epi5Beat extends BaseBeat {
-  /** Figure gesture. */ p?: number;
-  /** Star brightness 0..1. */ star?: number;
-  /** Bacon's power — the line down to COMMAND OVER NATURE (0/1). */ power?: number;
-  /** How many rungs of Aristotle's ladder are drawn (0..5, bottom up). */ rungs?: number;
-  /** 1 = a "BORN WITH IT" tag lands by the figure, once the innate claim is made. */ born?: number;
-  /** 1 = a ring marks the WISDOM rung as the one sought for its own sake. */ freeRing?: number;
-  /** 1 = a ring marks the SENSATION rung, the lowest and the one every animal has. */ sightRing?: number;
-  /** 1 = a second, smaller spark joins the star — Plato agreeing with Aristotle. */ twin?: number;
-  /** 1 = a ring marks the SCIENCE rung, "knowing the why" that resolves perplexity. */ puzzleRing?: number;
-  /** 1 = a VS tag lands on Bacon's line, contrasting his purpose with Aristotle's. */ vs?: number;
+  /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
+  /** Where he stands: 224 by the side table and 262 at the window in the study · 190 on the hill. */ x?: number;
+  /** The act across this beat's line (the scene choreographs it). */
+  act?: 'read' | 'pages' | 'ladder' | 'free' | 'gaze' | 'sense' | 'enter' | 'ask' | 'mill' | 'compare';
+  /** He holds Aristotle's book. */ book?: boolean;
+  /** The ladder's rungs are named, WISDOM at the top. */ rungs?: boolean;
+  /** The window is open and the bird has flown: FREE, beside WISDOM. */ free?: boolean;
+  /** SENSATION, the bottom rung, is lit. */ sense?: boolean;
+  /** He is on the hill under the moon, not in the study (the scene change is the beat that sets it). */ hill?: boolean;
+  /** The stars have joined into a question mark. */ ask?: boolean;
+  /** The windmill is turning and lit: POWER. */ mill?: boolean;
+  /** The last question, on the stage: the moon for Aristotle, the windmill for Bacon. */ q2?: boolean;
+  /** This beat's camera tour, over the generated one (K10); [] holds the whole set, which the scene change needs. */ tour?: readonly (readonly number[])[];
 }
 
 export const BEATS: Epi5Beat[] = [
   {
-    p: 164, star: 0.4, power: 0, rungs: 2,
+    p: 158, x: 224, act: 'read', book: true,
     text: 'Aristotle opens his Metaphysics with a claim about human nature. He writes that “all men by nature desire to know”.',
     dur: 2.6,
   },
   {
-    p: 164, star: 0.4, power: 0, rungs: 2, born: 1,
+    p: 158, x: 224, act: 'pages', book: true,
     text: 'On this view, nobody needs to be taught to want knowledge. The desire comes with being human.',
     dur: 1.8,
   },
   {
-    p: 275, star: 0.8, rungs: 5, born: 1,
+    p: 158, x: 224, act: 'ladder', rungs: true,
     text: 'Aristotle ranks the kinds of knowledge. The highest, wisdom, isn’t valued for its usefulness but is sought for its own sake.',
     cite: 'Aristotle, Metaphysics, Book One',
     dur: 3.2,
   },
   {
-    p: 275, star: 0.8, rungs: 5, born: 1, freeRing: 1,
+    p: 158, x: 262, act: 'free', rungs: true, free: true,
     text: 'Aristotle calls wisdom the only free science. Just as a free person exists for their own sake, so does wisdom.',
     dur: 1.8,
   },
   {
-    p: 19, star: 1, rungs: 5, born: 1, freeRing: 1,
+    p: 158, x: 262, act: 'gaze', rungs: true, free: true,
     text: 'Aristotle offers evidence from ordinary life: people delight in their senses, and above all in sight.',
     cite: 'The joy of sight',
     dur: 1.8,
   },
   {
-    p: 169, star: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1,
+    p: 158, x: 262, act: 'sense', rungs: true, free: true, sense: true,
     text: 'People enjoy seeing even when it serves no purpose. Sensation is the lowest rung of Aristotle’s ladder of knowledge.',
     dur: 3,
   },
   {
-    p: 467, star: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1, twin: 1,
-    // The cite plate carries `thaumazein`; the narration says what it means. A term
-    // the reader can SEE spelled out does not also need spelling out in the prose (J7).
+    p: 158, x: 190, act: 'enter', rungs: true, free: true, sense: true, hill: true, tour: [],
     text: 'Plato and Aristotle both hold that philosophy begins in wonder. Plato says so in the Theaetetus, Aristotle in the Metaphysics.',
     cite: 'Thaumazein — wonder',
     dur: 2.2,
   },
   {
-    p: 467, star: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1, twin: 1, puzzleRing: 1,
-    // The cite plate carries `thaumazein`; the narration says what it means. A term
-    // the reader can SEE spelled out does not also need spelling out in the prose (J7).
+    p: 158, x: 190, act: 'ask', rungs: true, free: true, sense: true, hill: true, ask: true,
     text: 'Aristotle links wonder to perplexity. Someone puzzled by what they can’t explain becomes aware of their own ignorance.',
     dur: 2.6,
   },
   {
-    p: 272, star: 1, power: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1, twin: 1, puzzleRing: 1,
+    p: 158, x: 190, act: 'mill', rungs: true, free: true, sense: true, hill: true, ask: true, mill: true,
     text: 'Nearly two thousand years later, Francis Bacon gave knowledge a new purpose. For Bacon, knowledge is worth having for the power it gives over nature.',
     cite: 'Knowledge as power',
     dur: 3.4,
   },
   {
-    p: 272, star: 1, power: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1, twin: 1, puzzleRing: 1, vs: 1,
+    p: 167, x: 190, act: 'compare', rungs: true, free: true, sense: true, hill: true, ask: true, mill: true,
     text: 'Aristotle prized understanding nature for its own sake. Bacon prized knowledge that could be used to control nature.',
     dur: 1.8,
   },
   {
-    p: 129, star: 1, power: 1, rungs: 5, born: 1, freeRing: 1, sightRing: 1, twin: 1, puzzleRing: 1, vs: 1,
+    p: 263, x: 190, rungs: true, free: true, sense: true, hill: true, ask: true, mill: true,
     quote: {
       id: 'lq-epistemology-knowledge-5-1',
       text: 'Knowledge itself is power.',
@@ -96,16 +99,20 @@ export const BEATS: Epi5Beat[] = [
       era: '1597',
       branchSlugs: ['epistemology'],
     },
-    dur: 3.0,
+    dur: 3,
   },
   {
-    p: 172, star: 1, rungs: 5,
+    p: 260, x: 190, rungs: true, free: true, sense: true, hill: true, ask: true, mill: true,
     interact: {
       prompt: 'As a person grows, which shape does the desire to know take?',
       plot: {
         cols: ['INFANT', 'CHILD', 'ADULT'],
         axis: 'THE DESIRE TO KNOW',
-        start: [0.3, 0.3, 0.3],
+        start: [
+          0.3,
+          0.3,
+          0.3,
+        ],
         shapes: [
           { id: 'born', profile: [0.85, 0.88, 0.86, 0.89, 0.87], reads: 'there from the start', correct: true },
           { id: 'taught', profile: [0.05, 0.25, 0.5, 0.75, 0.95], reads: 'put there by teaching' },
@@ -115,21 +122,19 @@ export const BEATS: Epi5Beat[] = [
       explain: 'There from the start. Aristotle opens the Metaphysics with the claim that all human beings by nature desire to know, and offers the delight taken in the senses for its own sake as evidence. Teaching shapes it; it doesn\'t install it.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
-    p: 383, star: 1, power: 1, rungs: 5,
+    p: 260, x: 190, rungs: true, free: true, sense: true, hill: true, ask: true, mill: true, q2: true,
     interact: {
-      // Was "Who said ... ? Tap the name" — a memory test of the quote card two beats
-      // back. Asking which of them HELD the position is the same tap and a real question (J8).
       prompt: 'Which of these thinkers valued knowledge as a means of controlling nature?',
-      explain:
-        'Francis Bacon. He valued knowledge for the power it gives over nature. Aristotle held the opposite view: the highest knowledge is sought for its own sake, whatever its use.',
+      explain: 'Francis Bacon. He valued knowledge for the power it gives over nature. Aristotle held the opposite view: the highest knowledge is sought for its own sake, whatever its use.',
       xp: 5,
     },
-    dur: 1.0,
+    dur: 1,
   },
   {
+    rungs: true, free: true, sense: true, hill: true, ask: true, mill: true,
     summary: {
       title: 'The Human Drive to Know',
       points: [

@@ -114,6 +114,13 @@ export const HANDS_ON_PROP = new Set([
   'ethics-ethics-3',
   'aesthetics-aesthetics-3',
   'political-political-3',
+  // the fourth lessons: each changes scene through portal.ts, and he handles the objects in both sets
+  'metaphysics-being-4',
+  'epistemology-knowledge-5',
+  'logic-arguments-4',
+  'ethics-ethics-4',
+  'aesthetics-aesthetics-4',
+  'political-political-4',
 ]);
 
 const RIG_BOUND = new Set([

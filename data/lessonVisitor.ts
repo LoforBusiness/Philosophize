@@ -26,7 +26,6 @@ export interface VisitorCue {
 }
 
 export const VISITOR: Record<string, VisitorCue> = {
-  'political-political-4': { enter: 7, x: 282, from: 460, dir: -1 },
   'ethics-ethics-31': { enter: 8, x: 282, from: 460, dir: -1 },
   'political-political-33': { enter: 8, x: 115, from: 460, dir: -1 },
   'logic-arguments-39': { enter: 6, x: 43, from: -60, dir: 1, turn: -1 },

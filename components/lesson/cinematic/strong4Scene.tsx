@@ -1,452 +1,541 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './strong4Script';
-import { GROUND, K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
-import Target, { useAnswerSpent } from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import { PORTAL, PORTAL_Z, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import {
+  board, desk, bowl, terrace, banquetTable, amphora,
+  BOARD, BOWL, LOCK, TABLE, PLATES, EMPTY_PLATE, DISH, OLIVE_PLATE, LEDGE, SHARDS, AMPHORAE,
+} from './strong4Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// logic-arguments-4, "Strong Arguments vs Weak Arguments" — A LECTURE ROOM, AND A
+// GREEK BANQUET BY THE SEA.
+//
+// Redrawn 2026-09-27: the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). Every act is laid across its voiced line in stages.
+//
+//   b0   the board heads its two columns, DEDUCTIVE and INDUCTIVE; he points to each.
+//   b2   VALID · SOUND under the first.   b3  STRONG · COGENT under the second.
+//   b4   the Socrates syllogism goes up, and a padlock shuts on it.
+//   b5   its words turn into letters, the lock still shut; he takes an olive and holds it up.
+//   b6   THE CHANGE: into the olive, out of an olive on a plate at a banquet by the sea.
+//        He walks the long table: most places have olives.
+//   b7   at Socrates' place he lifts the cover: bread. PROBABLE.
+//   b9   Q1: four clay voting shards on the ledge.
+//   b10  Q2: the amphora for each bin rocks as the chip crosses it (R7c).
+//
+// COMPOSITION, in stage units. The room: the board 50–350 × 326–430, split at 200, the
+// padlock at 176; the desk 150–250 with the bowl at 236. The banquet: columns at 20 and
+// 380, the table 64–326 at 470 with seven plates and Socrates' covered dish at 300, the
+// ledge at 420 with the shards, the amphorae at 20–52. He stands at 262 in the room;
+// at the banquet he walks in at 70 and stops at 280. Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('logic');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const CLAY = stageToneOf(EMBER);
+const MARBLE = stageToneOf(TEAL);
+const TR = 0.85;
 
-// An instrument panel the presenter reads from.
-//
-//   · THE CERTAINTY GAUGE — a 320-wide 0→100% scale with quarter ticks, an inked
-//     fill and a needle that travels to the reading. A padlock guards the 100% end
-//     and snaps shut only for a deduction; dice roll out for an induction; a banner
-//     stamps GUARANTEED or LIKELY.
-//   · THE TWO RULER CARDS — deductive vs inductive, each listing what it aims at,
-//     how it is graded, and what it becomes with true premises. The card being
-//     discussed inks its title strip SOLID and reverses the word out in paper, so
-//     which yardstick is in play reads at a glance. This pair IS "wrong ruler,
-//     wrong verdict".
-//
-// On the graded beat the cards clear and four one-word VERDICT CHIPS take the
-// column, so the question is answered by tapping in the scene.
-//
-// No camera transform: the art is authored straight into stage space, so the band
-// below is exact. The presenter's widest reach ends at x ≈ 134 and the card
-// column starts at x = 152, so the figure can never cover a chip.
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, logic-arguments-4. */
+const LINES = [5.28, 4.36, 8.52, 8.16, 8.88, 3.92, 8.92, 6.16, 0, 0, 0, 0];
 
-const K = K_FIG * 1.08;            // stage units per rig unit (figure ≈ 111 tall)
-const FIG_X = 76;
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+const MID = { x: STAGE_W / 2, y: 401 };
+/** The olive in his hand is the larger, so the room is pushed in less deep and they meet. */
+const OLIVE_HAND_R = 3.5;
+const Z_ROOM = PORTAL_Z * (OLIVE_PLATE.r / OLIVE_HAND_R);
+/** Where he walks in at the banquet, and when he sets off. */
+const FEAST_IN = 70;
+const FEAST_GO = PORTAL.outTo + 0.4;
 
-// ── gauge ────────────────────────────────────────────────────────────────────
-const G_L = 40;
-const G_W = 320;
-const G_Y = 226;
-const G_H = 26;
+const X = BEATS.map((b) => b.x ?? 280);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_HEADS = is('heads');
+const A_VALID = is('valid');
+const A_STRONG = is('strong');
+const A_SYL = is('syllogism');
+const A_FORM = is('form');
+const A_ENTER = is('enter');
+const A_DISH = is('dish');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const HEADS = flag((b) => b.heads);
+const VALID = flag((b) => b.valid);
+const STRONG = flag((b) => b.strong);
+const SYL = flag((b) => b.syl);
+const FORM = flag((b) => b.form);
+const FEAST = flag((b) => b.feast);
+const LIFTED = flag((b) => b.lifted);
+const Q1 = flag((b) => b.q1);
+/** The sort is being answered: the amphora for the bin the chip is over rocks (R7c). */
+const SORT = flag((b) => b.interact?.sort);
+const ROCK_AT = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+/** Which way he faces once each beat settles: the bowl and the board on his left; then along the table. */
+const DIR = BEATS.map((b) => (b.feast ? 1 : -1));
 
-// ── column: the ruler cards, and the ballot that replaces them ───────────────
-const COL_L = 152;
-const COL_W = 234;
-const COL_TOP = 324;
-// The card holds a 23-tall title strip over THREE 17.5-tall lines = 75.5, plus a
-// 2 border top and bottom = 79.5. At 78 that overflowed its own `overflow: hidden`
-// box and Android shaved the bottom off the third line; 84 leaves 4.5 of slack.
-const CARD_H = 84;                 // 324..408 and 412..496
-const CHIP_H = 40;
-const CHIP_STEP = 43;              // 324 · 367 · 410 · 453 → ends at 493
-
-// One word per chip, deliberately. A gloss line under each ("induction's version of
-// valid") handed the answer straight to the reader; a bare verdict makes them read
-// the two ruler cards they were just shown, which is the point of the lesson. It
-// also buys the type room to sit at 16px instead of 10.
-// The link token's journey (group AH): from the lock's centre down to the
-// deductive card's VALID/INVALID line — read off the lock and card geometry
-// above rather than typed as fresh literals.
-const LINK_X0 = 382;
-const LINK_Y0 = 243;
-const LINK_X1 = COL_L + 10;
-const LINK_Y1 = COL_TOP + 23 + 17.5 + 8.75;
-
-const CHIPS = [
+const Q1_T = [
   { id: 'a', title: 'STRONG', correct: true },
   { id: 'b', title: 'SOUND', correct: false },
   { id: 'c', title: 'INVALID', correct: false },
   { id: 'd', title: 'WEAK', correct: false },
 ];
 
-const P_CODE = BEATS.map((b) => b.p ?? 0);
-const FILL = BEATS.map((b) => b.fill ?? 0.5);
-const LOCK = BEATS.map((b) => b.lock ?? 0);
-const DICE = BEATS.map((b) => b.dice ?? 0);
-const VERD = BEATS.map((b) => b.verdict ?? 0);
-const DIVIDEV = BEATS.map((b) => ((b.divide ?? 0) > 0 ? 1 : 0));
-const LENS = BEATS.map((b) => b.lens ?? 0);
-const TR = 0.85;
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, 1, tx, ty, w);
+}
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS him when a beat moves him far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on. Beats that do not set
-// `x` stand at FIG_X, so a still lesson gets the one-in-three push rather than a
-// camera that never rests.
-const X = BEATS.map((b) => b.x ?? FIG_X);
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic'));
 
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('strong4'));
-
-const TICKV = BEATS.map((b) => ((b.tick ?? 0) > 0 ? 1 : 0));
-const STRIKEV = BEATS.map((b) => ((b.strike ?? 0) > 0 ? 1 : 0));
-
-export default function Strong4Scene({ clock, bt, bi, i, picked, onPick, pickPos, gazeX, gazeY, gazeOn }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldS = useHeld();
-  const cv = useCarry(8);
-  const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-  const showPick = !!cur.interact;
-  const leaving = !!prev?.interact && !cur.interact;
-  const answered = picked !== null;
-  // The stage's own instruction, spent the moment the answer lands (S11).
-  const spent = useAnswerSpent(picked);
-
-  // ── the four still-tap events (group AH) ─────────────────────────────────
-  // Each is a plain reveal that grows in on the beat that first sets it, then
-  // holds — same shape as `factOn`/`conclOn` above, no `carry()` needed because
-  // none of them interpolate between two non-zero values.
-  const divideOn = (cur.divide ?? 0) > 0;
-  const divideFade = (cur.divide ?? 0) !== (prev?.divide ?? 0);
-  const tickOn = (cur.tick ?? 0) > 0;
-  const tickFade = (cur.tick ?? 0) !== (prev?.tick ?? 0);
-  const strikeOn = (cur.strike ?? 0) > 0;
-  const strikeFade = (cur.strike ?? 0) !== (prev?.strike ?? 0);
-  // The link token runs once, on the beat that asks for it (C20c) — it never
-  // holds, so it is not carried, exactly like `flow` in logic7.
-  const linkNow = (cur.link ?? 0) > 0 && (cur.link ?? 0) !== (prev?.link ?? 0) ? 1 : 0;
-
+export default function Strong4Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(19);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    const b = bt.value;
     const t = clock.value;
-    const grow = ease01(bt.value / 0.55);
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const s = keepHeld(heldS, mixStance(carryFrom(heldS, n, emoteHold(P_CODE[p], t)), emoteLive(P_CODE[n], t, bt.value), tr));
-    const dice = carry(cv, 0, n, DICE[p], DICE[n], tr);
-    const v = carry(cv, 1, n, VERD[p], VERD[n], tr);
-    const lens = carry(cv, 2, n, LENS[p], LENS[n], tr);
+    // ── the change (b6), and which set he is in otherwise ───────────────────
+    const pt = portalAt(b);
+    const world = A_ENTER[n] ? pt.world : FEAST[n];
+    const kRoom = A_ENTER[n] ? pt.out : FEAST[n];
+    const kFeast = A_ENTER[n] ? pt.into : 1 - FEAST[n];
+
+    // ── where he is: in the room at the desk, then along the banquet table ───
+    const xp = X[p];
+    const xn = X[n];
+    const feastDur = moveTr(FEAST_IN, xn, TR);
+    const feastU = A_ENTER[n] ? ease01(clamp01((b - FEAST_GO) / feastDur)) : 1;
+    const feastWalk = A_ENTER[n] && world >= 0.5 && feastU > 0 && feastU < 1;
+    const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const target = A_ENTER[n] ? (world < 0.5 ? xp : lerp(FEAST_IN, xn, feastU)) : xn;
+    const x = n === 0 ? xn : carry(cv, 0, n, xp, target, A_ENTER[n] ? 1 : walking ? walkU : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : feastWalk
+        ? travelStance(FEAST_IN, xn, hHold(P[n], t), hHold(P[n], t), hLive(P[n], t, b), feastU, WALK, 0)
+        : hLive(P[n], t, b);
+    const dirV = A_ENTER[n] ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom) : facing(DIR[p], DIR[n], b);
+    const dir = dirV < 0 ? -1 : 1;
+
+    // ── pointing up at the board's two columns (b0), and at the lock (b4) ───
+    const ptL = A_HEADS[n] ? pulse(0.4, 0.9, 2.2) : A_SYL[n] ? pulse(L * 0.7, L * 0.78, L * 0.95) : 0;
+    s = handOn(s, x, dir, 150, 420, ptL);
+    const ptR = A_HEADS[n] ? pulse(2.6, 3.1, 4.6) : 0;
+    s = handOn(s, x, dir, 248, 420, ptR);
+    // ── the olive: taken from the bowl (b5), held up, into the change (b6) ──
+    const take = A_FORM[n] ? pulse(1.7, 2.1, 2.5) : 0;
+    s = handOn(s, x, dir, BOWL.x, BOWL.y - 4, take);
+    const hold = A_FORM[n] ? sec(2.3, 2.9) : A_ENTER[n] ? 1 - clamp01(world * 2) : 0;
+    s = mixStance(s, { ...s, fistR: { x: 18, y: -44 } }, hold * (1 - take));
+    // ── the cover off Socrates' dish (b7) ────────────────────────────────────
+    const lift = A_DISH[n] ? pulse(0.3, 0.8, 1.6) : 0;
+    s = handOn(s, x, dir, DISH.x, DISH.y - 6 - 12 * sec(0.8, 1.2), lift);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the room ─────────────────────────────────────────────────────────────
+    const hd = A_HEADS[n] ? st(0.05, 0.2) : HEADS[n];
+    const hi = A_HEADS[n] ? st(0.5, 0.65) : HEADS[n];
+    const va = A_VALID[n] ? st(0.3, 0.45) : VALID[n];
+    const so = A_VALID[n] ? st(0.78, 0.9) : VALID[n];
+    const stg = A_STRONG[n] ? st(0.3, 0.45) : STRONG[n];
+    const cog = A_STRONG[n] ? st(0.78, 0.9) : STRONG[n];
+    const l1 = A_SYL[n] ? st(0.1, 0.2) : SYL[n];
+    const l2 = A_SYL[n] ? st(0.28, 0.38) : SYL[n];
+    const l3 = A_SYL[n] ? st(0.5, 0.6) : SYL[n];
+    const shut = A_SYL[n] ? st(0.72, 0.8) : SYL[n];
+    const form = A_FORM[n] ? sec(0.3, 1.2) : FORM[n];
+
+    // ── the banquet ──────────────────────────────────────────────────────────
+    const lifted = A_DISH[n] ? sec(0.8, 1.2) : LIFTED[n];
+    const prob = A_DISH[n] ? st(0.2, 0.3) : LIFTED[n];
+    const rock0 = SORT[n] ? pickAt(ROCK_AT[0], pickPos.value) : 0;
+    const rock1 = SORT[n] ? pickAt(ROCK_AT[1], pickPos.value) : 0;
+    const rock2 = SORT[n] ? pickAt(ROCK_AT[2], pickPos.value) : 0;
+
     return {
-      fig: lookPose(s, FIG_X, GROUND, K, 1, 1, gazeX.value, gazeY.value, gazeOn.value),
-      fill: carry(cv, 3, n, FILL[p], FILL[n], tr),
-      // R7b — the arm asks for a guarantee, and the lock answers. At the first
-      // setting the verdict demands certainty and the lock is shut; move away and it
-      // opens, because likelihood was never trying to lock anything.
-      lock: carry(cv, 4, n, LOCK[p], reacting ? 1 - pickPos.value : LOCK[n], tr),
-      dice,
-      banner: clamp01(v),
-      likely: clamp01(v) - clamp01(v - 1),
-      sure: clamp01(v - 1),
-      deduct: clamp01(lens) - clamp01(lens - 1),
-      induct: clamp01(lens - 1),
-      // The ruler cards and the chips cross-fade, so neither ever pops.
-      cards: showPick ? 1 - grow : leaving ? grow : 1,
-      ballot: showPick ? grow : 0,
-      // dice jitter only while they are out
-      wob: Math.sin(t * 6.0) * 5 * dice,
-      wob2: Math.sin(t * 5.1 + 1.3) * 5 * dice,
-      // "each has its own standard" — a dashed rule draws between the two cards.
-      // Carried rather than switched: the plain ternary yields 0 on the beat the
-      // rule goes out, which is a CUT (AH4).
-      divide: carry(cv, 7, n, DIVIDEV[p], DIVIDEV[n], divideFade ? grow : 1),
-      // "…so it's judged strong or weak. A strong one … is cogent" — a check
-      // lands on the inductive card's own COGENT line.
-      // CARRIED, so it fades out as well as in: `on ? (fade ? grow : 1) : 0` switches
-      // the thing off between two frames, which is a cut (group L).
-      tick: carry(cv, 5, n, TICKV[p], TICKV[n], tickFade ? grow : 1),
-      // "Judging such an argument by the standard of validity is a mistake" —
-      // a stroke crosses out the deductive card's VALID/INVALID line.
-      strike: carry(cv, 6, n, STRIKEV[p], STRIKEV[n], strikeFade ? grow : 1),
-      // "That certainty comes from the argument's form" — a token runs once
-      // from the lock down to the deductive card's VALID/INVALID line.
-      link: linkNow ? ease01(bt.value / 1.1) : 0,
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      world: carry(cv, 1, n, FEAST[p], world, A_ENTER[n] ? 1 : tr),
+      kRoom: carry(cv, 2, n, FEAST[p], kRoom, A_ENTER[n] ? 1 : tr),
+      kFeast: carry(cv, 3, n, 1 - FEAST[p], kFeast, A_ENTER[n] ? 1 : tr),
+      hold: carry(cv, 4, n, 0, hold, tr),
+      hd: carry(cv, 5, n, HEADS[p], hd, tr),
+      hi: carry(cv, 6, n, HEADS[p], hi, tr),
+      va: carry(cv, 7, n, VALID[p], va, tr),
+      so: carry(cv, 8, n, VALID[p], so, tr),
+      stg: carry(cv, 9, n, STRONG[p], stg, tr),
+      cog: carry(cv, 10, n, STRONG[p], cog, tr),
+      l1: carry(cv, 11, n, SYL[p], l1, tr),
+      l2: carry(cv, 12, n, SYL[p], l2, tr),
+      l3: carry(cv, 13, n, SYL[p], l3, tr),
+      shut: carry(cv, 14, n, SYL[p], shut, tr),
+      form: carry(cv, 15, n, FORM[p], form, tr),
+      lifted: carry(cv, 16, n, LIFTED[p], lifted, tr),
+      prob: carry(cv, 17, n, LIFTED[p], prob, tr),
+      q1: carry(cv, 18, n, Q1[p], Q1[n], tr),
+      rock0, rock1, rock2,
+      t,
     };
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
-  const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, SCENE.value.fill) }] }));
-  const needleStyle = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.fill * G_W }] }));
-  const lockStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.lock, transform: [{ scale: 0.6 + 0.4 * SCENE.value.lock }] }));
-  const die1Style = useAnimatedStyle(() => ({ opacity: SCENE.value.dice, transform: [{ rotate: `${SCENE.value.wob}deg` }] }));
-  const die2Style = useAnimatedStyle(() => ({ opacity: SCENE.value.dice, transform: [{ rotate: `${SCENE.value.wob2}deg` }] }));
-  const bannerStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.banner }));
-  const likelyStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.likely }));
-  const sureStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.sure }));
-  const cardsStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.cards }));
-  const dedStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.deduct }));
-  const indStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.induct }));
-  const ballotStyle = useAnimatedStyle(() => ({
-    opacity: SCENE.value.ballot,
-    transform: [{ translateY: (1 - SCENE.value.ballot) * 10 }],
-  }));
-  const divideStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, SCENE.value.divide) }] }));
-  const tickStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.tick }));
-  const strikeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, SCENE.value.strike) }] }));
-  // The token fades in over its first fifth and out over its last, so it
-  // arrives rather than stopping dead, and is invisible at rest (as logic7).
-  const linkStyle = useAnimatedStyle(() => {
-    const u = SCENE.value.link;
-    const on = u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2);
+  // the room goes in towards the olive where his hand holds it
+  const roomXf = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
     return {
-      opacity: on,
-      transform: [
-        { translateX: LINK_X0 + (LINK_X1 - LINK_X0) * u },
-        { translateY: LINK_Y0 + (LINK_Y1 - LINK_Y0) * u },
-      ],
+      opacity: 1 - SCENE.value.world,
+      ...portalXf(SCENE.value.kRoom, w[0].translateX, w[1].translateY - 3, MID.x, MID.y, Z_ROOM),
     };
   });
+  const feastXf = useAnimatedStyle(() => ({
+    opacity: SCENE.value.world > 0.001 ? 1 : 0,
+    ...portalXf(SCENE.value.kFeast, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y),
+  }));
+  const figXf = useAnimatedStyle(() => {
+    const atFeast = SCENE.value.world >= 0.5;
+    const k = atFeast ? SCENE.value.kFeast : SCENE.value.kRoom;
+    const w = DF.value.wrR;
+    const s = atFeast ? portalScale(k) : portalScale(k, Z_ROOM);
+    const xf = atFeast
+      ? portalXf(k, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y)
+      : portalXf(k, w[0].translateX, w[1].translateY - 3, MID.x, MID.y, Z_ROOM);
+    return { opacity: figureAt(s), ...xf };
+  });
+  const feastWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kFeast) : 0));
+  const roomWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kRoom));
 
   return (
-    <Animated.View style={styles.scene}>
-      <View style={styles.floor} pointerEvents="none" />
-      <View style={styles.ground} pointerEvents="none" />
-
-      {/* ── the certainty gauge ─────────────────────────────────────────────── */}
-      <View style={styles.gaugeLab} pointerEvents="none">
-        <Text style={styles.gaugeLabT}>HOW SURE IS THE CONCLUSION?</Text>
-      </View>
-      <View style={styles.track} pointerEvents="none">
-        <View style={[styles.tick, { left: G_W * 0.25 }]} />
-        <View style={[styles.tick, { left: G_W * 0.5 }]} />
-        <View style={[styles.tick, { left: G_W * 0.75 }]} />
-        <Animated.View style={[styles.fill, fillStyle]} />
-      </View>
-      <Animated.View style={[styles.needle, needleStyle]} pointerEvents="none" />
-      <Text style={[styles.scaleT, { left: G_L }]}>0%</Text>
-      <Text style={[styles.scaleT, { left: G_L + G_W / 2 - 14, width: 28, textAlign: 'center' }]}>50%</Text>
-      <Text style={[styles.scaleT, { left: G_L + G_W - 30, width: 30, textAlign: 'right' }]}>100%</Text>
-
-      {/* the guarantee lock, standing at the 100% end */}
-      <Animated.View style={[styles.lock, lockStyle]} pointerEvents="none">
-        <View style={styles.shackle} />
-        <View style={styles.lockBody} />
+    <View style={styles.scene}>
+      <Animated.View style={[styles.set, feastXf]} pointerEvents="none">
+        <Feast S={SCENE} />
       </Animated.View>
-
-      {/* the verdict banner */}
-      <Animated.View style={[styles.banner, bannerStyle]} pointerEvents="none">
-        <Animated.Text style={[styles.bannerT, likelyStyle]}>LIKELY</Animated.Text>
-        <Animated.Text style={[styles.bannerT, sureStyle]}>GUARANTEED</Animated.Text>
-      </Animated.View>
-
-      {/* the dice — only out for an induction */}
-      <Animated.View style={[styles.die, { left: 200 }, die1Style]} pointerEvents="none">
-        <View style={[styles.pip, { top: 5, left: 5 }]} />
-        <View style={[styles.pip, { bottom: 5, right: 5 }]} />
-      </Animated.View>
-      <Animated.View style={[styles.die, { left: 240 }, die2Style]} pointerEvents="none">
-        <View style={[styles.pip, { top: 5, left: 5 }]} />
-        <View style={[styles.pip, { top: 13.5, left: 13.5 }]} />
-        <View style={[styles.pip, { bottom: 5, right: 5 }]} />
-      </Animated.View>
-
-      {/* The link token: "certainty comes from the argument's form" — it runs
-          once from the lock down to the deductive card's VALID/INVALID line. */}
-      <Animated.View style={[styles.linkDot, linkStyle]} pointerEvents="none" />
-
-      <Stickman D={DF} k={K} />
-
-      {/* ── the two ruler cards ─────────────────────────────────────────────── */}
-      <Animated.View style={[styles.cards, cardsStyle]} pointerEvents="none">
-        {/* "each has its own standard of assessment" — a dashed rule draws
-            between the two cards, marking the two as separate yardsticks. */}
-        <Animated.View style={[styles.divide, divideStyle]} />
-        <View style={[styles.card, { top: COL_TOP }]}>
-          {/* the active ruler's title strip inks SOLID, with the word reversed out —
-              a RULE-grey wash was too quiet to say "this is the one in play" */}
-          <View style={styles.cardHead}>
-            <Animated.View style={[styles.cardHeadOn, dedStyle]} />
-            <Text style={styles.cardHeadT}>DEDUCTIVE</Text>
-            <Animated.Text style={[styles.cardHeadT, styles.cardHeadTOn, dedStyle]}>DEDUCTIVE</Animated.Text>
-          </View>
-          <Text style={styles.cardLine}>aims to  GUARANTEE</Text>
-          <Text style={styles.cardLine}>graded  VALID / INVALID</Text>
-          <Text style={styles.cardLine}>+ true premises → SOUND</Text>
-          {/* "Judging such an argument by the standard of validity is a
-              mistake" — a stroke crosses out the wrong standard's own line. */}
-          <Animated.View style={[styles.strike, strikeStyle]} />
+      <Animated.View style={[styles.set, roomXf]} pointerEvents="none">
+        <View style={styles.floor} />
+        <View style={styles.wall}>
+          {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
         </View>
-        <View style={[styles.card, { top: COL_TOP + CARD_H + 4 }]}>
-          <View style={styles.cardHead}>
-            <Animated.View style={[styles.cardHeadOn, indStyle]} />
-            <Text style={styles.cardHeadT}>INDUCTIVE</Text>
-            <Animated.Text style={[styles.cardHeadT, styles.cardHeadTOn, indStyle]}>INDUCTIVE</Animated.Text>
-          </View>
-          <Text style={styles.cardLine}>aims to make  LIKELY</Text>
-          <Text style={styles.cardLine}>graded  STRONG / WEAK</Text>
-          <Text style={styles.cardLine}>+ true premises → COGENT</Text>
-          {/* "A strong one with true premises is cogent" — a check lands on
-              the fact just stated, right where it is already written. */}
-          <Animated.View style={[styles.cogentTick, tickStyle]}>
-            <Text style={styles.cogentTickT}>✓</Text>
-          </Animated.View>
-        </View>
+        <ObjectArt parts={BOARD_ART} tone={WOOD} />
+        <View style={styles.slate} />
+        <Padlock S={SCENE} />
+        <ObjectArt parts={DESK_ART} tone={WOOD} />
+        <ObjectArt parts={BOWL_ART} tone={CLAY} />
+        <View style={[styles.olive, { left: BOWL.x - 7, top: BOWL.y - 8 }]} />
+        <View style={[styles.olive, { left: BOWL.x + 1, top: BOWL.y - 9 }]} />
+        <View style={styles.ground} />
+        <Held S={SCENE} DF={DF} />
       </Animated.View>
+      {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
+          word inside a transparent plate, and a set still nine times over on the change
+          beat puts that hidden word far off the stage (check:space). A word only shows
+          once its set has landed at scale 1, so over the sets is where it belongs. */}
+      <FeastWords S={SCENE} words={feastWords} on={on} />
+      <Chalk S={SCENE} words={roomWords} />
+      <Animated.View style={[styles.set, figXf]} pointerEvents="none">
+        <Stickman D={DF} k={K_M} />
+      </Animated.View>
+      {Q1[i] ? <Shards picked={picked} onPick={onPick} S={SCENE} /> : null}
+    </View>
+  );
+}
 
-      {/* ── the verdict chips: the question is answered here ────────────────── */}
-      {showPick ? (
-        <Animated.View style={[styles.ballot, ballotStyle]} pointerEvents="box-none">
-          <Animated.Text style={[styles.ballotHdr, spent]}>TAP THE RIGHT VERDICT</Animated.Text>
-          {CHIPS.map((c, k) => {
-            const chosen = picked === c.id;
-            return (
-              <Target id={c.id} correct={c.correct} picked={picked} onPick={onPick}
-              key={c.id} style={[styles.chipSlot, { top: 18 + k * CHIP_STEP }]} disabled={answered}>
-                <View
-                  style={[
-                    styles.chip,
-                    answered && c.correct && styles.chipRight,
-                    answered && chosen && !c.correct && styles.chipWrong,
-                  ]}
-                >
-                  <Text style={[styles.chipT, answered && c.correct && styles.chipTOn]}>{c.title}</Text>
-                </View>
-              </Target>
-            );
-          })}
+const BOARD_ART = board();
+const DESK_ART = desk();
+const BOWL_ART = bowl();
+const TERRACE_ART = terrace();
+const TABLE_ART = banquetTable();
+
+// ── the room ─────────────────────────────────────────────────────────────────
+
+function Row({ v, text, x, y, w }: { v: SharedValue<number>; text: string; x: number; y: number; w: number }) {
+  const st = useAnimatedStyle(() => ({ opacity: v.value }));
+  return <Animated.Text style={[styles.chalk, { left: x, top: y, width: w }, st]} numberOfLines={1}>{text}</Animated.Text>;
+}
+function Chalk({ S, words }: { S: SharedValue<any>; words: SharedValue<number> }) {
+  const w = words;
+  const hd = useDerivedValue(() => S.value.hd * w.value);
+  const hi = useDerivedValue(() => S.value.hi * w.value);
+  const va = useDerivedValue(() => S.value.va * w.value);
+  const so = useDerivedValue(() => S.value.so * w.value);
+  const stg = useDerivedValue(() => S.value.stg * w.value);
+  const cog = useDerivedValue(() => S.value.cog * w.value);
+  // the example lines, and the same lines as letters: one fades as the other comes
+  const l1 = useDerivedValue(() => S.value.l1 * (1 - S.value.form) * w.value);
+  const l2 = useDerivedValue(() => S.value.l2 * (1 - S.value.form) * w.value);
+  const l3 = useDerivedValue(() => S.value.l3 * (1 - S.value.form) * w.value);
+  const f = useDerivedValue(() => S.value.form * w.value);
+  const L = BOARD.x0 + 10;
+  const R = BOARD.mid + 10;
+  return (
+    <>
+      <Row v={hd} text="DEDUCTIVE" x={L} y={334} w={130} />
+      <Row v={hi} text="INDUCTIVE" x={R} y={334} w={130} />
+      <Row v={va} text="VALID ·" x={L} y={352} w={48} />
+      <Row v={so} text="SOUND" x={L + 46} y={352} w={60} />
+      <Row v={stg} text="STRONG ·" x={R} y={352} w={58} />
+      <Row v={cog} text="COGENT" x={R + 56} y={352} w={60} />
+      <Row v={l1} text="ALL MEN ARE MORTAL" x={L} y={376} w={112} />
+      <Row v={l2} text="SOCRATES IS A MAN" x={L} y={392} w={112} />
+      <Row v={l3} text="SO HE IS MORTAL" x={L} y={408} w={112} />
+      <Row v={f} text="ALL A ARE B" x={L} y={376} w={112} />
+      <Row v={f} text="S IS A" x={L} y={392} w={112} />
+      <Row v={f} text="SO S IS B" x={L} y={408} w={112} />
+    </>
+  );
+}
+function Padlock({ S }: { S: SharedValue<any> }) {
+  const body = useAnimatedStyle(() => ({ opacity: S.value.l1 }));
+  const shackle = useAnimatedStyle(() => ({ transform: [{ translateY: -5 * (1 - S.value.shut) }] }));
+  return (
+    <Animated.View style={[styles.lock, body]}>
+      <Animated.View style={[styles.shackle, shackle]} />
+      <View style={styles.lockBody}>
+        <View style={styles.keyhole} />
+      </View>
+    </Animated.View>
+  );
+}
+function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  // the olive rides his hand; it is in the room's layer, so it grows with the room when
+  // the change goes into it, while he himself fades
+  const st = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    return { opacity: S.value.hold > 0.02 ? 1 : 0, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY - 3 }] };
+  });
+  return (
+    <Animated.View style={[styles.rider, st]}>
+      <View style={styles.oliveHeld} />
+    </Animated.View>
+  );
+}
+
+// ── the banquet ──────────────────────────────────────────────────────────────
+
+function Feast({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      <View style={styles.dusk} />
+      <View style={styles.sun} />
+      <View style={styles.sea} />
+      <View style={styles.island} />
+      <View style={styles.stone} />
+      <ObjectArt parts={TERRACE_ART} tone={MARBLE} />
+      <ObjectArt parts={TABLE_ART} tone={WOOD} />
+      {PLATES.map((px, k) => (k === EMPTY_PLATE ? null : <Olives key={px} x={px} />))}
+      <Dish S={S} />
+      {AMPHORAE.map((ax, k) => <Amphora key={ax} S={S} ax={ax} k={k} />)}
+      <View style={styles.feastFloor} />
+    </>
+  );
+}
+function Olives({ x }: { x: number }) {
+  return (
+    <>
+      <View style={[styles.olive, { left: x - 7, top: TABLE.top - 9 }]} />
+      <View style={[styles.olive, { left: x - OLIVE_PLATE.r, top: OLIVE_PLATE.y - 2 }]} />
+      <View style={[styles.olive, { left: x + 2, top: TABLE.top - 9 }]} />
+    </>
+  );
+}
+function Dish({ S }: { S: SharedValue<any> }) {
+  const lid = useAnimatedStyle(() => ({
+    transform: [{ translateX: -10 * S.value.lifted }, { translateY: -16 * S.value.lifted }, { rotate: `${-20 * S.value.lifted}deg` }],
+  }));
+  return (
+    <>
+      <View style={styles.bread} />
+      <Animated.View style={[styles.cloche, lid]}>
+        <View style={styles.knob} />
+      </Animated.View>
+    </>
+  );
+}
+function Amphora({ S, ax, k }: { S: SharedValue<any>; ax: number; k: number }) {
+  const art = amphora(ax);
+  const st = useAnimatedStyle(() => {
+    const r = k === 0 ? S.value.rock0 : k === 1 ? S.value.rock1 : S.value.rock2;
+    return { transform: [{ rotate: `${7 * r * Math.sin(S.value.t * 7)}deg` }] };
+  });
+  return (
+    <Animated.View style={[styles.set, { transformOrigin: `${ax}px ${GROUND}px` }, st]}>
+      <ObjectArt parts={art} tone={CLAY} />
+    </Animated.View>
+  );
+}
+function FeastWords({ S, words, on }: { S: SharedValue<any>; words: SharedValue<number>; on: (a: readonly number[]) => boolean }) {
+  const soc = useAnimatedStyle(() => ({ opacity: words.value * (1 - S.value.q1) }));
+  const prob = useAnimatedStyle(() => ({ opacity: words.value * S.value.prob * (1 - S.value.q1) }));
+  return (
+    <>
+      <Animated.View style={[styles.plate, styles.socPlate, soc]}>
+        <Text style={styles.plateText} numberOfLines={1}>SOCRATES</Text>
+      </Animated.View>
+      {on(LIFTED) ? (
+        <Animated.View style={[styles.plate, styles.probPlate, prob]}>
+          <Text style={styles.plateText} numberOfLines={1}>PROBABLE</Text>
         </Animated.View>
       ) : null}
+    </>
+  );
+}
+
+// ── Q1: four clay voting shards on the ledge ────────────────────────────────
+
+function Shards({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {Q1_T.map((c, k) => (
+        <Target
+          key={c.id} id={c.id} correct={c.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered} sealAt="tr"
+          style={[styles.shard, { left: SHARDS[k] - 22, top: LEDGE.y - 26 }]}
+        >
+          <View style={[styles.shardFace, answered && c.correct && styles.tagRight]}>
+            <Text style={[styles.plateText, answered && c.correct && styles.onInk]} numberOfLines={1}>{c.title}</Text>
+          </View>
+        </Target>
+      ))}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 12, width: 140, top: GROUND, height: 2, backgroundColor: RULE },
-  // THE FLOOR THE GROUND LINE SITS ON. A rule on its own leaves the
-  // figure and everything it is looking at standing on bare page;
-  // political7 and political8 both stand their subject on a filled mass.
+  set: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  rider: { position: 'absolute', left: 0, top: 0 },
+
+  // ── the room ──────────────────────────────────────────────────────────────
   floor: floorStyle(TONE, GROUND),
-
-  // ── gauge ─────────────────────────────────────────────────────────────────
-  gaugeLab: { position: 'absolute', left: G_L, top: 210, width: G_W },
-  gaugeLabT: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT, includeFontPadding: false },
-  track: {
-    position: 'absolute', left: G_L, top: G_Y, width: G_W, height: G_H,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 288, width: STAGE_W, height: GROUND - 288, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
   },
-  tick: { position: 'absolute', top: 0, bottom: 0, width: 1.5, backgroundColor: RULE },
-  fill: {
-    position: 'absolute', left: 0, top: 0, bottom: 0, width: '100%',
-    backgroundColor: INK, transformOrigin: '0% 50%',
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  slate: {
+    position: 'absolute', left: BOARD.x0, top: BOARD.top, width: BOARD.x1 - BOARD.x0, height: BOARD.bottom - BOARD.top,
+    backgroundColor: DEEP, borderRadius: 1,
   },
-  // needle spans 218..256; lock 222..265; scale labels 256..269
-  needle: { position: 'absolute', left: G_L - 1.5, top: G_Y - 6, width: 3, height: G_H + 12, backgroundColor: INK, borderRadius: 2 },
-  scaleT: {
-    position: 'absolute', top: G_Y + G_H + 6,
-    fontFamily: 'Inter_500Medium', fontSize: 10, color: SOFT, includeFontPadding: false,
+  chalk: {
+    position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: PAPER_LIT,
+    includeFontPadding: false,
   },
-
-  lock: { position: 'absolute', left: 366, top: 222, width: 32, alignItems: 'center', transformOrigin: '50% 50%' },
-  shackle: { width: 20, height: 16, borderWidth: 3, borderColor: INK, borderBottomWidth: 0, borderTopLeftRadius: 10, borderTopRightRadius: 10 },
-  lockBody: { width: 30, height: 28, borderWidth: 2.5, borderColor: INK, backgroundColor: INK, borderRadius: 3, marginTop: -1 },
-
-  banner: {
-    position: 'absolute', left: 36, top: 274, width: 140, height: 28,
-    borderWidth: 2.5, borderColor: INK, borderRadius: 8, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center',
+  lock: { position: 'absolute', left: LOCK.x - 7, top: LOCK.y - 10, width: 14, height: 20 },
+  shackle: {
+    position: 'absolute', left: 2.5, top: 0, width: 9, height: 10, borderTopLeftRadius: 4.5, borderTopRightRadius: 4.5,
+    borderWidth: 2, borderBottomWidth: 0, borderColor: PAPER_LIT,
   },
-  bannerT: {
-    position: 'absolute', top: 5, width: 140, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 1.6, color: INK, includeFontPadding: false,
+  lockBody: {
+    position: 'absolute', left: 0, top: 8, width: 14, height: 11, borderRadius: 2, backgroundColor: EMBER,
+    borderWidth: 1, borderColor: PAPER_LIT, alignItems: 'center',
   },
-
-  die: {
-    position: 'absolute', top: 272, width: 32, height: 32, borderWidth: 2.5, borderColor: INK,
-    borderRadius: 8, backgroundColor: PAPER, transformOrigin: '50% 50%',
+  keyhole: { marginTop: 3, width: 2.4, height: 4, borderRadius: 1.2, backgroundColor: INK },
+  olive: {
+    position: 'absolute', width: 5, height: 4, borderRadius: 2.5, backgroundColor: stageToneOf(OLIVE).SHADE,
+    borderWidth: 0.8, borderColor: INK,
   },
-  pip: { position: 'absolute', width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
-
-  // ── ruler cards ───────────────────────────────────────────────────────────
-  cards: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
-  card: {
-    position: 'absolute', left: COL_L, width: COL_W, height: CARD_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP, overflow: 'hidden',
-  },
-  cardHead: { height: 23, justifyContent: 'center', paddingHorizontal: 10, borderBottomWidth: 1.5, borderBottomColor: RULE },
-  cardHeadOn: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: INK },
-  cardHeadT: {
-    fontFamily: 'Inter_700Bold', fontSize: 13.5, lineHeight: 17, letterSpacing: 1.2, color: INK, includeFontPadding: false,
-  },
-  // The head box is 23 tall with a 1.5 border inside it, so a 17-tall line centres
-  // at (23 − 1.5 − 17) / 2 = 2.25 — the reversed copy must sit exactly on the base.
-  cardHeadTOn: { position: 'absolute', left: 10, top: 2.25, color: PAPER },
-  cardLine: {
-    fontFamily: 'Inter_500Medium', fontSize: 11.5, lineHeight: 17.5, color: INK, paddingHorizontal: 10, includeFontPadding: false,
+  oliveHeld: {
+    position: 'absolute', left: -OLIVE_HAND_R, top: -OLIVE_HAND_R * 0.8, width: 2 * OLIVE_HAND_R, height: 1.6 * OLIVE_HAND_R,
+    borderRadius: OLIVE_HAND_R, backgroundColor: stageToneOf(OLIVE).SHADE, borderWidth: 0.8, borderColor: INK,
   },
 
-  // ── the four still-tap events (group AH) ─────────────────────────────────
-  //
-  // A dashed rule between the two cards — a boundary, never a fill (D31) —
-  // marking that each argument family gets its own separate standard.
-  divide: {
-    position: 'absolute', left: COL_L, top: COL_TOP + CARD_H + 1, width: COL_W, height: 0,
-    borderTopWidth: 1.5, borderTopColor: SHADE, borderStyle: 'dashed', transformOrigin: '0% 50%',
+  // ── the banquet ───────────────────────────────────────────────────────────
+  dusk: { position: 'absolute', left: 0, right: 0, top: 288, height: 150, backgroundColor: stageToneOf(EMBER).STONE },
+  sun: { position: 'absolute', left: 250, top: 408, width: 30, height: 30, borderRadius: 15, backgroundColor: EMBER },
+  sea: { position: 'absolute', left: 0, right: 0, top: 428, height: 24, backgroundColor: TEAL },
+  island: { position: 'absolute', left: 60, top: 420, width: 90, height: 16, borderTopLeftRadius: 45, borderTopRightRadius: 45, backgroundColor: stageToneOf(TEAL).SHADE },
+  stone: { position: 'absolute', left: 0, right: 0, top: 452, height: 48, borderRadius: 1, backgroundColor: MARBLE.STONE },
+  bread: {
+    position: 'absolute', left: DISH.x - 8, top: TABLE.top - 10, width: 16, height: 8, borderRadius: 4,
+    backgroundColor: stageToneOf(OLIVE).STONE, borderWidth: 1, borderColor: INK,
   },
-  // A stroke crossing out the deductive card's own VALID/INVALID line — the
-  // wrong standard for grading an inductive argument. Positioned relative to
-  // the card it is nested in: past the 23-tall head and the "aims to
-  // GUARANTEE" line, centred on the 17.5-tall "graded VALID/INVALID" line.
-  strike: {
-    position: 'absolute', left: 10, top: 23 + 17.5 + 17.5 / 2 - 1, width: 200, height: 2,
-    backgroundColor: INK, transformOrigin: '0% 50%',
+  cloche: {
+    position: 'absolute', left: DISH.x - 12, top: TABLE.top - 18, width: 24, height: 14, borderTopLeftRadius: 12,
+    borderTopRightRadius: 12, backgroundColor: MARBLE.SHADE, borderWidth: 1.2, borderColor: INK, alignItems: 'center',
   },
-  // A check mark landing on the inductive card's own COGENT line — "a strong
-  // one with true premises is cogent" pointing at the fact already written.
-  cogentTick: {
-    position: 'absolute', left: COL_W - 28, top: 23 + 17.5 * 2, width: 20, height: 17.5,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  cogentTickT: { fontFamily: 'Inter_700Bold', fontSize: 15, color: INK, includeFontPadding: false },
-  // The token that runs once from the lock to the deductive card's own
-  // VALID/INVALID line — "certainty comes from the argument's form". INK, the
-  // size of a full stop, so it reads as the claim travelling, not an object.
-  linkDot: {
-    position: 'absolute', left: 0, top: 0, width: 7, height: 7, borderRadius: 3.5,
-    backgroundColor: INK,
-  },
+  knob: { marginTop: -4, width: 5, height: 5, borderRadius: 2.5, backgroundColor: INK },
+  feastFloor: floorStyle(TONE, GROUND),
 
-  // ── ballot ────────────────────────────────────────────────────────────────
-  ballot: { position: 'absolute', left: COL_L, top: 306, width: COL_W, height: 200 },
-  ballotHdr: {
-    position: 'absolute', left: 0, top: 0, width: COL_W,
-    fontFamily: 'Inter_700Bold', fontSize: 11, lineHeight: 14, letterSpacing: 1.4, color: SOFT, includeFontPadding: false,
+  // ── the words ─────────────────────────────────────────────────────────────
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  // Tap target: 234 × 40 stage units carrying one 16px word — a verdict plate.
-  chipSlot: { position: 'absolute', left: 0, width: COL_W, height: CHIP_H },
-  chip: {
-    width: COL_W, height: CHIP_H, borderWidth: 2, borderColor: INK, borderRadius: 8,
-    backgroundColor: STONE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12,
+  socPlate: { left: DISH.x - 30, top: LEDGE.y - 36, width: 60 },
+  probPlate: { left: DISH.x - 30, top: LEDGE.y - 54, width: 60 },
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  chipRight: { backgroundColor: INK, borderColor: INK },
-  chipWrong: { borderColor: SOFT },
-  chipT: { fontFamily: 'Inter_700Bold', fontSize: 16, lineHeight: 21, letterSpacing: 2.2, color: INK, includeFontPadding: false },
-  chipTOn: { color: PAPER },
+  shard: { position: 'absolute', width: 44, height: 24 },
+  shardFace: {
+    flexGrow: 1, borderRadius: 6, borderTopRightRadius: 12, borderBottomLeftRadius: 10, backgroundColor: CLAY.STONE,
+    borderWidth: 1.2, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  },
+  tagRight: { backgroundColor: INK },
+  onInk: { color: PAPER_LIT },
 });
 
-// BAND. Topmost ink is the gauge caption at 210 (the needle starts at 220, the lock
-// at 222); the lowest is the ground line at 500 + 2 thick. In between, every extreme
-// is accounted for: the scale labels end at 270, the wobbling dice at 305, the lower
-// ruler card at 496, the last verdict chip at 493, the figure's crown at 350. So
-// [202, 510] holds the lot with 8 units of margin at each end — and since the art
-// genuinely spans 292 units there is no tighter honest crop.
 export function Strong4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Strong4Scene} band={[202, 510]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Strong4Scene} band={[288, 514]} camera={CAM} />;
 }

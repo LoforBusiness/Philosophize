@@ -1,442 +1,584 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
-import { clamp01, ease01, lerp, mixStance, pose, type Bundle } from './rig';
-// The whole movement library, not just rig's 49 emotes. Codes under 100 ARE
-// rig's and mean exactly what they always did; 100+ reach moves.ts (emoteAny).
-import { emoteAny as emoteHold, emoteAnyLive as emoteLive } from './moves';
+import Target from './Target';
+import ObjectArt from './ObjectArt';
 import { BEATS } from './ethics4Script';
-import { K_FIG, STAGE_W, STAGE_H, INK, SOFT, PAPER, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+import {
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  type Bundle, type Stance,
+} from './rig';
+import {
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
 } from './cinematicKit';
-import { stageTone } from './stageTones';
+import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
-import Target from './Target';
 import { followMoves, kindOf, seedOf } from './camera';
+import { emoteAny, emoteAnyLive } from './moves';
+import { reachHandTo } from './interact';
+import { useLinger } from './useLinger';
+import { lineOf, stage } from './pace';
+import { PORTAL, portalAt, portalXf, portalScale, figureAt, wordsAt } from './portal';
+import {
+  globeStand, mapFrame, desk, tent, roundHut, pagoda, cottage, signPosts,
+  GLOBE, MAP, PINS, DESK, BOOK, HOME_GROUND, HOMES, SIGNS,
+} from './ethics4Set';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
-// THE STAGE IS STRUCK IN THIS LESSON'S OWN BRANCH HUE (./stageTones).
-// Same three tones, same luminance to the third decimal — so every contrast
-// measured against the old greys still holds and nothing on the stage moved.
+// ─────────────────────────────────────────────────────────────────────────────
+// ethics-ethics-4, "Is Morality Universal or Relative?" — AN ANTHROPOLOGIST'S STUDY,
+// AND A VILLAGE OF THE WORLD.
+//
+// Redrawn 2026-09-27: the fourth lesson of the branch in reading order, with a scene
+// change (portal.ts). A grave lesson (N11): nothing in it is a gag, and nothing draws
+// a harm the narration names. Every act is laid across its voiced line in stages.
+//
+//   b0   the pins on the wall map light up, each culture its own colour.
+//   b1   he goes to the map; a question mark stands over it: is there no answer?
+//   b2   DESCRIPTIVE on the map's legend.   b3  MORAL beside it.
+//   b4   an arrow runs from the first to the second, and is struck out.
+//   b5   at the desk he takes up Benedict's book: BENEDICT.   b7  OBJECTIVISM.
+//   b8   back at the globe he spins it.
+//   b9   THE CHANGE: into the globe's ocean, out of the sky over a village of five
+//        homes from five parts of the world. HUMAN UNIVERSALS.
+//   b10  a gift appears at every door in turn.
+//   b11  under the grass, one stone foundation beneath all five: SHARED FOUNDATION.
+//   b12  Q1: the foundation cracks as the claim picked gets stronger (R7c).
+//   b13  Q2: two signs, IT FOLLOWS and IT DOES NOT.
+//
+// COMPOSITION, in stage units. The study: the globe at 80 on its stand, the map
+// 150–310 × 330–404 with its legend along the bottom, the desk 300–380 with the book at
+// 330. The village: homes at 48, 122, 200, 278 and 352 on a ground at 470, the signs at
+// 96 and 304. He stands at 114, 170 and 312 in the study, 236 in the village.
+// Band [288, 514].
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TONE = stageTone('ethics');
-const { RULE, STONE, SHADE } = TONE;
-const LIP = lipOf(TONE);   // the ledge a toned plate stands on (scripts/skin-stage.mjs)
+const { RULE } = TONE;
+const LIP = lipOf(TONE);
+const WALL = stageToneOf(SAGE);
+const WOOD = stageToneOf(OLIVE);
+const SKY = stageToneOf(TEAL);
+const TR = 0.85;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A TWO-LAYER DIAGRAM with the argument happening inside it.
-//
-//   the SURFACE (y 206–276)   two culture tablets, side by side, whose rows are
-//                             written in one at a time — codes that plainly differ,
-//                             with a ≠ standing in the gutter between them
-//   the ARGUERS  (y 287–434)  two figures under their own emblems, facing off
-//   the FLOOR   (y 444–510)   Brown's human universals as a bar chart: four traits,
-//                             four bars, every one of them running the full track
-//
-// On the verdict beat the tablets give way to two big stamps, so Q2 is answered by
-// tapping the stage. The camera is identity — design coordinates ARE final stage
-// coordinates, so the band below can be read straight off these constants.
-// ─────────────────────────────────────────────────────────────────────────────
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, ethics-ethics-4. */
+const LINES = [3.8, 5.92, 5.44, 6.72, 4.44, 6.92, 0, 6.32, 6.6, 6.52, 4.56, 4.6, 0, 0, 0];
 
-const A_X = 118;
-const B_X = 282;
-const FIG_G = 434;                       // the ground the two arguers stand on
+/** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
+const K_M = K_FIG * 0.82;
+const MID = { x: STAGE_W / 2, y: 401 };
+/** Out of the globe's ocean into the village's sky: a point of open sky. */
+const SKY_AT = { x: 200, y: 336 };
+/** The pins' colours: every culture its own. */
+const PIN_COLOURS = [EMBER, TEAL, OLIVE, DEEP, SAGE, EMBER, DEEP, TEAL];
 
-// ── the surface: two codes that differ ──────────────────────────────────────
-const TAB_T = 206;
-const TAB_H = 70;
-const TAB_W = 176;
-const TAB_L = 14;
-const TAB_R = 210;
-const CODE_ROW = [234, 247, 260];
-const CODE_A = ['BURY THE DEAD', 'HEADS COVERED', 'NO PORK'];
-const CODE_B = ['BURN THE DEAD', 'HEADS BARE', 'NO BEEF'];
+const X = BEATS.map((b) => b.x ?? 236);
+const P = BEATS.map((b) => b.p ?? 0);
+const ACT = BEATS.map((b) => b.act ?? '');
+const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
+const A_PINS = is('pins');
+const A_STRONGER = is('stronger');
+const A_DESCR = is('descr');
+const A_MORAL = is('moral');
+const A_ERROR = is('error');
+const A_BENE = is('benedict');
+const A_OBJ = is('object');
+const A_GLOBE = is('globe');
+const A_ENTER = is('enter');
+const A_GIFTS = is('gifts');
+const A_FOUND = is('found');
+const flag = (f: (b: (typeof BEATS)[number]) => unknown) => BEATS.map((b) => (f(b) ? 1 : 0));
+const PINNED = flag((b) => b.pins);
+const DESCR = flag((b) => b.descr);
+const MORAL = flag((b) => b.moral);
+const ERROR = flag((b) => b.error);
+const BENE = flag((b) => b.bene);
+const OBJ = flag((b) => b.obj);
+const VILLAGE = flag((b) => b.village);
+const GIFTS = flag((b) => b.gifts);
+const FOUND = flag((b) => b.found);
+const Q2 = flag((b) => b.q2);
+/** He holds Benedict's book from when he takes it up (b5) until he sets it down (b7). */
+const BOOK_HELD = BEATS.map((b) => (b.bene && !b.obj ? 1 : 0));
+/** The order control is being answered: the foundation cracks as the claim gets stronger (R7c). */
+const ORDER = flag((b) => b.interact?.order);
+const CRACK_AT = [0, 0.5, 1];
+/** Which way he faces once each beat settles: the map and the desk on his right, the globe on his left. */
+const DIR = BEATS.map((b) => (b.act === 'globe' ? -1 : 1));
 
-// ── the floor: every bar full, because every society has it ─────────────────
-const CHART_T = 460;
-const PITCH = 13;
-const BAR_L = 152;
-const BAR_W = 188;
-const BAR_H = 11;
-const TRAITS = ['FAIRNESS', 'RECIPROCITY', 'NO MURDER', 'INCEST TABOO'];
-
-// ── the scene-answered verdict (Q2) ─────────────────────────────────────────
-// 176 × 48 each — comfortably past the 132 × 38 floor for a thumb, and the labels
-// are three short words so they sit on one line at 14px.
-const V_T = 224;
-const VERDICTS = [
-  { id: 'follows', label: 'IT FOLLOWS', x: TAB_L, correct: false },
-  { id: 'doesnt', label: 'IT DOES NOT', x: TAB_R, correct: true },
+const Q2_T = [
+  { id: 'follows', label: 'IT FOLLOWS', x: SIGNS[0], correct: false },
+  { id: 'doesnt', label: 'IT DOES NOT', x: SIGNS[1], correct: true },
 ];
 
-const A_CODE = BEATS.map((b) => b.a ?? 0);
-const B_CODE = BEATS.map((b) => b.b ?? 0);
-const FLOOR = BEATS.map((b) => b.floor ?? 0);
-const ROWS = BEATS.map((b) => b.rows ?? 0);
-const NOTE = BEATS.map((b) => b.note ?? 0);
+function hHold(code: number, t: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAny(code, t);
+  if (code === 0) return stand(t);
+  return narratorHold(code, t);
+}
+function hLive(code: number, t: number, bt: number): Stance {
+  'worklet';
+  if (code >= 100) return emoteAnyLive(code, t, bt);
+  if (code === 0) return stand(t);
+  return narratorLive(code, t, bt);
+}
+function handOn(s: Stance, x: number, dir: number, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, 1, tx, ty, w);
+}
 
-// ── group AH: one still-tap annotation per beat that names a new claim ──────
-// A one-shot flash in the gutter between the two arguers (or, for 6/7, beside
-// the floor chart), timed to the beat's OWN sentence — never carried across
-// beats, so it costs no cross-beat interpolation. Text for the four claim tags.
-const NOTE_TEXT: Record<number, string> = {
-  1: 'A STRONGER CLAIM?',
-  2: 'MORAL RELATIVISM',
-  3: 'DOESN’T FOLLOW',
-  4: 'WRONG EVERYWHERE',
-};
+const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
-// THE CAMERA (H60b). `followMoves` reads the x track and gives each beat its own
-// shot: it FOLLOWS the subject when a beat moves far enough to be worth following,
-// pushes close on a quote, and PULLS BACK to the whole band on a question or a
-// summary — the beats the reader has to read and act on.
-// Two figures at 118 and 282, so the track is the point BETWEEN them (200) — following
-// either one alone would frame the other out, and here the pair is the subject.
-const X = BEATS.map((b) => b.x ?? 200);
-
-// R7b — the stage follows the control on its own graded beat, and only there.
-// Derived from the beat rather than declared as a channel so it cannot fall out
-// of step with the control it is about.
-const REACT = BEATS.map((b) => (b.interact?.order ? 1 : 0));
-const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics4'));
-
-export default function Ethics4Scene({ clock, bt, bi, i, picked, onPick, dragPos, pickPos }: SceneApi) {
-  const reacting = REACT[i] === 1;
-  const heldA = useHeld();
-  const cv = useCarry(2);
-  const heldB = useHeld();
-  const cur = BEATS[i];
-  const prev = i > 0 ? BEATS[i - 1] : undefined;
-  const answered = picked !== null;
-  const asking = !!cur.interact;
-  // ANIMATE ONLY WHAT CHANGED (C20c) — a one-shot, so it fires only on the beat
-  // that introduces it, never on a beat that merely holds the same claim.
-  const noteNow = (cur.note ?? 0) > 0 && (cur.note ?? 0) !== (prev?.note ?? 0) ? (cur.note ?? 0) : 0;
-
+export default function Ethics4Scene({
+  clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
+}: SceneApi) {
+  const held = useHeld();
+  const cv = useCarry(19);
+  const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / 0.85);
+    const b = bt.value;
     const t = clock.value;
+    const tr = ease01(b / TR);
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a, z);
+    };
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((b - a) / (z - a)));
+    };
+    const pulse = (a: number, m: number, z: number) => {
+      'worklet';
+      return sec(a, m) * (1 - sec(m, z));
+    };
 
-    const a = keepHeld(heldA, mixStance(carryFrom(heldA, n, emoteHold(A_CODE[p], t)), emoteLive(A_CODE[n], t, bt.value), tr));
-    const b = keepHeld(heldB, mixStance(carryFrom(heldB, n, emoteHold(B_CODE[p], t)), emoteLive(B_CODE[n], t, bt.value), tr));
+    // ── the change (b9), and which set he is in otherwise ───────────────────
+    const pt = portalAt(b);
+    const world = A_ENTER[n] ? pt.world : VILLAGE[n];
+    const kStudy = A_ENTER[n] ? pt.out : VILLAGE[n];
+    const kVillage = A_ENTER[n] ? pt.into : 1 - VILLAGE[n];
+
+    // ── where he is ──────────────────────────────────────────────────────────
+    const xp = X[p];
+    const xn = X[n];
+    const walking = !A_ENTER[n] && Math.abs(xn - xp) > 1;
+    const walkDur = moveTr(xp, xn, TR);
+    const walkU = walking ? ease01(b / walkDur) : 1;
+    const swapU = clamp01((b - PORTAL.swapFrom) / (PORTAL.swapTo - PORTAL.swapFrom));
+    const x = n === 0 ? xn : carry(cv, 0, n, xp, xn, A_ENTER[n] ? swapU : walking ? walkU : tr);
+    let s: Stance = walking
+      ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
+      : hLive(P[n], t, b);
+    const dirV = A_ENTER[n]
+      ? facing(DIR[p], DIR[n], b - PORTAL.swapFrom)
+      : walking
+        ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+        : facing(DIR[p], DIR[n], b);
+    const dir = dirV < 0 ? -1 : 1;
+    const arrive = walking ? walkDur : 0;
+
+    // ── pointing up at the legend (b2, b3, b4) ──────────────────────────────
+    const point = A_DESCR[n] ? pulse(0.8, 1.3, 4.4) : A_MORAL[n] ? pulse(0.8, 1.3, 5.6) : A_ERROR[n] ? pulse(1.6, 2.0, 3.8) : 0;
+    s = handOn(s, x, dir, A_MORAL[n] ? 250 : 196, 420, point);
+    // ── Benedict's book: taken up (b5), held (b6), set down (b7) ────────────
+    const take = A_BENE[n] ? pulse(arrive + 0.2, arrive + 0.6, arrive + 1.0) : 0;
+    s = handOn(s, x, dir, BOOK.x, BOOK.y - 2, take);
+    const holding = A_BENE[n] ? sec(arrive + 0.55, arrive + 0.65) : A_OBJ[n] ? 1 - sec(0.75, 0.85) : BOOK_HELD[n];
+    s = mixStance(s, { ...s, fistR: { x: 20, y: -22 }, fistL: { x: 14, y: -20 } }, holding * (1 - take));
+    const put = A_OBJ[n] ? pulse(0.3, 0.8, 1.2) : 0;
+    s = handOn(s, x, dir, BOOK.x, BOOK.y - 2, put);
+    // ── the globe, spun (b8) ─────────────────────────────────────────────────
+    const spinHand = A_GLOBE[n] ? pulse(arrive + 0.1, arrive + 0.4, arrive + 1.3) : 0;
+    s = handOn(s, x, dir, GLOBE.x + GLOBE.r - 2 - 10 * sec(arrive + 0.4, arrive + 1.0), GLOBE.y - 4, spinHand);
+
+    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+
+    // ── the study ────────────────────────────────────────────────────────────
+    const pins = A_PINS[n] ? st(0.08, 0.75) : PINNED[n];
+    const ask = A_STRONGER[n] ? st(0.35, 0.5) : 0;
+    const descr = A_DESCR[n] ? st(0.3, 0.42) : DESCR[n];
+    const moral = A_MORAL[n] ? st(0.18, 0.3) : MORAL[n];
+    const arrow = A_ERROR[n] ? st(0.05, 0.25) : ERROR[n];
+    const cross = A_ERROR[n] ? st(0.5, 0.62) : ERROR[n];
+    const bene = A_BENE[n] ? sec(arrive + 0.8, arrive + 1.3) : BENE[n];
+    const obj = A_OBJ[n] ? st(0.12, 0.24) : OBJ[n];
+    const spin = A_GLOBE[n] ? sec(arrive + 0.4, arrive + 2.6) : 0;
+
+    // ── the village ──────────────────────────────────────────────────────────
+    const universals = A_ENTER[n] ? sec(PORTAL.outTo + 0.2, PORTAL.outTo + 0.6) : VILLAGE[n];
+    const gifts = A_GIFTS[n] ? st(0.1, 0.8) : GIFTS[n];
+    const found = A_FOUND[n] ? st(0.15, 0.65) : FOUND[n];
+    const crack = ORDER[n] ? pickAt(CRACK_AT, pickPos.value) : 0;
+
     return {
-      a: reactPose(a, A_X, FIG_G, K_FIG, 1, 1),
-      b: pose(b, B_X, FIG_G, K_FIG, -1, 1),
-      // R7b — the knob puts the shared floor out. Drag toward NOTHING IS RIGHT OR
-      // WRONG and the common ground under both cultures fades, so the reader watches
-      // the claim cost something rather than being told it does. Inverted on purpose:
-      // the far end of the rail is the end with no floor left.
-      floor: carry(cv, 0, n, FLOOR[p], reacting ? 1 - pickPos.value : FLOOR[n], tr),
-      rows: carry(cv, 1, n, ROWS[p], ROWS[n], tr),
-      // THE ANNOTATION'S OWN PROGRESS, 0..1 across 1.1s of the beat it belongs
-      // to, flatly 0 on every other beat — one flash per tap, not a loop.
-      note: noteNow ? ease01(bt.value / 1.1) : 0,
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      world: carry(cv, 1, n, VILLAGE[p], world, A_ENTER[n] ? 1 : tr),
+      kStudy: carry(cv, 2, n, VILLAGE[p], kStudy, A_ENTER[n] ? 1 : tr),
+      kVillage: carry(cv, 3, n, 1 - VILLAGE[p], kVillage, A_ENTER[n] ? 1 : tr),
+      holding: carry(cv, 4, n, BOOK_HELD[p], holding, tr),
+      pins: carry(cv, 5, n, PINNED[p], pins, tr),
+      ask: carry(cv, 6, n, 0, ask, tr),
+      descr: carry(cv, 7, n, DESCR[p], descr, tr),
+      moral: carry(cv, 8, n, MORAL[p], moral, tr),
+      arrow: carry(cv, 9, n, ERROR[p], arrow, tr),
+      cross: carry(cv, 10, n, ERROR[p], cross, tr),
+      bene: carry(cv, 11, n, BENE[p], bene, tr),
+      obj: carry(cv, 12, n, OBJ[p], obj, tr),
+      spin: carry(cv, 13, n, 0, spin, tr),
+      universals: carry(cv, 14, n, VILLAGE[p], universals, tr),
+      gifts: carry(cv, 15, n, GIFTS[p], gifts, tr),
+      found: carry(cv, 16, n, FOUND[p], found, tr),
+      crack: carry(cv, 17, n, 0, crack, tr),
+      q2: carry(cv, 18, n, Q2[p], Q2[n], tr),
       t,
     };
   });
 
-  const DA = useDerivedValue<Bundle>(() => SCENE.value.a);
-  const DB = useDerivedValue<Bundle>(() => SCENE.value.b);
-  const chartStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.floor }));
-  // The same value, read as a threshold, for the layer that carries the words. See
-  // the note at the chart itself.
-  const chartWords = useAnimatedStyle(() => ({ opacity: SCENE.value.floor > 0.5 ? 1 : 0 }));
-  // Fades in over the first fifth of its window and out over the last, so it
-  // arrives and settles rather than snapping on, and is invisible at rest.
-  const noteStyle = useAnimatedStyle(() => {
-    const u = SCENE.value.note;
-    return { opacity: u <= 0 || u >= 1 ? 0 : Math.min(1, Math.min(u, 1 - u) / 0.2) };
-  });
-
-  return (
-    <Animated.View style={styles.scene}>
-      {/* ── the surface: two tablets of differing custom ─────────────────── */}
-      {!asking && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Text style={styles.layerLabel}>THE SURFACE — THESE CODES DIFFER</Text>
-          <Tablet left={TAB_L} name="CULTURE A" emblem="tri" rows={CODE_A} S={SCENE} />
-          <Tablet left={TAB_R} name="CULTURE B" emblem="dia" rows={CODE_B} S={SCENE} />
-          {/* ≠ in the 20-unit gutter between the tablets: the surface does not match.
-              It answers the four ALLs on the floor chart — differ up here, identical
-              down there — so the two layers read as one argument. */}
-          <View style={styles.neq}>
-            <View style={[styles.neqBar, { top: 8 }]} />
-            <View style={[styles.neqBar, { top: 16 }]} />
-            <View style={styles.neqSlash} />
-          </View>
-        </View>
-      )}
-
-      {/* ── the two arguers ───────────────────────────────────────────────── */}
-      <View style={styles.ground} pointerEvents="none" />
-      <Stickman D={DA} k={K_FIG} />
-      <Stickman role="second" D={DB} k={K_FIG} />
-
-      {/* ── the floor: Brown's universals, drawn as a bar chart ───────────── */}
-      {/* THE BARS RIDE THE REACTION; THE WORDS DO NOT (D35).
-
-          `floor` is driven by the control on the graded beat —
-          `reacting ? 1 - pickPos.value : FLOOR[n]` — so with the question not yet
-          answered it RESTS mid-range, and every word in here rested with it.
-          Measured: "THE FLOOR — FOUND IN EVERY SOCIETY DOCUMENTED" at opacity 0.50
-          and 2:1 contrast, which is a smear in the shape of a sentence.
-
-          R7c is right and stays: the chart still fades as the reader moves. It is
-          the WORDS that may not be dimmed, so they take the same value read as a
-          threshold — legible while the chart is there, gone once it is not. */}
-      <Animated.View style={[StyleSheet.absoluteFill, chartStyle]} pointerEvents="none">
-        {TRAITS.map((tr, k) => <Bar key={`b${tr}`} S={SCENE} k={k} />)}
-      </Animated.View>
-      <Animated.View style={[StyleSheet.absoluteFill, chartWords]} pointerEvents="none">
-        <Text style={styles.chartHdr}>THE FLOOR — FOUND IN EVERY SOCIETY DOCUMENTED</Text>
-        {TRAITS.map((tr, k) => (
-          <Text key={`t${tr}`} style={[styles.traitT, { top: CHART_T + k * PITCH }]}>{tr}</Text>
-        ))}
-        {TRAITS.map((tr, k) => (
-          <Text key={`v${tr}`} style={[styles.valT, { top: CHART_T + k * PITCH }]}>ALL</Text>
-        ))}
-      </Animated.View>
-
-      {/* ── group AH: one flash per still tap, naming this beat's own claim ── */}
-      {(noteNow === 1 || noteNow === 2 || noteNow === 3 || noteNow === 4) && (
-        <Animated.View style={[styles.noteRow, noteStyle]} pointerEvents="none">
-          <View
-            style={[
-              styles.noteTagLine,
-              noteNow === 1 && styles.noteTagDashed,
-              noteNow === 4 && styles.noteTagBoxed,
-            ]}
-          >
-            <Text style={[styles.noteText, noteNow === 3 && styles.noteTextStruck]}>
-              {NOTE_TEXT[noteNow]}
-            </Text>
-            {noteNow === 3 && <View style={styles.noteStrike} />}
-          </View>
-        </Animated.View>
-      )}
-
-      {/* Beat 8's analogy: two guesses about the Earth's shape, only one true —
-          FLAT struck through, ROUND left standing, the same way the argument
-          treats a culture's code. */}
-      {noteNow === 5 && (
-        <Animated.View style={[styles.noteRow, noteStyle]} pointerEvents="none">
-          <View style={styles.earthPair}>
-            <Text style={styles.earthWord}>FLAT</Text>
-            <View style={styles.earthStrike} />
-          </View>
-          <Text style={[styles.earthWord, styles.earthWordOn]}>ROUND</Text>
-        </Animated.View>
-      )}
-
-      {/* Beat 10: a bracket beside the three universals this sentence actually
-          names (reciprocity, murder, incest) — not fairness, the fourth bar. */}
-      {noteNow === 6 && (
-        <Animated.View style={[styles.bracket, noteStyle]} pointerEvents="none">
-          <View style={styles.bracketSpine} />
-          <View style={[styles.bracketTick, { top: 0 }]} />
-          <View style={[styles.bracketTick, { bottom: 0 }]} />
-        </Animated.View>
-      )}
-
-      {/* Beat 11: the floor is BENEATH the surface's differences, literally —
-          a line dropping from where the arguers stand toward the chart below. */}
-      {noteNow === 7 && (
-        <Animated.View style={[styles.bridge, noteStyle]} pointerEvents="none" />
-      )}
-
-      {/* ── Q2 answered in the scene: two verdict stamps ──────────────────── */}
-      {asking && (
-        <>
-          <Text style={styles.askLabel}>TAP YOUR VERDICT</Text>
-          {VERDICTS.map((v) => (
-            <Target id={v.id} correct={v.correct} picked={picked} onPick={onPick}
-              key={v.id} style={[styles.vHit, { left: v.x, top: V_T }]} disabled={answered}>
-              <View
-                style={[
-                  styles.vBox,
-                  answered && v.correct && styles.vRight,
-                  answered && picked === v.id && !v.correct && styles.vWrong,
-                ]}
-              >
-                <Text style={[styles.vText, answered && v.correct && styles.vTextOn]}>{v.label}</Text>
-              </View>
-            </Target>
-          ))}
-        </>
-      )}
-    </Animated.View>
-  );
-}
-
-/** One culture's code: its emblem, its name, and rows that get written in. */
-function Tablet({
-  left, name, emblem, rows, S,
-}: { left: number; name: string; emblem: 'tri' | 'dia'; rows: string[]; S: SharedValue<any> }) {
-  return (
-    <View style={[styles.tablet, { left }]} pointerEvents="none">
-      <View style={styles.tabHead}>
-        {emblem === 'tri' ? <View style={styles.triangle} /> : <View style={styles.diamond} />}
-        <Text style={styles.tabName}>{name}</Text>
-      </View>
-      <View style={styles.tabRule} />
-      {rows.map((r, k) => <CodeRow key={r} S={S} text={r} k={k} />)}
-    </View>
-  );
-}
-
-function CodeRow({ S, text, k }: { S: SharedValue<any>; text: string; k: number }) {
-  const st = useAnimatedStyle(() => {
-    const on = clamp01(S.value.rows - k);
-    return { opacity: on, transform: [{ translateX: (1 - on) * -12 }] };
-  });
-  return (
-    <Animated.View style={[styles.codeRow, { top: CODE_ROW[k] - TAB_T }, st]}>
-      <Text style={styles.codeDash}>·</Text>
-      <Text style={styles.codeT}>{text}</Text>
-    </Animated.View>
-  );
-}
-
-/** One universal's bar. Scaled, never re-laid-out — a width animation relayouts. */
-function Bar({ S, k }: { S: SharedValue<any>; k: number }) {
-  const fill = useAnimatedStyle(() => ({
-    transform: [{ scaleX: clamp01((S.value.floor - k * 0.09) / 0.55) }],
+  const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const studyXf = useAnimatedStyle(() => ({
+    opacity: 1 - SCENE.value.world,
+    ...portalXf(SCENE.value.kStudy, GLOBE.x, GLOBE.y, MID.x, MID.y),
   }));
+  const villageXf = useAnimatedStyle(() => ({
+    opacity: SCENE.value.world > 0.001 ? 1 : 0,
+    ...portalXf(SCENE.value.kVillage, SKY_AT.x, SKY_AT.y, MID.x, MID.y),
+  }));
+  const figXf = useAnimatedStyle(() => {
+    const inVillage = SCENE.value.world >= 0.5;
+    const k = inVillage ? SCENE.value.kVillage : SCENE.value.kStudy;
+    const xf = inVillage ? portalXf(k, SKY_AT.x, SKY_AT.y, MID.x, MID.y) : portalXf(k, GLOBE.x, GLOBE.y, MID.x, MID.y);
+    return { opacity: figureAt(portalScale(k)), ...xf };
+  });
+  const villageWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kVillage) : 0));
+  const studyWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudy));
+
   return (
-    <View style={[styles.barTrack, { top: CHART_T + k * PITCH }]} pointerEvents="none">
-      <Animated.View style={[styles.barFill, fill]} />
+    <View style={styles.scene}>
+      <Animated.View style={[styles.set, villageXf]} pointerEvents="none">
+        <Village S={SCENE} />
+      </Animated.View>
+      <Animated.View style={[styles.set, studyXf]} pointerEvents="none">
+        <View style={styles.floor} />
+        <View style={styles.wall}>
+          {[0, 1, 2, 3, 4, 5, 6].map((k) => <View key={k} style={[styles.panel, { left: 6 + k * 57 }]} />)}
+        </View>
+        <ObjectArt parts={MAP_ART} tone={WOOD} />
+        <WallMap S={SCENE} />
+        <ObjectArt parts={DESK_ART} tone={WOOD} />
+        <ObjectArt parts={STAND_ART} tone={WOOD} />
+        <Globe S={SCENE} />
+        <View style={styles.ground} />
+        <Book S={SCENE} DF={DF} />
+      </Animated.View>
+      {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
+          word inside a transparent plate, and a set still nine times over on the change
+          beat puts that hidden word far off the stage (check:space). A word only shows
+          once its set has landed at scale 1, so over the sets is where it belongs. */}
+      <VillageWords S={SCENE} words={villageWords} on={on} />
+      <StudyWords S={SCENE} words={studyWords} />
+      <Animated.View style={[styles.set, figXf]} pointerEvents="none">
+        <Stickman D={DF} k={K_M} />
+      </Animated.View>
+      {Q2[i] ? <Signs picked={picked} onPick={onPick} S={SCENE} /> : null}
     </View>
   );
 }
+
+const MAP_ART = mapFrame();
+const DESK_ART = desk();
+const STAND_ART = globeStand();
+/** The four homes drawn from parts; the igloo is drawn as Views, since it is white snow blocks. */
+const HOME_ART = [tent(HOMES[1]), roundHut(HOMES[2]), pagoda(HOMES[3]), cottage(HOMES[4])];
+const POST_ART = signPosts();
+
+// ── the study ────────────────────────────────────────────────────────────────
+
+function WallMap({ S }: { S: SharedValue<any> }) {
+  const ask = useAnimatedStyle(() => ({ opacity: S.value.ask }));
+  return (
+    <View style={styles.map} pointerEvents="none">
+      <View style={[styles.land, { left: 12, top: 10, width: 44, height: 30 }]} />
+      <View style={[styles.land, { left: 64, top: 6, width: 58, height: 40 }]} />
+      <View style={[styles.land, { left: 124, top: 16, width: 28, height: 34 }]} />
+      {PINS.map(([px, py], k) => <Pin key={k} S={S} k={k} x={px - MAP.x0} y={py - MAP.top} />)}
+      <Animated.Text style={[styles.ask, ask]}>?</Animated.Text>
+    </View>
+  );
+}
+function Pin({ S, k, x, y }: { S: SharedValue<any>; k: number; x: number; y: number }) {
+  const st = useAnimatedStyle(() => {
+    const v = clamp01(S.value.pins * PINS.length - k);
+    return { opacity: v, transform: [{ translateY: -4 * (1 - v) }] };
+  });
+  return (
+    <Animated.View style={[styles.pin, { left: x - 3, top: y - 3 }, st]}>
+      <View style={[styles.pinCap, { backgroundColor: PIN_COLOURS[k] }]} />
+    </Animated.View>
+  );
+}
+function Globe({ S }: { S: SharedValue<any> }) {
+  // the land goes round: slowly all the time, and once more when he spins it (b8)
+  const land = useAnimatedStyle(() => ({ transform: [{ translateX: -(((S.value.t * 3 + 60 * S.value.spin) % 60)) }] }));
+  return (
+    <View style={styles.globe} pointerEvents="none">
+      <Animated.View style={[styles.globeLand, land]}>
+        {[0, 1].map((r) => (
+          <View key={r} style={{ position: 'absolute', left: r * 60, top: 0, width: 60, height: 2 * GLOBE.r }}>
+            <View style={[styles.land, { left: 4, top: 8, width: 16, height: 14 }]} />
+            <View style={[styles.land, { left: 28, top: 4, width: 20, height: 22 }]} />
+            <View style={[styles.land, { left: 12, top: 28, width: 12, height: 8 }]} />
+          </View>
+        ))}
+      </Animated.View>
+    </View>
+  );
+}
+function Book({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  const st = useAnimatedStyle(() => {
+    const w = DF.value.wrR;
+    const h = S.value.holding;
+    return {
+      opacity: 1 - S.value.world,
+      transform: [
+        { translateX: lerp(BOOK.x, w[0].translateX, h) },
+        { translateY: lerp(BOOK.y, w[1].translateY - 3, h) },
+      ],
+    };
+  });
+  return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.bookCover} /></Animated.View>;
+}
+function StudyWords({ S, words }: { S: SharedValue<any>; words: SharedValue<number> }) {
+  const descr = useAnimatedStyle(() => ({ opacity: S.value.descr * words.value }));
+  const moral = useAnimatedStyle(() => ({ opacity: S.value.moral * words.value }));
+  const arrow = useAnimatedStyle(() => ({ opacity: S.value.arrow * words.value, transform: [{ scaleX: S.value.arrow }] }));
+  const cross = useAnimatedStyle(() => ({ opacity: S.value.cross * words.value, transform: [{ scale: 0.6 + 0.4 * S.value.cross }] }));
+  const bene = useAnimatedStyle(() => ({ opacity: S.value.bene * words.value }));
+  const obj = useAnimatedStyle(() => ({ opacity: S.value.obj * words.value }));
+  return (
+    <>
+      <Animated.View style={[styles.plate, styles.descrPlate, descr]}>
+        <Text style={styles.plateText} numberOfLines={1}>DESCRIPTIVE</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.moralPlate, moral]}>
+        <Text style={styles.plateText} numberOfLines={1}>MORAL</Text>
+      </Animated.View>
+      <Animated.View style={[styles.arrow, arrow]} />
+      <Animated.View style={[styles.cross, cross]}>
+        <View style={[styles.crossBar, { transform: [{ rotate: '45deg' }] }]} />
+        <View style={[styles.crossBar, { transform: [{ rotate: '-45deg' }] }]} />
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.benePlate, bene]}>
+        <Text style={styles.plateText} numberOfLines={1}>BENEDICT</Text>
+      </Animated.View>
+      <Animated.View style={[styles.plate, styles.objPlate, obj]}>
+        <Text style={styles.plateText} numberOfLines={1}>OBJECTIVISM</Text>
+      </Animated.View>
+    </>
+  );
+}
+
+// ── the village ──────────────────────────────────────────────────────────────
+
+function Village({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      <View style={styles.sky} />
+      <View style={styles.hillsFar} />
+      <Foundation S={S} />
+      <Igloo />
+      {HOME_ART.map((art, k) => <ObjectArt key={k} parts={art} tone={WOOD} />)}
+      {HOMES.map((hx, k) => <Gift key={hx} S={S} k={k} x={hx} />)}
+      <View style={styles.villageFloor} />
+    </>
+  );
+}
+function Foundation({ S }: { S: SharedValue<any> }) {
+  // the grass the homes stand on draws back, and one stone foundation runs under all five
+  const grass = useAnimatedStyle(() => ({ transform: [{ scaleY: 1 - 0.8 * S.value.found }] }));
+  const stones = useAnimatedStyle(() => ({ opacity: S.value.found }));
+  const crack = useAnimatedStyle(() => ({ opacity: S.value.crack }));
+  const crack2 = useAnimatedStyle(() => ({ opacity: clamp01(S.value.crack * 2 - 1) }));
+  return (
+    <>
+      <Animated.View style={[styles.stones, stones]}>
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <View key={k} style={[styles.joint, { left: 22 + k * 48 + (k % 2) * 12 }]} />)}
+        <Animated.View style={[styles.crack, { left: 150 }, crack]} />
+        <Animated.View style={[styles.crack, { left: 262, transform: [{ rotate: '24deg' }] }, crack2]} />
+      </Animated.View>
+      <Animated.View style={[styles.grass, grass]} />
+    </>
+  );
+}
+/** An igloo: a white half-dome of snow blocks with an arched door at its foot. */
+function Igloo() {
+  return (
+    <View style={styles.igloo}>
+      {[0, 1, 2].map((r) => <View key={r} style={[styles.course, { top: 7 + r * 7 }]} />)}
+      <View style={styles.iglooDoor} />
+    </View>
+  );
+}
+function Gift({ S, k, x }: { S: SharedValue<any>; k: number; x: number }) {
+  const st = useAnimatedStyle(() => {
+    const v = clamp01(S.value.gifts * HOMES.length - k);
+    return { opacity: v, transform: [{ translateY: -6 * (1 - v) }] };
+  });
+  return (
+    <Animated.View style={[styles.gift, { left: x + 12 }, st]}>
+      <View style={styles.ribbon} />
+    </Animated.View>
+  );
+}
+function VillageWords({ S, words, on }: { S: SharedValue<any>; words: SharedValue<number>; on: (a: readonly number[]) => boolean }) {
+  const uni = useAnimatedStyle(() => ({ opacity: words.value * S.value.universals * (1 - S.value.q2) }));
+  const found = useAnimatedStyle(() => ({ opacity: words.value * S.value.found * (1 - S.value.q2) }));
+  return (
+    <>
+      {on(VILLAGE) ? (
+        <Animated.View style={[styles.plate, styles.uniPlate, uni]}>
+          <Text style={styles.plateText} numberOfLines={1}>HUMAN UNIVERSALS</Text>
+        </Animated.View>
+      ) : null}
+      {on(FOUND) ? (
+        <Animated.View style={[styles.plate, styles.foundPlate, found]}>
+          <Text style={styles.plateText} numberOfLines={1}>SHARED FOUNDATION</Text>
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
+
+// ── Q2: the two signs ────────────────────────────────────────────────────────
+
+function Signs({ picked, onPick, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; S: SharedValue<any> }) {
+  const answered = picked !== null;
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      <ObjectArt parts={POST_ART} tone={WOOD} />
+      {Q2_T.map((q) => (
+        <Target
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
+          disabled={answered} sealAt="tr"
+          style={[styles.sign, { left: q.x - 36, top: 398 }]}
+        >
+          <View style={[styles.signFace, answered && q.correct && styles.tagRight]}>
+            <Text style={[styles.plateText, answered && q.correct && styles.onInk]} numberOfLines={1}>{q.label}</Text>
+          </View>
+        </Target>
+      ))}
+    </Animated.View>
+  );
+}
+
+const MAP_W = MAP.x1 - MAP.x0;
+const MAP_H = MAP.bottom - MAP.top;
 
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
-  ground: { position: 'absolute', left: 24, right: 24, top: FIG_G, height: 1.5, backgroundColor: RULE },
+  set: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
+  rider: { position: 'absolute', left: 0, top: 0 },
 
-  layerLabel: {
-    position: 'absolute', left: 0, right: 0, top: 190, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.6, color: SOFT,
-    includeFontPadding: false,
+  // ── the study ─────────────────────────────────────────────────────────────
+  floor: floorStyle(TONE, GROUND),
+  ground: { position: 'absolute', left: 0, right: 0, top: GROUND, height: 1.5, backgroundColor: RULE },
+  wall: {
+    position: 'absolute', left: 0, top: 288, width: STAGE_W, height: GROUND - 288, backgroundColor: WALL.STONE,
+    borderTopLeftRadius: 2, borderTopRightRadius: 2, overflow: 'hidden',
   },
-
-  // TONE, NOT WHITE. This scene drew every prop as an outline on paper — two
-  // values and no depth, which is the flat case `check:shade` exists to find.
-  // The structural mass takes STONE, a secondary surface takes RULE, and what
-  // carries the message stays PAPER, so the picture has things at different
-  // values rather than everything a shade darker. See cinematicKit's ramp.
-  tablet: {
-    position: 'absolute', top: TAB_T, width: TAB_W, height: TAB_H,
-    borderWidth: 2, borderColor: INK, borderRadius: 8, backgroundColor: STONE, boxShadow: LIP,
+  panel: { position: 'absolute', top: 0, bottom: 0, width: 1, borderRadius: 0.5, backgroundColor: WALL.RULE },
+  map: {
+    position: 'absolute', left: MAP.x0, top: MAP.top, width: MAP_W, height: MAP_H, backgroundColor: SKY.STONE,
+    overflow: 'hidden', borderRadius: 1,
   },
-  tabHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10, paddingTop: 6 },
-  tabName: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: INK,
-    includeFontPadding: false,
+  land: { position: 'absolute', borderRadius: 8, backgroundColor: stageToneOf(OLIVE).STONE, borderWidth: 1, borderColor: INK },
+  pin: { position: 'absolute', width: 6, height: 6 },
+  pinCap: { width: 6, height: 6, borderRadius: 3, borderWidth: 1, borderColor: INK },
+  ask: {
+    position: 'absolute', left: MAP_W / 2 - 8, top: 8, width: 16, fontFamily: 'Inter_700Bold', fontSize: 24, lineHeight: 28,
+    color: INK, textAlign: 'center', includeFontPadding: false,
   },
-  tabRule: { marginTop: 5, marginHorizontal: 8, height: 1, backgroundColor: RULE },
-  triangle: {
-    width: 0, height: 0,
-    borderLeftWidth: 8, borderRightWidth: 8, borderBottomWidth: 14,
-    borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: INK,
+  globe: {
+    position: 'absolute', left: GLOBE.x - GLOBE.r, top: GLOBE.y - GLOBE.r, width: 2 * GLOBE.r, height: 2 * GLOBE.r,
+    borderRadius: GLOBE.r, backgroundColor: SKY.STONE, borderWidth: 1.5, borderColor: INK, overflow: 'hidden',
   },
-  diamond: { width: 12, height: 12, borderWidth: 2.5, borderColor: INK, transform: [{ rotate: '45deg' }] },
-
-  neq: { position: 'absolute', left: 189, top: 228, width: 22, height: 26 },
-  neqBar: { position: 'absolute', left: 3.5, width: 15, height: 2.5, backgroundColor: INK, borderRadius: 1 },
-  neqSlash: {
-    position: 'absolute', left: 0, top: 11, width: 22, height: 2.5,
-    backgroundColor: INK, borderRadius: 1, transform: [{ rotate: '-62deg' }],
+  globeLand: { position: 'absolute', left: 0, top: 0, width: 120, height: 2 * GLOBE.r },
+  bookCover: {
+    position: 'absolute', left: -9, top: -5, width: 18, height: 10, borderRadius: 1.5, backgroundColor: DEEP,
+    borderWidth: 1.2, borderColor: INK,
   },
 
-  codeRow: { position: 'absolute', left: 10, right: 8, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  codeDash: { fontFamily: 'Inter_700Bold', fontSize: 11, color: SOFT,
-    includeFontPadding: false,
+  // ── the village ───────────────────────────────────────────────────────────
+  sky: { position: 'absolute', left: 0, right: 0, top: 288, height: GROUND - 288, backgroundColor: SKY.STONE },
+  hillsFar: {
+    position: 'absolute', left: -40, right: -40, top: 420, height: 80, borderTopLeftRadius: 200, borderTopRightRadius: 200,
+    backgroundColor: stageToneOf(SAGE).STONE,
   },
-  codeT: { fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 0.3, color: INK, includeFontPadding: false },
+  grass: {
+    position: 'absolute', left: 0, right: 0, top: HOME_GROUND, height: GROUND - HOME_GROUND, backgroundColor: stageToneOf(SAGE).SHADE,
+    transformOrigin: '50% 0%',
+  },
+  stones: {
+    position: 'absolute', left: 0, right: 0, top: HOME_GROUND, height: GROUND - HOME_GROUND, backgroundColor: stageToneOf(OLIVE).STONE,
+    borderTopWidth: 1.5, borderColor: INK, overflow: 'hidden',
+  },
+  joint: { position: 'absolute', top: 0, bottom: 0, width: 1.2, borderRadius: 0.6, backgroundColor: INK, opacity: 0.5 },
+  crack: {
+    position: 'absolute', top: 2, width: 2, height: 24, borderRadius: 1, backgroundColor: INK, transform: [{ rotate: '-18deg' }],
+  },
+  igloo: {
+    position: 'absolute', left: HOMES[0] - 26, top: HOME_GROUND - 28, width: 52, height: 28, borderTopLeftRadius: 26,
+    borderTopRightRadius: 26, backgroundColor: PAPER_LIT, borderWidth: 1.5, borderBottomWidth: 0, borderColor: INK, overflow: 'hidden',
+  },
+  course: { position: 'absolute', left: 0, right: 0, height: 1, borderRadius: 0.5, backgroundColor: INK, opacity: 0.35 },
+  iglooDoor: {
+    position: 'absolute', left: 19, bottom: 0, width: 14, height: 12, borderTopLeftRadius: 7, borderTopRightRadius: 7,
+    backgroundColor: DEEP,
+  },
+  gift: {
+    position: 'absolute', top: HOME_GROUND - 9, width: 9, height: 8, borderRadius: 1.5, backgroundColor: EMBER,
+    borderWidth: 1, borderColor: INK, alignItems: 'center',
+  },
+  ribbon: { width: 1.6, height: '100%', borderRadius: 0.8, backgroundColor: PAPER_LIT },
+  villageFloor: floorStyle(TONE, GROUND),
 
-  chartHdr: {
-    position: 'absolute', left: 0, right: 0, top: 444, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
+  // ── the words ─────────────────────────────────────────────────────────────
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
+    boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  traitT: {
-    position: 'absolute', left: 20, width: 124, textAlign: 'right', height: BAR_H, lineHeight: BAR_H,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  plateText: {
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
-  barTrack: {
-    position: 'absolute', left: BAR_L, width: BAR_W, height: BAR_H,
-    borderWidth: 1, borderColor: RULE, backgroundColor: RULE, overflow: 'hidden',
+  descrPlate: { left: MAP.x0 + 8, top: MAP.bottom - 20, width: 70 },
+  moralPlate: { left: MAP.x1 - 60, top: MAP.bottom - 20, width: 52 },
+  arrow: {
+    position: 'absolute', left: MAP.x0 + 80, top: MAP.bottom - 14, width: 18, height: 2, borderRadius: 1, backgroundColor: INK,
+    transformOrigin: '0% 50%',
   },
-  barFill: {
-    position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',
-    backgroundColor: INK, transformOrigin: '0% 50%',
-  },
-  valT: {
-    position: 'absolute', left: BAR_L + BAR_W + 8, width: 40, height: BAR_H, lineHeight: BAR_H,
-    fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 0.8, color: INK, includeFontPadding: false,
-  },
+  cross: { position: 'absolute', left: MAP.x0 + 83, top: MAP.bottom - 19, width: 12, height: 12 },
+  crossBar: { position: 'absolute', left: -1, top: 5, width: 14, height: 2.4, borderRadius: 1.2, backgroundColor: EMBER },
+  benePlate: { left: MAP.x1 + 10, top: 380, width: 70 },
+  objPlate: { left: MAP.x1 + 8, top: 362, width: 78 },
+  uniPlate: { left: 140, top: 302, width: 120 },
+  foundPlate: { left: 12, top: 478, width: 120 },
 
-  // ── group AH: the seven still-tap flashes, one per beat, in the free strip
-  // of paper between the ground line (434) and the (still-hidden) floor
-  // header (444) — real estate no other element occupies before beat 9.
-  noteRow: {
-    position: 'absolute', left: 60, right: 60, top: 436,
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14,
+  sign: { position: 'absolute', width: 72, height: 22 },
+  signFace: {
+    flexGrow: 1, borderRadius: 3, backgroundColor: stageToneOf(OLIVE).STONE, borderWidth: 1.5, borderColor: INK,
+    alignItems: 'center', justifyContent: 'center',
   },
-  noteTagLine: {
-    position: 'relative', paddingHorizontal: 6, paddingBottom: 2,
-    borderBottomWidth: 2, borderBottomColor: INK,
-  },
-  noteTagDashed: { borderBottomColor: SOFT, borderStyle: 'dashed' },
-  noteTagBoxed: {
-    borderWidth: 1.5, borderColor: INK, borderRadius: 4, paddingVertical: 3,
-    backgroundColor: PLATE_FACE, boxShadow: LIP,
-  },
-  noteText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: INK,
-    includeFontPadding: false,
-  },
-  noteTextStruck: { color: SOFT },
-  noteStrike: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1.5, marginTop: -0.75, backgroundColor: SOFT },
-
-  earthPair: { position: 'relative' },
-  earthWord: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6, color: SOFT,
-    includeFontPadding: false,
-  },
-  earthWordOn: { color: INK },
-  earthStrike: { position: 'absolute', left: 0, right: 0, top: '50%', height: 1.5, marginTop: -0.75, backgroundColor: SOFT },
-
-  // The bracket beside the floor chart's own three named rows, clear of the
-  // trait labels (which start at x = 20).
-  bracket: { position: 'absolute', left: 8, top: CHART_T + PITCH, width: 6, height: PITCH * 2 + BAR_H },
-  bracketSpine: { position: 'absolute', left: 2, top: 0, bottom: 0, width: 2, backgroundColor: INK },
-  bracketTick: { position: 'absolute', left: 0, width: 6, height: 2, backgroundColor: INK },
-
-  // The floor sits BENEATH the surface's differences — a line dropping from
-  // where the arguers stand toward the chart, stopping short of its header.
-  bridge: { position: 'absolute', left: 199, top: 282, width: 2, height: 160, backgroundColor: SHADE },
-
-  askLabel: {
-    position: 'absolute', left: 0, right: 0, top: 200, textAlign: 'center',
-    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.4, color: SOFT,
-    includeFontPadding: false,
-  },
-  vHit: { position: 'absolute', width: TAB_W },
-  vBox: {
-    height: 48, borderWidth: 2.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8,
-  },
-  vRight: { backgroundColor: INK, borderColor: INK },
-  vWrong: { borderColor: SOFT },
-  vText: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 0.3, color: INK, includeFontPadding: false },
-  vTextOn: { color: PAPER },
+  tagRight: { backgroundColor: INK },
+  onInk: { color: PAPER_LIT },
 });
 
-// The band. Topmost ink is the surface label at y 190 (the verdict label sits at 200);
-// the lowest is the last universals bar, whose track runs to 460 + 3×13 + 11 = 510.
-// The arguers' crowns reach y ≈ 288 at their bounciest and their ankle joints reach
-// 441, both comfortably inside. Cropping to 334 units instead of 560 renders the whole
-// scene at ~1.95× rather than the letterboxed 1.15×.
 export function Ethics4Lesson({ lesson }: { lesson: Lesson }) {
-  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics4Scene} band={[184, 518]} camera={CAM} />;
+  return <CinematicPlayer lesson={lesson} beats={BEATS} Scene={Ethics4Scene} band={[288, 514]} camera={CAM} />;
 }
