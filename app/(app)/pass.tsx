@@ -3,6 +3,8 @@ import { View, Text, ScrollView, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import DoodleGround from '@/components/shared/DoodleGround';
+import { WALL } from '@/components/shared/tone';
 import { MetalPlate } from '@/components/profile/Struck';
 import PassChart, { PlanTiles, usePassArrival } from '@/components/paywall/PassChart';
 import PassDoor from '@/components/paywall/PassDoor';
@@ -84,8 +86,9 @@ export default function PassTab() {
   );
 
   return (
-    <ScreenTransition bg={C.paper}>
+    <ScreenTransition bg={WALL}>
       <SafeAreaView style={st.safe} edges={['top']}>
+        <DoodleGround />
         {/* NO GLOW. A sand light used to wash the top-left corner of this
             screen, and a gold haze behind the headline is exactly the "AI look"
             the owner asked to be rid of (2026-09-16). The page is paper. */}
@@ -107,7 +110,12 @@ export default function PassTab() {
             </View>
           ) : null}
 
-          <View style={st.chart}>
+          {/* THE CHART AND ITS DOOR ON ONE WHITE PANEL (2026-09-29). The tab stands on the
+              doodle wallpaper now, and the benefit labels sat straight on it with a
+              doodle behind every word. The panel reaches out by exactly its own padding
+              and border, so the chart inside keeps the width check:pass measures. */}
+          <View style={st.panel}>
+          <View>
             <PassChart play={play} />
           </View>
 
@@ -122,6 +130,7 @@ export default function PassTab() {
             ) : (
               <PassDoor source="pass_tab" />
             )}
+          </View>
           </View>
 
           <Text style={st.kicker}>FREE FOR EVERYONE</Text>
@@ -140,7 +149,7 @@ export default function PassTab() {
 }
 
 const st = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.paper },
+  safe: { flex: 1, backgroundColor: WALL },
   body: { paddingHorizontal: SPACE[4], paddingTop: SPACE[4], paddingBottom: SPACE[5] * 2 },
 
   h1: {
@@ -162,7 +171,11 @@ const st = StyleSheet.create({
   h1Accent: { color: PATINA.base },
   trial: { marginTop: SPACE[4] },
 
-  chart: { marginTop: SPACE[5] },
+  panel: {
+    marginTop: SPACE[5], marginHorizontal: -(SPACE[3] + 2), paddingHorizontal: SPACE[3],
+    paddingTop: SPACE[3], paddingBottom: SPACE[4], borderRadius: 18, borderWidth: 2,
+    borderColor: C.edge, backgroundColor: C.surface,
+  },
   door: { marginTop: SPACE[4] },
   held: { alignItems: 'center', gap: SPACE[2] },
   heldNote: {

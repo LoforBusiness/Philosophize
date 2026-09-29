@@ -8123,6 +8123,14 @@ Technology and History & Politics are announced and empty. Spec:
     tile was drawn once until its size was stated.
   - `npm run sheet:subjects` draws every poster at the card, tile and masthead shape;
     `check:subjects` §5 holds that every box keeps every object in view.
+- **Profile and Pass stand on the wallpaper too, and Profile speaks in subjects.**
+  "Where your reading goes" is seven SUBJECT rows (`SUBJECT_SHORT`/`SUBJECT_ICON` in
+  branchMarks.ts), a subject's lessons summed over its courses, the coming-soon ones
+  quiet at the foot as SOON. "Who you're becoming" (`userBio.ts`) opens from the
+  reader's top subject's pool — seven pools, held ≥12 deep by `check:quips` — and a
+  philosophy reader draws from their top branch's pool half the time. The title under
+  the name follows the subject too. On the Pass tab the chart and its door sit on a
+  white panel, because on the wallpaper a doodle ran behind every benefit label.
 - **`npm run check:subjects`** holds the list, the colours (tame, clear of the
   verdict wedge, ΔE ≥ 11.4 apart), every drawing inside its box, no hex in
   `components/subjects/`, every name/pill/course line measured against the real

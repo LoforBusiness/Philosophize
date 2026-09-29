@@ -10,13 +10,15 @@ import RankHeader from '@/components/profile/RankHeader';
 import BecomingJournal from '@/components/profile/BecomingJournal';
 import { DayBars } from '@/components/profile/InkCharts';
 import ScreenTransition from '@/components/shared/ScreenTransition';
+import DoodleGround from '@/components/shared/DoodleGround';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { C, TYPE, SPACE, BRANCH, RADIUS, LIP, type TypeKey, type BranchKey } from '@/constants/design';
-import { GHOST, ramp, EMBER_INK, EMBER_LIT } from '@/components/shared/tone';
+import { C, TYPE, SPACE, RADIUS, LIP, type TypeKey } from '@/constants/design';
+import { GHOST, ramp, EMBER_INK, EMBER_LIT, WALL } from '@/components/shared/tone';
 import { ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
-import { BRANCH_SHORT, BRANCH_ICON } from '@/components/shared/branchMarks';
+import { SUBJECT_SHORT, SUBJECT_ICON } from '@/components/shared/branchMarks';
+import { SUBJECTS } from '@/data/subjects';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakPanel from '@/components/gamification/StreakPanel';
@@ -40,11 +42,6 @@ const SW = Dimensions.get('window').width;
 // The page gutter (SPACE[3], both sides) and three inter-badge gaps (SPACE[1]) across four columns.
 const BADGE_W = (SW - SPACE[3] * 2 - SPACE[1] * 3) / 4;
 
-// The short names and marks moved to components/shared/branchMarks.ts when the
-// paywall started drawing mastery rows too — two private copies of the same six
-// keys is how "POLITICS" becomes "Political Philosophy" on one screen only.
-const SHORT = BRANCH_SHORT;
-const BICON = BRANCH_ICON;
 const TITLE: Record<string, string> = {
   logic: 'LOGICIAN',
   ethics: 'ETHICIST',
@@ -52,6 +49,15 @@ const TITLE: Record<string, string> = {
   metaphysics: 'METAPHYSICIAN',
   aesthetics: 'AESTHETE',
   'political-philosophy': 'THEORIST',
+};
+/** The title for a reader whose top subject is not philosophy. */
+const SUBJECT_TITLE: Record<string, string> = {
+  psychology: 'MIND READER',
+  'personal-growth': 'SELF-IMPROVER',
+  business: 'STRATEGIST',
+  economics: 'ECONOMIST',
+  science: 'EXPERIMENTER',
+  history: 'CHRONICLER',
 };
 
 // FOUR CONSTANTS, BUILT ONCE. It sat inside the component, so every render made
@@ -190,20 +196,36 @@ export default function ProfileScreen() {
   // nothing wrong every time content ships, and this app has gone 60 → 192 → 246
   // lessons. A share of the reader's own leading branch cannot do that, and it
   // answers the more interesting question anyway.
-  const reading = useMemo(() => ALL_BRANCHES.map((b) => {
-    return {
-      slug: b.slug,
-      name: SHORT[b.slug] ?? b.name.toUpperCase(),
-      icon: BICON[b.slug] ?? 'frame',
-      hue: BRANCH[b.slug as BranchKey] ?? C.ink,
-      lessons: lessonsByBranch[b.slug] ?? 0,
-    };
-  }).sort((a, b) => b.lessons - a.lessons), [lessonsByBranch]);
-  /** The reader's own strongest branch — both ends of every bar are theirs. */
+  //
+  // AND IT IS BY SUBJECT NOW (2026-09-29). Ashmere teaches seven subjects, and the
+  // owner asked for this card to say which of THEM the reader's time goes to. A
+  // subject's lessons are its courses' lessons added up; a subject with no courses
+  // yet is listed quietly at the foot as SOON, so the card shows where there is to go
+  // without scoring the reader against a shelf that is still empty.
+  const reading = useMemo(() => SUBJECTS.map((s) => ({
+    slug: s.slug,
+    name: SUBJECT_SHORT[s.slug] ?? s.short.toUpperCase(),
+    fullName: s.name,
+    icon: SUBJECT_ICON[s.slug] ?? 'frame',
+    hue: s.hue,
+    soon: s.status === 'soon',
+    lessons: s.courses.reduce((n, c) => n + (lessonsByBranch[c] ?? 0), 0),
+  })).sort((a, b) => Number(a.soon) - Number(b.soon) || b.lessons - a.lessons), [lessonsByBranch]);
+  /** The reader's own strongest subject — both ends of every bar are theirs. */
   const readingLead = reading[0]?.lessons ?? 0;
+  const topSubject = readingLead > 0 ? reading[0] : null;
+  const subjectsRead = reading.filter((r) => r.lessons > 0).length;
 
-  const topBranch = readingLead > 0 ? reading[0].slug : null;
-  const descriptor = topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
+  // The title under the name: a philosophy reader is named for their top branch
+  // (ETHICIST), anyone else for their subject.
+  const topBranch = useMemo(() => {
+    const best = ALL_BRANCHES.map((b) => ({ slug: b.slug, n: lessonsByBranch[b.slug] ?? 0 }))
+      .sort((a, b) => b.n - a.n)[0];
+    return best && best.n > 0 ? best.slug : null;
+  }, [lessonsByBranch]);
+  const descriptor = topSubject && topSubject.slug !== 'philosophy'
+    ? SUBJECT_TITLE[topSubject.slug] ?? 'SEEKER'
+    : topBranch ? TITLE[topBranch] ?? 'SEEKER' : 'SEEKER';
 
   // RETURNING TO SOMEONE MEANS YOU OPENED THEM.
   //
@@ -266,9 +288,12 @@ export default function ProfileScreen() {
       topPhilosopher: topPhilosopher?.name ?? null,
       topInterestName: topInterest?.name ?? null,
       topInterestSlug: topInterest?.slug ?? null,
+      topSubjectSlug: topSubject?.slug ?? null,
+      topSubjectName: topSubject?.fullName ?? null,
+      subjectsRead,
     },
     bioSeed
-  ), [lessonsDone, shownStreak, quotesSaved, distinctViewed, topPhilosopher, topInterest, bioSeed]);
+  ), [lessonsDone, shownStreak, quotesSaved, distinctViewed, topPhilosopher, topInterest, topSubject, subjectsRead, bioSeed]);
 
   // One shared computation — see `rankProgress`. This screen used to divide
   // totalXP by the next threshold, which counts from zero rather than from the
@@ -462,6 +487,9 @@ export default function ProfileScreen() {
             ScrollView. Detaching those twelve bought no memory back and put a
             UI-thread pass under every frame of the overscroll stretch. */}
         <View style={styles.body}>
+          {/* The wallpaper Home and Learn stand on (2026-09-29), laid inside the body so
+              it scrolls with the page and the dark header keeps its own ground. */}
+          <DoodleGround />
 
           {/* streak */}
           {useMemo(() => (
@@ -537,6 +565,7 @@ export default function ProfileScreen() {
                   hue={b.hue}
                   lessons={b.lessons}
                   lead={readingLead}
+                  soon={b.soon}
                   icon={<SketchIcon name={b.icon} size={15} color={ramp(b.hue).shade} />}
                 />
               ))}
@@ -691,7 +720,7 @@ const role = (k: TypeKey) => ({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.ink },
-  scroll: { flex: 1, backgroundColor: C.paper },
+  scroll: { flex: 1, backgroundColor: WALL },
 
   header: {
     // No background colour: ProfileArtFill paints it. `overflow: hidden` keeps

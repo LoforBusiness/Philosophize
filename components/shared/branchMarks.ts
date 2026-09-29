@@ -33,3 +33,29 @@ export const BRANCH_ICON: Record<string, SketchIconName> = {
   aesthetics: 'palette',
   'political-philosophy': 'building',
 };
+
+// ── AND THE SEVEN SUBJECTS (2026-09-29) ─────────────────────────────────────
+// Profile's "where your reading goes" lists subjects now, not philosophy's branches.
+// Each subject's short name fits the same row; its mark is the nearest SketchIcon to
+// its poster (posters.ts): the mortarboard, a thought cloud, a star for a goal, a
+// building, a stack of coins, a globe, a clock.
+
+export const SUBJECT_SHORT: Record<string, string> = {
+  philosophy: 'PHILOSOPHY',
+  psychology: 'PSYCHOLOGY',
+  'personal-growth': 'GROWTH',
+  business: 'BUSINESS',
+  economics: 'ECONOMICS',
+  science: 'SCIENCE',
+  history: 'HISTORY',
+};
+
+export const SUBJECT_ICON: Record<string, SketchIconName> = {
+  philosophy: 'grad',
+  psychology: 'cloud',
+  'personal-growth': 'star',
+  business: 'building',
+  economics: 'database',
+  science: 'globe',
+  history: 'clock',
+};

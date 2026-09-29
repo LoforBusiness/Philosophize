@@ -391,24 +391,29 @@ export function CountStrip({ items }: { items: { label: string; value: number; i
  * MARK shapes were built on, which is the only part of that file worth keeping.
  */
 export function ReadingRow({
-  name, hue, lessons, lead, icon,
+  name, hue, lessons, lead, icon, soon = false,
 }: {
   name: string;
   hue: string;
   lessons: number;
-  /** The reader's own strongest branch, so the bar is a share rather than a score. */
+  /** The reader's own strongest subject, so the bar is a share rather than a score. */
   lead: number;
   icon: React.ReactNode;
+  /** A subject with no courses yet: the row says SOON where the count goes, and is
+   *  drawn quieter, so it reads as "on the way" rather than as a zero the reader owes. */
+  soon?: boolean;
 }) {
   const r = ramp(hue);
   const pct = lead > 0 ? lessons / lead : 0;
   return (
-    <View style={s.rRow}>
+    <View style={[s.rRow, soon && s.rSoon]}>
       <View style={[s.rChip, { backgroundColor: r.track, borderColor: r.base }]}>{icon}</View>
       <View style={s.rBody}>
         <View style={s.rTop}>
           <Text style={[s.rName, { color: r.shade }]} numberOfLines={1}>{name}</Text>
-          <Text style={[s.rCount, { color: r.base }]}>{lessons}</Text>
+          {soon
+            ? <Text style={s.rSoonText}>SOON</Text>
+            : <Text style={[s.rCount, { color: r.base }]}>{lessons}</Text>}
         </View>
         <StruckBar pct={pct} fill={r} height={8} style={{ marginTop: 4 }} />
       </View>
@@ -537,6 +542,8 @@ const s = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1, includeFontPadding: false, flex: 1,
   },
   rCount: { fontFamily: 'Inter_700Bold', fontSize: 13, includeFontPadding: false },
+  rSoon: { opacity: 0.6 },
+  rSoonText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2, color: INK, includeFontPadding: false },
 });
 
 /** Re-exported so callers do not have to import from two places to draw a row. */

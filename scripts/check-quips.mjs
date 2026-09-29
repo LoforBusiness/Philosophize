@@ -533,6 +533,20 @@ console.log('\nthe bio\n');
     else { thin++; bad(`${slug}: only ${pool.length} openers`, 'the opener is the first thing read, so it is the repetition a reader notices'); }
   }
 
+  // THE SUBJECTS (2026-09-29): the opener follows the reader's top SUBJECT now, so
+  // every subject needs a pool as deep as a branch's, or a psychology reader repeats.
+  const subj = src.slice(src.indexOf('const SUBJECT_ARCHETYPE:'), src.indexOf('const MICRO'));
+  const subjects = [...subj.matchAll(/^\s{2}'?([\w-]+)'?:\s*\[([\s\S]*?)^\s{2}\],/gm)];
+  const wanted = ['philosophy', 'psychology', 'personal-growth', 'business', 'economics', 'science', 'history'];
+  const missing = wanted.filter((w) => !subjects.some(([, slug]) => slug === w));
+  if (!missing.length) ok('all seven subjects have an opener pool');
+  else { thin++; bad(`no opener pool for ${missing.join(', ')}`); }
+  for (const [, slug, body] of subjects) {
+    const pool = strings(body);
+    if (pool.length >= 12) ok(`subject ${slug}: ${pool.length} openers`);
+    else { thin++; bad(`subject ${slug}: only ${pool.length} openers`); }
+  }
+
   for (const [name, from] of [['generic openers', 'const ARCHETYPE_GENERIC'], ['closers', 'const MICRO'], ['blank slate', 'const BLANK_SLATE']]) {
     const start = src.indexOf(from);
     const pool = strings(src.slice(start, src.indexOf('];', start)));

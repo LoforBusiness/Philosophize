@@ -17,6 +17,11 @@ export interface BioInput {
   topPhilosopher: string | null; // display name, e.g. "Marcus Aurelius"
   topInterestName: string | null; // branch display name, e.g. "Ethics"
   topInterestSlug: string | null; // branch slug, e.g. "ethics"
+  /** The subject the reader reads most, e.g. "psychology" — it decides the opener. */
+  topSubjectSlug?: string | null;
+  topSubjectName?: string | null; // e.g. "Psychology"
+  /** How many subjects the reader has finished a lesson in. */
+  subjectsRead?: number;
 }
 
 // Opening identity tags, keyed to the user's strongest area of interest.
@@ -135,13 +140,122 @@ const ARCHETYPE_GENERIC = [
   'Building an argument out of spare evenings',
 ];
 
+// ── THE SUBJECTS (2026-09-29) ─────────────────────────────────────────────────
+// Ashmere teaches seven subjects now, and the owner asked for this sentence to be
+// about "whatever the user tends to learn". So the opener is chosen by the reader's
+// top SUBJECT. A philosophy reader still draws from the sharper branch pools above
+// half the time — "allergic to a sloppy argument" is truer of a logic reader than
+// anything a subject-level line can say.
+const SUBJECT_ARCHETYPE: Record<string, string[]> = {
+  philosophy: [
+    'Asking the questions that keep philosophers up',
+    'Arguing with the ancients, and holding their own',
+    'Treats every “why” as an invitation',
+    'A student of the oldest questions',
+    'Taking big ideas for a long walk',
+    'Keeps a philosopher’s notebook, and uses it',
+    'Thinking slowly, on purpose',
+    'Following arguments wherever they go',
+    'A quiet examiner of the examined life',
+    'Turns small talk into big questions',
+    'Picking fights with famous ideas, politely',
+    'Reads the great books as a conversation',
+  ],
+  psychology: [
+    'Quietly working out everyone at the dinner table',
+    'Reads body language for fun',
+    'Wants to know why people do that',
+    'A student of the human operating system',
+    'Has started noticing their own biases, awkwardly',
+    'Asks “but why did I do that?” a lot',
+    'Fascinated by the part of the mind that fibs',
+    'An amateur detective of motives',
+    'Keeps a field guide to the human mind',
+    'Now suspicious of every first impression',
+    'Treats a bad mood as data',
+    'Collecting cognitive biases like trading cards',
+    'Knows why the other queue always feels faster',
+  ],
+  'personal-growth': [
+    'Upgrading themselves one habit at a time',
+    'Quietly building a better Tuesday',
+    'Treats every morning as a rough draft',
+    'A work in progress with a plan',
+    'Stacking small wins on purpose',
+    'Getting one percent better, deliberately',
+    'Has a system for the systems',
+    'Turning good intentions into routines',
+    'Keeps promises to themselves, mostly',
+    'Learning how to learn, which is the long game',
+    'Pruning old habits with a steady hand',
+    'Planting habits and waiting for the harvest',
+    'On speaking terms with discipline',
+  ],
+  business: [
+    'Thinking like a founder, reading like a student',
+    'Sizing up every shop they walk into',
+    'Has opinions on pricing now',
+    'A strategist in training',
+    'Mentally reorganising every queue they stand in',
+    'Learning to lead before being asked to',
+    'Reads a company like a story',
+    'Knows a good pitch when they hear one',
+    'Keeps a notebook of ideas worth building',
+    'Asks who the customer really is',
+    'Building a boardroom vocabulary',
+    'Turning hunches into business cases',
+  ],
+  economics: [
+    'Now sees the invisible hand everywhere',
+    'Asks what it really costs, every time',
+    'Has thoughts about the price of coffee',
+    'Fluent in trade-offs',
+    'Reading the markets like weather',
+    'Thinks at the margin now',
+    'Knows where the money goes',
+    'Suspicious of anything labelled free',
+    'Counting opportunity costs for fun',
+    'Following the incentives home',
+    'Can explain inflation at a party, and will',
+    'Spotting supply and demand in the wild',
+  ],
+  science: [
+    'Runs small experiments on everyday life',
+    'Asking how it works, then how it really works',
+    'Takes nothing on trust without the evidence',
+    'A lab coat in spirit',
+    'Taking the universe apart, gently',
+    'Knows why the sky is that colour',
+    'Treats curiosity as a method',
+    'Collecting mechanisms, cog by cog',
+    'Fond of a good hypothesis',
+    'Reading the manual of the universe',
+    'Suspiciously excited about orbits',
+    'Half engineer, half explorer',
+  ],
+  history: [
+    'Always asking what happened before that',
+    'Reads the present as a sequel',
+    'On first-name terms with several empires',
+    'A time traveller on a budget',
+    'Keeps connecting the past to the news',
+    'Collecting turning points',
+    'Sees old patterns in new headlines',
+    'Unafraid of a long timeline',
+    'Hunting for causes, not just dates',
+    'Treats every ruin as a clue',
+    'A quiet chronicler of how we got here',
+    'Remembers what everyone else forgot',
+  ],
+};
+
 const MICRO = [
   'No notes.',
   'Dangerous.',
   'Keeps the librarians on their toes.',
   'The questions don’t stand a chance.',
   'Honestly, a little intimidating.',
-  'Going places — probably ancient Greece.',
+  'Going places, several subjects at once.',
   'Frankly, showing off.',
   'Genuinely alarming.',
   'Somebody stop them.',
@@ -159,9 +273,9 @@ const BLANK_SLATE = [
   'A clean slate and an itch to ask why. The good trouble begins shortly.',
   'Nothing on the record yet. The first question is always the hardest one to ask.',
   'An empty shelf and every intention of filling it. Start with something impossible.',
-  'Day zero. Twenty-four centuries of argument waiting, and none of it read yet.',
-  'Unwritten — which is, philosophically, the most interesting state to be in.',
-  'No lessons, no quotes, no thinkers. Just the itch. That is where every one of them started.',
+  'Day zero. Seven subjects waiting, and none of them opened yet.',
+  'Unwritten — which is, honestly, the most interesting state to be in.',
+  'No lessons yet. Just the itch. That is where every expert started.',
 ];
 
 // Small, fast, well-distributed PRNG so one integer seed drives many independent
@@ -190,6 +304,11 @@ function joinList(items: string[]): string {
 export function generateUserBio(input: BioInput, seed = 0): string {
   const { lessonsDone, streak, quotesSaved, distinctViewed, topPhilosopher, topInterestName, topInterestSlug } =
     input;
+  const topSubject = input.topSubjectSlug ?? null;
+  const subjectsRead = input.subjectsRead ?? 0;
+  // Thinkers and branches belong to philosophy, so they only speak for a reader whose
+  // top subject is philosophy (or who has no top subject yet).
+  const philosophyReader = !topSubject || topSubject === 'philosophy';
 
   // Mix the refresh seed with the real data so two states never read identically
   // and the text is always grounded in what the user has actually done.
@@ -215,7 +334,11 @@ export function generateUserBio(input: BioInput, seed = 0): string {
     return pick(BLANK_SLATE);
   }
 
-  const archetypes = (topInterestSlug && ARCHETYPE[topInterestSlug]) || ARCHETYPE_GENERIC;
+  // The opener follows the SUBJECT the reader reads most. A philosophy reader draws
+  // half the time from their top branch's sharper pool instead.
+  const branchPool = philosophyReader && topInterestSlug ? ARCHETYPE[topInterestSlug] : undefined;
+  const subjectPool = topSubject ? SUBJECT_ARCHETYPE[topSubject] : undefined;
+  const archetypes = (branchPool && (!subjectPool || rng() < 0.5) ? branchPool : subjectPool) || ARCHETYPE_GENERIC;
   const opener = pick(archetypes);
 
   // The receipts — each phrased a few different ways, a varying subset shown.
@@ -306,7 +429,14 @@ export function generateUserBio(input: BioInput, seed = 0): string {
   // The closing flourish about the thinker (or breadth / area) they keep
   // returning to — always true to their actual top thinker or interest.
   let flourish = '';
-  if (topPhilosopher) {
+  if (subjectsRead >= 2 && rng() < 0.5) {
+    flourish = pick([
+      `Reading across ${subjectsRead} subjects now.`,
+      `Refuses to stick to one subject. ${subjectsRead} and counting.`,
+      `Spreading out: ${subjectsRead} subjects on the go.`,
+      `A generalist in the making, ${subjectsRead} subjects deep.`,
+    ]);
+  } else if (topPhilosopher && philosophyReader) {
     const P = topPhilosopher;
     const base = [
       `Soft spot for ${P}.`,
@@ -334,7 +464,7 @@ export function generateUserBio(input: BioInput, seed = 0): string {
       );
     }
     flourish = pick(base);
-  } else if (distinctViewed >= 3) {
+  } else if (distinctViewed >= 3 && philosophyReader) {
     flourish = pick([
       `Already on a first-name basis with ${distinctViewed} thinkers.`,
       `Making the rounds — ${distinctViewed} thinkers and counting.`,
@@ -342,8 +472,10 @@ export function generateUserBio(input: BioInput, seed = 0): string {
       `Casting a wide net — ${distinctViewed} minds so far.`,
       `Sampling broadly. ${distinctViewed} thinkers in, no allegiances.`,
     ]);
-  } else if (topInterestName) {
-    const a = topInterestName.toLowerCase();
+  } else if ((philosophyReader && topInterestName) || input.topSubjectName) {
+    // A philosophy reader is placed in their branch ("at home in ethics"); anyone
+    // else in their subject ("at home in psychology").
+    const a = (philosophyReader && topInterestName ? topInterestName : input.topSubjectName ?? '').toLowerCase();
     flourish = pick([
       `Increasingly at home in ${a}.`,
       `${capitalize(a)} has its hooks in.`,
