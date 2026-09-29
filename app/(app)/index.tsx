@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView, InteractionManager } from 'react-native';
+import { Text, Pressable, StyleSheet, Platform, ScrollView, InteractionManager } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -16,45 +16,14 @@ import { useUIStore } from '@/stores/uiStore';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
+import DoodleGround from '@/components/shared/DoodleGround';
+import { WALL } from '@/components/shared/tone';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
 
-// The ruled-paper texture. `hairline` from constants/design.ts — Home used to
-// carry its own #ECEAE2, four points off the token, which is exactly the "two
-// greys that are one grey and a bug" the design file was written to stop.
-const Rule = '#E7E3DA';
-
-const SH = Dimensions.get('window').height;
 /** The page's side margin, which the subject shelf runs past to the screen's edge. */
 const PAD = 24;
-
-// Faint ruled-paper texture behind the whole page (fixed, non-scrolling).
-//
-// VIEWS, NOT AN <Svg>. react-native-svg paints every <Svg> into a bitmap the size
-// of its whole box, so this sheet of hairlines was a 1080×2340 texture — 9.6MB of
-// GPU memory for sixty-odd one-pixel lines. A built tab stays attached for the
-// session, so that texture was held on EVERY screen, and it was one of the two
-// things keeping Profile and Streak within a few MB of Android's 121MB GPU cache
-// budget. Past that budget each frame evicts and re-uploads every bitmap in the
-// app: Profile's overscroll stretch needs one more screen-sized layer and tipped
-// over, and Streak's walking mascot did it at rest. A View is a colour on a render
-// node and holds no texture at all.
-function RuledPaper() {
-  const lines: number[] = [];
-  for (let y = 70; y < SH; y += 34) lines.push(y);
-  return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {lines.map((y) => (
-        <View key={y} style={[ruled.line, { top: y - 0.5 }]} />
-      ))}
-    </View>
-  );
-}
-
-const ruled = StyleSheet.create({
-  line: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: Rule },
-});
 
 // ── HOME IS THREE THINGS NOW (2026-09-29) ────────────────────────────────────
 //
@@ -108,9 +77,9 @@ export default function HomeScreen() {
   const widgetPlaced = useWidgetPlaced();
 
   return (
-    <ScreenTransition bg={Paper}>
+    <ScreenTransition bg={WALL}>
     <SafeAreaView style={styles.safe}>
-      <RuledPaper />
+      <DoodleGround />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.page}
@@ -159,7 +128,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Paper },
+  safe: { flex: 1, backgroundColor: WALL },
   scroll: { flex: 1 },
   // flexGrow, NOT flex — `flex: 1` on a scroll content container pins it to the
   // viewport height and the view can never scroll.

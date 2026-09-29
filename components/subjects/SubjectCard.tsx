@@ -2,18 +2,22 @@
 // A SUBJECT IN HOME'S CAROUSEL — a large card, most of the screen wide, so the next
 // one peeks in from the right and says "there is more this way" without an arrow.
 //
-// The same parts as a Learn tile, laid out bigger: the drawing on its pale panel,
-// the full name, the one-line blurb, and a tag. Brilliant's home shelf is this shape.
+// The poster fills the top of the card edge to edge, in the subject's own colour,
+// with a label pinned to its corner (Imprint's course covers, Brilliant's shelf);
+// the name, the one-line blurb and a tag sit on the white foot under it. The owner
+// picked this over the small drawing on a pale panel on 2026-09-29.
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '@/components/ui/Card';
 import { C } from '@/constants/design';
 import { lipOf } from '@/components/shared/tone';
 import type { Subject } from '@/data/subjects';
-import SubjectArt from './SubjectArt';
-import { sceneTones } from './subjectScenes';
-import { DoneTag, SoonTag } from './tag';
-import { CARD_PAD, CARD_TITLE } from './tileLayout';
+import Poster from './Poster';
+import { ArtBadge, DoneTag, SoonTag } from './tag';
+import { CARD_PAD, CARD_TITLE, cardArtHeight } from './tileLayout';
+
+/** The card face's own border, each side (Card). */
+const BORDER = 2;
 
 export default function SubjectCard({
   subject, done, width, onPress,
@@ -23,23 +27,21 @@ export default function SubjectCard({
   width: number;
   onPress: () => void;
 }) {
-  const t = sceneTones(subject.hue);
   const soon = subject.status === 'soon';
-  const inner = width - 2 * CARD_PAD;
-  const panelH = Math.round(inner * 0.66);
   return (
     <Card pad={0} onPress={onPress} ledge={lipOf(subject.hue)}
       accessibilityLabel={`Open ${subject.name}${soon ? ', coming soon' : ''}`}
       containerStyle={{ width }}>
-      <View style={{ padding: CARD_PAD }}>
-        <View style={[styles.panel, { backgroundColor: t.tile, height: panelH }]}>
-          <SubjectArt art={subject.slug} hue={subject.hue} size={panelH - 10} />
-        </View>
+      <View>
+        <Poster art={subject.slug} hue={subject.hue} width={width - 2 * BORDER} height={cardArtHeight(width)} style={styles.poster} />
+        <ArtBadge label={soon ? 'SOON' : `${subject.courses.length} COURSES`} hue={subject.hue} />
+      </View>
+      <View style={styles.foot}>
         <Text style={styles.name} numberOfLines={2}>{subject.name}</Text>
         <Text style={styles.blurb} numberOfLines={2}>{subject.blurb}</Text>
         <View style={styles.tagRow}>
           {soon ? <SoonTag /> : done > 0 ? <DoneTag done={done} /> : (
-            <Text style={styles.start}>{subject.courses.length} COURSES · START HERE</Text>
+            <Text style={styles.start}>START HERE</Text>
           )}
         </View>
       </View>
@@ -48,10 +50,12 @@ export default function SubjectCard({
 }
 
 const styles = StyleSheet.create({
-  panel: { borderRadius: 14, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  // The face's radius less its border, so the poster's corners sit inside the rule.
+  poster: { borderTopLeftRadius: 14, borderTopRightRadius: 14 },
+  foot: { padding: CARD_PAD, paddingTop: 12 },
   name: {
     fontFamily: CARD_TITLE.family, fontSize: CARD_TITLE.fontSize, lineHeight: CARD_TITLE.lineHeight,
-    color: C.ink, marginTop: 12,
+    color: C.ink,
   },
   blurb: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13.5, lineHeight: 19,

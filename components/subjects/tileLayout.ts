@@ -31,14 +31,40 @@ export const PILL = { fontSize: 9, letterSpacing: 0.8, padX: 7 } as const;
 export const BRANCH_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 18, lineHeight: 22 } as const;
 /** How many lines a branch card gives its name: "Political Philosophy" needs two on a narrow phone. */
 export const BRANCH_NAME_LINES = 2;
-/** A branch card's drawing, per phone width. */
+/**
+ * A branch card's poster: a panel flush with the card's left edge, the card's full
+ * height (BRANCH_CARD_H), this wide.
+ */
 export function branchArt(screenW: number): number {
-  return screenW < 360 ? 72 : WIDE_ART - 16;
+  return screenW < 360 ? 80 : 112;
 }
-/** The room a branch card leaves its words: the page less padding, art, gaps and arrow. */
+/** A branch card's height — two lines of name, two of description and the foot. */
+export const BRANCH_CARD_H = 132;
+/** The card's own 2px border, each side (Card's face). */
+const CARD_BORDER = 2;
+/** The room a branch card leaves its words: the page less the poster, gaps, arrow and borders. */
 export function branchTextWidth(screenW: number): number {
-  return screenW - 2 * PAGE_PAD - 2 * TILE_PAD - branchArt(screenW) - 2 * TILE_PAD - 12;
+  return screenW - 2 * PAGE_PAD - branchArt(screenW) - 3 * TILE_PAD - 12 - 2 * CARD_BORDER;
 }
+
+// ── THE POSTERS' BOXES (2026-09-29) ──────────────────────────────────────────
+// The art fills the top of every card, edge to edge (posters.ts). Each height is a
+// share of the card's width, so the poster keeps one shape on every phone.
+
+/** A Home carousel card's poster height. */
+export function cardArtHeight(cardW: number): number {
+  return Math.round(cardW * 0.64);
+}
+/** A Learn grid tile's poster height. */
+export function tileArtHeight(tileW: number): number {
+  return Math.round(tileW * 0.7);
+}
+/** The wide (Philosophy) Learn tile's poster height. */
+export function heroArtHeight(w: number): number {
+  return Math.round(w * 0.5);
+}
+/** A subject page's masthead poster height. */
+export const MAST_ART_H = 170;
 
 /** A grid tile's side, two to a row. */
 export function tileSize(screenW: number): number {

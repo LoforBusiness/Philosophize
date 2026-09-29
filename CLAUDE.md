@@ -8100,11 +8100,29 @@ Technology and History & Politics are announced and empty. Spec:
 - **A coming-soon subject is a road, not a dead tile**: `ComingSoonRoad` is
   `BranchWorld` with a hidden start stop and a `signpost` stop; the stickman
   walks to a COMING SOON sign and stands there.
-- **The drawings are `components/subjects/subjectScenes.ts`** — 13 still lifes
-  (7 subjects, 6 branches) built from the lesson objects' part roles, one outline
-  per object LAYER, approved by the owner on `npm run sheet:subjects`. It is not
-  `subjectArt.ts` because on a case-insensitive disk that and `SubjectArt.tsx`
-  are one file.
+- **The drawings are POSTERS now (`components/subjects/posters.ts`, 2026-09-29, same
+  day).** The owner: the subject cards were *"pretty boring … you could get more
+  reference photos"*, and the pure-white Home and Learn *"not very exciting"*. Nine
+  apps' store screenshots were pulled and read (Brilliant, Imprint, Headway, Duolingo,
+  Blinkist, Elevate, Khan Academy, Deepstash, Mimo), and they agree on two things:
+  **the art fills the card** — a saturated ground in the course's colour with one lit
+  object, not a small drawing on a pale panel — and **no page is plain white**. Three
+  grounds were mocked with the real posters and the owner picked the doodle wallpaper.
+  - 13 posters, each an SVG string built for its exact box: the 200×150 frame grows to
+    the box's shape (sideways, or upward after trimming the empty sides to `CORE`), so
+    nothing is cropped or stretched. `Poster.tsx` paints it with `SvgXml`. **This is
+    SVG on purpose** — curves the View primitives cannot draw — so each poster is a
+    box-sized bitmap (§19): the Home shelf is windowed to three cards, and the Learn
+    grid's tiles are small. Worth a `dumpsys gfxinfo` look on the phone.
+  - Every object drawn against a Commons reference (`npm run ref`); economics is a
+    supply-and-demand board and coins because ethics owns the balance scale.
+  - **The wallpaper is a 132dp TILE** (`npm run make:wallpaper` → `assets/images/wallpaper/`,
+    `DoodleGround.tsx`), never a screen-sized drawing — §19's GPU rule. Its colours
+    are `WALL`/`WALL_DOODLE` in tone.ts, a green-grey, never beige. On web an image
+    with no width and height takes its source's size whatever its insets say, so the
+    tile was drawn once until its size was stated.
+  - `npm run sheet:subjects` draws every poster at the card, tile and masthead shape;
+    `check:subjects` §5 holds that every box keeps every object in view.
 - **`npm run check:subjects`** holds the list, the colours (tame, clear of the
   verdict wedge, ΔE ≥ 11.4 apart), every drawing inside its box, no hex in
   `components/subjects/`, every name/pill/course line measured against the real

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ImageBackground, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +14,8 @@ import { getSubject, COURSE_LINE } from '@/data/subjects';
 import { getBranchBySlug, branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { C } from '@/constants/design';
+import DoodleGround from '@/components/shared/DoodleGround';
+import { WALL } from '@/components/shared/tone';
 import { SCRIM_TOP, SCRIM_MID, SCRIM_DEEP, ArtCream, ArtSoft, ArtFaint } from '@/constants/branchArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,6 +45,7 @@ export default function SubjectScreen() {
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const introSeen = useUserDataStore((s) => s.seenProfessorIntro);
   const done = useMemo(() => branchCountsFromUnits(lessonsByUnit), [lessonsByUnit]);
+  const { width } = useWindowDimensions();
 
   // BACK GOES WHERE THE READER CAME FROM. Opened from Home's carousel, the page sits
   // on the Learn grid (it was pushed anchored, so the Learn tab is never stranded),
@@ -60,7 +63,7 @@ export default function SubjectScreen() {
 
   if (!subject) {
     return (
-      <ScreenTransition bg={C.paper}>
+      <ScreenTransition bg={WALL}>
         <SafeAreaView style={styles.safe} edges={['top']}>
           <View style={styles.pad}>
             <Text style={styles.missing} onPress={() => router.back()}>This subject was not found. Go back</Text>
@@ -71,11 +74,12 @@ export default function SubjectScreen() {
   }
 
   return (
-    <ScreenTransition bg={C.paper}>
+    <ScreenTransition bg={WALL}>
       <SafeAreaView style={styles.safe} edges={['top']}>
+        <DoodleGround />
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.pad}>
-            <SubjectMasthead subject={subject} onBack={back} />
+            <SubjectMasthead subject={subject} width={width - 2 * PAGE_PAD} onBack={back} />
           </View>
 
           {subject.status === 'soon' ? (
@@ -145,7 +149,7 @@ export default function SubjectScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.paper },
+  safe: { flex: 1, backgroundColor: WALL },
   scroll: { paddingBottom: 40 },
   pad: { paddingHorizontal: PAGE_PAD },
   section: {

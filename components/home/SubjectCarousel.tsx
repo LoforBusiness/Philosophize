@@ -42,6 +42,13 @@ export default function SubjectCarousel({ pad, style }: { pad: number; style?: o
         showsHorizontalScrollIndicator={false}
         snapToOffsets={offsets}
         decelerationRate="fast"
+        // WINDOWED. Each card's poster is an <Svg> painted into a bitmap the size of
+        // its box (§19's GPU rule), and Home is built for the whole session — so only
+        // the card on screen and its neighbours are mounted, never all seven.
+        initialNumToRender={2}
+        maxToRenderPerBatch={2}
+        windowSize={3}
+        removeClippedSubviews
         // The shelf runs to the screen's edges, so a card slides out from under the
         // page's own margin rather than being cut off at it.
         style={{ marginHorizontal: -pad, marginTop: 14 }}

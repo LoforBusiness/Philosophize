@@ -266,6 +266,17 @@ export const EMBER = '#D35E36';
 /** Sage — a tame fill: a progress track, a quiet panel. 1.76:1 on paper. */
 export const SAGE = '#C0C29D';
 
+/**
+ * THE WALLPAPER (2026-09-29): the ground Home, Learn and a subject page sit on — paper
+ * leaned a little toward the teal and the olive, so it is a cool green-grey and never
+ * a beige (§7). The owner picked it over pure white and over a dotted grid, from
+ * references (Brilliant, Imprint, Duolingo, Deepstash) that all put their cards on a
+ * coloured or textured ground rather than a white one.
+ */
+export const WALL = mix(mix(PAPER, TEAL, 0.05), OLIVE, 0.04);
+/** The line of the wallpaper's doodles — a step toward DEEP, faint on purpose. */
+export const WALL_DOODLE = mix(WALL, DEEP, 0.12);
+
 /** Sand a step down: the floor of a sand recess, and a hairline on sand. */
 export const SAND_SHADE = mix(SAND, INK, 0.1);
 /** Sand a step up: the lit edge of a sand surface. */

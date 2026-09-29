@@ -1,19 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ONE OF PHILOSOPHY'S COURSES ON ITS SUBJECT PAGE — a branch, which opens its road.
 //
-// It replaces the photographed branch card the Learn tab used to draw (the owner
-// asked for the branches to be redrawn in the same language as the subjects, so the
-// whole flow is one look). The branch keeps its own hue from design.ts: the drawing's
-// panel and the ledge are that colour, the words are ink on white.
+// The branch's poster (posters.ts) fills the card's left side, flush with its edge
+// and the card's full height, in the branch's own hue from design.ts; the words are
+// ink on the white face beside it. The same construction as the subject tiles, turned
+// on its side, so a list of six reads as a shelf of covers.
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import Card from '@/components/ui/Card';
 import { C, BRANCH, type BranchKey } from '@/constants/design';
 import { lipOf } from '@/components/shared/tone';
-import SubjectArt from './SubjectArt';
-import { sceneTones } from './subjectScenes';
+import Poster from './Poster';
 import { DoneTag } from './tag';
-import { TILE_PAD, BRANCH_TITLE, BRANCH_NAME_LINES, branchArt } from './tileLayout';
+import { TILE_PAD, BRANCH_TITLE, BRANCH_NAME_LINES, BRANCH_CARD_H, branchArt } from './tileLayout';
+
+/** The card face's own border, each side (Card). */
+const BORDER = 2;
 
 export default function BranchCard({
   slug, name, desc, units, done, onPress,
@@ -26,15 +28,12 @@ export default function BranchCard({
   onPress: () => void;
 }) {
   const hue = BRANCH[slug];
-  const t = sceneTones(hue);
   const { width } = useWindowDimensions();
   const art = branchArt(width);
   return (
     <Card pad={0} onPress={onPress} ledge={lipOf(hue)} accessibilityLabel={`Open ${name}`}>
       <View style={styles.row}>
-        <View style={[styles.panel, { backgroundColor: t.tile, width: art, height: art }]}>
-          <SubjectArt art={slug} hue={hue} size={art - 8} />
-        </View>
+        <Poster art={slug} hue={hue} width={art} height={BRANCH_CARD_H - 2 * BORDER} style={styles.poster} />
         <View style={styles.text}>
           <Text style={styles.name} numberOfLines={BRANCH_NAME_LINES}>{name}</Text>
           <Text style={styles.desc} numberOfLines={2}>{desc}</Text>
@@ -50,8 +49,9 @@ export default function BranchCard({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', padding: TILE_PAD, gap: TILE_PAD },
-  panel: { borderRadius: 12, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: TILE_PAD, paddingRight: TILE_PAD, height: BRANCH_CARD_H - 2 * BORDER },
+  // The face's radius less its border, so the poster's corners sit inside the rule.
+  poster: { borderTopLeftRadius: 14, borderBottomLeftRadius: 14 },
   text: { flex: 1 },
   name: { fontFamily: BRANCH_TITLE.family, fontSize: BRANCH_TITLE.fontSize, lineHeight: BRANCH_TITLE.lineHeight, color: C.ink },
   desc: {

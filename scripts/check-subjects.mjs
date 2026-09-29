@@ -65,39 +65,40 @@ ok(S.getSubject('no-such-subject') === undefined, 'an unknown slug is undefined,
 ok(S.subjectOfBranch('ethics')?.slug === 'philosophy', 'a branch knows its subject');
 ok(S.subjectOfBranch('no-such-branch') === undefined, 'an unknown branch has no subject');
 
-head('§5 · the drawings');
-// Every subject and every branch has a scene; every part of every scene stays inside
-// the 100-box it is authored in (a part outside it is cropped by the tile silently);
-// and every scene is a still life of at least two objects, with its spark.
-const A = await import('@/components/subjects/subjectScenes');
-for (const s of S.SUBJECTS) ok(!!A.ART[s.slug], `${s.slug} has a drawing`);
-for (const b of Object.keys(D.BRANCH)) ok(!!A.ART[b], `branch ${b} has a drawing`);
-// A shape's real reach: a bar by its caps, anything else by its rotated half-extents
-// (a box turned θ reaches |w cos θ|/2 + |h sin θ|/2 across) — not by its longest side,
-// which reported a wide briefcase as 28 units below its own tile.
-const extent = (p) => {
-  if (p.k === 'bar') {
-    return [Math.min(p.x1, p.x2) - p.t / 2, Math.min(p.y1, p.y2) - p.t / 2, Math.max(p.x1, p.x2) + p.t / 2, Math.max(p.y1, p.y2) + p.t / 2];
-  }
-  const r = ((p.rot || 0) * Math.PI) / 180;
-  const hx = Math.abs((p.w / 2) * Math.cos(r)) + Math.abs((p.h / 2) * Math.sin(r));
-  const hy = Math.abs((p.w / 2) * Math.sin(r)) + Math.abs((p.h / 2) * Math.cos(r));
-  return [p.x - hx, p.y - hy, p.x + hx, p.y + hy];
-};
-for (const [key, sc] of Object.entries(A.ART)) {
-  const laid = A.artIn(key, 0, 0, 100, 100);
-  let worst = 0;
-  for (const layer of laid.layers) for (const p of layer) {
-    const [x0, y0, x1, y1] = extent(p);
-    worst = Math.max(worst, -x0, -y0, x1 - 100, y1 - 100);
-  }
-  ok(worst <= 0.5, `${key} stays inside its box`, worst > 0.5 ? `${worst.toFixed(1)} units out` : '');
-  ok(sc.layers.length >= 2, `${key} is a still life of at least two objects`, `${sc.layers.length} layer(s)`);
-  ok(sc.spark && sc.spark.s > 0, `${key} carries its spark`);
+head('§5 · the posters');
+// Every subject and every branch has a poster (posters.ts); each is ONE svg in its own
+// hue carrying the ember spark; and the viewBox grows to any box so every object in
+// the 200×150 frame (CORE sideways) is inside it — never cropped, never stretched
+// (a slice crop took the bust's head off in the first mockup).
+const P = await import('@/components/subjects/posters');
+const TONE = await import('@/components/shared/tone');
+for (const s of S.SUBJECTS) ok(P.POSTER_KEYS.includes(s.slug), `${s.slug} has a poster`);
+for (const b of Object.keys(D.BRANCH)) ok(P.POSTER_KEYS.includes(b), `branch ${b} has a poster`);
+const hueFor = (k) => S.getSubject(k)?.hue ?? D.BRANCH[k];
+for (const k of P.POSTER_KEYS) {
+  const xml = P.posterXml(k, hueFor(k), 169, 118);
+  ok((xml.match(/<svg/g) ?? []).length === 1 && xml.trim().endsWith('</svg>'), `${k} is one svg document`);
+  ok(xml.includes(`fill="${hueFor(k)}"`), `${k} is struck in its own hue`);
+  ok(xml.includes(TONE.EMBER), `${k} carries the ember spark`);
+  ok(!/NaN|undefined/.test(xml), `${k} has no NaN or undefined in it`);
 }
-const wide = A.artIn('logic', 0, 0, 200, 100);
-ok(Math.abs(wide.spark.s - A.ART.logic.spark.s) < 1e-6 && Math.abs(wide.spark.x - (50 + A.ART.logic.spark.x)) < 1e-6,
-  'a wide box lays a drawing into its largest SQUARE, centred, never stretched');
+{
+  const L5 = await import('@/components/subjects/tileLayout');
+  const boxes = [];
+  for (const W of [320, 360, 390, 430]) {
+    const card = L5.cardWidth(W); const tile = L5.tileSize(W); const page = W - 2 * L5.PAGE_PAD;
+    boxes.push([card - 4, L5.cardArtHeight(card)], [tile - 4, L5.tileArtHeight(tile)], [page - 4, L5.heroArtHeight(page)],
+      [page - 4, L5.MAST_ART_H], [L5.branchArt(W), L5.BRANCH_CARD_H - 4]);
+  }
+  for (const [w, h] of boxes) {
+    const [x, y, vw, vh] = P.posterViewBox(w, h);
+    // Sideways it must hold CORE (the band every object stays in); up and down, all of it.
+    const holds = x <= P.CORE.x0 + 0.01 && y <= 0.01 && x + vw >= P.CORE.x1 - 0.01 && y + vh >= P.FRAME.h - 0.01;
+    const same = Math.abs(vw / vh - w / h) < 1e-6;
+    const floorKept = Math.abs(y + vh - P.FRAME.h) < 0.01 || Math.abs(y) < 0.01;
+    ok(holds && same && floorKept, `a ${w}×${h} box holds the whole frame at the box's own shape`, `viewBox ${[x, y, vw, vh].map((n) => n.toFixed(1)).join(' ')}`);
+  }
+}
 
 head('§6 · every name fits its box, on the narrow phone too');
 // Measured against the real .ttf (scripts/lib/ttfwidth.mjs), because a character
@@ -113,9 +114,10 @@ const fitsIn = (text, px, maxW, maxLines) => {
 };
 for (const W of [320, 360, 390, 430]) {
   const tile = L.tileSize(W);
-  const inner = tile - 2 * L.TILE_PAD;
-  const card = L.cardWidth(W) - 2 * L.CARD_PAD;
-  const wideText = W - 2 * L.PAGE_PAD - 2 * L.TILE_PAD - L.WIDE_ART - L.TILE_PAD;
+  // Every card face has a 2px border inside its width (Card), so the words measure from inside it.
+  const inner = tile - 4 - 2 * L.TILE_PAD;
+  const card = L.cardWidth(W) - 4 - 2 * L.CARD_PAD;
+  const wideText = W - 2 * L.PAGE_PAD - 4 - 2 * (L.TILE_PAD + 2);
   for (const s of S.SUBJECTS) {
     const t = fitsIn(L.tileTitle(s, tile), L.TILE_TITLE.fontSize, inner, 2);
     ok(t.ok, `${W}dp · ${s.slug}'s grid tile name`, t.why);

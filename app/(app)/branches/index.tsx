@@ -9,6 +9,8 @@ import { SUBJECTS, type Subject } from '@/data/subjects';
 import { branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { C } from '@/constants/design';
+import DoodleGround from '@/components/shared/DoodleGround';
+import { WALL } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LEARN — EVERY SUBJECT, AS A GRID (2026-09-29).
@@ -47,8 +49,9 @@ export default function LearnScreen() {
   const open = (s: Subject) => router.push(`/(app)/branches/subject/${s.slug}` as never);
 
   return (
-    <ScreenTransition bg={C.paper}>
+    <ScreenTransition bg={WALL}>
       <SafeAreaView style={styles.safe} edges={['top']}>
+        <DoodleGround />
         <View style={styles.topBar}>
           <Text style={styles.brand}>ASHMERE · LEARN</Text>
         </View>
@@ -79,7 +82,7 @@ export default function LearnScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.paper },
+  safe: { flex: 1, backgroundColor: WALL },
   topBar: { paddingHorizontal: PAGE_PAD, paddingTop: 4, paddingBottom: 8 },
   brand: { fontFamily: 'Inter_500Medium', fontSize: 11, color: C.inkSoft, letterSpacing: 2 },
   scroll: { paddingHorizontal: PAGE_PAD, paddingBottom: 40 },

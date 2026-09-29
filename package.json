@@ -217,6 +217,7 @@
     "sheet:professor": "node --import ./scripts/lib/register.mjs scripts/sheet-professor.mjs",
     "check:paywall-flow": "node scripts/check-paywall-flow.mjs",
     "check:subjects": "node --import ./scripts/lib/register.mjs scripts/check-subjects.mjs",
+    "make:wallpaper": "node scripts/make-wallpaper.mjs",
     "sheet:subjects": "node scripts/sheet-subjects.mjs"
   },
   "overrides": {
