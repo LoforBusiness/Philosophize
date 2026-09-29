@@ -104,10 +104,13 @@ try {
   // not watched it (owner, 2026-09-25: "make sure the home tab still has everything
   // it had before").
   ok(await open('case=homefull&pass=free'), 'the whole Home screen mounted');
-  await until(`/DAILY REFLECTION/.test(document.body.innerText || '')`, 80);
+  // Home is three things since 2026-09-29 (the move to seven subjects): the
+  // masthead, Quick Start and the SUBJECTS shelf. The daily reflection, Thinker of
+  // the Day and the habit panel went at the owner's request, so they are not asked for.
+  await until(`/SUBJECTS/.test(document.body.innerText || '')`, 80);
   await wait(2500);
   t = await text();
-  for (const part of ['QUICK START · INTRO', 'DAILY REFLECTION', 'THINKER OF THE DAY', 'YOUR STREAK']) {
+  for (const part of ['QUICK START · INTRO', 'SUBJECTS', 'Philosophy', 'Psychology']) {
     ok(t.includes(part), `Home still shows ${part}`, t.includes(part) ? '' : t.slice(0, 160));
   }
   if (process.env.FLOW_SHOTS) {
@@ -120,9 +123,11 @@ try {
   await wait(3000);
   ok(!(await has('professor-intro')), 'and Home does not start the film by itself');
 
-  ok(await open('case=learn&pass=free'), 'Learn mounted');
+  // The intro card lives on the PHILOSOPHY PAGE since 2026-09-29 — the Learn tab is a
+  // grid of subjects, and the card moved with the six branches it opens.
+  ok(await open('case=subject&subjectSlug=philosophy&pass=free'), 'the Philosophy page mounted');
   await until(`!!document.getElementById('learn-intro')`, 60);
-  ok(await has('learn-intro'), 'Learn shows the intro card');
+  ok(await has('learn-intro'), 'the Philosophy page shows the intro card');
   await wait(1200);
   await snap('learn-door');
   const branches = await ev(`[...document.querySelectorAll('[aria-label]')].filter((n) => /^Open /.test(n.getAttribute('aria-label'))).length`);
@@ -157,10 +162,14 @@ try {
   await wait(1500);
   t = await text();
   ok(!t.includes('INTRO') && t.includes('START LESSON'), 'Quick Start names a lesson', t.slice(0, 120));
-  ok(await open('case=learn&seen=1&pass=paid'), 'Learn mounted');
+  ok(await open('case=subject&subjectSlug=philosophy&seen=1&pass=paid'), 'the Philosophy page mounted');
   await until(`[...document.querySelectorAll('[aria-label]')].some((n) => /^Open /.test(n.getAttribute('aria-label')))`, 60);
   const six = await ev(`[...document.querySelectorAll('[aria-label]')].filter((n) => /^Open /.test(n.getAttribute('aria-label'))).length`);
-  ok(six === 6 && !(await has('learn-intro')), 'Learn shows the six branches and no intro', `${six} branch cards`);
+  ok(six === 6 && !(await has('learn-intro')), 'the Philosophy page shows the six branches and no intro', `${six} branch cards`);
+  ok(await open('case=learn&seen=1&pass=paid'), 'Learn mounted');
+  await until(`!!document.getElementById('learn-grid')`, 60);
+  const tiles = await ev(`[...document.querySelectorAll('[aria-label]')].filter((n) => /^Open /.test(n.getAttribute('aria-label'))).length`);
+  ok(tiles === 7, 'and Learn shows all seven subjects', `${tiles} tiles`);
 
   // ── 5 ─────────────────────────────────────────────────────────────────────
   console.log('\n5 · seen, free, a lesson: the paywall');

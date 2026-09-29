@@ -13,7 +13,7 @@
 
 ## 1. Project Overview
 
-**Ashmere** is a mobile philosophy learning app for iOS and Android. It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
+**Ashmere** is a mobile learning app for iOS and Android — philosophy first, and since 2026-09-29 a home for SEVEN subjects (§23). It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
 
 **Target audience:** Ages 16–35, curious beginners with no prior philosophy background.
 
@@ -111,14 +111,15 @@ Philosophize/
 │   ├── sign-in.tsx              # Modal presentation
 │   ├── thinker/[id].tsx         # Deep-link target (philosophize://thinker/<id>)
 │   └── (app)/                   # Authenticated tab shell (5 tabs)
-│       ├── _layout.tsx          # Tabs: Home · Learn · Thinkers · Pass · Profile
+│       ├── _layout.tsx          # Tabs: Home · Learn · Pass · Profile (FOUR since
+│       │                        #   2026-09-29 — Thinkers went with the move to
+│       │                        #   seven subjects, §23)
 │       │                        #   animation:'fade' cross-dissolve, 340ms (§19)
 │       │                        #   INSIGHTS WAS THE SIXTH and went on 2026-09-15
 │       ├── index.tsx            # Home: reflection → QuickStart → actions → streak
 │       ├── branches/            # _layout (fade_from_bottom push) → index (Learn)
 │       │                        #   → [branchSlug] (units accordion)
 │       │                        #   → [pathSlug]/lesson/[lessonId]
-│       ├── philosophers/        # "Thinkers" directory (+ its own stack _layout)
 │       ├── profile/             # Streak · YOUR PROGRESS (the condensed stats) ·
 │       │                        #   rank ladder · bio · saved quotes · badges
 │       ├── settings.tsx         # Hidden route. 9 sections down a LABELLED rail:
@@ -1100,7 +1101,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-eight** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-nine** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1111,7 +1112,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-professor` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-professor` · `check-subjects` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1311,7 +1312,9 @@ they belong to, so the rule book has them and this file did not:
   the pin they held handing over to the pin they just earned, a three-badge
   profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
 - **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
-  lesson, Thinkers, **Pass**, Profile, Settings, paywall, widget, saved quotes.
+  lesson, **Pass**, Profile, Settings, paywall, widget. **FOUR tabs since
+  2026-09-29** — the Thinkers tab and saved quotes went with the move to seven
+  subjects (§23).
   **FIVE tabs since 2026-09-15**, when the owner asked for the app to be
   simpler — "there's too much information, there's too many statistics … I want
   the user to be focused on the lessons." Insights was the sixth and its readings
@@ -2459,7 +2462,9 @@ and fails on any digit left in literal text.
 > to be re-argued is whether a sixth destination earns the room, and the streak
 > still does not: it is already one tap from every screen that shows the count.
 
-**Free tier** — since 2026-09-25, everything but the lessons: all 341 thinkers and
+**Free tier** — (since 2026-09-29 the Pass chart's free tiles are ranks, badges and
+streaks only; thinkers, quotations and quizzes left with the Thinkers tab, §23.)
+Since 2026-09-25, everything but the lessons: all 341 thinkers and
 their quotations and quizzes, the full streak, XP, rank and badge systems, Quote of
 the Day and the widget. The lessons need the Pass or its trial.
 
@@ -8059,3 +8064,52 @@ Consequences to remember:
    with colour `#1A1A1A`. Without it Android silhouettes the launcher icon, which
    for a feather on white comes out as a blob. It went in *with* build 19 rather
    than just before an OTA, which is the rule that made it safe.
+
+---
+
+## 23. Seven Subjects (2026-09-29)
+
+> *"I have been thinking and decided I want to go all in on different subjects …
+> a similar design … as how Brilliant does theirs."*
+
+**Ashmere teaches seven subjects now.** Philosophy is live; Psychology, Personal
+Growth & Self-Help, Business & Leadership, Economics & Finance, Science &
+Technology and History & Politics are announced and empty. Spec:
+`docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
+
+- **`data/subjects.ts` is the one list.** Name, short name, blurb, hue, status,
+  courses. Home's carousel, the Learn grid and every subject page read it; a new
+  subject is one entry. Philosophy's courses are its six branches.
+- **The Learn route is still `branches`.** `/branches` is the subject grid,
+  `/branches/subject/[subjectSlug]` a subject page (the static segment outranks
+  `[branchSlug]`), and a branch road is where it always was.
+- **The professor's intro lives on the Philosophy page**, above the six branches,
+  which open after it. `leaveIntro('learn')` goes back to that page.
+- **Every entry from outside the Learn stack still has one door** (`lessonNav`):
+  `openSubject(slug, 'home')` from Home's carousel, and `backFromBranch` —
+  `dismissTo` the road's subject page — from a road however it was reached.
+  Replayed against the real router: Learn › Philosophy › Ethics › back › back;
+  a road landed on from Home › back › back; Home › Psychology › back returns Home
+  and leaves Learn on its grid. `check:nav` holds both.
+- **A coming-soon subject is a road, not a dead tile**: `ComingSoonRoad` is
+  `BranchWorld` with a hidden start stop and a `signpost` stop; the stickman
+  walks to a COMING SOON sign and stands there.
+- **The drawings are `components/subjects/subjectScenes.ts`** — 13 still lifes
+  (7 subjects, 6 branches) built from the lesson objects' part roles, one outline
+  per object LAYER, approved by the owner on `npm run sheet:subjects`. It is not
+  `subjectArt.ts` because on a case-insensitive disk that and `SubjectArt.tsx`
+  are one file.
+- **`npm run check:subjects`** holds the list, the colours (tame, clear of the
+  verdict wedge, ΔE ≥ 11.4 apart), every drawing inside its box, no hex in
+  `components/subjects/`, every name/pill/course line measured against the real
+  `.ttf` at 320–430dp, and that saved quotes are gone from Profile, Settings,
+  Home, the lesson quote card and the Pass chart. The 320dp render found three
+  things the first draft of that check passed — a wrapping pill, unequal row
+  heights, a clipped branch name — which is why each is a rule now.
+
+**Phase 2, not done:** quotes and tappable names inside lessons, quote/thinker
+badges and XP, the Quote-of-the-Day widget's content (it is compiled into the
+binary; its thinker link now opens the card over Home), per-subject intros, and
+the orphaned `HabitCard.tsx` / `DailyReflection.tsx`, kept only because
+`check-ui` and `check-thinkers` read them. The store still holds
+`savedQuotes` and `philosopherViews` so nothing a reader saved was destroyed.

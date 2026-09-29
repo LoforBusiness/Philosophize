@@ -2,8 +2,10 @@
 // Written and removed by scripts/check-paywall-flow.mjs; check-routes.mjs blocks a
 // build if one is left behind.
 //
-//   ?case=home|homefull|learn|intro|lesson   which real screen to draw
-//                                   (home = the Quick Start card alone; homefull = all of Home)
+//   ?case=home|homefull|learn|subject|intro|lesson   which real screen to draw
+//                                   (home = the Quick Start card alone; homefull = all of Home;
+//                                    subject = a subject page, ?subjectSlug=philosophy — where the
+//                                    intro card and the six branches live since 2026-09-29)
 //   ?seen=1                         the professor's intro already watched
 //   ?pass=free|trial|paid           the reader's plan, seeded the way the store holds it
 //   ?lessonId=…                     for case=lesson (the route reads it from here)
@@ -12,6 +14,7 @@ import { View } from 'react-native';
 import QuickStartCard from '@/components/home/QuickStartCard';
 import HomeScreen from '@/app/(app)/index';
 import LearnScreen from '@/app/(app)/branches/index';
+import SubjectScreen from '@/app/(app)/branches/subject/[subjectSlug]';
 import IntroScreen from '@/app/(app)/intro';
 import LessonScreen from '@/app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -56,6 +59,7 @@ export default function PreviewFlow() {
       {c === 'home' ? <View style={{ padding: 20 }}><QuickStartCard /></View>
         : c === 'homefull' ? <HomeScreen />
         : c === 'learn' ? <LearnScreen />
+        : c === 'subject' ? <SubjectScreen />
           : c === 'intro' ? <IntroScreen />
             : <LessonScreen />}
     </View>
