@@ -7,7 +7,7 @@
 // again at 96px, which is about what the Learn grid draws one at on a narrow phone. A
 // drawing that only reads when it is large is a drawing that does not read.
 //
-// It draws through `components/subjects/subjectArt.ts` itself — the same parts, the
+// It draws through `components/subjects/subjectScenes.ts` itself — the same parts, the
 // same role → fill mapping (`fillFor`), the same outline order as SubjectArt.tsx — so
 // what it shows is what the app draws, not a restatement of it.
 import fs from 'node:fs';
@@ -35,7 +35,7 @@ function loadWith(rel, deps = {}) {
 }
 const tone = loadWith('components/shared/tone.ts');
 const design = loadWith('constants/design.ts');
-const A = loadWith('components/subjects/subjectArt.ts', { '@/components/shared/tone': tone });
+const A = loadWith('components/subjects/subjectScenes.ts', { '@/components/shared/tone': tone });
 const S = loadWith('data/subjects.ts');
 
 const hueOf = (key) => S.getSubject(key)?.hue ?? design.BRANCH[key];

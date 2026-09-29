@@ -3,7 +3,7 @@
 //
 //   <SubjectArt art="science" hue={subject.hue} size={120} />
 //
-// `subjectArt.ts` says what a scene is MADE OF; this puts it on screen, the way
+// `subjectScenes.ts` says what a scene is MADE OF; this puts it on screen, the way
 // `ObjectArt` does for a lesson object: every object's BODY outlined as one union in
 // ink, then filled, then its marks on top — layer by layer, back to front, so an
 // object passing in front of another keeps its own edge.
@@ -18,7 +18,7 @@
 import { View, type ViewStyle } from 'react-native';
 import { Shapes, Outlined, type Part } from '@/components/lesson/cinematic/Silhouette';
 import type { ObjPart } from '@/components/lesson/cinematic/objects';
-import { artIn, fillFor, sceneTones, ART_LINE, GROUND_SLAB, type ArtKey } from './subjectArt';
+import { artIn, fillFor, sceneTones, ART_LINE, GROUND_SLAB, type ArtKey } from './subjectScenes';
 
 const isBody = (p: ObjPart) => p.role === 'mass' || p.role === 'face';
 

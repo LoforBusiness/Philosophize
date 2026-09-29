@@ -69,7 +69,7 @@ head('§5 · the drawings');
 // Every subject and every branch has a scene; every part of every scene stays inside
 // the 100-box it is authored in (a part outside it is cropped by the tile silently);
 // and every scene is a still life of at least two objects, with its spark.
-const A = await import('@/components/subjects/subjectArt');
+const A = await import('@/components/subjects/subjectScenes');
 for (const s of S.SUBJECTS) ok(!!A.ART[s.slug], `${s.slug} has a drawing`);
 for (const b of Object.keys(D.BRANCH)) ok(!!A.ART[b], `branch ${b} has a drawing`);
 // A shape's real reach: a bar by its caps, anything else by its rotated half-extents
@@ -98,6 +98,51 @@ for (const [key, sc] of Object.entries(A.ART)) {
 const wide = A.artIn('logic', 0, 0, 200, 100);
 ok(Math.abs(wide.spark.s - A.ART.logic.spark.s) < 1e-6 && Math.abs(wide.spark.x - (50 + A.ART.logic.spark.x)) < 1e-6,
   'a wide box lays a drawing into its largest SQUARE, centred, never stretched');
+
+head('§6 · every name fits its box, on the narrow phone too');
+// Measured against the real .ttf (scripts/lib/ttfwidth.mjs), because a character
+// count is not a width: "Personal Growth & Self-Help" is the long one, and §14 records
+// a product name clipping on a 320dp phone twice after passing at 390.
+const { loadFont, wrap } = await import('./lib/ttfwidth.mjs');
+const L = await import('@/components/subjects/tileLayout');
+const PF = loadFont('node_modules/@expo-google-fonts/playfair-display/700Bold/PlayfairDisplay_700Bold.ttf');
+const fitsIn = (text, px, maxW, maxLines) => {
+  const lines = wrap(text, px, maxW, PF);
+  const widest = Math.max(...lines.map((l) => PF.width(l, px)));
+  return { ok: lines.length <= maxLines && widest <= maxW, why: `${lines.length} line(s), widest ${widest.toFixed(0)} of ${maxW.toFixed(0)}` };
+};
+for (const W of [320, 360, 390, 430]) {
+  const tile = L.tileSize(W);
+  const inner = tile - 2 * L.TILE_PAD;
+  const card = L.cardWidth(W) - 2 * L.CARD_PAD;
+  const wideText = W - 2 * L.PAGE_PAD - 2 * L.TILE_PAD - L.WIDE_ART - L.TILE_PAD;
+  for (const s of S.SUBJECTS) {
+    const t = fitsIn(L.tileTitle(s, tile), L.TILE_TITLE.fontSize, inner, 2);
+    ok(t.ok, `${W}dp · ${s.slug}'s grid tile name`, t.why);
+    const c = fitsIn(s.name, L.CARD_TITLE.fontSize, card, 2);
+    ok(c.ok, `${W}dp · ${s.slug}'s carousel card name`, c.why);
+    const m = fitsIn(s.name, L.MAST_TITLE.fontSize, W - 2 * L.PAGE_PAD, 2);
+    ok(m.ok, `${W}dp · ${s.slug}'s masthead name`, m.why);
+  }
+  const live = S.SUBJECTS.filter((s) => s.status === 'live');
+  for (const s of live) {
+    const w = fitsIn(s.name, L.CARD_TITLE.fontSize, wideText, 1);
+    ok(w.ok, `${W}dp · ${s.slug}'s wide tile name`, w.why);
+  }
+}
+
+head('§7 · no colour is typed into a subject component');
+// The welcome screen kept a palette the app had replaced twice because its colours
+// were literals (§19). A subject's colour lives in data/subjects.ts and nowhere else.
+{
+  const fs = await import('node:fs');
+  const dir = 'components/subjects';
+  for (const f of fs.readdirSync(dir)) {
+    const src = fs.readFileSync(`${dir}/${f}`, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    const hits = src.match(/['"]#[0-9A-Fa-f]{3,8}['"]/g) ?? [];
+    ok(hits.length === 0, `${dir}/${f} types no hex colour`, hits.join(' '));
+  }
+}
 
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);
