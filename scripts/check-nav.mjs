@@ -175,6 +175,13 @@ if (fs.existsSync(NAV)) {
   if (!/export function backFromBranch\([\s\S]*?router\.dismissTo\(/.test(navSrc)) {
     door.push('lessonNav has no backFromBranch that dismisses to the subject page');
   }
+  // AND A PLAIN BACK WHEN THE SUBJECT PAGE IS DIRECTLY BELOW (final review): POP_TO
+  // rebuilds the found route's params, so dismissTo alone stripped `from=home` and
+  // Home → Philosophy → Ethics → back → back ended on the grid — or on an older road.
+  const bfb = /export function backFromBranch\([\s\S]*?\n\}/.exec(navSrc)?.[0] ?? '';
+  if (!/below/.test(bfb) || !/router\.back\(\)/.test(bfb)) {
+    door.push('backFromBranch does not pop one when its subject page is directly below — dismissTo alone drops that page\'s from=home');
+  }
 }
 {
   const BR = 'app/(app)/branches/[branchSlug]/index.tsx';

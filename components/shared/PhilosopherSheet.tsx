@@ -67,10 +67,6 @@ export default function PhilosopherSheet() {
   const openPhilosopher = useUIStore((s) => s.openPhilosopher);
 
   const recordView = useUserDataStore((s) => s.recordPhilosopherView);
-  const savedQuotes = useUserDataStore((s) => s.savedQuotes);
-  const toggleQuote = useUserDataStore((s) => s.toggleQuote);
-  const profileQuote = useUserDataStore((s) => s.profileQuote);
-  const setProfileQuote = useUserDataStore((s) => s.setProfileQuote);
   const quizScores = useUserDataStore((s) => s.quizScores);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const isPro = useSubscriptionStore((s) => s.isPro);
@@ -149,7 +145,6 @@ export default function PhilosopherSheet() {
 
   if (!visible) return null;
 
-  const savedIds = new Set(savedQuotes.map((q) => q.id));
   const facts = phil ? PHILOSOPHER_FACTS[phil.id] ?? [] : [];
   const quizAvailable = phil ? hasQuiz(phil.id) : false;
   const score = phil ? quizScores[phil.id] : undefined;
@@ -428,7 +423,10 @@ export default function PhilosopherSheet() {
                     with the words for the same line. The plate keeps them there
                     by construction. */}
                 <SectionHeading label="Quotes" />
-                <Text style={styles.quotesHint}>Bookmark to save · star to feature it on your profile.</Text>
+                {/* NO SAVE AND NO FEATURE (2026-09-29). Saved quotes and the
+                    profile's featured quote went with the move to seven subjects,
+                    so the bookmark and the star would write to a shelf no screen
+                    shows. QuotePlate draws neither without its handler. */}
                 {phil.quotes.map((q) => (
                   <QuotePlate
                     key={q.id}
@@ -437,25 +435,7 @@ export default function PhilosopherSheet() {
                     author={phil.name}
                     meta={phil.era}
                     eraGroup={stats?.era ?? null}
-                    saved={savedIds.has(q.id)}
-                    onToggleSave={() =>
-                      toggleQuote({
-                        id: q.id,
-                        text: q.text,
-                        author: phil.name,
-                        philosopherId: phil.id,
-                        branchSlugs: phil.branchSlugs,
-                        savedAt: Date.now(),
-                      })
-                    }
-                    featured={profileQuote?.id === q.id}
-                    onToggleFeature={() =>
-                      setProfileQuote(
-                        profileQuote?.id === q.id
-                          ? null
-                          : { id: q.id, text: q.text, author: phil.name, philosopherId: phil.id }
-                      )
-                    }
+                    saved={false}
                   />
                 ))}
               </View>
@@ -724,13 +704,6 @@ const styles = StyleSheet.create({
   },
   factText: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: Ink, lineHeight: 22 },
 
-  quotesHint: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: InkSoft,
-    marginTop: -4,
-    marginBottom: 14,
-  },
   // The plate owns everything else about a quote; the sheet owns only how far
   // apart they sit.
   quotePlate: { marginBottom: 12 },

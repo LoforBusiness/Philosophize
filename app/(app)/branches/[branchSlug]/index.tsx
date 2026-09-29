@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
-import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect, useNavigation } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView, AnimatePresence } from 'moti';
@@ -63,6 +63,9 @@ interface UnitModel {
 
 export default function BranchDetailScreen() {
   const { branchSlug } = useLocalSearchParams<{ branchSlug: string }>();
+  // The route under this road, read at the press: backFromBranch pops one when it is
+  // this road's subject page, so that page keeps its own params (from=home).
+  const navigation = useNavigation();
   const branch = getBranchBySlug(branchSlug);
   const hue = BRANCH[branchSlug as keyof typeof BRANCH] ?? C.HUE;
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
@@ -328,7 +331,14 @@ export default function BranchDetailScreen() {
       <SafeAreaView style={styles.safe} edges={['top']}>
         {/* Top bar */}
         <View style={styles.topBar}>
-          <Pressable onPress={() => backFromBranch(branch.slug)} hitSlop={10} style={styles.backRow}>
+          <Pressable
+            onPress={() => {
+              const st = navigation.getState();
+              backFromBranch(branch.slug, st ? (st.routes[st.index - 1] as { name: string; params?: object } | undefined) : undefined);
+            }}
+            hitSlop={10}
+            style={styles.backRow}
+          >
             <SketchIcon name="back" size={18} color={C.inkSoft} />
             <Text style={styles.brand}>{branch.name.toUpperCase()}</Text>
           </Pressable>

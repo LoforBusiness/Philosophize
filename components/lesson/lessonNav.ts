@@ -91,9 +91,22 @@ export function openSubject(slug: string, from?: 'home') {
  * replaces the ROAD with it: `[grid, road]` → `[grid, subject]`. Both leave the grid
  * underneath. What is replaced is the screen on top, never the list at the root, so
  * this is not the replace this file's header warns about.
+ *
+ * AND WHEN THE SUBJECT PAGE IS DIRECTLY BELOW, IT IS A PLAIN BACK — found by the
+ * final review and reproduced against the real router. `dismissTo` is POP_TO, which
+ * rebuilds the found route's params from the action, so it stripped the page's
+ * `from=home`: Home → Philosophy → Ethics → back → back ended on the Learn grid, and
+ * with an older road already in the stack, on THAT road. `below` is the route under
+ * the road (the screen passes its stack's `routes[index - 1]`); popping one keeps
+ * its params exactly as they were.
  */
-export function backFromBranch(branchSlug: string) {
+export function backFromBranch(branchSlug: string, below?: { name: string; params?: object }) {
   const subject = subjectOfBranch(branchSlug)?.slug ?? 'philosophy';
+  const params = (below?.params ?? {}) as { subjectSlug?: string };
+  if (below?.name === 'subject/[subjectSlug]' && params.subjectSlug === subject) {
+    router.back();
+    return;
+  }
   router.dismissTo(`/(app)/branches/subject/${subject}` as never);
 }
 

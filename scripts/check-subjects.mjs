@@ -183,6 +183,19 @@ head('§8 · quotes are not a feature outside lessons any more (2026-09-29)');
     'the in-app quote card\'s settings are gone from DEFAULT_SETTINGS, so sanitizeSettings prunes them from old installs (§22)');
   const kit = strip(fs.readFileSync('components/lesson/cinematic/cinematicKit.tsx', 'utf8'));
   ok(!/onToggleSave=/.test(kit), 'a lesson\'s quote card offers no save button');
+  // THE THINKER CARD TOO — found by the final review. The widget's link opens it over
+  // Home, and it still said "Bookmark to save · star to feature it on your profile"
+  // over two buttons whose results no screen shows any more.
+  const sheet = strip(fs.readFileSync('components/shared/PhilosopherSheet.tsx', 'utf8'));
+  ok(!/onToggleSave=|onToggleFeature=|Bookmark to save/.test(sheet),
+    'the thinker card offers no save or feature on its quotes');
+  // XP took the Quotes count's cell in Settings › Profile, and XP runs to five digits:
+  // at 320dp a cell is about 45pt and "12450" in Playfair Bold 22 is 55.8 (final
+  // review). The value must stay on one line and shrink to fit rather than break.
+  const settingsSrc = strip(fs.readFileSync('app/(app)/settings.tsx', 'utf8'));
+  const mini = /function MiniStat[\s\S]*?\n\}/.exec(settingsSrc)?.[0] ?? '';
+  ok(/<Text style=\{styles\.miniValue\}[^>]*numberOfLines=\{1\}[^>]*adjustsFontSizeToFit/.test(mini),
+    'a Settings stat value keeps to one line and shrinks to fit (XP runs to five digits)');
   const pass = strip(fs.readFileSync('lib/utils/passValue.ts', 'utf8'));
   ok(!/id: 'thinkers'|id: 'quotations'|id: 'quizzes'/.test(pass), 'the Pass chart\'s free tiles no longer name thinkers, quotations or quizzes');
 }

@@ -495,7 +495,9 @@ function ProfileSection() {
 function MiniStat({ value, label }: { value: number; label: string }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={styles.miniValue}>{value}</Text>
+      {/* One line, shrinking to fit: XP (since 2026-09-29, where Quotes stood) runs
+          to five digits, and a cell here is about 45pt wide on a 320dp phone. */}
+      <Text style={styles.miniValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{value}</Text>
       <Text style={styles.miniLabel}>{label}</Text>
     </View>
   );

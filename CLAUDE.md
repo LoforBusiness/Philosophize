@@ -8088,9 +8088,15 @@ Technology and History & Politics are announced and empty. Spec:
 - **Every entry from outside the Learn stack still has one door** (`lessonNav`):
   `openSubject(slug, 'home')` from Home's carousel, and `backFromBranch` —
   `dismissTo` the road's subject page — from a road however it was reached.
-  Replayed against the real router: Learn › Philosophy › Ethics › back › back;
-  a road landed on from Home › back › back; Home › Psychology › back returns Home
-  and leaves Learn on its grid. `check:nav` holds both.
+  When the subject page is directly under the road, `backFromBranch` is a plain
+  back instead: POP_TO rebuilds the found route's params, so `dismissTo` alone
+  stripped `from=home` (found by the final review). Replayed against the real
+  router: Learn › Philosophy › Ethics › back › back; a road landed on from Home ›
+  back › back; Home › Psychology › back returns Home and leaves Learn on its grid;
+  Home › Philosophy › Ethics › back › back returns Home, also with an older road
+  already in the Learn stack. `check:nav` holds all of it. Android's hardware back
+  simply pops the stack (nothing handles BackHandler), so it can differ from the
+  on-screen arrow here — deliberately not "fixed" to match.
 - **A coming-soon subject is a road, not a dead tile**: `ComingSoonRoad` is
   `BranchWorld` with a hidden start stop and a `signpost` stop; the stickman
   walks to a COMING SOON sign and stands there.
