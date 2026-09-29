@@ -82,6 +82,13 @@ const BUB = {
   lh: 31,
   font: 23.5,
   tail: 15,
+  /**
+   * The outline, and it is INSIDE the height. A React Native box's height includes its
+   * border, so a bubble set to rows × lh + padding had 4.8 units less room than its rows
+   * needed: the last row was pushed down into the bottom padding, and the owner saw
+   * "philosophy?" sitting far lower than the words above it, hard against the edge.
+   */
+  border: 2.4,
 };
 /** When the bubble goes, ahead of the hat. */
 const T_BUBBLE_OUT = T_TIP0 + 0.15;
@@ -409,7 +416,7 @@ function Bubble({ clock, D }: { clock: SharedValue<number>; D: SharedValue<any> 
   // only as tall as the rows he has REACHED, so a three-row page does not open as a
   // tall empty card and fill from the top; it grows a row as the voice gets there.
   // Told 0.22s early, so the row is open before its first word fades up into it.
-  const h = useSharedValue(BUB.lh + 2 * BUB.padY);
+  const h = useSharedValue(BUB.lh + 2 * BUB.padY + 2 * BUB.border);
   useAnimatedReaction(
     () => {
       const r = rowAt.value;
@@ -420,7 +427,7 @@ function Bubble({ clock, D }: { clock: SharedValue<number>; D: SharedValue<any> 
     },
     (n, was) => {
       if (n === was) return;
-      h.value = withTiming(n * BUB.lh + 2 * BUB.padY, { duration: 170 });
+      h.value = withTiming(n * BUB.lh + 2 * BUB.padY + 2 * BUB.border, { duration: 170 });
     },
   );
 
@@ -573,7 +580,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: BUB.padX,
     paddingVertical: BUB.padY,
     backgroundColor: FLAT_FACE,
-    borderWidth: 2.4,
+    borderWidth: BUB.border,
     borderColor: INK,
     borderRadius: 20,
     boxShadow: `0px 4px 0px ${FLAT_EDGE}`,
