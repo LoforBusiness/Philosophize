@@ -127,7 +127,7 @@ const STYLE_ERROR_BUDGET = 0;
 
 const DT = 1 / 60;
 /** How long a patient reader leaves each beat. Long enough for any delayed one-shot. */
-const REST = 5;
+const REST = +(process.env.REPLAY_REST || 5);
 
 // A jump is judged against the frame the old beat would have drawn next.
 const JUMP = { opacity: 0.3, px: 8, deg: 6, scale: 0.12 };
@@ -712,8 +712,41 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       m.lo = m.lo ? m.lo.map((a, j) => Math.min(a, v[j])) : v.slice();
       m.hi = m.hi ? m.hi.map((a, j) => Math.max(a, v[j])) : v.slice();
     });
+    // FOOT SLIDE (REPLAY_SLIDE): a foot that is down while the body travels must stay
+    // where it is on the ground. Measured every frame from the pose bundle — both ankles
+    // in stage units — so a walk whose legs do not match the ground it covers shows as
+    // the planted foot sliding, and a walk with too few or too many steps for its
+    // distance shows as its stride.
+    const slide = figs.map(() => ({ slide: 0, worst: 0, travel: 0, steps: 0, prev: null, down: [false, false] }));
+    const slideSample = () => figs.forEach((ch, i) => {
+      let B = null;
+      try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
+      if (!B || !B.ankL || !B.ankR || !B.pel) return;
+      const cur = [+B.ankL[0].translateX, +B.ankL[1].translateY, +B.ankR[0].translateX, +B.ankR[1].translateY, +B.pel[0].translateX];
+      const m = slide[i];
+      if (process.env.REPLAY_TRACE && process.env.REPLAY_TRACE === path.basename(sceneFile, '.tsx') + ':' + n + ':' + i) {
+        fs.appendFileSync(process.env.REPLAY_TRACE_FILE, [api.bt.value.toFixed(3), ...cur.map((v) => v.toFixed(2)), (+B.dir).toFixed(3)].join(' ') + '\n');
+      }
+      if (m.prev) {
+        const moved = Math.abs(cur[4] - m.prev[4]);
+        m.travel += moved;
+        for (let a = 0; a < 2; a++) {
+          const y = cur[a * 2 + 1], py = m.prev[a * 2 + 1], oy = cur[(1 - a) * 2 + 1];
+          const down = Math.abs(y - py) < 0.03 && y >= oy - 0.3;
+          if (down && m.down[a] && moved > 0.02) {
+            const dx = Math.abs(cur[a * 2] - m.prev[a * 2]);
+            m.slide += dx;
+            m.worst = Math.max(m.worst, dx);
+          }
+          if (down && !m.down[a] && moved > 0.02) m.steps++;
+          m.down[a] = down;
+        }
+      }
+      m.prev = cur;
+    });
     for (let f = 0; f <= steps; f++) {
       FRAME++;
+      if (process.env.REPLAY_SLIDE) slideSample();
       if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
       else if (f === steps) {
@@ -729,6 +762,10 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
             x: +B.pel[0].translateX || 0, y: +B.pel[1].translateY || 0,
             hx: +B.head[0].translateX || 0, hy: +B.head[1].translateY || 0,
             opacity: B.opacity ?? 1,
+            slide: (() => {
+              const m = slide[figs.indexOf(ch)];
+              return m ? { slide: +m.slide.toFixed(2), worst: +m.worst.toFixed(2), travel: +m.travel.toFixed(1), steps: m.steps } : null;
+            })(),
             move: (() => {
               const m = figMove[figs.indexOf(ch)];
               if (!m || !m.lo) return 0;
@@ -778,6 +815,14 @@ function checkLesson({ id, file }) {
     const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
     const per = snaps.map((s) => (s.figs || []).filter((fg) => fg.opacity > 0.3));
     if (per.every((v) => v.length <= 1)) cur[id] = per.map((v) => (v.length ? v[0].dir : null));
+    fs.writeFileSync(f, JSON.stringify(cur));
+  }
+
+  // REPLAY_SLIDE=<file> records, per beat and figure, how far a planted foot slid.
+  if (process.env.REPLAY_SLIDE) {
+    const f = process.env.REPLAY_SLIDE;
+    const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    cur[id] = snaps.map((s) => (s.figs || []).map((fg) => ({ src: fg.src, k: fg.k, ...fg.slide })));
     fs.writeFileSync(f, JSON.stringify(cur));
   }
 

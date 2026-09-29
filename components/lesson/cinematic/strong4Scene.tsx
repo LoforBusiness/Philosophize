@@ -10,7 +10,7 @@ import { attendAt } from './attend';
 import { BEATS } from './strong4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -23,7 +23,8 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import PortalIris from './PortalIris';
 import {
   board, desk, bowl, terrace, banquetTable, amphora,
   BOARD, BOWL, LOCK, TABLE, PLATES, EMPTY_PLATE, DISH, OLIVE_PLATE, LEDGE, SHARDS, AMPHORAE,
@@ -71,7 +72,15 @@ const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
 /** The olive in his hand is the larger, so the room is pushed in less deep and they meet. */
 const OLIVE_HAND_R = 3.5;
-const Z_ROOM = PORTAL_Z * (OLIVE_PLATE.r / OLIVE_HAND_R);
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts). An olive is far too small to go
+ * all the way into, so both sets go 24 deep (the room less, for its larger olive) and the
+ * olive's own colour grows out over the last of the push until the band is nothing but
+ * olive on both sides (PortalIris) — and the swap happens there.
+ */
+const Z_FEAST = 24;
+const Z_ROOM = Z_FEAST * (OLIVE_PLATE.r / OLIVE_HAND_R);
+const OLIVE_FLESH = stageToneOf(OLIVE).SHADE;
 /**
  * How long the camera holds before it pushes in on the change beat: time for him to
  * step clear of the thing it goes into, so he leaves the frame at his own size
@@ -85,7 +94,7 @@ const ROOM_BACK = 332;
 /** When he steps back: after setting the olive down, before the camera moves. */
 const BACK_AT = 0.7;
 /** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt(Z_ROOM, undefined, DELAY) - PORTAL.swapFor / 2;
+const SWAP_FROM = portalSwapAt(Z_ROOM, Z_FEAST, DELAY) - PORTAL.swapFor / 2;
 /** Where he walks in at the banquet, and when he sets off. */
 // lands well along the table from the plate the camera pulls back from, so the pull-out
 // brings him in from the edge at his own size (portal.ts, STAND CLEAR)
@@ -171,7 +180,7 @@ export default function Strong4Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b, Z_ROOM, undefined, DELAY);
+    const pt = portalAt(b, Z_ROOM, Z_FEAST, DELAY);
     const world = A_ENTER[n] ? pt.world : FEAST[n];
     const kRoom = A_ENTER[n] ? pt.out : FEAST[n];
     const kFeast = A_ENTER[n] ? pt.into : 1 - FEAST[n];
@@ -226,7 +235,10 @@ export default function Strong4Scene({
     const lift = A_DISH[n] ? pulse(0.3, 0.8, 1.6) : 0;
     s = handOn(s, x, dir, DISH.x, DISH.y - 6 - 12 * sec(0.8, 1.2), lift);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ─────────────────────────────────────────────────────────────
     const hd = A_HEADS[n] ? st(0.05, 0.2) : HEADS[n];
@@ -270,7 +282,7 @@ export default function Strong4Scene({
       kRoom: carry(cv, 2, n, FEAST[p], kRoom, A_ENTER[n] ? 1 : tr),
       kFeast: carry(cv, 3, n, 1 - FEAST[p], kFeast, A_ENTER[n] ? 1 : tr),
       hold: carry(cv, 4, n, 0, hold, tr),
-      placed: A_ENTER[n] && world < 0.5 ? placed : 0,
+      placed: A_ENTER[n] ? placed : 0,
       hd: carry(cv, 5, n, HEADS[p], hd, tr),
       hi: carry(cv, 6, n, HEADS[p], hi, tr),
       va: carry(cv, 7, n, VALID[p], va, tr),
@@ -302,15 +314,14 @@ export default function Strong4Scene({
   });
   const feastXf = useAnimatedStyle(() => ({
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kFeast, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kFeast, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y, Z_FEAST),
   }));
   const figXf = useAnimatedStyle(() => {
     const atFeast = SCENE.value.world >= 0.5;
     const k = atFeast ? SCENE.value.kFeast : SCENE.value.kRoom;
     const w = DF.value.wrR;
-    const s = atFeast ? portalScale(k) : portalScale(k, Z_ROOM);
     const xf = atFeast
-      ? portalXf(k, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y)
+      ? portalXf(k, OLIVE_PLATE.x, OLIVE_PLATE.y, MID.x, MID.y, Z_FEAST)
       : portalXf(k, lerp(w[0].translateX, OLIVE_REST.x, SCENE.value.placed), lerp(w[1].translateY - 3, OLIVE_REST.y, SCENE.value.placed), MID.x, MID.y, Z_ROOM);
     return { opacity: 1, ...xf };
   });
@@ -321,6 +332,7 @@ export default function Strong4Scene({
     <View style={styles.scene}>
       <Animated.View style={[styles.set, feastXf]} pointerEvents="none">
         <Feast S={SCENE} />
+        <PortalIris S={SCENE} field="kFeast" x={OLIVE_PLATE.x} y={OLIVE_PLATE.y} r0={1.1} z={Z_FEAST} color={OLIVE_FLESH} />
       </Animated.View>
       <Animated.View style={[styles.set, roomXf]} pointerEvents="none">
         <View style={styles.floor} />
@@ -336,6 +348,7 @@ export default function Strong4Scene({
         <View style={[styles.olive, { left: BOWL.x + 1, top: BOWL.y - 9 }]} />
         <View style={styles.ground} />
         <Held S={SCENE} DF={DF} />
+        <PortalIris S={SCENE} field="kRoom" x={OLIVE_REST.x} y={OLIVE_REST.y} r0={1.8} z={Z_ROOM} color={OLIVE_FLESH} />
       </Animated.View>
       {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
           word inside a transparent plate, and a set still nine times over on the change

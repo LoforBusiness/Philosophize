@@ -9,7 +9,7 @@ import SetArt from './SetArt';
 import { BEATS } from './aesthetics3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -227,7 +227,10 @@ export default function Aesthetics3Scene({
     // ── a hand out to the storm on the wall (b5), and a tilt of the head at the word (b3) ──
     s = { ...s, tilt: s.tilt + 0.06 * (A_NAMED[n] ? pulse(1.6, 2.2, 4.4) : 0) };
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ─────────────────────────────────────────────────────────────
     const open = A_CURTAIN[n] ? sec(cordAt + 0.45, cordAt + 1.5) : OPEN[n];

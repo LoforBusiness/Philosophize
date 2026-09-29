@@ -10,7 +10,7 @@ import { attendAt } from './attend';
 import { BEATS } from './epistemology5Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, seated, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -23,7 +23,7 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import { PORTAL, flatDepth, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
   bookcase, ladder, sideTable, windowFrame, mill, farDowns, millHill, nearField, footpath, tufts, armchair,
   RUNG_Y, BOOK, WINDOW, LATCH, MOON_WIN, MOON, MILL, STARS, ASK, CHAIR,
@@ -73,10 +73,18 @@ const LINES = [7.28, 5.32, 7.24, 6.56, 5.96, 7.68, 7.84, 7, 8.76, 6.2, 0, 0, 0, 
 const K_M = K_FIG * 0.82;
 /** The middle of the band, where the moon ends up at the deepest point of the change. */
 const MID = { x: STAGE_W / 2, y: 401 };
-/** The study's moon is half the hill's, so the study is pushed in twice as deep and they meet. */
-const Z_STUDY = PORTAL_Z * (MOON.r / MOON_WIN.r);
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts): both moons are one flat disc of
+ * the same white, so each set goes in until the band lies inside its moon — the band's
+ * own shape inscribed in the disc, half a unit clear of its rim — and at the swap there
+ * is nothing on screen but moonlight. The study's moon is half the hill's, so the study
+ * is pushed in twice as deep and they meet at one size.
+ */
+const inMoon = (r: number) => flatDepth((r - 0.5) * 0.87, (r - 0.5) * 0.49);
+const Z_HILL = inMoon(MOON.r);
+const Z_STUDY = Z_HILL * (MOON.r / MOON_WIN.r);
 /** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt(Z_STUDY) - PORTAL.swapFor / 2;
+const SWAP_FROM = portalSwapAt(Z_STUDY, Z_HILL) - PORTAL.swapFor / 2;
 /** The ladder's rungs, bottom to top. */
 const RUNGS = ['SENSATION', 'MEMORY', 'EXPERIENCE', 'SCIENCE', 'WISDOM'];
 
@@ -160,7 +168,7 @@ export default function Epistemology5Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b, Z_STUDY);
+    const pt = portalAt(b, Z_STUDY, Z_HILL);
     const world = A_ENTER[n] ? pt.world : HILL[n];
     const kStudy = A_ENTER[n] ? pt.out : HILL[n];
     const kHill = A_ENTER[n] ? pt.into : 1 - HILL[n];
@@ -205,7 +213,10 @@ export default function Epistemology5Scene({
     s = mixStance(s, { ...seated(SEAT_H, t), neck: -0.32 }, sit);
     s = mixStance(s, { ...s, fistR: { x: 17, y: -8 }, fistL: { x: 11, y: -6 } }, sit * holding);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the study ────────────────────────────────────────────────────────────
     const page = A_PAGES[n] ? ((b * 0.8) % 1) * sec(0.3, 0.6) * (1 - sec(L - 0.3, L)) : 0;
@@ -280,14 +291,13 @@ export default function Epistemology5Scene({
   }));
   const hillXf = useAnimatedStyle(() => ({
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kHill, MOON.x, MOON.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kHill, MOON.x, MOON.y, MID.x, MID.y, Z_HILL),
   }));
   const figXf = useAnimatedStyle(() => {
     const onHill = SCENE.value.world >= 0.5;
     const k = onHill ? SCENE.value.kHill : SCENE.value.kStudy;
-    const s = onHill ? portalScale(k) : portalScale(k, Z_STUDY);
     const xf = onHill
-      ? portalXf(k, MOON.x, MOON.y, MID.x, MID.y)
+      ? portalXf(k, MOON.x, MOON.y, MID.x, MID.y, Z_HILL)
       : portalXf(k, MOON_WIN.x, MOON_WIN.y, MID.x, MID.y, Z_STUDY);
     return { opacity: 1, ...xf };
   });

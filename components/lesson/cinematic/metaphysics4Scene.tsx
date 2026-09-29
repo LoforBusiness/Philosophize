@@ -8,7 +8,7 @@ import SetArt from './SetArt';
 import { BEATS } from './metaphysics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -22,10 +22,10 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
 import { attendAt } from './attend';
-import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import { PORTAL, flatDepth, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
   desk, box, bust, frame, range, hill, meadow, road, roadNot, ruts, gate, cliff, water, post, onCanvas,
-  DESK, BOX, BUST, CANVAS, MINI, ARM_IS, ARM_NOT, LANTERN, GATE, FALL, ACORN, FOCUS_ROAD, POST,
+  DESK, BOX, BUST, CANVAS, MINI, ARM_IS, ARM_NOT, LANTERN, GATE, FALL, ACORN, POST,
 } from './metaphysics4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -76,11 +76,19 @@ const LINES = [8.04, 6, 4.84, 6.28, 7.36, 0, 8.28, 11.04, 0, 0, 0];
 const K_M = K_FIG * 0.82;
 /** The middle of the band, where the object a change goes into ends up. */
 const MID = { x: STAGE_W / 2, y: 401 };
-/** Into the painting: where the fork is on the canvas, and how deep the push goes. */
-const FOCUS_STUDY = onCanvas(FOCUS_ROAD.x, FOCUS_ROAD.y);
-const Z_STUDY = PORTAL_Z / MINI;
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts). The painting IS the road at a
+ * quarter size, so the push goes into a patch of its SKY between two peaks — clear of them
+ * (measured on film: the frame edge above and a peak tip below showed at 19) and of the sun — and the road comes out of the
+ * same patch of the same sky, four times deeper. At the swap the band is sky and nothing
+ * else on both sides.
+ */
+const SKY_ROAD = { x: 160, y: 306 };
+const Z_ROAD = flatDepth(60, 15);
+const FOCUS_STUDY = onCanvas(SKY_ROAD.x, SKY_ROAD.y);
+const Z_STUDY = Z_ROAD / MINI;
 /** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt(Z_STUDY) - PORTAL.swapFor / 2;
+const SWAP_FROM = portalSwapAt(Z_STUDY, Z_ROAD) - PORTAL.swapFor / 2;
 
 const X = BEATS.map((b) => b.x ?? 146);
 const P = BEATS.map((b) => b.p ?? 0);
@@ -156,7 +164,7 @@ export default function Metaphysics4Scene({
     };
 
     // ── the change (b3), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b, Z_STUDY);
+    const pt = portalAt(b, Z_STUDY, Z_ROAD);
     const world = A_ENTER[n] ? pt.world : ROAD[n];
     const kStudy = A_ENTER[n] ? pt.out : ROAD[n];
     const kRoad = A_ENTER[n] ? pt.into : 1 - ROAD[n];
@@ -191,7 +199,10 @@ export default function Metaphysics4Scene({
     // looking up at the thought as it rises (b1), and down at the acorn (b7)
     s = { ...s, neck: s.neck + 0.16 * (A_THINK[n] ? pulse(1.0, 2.0, 5.2) : 0) - 0.22 * (A_GROW[n] ? sec(arrive + 0.2, arrive + 0.8) : 0) };
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the study ────────────────────────────────────────────────────────────
     const lid = A_BOX[n] ? sec(1.1, 1.6) : OPEN[n];
@@ -261,14 +272,13 @@ export default function Metaphysics4Scene({
     // the road is drawn whole beneath the study the moment the change starts, so the
     // dissolve at the deepest point never shows the paper through the middle of it
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kRoad, FOCUS_ROAD.x, FOCUS_ROAD.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kRoad, SKY_ROAD.x, SKY_ROAD.y, MID.x, MID.y, Z_ROAD),
   }));
   const figXf = useAnimatedStyle(() => {
     const inRoad = SCENE.value.world >= 0.5;
     const k = inRoad ? SCENE.value.kRoad : SCENE.value.kStudy;
-    const s = inRoad ? portalScale(k) : portalScale(k, Z_STUDY);
     const xf = inRoad
-      ? portalXf(k, FOCUS_ROAD.x, FOCUS_ROAD.y, MID.x, MID.y)
+      ? portalXf(k, SKY_ROAD.x, SKY_ROAD.y, MID.x, MID.y, Z_ROAD)
       : portalXf(k, FOCUS_STUDY.x, FOCUS_STUDY.y, MID.x, MID.y, Z_STUDY);
     return { opacity: 1, ...xf };
   });

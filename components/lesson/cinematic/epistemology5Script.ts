@@ -63,6 +63,8 @@ export const BEATS: Epi5Beat[] = [
   },
   {
     p: 158, x: 262, act: 'sense', rungs: true, free: true, sense: true,
+    // wide before the change: a push held into it would frame the hill off-centre
+    tour: [[0, 288, 400, 226, 1.2, 9]],
     text: 'People enjoy seeing even when it serves no purpose. Sensation is the lowest rung of Aristotle’s ladder of knowledge.',
     dur: 3,
   },

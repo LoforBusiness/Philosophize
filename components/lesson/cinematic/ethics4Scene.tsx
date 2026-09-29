@@ -10,7 +10,7 @@ import { attendAt } from './attend';
 import { BEATS } from './ethics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -23,7 +23,7 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import { PORTAL, flatDepth, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
 import {
   globeStand, mapFrame, desk, igloo, tent, roundHut, pagoda, cottage, signPosts,
   GLOBE, MAP, PINS, DESK, BOOK, HOME_GROUND, HOMES, SIGNS,
@@ -72,10 +72,29 @@ const LINES = [3.8, 5.92, 5.44, 6.72, 4.44, 6.92, 0, 6.32, 6.6, 6.52, 4.56, 4.6,
 /** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
 const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
-/** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt() - PORTAL.swapFor / 2;
-/** Out of the globe's ocean into the village's sky: a point of open sky. */
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts). The globe always shows the ocean
+ * between its continents at its centre (`LAND_AT`), a column 16 wide and the globe's
+ * height, and the village's sky is the same STONE: in far enough that the band is all
+ * ocean, out of a patch of sky that is all sky, and the swap cannot be seen.
+ */
+const Z_STUDY = flatDepth(8, 16);
+/** Out of the globe's ocean into the village's sky: a point of open sky, clear of the
+ *  band's top, of the hills and roofs below, and of his hat where he lands (32 either way,
+ *  measured with the camera wide: at 56 his head showed in the corner at the swap). */
 const SKY_AT = { x: 200, y: 336 };
+const Z_VILLAGE = flatDepth(150, 32);
+/** The crossover on the change beat, where he can change place or turn unseen. */
+const SWAP_FROM = portalSwapAt(Z_STUDY, Z_VILLAGE) - PORTAL.swapFor / 2;
+/**
+ * Where the land stands on the globe: at 36 the open ocean between the continents faces
+ * front, which is where the change goes in. It turns only when he spins it (b8), one
+ * whole turn, so it ends where it began — it used to creep round on the clock, and the
+ * camera read the creeping land as something arriving and parked on the globe for four
+ * beats while the map the narration was about stood out of frame.
+ */
+const LAND_AT = 36;
+const SPUN = BEATS.map((_, k) => (BEATS.slice(0, k).some((q) => q.act === 'globe') ? 1 : 0));
 /** The pins' colours: every culture its own. */
 const PIN_COLOURS = [EMBER, TEAL, OLIVE, DEEP, SAGE, EMBER, DEEP, TEAL];
 
@@ -164,7 +183,7 @@ export default function Ethics4Scene({
     };
 
     // ── the change (b9), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b);
+    const pt = portalAt(b, Z_STUDY, Z_VILLAGE);
     const world = A_ENTER[n] ? pt.world : VILLAGE[n];
     const kStudy = A_ENTER[n] ? pt.out : VILLAGE[n];
     const kVillage = A_ENTER[n] ? pt.into : 1 - VILLAGE[n];
@@ -202,7 +221,10 @@ export default function Ethics4Scene({
     const spinHand = A_GLOBE[n] ? pulse(arrive + 0.1, arrive + 0.4, arrive + 1.3) : 0;
     s = handOn(s, x, dir, GLOBE.x + GLOBE.r - 2 - 10 * sec(arrive + 0.4, arrive + 1.0), GLOBE.y - 4, spinHand);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the study ────────────────────────────────────────────────────────────
     const pins = A_PINS[n] ? st(0.08, 0.75) : PINNED[n];
@@ -213,7 +235,7 @@ export default function Ethics4Scene({
     const cross = A_ERROR[n] ? st(0.5, 0.62) : ERROR[n];
     const bene = A_BENE[n] ? sec(arrive + 0.8, arrive + 1.3) : BENE[n];
     const obj = A_OBJ[n] ? st(0.12, 0.24) : OBJ[n];
-    const spin = A_GLOBE[n] ? sec(arrive + 0.4, arrive + 2.6) : 0;
+    const spin = A_GLOBE[n] ? sec(arrive + 0.4, arrive + 2.6) : SPUN[n];
 
     // ── the village ──────────────────────────────────────────────────────────
     const universals = A_ENTER[n] ? sec(PORTAL.outTo + 0.2, PORTAL.outTo + 0.6) : VILLAGE[n];
@@ -253,7 +275,7 @@ export default function Ethics4Scene({
       cross: carry(cv, 10, n, ERROR[p], cross, tr),
       bene: carry(cv, 11, n, BENE[p], bene, tr),
       obj: carry(cv, 12, n, OBJ[p], obj, tr),
-      spin: carry(cv, 13, n, 0, spin, tr),
+      spin: carry(cv, 13, n, SPUN[p], spin, tr),
       universals: carry(cv, 14, n, VILLAGE[p], universals, tr),
       gifts: carry(cv, 15, n, GIFTS[p], gifts, tr),
       found: carry(cv, 16, n, FOUND[p], found, tr),
@@ -266,16 +288,16 @@ export default function Ethics4Scene({
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const studyXf = useAnimatedStyle(() => ({
     opacity: 1 - SCENE.value.world,
-    ...portalXf(SCENE.value.kStudy, GLOBE.x, GLOBE.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kStudy, GLOBE.x, GLOBE.y, MID.x, MID.y, Z_STUDY),
   }));
   const villageXf = useAnimatedStyle(() => ({
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kVillage, SKY_AT.x, SKY_AT.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kVillage, SKY_AT.x, SKY_AT.y, MID.x, MID.y, Z_VILLAGE),
   }));
   const figXf = useAnimatedStyle(() => {
     const inVillage = SCENE.value.world >= 0.5;
     const k = inVillage ? SCENE.value.kVillage : SCENE.value.kStudy;
-    const xf = inVillage ? portalXf(k, SKY_AT.x, SKY_AT.y, MID.x, MID.y) : portalXf(k, GLOBE.x, GLOBE.y, MID.x, MID.y);
+    const xf = inVillage ? portalXf(k, SKY_AT.x, SKY_AT.y, MID.x, MID.y, Z_VILLAGE) : portalXf(k, GLOBE.x, GLOBE.y, MID.x, MID.y, Z_STUDY);
     return { opacity: 1, ...xf };
   });
   const villageWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kVillage) : 0));
@@ -347,8 +369,8 @@ function Pin({ S, k, x, y }: { S: SharedValue<any>; k: number; x: number; y: num
   );
 }
 function Globe({ S }: { S: SharedValue<any> }) {
-  // the land goes round: slowly all the time, and once more when he spins it (b8)
-  const land = useAnimatedStyle(() => ({ transform: [{ translateX: -(((S.value.t * 3 + 60 * S.value.spin) % 60)) }] }));
+  // the land goes round once when he spins it (b8), and stands with the ocean to the front
+  const land = useAnimatedStyle(() => ({ transform: [{ translateX: -((LAND_AT + 60 * S.value.spin) % 60) }] }));
   return (
     <View style={styles.globe} pointerEvents="none">
       <Animated.View style={[styles.globeLand, land]}>

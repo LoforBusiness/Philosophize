@@ -1383,6 +1383,20 @@ export function mixStance(a: Stance, b: Stance, t: number): Stance {
 }
 
 /**
+ * `mixStance`, but the FEET are `b`'s. For the carry-over blend a scene lays over a
+ * beat that WALKS: the walk's feet are pinned to the floor by `travelStance`, and
+ * easing them from the previous beat's standing feet on top of that drags the planted
+ * foot along the ground for the whole blend — measured, 30 to 70 per cent of the
+ * distance walked in the lessons that did it. The walk already starts from the
+ * standing pose, so the legs need no second blend; everything above them does.
+ */
+export function mixKeepLegs(a: Stance, b: Stance, t: number): Stance {
+  'worklet';
+  const s = mixStance(a, b, t);
+  return { ...s, footL: b.footL, footR: b.footR };
+}
+
+/**
  * THE LAST STEP. Hand a walk over to a standing pose without a foot skating.
  *
  * Two things have to be true at once, and doing only the first is what left a
@@ -1613,14 +1627,51 @@ export function strideStance(
  * captured into the worklet runtime and throws "Property 'WALK' doesn't exist".
  * Defined after strideStance/mixStance: a worklet that calls a worklet declared
  * later captures it as undefined and crashes the UI thread.
+ *
+ * A WALK STARTS FROM STANDING (owner, 2026-09-28: "when he walks … the amount he is
+ * moving his legs does not seem to fit for how he is moving on the ground"). This
+ * used to hand `strideStance` phase 0, where the feet are a FULL STRIDE APART, so the
+ * first frame of every walk in every lesson threw his feet 30 units apart — and when
+ * the walk also turned him round (it does whenever he heads back the way he came,
+ * `facing` easing the sign through zero over the first 0.36s) that wide stance was
+ * mirrored across his body while the foot was down: measured on logic-arguments-7,
+ * the planted foot swept 40 units across the floor. Counted over every lesson with
+ * a foot-slide probe in `check:replay` (REPLAY_SLIDE), 345 of 500 walking beats slid
+ * a planted foot by a third of the distance walked or more. The rig itself is exact —
+ * a plain walk slides 0.0 — it was the start.
+ *
+ * So it starts the way the wander layer's steps start (`wander.stepStance`): the
+ * gait's phase begins where both feet pass under the body (`lead`), and over the
+ * first 11 units the standing feet stay pinned to the floor while the foot with
+ * further to go arcs over to its first step. Nothing is wide while he turns, and
+ * there is no frame on which his legs jump.
  */
 export function travelStance(
   x0: number, x1: number, holdPrev: Stance, holdNext: Stance, liveNext: Stance, tr: number,
   g: Gait, seed = 0
 ): Stance {
   'worklet';
-  if (Math.abs(x1 - x0) > 1) return strideStance(x0, x1, holdNext, tr, g, seed);
-  return mixStance(holdPrev, liveNext, tr);
+  const span = Math.abs(x1 - x0);
+  if (span <= 1) return mixStance(holdPrev, liveNext, tr);
+  const vg = gaitVary(g, x0 * 0.37 + x1 * 0.11 + seed * 3.7);
+  const st = stanceUsed(vg);
+  const lead = ((1 + st) * 0.5 * vg.S) / st;
+  const moving = strideStance(x0, x1, holdNext, tr, g, seed, lead);
+  const walked = span * tr;
+  const pd = clamp01(walked / 11);
+  if (pd >= 1) return moving;
+  const tgtL = holdPrev.footL.x - walked;
+  const tgtR = holdPrev.footR.x - walked;
+  const gapL = Math.abs(tgtL - moving.footL.x);
+  const gapR = Math.abs(tgtR - moving.footR.x);
+  const arc = Math.sin(Math.PI * pd) * Math.min(U.standH * 0.3, Math.max(gapL, gapR) * 0.5) * 2;
+  const tot = gapL + gapR + 1e-4;
+  const standing: Stance = {
+    ...holdPrev,
+    footL: { x: tgtL, y: holdPrev.footL.y - arc * (gapL / tot) },
+    footR: { x: tgtR, y: holdPrev.footR.y - arc * (gapR / tot) },
+  };
+  return mixStance(standing, moving, pd);
 }
 
 /**

@@ -9,7 +9,7 @@ import SetArt from './SetArt';
 import { BEATS } from './ethics3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -280,7 +280,10 @@ export default function Ethics3Scene({
     const heart = A_WISE[n] ? pulse(2.0, 2.6, 5.4) : 0;
     s = mixStance(s, { ...s, fistR: { x: 5, y: -30 } }, heart);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the diagram ──────────────────────────────────────────────────────────
     const lit = A_POWER[n] ? sec(0.3, 1.2) : LIT[n];

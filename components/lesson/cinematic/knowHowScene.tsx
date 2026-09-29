@@ -8,7 +8,7 @@ import ObjectArt from './ObjectArt';
 import { BEATS } from './knowHowScript';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
@@ -232,7 +232,10 @@ export default function KnowHowScene({
     // in the water
     s = mixStance(s, swimStance(t, flail), swim);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     return {
       fig: lookPose(fig, x, figGY, K_SW, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),

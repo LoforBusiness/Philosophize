@@ -8,7 +8,7 @@ import ObjectArt from './ObjectArt';
 import { BEATS } from './epistemology2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
@@ -277,7 +277,10 @@ export default function Epistemology2Scene({
     const open = A_REBUILD[n] ? pulse(6.1, 6.35, 7.0) : 0;
     s = handOn(s, x, dir, 1, lerp((WINDOW.x0 + WINDOW.x1) / 2 + 6, WINDOW.x1 - 2, sec(6.35, 6.85)), WINDOW.bottom - 10, open);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ──────────────────────────────────────────────────────────
     // the shadow: grows on b3, thins on b6, and reaches for one thing at a time

@@ -223,8 +223,8 @@ function calm(t: number, k: number, bow: number): Stance {
     ...s,
     tilt: s.tilt + shift * 0.05 - bow * 0.16,
     neck: s.neck + shift * 0.05 - nod * 0.24 + bow * 0.32,
-    footL: { x: s.footL.x - shift * 1.8, y: s.footL.y },
-    footR: { x: s.footR.x - shift * 1.8, y: s.footR.y },
+    // (the weight shift is in the lean alone: moving the feet under a still body slid
+    // them sideways across the pavement)
     fistL: { x: -13 - shift * 2.6, y: 4 + shift * 2.4 + bow * 2 },
     fistR: { x: 13 - shift * 2.6, y: 4 - shift * 2.4 + bow * 2 },
   };
@@ -388,7 +388,18 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
       let live = mixStance(melee(t, k), calm(t, k, bow), 1 - fight);
       // squared up in pairs: each steps back from his partner as the fight builds, and
       // only lunges a third as far, so two fighters never run into one body
-      const x = CIT_X[k] + ((live.adv ?? 0) * 0.35 - 7) * dir * fight;
+      const lunge = (live.adv ?? 0) * 0.35 * fight;
+      // the lunge goes the way he faces (eased, so a turn cannot throw him); the step
+      // back goes AWAY FROM HIS PARTNER, a fixed side, so turning to the officer does not
+      // walk him across the pavement
+      const x = CIT_X[k] + lunge * dv - 7 * fight * (k % 2 === 0 ? 1 : -1);
+      // a lunge carries the BODY over planted feet: the feet are held where they were,
+      // or they skate along the pavement with every punch
+      live = {
+        ...live,
+        footL: { x: live.footL.x - lunge / CIT_K, y: live.footL.y },
+        footR: { x: live.footR.x - lunge / CIT_K, y: live.footR.y },
+      };
       // what he is looking at — a point, his partner's head, the officer's, or his
       // shop's words — resolved into attend.ts keys and eased between like the lead's
       const keys: number[] = [];

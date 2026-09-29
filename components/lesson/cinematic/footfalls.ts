@@ -1,4 +1,4 @@
-import { WALK, gaitVary, moveTr, type Gait } from './rig';
+import { WALK, gaitVary, moveTr, stanceUsed, type Gait } from './rig';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHEN THE FEET HIT THE GROUND.
@@ -137,7 +137,11 @@ export function footfallTimes(
   const halfStride = g.S / (2 * g.stance);
   if (!(halfStride > 0)) return none;
 
-  const offset = seed * 11;   // `strideStance` adds this to the distance travelled
+  // `strideStance` adds the seed's offset to the distance travelled, and `travelStance`
+  // hands it the LEAD — a walk starts with both feet under the body, not a stride apart
+  // (rig.travelStance, A WALK STARTS FROM STANDING) — so the plants move by both
+  const st = stanceUsed(g);
+  const offset = seed * 11 + ((1 + st) * 0.5 * g.S) / st;
 
   const steps: number[] = [];
   let settle = -1;

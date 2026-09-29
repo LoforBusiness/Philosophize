@@ -10,7 +10,7 @@ import { Outlined, ell, bar, tri } from './Silhouette';
 import { BEATS } from './aesthetics2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, pose, seated, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -238,7 +238,10 @@ export default function Aesthetics2Scene({
     // (FrontTent) covers him — canvas, or ink on the ink of the doorway.
     const duck = A_LEAVE[n] ? ease01(clamp01((b - walkDur * 0.75) / 0.6)) : IN_TENT[n] ? 1 : 0;
     s = { ...s, bob: s.bob - 24 * duck, tilt: s.tilt - 0.06 * duck };
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(A[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(A[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the campers ───────────────────────────────────────────────────────
     const arrive = [0.25, 0.5, 0.75];

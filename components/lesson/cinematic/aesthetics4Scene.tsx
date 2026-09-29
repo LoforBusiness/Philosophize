@@ -9,7 +9,7 @@ import { attendAt } from './attend';
 import { BEATS } from './aesthetics4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -23,6 +23,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
 import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import PortalIris from './PortalIris';
 import {
   workTable, easel, plinth, frames, ropePosts, rope, windows, rails,
   PIECE_TABLE, EASELS, CANVAS_Y, PLINTH, PIECE_PLINTH, FRAMES, WINDOWS,
@@ -73,8 +74,15 @@ const MID = { x: STAGE_W / 2, y: 401 };
  * rather than being faded out while he is large (portal.ts, STAND CLEAR).
  */
 const DELAY = 1.2;
-/** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt(undefined, undefined, DELAY) - PORTAL.swapFor / 2;
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts): into the basin of the urinal on
+ * the table, out of the basin of the same urinal on the plinth. Both go 14 deep and the
+ * basin's glaze grows out from its middle over the last of the push (PortalIris), so at
+ * the swap the band is nothing but that glaze. The disc starts 3 across the middle,
+ * clear of the drain (3.35 away) and of the basin's rim.
+ */
+const Z_PIECE = 14;
+const SWAP_FROM = portalSwapAt(Z_PIECE, Z_PIECE, DELAY) - PORTAL.swapFor / 2;
 /** The urinal's box, upright; on its back it is the same box turned a quarter. */
 const PIECE = { w: 26, h: 30 };
 /** Into the signed urinal on the table, out of it on the plinth: its middle, lying down. */
@@ -157,7 +165,7 @@ export default function Aesthetics4Scene({
     };
 
     // ── the change (b5), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b, undefined, undefined, DELAY);
+    const pt = portalAt(b, Z_PIECE, Z_PIECE, DELAY);
     const world = A_ENTER[n] ? pt.world : HALL[n];
     const kStudio = A_ENTER[n] ? pt.out : HALL[n];
     const kHall = A_ENTER[n] ? pt.into : 1 - HALL[n];
@@ -201,7 +209,10 @@ export default function Aesthetics4Scene({
 
     const brush = A_SIGN[n] ? sec(2.6, 3.0) * (1 - sec(5.4, 5.9)) : 0;
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the studio ───────────────────────────────────────────────────────────
     const bare = A_UNVEIL[n] ? sec(1.4, 2.4) : BARE[n];
@@ -259,17 +270,17 @@ export default function Aesthetics4Scene({
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
   const studioXf = useAnimatedStyle(() => ({
     opacity: 1 - SCENE.value.world,
-    ...portalXf(SCENE.value.kStudio, FOCUS_STUDIO.x, FOCUS_STUDIO.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kStudio, FOCUS_STUDIO.x, FOCUS_STUDIO.y, MID.x, MID.y, Z_PIECE),
   }));
   const hallXf = useAnimatedStyle(() => ({
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kHall, FOCUS_HALL.x, FOCUS_HALL.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kHall, FOCUS_HALL.x, FOCUS_HALL.y, MID.x, MID.y, Z_PIECE),
   }));
   const figXf = useAnimatedStyle(() => {
     const inHall = SCENE.value.world >= 0.5;
     const k = inHall ? SCENE.value.kHall : SCENE.value.kStudio;
     const f = inHall ? FOCUS_HALL : FOCUS_STUDIO;
-    return { opacity: 1, ...portalXf(k, f.x, f.y, MID.x, MID.y) };
+    return { opacity: 1, ...portalXf(k, f.x, f.y, MID.x, MID.y, Z_PIECE) };
   });
   const hallWords = useDerivedValue(() => (SCENE.value.world >= 0.5 ? wordsAt(SCENE.value.kHall) : 0));
   const studioWords = useDerivedValue(() => (1 - SCENE.value.world) * wordsAt(SCENE.value.kStudio));
@@ -278,6 +289,7 @@ export default function Aesthetics4Scene({
     <View style={styles.scene}>
       <Animated.View style={[styles.set, hallXf]} pointerEvents="none">
         <Hall S={SCENE} />
+        <PortalIris S={SCENE} field="kHall" x={FOCUS_HALL.x} y={FOCUS_HALL.y} r0={3} z={Z_PIECE} color={MARBLE.STONE} />
       </Animated.View>
       <Animated.View style={[styles.set, studioXf]} pointerEvents="none">
         <View style={styles.floor} />
@@ -290,6 +302,7 @@ export default function Aesthetics4Scene({
         <Piece x={PIECE_TABLE.x} base={PIECE_TABLE.base} back={SCENE} />
         <Cloth S={SCENE} />
         <View style={styles.ground} />
+        <PortalIris S={SCENE} field="kStudio" x={FOCUS_STUDIO.x} y={FOCUS_STUDIO.y} r0={3} z={Z_PIECE} color={MARBLE.STONE} />
       </Animated.View>
       {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
           word inside a transparent plate, and a set still nine times over on the change

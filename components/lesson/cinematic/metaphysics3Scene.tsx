@@ -8,7 +8,7 @@ import ObjectArt from './ObjectArt';
 import { BEATS } from './metaphysics3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, seated, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -325,7 +325,10 @@ export default function Metaphysics3Scene({
     const setRuler = A_STICKS[n] ? pulse(5.2, 5.55, 6.1) : 0;
     s = handOn(s, x, figGY, dir, STICKS.x + 8, STICKS.base - 46, setRuler);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ─────────────────────────────────────────────────────────────
     const fade = A_APPLE[n] ? pulse(3.6, 4.4, 6.0) : 0;

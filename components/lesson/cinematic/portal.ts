@@ -29,10 +29,11 @@
 //     worse still: at the moment of the dissolve the two sets were at different depths
 //     and the moon doubled into a disc and a ghost ring beside it.
 //
-// So the camera does what a person with a camera does: EASES INTO the object, arrives,
-// and the two sets dissolve while it is all but still — both at their deepest, so they
-// line up exactly — then EASES back OUT of the new one. The whole change is 4.2s, each
-// half a smoothstep in DEPTH rather than in scale (van Wijk & Nuij, "Smooth and
+// That version eased into the object and dissolved the two sets while the camera was
+// all but still. It was right that a reversal must not be SEEN, and it was replaced
+// (below, THE SWAP HAPPENS INSIDE ONE FLAT COLOUR) by making the reversal happen where
+// there is nothing to see. What stays from it: the whole change is 4.2s, each half
+// eased in DEPTH rather than in scale (van Wijk & Nuij, "Smooth and
 // efficient zooming and panning", 2003: the perceived speed of a zoom is the rate of
 // change of log scale, so a 9x zoom has to be exponential in time to look even), and
 // each half is given time in proportion to how deep it goes, so a seamless miniature
@@ -48,6 +49,26 @@
 // few paces from it, so the camera carries him out of frame while he is still his own
 // size and brings him back in from the edge. `delay` on portalAt is the time he needs.
 //
+// THE SWAP HAPPENS INSIDE ONE FLAT COLOUR (owner, 2026-09-28: "I want it to zoom in,
+// and you can't see a change in this scene at all, because then when you zoom out,
+// then it's a different scene. I don't want to be able to see a change when zoomed
+// in."). Pushed nine times into an object, the frame still held the object's edge, its
+// markings and whatever stood behind it — measured on ethics-4, 12–17% of the stage was
+// not the ocean while the two sets crossed, so the reader SAW the picture change. So each
+// set now goes in until the whole band lies inside one flat patch of its object — the
+// ocean of a globe, the white of the porcelain, the inside of a moon — and the other set
+// comes out of a patch of the SAME colour. At the deepest point there is nothing on
+// screen but that colour, and a swap between two identical flat fields cannot be seen.
+// `flatDepth` turns a patch's half-size into the depth that fills the band with it.
+//
+// AND IT DOES NOT STOP THERE. The first version eased into the deepest point and out of
+// it, which held the camera nearly still at the one moment when the screen is a flat
+// colour: ethics-4 showed a second of plain sky, a camera "in one place too long without
+// showing any information". Inside a flat field a change of direction cannot be seen, so
+// the push now ARRIVES at speed and the pull LEAVES at speed (a sine ease-in, then a sine
+// ease-out), each half timed by its depth so the speed is the same on both sides of the
+// cut, and the flat colour is on screen for a fifth of a second.
+//
 // WHAT THE CHANGE BEAT MUST DO: every change-beat line in the six lessons runs 6.3s or
 // longer, so a landing at 4.6s leaves the new set at least 1.7s in view before the
 // reader is invited to tap. Words show on neither set while it is zoomed, and the new
@@ -56,8 +77,25 @@
 // Zero imports, like rig.ts: a scene imports this, and a sheet can too, in plain Node.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** How far a set zooms at its deepest: the object fills the band. */
+/** How far a set zooms at its deepest when a scene does not say (see `flatDepth`). */
 export const PORTAL_Z = 9;
+
+/**
+ * How much deeper than "just fills the band" each set goes, so the flat field holds for
+ * a moment either side of the swap rather than for one frame.
+ */
+export const FLAT_MARGIN = 1.15;
+
+/** The band every portal lesson uses, as it is seen: 400 wide, this tall. */
+export const PORTAL_BAND_H = 226;
+
+/**
+ * The depth at which a flat patch of half-size (hw, hh), centred on the zoom's focus,
+ * covers the whole band — times FLAT_MARGIN. Not a worklet: scenes compute it once.
+ */
+export function flatDepth(hw: number, hh: number): number {
+  return FLAT_MARGIN * Math.max(200 / hw, PORTAL_BAND_H / 2 / hh);
+}
 
 /** When the change runs inside its beat, in seconds from the beat's start. */
 export const PORTAL = {
@@ -65,8 +103,9 @@ export const PORTAL = {
   inFrom: 0.4,
   /** the second set has landed */
   outTo: 4.6,
-  /** how long the two sets take to cross over, centred on the deepest point */
-  swapFor: 0.44,
+  /** how long the two sets take to cross over, centred on the deepest point — inside
+   *  the flat field, where it cannot be seen */
+  swapFor: 0.1,
 };
 
 function clamp01(v: number): number {
@@ -77,6 +116,18 @@ function clamp01(v: number): number {
 function smooth(t: number): number {
   'worklet';
   return t * t * (3 - 2 * t);
+}
+
+/** Starts at rest and ARRIVES at speed. */
+function easeInSine(t: number): number {
+  'worklet';
+  return 1 - Math.cos((t * Math.PI) / 2);
+}
+
+/** LEAVES at speed and comes to rest. */
+function easeOutSine(t: number): number {
+  'worklet';
+  return Math.sin((t * Math.PI) / 2);
 }
 
 /**
@@ -106,13 +157,15 @@ export function portalAt(
   // to step clear of the thing being zoomed into (see STAND CLEAR, above)
   const b = b0 - (delay === undefined ? 0 : delay);
   const at = portalSwapAt(zOut, zIn);
+  // (the eased halves below meet at the deepest point with the same speed in log-scale,
+  // because each is given time in proportion to its depth)
   const u = clamp01((b - PORTAL.inFrom) / (at - PORTAL.inFrom));
   const v = clamp01((b - at) / (PORTAL.outTo - at));
   const w = clamp01((b - (at - PORTAL.swapFor / 2)) / PORTAL.swapFor);
   return {
-    out: smooth(u),
+    out: easeInSine(u),
     world: smooth(w),
-    into: 1 - smooth(v),
+    into: 1 - easeOutSine(v),
     swapU: w,
   };
 }
@@ -151,6 +204,30 @@ export function portalXf(k: number, fx: number, fy: number, cx: number, cy: numb
   };
 }
 
+
+/**
+ * THE IRIS, for an object too small to go INTO. A flat patch of half-size h needs a depth
+ * of about 230 / h, and an olive or a primer's letter A would need 100x and more — a dive
+ * nobody can follow. So those go in as deep as reads comfortably, and over the last
+ * quarter of the push the patch's own colour grows out from the focus until it covers the
+ * band (`PortalIris.tsx`): the camera is rushing in, so it reads as arriving inside the
+ * thing. `irisR` is its radius in the set's own units, `r0` (inside the patch, where
+ * it cannot be seen) until IRIS_FROM, then out to the band's half-diagonal at the deepest
+ * point, times FLAT_MARGIN.
+ */
+export const IRIS_FROM = 0.75;
+/** …and it has covered the band by here, so the flat field holds for the last tenth of
+ *  the push and the first tenth of the pull — the swap sits in the middle of it. */
+export const IRIS_TO = 0.9;
+const HALF_DIAG = Math.hypot(200, PORTAL_BAND_H / 2);
+
+export function irisR(k: number, r0: number, z: number): number {
+  'worklet';
+  const r1 = (FLAT_MARGIN * HALF_DIAG) / Math.pow(z, IRIS_TO);
+  if (r1 <= r0) return r0;
+  const e = smooth(clamp01((k - IRIS_FROM) / (IRIS_TO - IRIS_FROM)));
+  return r0 * Math.pow(r1 / r0, e);
+}
 
 /** How much of a set's WORDS show at a depth `k`: gone as soon as the zoom starts. */
 export function wordsAt(k: number): number {

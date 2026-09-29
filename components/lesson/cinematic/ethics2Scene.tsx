@@ -8,7 +8,7 @@ import ObjectArt from './ObjectArt';
 import { BEATS } from './ethics2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, pose, seated, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
@@ -271,7 +271,11 @@ export default function Ethics2Scene({
     const figGY = n === 0 ? gy : carry(cv, 1, n, gp, gy, A_CLIMB[n] ? 1 : tr);
     // walking away from the café he faces the way he goes, and turns back the moment he stops
     const back = A_STEPS[n] ? clamp01((b - walkDur - 1.5) / 0.35) : A_CLIMB[n] ? clamp01((b - climbEnd - 0.1) / 0.35) : 0;
-    const dirV = A_STEPS[n] || A_CLIMB[n] ? lerp(facing(END_DIR[p], -1, b), 1, back) : facing(END_DIR[p], DIR[n], b);
+    // a walk faces the way it goes (C18: he walked backwards 106 units to the A-board on
+    // b2, facing the café the whole way), then turns to the beat's own facing on arrival
+    const dirV = A_STEPS[n] || A_CLIMB[n] ? lerp(facing(END_DIR[p], -1, b), 1, back)
+      : walking ? lerp(facing(END_DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      : facing(END_DIR[p], DIR[n], b);
     const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
     let s: Stance = walking
@@ -334,7 +338,10 @@ export default function Ethics2Scene({
     // looking up at HONESTY
     if (A_STEPS[n]) s = { ...s, neck: s.neck + 0.3 * clamp01((b - walkDur - 0.1) / 0.5) * (1 - clamp01((b - walkDur - 1.4) / 0.4)) };
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── her, at the café table ────────────────────────────────────────────
     const r0 = seated(SEAT_H, t);

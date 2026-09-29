@@ -9,7 +9,7 @@ import { attendAt } from './attend';
 import { BEATS } from './political4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, hideLeadWhile, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -22,7 +22,8 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
-import { PORTAL, PORTAL_Z, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import { PORTAL, portalAt, portalSwapAt, portalXf, portalScale, wordsAt } from './portal';
+import PortalIris from './PortalIris';
 import {
   fence, soapbox, gardenTable, well, desks, doorway, bookshelf, wainscot,
   FENCE, SOAPBOX, CAKE, PRIMER, WELL, CHART, CHART_A, PAGE_A_H, DOOR, DESKS, HOOK,
@@ -69,8 +70,18 @@ const LINES = [7.56, 6.72, 7.24, 9.08, 8, 0, 10.36, 5.52, 0, 0, 0];
 /** His scale: a lone figure at K_FIG fills 45% of this band; this is 37%. */
 const K_M = K_FIG * 0.82;
 const MID = { x: STAGE_W / 2, y: 401 };
+/**
+ * THE CHANGE GOES THROUGH ONE FLAT COLOUR (portal.ts): into the paper inside the page's
+ * A, out of the paper inside the chart's. A letter is far too small to go all the way
+ * into, so the chart goes 10 deep (the page as much deeper as its A is smaller) and the
+ * paper grows out from the middle of the A over the last of the push (PortalIris) — at
+ * the swap the band is nothing but paper. The disc starts inside the A's counter, clear of
+ * both legs and of the crossbar.
+ */
+const Z_SCHOOL = 10;
 /** The page's A is smaller than the chart's by this, so the garden is pushed in that much deeper. */
-const Z_GARDEN = PORTAL_Z * (CHART_A.h / PAGE_A_H);
+const Z_GARDEN = Z_SCHOOL * (CHART_A.h / PAGE_A_H);
+const COUNTER_R = 3.3;
 /**
  * How long the camera holds before it pushes in on the change beat: time for him to
  * step clear of the thing it goes into, so he leaves the frame at his own size
@@ -84,7 +95,7 @@ const GARDEN_BACK = 302;
 /** When he steps back: once the primer is standing, before the camera moves. */
 const BACK_AT = 0.6;
 /** The crossover on the change beat, where he can change place or turn unseen. */
-const SWAP_FROM = portalSwapAt(Z_GARDEN, undefined, DELAY) - PORTAL.swapFor / 2;
+const SWAP_FROM = portalSwapAt(Z_GARDEN, Z_SCHOOL, DELAY) - PORTAL.swapFor / 2;
 /** The primer, held open: where the page's A sits from his hand. */
 const A_FROM_HAND = { x: -8, y: -9 };
 /** b0: in from outside the fence. b3: across to the soapbox. b4: across to the gate. */
@@ -174,7 +185,7 @@ export default function Political4Scene({
     };
 
     // ── the change (b6), and which set he is in otherwise ───────────────────
-    const pt = portalAt(b, Z_GARDEN, undefined, DELAY);
+    const pt = portalAt(b, Z_GARDEN, Z_SCHOOL, DELAY);
     const world = A_SCHOOL[n] ? pt.world : SCHOOL[n];
     const kGarden = A_SCHOOL[n] ? pt.out : SCHOOL[n];
     const kSchool = A_SCHOOL[n] ? pt.into : 1 - SCHOOL[n];
@@ -243,7 +254,10 @@ export default function Political4Scene({
     const chart = A_STATE[n] ? pulse(1.2, 1.7, 4.6) : 0;
     s = handOn(s, x, gy, dir, CHART.x0 + 6, 396, chart);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the garden ───────────────────────────────────────────────────────────
     const neg = A_NEG[n] ? st(0.18, 0.3) : NEG[n];
@@ -284,7 +298,7 @@ export default function Political4Scene({
       inHand: carry(cv, 8, n, 0, inHand, tr),
       others: carry(cv, 9, n, OTHERS[p], others, tr),
       primerHeld: carry(cv, 10, n, HOLDING[p], primerHeld, tr),
-      placed: A_SCHOOL[n] && world < 0.5 ? placed : 0,
+      placed: A_SCHOOL[n] ? placed : 0,
       positive: carry(cv, 11, n, SCHOOL[p], positive, tr),
       state: carry(cv, 12, n, STATE[p], state, tr),
       ring: carry(cv, 13, n, 0, ODD[n], tr),
@@ -306,15 +320,14 @@ export default function Political4Scene({
   });
   const schoolXf = useAnimatedStyle(() => ({
     opacity: SCENE.value.world > 0.001 ? 1 : 0,
-    ...portalXf(SCENE.value.kSchool, CHART_A.x, CHART_A.y, MID.x, MID.y),
+    ...portalXf(SCENE.value.kSchool, CHART_A.x, CHART_A.y, MID.x, MID.y, Z_SCHOOL),
   }));
   const figXf = useAnimatedStyle(() => {
     const inSchool = SCENE.value.world >= 0.5;
     const k = inSchool ? SCENE.value.kSchool : SCENE.value.kGarden;
     const w = DF.value.wrR;
-    const s = inSchool ? portalScale(k) : portalScale(k, Z_GARDEN);
     const xf = inSchool
-      ? portalXf(k, CHART_A.x, CHART_A.y, MID.x, MID.y)
+      ? portalXf(k, CHART_A.x, CHART_A.y, MID.x, MID.y, Z_SCHOOL)
       : portalXf(k, lerp(w[0].translateX, PRIMER_REST.x, SCENE.value.placed) + A_FROM_HAND.x, lerp(w[1].translateY, PRIMER_REST.y, SCENE.value.placed) + A_FROM_HAND.y, MID.x, MID.y, Z_GARDEN);
     return { opacity: 1, ...xf };
   });
@@ -325,10 +338,12 @@ export default function Political4Scene({
     <View style={styles.scene}>
       <Animated.View style={[styles.set, schoolXf]} pointerEvents="none">
         <School S={SCENE} />
+        <PortalIris S={SCENE} field="kSchool" x={CHART_A.x} y={CHART_A.y} r0={COUNTER_R} z={Z_SCHOOL} color={PAPER_LIT} />
       </Animated.View>
       <Animated.View style={[styles.set, gardenXf]} pointerEvents="none">
         <Garden S={SCENE} />
         <Held S={SCENE} DF={DF} />
+        <PortalIris S={SCENE} field="kGarden" x={PRIMER_REST.x + A_FROM_HAND.x} y={PRIMER_REST.y + A_FROM_HAND.y} r0={(COUNTER_R * PAGE_A_H) / CHART_A.h} z={Z_GARDEN} color={PAPER_LIT} />
       </Animated.View>
       {/* THE WORDS ARE LAID OVER THE SETS, NOT INSIDE THEM. The must-box probe reads a
           word inside a transparent plate, and a set still nine times over on the change

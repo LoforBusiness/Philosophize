@@ -10,7 +10,7 @@ import { oEll, oRect, oTri, oBar } from './objects';
 import { BEATS } from './political3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -268,7 +268,10 @@ export default function Political3Scene({
     s = handOn(s, x, dir, 1, SLOT.x, SLOT.y - 3 + 4 * sec(arrive + 0.8, arrive + 1.0), vote);
     const slipHeld = A_ROUSSEAU[n] ? sec(arrive + 0.2, arrive + 0.3) * (1 - sec(arrive + 0.95, arrive + 1.05)) : 0;
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ─────────────────────────────────────────────────────────────
     // the shadow comes back for the state of war, and is gone again once the line is over

@@ -9,7 +9,7 @@ import SetArt from './SetArt';
 import { BEATS } from './valid3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -249,7 +249,10 @@ export default function Valid3Scene({
     const pull = A_REJECT[n] ? pulse(5.6, 6.0, 7.2) : 0;
     s = handOn(s, x, dir, HOPPERS[0] - 2, HOPPER_MOUTH - 4 - 14 * sec(6.0, 6.6), pull);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the machine ──────────────────────────────────────────────────────────
     const p1 = A_LOAD[n] ? sec(0.9, 1.7) : P1_ON[n];

@@ -9,7 +9,7 @@ import SetArt from './SetArt';
 import { BEATS } from './epistemology4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing, pickAt,
@@ -269,7 +269,10 @@ export default function Epistemology4Scene({
     const cordHand = A_FORMS[n] ? pulse(3.2, 3.5, 4.6) : 0;
     s = handOn(s, x, dir, CORD.x, CORD.handle + 6 * sec(3.5, 4.0), cordHand);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(P[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     // ── the room ─────────────────────────────────────────────────────────────
     const lit = A_OPEN[n] ? sec(2.6, 3.2) : A_SHUT[n] ? 1 - sec(0.35, 0.75) : A_KANT[n] ? sec(3.55, 4.1) : LIT[n];

@@ -9,7 +9,7 @@ import { Outlined, ell, bar, tri } from './Silhouette';
 import { BEATS } from './metaphysics2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
-  type Bundle, type Stance,
+  type Bundle, type Stance, mixKeepLegs,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
@@ -340,7 +340,10 @@ export default function Metaphysics2Scene({
       : [0.2, 0, 0, 0];
     const lk = attendAt(LK, b, 0, 0, 0);
 
-    const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(E[p], t)), s, tr));
+    // on a walking beat the feet are the walk's own (rig.mixKeepLegs): blending them from
+    // the last beat's standing feet dragged the planted foot along the floor
+    const prevPose = carryFrom(held, n, hHold(E[p], t));
+    const fig = keepHeld(held, (walking ? mixKeepLegs(prevPose, s, tr) : mixStance(prevPose, s, tr)));
 
     return {
       fig: lookPose(fig, x, GROUND, K_MAG, dirV, 1, carry(cv, 24, n, lk.x, lk.x, tr), carry(cv, 25, n, lk.y, lk.y, tr), carry(cv, 26, n, 0, lk.w, tr)),

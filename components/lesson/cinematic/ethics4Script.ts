@@ -89,6 +89,8 @@ export const BEATS: Ethics4Beat[] = [
   },
   {
     p: 158, x: 114, act: 'globe', pins: true, descr: true, moral: true, error: true, bene: true, obj: true,
+    // wide before the change: a push held into it stayed on the village for three beats
+    tour: [[0, 288, 400, 226, 1.2, 9]],
     text: 'Cultures differing does not make every code equally true. Disagreement about the Earth’s shape didn’t make every answer true.',
     dur: 1.8,
   },

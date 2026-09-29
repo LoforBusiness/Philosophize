@@ -8,10 +8,11 @@ import ObjectArt from './ObjectArt';
 import SetArt from './SetArt';
 import { BEATS } from './logic2Script';
 import {
-  WALK, ease01, lerp, mixStance, narratorHold, narratorLive, stand, strideStance, type Bundle, type Stance,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, strideStance, travelStance,
+  type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, facing,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
@@ -236,7 +237,14 @@ export default function Logic2Scene({
     // He stands by the mast facing the work. On the rebuild he pushes the second
     // premise home, walking the way he faces (C18); `walkU` is that walk.
     const walkU = A_RE[n] ? st(0.1, 0.32) : 0;
-    const x = carry(cv, 29, n, X[p], X[n], A_RE[n] ? walkU : tr);
+    // …and on the pull he steps out of the second premise's way (330 → 356): a real walk,
+    // facing the way he goes, then turned back to the stones — it was a glide backwards
+    const stepDur = moveTr(X[p], X[n], 0.85);
+    const stepU = A_PULL[n] && Math.abs(X[n] - X[p]) > 1 ? ease01(clamp01(b / stepDur)) : 1;
+    const x = carry(cv, 29, n, X[p], X[n], A_RE[n] ? walkU : A_PULL[n] ? stepU : tr);
+    const dirV = A_PULL[n] && Math.abs(X[n] - X[p]) > 1
+      ? lerp(facing(-1, X[n] > X[p] ? 1 : -1, b), -1, clamp01((b - stepDur) / 0.3))
+      : -1;
 
     // ── the crane ──────────────────────────────────────────────────────────
     let T = PARK_T;
@@ -368,6 +376,7 @@ export default function Logic2Scene({
     // the rebuild: he walks the second premise home, his hand on its end, leaning in
     const push = A_RE[n] ? st(0.1, 0.13) * (1 - st(0.32, 0.4)) : 0;
     if (A_RE[n] && walkU > 0 && walkU < 1) s = strideStance(X[p], X[n], s, walkU, WALK, 0);
+    if (stepU < 1) s = travelStance(X[p], X[n], s, s, s, stepU, WALK, 0);
     s = handOn(s, x, p2x + STONE.baseW / 2 - 2, BASE_TOP + 12, push);
     s = { ...s, tilt: s.tilt - 0.12 * push };
 
@@ -402,7 +411,7 @@ export default function Logic2Scene({
       carry(cv, 2, n, 0, hits[0], tr), carry(cv, 3, n, 0, hits[1], tr), carry(cv, 4, n, 0, hits[2], tr),
     ];
     return {
-      fig: lookPose(fig, x, GROUND, K_M, -1, 1, carry(cv, 30, n, lk.x, lk.x, tr), carry(cv, 31, n, lk.y, lk.y, tr), carry(cv, 32, n, 0, lk.w, tr)),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 30, n, lk.x, lk.x, tr), carry(cv, 31, n, lk.y, lk.y, tr), carry(cv, 32, n, 0, lk.w, tr)),
       T, H, load,
       block: carry(cv, 24, n, 0, load === 4 ? 1 : 0, tr),
       stampsOn: carry(cv, 25, n, STAMPS[p], STAMPS[n], tr),
