@@ -304,7 +304,6 @@ function ProfileSection() {
   const setProfile = useUserDataStore((s) => s.setProfile);
   const joinedAt = useUserDataStore((s) => s.joinedAt);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
-  const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const streakRaw = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
@@ -476,7 +475,7 @@ function ProfileSection() {
       <View style={styles.miniStats}>
         <MiniStat value={lessons} label="Lessons" />
         <View style={styles.miniDiv} />
-        <MiniStat value={savedQuotes.length} label="Quotes" />
+        <MiniStat value={xp} label="XP" />
         <View style={styles.miniDiv} />
         <MiniStat value={streak} label="Day Streak" />
       </View>
@@ -725,23 +724,9 @@ function DisplaySection() {
     <Card>
       <Header title="Display" sub="What the app shows you, and where." />
       <View style={styles.hr} />
-      <Row title="Daily Quote Card" sub="A fresh quote inside the app each day" last={!settings.widgetEnabled}>
-        <Toggle value={settings.widgetEnabled} onChange={(v) => setSetting('widgetEnabled', v)} />
-      </Row>
-      {settings.widgetEnabled ? (
-        <Row title="Where It Appears" sub="The screen the card is shown on" last stack>
-          <Segmented
-            value={settings.widgetPlacement}
-            onChange={(k) => setSetting('widgetPlacement', k as AppSettings['widgetPlacement'])}
-            options={[
-              { key: 'home', label: 'Home' },
-              { key: 'profile', label: 'Profile' },
-              { key: 'insights', label: 'Insights' },
-            ]}
-          />
-        </Row>
-      ) : null}
-      <View style={styles.hr} />
+      {/* The in-app Daily Quote Card and its placement went on 2026-09-29 with
+          saved quotes (§22: a setting earns its place by having a reader, and the
+          card no longer has a screen). The phone's own widget stays. */}
       <Row title="Home-Screen Widget" sub="The scene the quote is printed on" last stack>
         <WidgetSceneRow />
       </Row>
@@ -1146,7 +1131,6 @@ function SubscriptionSection() {
 
 function DangerSection() {
   const resetProgress = useUserDataStore((s) => s.resetProgress);
-  const clearSavedQuotes = useUserDataStore((s) => s.clearSavedQuotes);
   const revokeBadges = useUserDataStore((s) => s.revokeBadges);
   const deleteAccount = useUserDataStore((s) => s.deleteAccount);
 
@@ -1165,12 +1149,6 @@ function DangerSection() {
         sub="Erase all XP, ranks, and completed lessons. Cannot be undone."
         label="Reset Progress"
         onPress={() => ask('Reset Learning Progress', 'This erases all XP, ranks, and completed lessons. This cannot be undone.', 'Reset Progress', resetProgress)}
-      />
-      <DangerRow
-        title="Clear Saved Quotes"
-        sub="Permanently delete all quotes you have collected."
-        label="Clear Quotes"
-        onPress={() => ask('Clear Saved Quotes', 'This permanently deletes every quote you have collected.', 'Clear Quotes', clearSavedQuotes)}
       />
       <DangerRow
         title="Revoke All Badges"

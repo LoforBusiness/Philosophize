@@ -1,15 +1,10 @@
 import { ALL_BRANCHES } from '@/data';
-import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { RANKS } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
-import { hasQuiz } from '@/data/philosopherQuizzes';
 
 // COUNTED ONCE AT MODULE LOAD, not per render. These are the biggest arrays in
 // the app, and a certificate that recounted them on every frame would be doing
 // the most expensive thing on the screen for a figure that cannot change.
-const PHILOSOPHER_COUNT = ALL_PHILOSOPHERS.length;
-const QUOTATION_COUNT = ALL_PHILOSOPHERS.reduce((n, p) => n + (p.quotes?.length ?? 0), 0);
-const QUIZ_COUNT = ALL_PHILOSOPHERS.filter((p) => hasQuiz(p.id)).length;
 const RANK_COUNT = RANKS.length;
 const BADGE_COUNT = BADGES.length;
 
@@ -107,13 +102,15 @@ export function longPass(line: PassLine): string {
  * THE FREE HALF, and on a hard paywall it is the half that sells the trial as
  * much as the Pass half does: it is proof the app is not a locked door.
  *
- * Every figure is COUNTED OUT OF THE TREE. The quotations are the THINKERS'
- * quotations, because those are the ones a free reader can save — the lesson
- * quote cards are behind the Pass with the lessons.
+ * Every figure is COUNTED OUT OF THE TREE.
+ *
+ * THINKERS, QUOTES AND QUIZZES WERE THE FIRST THREE TILES until 2026-09-29, when the
+ * Thinkers tab and saved quotes went with the move to seven subjects. A paywall that
+ * lists a roster the app no longer opens is selling what is not there.
  */
 export interface FreeThing {
   /** Stable id — `check-pass` names its assertions by these. */
-  id: 'thinkers' | 'quotations' | 'quizzes' | 'ranks' | 'badges' | 'streak';
+  id: 'ranks' | 'badges' | 'streak';
   /** The big figure on the tile. Counted, never typed. */
   figure: string;
   /** What the figure counts. One word where it can be: a tile is 85pt at 320dp. */
@@ -122,9 +119,6 @@ export interface FreeThing {
 
 export function freeThings(): readonly FreeThing[] {
   return [
-    { id: 'thinkers', figure: `${PHILOSOPHER_COUNT}`, noun: 'thinkers' },
-    { id: 'quotations', figure: QUOTATION_COUNT.toLocaleString('en-US'), noun: 'quotes' },
-    { id: 'quizzes', figure: `${QUIZ_COUNT}`, noun: 'quizzes' },
     { id: 'ranks', figure: `${RANK_COUNT}`, noun: 'ranks' },
     { id: 'badges', figure: `${BADGE_COUNT}`, noun: 'badges' },
     { id: 'streak', figure: 'XP', noun: '& streaks' },

@@ -120,9 +120,6 @@ const ICON = 19;
 
 function TileIcon({ id }: { id: FreeTile['id'] }) {
   switch (id) {
-    case 'thinkers': return <StatSticker name="thinkers" size={ICON} />;
-    case 'quotations': return <StatSticker name="quotes" size={ICON} />;
-    case 'quizzes': return <StatSticker name="lessons" size={ICON} />;
     case 'streak': return <StatSticker name="xp" size={ICON} />;
     case 'ranks': {
       const i = Math.max(0, TILE_RANK);

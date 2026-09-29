@@ -301,16 +301,13 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
   const QZ = await import('@/data/philosopherQuizzes');
   const free = V.freeThings();
   const byId = (id) => free.find((l) => l.id === id);
-  const IDS = ['thinkers', 'quotations', 'quizzes', 'ranks', 'badges', 'streak'];
+  // THINKERS, QUOTES AND QUIZZES LEFT THE FREE TILES ON 2026-09-29 with the Thinkers
+  // tab: Ashmere teaches seven subjects, and a Pass screen that advertised a roster
+  // the app no longer opens would be selling what is not there.
+  const IDS = ['ranks', 'badges', 'streak'];
   ok(free.length === IDS.length && IDS.every((i) => byId(i)), 'one free tile per free id',
     free.map((t) => t.id).join(' · '));
-  let quotations = 0;
-  for (const p of PH.ALL_PHILOSOPHERS) quotations += (p.quotes || []).length;
-  const quizzes = PH.ALL_PHILOSOPHERS.filter((p) => QZ.hasQuiz(p.id)).length;
   const num = (id) => Number(String(byId(id)?.figure).replace(/,/g, ''));
-  ok(num('thinkers') === PH.ALL_PHILOSOPHERS.length, 'the thinkers tile counts ALL_PHILOSOPHERS', `${byId('thinkers')?.figure}`);
-  ok(num('quotations') === quotations, 'the quotes tile counts every thinker\u2019s quotations', `${byId('quotations')?.figure} of ${quotations}`);
-  ok(num('quizzes') === quizzes, 'the quizzes tile counts the thinkers with a quiz', `${byId('quizzes')?.figure}`);
   ok(num('ranks') === RK.RANKS.length, 'the ranks tile counts the real ladder', `${byId('ranks')?.figure}`);
   ok(num('badges') === BG.BADGES.length, 'the badges tile counts the real roll', `${byId('badges')?.figure}`);
   ok(!free.some((t) => /lesson/i.test(t.noun)), 'and no free tile is a lesson');

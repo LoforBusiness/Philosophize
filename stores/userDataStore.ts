@@ -51,7 +51,6 @@ export interface QuizScore {
   lastPlayedAt: number;
 }
 
-export type WidgetPlacement = 'home' | 'profile' | 'insights';
 
 /**
  * EVERY KEY IN HERE IS READ BY SOMETHING.
@@ -72,9 +71,10 @@ export interface AppSettings {
   reminderTime: string; // e.g. '08:00 AM'
   streakAlerts: boolean;
   quoteOfDay: boolean;
-  // Daily quote widget (in-app, shown on a chosen screen)
-  widgetEnabled: boolean;
-  widgetPlacement: WidgetPlacement;
+  // `widgetEnabled` and `widgetPlacement` were here: the in-app Daily Quote Card and
+  // which screen showed it. The card went with saved quotes on 2026-09-29, so nothing
+  // reads them; removed rather than defaulted, so sanitizeSettings() prunes them from
+  // AsyncStorage and the cloud snapshot.
   // Which scene the HOME-SCREEN widget is drawn on. Read outside Settings by
   // lib/widget/background.ts, which the headless widget task calls — so this key
   // meets the rule above. Values are ids from components/widget/backgrounds.ts;
@@ -113,8 +113,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   reminderTime: '08:00 AM',
   streakAlerts: true,
   quoteOfDay: true,
-  widgetEnabled: false,
-  widgetPlacement: 'home',
   widgetBackground: 'grove',
   // `autoAdvance` was here and defaulted to TRUE, which is why finishing a lesson
   // threw the reader into the next one. Its behaviour is replaced by the advance

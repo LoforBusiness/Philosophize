@@ -2008,8 +2008,12 @@ export function QuoteCard({
       // Only consulted when there is no thinker: QuotePlate prefers eraGroup, so
       // passing it unconditionally would override the thinker with a guess.
       eraGroup={q.philosopherId ? null : eraGroupOfDate(q.era)}
-      saved={saved}
-      onToggleSave={onToggle}
+      // NO SAVE BUTTON (2026-09-29). Saved quotes stopped being a feature when the
+      // Thinkers tab went, and a save with no shelf to see it on is a button that
+      // does nothing a reader can find. QuotePlate draws the button only when it is
+      // handed `onToggleSave`, so the quotation still shows and nothing else moves.
+      // `saved`/`onToggle` stay in the signature so no caller changes (Phase 2).
+      saved={false}
       style={styles.quotePlate}
     />
   );

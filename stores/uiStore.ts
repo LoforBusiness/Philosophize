@@ -35,10 +35,6 @@ interface UIStore {
   ranksBadgesTab: 'ranks' | 'badges' | null;
   openRanksBadges: (tab: 'ranks' | 'badges') => void;
   closeRanksBadges: () => void;
-  // Saved Quotes sheet — slides up the user's full quote collection.
-  savedQuotesOpen: boolean;
-  openSavedQuotes: () => void;
-  closeSavedQuotes: () => void;
   // Paywall sheet — slides the Scholar's Pass offer up as a dismissible option,
   // from a locked stop on a branch road (a lesson or a unit review). Since the
   // hard paywall (2026-09-25) it draws `HardPaywall`; `paywallSource` is why it
@@ -162,9 +158,6 @@ export const useUIStore = create<UIStore>((set) => ({
   ranksBadgesTab: null,
   openRanksBadges: (tab) => set({ ranksBadgesTab: tab }),
   closeRanksBadges: () => set({ ranksBadgesTab: null }),
-  savedQuotesOpen: false,
-  openSavedQuotes: () => set({ savedQuotesOpen: true }),
-  closeSavedQuotes: () => set({ savedQuotesOpen: false }),
   paywallOpen: false,
   paywallSource: 'locked_lesson',
   devUnlocked: __DEV__,

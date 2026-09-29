@@ -163,5 +163,29 @@ head('§7 · no colour is typed into a subject component');
   }
 }
 
+head('§8 · quotes are not a feature outside lessons any more (2026-09-29)');
+// The owner: "having a thinkers profile or thinkers tab, and also quotes will not be
+// necessary." Phase 1 takes quotes off Profile, Settings and the lesson's save button;
+// the lessons still SHOW their quotation (Phase 2 decides that), and the store keeps
+// the data so nothing a reader saved is destroyed by a screen going away.
+{
+  const fs = await import('node:fs');
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  for (const rel of ['app/(app)/profile/index.tsx', 'app/(app)/settings.tsx', 'app/(app)/index.tsx']) {
+    const src = strip(fs.readFileSync(rel, 'utf8'));
+    const hits = src.match(/savedQuotes|openSavedQuotes|clearSavedQuotes|profileQuote|DailyQuoteWidget/g) ?? [];
+    ok(hits.length === 0, `${rel} shows no saved quotes`, [...new Set(hits)].join(' '));
+  }
+  const store = strip(fs.readFileSync('stores/userDataStore.ts', 'utf8'));
+  const defaults = /const DEFAULT_SETTINGS[\s\S]*?\n\};/.exec(store)?.[0] ?? '';
+  ok(defaults.length > 0, 'DEFAULT_SETTINGS was found');
+  ok(!/widgetEnabled|widgetPlacement/.test(defaults),
+    'the in-app quote card\'s settings are gone from DEFAULT_SETTINGS, so sanitizeSettings prunes them from old installs (§22)');
+  const kit = strip(fs.readFileSync('components/lesson/cinematic/cinematicKit.tsx', 'utf8'));
+  ok(!/onToggleSave=/.test(kit), 'a lesson\'s quote card offers no save button');
+  const pass = strip(fs.readFileSync('lib/utils/passValue.ts', 'utf8'));
+  ok(!/id: 'thinkers'|id: 'quotations'|id: 'quizzes'/.test(pass), 'the Pass chart\'s free tiles no longer name thinkers, quotations or quizzes');
+}
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);

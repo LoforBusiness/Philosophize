@@ -56,7 +56,6 @@ import { prepareFeedback } from '@/lib/feedback';
 import { configureGoogleSignIn } from '@/lib/auth/social';
 import PhilosopherSheet from '@/components/shared/PhilosopherSheet';
 import RanksBadgesSheet from '@/components/shared/RanksBadgesSheet';
-import SavedQuotesSheet from '@/components/shared/SavedQuotesSheet';
 import PaywallSheet from '@/components/shared/PaywallSheet';
 import PassConferred from '@/components/paywall/PassConferred';
 import LaunchScreen from '@/components/launch/LaunchScreen';
@@ -457,7 +456,6 @@ export default function RootLayout() {
         <Stack.Screen name="thinker/[id]" />
       </Stack>
       {/* Global bottom sheets — opened from anywhere via uiStore */}
-      <SavedQuotesSheet />
       <PhilosopherSheet />
       <RanksBadgesSheet />
       <PaywallSheet />

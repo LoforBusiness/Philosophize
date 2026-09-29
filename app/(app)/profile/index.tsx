@@ -9,7 +9,6 @@ import RankClimbChart from '@/components/shared/RankClimbChart';
 import RankHeader from '@/components/profile/RankHeader';
 import BecomingJournal from '@/components/profile/BecomingJournal';
 import { DayBars } from '@/components/profile/InkCharts';
-import DailyQuoteWidget from '@/components/shared/DailyQuoteWidget';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -73,7 +72,6 @@ function SectionLabel({ children }: { children: string }) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const savedQuotes = useUserDataStore((s) => s.savedQuotes);
   const lessonsByBranch = useUserDataStore((s) => s.lessonsByBranch);
   const philosopherViews = useUserDataStore((s) => s.philosopherViews);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
@@ -110,11 +108,7 @@ export default function ProfileScreen() {
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const bioSeed = useUserDataStore((s) => s.bioSeed);
   const settings = useUserDataStore((s) => s.settings);
-  const showWidget = settings.widgetEnabled && settings.widgetPlacement === 'profile';
   const openRanksBadges = useUIStore((s) => s.openRanksBadges);
-  const openSavedQuotes = useUIStore((s) => s.openSavedQuotes);
-  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
-  const profileQuote = useUserDataStore((s) => s.profileQuote);
   const isSignedIn = !!useAuthSession();
 
   useEffect(() => {
@@ -164,7 +158,10 @@ export default function ProfileScreen() {
   );
 
   const lessonsDone = Object.values(lessonsByBranch).reduce((a, b) => a + b, 0);
-  const quotesSaved = savedQuotes.length;
+  // Quotes are not a feature any more (2026-09-29): the bio is told there are none,
+  // so it never tells a reader about a collection they can no longer open. The
+  // store still holds what they saved.
+  const quotesSaved = 0;
   const distinctViewed = Object.keys(philosopherViews).length;
   // THE STORE'S TOTAL, NOT A RE-DERIVED ONE.
   //
@@ -228,22 +225,20 @@ export default function ProfileScreen() {
   // are now two different questions rather than one answered inconsistently.
   const philScores = useMemo(() => ALL_PHILOSOPHERS.map((p) => {
     const views = philosopherViews[p.id] ?? 0;
-    const quotes = savedQuotes.filter((q) => q.philosopherId === p.id).length;
-    return { name: p.name, score: views * 3 + quotes * 5, opened: views, kept: quotes };
+    return { name: p.name, score: views * 3, opened: views, kept: 0 };
   })
     .filter((p) => p.score > 0)
-    .sort((a, b) => b.score - a.score), [philosopherViews, savedQuotes]);
+    .sort((a, b) => b.score - a.score), [philosopherViews]);
   const topPhilosopher = philScores[0] ?? null;
 
   const branchInterest = useMemo(() => ALL_BRANCHES.map((b) => {
     const lessons = lessonsByBranch[b.slug] ?? 0;
-    const quotes = savedQuotes.filter((q) => q.branchSlugs.includes(b.slug)).length;
     const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
       (a, p) => a + (philosopherViews[p.id] ?? 0),
       0
     );
-    return { slug: b.slug, name: b.name, interactions: lessons + quotes + views };
-  }).sort((a, b) => b.interactions - a.interactions), [lessonsByBranch, savedQuotes, philosopherViews]);
+    return { slug: b.slug, name: b.name, interactions: lessons + views };
+  }).sort((a, b) => b.interactions - a.interactions), [lessonsByBranch, philosopherViews]);
   const topInterest = (branchInterest[0]?.interactions ?? 0) > 0 ? branchInterest[0] : null;
 
   // ── what the three sections DRAW ──────────────────────────────────────────
@@ -453,36 +448,12 @@ export default function ProfileScreen() {
             )}
           </Pressable>
 
-          {/* Featured "profile quote" — set from any quote (lesson / saved / thinker).
-              Tapping it opens that thinker; empty state nudges the user to pick one. */}
-          {profileQuote ? (
-            <Pressable
-              onPress={() => openPhilosopher(profileQuote.philosopherId)}
-              style={({ pressed }) => [styles.profileQuote, pressed && { opacity: 0.7 }]}
-              hitSlop={6}
-            >
-              <Text style={[styles.profileQuoteText, { color: palette.text }]} numberOfLines={4}>
-                “{profileQuote.text}”
-              </Text>
-              <Text style={[styles.profileQuoteBy, { color: palette.muted }]}>
-                — {profileQuote.author.toUpperCase()}
-              </Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={openSavedQuotes}
-              style={({ pressed }) => [styles.profileQuotePrompt, pressed && { opacity: 0.6 }]}
-              hitSlop={6}
-            >
-              <SketchIcon name="star" size={12} color={palette.muted} />
-              <Text style={[styles.profileQuotePromptText, { color: palette.muted }]}>
-                Feature a favorite quote
-              </Text>
-            </Pressable>
-          )}
+          {/* The featured quotation under the name went on 2026-09-29, with saved
+              quotes: Ashmere teaches seven subjects, and quotes are not a feature
+              of the app any more (the owner's call). */}
         </View>
           </>
-        ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, profileQuote, openRanksBadges, openSavedQuotes, openPhilosopher])}
+        ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, openRanksBadges])}
 
         {/* Body */}
         {/* THE CLIPPING USED TO HAPPEN HERE, and this was the half that could
@@ -491,8 +462,6 @@ export default function ProfileScreen() {
             ScrollView. Detaching those twelve bought no memory back and put a
             UI-thread pass under every frame of the overscroll stretch. */}
         <View style={styles.body}>
-
-          {showWidget ? <DailyQuoteWidget style={{ marginBottom: SPACE[4] }} /> : null}
 
           {/* streak */}
           {useMemo(() => (
@@ -549,10 +518,11 @@ export default function ProfileScreen() {
           <Card>
             <CountStrip
               items={[
+                // THINKERS and QUOTES went with the Thinkers tab and saved quotes
+                // (2026-09-29); what is left is the reader's own effort.
                 { label: 'LESSONS', value: lessonsDone, icon: 'lessons' },
-                { label: 'THINKERS', value: distinctViewed, icon: 'thinkers' },
-                { label: 'QUOTES', value: quotesSaved, icon: 'quotes' },
                 { label: 'DAYS', value: daysActive, icon: 'days' },
+                { label: 'XP', value: totalXP, icon: 'xp' },
               ]}
             />
 
@@ -585,7 +555,7 @@ export default function ProfileScreen() {
             </View>
           </Card>
             </>
-          ), [lessonsDone, distinctViewed, quotesSaved, daysActive, reading, readingLead, monthXP, xpDays])}
+          ), [lessonsDone, daysActive, totalXP, reading, readingLead, monthXP, xpDays])}
 
           {/* becoming */}
           {useMemo(() => (
@@ -648,36 +618,6 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
-
-          {/* quotes */}
-          {useMemo(() => (
-            <>
-          <SectionLabel>SAVED QUOTES</SectionLabel>
-          <Card onPress={openSavedQuotes} style={styles.quotesCard}>
-            <View style={styles.quotesIcon}>
-              <SketchIcon name={quotesSaved > 0 ? 'bookmark-filled' : 'bookmark'} size={20} color={C.ink} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.quotesCount}>
-                {quotesSaved > 0 ? `${quotesSaved} SAVED` : 'NONE YET'}
-              </Text>
-              {/* A saved quote's teaser is cut to one line on purpose. The empty
-                  line is an instruction and is allowed two, so it is never cut. It
-                  names thinkers, not lessons: since the hard paywall (2026-09-25) a
-                  free reader saves quotes from a thinker's page. */}
-              <Text style={styles.quotesTeaser} numberOfLines={quotesSaved > 0 ? 1 : 2}>
-                {quotesSaved > 0
-                  ? `“${savedQuotes[0].text}”`
-                  : 'Save quotes from any thinker to keep them here'}
-              </Text>
-            </View>
-            {/* mirrored "back" chevron → forward chevron */}
-            <View style={styles.quotesChev}>
-              <SketchIcon name="back" size={14} color={C.inkSoft} />
-            </View>
-          </Card>
-            </>
-          ), [quotesSaved, savedQuotes, openSavedQuotes])}
 
           {/* badges */}
           {useMemo(() => (
@@ -748,7 +688,6 @@ const role = (k: TypeKey) => ({
   lineHeight: TYPE[k].lineHeight,
   letterSpacing: TYPE[k].letterSpacing ?? 0,
 });
-const PLAYFAIR_CAPTION = 'PlayfairDisplay_400Regular';
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.ink },
@@ -802,16 +741,6 @@ const styles = StyleSheet.create({
   rankChipDown: { transform: [{ translateY: LIP.card }] },
   rankChipText: { ...role('micro'), fontFamily: 'Inter_700Bold', letterSpacing: 1, color: C.ink },
 
-  profileQuote: { alignItems: 'center', marginTop: SPACE[3], paddingHorizontal: SPACE[2], maxWidth: 340 },
-  profileQuoteText: {
-    ...role('body'),
-    fontFamily: PLAYFAIR_CAPTION,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  profileQuoteBy: { ...role('micro'), letterSpacing: 1.5, marginTop: SPACE[1] },
-  profileQuotePrompt: { flexDirection: 'row', alignItems: 'center', gap: SPACE[1], marginTop: SPACE[3] },
-  profileQuotePromptText: { ...role('micro'), letterSpacing: 0.5 },
 
   body: { paddingHorizontal: SPACE[3], paddingTop: SPACE[4] },
 
@@ -846,20 +775,6 @@ const styles = StyleSheet.create({
   streakChevron: { transform: [{ scaleX: -1 }] },
 
   rankChartWrap: { marginTop: SPACE[3] },
-
-  quotesCard: { flexDirection: 'row', alignItems: 'center', gap: SPACE[3] },
-  quotesIcon: {
-    width: 38,
-    height: 38,
-    borderWidth: 1.5,
-    borderColor: C.ink,
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quotesCount: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 1.5 },
-  quotesTeaser: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[0] },
-  quotesChev: { transform: [{ scaleX: -1 }], opacity: 0.7 },
 
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[1] },
   // No border: the medal already has an outline, and a box around it just puts a
