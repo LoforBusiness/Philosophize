@@ -8117,10 +8117,20 @@ Technology and History & Politics are announced and empty. Spec:
   - Every object drawn against a Commons reference (`npm run ref`); economics is a
     supply-and-demand board and coins because ethics owns the balance scale.
   - **The wallpaper is a 132dp TILE** (`npm run make:wallpaper` → `assets/images/wallpaper/`,
-    `DoodleGround.tsx`), never a screen-sized drawing — §19's GPU rule. Its colours
-    are `WALL`/`WALL_DOODLE` in tone.ts, a green-grey, never beige. On web an image
-    with no width and height takes its source's size whatever its insets say, so the
-    tile was drawn once until its size was stated.
+    `DoodleGround.tsx`), laid as a GRID of small images sharing one bitmap, fixed
+    behind the scroll view. Its colours are `WALL`/`WALL_DOODLE` in tone.ts, a
+    green-grey, never beige.
+  - **NEVER `resizeMode="repeat"` ON ANDROID — it made Profile and the streak screen
+    lag within a day (§19 a third time).** React Native implements repeat with a
+    Fresco postprocessor (`ReactImageView.TilePostprocessor`) that calls
+    `createBitmap(width, height)`: a bitmap the size of the VIEW. Behind Profile's
+    scrolling body that was ~30MB, plus ~10MB on each other tab, all held for the
+    session, and the app went over HWUI's texture budget — Profile's overscroll
+    stretch and the streak screen's mascot stuttered exactly as §19 records. A
+    browser cannot show it (web repeat is a CSS background).
+  - **A poster draws only while its TAB is focused** (`Poster.tsx`, `useTabFocused`),
+    and is a box of its hue otherwise, released 420ms after blur so the tab fade never
+    shows it empty. Measured in the real navigator: Learn 7 posters held, Profile 0.
   - `npm run sheet:subjects` draws every poster at the card, tile and masthead shape;
     `check:subjects` §5 holds that every box keeps every object in view.
 - **Profile and Pass stand on the wallpaper too, and Profile speaks in subjects.**

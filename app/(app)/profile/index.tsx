@@ -373,6 +373,9 @@ export default function ProfileScreen() {
   return (
     <ScreenTransition bg={palette.base}>
     <View style={styles.root}>
+      {/* The wallpaper, FIXED behind the page like Home's — never inside the scroll
+          content, where a page-tall ground cost a page-tall bitmap (DoodleGround). */}
+      <DoodleGround />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: SPACE[5] }}
@@ -487,9 +490,6 @@ export default function ProfileScreen() {
             ScrollView. Detaching those twelve bought no memory back and put a
             UI-thread pass under every frame of the overscroll stretch. */}
         <View style={styles.body}>
-          {/* The wallpaper Home and Learn stand on (2026-09-29), laid inside the body so
-              it scrolls with the page and the dark header keeps its own ground. */}
-          <DoodleGround />
 
           {/* streak */}
           {useMemo(() => (
@@ -719,8 +719,8 @@ const role = (k: TypeKey) => ({
 });
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.ink },
-  scroll: { flex: 1, backgroundColor: WALL },
+  root: { flex: 1, backgroundColor: WALL },
+  scroll: { flex: 1 },
 
   header: {
     // No background colour: ProfileArtFill paints it. `overflow: hidden` keeps
