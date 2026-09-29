@@ -62,7 +62,10 @@ export const SUBJECTS: readonly Subject[] = [
     hue: '#4E5578', status: 'soon', courses: [],
   },
   {
-    slug: 'personal-growth', name: 'Personal Growth & Self-Help', short: 'Personal Growth',
+    // U+2060 WORD JOINER after the hyphen: the name wrapped as 'Self-' / 'Help' on
+    // the carousel card. The font has no non-breaking hyphen (U+2011 draws tofu), and
+    // a joiner is default-ignorable, so it draws nothing and only forbids the break.
+    slug: 'personal-growth', name: 'Personal Growth & Self-\u2060Help', short: 'Personal Growth',
     blurb: 'Habits, focus and a better you',
     hue: '#6E7A4A', status: 'soon', courses: [],
   },
