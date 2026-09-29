@@ -51,10 +51,9 @@ import { useUIStore } from '@/stores/uiStore';
  *
  * HOME IS IN THE LIST EVEN THOUGH IT IS THE TAB THE APP OPENS ON. `lazy` is
  * ignored for the focused screen, so on an ordinary launch its turn costs
- * nothing at all — but the app does not always open on Home. A widget deep link
- * lands on Thinkers (see the root layout's `pendingThinker`), and leaving Home
- * out means the one tab a reader is certain to press next is the one still
- * unbuilt. It is first for the same reason.
+ * nothing at all — but the app does not always open on Home (a notification can
+ * land on the Pass), and leaving Home out means the one tab a reader is certain
+ * to press next is the one still unbuilt. It is first for the same reason.
  */
 /**
  * AND A HIDDEN ROUTE CAN NEED IT MORE THAN A TAB DOES. `streak` is pushed from
@@ -79,7 +78,7 @@ import { useUIStore } from '@/stores/uiStore';
  * other destination costs a deliberate press on the bar first, and this one
  * is a box on the screen the reader is already standing on.
  */
-const WARM = ['index', 'branches', 'streak', 'philosophers', 'pass', 'profile'] as const;
+const WARM = ['index', 'branches', 'streak', 'pass', 'profile'] as const;
 
 // `launchDone` fires when the launch screen starts to LIFT, not when it leaves:
 // its own art still has a 520ms dissolve to run, and Home's arrival stagger
@@ -261,10 +260,12 @@ export default function AppLayout() {
         name="branches"
         options={{ title: 'Branches', tabBarIcon: tab('learn', current === 'branches'), lazy: !built('branches') }}
       />
-      <Tabs.Screen
-        name="philosophers"
-        options={{ title: 'Thinkers', tabBarIcon: tab('thinkers', current === 'philosophers'), lazy: !built('philosophers') }}
-      />
+      {/* ── FOUR TABS: THINKERS WENT WITH THE SINGLE SUBJECT (2026-09-29) ───
+          Ashmere teaches seven subjects now, Brilliant's shape, and a roster of
+          341 philosophers is one subject's furniture rather than a destination
+          for everyone. The owner: "having a thinkers profile or thinkers tab, and
+          also quotes will not be necessary." A philosopher named in a lesson still
+          opens their card (PhilosopherSheet) — that is a lesson's, not the tab's. */}
       {/* ── FIVE TABS, AND STATISTICS IS THE ONE THAT WENT (2026-09-15) ─────
           The bar carried six. The owner asked for five: "instead of a dedicated
           statistics tab, I want all the statistics to be in the profile. And I

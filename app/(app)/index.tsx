@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView } from 'react-native';
+import { useCallback, useState } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform, ScrollView, InteractionManager } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
@@ -11,6 +12,7 @@ import SubjectCarousel from '@/components/home/SubjectCarousel';
 import Arrive from '@/components/home/Arrive';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { useUserDataStore } from '@/stores/userDataStore';
+import { useUIStore } from '@/stores/uiStore';
 import { effectiveStreak } from '@/lib/utils/streak';
 import { restDaysHeld } from '@/constants/streak';
 import { useTodayKey } from '@/lib/utils/useTodayKey';
@@ -76,6 +78,30 @@ export default function HomeScreen() {
   // alive. Without them the reader who missed yesterday sees a 0 on Home, gives
   // up on the streak they actually still have, and the rest day never gets spent.
   const streak = effectiveStreak(streakRaw, lastLessonDate, restDaysHeld(restDaysEarned, restDaysUsed));
+  // THE WIDGET'S THINKER LANDS HERE NOW (2026-09-29). The Quote-of-the-Day widget is
+  // compiled into the installed app and still links to a thinker; that link parks
+  // the id and routes Home (app/thinker/[id].tsx), and Home opens their card —
+  // keyed on FOCUS, after interactions and a beat, because every tab is built at
+  // startup and a mount-keyed effect would slide a sheet over whatever screen the
+  // reader was actually on. The Thinkers tab carried this effect until it went.
+  const pendingThinker = useUIStore((s) => s.pendingPhilosopherId);
+  const openPhilosopher = useUIStore((s) => s.openPhilosopher);
+  useFocusEffect(
+    useCallback(() => {
+      if (!pendingThinker) return;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const task = InteractionManager.runAfterInteractions(() => {
+        timer = setTimeout(() => {
+          useUIStore.getState().setPendingPhilosopher(null);
+          openPhilosopher(pendingThinker);
+        }, 260);
+      });
+      return () => {
+        task.cancel();
+        if (timer) clearTimeout(timer);
+      };
+    }, [pendingThinker, openPhilosopher]),
+  );
   const [addWidgetOpen, setAddWidgetOpen] = useState(false);
   // Hide the CTA once the Quote widget is on the phone's home screen; it returns
   // if they remove it (re-checked whenever the app comes back to the foreground).

@@ -405,13 +405,11 @@ export default function RootLayout() {
         // email lets reviewer/tester accounts unlock Pro without a purchase.
         sub.init(session?.user?.id ?? null, session?.user?.email ?? null);
         // Returning (signed-in) users go straight in; otherwise show onboarding.
-        // If a widget deep link already parked a thinker (cold start races this
-        // redirect), land on the Thinkers tab so the profile sheet still opens —
-        // otherwise this replace would stomp the deep link back to Home.
-        if (session) {
-          const pendingThinker = useUIStore.getState().pendingPhilosopherId;
-          router.replace(pendingThinker ? '/(app)/philosophers' : '/(app)');
-        }
+        // A widget deep link may already have parked a thinker (a cold start races
+        // this redirect). Home opens their card once it has focus (see its
+        // pending-thinker effect), so landing on Home is right either way — the
+        // Thinkers tab this used to route to went on 2026-09-29.
+        if (session) router.replace('/(app)');
       } else if (event === 'SIGNED_IN') {
         // Keep RevenueCat in sync every time (idempotent), but only route into the
         // app on a genuine new sign-in — never on a spurious same-user re-fire.

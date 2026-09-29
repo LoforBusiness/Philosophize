@@ -782,7 +782,6 @@ ok(/onPress\s*\?\s*LIP\.card\s*:\s*0|onPress\s*&&|!!onPress/.test(card),
 const CONVERTED = [
   'app/(app)/settings.tsx',
   'app/(app)/profile/index.tsx',
-  'app/(app)/philosophers/index.tsx',
   'app/(app)/branches/[branchSlug]/index.tsx',
   // Not a screen, but held to the same rule for the same reason: it is where the
   // Thinkers surfaces get their era colour and their stats, so it is the first
@@ -1088,9 +1087,14 @@ function stripJs(src) {
   // 'stats' left this list on 2026-09-15 with the tab it named. The other five
   // still have to be here: a tab that never warms is the "first switch is slow"
   // complaint back again.
-  ok(/const WARM = \[[^\]]*'index'[^\]]*'branches'[^\]]*'philosophers'[^\]]*'pass'[^\]]*'profile'/.test(lay),
-    'all five tabs are still built without being visited, just later',
+  // 'philosophers' left on 2026-09-29 with the Thinkers tab: Ashmere teaches seven
+  // subjects now, and a roster of philosophers is one subject's furniture. Four tabs.
+  ok(/const WARM = \[[^\]]*'index'[^\]]*'branches'[^\]]*'pass'[^\]]*'profile'/.test(lay),
+    'all four tabs are still built without being visited, just later',
     'a tab that never warms is the "first switch is slow" complaint back again');
+  ok(!/'philosophers'/.test(lay) && !/name="philosophers"/.test(lay),
+    'the Thinkers tab is gone rather than merely hidden',
+    'a tab that is only hidden still builds and warms, and can still be reached by URL');
   ok(!/'stats'/.test(lay),
     'and the statistics tab is gone rather than merely hidden',
     'its readings live in a card on Profile — two homes for one number is how they drift');
@@ -1297,7 +1301,9 @@ function stripJs(src) {
   const layout = stripc(fs.readFileSync('app/(app)/_layout.tsx', 'utf8'));
   const warm = [...(/const WARM = \[([^\]]*)\]/.exec(layout)?.[1] ?? '').matchAll(/'([a-z]+)'/g)]
     .map((m) => m[1]);
-  ok(warm.length >= 6, 'the warm list was read out of the layout', warm.join(' · '));
+  // Five since 2026-09-29 (four tabs and the streak): Thinkers left with the move to
+  // seven subjects. The floor only proves the list was PARSED, not how long it is.
+  ok(warm.length >= 5, 'the warm list was read out of the layout', warm.join(' · '));
 
   // A NAME IN THE LIST DOES NOTHING ON ITS OWN. `lazy` is read per screen off
   // the descriptor on every render, so a screen added to WARM and never given
