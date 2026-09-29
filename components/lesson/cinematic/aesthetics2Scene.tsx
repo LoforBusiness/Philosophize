@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { Outlined, ell, bar, tri } from './Silhouette';
 import { BEATS } from './aesthetics2Script';
 import {
@@ -22,6 +23,7 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
+import { attendAt } from './attend';
 import { screen, tent, fireRing, chair, SCREEN, TENT, FIRE, CHAIRS, SEAT } from './aesthetics2Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -41,12 +43,21 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //        listeners shiver, and then so does he.
 //   b5   Q1: three thoughts over the fire.
 //   b6   the screen shows the feeling in lines, then sounds, then words.
-//   b7   he goes into the tent and the flap falls; the story plays on the screen
-//        in other languages, the year counting on.
+//   b7   he ducks into the tent — never faded: the tent is drawn again IN FRONT of him
+//        from this beat on, so the canvas and the dark doorway cover him — and the
+//        story plays on the screen in other languages, the year counting on.
 //   b8   Q2: the campers cry at a film.
 //
-// COMPOSITION, in stage units: the screen 16–200 × 298–394 over the tent (feet 12
-// and 140, peak 414); the fire at x 208; the boy at x 166; three camp chairs at 262,
+// REVISED 2026-09-28: he turns to what each beat is about — the spark leaving the
+// portrait behind him (b1), the spark jumping to the tent and on (b2), the screen
+// drawing the forms (b6) — turning back to the campers each time, where before all of
+// it happened at his back. He ducks into the tent on b7 instead of fading out. Q1's
+// thoughts sit over the fire with a trail to his head, not over the campers. The tent
+// (crossed poles, tied flaps, guy ropes) and the screen (braced legs) were redrawn
+// against references.
+//
+// COMPOSITION, in stage units: the screen 16–200 × 298–394 over the tent (feet 4
+// and 148, peak 404); the fire at x 208; the boy at x 166; three camp chairs at 262,
 // 312, 362. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -96,8 +107,25 @@ const POLLING = BEATS.map((b) => (b.interact?.poll ? 1 : 0));
  * stirring barely reaches the eyes.
  */
 const CRY_BY = [1, 0.35, 0.75, 0.15];
-/** The boy faces the campers, except on his way into the tent. */
-const DIR = BEATS.map((b) => (b.act === 'leave' ? -1 : 1));
+/**
+ * The boy faces the campers he is talking to, and every beat ENDS that way (N21: two
+ * figures on a stage face each other). Where what a beat is about is at his BACK he
+ * turns to it for the part of the line it happens in, and back again — a look only
+ * tilts his head (see `dirV` in the scene): the spark leaving the portrait (b1), the
+ * spark on the tent (b2), the screen drawing the forms (b6), and the
+ * tent he walks into (b7), inside which he turns round again.
+ *
+ * NOT the wolf (b3): he is the storyteller facing his listeners with the fire in front
+ * of him, so the shadow of his raised hands is thrown BEHIND him onto the tent — which
+ * is where the light puts it, and where the listeners, facing him, can see it.
+ */
+const DIR = BEATS.map(() => 1);
+/** Q1's thoughts: over the fire, up and to the right of his head, with a trail to it. */
+/** The beats the tent is drawn in front of him: from the one he goes in on. */
+const FRONT = BEATS.map((b) => (b.act === 'leave' || b.inTent ? 1 : 0));
+const THOUGHT_X = 212;
+const THOUGHT_W = 110;
+const TRAIL = [[181, 413, 3], [192, 405, 4.5], [204, 398, 6]];
 
 const THOUGHT_Q = [
   { id: 'fear', l1: 'PASS ON', l2: 'HIS FEAR', y: 300, correct: true },
@@ -151,7 +179,7 @@ export default function Aesthetics2Scene({
   const h0 = useHeld();
   const h1 = useHeld();
   const h2 = useHeld();
-  const cv = useCarry(22);
+  const cv = useCarry(24);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -167,9 +195,31 @@ export default function Aesthetics2Scene({
 
     // ── the boy ────────────────────────────────────────────────────────────
     const walking = Math.abs(X[n] - X[p]) > 1;
-    const walkU = walking ? ease01(b / moveTr(X[p], X[n], TR)) : 1;
+    const walkDur = walking ? moveTr(X[p], X[n], TR) : 0;
+    const walkU = walking ? ease01(b / walkDur) : 1;
     const x = carry(cv, 0, n, X[p], X[n], walking ? walkU : tr);
-    const dir = DIR[n] as 1 | -1;
+    // b1 and b2 turn him WITHIN the beat, to follow the spark, timed off its own
+    // stages below: b1 he watches it leave the portrait behind him and turns as it
+    // passes him (u ≈ 0.16 of st(0.08, 0.8)); b2 he turns to the tent as it jumps
+    // there (st(0.32, 0.5)) and back to the listeners as it goes on (st(0.58, 0.88)).
+    let dirV = facing(DIR[p], DIR[n], b);
+    if (A_SPREAD[n]) {
+      const T1 = L * 0.17;
+      dirV = b < T1 ? facing(DIR[p], -1, b) : facing(-1, 1, b - T1);
+    } else if (A_CHAIN[n]) {
+      const T1 = L * 0.3;
+      const T2 = L * 0.5;
+      dirV = b < T1 ? facing(DIR[p], 1, b) : b < T2 ? facing(1, -1, b - T1) : facing(-1, 1, b - T2);
+    } else if (A_FORMS[n]) {
+      // the screen draws LINES, SOUNDS, WORDS at L·0.02, 0.34, 0.66; then back to them
+      const T1 = L * 0.78;
+      dirV = b < T1 ? facing(DIR[p], -1, b) : facing(-1, 1, b - T1);
+    } else if (A_LEAVE[n]) {
+      // he walks to the tent, ducks in, and turns round inside it (hidden by then)
+      const T1 = walkDur + 1.0;
+      dirV = b < T1 ? facing(DIR[p], -1, b) : facing(-1, 1, b - T1);
+    }
+    const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
     let s: Stance = walking
       ? travelStance(X[p], X[n], hHold(A[p], t), hHold(A[n], t), hLive(A[n], t, b), walkU, WALK, 0)
       : hLive(A[n], t, b);
@@ -177,14 +227,17 @@ export default function Aesthetics2Scene({
     const feed = A_MOVED[n] ? bump(b, L, 0.1, 0.3, 0.55) : 0;
     s = { ...s, tilt: s.tilt - 0.4 * feed };
     s = handOn(s, x, dir, FIRE.cx - 6, FIRE.top, feed);
-    // the shadow-maker's hands raised to the firelight, and his own shiver
+    // the shadow-maker's hands raised to the firelight, so their shadow is thrown
+    // behind him onto the tent, and his own shiver
     const cast = A_WOLF[n] ? bump(b, L, 0.02, 0.18, 0.72) : 0;
     s = mixStance(s, { ...s, fistR: { x: 26, y: -52 }, fistL: { x: 20, y: -46 } }, cast);
     const hisShiver = A_WOLF[n] ? st(0.7, 0.78) * (1 - st(0.96, 1)) : 0;
     s = { ...s, tilt: s.tilt + 0.06 * hisShiver * Math.sin(t * 36) };
-    // crouching into the tent
-    const crouch = A_LEAVE[n] ? st(0.45, 0.6) : IN_TENT[n] ? 1 : 0;
-    s = { ...s, tilt: s.tilt - 0.6 * crouch };
+    // ducking in at the door (b7): knees bent and the head down, so the whole of him
+    // is inside the tent's outline once he is there, and the tent drawn over him
+    // (FrontTent) covers him — canvas, or ink on the ink of the doorway.
+    const duck = A_LEAVE[n] ? ease01(clamp01((b - walkDur * 0.75) / 0.6)) : IN_TENT[n] ? 1 : 0;
+    s = { ...s, bob: s.bob - 24 * duck, tilt: s.tilt - 0.06 * duck };
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(A[p], t)), s, tr));
 
     // ── the campers ───────────────────────────────────────────────────────
@@ -225,8 +278,25 @@ export default function Aesthetics2Scene({
       spark = st(0.72, 0.8) * (1 - st(0.96, 1));
     }
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // Each key rides the act's own stages above: the fire he feeds, the camper who
+    // wipes an eye, the spark (live, sx/sy) as it passes camper to camper, the
+    // hands he raises to the firelight, the shiver, the fear on himself, the forms
+    // as the screen draws each one, the tent he walks into. A seated camper's head
+    // is about 65 units above the ground at K_A. The thoughts sit at left 250,
+    // width 110 (middle x 305), 28 tall.
+    const LK = A_MOVED[n] ? [L * 0.08, FIRE.cx, FIRE.top - 8, 1, L * 0.5, CHAIRS[0], GROUND - 65, 1, L * 0.9, 0, 0, 0]
+      : A_SPREAD[n] ? [L * 0.12, sx, sy, 1, L * 0.86, 0, 0, 0]
+      : A_CHAIN[n] ? [L * 0.04, sx, sy, 1, L * 0.95, 0, 0, 0]
+      : A_WOLF[n] ? [L * 0.03, FIRE.cx, FIRE.top - 40, 1, L * 0.4, CHAIRS[1], GROUND - 65, 1, L * 0.72, x + 4, 448, 0.8, L * 0.96, 0, 0, 0]
+      : THOUGHTS[n] ? [0.3, THOUGHT_X + THOUGHT_W / 2, THOUGHT_Q[1].y + 14, 0.6]
+      : A_FORMS[n] ? [L * 0.02, SCREEN.x + 33, SCREEN.y + 40, 1, L * 0.34, SCREEN.x + 93, SCREEN.y + 40, 1, L * 0.66, SCREEN.x + 153, SCREEN.y + 40, 1, L * 0.8, 0, 0, 0]
+      : A_LEAVE[n] ? [0.2, TENT.peak.x, TENT.peak.y + 50, 0.8, L * 0.6, 0, 0, 0]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
     return {
-      fig: lookPose(fig, x, GROUND, K_A, facing(DIR[p], DIR[n], b), 1 - carry(cv, 19, n, IN_TENT[p], A_LEAVE[n] ? st(0.62, 0.72) : IN_TENT[n], tr), gazeX.value, gazeY.value, gazeOn.value),
+      // never faded: on b7 he ducks into the tent, and the tent drawn over him hides him
+      fig: lookPose(fig, x, GROUND, K_A, dirV, 1, carry(cv, 22, n, lk.x, lk.x, tr), carry(cv, 23, n, lk.y, lk.y, tr), carry(cv, 19, n, 0, lk.w, tr)),
       c0: pose(c0, CHAIRS[0], GROUND, K_A, facing(IN_TENT[p] ? 1 : -1, IN_TENT[n] ? 1 : -1, b), 1),
       c1: pose(c1, CHAIRS[1], GROUND, K_A, -1, 1),
       c2: pose(c2, CHAIRS[2], GROUND, K_A, -1, 1),
@@ -268,11 +338,11 @@ export default function Aesthetics2Scene({
       <Sky S={SCENE} />
       <ObjectArt parts={SCREEN_ART} tone={WOOD} />
       <Screen S={SCENE} on={on} />
-      <ObjectArt parts={TENT_ART} tone={CANVAS} />
+      <SetArt parts={TENT_ART} tone={CANVAS} />
       <Shadow S={SCENE} on={on} />
       <View style={styles.tentInside} pointerEvents="none" />
       <Stickman D={DF} k={K_A} />
-      <Flap S={SCENE} />
+      {on(FRONT) ? <FrontTent S={SCENE} on={on} /> : null}
       <ObjectArt parts={FIRE_ART} tone={WOOD} />
       <Fire S={SCENE} />
       {CHAIRS.map((c) => <ObjectArt key={c} parts={chair(c)} tone={CANVAS} />)}
@@ -414,12 +484,30 @@ function Rain({ S, k }: { S: SharedValue<any>; k: number }) {
   return <Animated.View style={[styles.rain, { left: 12 + k * 24 }, st]} />;
 }
 
-// ── the tent: the flap that closes, and the shadow on the wall ──────────────
+// ── the tent: the shadow on its wall ────────────────────────────────────────
 
-function Flap({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.flap, transform: [{ scaleX: S.value.flap }] }));
-  return <Animated.View style={[styles.flap, st]} pointerEvents="none" />;
+/**
+ * THE TENT AGAIN, IN FRONT OF HIM, from the beat he goes in. It is pixel for pixel the
+ * tent already drawn behind him — the same art, the same shadow, the same doorway — so
+ * mounting it changes nothing on screen while he is still at the fire; as he walks to
+ * the door the canvas covers him, and what is over the doorway is ink on ink. Then the
+ * flap falls across the door.
+ */
+function FrontTent({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const flap = useAnimatedStyle(() => ({ opacity: S.value.flap > 0.02 ? 1 : 0, transform: [{ scaleX: Math.max(0.02, S.value.flap) }] }));
+  return (
+    <>
+      {/* the strip of floor under the tent, as it is already drawn, so his feet and
+          their shadow go under it too — the floor's fill, with the ground line on top */}
+      <View style={styles.floorPatch} pointerEvents="none" />
+      <SetArt parts={TENT_ART} tone={CANVAS} />
+      <Shadow S={S} on={on} />
+      <View style={styles.tentInside} pointerEvents="none" />
+      <Animated.View style={[styles.flap, flap]} pointerEvents="none" />
+    </>
+  );
 }
+
 function Shadow({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const st = useAnimatedStyle(() => ({
     opacity: 0.6 * S.value.wolf,
@@ -504,6 +592,10 @@ function Thoughts({ picked, onPick, S, live }: { picked: string | null; onPick: 
   const fade = useAnimatedStyle(() => ({ opacity: S.value.thoughts }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {/* a thought's trail, from his head up to the three thoughts: they are HIS */}
+      {TRAIL.map(([tx, ty, r]) => (
+        <View key={tx} pointerEvents="none" style={[styles.trail, { left: tx - r, top: ty - r, width: 2 * r, height: 2 * r, borderRadius: r }]} />
+      ))}
       {THOUGHT_Q.map((q) => (
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={12}
@@ -570,14 +662,18 @@ const styles = StyleSheet.create({
   filmFigure: { position: 'absolute', left: SCREEN.w / 2 - 4, top: 46, width: 8, height: 34, borderRadius: 4, backgroundColor: INK },
   filmHead: { position: 'absolute', left: SCREEN.w / 2 - 7, top: 32, width: 14, height: 14, borderRadius: 7, backgroundColor: INK },
 
+  floorPatch: {
+    position: 'absolute', left: 8, top: GROUND, width: TENT.right - 6, height: 16,
+    backgroundColor: RULE,
+  },
+  flap: {
+    position: 'absolute', left: TENT.peak.x - 17, top: TENT.peak.y + 29, width: 34, height: GROUND - TENT.peak.y - 29,
+    backgroundColor: CANVAS.SHADE, borderWidth: 1.5, borderColor: INK, borderTopLeftRadius: 17, borderTopRightRadius: 17,
+    transformOrigin: '0% 50%',
+  },
   tentInside: {
     position: 'absolute', left: TENT.peak.x - 16, top: TENT.peak.y + 30, width: 32, height: GROUND - TENT.peak.y - 30,
     backgroundColor: INK, borderTopLeftRadius: 16, borderTopRightRadius: 16,
-  },
-  flap: {
-    position: 'absolute', left: TENT.peak.x - 18, top: TENT.peak.y + 26, width: 36, height: GROUND - TENT.peak.y - 26,
-    backgroundColor: CANVAS.SHADE, borderWidth: 1.5, borderColor: INK, borderTopLeftRadius: 18, borderTopRightRadius: 18,
-    transformOrigin: '0% 50%',
   },
   shadow: { position: 'absolute', left: TENT.peak.x - 30, top: 470, transformOrigin: '50% 100%' },
   flame: { position: 'absolute', width: 8, borderRadius: 4, transformOrigin: '50% 100%' },
@@ -598,7 +694,8 @@ const styles = StyleSheet.create({
   },
   labelText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false },
 
-  thought: { position: 'absolute', left: 250, width: 110, height: 28 },
+  thought: { position: 'absolute', left: THOUGHT_X, width: THOUGHT_W, height: 28 },
+  trail: { position: 'absolute', backgroundColor: PLATE_FACE, borderWidth: 1.5, borderColor: INK },
   thoughtFace: {
     flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 12, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',

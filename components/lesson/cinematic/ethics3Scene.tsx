@@ -5,9 +5,10 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './ethics3Script';
 import {
-  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
+  WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, pose, stand, travelStance,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -21,10 +22,11 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
+import { attendAt } from './attend';
 import {
   leverFrame, balanceStand, table, weightBox, lectern, ruleBook, mirror, lamps, handleAt,
   BOARD, LINE_Y, LINE_X0, POINTS_X, MAIN_X1, BRANCH_Y, BRANCH_UP, FIVE_X, ONE_X, TRAIN_STOP,
-  LEVERS, LEVER_LEN, LEVER_REST, LEVER_PULLED, TABLE, BALANCE, WEIGHT_BOX, LECTERN, BOOK, MIRROR, MIRROR_PLATE,
+  LEVER_X, LEVER_LEN, LEVER_REST, LEVER_PULLED, LEVER_STAND, TABLE, BALANCE, WEIGHT_BOX, LECTERN, BOOK, MIRROR, MIRROR_PLATE,
   LAMPS, LAMP_R,
 } from './ethics3Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
@@ -37,7 +39,7 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // A grave lesson (N11): nothing in it is a gag, and the runaway's lamp on the diagram
 // stops short of the points, so it never reaches the five or the one.
 //
-//   b0   the track diagram lights, and he looks up at it.
+//   b0   the track diagram lights, and he looks up at it — in front of him.
 //   b1   the three plates take their names: MILL, KANT, ARISTOTLE.
 //   b2   the runaway's lamp comes down the line and holds short of the points; he puts
 //        a hand on the points lever.
@@ -54,11 +56,20 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //   b12  Q1: odd one out, ringed where it is in the room.   b13  Q2: TRUE or FALSE lamp.
 //
 // COMPOSITION, in stage units: the diagram 100–300 × 300–360 on the wall; the lamps at
-// 30 and 72, y 318; the lever frame 20–60 with the points lever at 60; the table
-// 100–180 at 470 with the balance at 122 and the weight box at 164; the lectern 244–290
-// at 458; the mirror 336–392 × 380–456. He stands at 78 by the lever, 158 behind the
-// table at the box, 84 by the balance, 226 at the lectern and 318 at the mirror.
-// Band [288, 514].
+// 30 and 72, y 318; the points lever in its ground frame at 70; the table 100–180 at
+// 470 with the balance at 122 and the weight box at 164; the lectern 244–290 at 458;
+// the mirror 336–392 × 380–456. He stands at 52 by the lever, 158 behind the table at
+// the box, 84 by the balance, 226 at the lectern, 318 at the mirror, and 292 facing
+// back into the room for the two questions. Band [288, 514].
+//
+// RESTAGED 2026-09-28 so that everything is IN FRONT of him. At the lever he used to
+// face left, at a frame by the wall, with the diagram, all three plates and the
+// runaway coming down the line behind him; he stands to the left of the lever now and
+// faces right into the room. For the questions he turns from the mirror to face the
+// things they ask about. The lever is a real railway points lever in a toothed
+// quadrant; the weights are knob weights, three with two stacked on them; and the
+// mirror shows HIM — the same figure, in the same pose, turned to face him — where it
+// showed an ink disc over an ink block. He is in it only while he stands before it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('ethics');
@@ -107,18 +118,21 @@ const ODD = flag((b) => b.interact?.odd);
 const PICK_X = [BALANCE.x - BALANCE.arm, BALANCE.x + BALANCE.arm, 258, BOOK.x];
 const PICK_Y = [456, 450, LINE_Y - 12, BOOK.y];
 const PICK_R = [14, 14, 30, 20];
-/** Which way he faces once each beat settles: the lever is to his left; everything else to his right. */
-const DIR = BEATS.map((b) => ((b.x ?? 318) === 78 ? -1 : 1));
+/** Which way he faces once each beat settles: into the room, and back from the mirror for the two questions. */
+const DIR = BEATS.map((b) => (b.interact ? -1 : 1));
+/** The mirror: where he stands before it, and its middle, which his reflection is placed about. */
+const AT_MIRROR = 318;
+const MIRROR_CX = (MIRROR.x0 + MIRROR.x1) / 2;
 
 /** b6: to the weight box behind the table, then back to the near end of the balance. */
-const BOX_AT = 0.4 + moveTr(78, 158, TR);
+const BOX_AT = 0.4 + moveTr(LEVER_STAND, 158, TR);
 const BACK = BOX_AT + 1.1;
 const A6 = BACK + moveTr(158, 84, TR);
 const WEIGH_LEGS = [[158, 0.4], [84, BACK]];
-const A7 = 0.3 + moveTr(84, 78, TR);
+const A7 = 0.3 + moveTr(84, LEVER_STAND, TR);
 const W7 = A7 + 1.6;
 /** b7: the step back to the lever, then along behind the table to the lectern. */
-const RESET_LEGS = [[78, 0.3], [226, W7]];
+const RESET_LEGS = [[LEVER_STAND, 0.3], [226, W7]];
 
 const TF_Q = [
   { id: 'true', label: 'TRUE', x: LAMPS[0].x, correct: false },
@@ -178,8 +192,8 @@ function beamDeg(wv: number): number {
 
 /** b6: turn to walk to the box, round to carry the weights back, round again to the pan. */
 const WEIGH_KEYS = [[0.1, 1], [BOX_AT + 0.8, -1], [A6 - 0.05, 1]];
-/** b7: turn to walk back to the lever, and round again for the lectern once it is home. */
-const RESET_KEYS = [[0, -1], [W7 - 0.25, 1]];
+/** b7: turn to walk back to the lever, and round again to face it — and the lectern beyond — as he arrives. */
+const RESET_KEYS = [[0, -1], [A7 - 0.1, 1]];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('ethics'));
 
@@ -187,7 +201,7 @@ export default function Ethics3Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(26);
+  const cv = useCarry(29);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -293,8 +307,47 @@ export default function Ethics3Scene({
     const reflect = A_MIRROR[n] ? sec(1.4, 2.3) : REFLECT[n];
     const glint = A_WISE[n] ? sec(3.0, 4.4) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening in the signal box, when it happens — keyed on the same
+    // seconds and stages the scene already acts on — and at nothing (weight 0, his
+    // pose's own head) once it is done. A grave lesson (N11): each person on the
+    // diagram is looked at once, softly, and not dwelt on; when the one is named he
+    // looks down at the lever under his hand.
+    // Since the restaging he faces right at the lever, so the diagram and the three
+    // plates are in front of him there.
+    const boardX = (BOARD.x0 + BOARD.x1) / 2;
+    const boardY = (BOARD.top + BOARD.bottom) / 2;
+    const millY = 383;                                           // styles.millPlate top 370 + half its 26
+    const kantX = (LECTERN.x0 + LECTERN.x1) / 2;
+    const kantY = 481;                                           // styles.kantPlate top 468 + half its 26
+    const arisX = (MIRROR_PLATE.x0 + MIRROR_PLATE.x1) / 2;
+    const arisY = (MIRROR_PLATE.top + MIRROR_PLATE.bottom) / 2;
+    const mirX = (MIRROR.x0 + MIRROR.x1) / 2;
+    const mirY = (MIRROR.top + MIRROR.bottom) / 2;
+    const LK = A_POWER[n] ? [0.3, boardX, boardY, 1, 3.2, 0, 0, 0]
+      : A_NAMES[n] ? [0.2, BALANCE.x, millY, 1, 0.9, kantX, kantY, 1, 1.6, arisX, arisY, 1, 3.2, 0, 0, 0]
+      : A_RUN[n] ? [0.3, LINE_X0, LINE_Y, 1, 0.8, lerp(LINE_X0, TRAIN_STOP, run), LINE_Y, 1, 2.0, FIVE_X[2], LINE_Y, 0.85, 3.9, handle.x, handle.y, 1, L + 0.5, 0, 0, 0]
+      : A_ROUTE[n] ? [L * 0.1, (BRANCH_UP.x1 + MAIN_X1) / 2, BRANCH_Y, 1, 1.6, ONE_X, BRANCH_Y, 0.85, 3.9, handle.x, handle.y, 0.8, L + 0.5, 0, 0, 0]
+      : A_ASK[n] ? [0.8, BALANCE.x, millY, 1, 2.3, kantX, kantY, 1, 3.8, arisX, arisY, 1, 5.4, 0, 0, 0]
+      : A_PULL[n] ? [0.2, handle.x, handle.y, 1, 2.0, POINTS_X, LINE_Y, 1, 3.0, BALANCE.x, millY, 0.9, 5.2, 0, 0, 0]
+      : A_WEIGH[n] ? [0.3, WEIGHT_BOX.x, WEIGHT_BOX.top, 1, BOX_AT + 0.8, left.x, left.y + BALANCE.string, 1, A6 + 0.6, BALANCE.x, BALANCE.beamY, 1, A6 + 1.1, BALANCE.x, millY, 1, A6 + 2.6, 0, 0, 0]
+      : A_RESET[n] ? [0.2, handle.x, handle.y, 1, A7 + 0.8, POINTS_X, LINE_Y, 0.8, W7 - 0.2, kantX, LECTERN.top, 0.9, W7 + 0.5, kantX, kantY, 1, W7 + 1.8, BOOK.x, BOOK.y, 0.8, L + 0.4, 0, 0, 0]
+      : A_READ[n] ? [0.3, BOOK.x - 8, BOOK.y - 4, 1, 2.4, kantX, kantY, 0.9, 3.1, BOOK.x, BOOK.y - 3, 1, 6.9, 0, 0, 0]
+      : A_MIRROR[n] ? [0.2, mirX, mirY, 0.8, 2.4, arisX, arisY, 1, 3.8, mirX, mirY, 1, L + 0.6, 0, 0, 0]
+      : A_WISE[n] ? [1.0, arisX, arisY, 1, 2.0, x + 4 * dir, GROUND - 58, 0.6, 3.0, mirX, mirY, 1, 5.6, arisX, arisY, 0.9, L + 0.5, 0, 0, 0]
+      : ODD[n] ? [0.3, pickAt(PICK_X, pickPos.value), pickAt(PICK_Y, pickPos.value), 0.6]
+      : LAMPS_ON[n] ? [0.3, (LAMPS[0].x + LAMPS[1].x) / 2, LAMPS[0].y, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
+    // HIS REFLECTION: the same figure in the same pose, turned to face him, placed
+    // about the mirror's middle; it slides out of the glass and is gone as he walks
+    // away from the mirror, and is there only while he stands before it.
+    const near = clamp01(1 - Math.abs(x - AT_MIRROR) / 22);
+    const refX = MIRROR_CX + (AT_MIRROR - x) * 1.4;
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      mirrorFig: pose(fig, refX, GROUND, K_M, -dirV, reflect * near),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 26, n, lk.x, lk.x, tr), carry(cv, 27, n, lk.y, lk.y, tr), carry(cv, 28, n, 0, lk.w, tr)),
       lit: carry(cv, 1, n, LIT[p], lit, tr),
       n0: carry(cv, 2, n, NAMES[p], n0, tr),
       n1: carry(cv, 3, n, NAMES[p], n1, tr),
@@ -328,6 +381,7 @@ export default function Ethics3Scene({
   });
 
   const DF = useDerivedValue<Bundle>(() => SCENE.value.fig);
+  const DM = useDerivedValue<Bundle>(() => SCENE.value.mirrorFig);
 
   return (
     <View style={styles.scene}>
@@ -340,13 +394,14 @@ export default function Ethics3Scene({
       <Lamps S={SCENE} />
       {on(NAMES) ? <WallPlate S={SCENE} /> : null}
       <ObjectArt parts={MIRROR_ART} tone={WOOD} />
-      <Glass S={SCENE} />
-      <ObjectArt parts={FRAME_ART} tone={IRON} />
-      <PointsLever S={SCENE} />
+      <Glass S={SCENE} DM={DM} />
       <ObjectArt parts={LECTERN_ART} tone={WOOD} />
       <Book S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_M} />
+      {/* the lever stands in the floor in front of him: he walks behind it, and works it from its left */}
+      <SetArt parts={FRAME_ART} tone={IRON} line={1.8} />
+      <PointsLever S={SCENE} />
       <ObjectArt parts={TABLE_ART} tone={WOOD} />
       <ObjectArt parts={STAND_ART} tone={IRON} />
       <Balance S={SCENE} DF={DF} />
@@ -430,11 +485,19 @@ function Lamps({ S }: { S: SharedValue<any> }) {
 
 // ── the points lever ─────────────────────────────────────────────────────────
 
+/**
+ * The points lever: a long black lever, tapering to a polished grip, with the spring
+ * catch-rod up its side and the catch handle under the grip — the shape every real
+ * one has (Wikimedia Commons, "Coombe No. 2 Ground Frame").
+ */
 function PointsLever({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${lerp(LEVER_REST, LEVER_PULLED, S.value.lever)}deg` }] }));
   return (
     <Animated.View style={[styles.lever, st]} pointerEvents="none">
-      <View style={styles.leverHandle} />
+      <View style={styles.leverShaft} />
+      <View style={styles.catchRod} />
+      <View style={styles.catchHandle} />
+      <View style={styles.leverGrip} />
     </Animated.View>
   );
 }
@@ -479,13 +542,25 @@ function Balance({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
         <View style={styles.pan} />
       </Animated.View>
       <Animated.View style={[styles.rider, five]} pointerEvents="none">
-        {[0, 1, 2].map((k) => <View key={k} style={[styles.weight, { left: -9 + k * 6, top: -5 }]} />)}
-        {[0, 1].map((k) => <View key={k} style={[styles.weight, { left: -6 + k * 6, top: -10 }]} />)}
+        {[0, 1, 2].map((k) => <KnobWeight key={k} left={-11 + k * 7.5} top={-6} />)}
+        {[0, 1].map((k) => <KnobWeight key={k} left={-7.2 + k * 7.5} top={-14} />)}
       </Animated.View>
       <Animated.View style={[styles.rider, single]} pointerEvents="none">
-        <View style={[styles.weight, { left: -3, top: -5 }]} />
+        <KnobWeight left={-3.5} top={-6} />
       </Animated.View>
     </>
+  );
+}
+
+/** A knob weight, the kind a pan balance is sold with: a short cylinder with a knob to lift it by. */
+function KnobWeight({ left, top }: { left: number; top: number }) {
+  return (
+    <View style={{ position: 'absolute', left, top }}>
+      <View style={styles.weightKnob} />
+      <View style={styles.weight}>
+        <View style={styles.weightLit} />
+      </View>
+    </View>
   );
 }
 
@@ -511,18 +586,19 @@ function Book({ S }: { S: SharedValue<any> }) {
 
 // ── the mirror's glass, and him in it ────────────────────────────────────────
 
-function Glass({ S }: { S: SharedValue<any> }) {
-  const me = useAnimatedStyle(() => ({ opacity: 0.6 * S.value.reflect }));
+function Glass({ S, DM }: { S: SharedValue<any>; DM: SharedValue<Bundle> }) {
   const glint = useAnimatedStyle(() => ({
     opacity: Math.sin(Math.PI * S.value.glint) * 0.8,
     transform: [{ translateX: -30 + 90 * S.value.glint }, { rotate: '25deg' }],
   }));
   return (
     <View style={styles.glass} pointerEvents="none">
-      <Animated.View style={[StyleSheet.absoluteFill, me]}>
-        <View style={styles.likenessCrown} />
-        <View style={styles.likenessShoulders} />
-      </Animated.View>
+      {/* the reflection is posed in stage units, so it is laid out in a stage-sized
+          layer offset back by the glass's own position and clipped by the glass */}
+      <View style={styles.inGlass}>
+        <Stickman D={DM} k={K_M} />
+      </View>
+      <View style={styles.glassTint} />
       <Animated.View style={[styles.glint, glint]} />
     </View>
   );
@@ -644,12 +720,21 @@ const styles = StyleSheet.create({
   },
 
   lever: {
-    position: 'absolute', left: LEVERS[2] - 1.75, top: GROUND - 4 - LEVER_LEN, width: 3.5, height: LEVER_LEN, borderRadius: 1.5,
-    backgroundColor: DEEP, borderWidth: 0.8, borderColor: INK, transformOrigin: '50% 100%',
+    position: 'absolute', left: LEVER_X - 5, top: GROUND - 5 - LEVER_LEN, width: 10, height: LEVER_LEN,
+    transformOrigin: '50% 100%',
   },
-  leverHandle: {
-    position: 'absolute', left: -2.25, top: -4, width: 8, height: 7, borderRadius: 2, backgroundColor: EMBER,
-    borderWidth: 1.2, borderColor: INK,
+  leverShaft: {
+    position: 'absolute', left: 3, top: 3, width: 4, bottom: 0, borderTopLeftRadius: 1.5, borderTopRightRadius: 1.5,
+    borderBottomLeftRadius: 2, borderBottomRightRadius: 2, backgroundColor: INK,
+  },
+  catchRod: { position: 'absolute', left: 7.2, top: 11, width: 1.3, bottom: 8, backgroundColor: INK },
+  catchHandle: {
+    position: 'absolute', left: 5, top: 9, width: 5.5, height: 3.4, borderRadius: 1.2, backgroundColor: IRON.SHADE,
+    borderWidth: 1, borderColor: INK,
+  },
+  leverGrip: {
+    position: 'absolute', left: 2.4, top: -2, width: 5.2, height: 10, borderRadius: 2.2, backgroundColor: PAPER_LIT,
+    borderWidth: 1.1, borderColor: INK,
   },
 
   beam: {
@@ -658,11 +743,17 @@ const styles = StyleSheet.create({
   },
   string: { position: 'absolute', left: -0.6, top: 0, width: 1.2, height: BALANCE.string, borderRadius: 0.6, backgroundColor: INK },
   pan: {
-    position: 'absolute', left: -10, top: BALANCE.string - 1, width: 20, height: 5, borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10, backgroundColor: IRON.SHADE, borderWidth: 1.2, borderColor: INK,
+    position: 'absolute', left: -13, top: BALANCE.string - 1, width: 26, height: 5, borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12, backgroundColor: IRON.SHADE, borderWidth: 1.2, borderColor: INK,
   },
   weight: {
-    position: 'absolute', width: 6, height: 5, borderRadius: 1, backgroundColor: DEEP, borderWidth: 0.8, borderColor: INK,
+    position: 'absolute', left: 0, top: 2, width: 7, height: 6, borderRadius: 1.5, backgroundColor: IRON.SHADE,
+    borderWidth: 1, borderColor: INK, overflow: 'hidden',
+  },
+  weightLit: { position: 'absolute', left: 1, top: 0.5, width: 1.4, height: 3.5, borderRadius: 0.7, backgroundColor: PAPER_LIT },
+  weightKnob: {
+    position: 'absolute', left: 2, top: -0.5, width: 3, height: 3.2, borderRadius: 1.5, backgroundColor: IRON.SHADE,
+    borderWidth: 1, borderColor: INK,
   },
 
   closedBook: {
@@ -678,8 +769,10 @@ const styles = StyleSheet.create({
     position: 'absolute', left: MIRROR.x0 + 4, top: MIRROR.top + 4, width: MIRROR_W - 8, height: MIRROR_H - 8,
     borderRadius: 2, backgroundColor: stageToneOf(TEAL).STONE, overflow: 'hidden',
   },
-  likenessCrown: { position: 'absolute', left: 9, top: 22, width: 26, height: 26, borderRadius: 13, backgroundColor: INK },
-  likenessShoulders: { position: 'absolute', left: 2, top: 50, width: 44, height: 40, borderRadius: 16, backgroundColor: INK },
+  inGlass: {
+    position: 'absolute', left: -(MIRROR.x0 + 4), top: -(MIRROR.top + 4), width: STAGE_W, height: STAGE_H, opacity: 0.72,
+  },
+  glassTint: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: PAPER_LIT, opacity: 0.12 },
   glint: { position: 'absolute', left: 0, top: -10, width: 8, height: 100, borderRadius: 4, backgroundColor: PAPER_LIT },
 
   plate: {

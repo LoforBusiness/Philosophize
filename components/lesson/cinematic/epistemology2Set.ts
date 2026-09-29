@@ -28,11 +28,20 @@ export const FIREBOX = { x: 30, y: 470, w: 26, h: 18 };
 export const WINDOW = { x0: 68, x1: 122, top: 366, bottom: 442 };
 export const PORTRAIT = { cx: 158, cy: 402, w: 36, h: 50 };
 export const SLATE = { x0: 194, x1: 242, top: 396, bottom: 436 };
-export const REACH_X = { window: 140, portrait: 180, slate: 180 };
+/**
+ * Where he stands to put a hand on each, FACING LEFT along the wall (the light, the
+ * stove and the three things are all to his left): the slate from its right, the
+ * portrait from its right, the window from its right. Restaged 2026-09-28 — he used to
+ * work the slate from its LEFT, facing right, with the portrait and the window behind
+ * him, and his head stood over the sum on the slate.
+ */
+export const REACH_X = { window: 140, portrait: 188, slate: 250 };
+/** Where he stands to LOOK at all three: right of the slate, facing left, all in front of him. */
+export const LOOK_X = 262;
 /** The desk, and where the notebook and the candle sit on it. */
 export const DESK = { x0: 286, x1: 382, top: 452 };
-export const NOTEBOOK = { x: 304, y: 448, w: 40 };
-export const CANDLE = { x: 334, y: 438 };
+export const NOTEBOOK = { x: 318, y: 448, w: 40 };
+export const CANDLE = { x: 360, y: 438 };
 /** Where he stands at the desk. */
 export const DESK_X = 290;
 

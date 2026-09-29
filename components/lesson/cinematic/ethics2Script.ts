@@ -19,7 +19,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Ethics2Beat extends BaseBeat {
   /** The finder's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 200 at the wallet · 284 by the A-board · 296 with the owner · 156 at the foot of the steps · 104 on the landing for the questions. */ x?: number;
+  /** Where he stands: 146 at the wallet · 282 at the café table · 176 at the A-board, facing it with the café beyond · 296 with the owner · 156 at the foot of the steps · 104 on the landing for the questions. */ x?: number;
   /** His act across this beat's line (the scene choreographs it). */
   act?: 'find' | 'cases' | 'lens1' | 'rows' | 'swap' | 'mill' | 'equal' | 'kant' | 'keep' | 'steps' | 'climb';
   /** Which lens he is wearing: 0 none · 1 outcomes · 2 duty · 3 character. */ lens?: number;
@@ -36,28 +36,28 @@ export interface Ethics2Beat extends BaseBeat {
 
 export const BEATS: Ethics2Beat[] = [
   {
-    p: 12, x: 200, act: 'find',
+    p: 12, x: 146, act: 'find',
     text: 'Suppose you find a wallet on the pavement. What should you do with it?',
     dur: 1.8,
   },
   {
-    p: 165, x: 284, act: 'cases',
+    p: 165, x: 282, act: 'cases',
     text: 'Three ethical theories will each deliver a verdict on this one small choice.',
     dur: 1.8,
   },
   {
-    p: 7, x: 284, act: 'lens1', lens: 1, rows: 1,
+    p: 7, x: 176, act: 'lens1', lens: 1, rows: 1,
     text: 'Moral philosophy offers three main approaches, here called lenses. The first asks what consequences an act will have.',
     cite: 'Three lenses',
     dur: 1.9,
   },
   {
-    p: 260, x: 284, act: 'rows', lens: 1, rows: 3,
+    p: 260, x: 176, act: 'rows', lens: 1, rows: 3,
     text: 'The second asks what your duty requires. The third asks what the act makes of your character.',
     dur: 2.1,
   },
   {
-    p: 260, x: 284, act: 'swap', lens: 1, rows: 3, mixed: true,
+    p: 260, x: 176, act: 'swap', lens: 1, rows: 3, mixed: true,
     text: 'Ordinary moral thinking mixes the three. Most people use all three without noticing which one they’re using.',
     dur: 1.8,
   },

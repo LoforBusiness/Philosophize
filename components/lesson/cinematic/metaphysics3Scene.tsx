@@ -21,6 +21,7 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
+import { attendAt } from './attend';
 import {
   stairs, doorFrame, stool, table, lantern, grateBars, easel, railY,
   TREADS, CLIMB_X, DOOR, STOOL, APPLE_AT, LANTERN, STICKS, GRATE, CANVAS,
@@ -52,6 +53,17 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // and the lantern at 266; the grate 298–374 high on the wall; the easel 318–378.
 // He stands at 196 by the table, 62 on the landing, 214 at the sticks, 172 by the
 // stool for the questions. Band [288, 514].
+//
+// 2026-09-28, the owner: *"If something's happening on scene, the stick man should be
+// looking at it"*, and *"the objects … seem to be more cheap … find reference"*.
+// BEING (over the door) and the Form (in the doorway) are BEHIND a man facing the
+// table, and a gaze only tilts a head — so on b2 and b8 he turns round to them through
+// a profile and back (turnBack, carried across a tap). The stairs have treads, nosings
+// and risers, a balustrade and newel posts (a photographed wooden staircase); the
+// river through the grate has a far bank, wavelets and a leaf carried past; the apple
+// is an apple (two lobes, a stem, a leaf); the Form is the apple's own shape, perfect
+// and radiant; the "equal" sticks are visibly unequal, the ruler across their tops
+// tilting to say so; and the painting is a framed still life he glances at in b0.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('metaphysics');
@@ -172,7 +184,7 @@ export default function Metaphysics3Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(16);
+  const cv = useCarry(20);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -272,6 +284,12 @@ export default function Metaphysics3Scene({
       }
       dirV = facing(DIR[p], 1, b);
     }
+    // BEING lights over the door and the Form stands in the doorway, both BEHIND a man
+    // facing the table — so he turns round to them (eased, through a profile) and back.
+    const turnBack = A_BEING[n] ? sec(3.25, 3.6) * (1 - sec(6.3, 6.65))
+      : A_OPINION[n] ? sec(1.9, 2.25) * (1 - sec(3.9, 4.25)) : 0;
+    // carried, so a tap mid-turn hands the next beat the way he is actually facing
+    dirV = carry(cv, 19, n, DIR[p], dirV * (1 - 2 * turnBack), tr);
     const dir = dirV < 0 ? -1 : 1;
     const x = n === 0 ? tx : carry(cv, 0, n, xp, tx, walking ? walkU : choreo ? 1 : tr);
     const figGY = n === 0 ? gy : carry(cv, 1, n, gp, gy, choreo ? 1 : tr);
@@ -305,7 +323,7 @@ export default function Metaphysics3Scene({
     const setSticks = A_STICKS[n] ? pulse(4.1, 4.45, 4.9) : 0;
     s = handOn(s, x, figGY, dir, STICKS.x, STICKS.base - 22, setSticks);
     const setRuler = A_STICKS[n] ? pulse(5.2, 5.55, 6.1) : 0;
-    s = handOn(s, x, figGY, dir, STICKS.x + 5, STICKS.base - 42, setRuler);
+    s = handOn(s, x, figGY, dir, STICKS.x + 8, STICKS.base - 46, setRuler);
 
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
@@ -317,8 +335,63 @@ export default function Metaphysics3Scene({
     const day = A_CAVE[n] ? sec(9.4, 10.5) : OPEN[n];
     const form = A_SUN[n] ? sec(1.5, 3.4) : A_CAVE[n] ? 0 : OPEN[n];
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At the apple in his hand, the river past the grate, each plaque as it lights,
+    // the shadow on the wall, the stairs under his feet, the day through the door, the
+    // sticks and the ruler as he sets them — and at nothing (weight 0, his pose's own
+    // head) once the thing is done. The generated gaze aimed every beat at the middle
+    // of the picture, which in this cellar is the bare wall above the table.
+    // Key times are the scene's own event timings (sec/pulse seconds, UP_AT, DOWN_AT).
+    // The apple he holds is at his fist, held out at (25, −18) in the rig (the `look`
+    // mix above): x + 25·K_M·dir, and 34 + 18 rig units up from the ground he stands on.
+    // The plaques' centres come from their styles: BEING over the door, BECOMING at 249.
+    const heldX = x + 25 * K_M * dir;
+    const heldY = figGY - (34 + 18) * K_M;
+    const doorX = (DOOR.x0 + DOOR.x1) / 2;
+    const LK = A_APPLE[n]
+      // the apple on the table as he reaches for it, then in his hand as he brings it
+      // up and it thins (3.6–6.0 s); nothing once the line is done
+      // — and a last glance at the easel, where a painting copies the thing he holds
+      ? [0.2, APPLE_AT.x, APPLE_AT.y, 1, 1.2, heldX, heldY, 1, L * 0.88, (CANVAS.x0 + CANVAS.x1) / 2, (CANVAS.top + CANVAS.bottom) / 2, 0.8, L + 0.3, 0, 0, 0]
+      : A_FLOW[n]
+      // up at the river running past the grate, "all things flow"; back to the apple
+      // on "Plato accepted this of perceptible things"
+      ? [0.6, (GRATE.x0 + GRATE.x1) / 2, (GRATE.top + GRATE.bottom) / 2, 1, 5.6, heldX, heldY, 0.9, L + 0.3, 0, 0, 0]
+      : A_BEING[n]
+      // the apple while "an object that doesn't change" is said over it, then BEING as it
+      // lights over the door (3.6–4.2 s) and he points to it
+      ? [0.3, heldX, heldY, 0.8, 3.6, doorX, DOOR.top - 20, 1, 6.4, 0, 0, 0]
+      : A_BECOMING[n]
+      // BECOMING as it lights over the table (0.2–1.0 s), then the apple bruising in his
+      // hand (0.3–0.8 of the line)
+      ? [0.15, 249, 330, 1, L * 0.3, heldX, heldY, 1, L + 0.3, 0, 0, 0]
+      : A_CAVE[n]
+      // the apple as he sets it down, the shadow the lantern throws on the wall while he
+      // sits, the first tread as he stands, the door ahead as he climbs, the day as it
+      // opens (9.3–10.5 s)
+      ? [0.05, APPLE_AT.x, APPLE_AT.y, 1, 1.5, PICK_X[1], PICK_Y[1], 1, 5.8, CLIMB_X[1], TREADS[0].top, 0.8,
+        UP_AT[1], doorX, DOOR.top + 50, 1, 9.4, doorX, DOOR.top + 30, 1]
+      : A_SUN[n]
+      // into the sun as he shields his eyes, then the Form of the apple standing in it
+      // (1.5–3.4 s), held through the line
+      ? [0.2, doorX, DOOR.top + 13, 0.7, 1.5, doorX, DOOR.top + 54, 1, L + 0.3, 0, 0, 0]
+      : A_STICKS[n]
+      // down at each tread ahead of his feet, then the sticks as he sets them in their
+      // block (4.1 s), then the ruler across them (5.2 s)
+      ? [DOWN_AT[0], x + 24 * dir, figGY + 8, 0.8, 3.0, STICKS.x, STICKS.base - 20, 1, 5.2, STICKS.x + 8, STICKS.base - 47, 1, L + 0.3, 0, 0, 0]
+      : A_OPINION[n]
+      // the apple wrinkling on the table, the Form in the doorway glowing, unchanged
+      // (2.0–5.5 s), and the apple again on "of changing things … only opinion"
+      ? [0.2, APPLE_AT.x, APPLE_AT.y, 1, 2.2, doorX, DOOR.top + 54, 0.9, 4.2, APPLE_AT.x, APPLE_AT.y, 0.9, L + 0.3, 0, 0, 0]
+      : ODD[n]
+      // Q2: softly, at whatever the reader's ring has found in the room
+      ? [0.3, pickAt(PICK_X, pickPos.value), pickAt(PICK_Y, pickPos.value), 0.7]
+      // Q1 (the four grades — any one look would point at an answer), the quote, the summary
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, figGY, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, figGY, K_M, dirV, 1, carry(cv, 16, n, lk.x, lk.x, tr), carry(cv, 17, n, lk.y, lk.y, tr), carry(cv, 18, n, 0, lk.w, tr)),
       holding: carry(cv, 2, n, HOLD[p], holding, tr),
       fade: carry(cv, 3, n, 0, fade, tr),
       age: carry(cv, 4, n, AGE[p], age, tr),
@@ -371,7 +444,11 @@ export default function Metaphysics3Scene({
       <ObjectArt parts={STAIRS_ART} tone={WOOD} />
       <Spill S={SCENE} />
       <ObjectArt parts={EASEL_ART} tone={WOOD} />
+      <View style={styles.canvasEdge} pointerEvents="none" />
       <View style={styles.canvas} pointerEvents="none">
+        {/* a still life: a wall, a table edge, a plate, the apple on it */}
+        <View style={styles.paintTable} />
+        <View style={styles.paintPlate} />
         <View style={styles.paintApple} />
         <View style={styles.paintStem} />
         <View style={styles.paintLeaf} />
@@ -384,10 +461,7 @@ export default function Metaphysics3Scene({
       <View style={styles.ground} pointerEvents="none" />
       <Stickman D={DF} k={K_M} />
       <Animated.View style={[styles.rider, apple]} pointerEvents="none">
-        <View style={styles.apple} />
-        <Animated.View style={[styles.bruise, bruise]} />
-        <Animated.View style={[styles.wrinkle, wrinkle]} />
-        <View style={styles.stem} />
+        <AppleArt bruise={bruise} wrinkle={wrinkle} />
       </Animated.View>
       {GRADES[i] ? <Grades picked={picked} onPick={onPick} S={SCENE} /> : null}
       {on(ODD) ? <PickRing S={SCENE} /> : null}
@@ -405,17 +479,47 @@ const EASEL_ART = easel();
 
 // ── the river past the grate ─────────────────────────────────────────────────
 
+// Seen through the grate: the far bank with its reeds, the water with its wavelets
+// running one way, and a leaf carried past on it — never the same water twice.
 function River({ S }: { S: SharedValue<any> }) {
+  const drift = useAnimatedStyle(() => {
+    const u = ((S.value.t * 14) % 110) - 16;
+    return { transform: [{ translateX: u }, { translateY: 1.2 * Math.sin(S.value.t * 2.4) }, { rotate: `${12 * Math.sin(S.value.t * 1.3)}deg` }] };
+  });
   return (
     <View style={styles.river} pointerEvents="none">
-      {[0, 1, 2].map((k) => <Ripple key={k} S={S} k={k} />)}
+      <View style={styles.bank} />
+      {[6, 20, 41, 58, 70].map((x, k) => <View key={k} style={[styles.reed, { left: x, height: 5 + (k % 3) * 2 }]} />)}
+      {[0, 1, 2, 3, 4, 5].map((k) => <Ripple key={k} S={S} k={k} />)}
+      <Animated.View style={[styles.floater, drift]} />
     </View>
   );
 }
 function Ripple({ S, k }: { S: SharedValue<any>; k: number }) {
-  // the water always runs one way, and never the same water twice
-  const st = useAnimatedStyle(() => ({ transform: [{ translateX: ((S.value.t * 22 + k * 30) % 96) - 20 }] }));
-  return <Animated.View style={[styles.ripple, { top: 5 + k * 5 }, st]} />;
+  // the water always runs one way: each wavelet a little arc of light carried along
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: ((S.value.t * 20 + k * 17 + (k % 2) * 8) % 100) - 18 }] }));
+  return <Animated.View style={[styles.ripple, { top: 13 + (k % 3) * 6.5 }, st]} />;
+}
+
+// ── the apple: two lobes under one outline, a stem, a leaf, a glint ────────────
+
+function AppleArt({ bruise, wrinkle }: { bruise: object; wrinkle: object }) {
+  return (
+    <>
+      <View style={[styles.appleLobe, styles.lobeL, styles.appleEdge]} />
+      <View style={[styles.appleLobe, styles.lobeR, styles.appleEdge]} />
+      <View style={[styles.appleLobe, styles.lobeL]} />
+      <View style={[styles.appleLobe, styles.lobeR]} />
+      <View style={styles.appleGlint} />
+      <Animated.View style={[styles.bruise, bruise]} />
+      <Animated.View style={[styles.wrinkle, wrinkle]}>
+        <View style={[styles.crease, { left: 3, top: 5, width: 5 }]} />
+        <View style={[styles.crease, { left: 8, top: 9, width: 4 }]} />
+      </Animated.View>
+      <View style={styles.stem} />
+      <View style={styles.appleLeaf} />
+    </>
+  );
 }
 
 // ── the door, and the day beyond it ──────────────────────────────────────────
@@ -428,7 +532,14 @@ function Doorway({ S }: { S: SharedValue<any> }) {
     <>
       <Animated.View style={[styles.daylight, light]} pointerEvents="none">
         <View style={styles.sun} />
-        <Animated.View style={[styles.formRing, form]}>
+        <Animated.View style={[styles.formWrap, form]}>
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => (
+            <View key={k} style={[styles.formRay, { transform: [{ rotate: `${k * 45}deg` }, { translateY: -19 }] }]} />
+          ))}
+          <View style={[styles.formLobe, { left: 2 }]} />
+          <View style={[styles.formLobe, { left: 11 }]} />
+          <View style={[styles.formLobe, styles.formFill, { left: 2 }]} />
+          <View style={[styles.formLobe, styles.formFill, { left: 11 }]} />
           <View style={styles.formStem} />
           <View style={styles.formLeaf} />
         </Animated.View>
@@ -492,12 +603,13 @@ function Shadow({ S }: { S: SharedValue<any> }) {
 
 function Sticks({ S }: { S: SharedValue<any> }) {
   const sticks = useAnimatedStyle(() => ({ opacity: S.value.sticks, transform: [{ translateY: (1 - S.value.sticks) * -8 }] }));
-  const ruler = useAnimatedStyle(() => ({ opacity: S.value.ruler, transform: [{ translateY: (1 - S.value.ruler) * -6 }, { rotate: '-4deg' }] }));
+  const ruler = useAnimatedStyle(() => ({ opacity: S.value.ruler, transform: [{ translateY: (1 - S.value.ruler) * -6 }, { rotate: '-16deg' }] }));
   return (
     <>
       <Animated.View style={[styles.sticksBox, sticks]} pointerEvents="none">
-        <View style={[styles.stick, { left: 2, height: 38, top: 3 }]} />
-        <View style={[styles.stick, { left: 12, height: 41, top: 0 }]} />
+        {/* "equal" sticks: the right one a hair longer, which the ruler across their tops shows by tilting */}
+        <View style={[styles.stick, { left: 2, height: 42, top: 4 }]} />
+        <View style={[styles.stick, { left: 16, height: 46, top: 0 }]} />
         <View style={styles.block} />
       </Animated.View>
       <Animated.View style={[styles.ruler, ruler]} pointerEvents="none">
@@ -563,21 +675,32 @@ const styles = StyleSheet.create({
     position: 'absolute', left: GRATE.x0, top: GRATE.top, width: GRATE.x1 - GRATE.x0, height: GRATE.bottom - GRATE.top,
     backgroundColor: TEAL, overflow: 'hidden', borderRadius: 1,
   },
-  ripple: { position: 'absolute', left: 0, width: 26, height: 1.6, borderRadius: 1, backgroundColor: PAPER_LIT, opacity: 0.7 },
+  bank: { position: 'absolute', left: 0, right: 0, top: 0, height: 8, backgroundColor: WOOD.SHADE, borderBottomWidth: 1, borderBottomColor: INK },
+  reed: { position: 'absolute', bottom: GRATE.bottom - GRATE.top - 9, width: 1.4, borderRadius: 0.7, backgroundColor: INK },
+  ripple: {
+    position: 'absolute', left: 0, width: 13, height: 5, borderTopLeftRadius: 7, borderTopRightRadius: 7,
+    borderTopWidth: 1.6, borderLeftWidth: 1, borderRightWidth: 1, borderColor: PAPER_LIT, opacity: 0.75,
+  },
+  floater: {
+    position: 'absolute', left: 0, top: 19, width: 9, height: 4, borderRadius: 2.5, backgroundColor: OLIVE,
+    borderWidth: 1, borderColor: INK,
+  },
 
   daylight: {
     position: 'absolute', left: DOOR.x0, top: DOOR.top, width: DOOR_W, height: DOOR_H, backgroundColor: PAPER_LIT,
     overflow: 'hidden', borderRadius: 1,
   },
   sun: { position: 'absolute', left: 24, top: 8, width: 10, height: 10, borderRadius: 5, backgroundColor: EMBER },
-  formRing: {
-    position: 'absolute', left: DOOR_W / 2 - 11, top: 44, width: 22, height: 21, borderRadius: 11,
-    borderWidth: 2, borderColor: INK,
-  },
-  formStem: { position: 'absolute', left: 9, top: -7, width: 2, height: 7, borderRadius: 1, backgroundColor: INK },
+  // THE FORM of the apple: the apple's own shape, perfect — drawn whole, in light, with
+  // rays round it. (It was a ring with a stem, which read as a Christmas bauble.)
+  formWrap: { position: 'absolute', left: DOOR_W / 2 - 12, top: 42, width: 24, height: 23 },
+  formRay: { position: 'absolute', left: 11, top: 9.5, width: 2, height: 6, borderRadius: 1, backgroundColor: EMBER },
+  formLobe: { position: 'absolute', top: 2, width: 12, height: 21, borderRadius: 7, backgroundColor: INK },
+  formFill: { top: 4, width: 9, height: 17, marginLeft: 1.5, borderRadius: 5, backgroundColor: PAPER_LIT },
+  formStem: { position: 'absolute', left: 11, top: -3, width: 2, height: 7, borderRadius: 1, backgroundColor: INK },
   formLeaf: {
-    position: 'absolute', left: 11, top: -8, width: 8, height: 4, borderRadius: 2, borderWidth: 1.5, borderColor: INK,
-    transform: [{ rotate: '-20deg' }],
+    position: 'absolute', left: 13, top: -3, width: 8, height: 4, borderRadius: 2, borderWidth: 1.5, borderColor: INK,
+    backgroundColor: OLIVE, transform: [{ rotate: '-20deg' }],
   },
   leaf: {
     position: 'absolute', left: DOOR.x0, top: DOOR.top, width: DOOR_W, height: DOOR_H, borderRadius: 1,
@@ -608,27 +731,46 @@ const styles = StyleSheet.create({
   shadowApple: { position: 'absolute', left: 2, top: 8, width: 40, height: 36, borderRadius: 20, backgroundColor: INK },
   shadowStem: { position: 'absolute', left: 21, top: 0, width: 3, height: 10, borderRadius: 1.5, backgroundColor: INK },
 
+  canvasEdge: {
+    position: 'absolute', left: CANVAS.x0 - 1.5, top: CANVAS.top - 1.5, width: CANVAS.x1 - CANVAS.x0 + 3,
+    height: CANVAS.bottom - CANVAS.top + 3, borderRadius: 3, backgroundColor: INK,
+  },
   canvas: {
     position: 'absolute', left: CANVAS.x0, top: CANVAS.top, width: CANVAS.x1 - CANVAS.x0, height: CANVAS.bottom - CANVAS.top,
-    borderRadius: 2, borderWidth: 3, borderColor: WOOD.SHADE, backgroundColor: PLATE_FACE, alignItems: 'center',
+    borderRadius: 2, borderWidth: 4, borderColor: WOOD.SHADE, backgroundColor: WALL.RULE, alignItems: 'center', overflow: 'hidden',
   },
-  paintApple: { position: 'absolute', left: 17, top: 16, width: 20, height: 19, borderRadius: 10, backgroundColor: EMBER },
-  paintStem: { position: 'absolute', left: 26, top: 9, width: 2, height: 7, borderRadius: 1, backgroundColor: INK },
-  paintLeaf: { position: 'absolute', left: 28, top: 8, width: 8, height: 4, borderRadius: 2, backgroundColor: OLIVE },
+  paintTable: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 11, backgroundColor: WOOD.STONE, borderTopWidth: 1, borderTopColor: WOOD.SHADE },
+  paintPlate: { position: 'absolute', left: 12, top: 31, width: 28, height: 6, borderRadius: 4, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK },
+  paintApple: { position: 'absolute', left: 17, top: 14, width: 18, height: 18, borderRadius: 9, backgroundColor: EMBER },
+  paintStem: { position: 'absolute', left: 25, top: 8, width: 2, height: 7, borderRadius: 1, backgroundColor: INK },
+  paintLeaf: { position: 'absolute', left: 27, top: 7, width: 8, height: 4, borderRadius: 2, backgroundColor: OLIVE },
 
-  sticksBox: { position: 'absolute', left: STICKS.x - 4, top: STICKS.base - 44, width: 20, height: 46 },
-  stick: { position: 'absolute', width: 4, borderRadius: 1.5, backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK },
-  block: { position: 'absolute', left: -2, bottom: 0, width: 24, height: 6, borderRadius: 1.5, backgroundColor: DEEP },
+  sticksBox: { position: 'absolute', left: STICKS.x - 4, top: STICKS.base - 46, width: 24, height: 48 },
+  stick: { position: 'absolute', width: 5.5, borderRadius: 1.5, backgroundColor: WOOD.SHADE, borderWidth: 1.2, borderColor: INK },
+  block: { position: 'absolute', left: -2, bottom: 0, width: 28, height: 7, borderRadius: 1.5, backgroundColor: DEEP, borderWidth: 1, borderColor: INK },
+  // the ruler rests across both tops (x 2.75 and 18.75 in the box, 4 units apart in
+  // height), so it lies at −16° and says, at a glance, that they are not equal
   ruler: {
-    position: 'absolute', left: STICKS.x - 12, top: STICKS.base - 48, width: 38, height: 5, borderRadius: 1,
+    position: 'absolute', left: STICKS.x - 4 + 10.75 - 20, top: STICKS.base - 46 - 3, width: 40, height: 5, borderRadius: 1,
     backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK,
   },
   tickMark: { position: 'absolute', top: 0, width: 1, height: 2.5, backgroundColor: INK },
 
-  apple: { position: 'absolute', left: -6, top: -6, width: 12, height: 11, borderRadius: 6, backgroundColor: EMBER, borderWidth: 1, borderColor: INK },
-  bruise: { position: 'absolute', left: -3, top: -3, width: 5, height: 4, borderRadius: 2, backgroundColor: OLIVE },
-  wrinkle: { position: 'absolute', left: -6, top: -6, width: 12, height: 11, borderRadius: 6, backgroundColor: DEEP, opacity: 0.5 },
-  stem: { position: 'absolute', left: -0.75, top: -10, width: 1.5, height: 5, backgroundColor: INK },
+  // the apple, 16 × 14 about its centre: two lobes (the dip at the top is what makes it
+  // an apple and not a ball), drawn once in ink grown by the line and once in the fill
+  appleLobe: { position: 'absolute', top: -7, width: 10, height: 14, borderRadius: 5.5, backgroundColor: EMBER },
+  lobeL: { left: -8.5 },
+  lobeR: { left: -1.5 },
+  appleEdge: { backgroundColor: INK, marginLeft: -1.2, marginTop: -1.2, width: 12.4, height: 16.4, borderRadius: 6.5 },
+  appleGlint: { position: 'absolute', left: -5.5, top: -4.5, width: 3, height: 4, borderRadius: 1.5, backgroundColor: PAPER_LIT, opacity: 0.85 },
+  bruise: { position: 'absolute', left: -1, top: -1, width: 6, height: 5, borderRadius: 2.5, backgroundColor: OLIVE },
+  wrinkle: { position: 'absolute', left: -8, top: -6.5, width: 16, height: 13, borderRadius: 6.5, backgroundColor: DEEP, opacity: 0.5 },
+  crease: { position: 'absolute', height: 1, borderRadius: 0.5, backgroundColor: INK },
+  stem: { position: 'absolute', left: -0.9, top: -11, width: 1.8, height: 6, borderRadius: 0.9, backgroundColor: INK, transform: [{ rotate: '12deg' }] },
+  appleLeaf: {
+    position: 'absolute', left: 0.5, top: -12, width: 7, height: 3.5, borderRadius: 2, backgroundColor: OLIVE,
+    borderWidth: 1, borderColor: INK, transform: [{ rotate: '-24deg' }],
+  },
 
   grade: { position: 'absolute' },
   gradeFill: { flexGrow: 1, alignItems: 'center' },

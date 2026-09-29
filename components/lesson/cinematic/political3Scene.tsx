@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { oEll, oRect, oTri, oBar } from './objects';
 import { BEATS } from './political3Script';
 import {
@@ -22,8 +23,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
+import { attendAt } from './attend';
 import {
-  doorway, plinth, cushion, charter, declFrame, ballotStand,
+  doorway, plinth, cushion, charter, declFrame, ballotStand, crownCap, crownMetal, crownErmine, gunmanShadow, CROWN_K,
   DOORWAY, SHADOW, CUSHION, HOOK, CHARTER, INKPOT, SIGN, LINE2, DECL, BOX, SLOT,
   AT_PLINTH, AT_CHARTER,
 } from './political3Set';
@@ -50,7 +52,7 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // COMPOSITION, in stage units: the doorway 10–50 from 404; the plinth at 110 with the
 // crown on its cushion at 446 and the hook at 124; the charter 170–226 × 390–452 with
 // the inkpot at 178; the Declaration 250–296 × 336–386; the ballot box 322–358 ×
-// 440–470. He stands at 132, 160, 232 and 310. Band [288, 514].
+// 440–470. He stands at 144, 160, 232 and 310. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('political');
@@ -107,13 +109,12 @@ const Q1_T = [
 ];
 
 /** The crown, the keys and the quill, each drawn about its own origin so it can ride a hand. */
-const CROWN_ART = [
-  oTri('mass', -6, -6, 6, 8, 'up'),
-  oTri('mass', 0, -7, 6, 9, 'up'),
-  oTri('mass', 6, -6, 6, 8, 'up'),
-  oRect('mass', 0, 0, 20, 6, 0, 1.5),
-  oEll('dark', 0, 0, 4, 3),
-];
+const CROWN_CAP = crownCap();
+const CROWN_METAL = crownMetal();
+const CROWN_ERMINE = crownErmine();
+/** Where the crown's origin (the middle of its circlet) sits on the cushion, and above his hands. */
+const CROWN_REST = { x: CUSHION.x, y: CUSHION.y - 11 * CROWN_K };
+const CROWN_ON_HAND = 7 * CROWN_K;
 const KEYS_ART = [
   oEll('line', 0, 0, 7, 7),
   oBar('mass', 1, 3, 3, 13, 2.2),
@@ -168,7 +169,7 @@ export default function Political3Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(21);
+  const cv = useCarry(25);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -217,13 +218,27 @@ export default function Political3Scene({
     const up = A_GUNMAN[n] ? sec(0.6, 1.1) : A_POWER[n] ? 1 - sec(0.4, 1.0) : 0;
     s = mixStance(s, { ...s, fistR: { x: 14, y: -76 }, fistL: { x: -8, y: -76 } }, up);
 
-    // ── the crown: lifted off in the left hand (b2), carried, set back (b3) ──
+    // ── the crown: lifted in BOTH hands and raised high over his head (b2), then
+    // carried out in front of him, level, in both hands (b3) — the left alone while
+    // the right signs — and set back with both ──
+    // Reference: a crown is held by its band, level, in two hands, and raised to be
+    // looked at — never swung at the hip like a bag. Held at the face it would hide
+    // his head, so it goes up above it, or out at arm's length below it.
     const lift = A_NATURE[n] ? pulse(0.8, 1.2, 1.6) : 0;
-    s = handOn(s, x, dir, -1, CUSHION.x, CUSHION.y - 6 - 10 * sec(1.2, 1.5), lift);
+    const liftY = CROWN_REST.y + CROWN_ON_HAND - 12 * sec(1.2, 1.5);
+    s = handOn(s, x, dir, -1, CUSHION.x + 6, liftY, lift);
+    s = handOn(s, x, dir, 1, CUSHION.x - 6, liftY, lift);
     const setDown = A_COVENANT[n] ? pulse(4.35, 4.75, 5.1) : 0;
     const holdCrown = A_NATURE[n] ? sec(1.2, 1.3) : A_COVENANT[n] ? 1 - sec(4.75, 4.85) : 0;
-    s = mixStance(s, { ...s, fistL: { x: 16, y: -24 } }, holdCrown * (1 - lift) * (1 - setDown));
-    s = handOn(s, x, dir, -1, CUSHION.x, CUSHION.y - 6, setDown);
+    // raised high over his head and looked up at, then brought down in front of him
+    const raise = A_NATURE[n] ? sec(1.3, 1.9) * (1 - sec(3.2, 3.9)) : 0;
+    s = mixStance(s, {
+      ...s,
+      fistL: { x: lerp(30, 12, raise), y: lerp(-28, -86, raise) },
+      fistR: { x: lerp(35, 18, raise), y: lerp(-29, -87, raise) },
+    }, holdCrown * (1 - lift) * (1 - setDown));
+    s = handOn(s, x, dir, -1, CUSHION.x + 6, CROWN_REST.y + CROWN_ON_HAND, setDown);
+    s = handOn(s, x, dir, 1, CUSHION.x - 6, CROWN_REST.y + CROWN_ON_HAND, setDown);
 
     // ── the quill: taken from the inkpot, a signature (b3) or a line (b8), put back ──
     const penAt = A_COVENANT[n] ? 1.1 : A_OWN[n] ? arrive + 0.2 : 99;
@@ -234,7 +249,12 @@ export default function Political3Scene({
     const penY = lerp(INKPOT.top - 4, penLine.y + 1.5 * Math.sin(b * 24) * writing, writing);
     const pen = sec(penAt, penAt + 0.25) * (1 - sec(penAt + 1.5, penAt + 1.75));
     s = handOn(s, x, dir, 1, penX, penY, pen);
+    // while he signs, the crown is drawn back to his side, off the charter's page
+    const aside = A_COVENANT[n] ? pen : 0;
+    s = { ...s, fistL: { x: lerp(s.fistL.x, -4, aside), y: lerp(s.fistL.y, -30, aside) } };
     const quillHeld = sec(penAt + 0.2, penAt + 0.3) * (1 - sec(penAt + 1.5, penAt + 1.6));
+    // the crown rides both hands, or the left alone while the right has the quill
+    const both = A_NATURE[n] || A_COVENANT[n] ? 1 - pen : 0;
 
     // ── the keys: out of his pocket, onto the plinth's hook (b4) ────────────
     const pocket = A_TRUST[n] ? pulse(0.5, 0.8, 1.1) : 0;
@@ -269,13 +289,40 @@ export default function Political3Scene({
     const line2 = A_OWN[n] ? sec(penAt + 0.4, penAt + 1.3) : LINE2_ON[n];
     const link = ORDER[n] ? pickAt(LINK_AT, pickPos.value) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening, when it happens: the shadow in the doorway, each word as
+    // it comes up on its plate, the crown in his hand, the quill's point as it writes,
+    // the keys onto their hook, the Declaration as it lights, the slip into the box —
+    // and at nothing (weight 0, his pose's own head) once it is over. The generated
+    // gaze aimed every beat at the middle of the picture, which on this set is the
+    // blank wall above the plinth.
+    // The plates are drawn by styles, not the set, so their rows are placed from
+    // there: the doorway's at x 44 (POWER 376, STATE OF WAR 388), the plinth's over
+    // CUSHION.x (LEGITIMACY 312, IN TRUST 324), the charter's at 199 (COVENANT 366,
+    // GENERAL WILL 378), the box's at 363 × 415. 430 is a wall shadow's chest, and
+    // x − 10 / 390 the crown held up over his head, x - 3 / 468 his pocket.
+    const LK = A_GUNMAN[n] ? [0.15, SHADOW.x, 430, 1]
+      : A_POWER[n] ? [0, SHADOW.x, 430, 1, 0.9, 44, 376, 1, L * 0.5, CUSHION.x, 312, 0.7, L * 0.85, 0, 0, 0]
+      : A_NATURE[n] ? [0.4, CUSHION.x, CUSHION.y, 1, 1.4, x - 10, 390, 1, 3.5, 0, 0, 0, L * 0.72, SHADOW.x, 430, 1, L * 0.8, 44, 388, 0.9, L + 0.8, 0, 0, 0]
+      : A_COVENANT[n] ? [0.2, (CHARTER.x0 + CHARTER.x1) / 2, 424, 0.8, 1.0, penX, penY, 1, 2.6, 199, 366, 0.85, 3.2, CUSHION.x, CUSHION.y, 1, 5.1, 0, 0, 0]
+      : A_TRUST[n] ? [0.4, x - 3, 468, 0.8, 1.1, HOOK.x, HOOK.y, 1, 2.6, 0, 0, 0, L * 0.6, CUSHION.x, 324, 0.8, L * 0.74, 0, 0, 0, L * 0.86, HOOK.x, HOOK.y, 0.9, L, 0, 0, 0]
+      : A_DECL[n] ? [arrive - 0.3, (DECL.x0 + DECL.x1) / 2, (DECL.top + DECL.bottom) / 2, 1, arrive + 2.6, 0, 0, 0]
+      : A_ROUSSEAU[n] ? [arrive - 0.4, SLOT.x, SLOT.y, 1, arrive + 1.3, (BOX.x0 + BOX.x1) / 2, 460, 0.9, L * 0.45, 199, 378, 0.6, L * 0.62, 0, 0, 0, L * 0.8, 363, 415, 1, L * 0.97, 0, 0, 0]
+      : A_OWN[n] ? [arrive, penX, penY, 1, penAt + 1.8, 0, 0, 0]
+      // Q1 stays eyes-front: its right answer is the plinth he stands beside, and a
+      // look at it would give it away. Q2 follows the cord as the order control draws it.
+      : ORDER[n] ? [0.3, lerp(CHARTER.x1 + 4, BOX.x0 - 2, link), lerp(424, BOX.top + 4, link), 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 21, n, lk.x, lk.x, tr), carry(cv, 22, n, lk.y, lk.y, tr), carry(cv, 23, n, 0, lk.w, tr)),
       shadow: carry(cv, 1, n, 0, shadow, tr),
       power: carry(cv, 2, n, NAMED[p], power, tr),
       legit: carry(cv, 3, n, NAMED[p], legit, tr),
       warRow: carry(cv, 4, n, WAR[p], warRow, tr),
       crownOff: carry(cv, 5, n, CROWN_HELD[p], crownOff, tr),
+      crownBoth: carry(cv, 24, n, CROWN_HELD[p], both, tr),
       sign: carry(cv, 6, n, SIGNED[p], sign, tr),
       cov: carry(cv, 7, n, SIGNED[p], cov, tr),
       keysOn: carry(cv, 8, n, KEYS[p], keysOn, tr),
@@ -325,6 +372,7 @@ export default function Political3Scene({
 }
 
 const DOORWAY_ART = doorway();
+const SHADOW_ART = gunmanShadow();
 const PLINTH_ART = plinth();
 const CUSHION_ART = cushion();
 const CHARTER_ART = charter();
@@ -334,14 +382,12 @@ const STAND_ART = ballotStand();
 // ── the gunman's shadow on the wall, thrown in through the doorway ────────────
 
 function Shadows({ S }: { S: SharedValue<any> }) {
-  const one = useAnimatedStyle(() => ({ opacity: 0.24 * S.value.shadow, transform: [{ translateX: -10 * (1 - S.value.shadow) }] }));
+  // one flat tone, laid on the wall at a fraction of ink: it slides in from the
+  // doorway as he steps up to it, and back out as he goes
+  const one = useAnimatedStyle(() => ({ opacity: 0.26 * S.value.shadow, transform: [{ translateX: -14 * (1 - S.value.shadow) }] }));
   return (
-    <Animated.View style={[styles.shade, { left: SHADOW.x - 16 }, one]} pointerEvents="none">
-      <View style={styles.shadeCrown} />
-      <View style={styles.shadeTrunk} />
-      <View style={[styles.shadeArm, { left: 18, transform: [{ rotate: '-8deg' }] }]} />
-      <View style={[styles.shadeLeg, { left: 12, transform: [{ rotate: '8deg' }] }]} />
-      <View style={[styles.shadeLeg, { left: 18, transform: [{ rotate: '-8deg' }] }]} />
+    <Animated.View style={[styles.shadowLayer, one]} pointerEvents="none">
+      <SetArt parts={SHADOW_ART} tone={IRON} line={0} />
     </Animated.View>
   );
 }
@@ -395,13 +441,19 @@ function Ballot({ S }: { S: SharedValue<any> }) {
 // ── what he holds: the crown, the quill, the keys, a slip ────────────────────
 
 function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
+  // on the cushion, or on his hands: between both of them while he holds it up (b2),
+  // on the left one alone while he walks and signs (b3)
   const crown = useAnimatedStyle(() => {
-    const w = DF.value.wrL;
+    const l = DF.value.wrL;
+    const r = DF.value.wrR;
     const h = S.value.crownOff;
+    const two = S.value.crownBoth;
+    const hx = lerp(l[0].translateX, (l[0].translateX + r[0].translateX) / 2, two);
+    const hy = lerp(l[1].translateY, (l[1].translateY + r[1].translateY) / 2, two) - CROWN_ON_HAND;
     return {
       transform: [
-        { translateX: lerp(CUSHION.x, w[0].translateX, h) },
-        { translateY: lerp(CUSHION.y - 8, w[1].translateY - 6, h) },
+        { translateX: lerp(CROWN_REST.x, hx, h) },
+        { translateY: lerp(CROWN_REST.y, hy, h) },
       ],
     };
   });
@@ -434,7 +486,9 @@ function Held({ S, DF }: { S: SharedValue<any>; DF: SharedValue<Bundle> }) {
   return (
     <>
       <Animated.View style={[styles.rider, crown]} pointerEvents="none">
-        <ObjectArt parts={CROWN_ART} tone={METAL} />
+        <ObjectArt parts={CROWN_CAP} tone={IRON} />
+        <ObjectArt parts={CROWN_METAL} tone={METAL} />
+        <ObjectArt parts={CROWN_ERMINE} tone={METAL} />
       </Animated.View>
       <Animated.View style={[styles.rider, quill]} pointerEvents="none">
         <ObjectArt parts={QUILL_ART} tone={WOOD} />
@@ -558,11 +612,7 @@ const styles = StyleSheet.create({
     backgroundColor: PAPER_LIT,
   },
 
-  shade: { position: 'absolute', top: SHADOW.top, width: 44, height: GROUND - SHADOW.top - 6 },
-  shadeCrown: { position: 'absolute', left: 8, top: 0, width: 20, height: 20, borderRadius: 10, backgroundColor: INK },
-  shadeTrunk: { position: 'absolute', left: 14, top: 18, width: 8, height: 44, borderRadius: 4, backgroundColor: INK },
-  shadeArm: { position: 'absolute', top: 26, width: 26, height: 5, borderRadius: 2.5, backgroundColor: INK, transformOrigin: '0% 50%' },
-  shadeLeg: { position: 'absolute', top: 58, width: 6, height: 42, borderRadius: 3, backgroundColor: INK, transformOrigin: '50% 0%' },
+  shadowLayer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
 
   sheet: {
     position: 'absolute', left: CHARTER.x0, top: CHARTER.top + 4, width: CHARTER.x1 - CHARTER.x0, height: CHARTER.bottom - CHARTER.top - 8,
@@ -592,7 +642,8 @@ const styles = StyleSheet.create({
     boxShadow: LIP, alignItems: 'center', paddingTop: 3,
   },
   doorPlate: { left: 4, top: 368, width: 80 },
-  crownPlate: { left: 74, top: 338, width: 72 },
+  // high over the plinth, clear of his head: a thought needs the air between them
+  crownPlate: { left: 74, top: 304, width: 72 },
   charterPlate: { left: 160, top: 360, width: 78 },
   boxPlate: { left: 330, top: 408, width: 66, height: 15, paddingTop: 2 },
   plateText: {

@@ -18,7 +18,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Ethics3Beat extends BaseBeat {
   /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 78 at the points lever · 84 at the end of the balance · 226 at the lectern · 318 at the mirror. */ x?: number;
+  /** Where he stands: 52 at the points lever (to its left, facing it) · 84 at the end of the balance · 226 at the lectern · 318 at the mirror · 292 facing back into the room for the questions. */ x?: number;
   /** The act across this beat's line (the scene choreographs it). */
   act?: 'power' | 'names' | 'run' | 'route' | 'ask' | 'pull' | 'weigh' | 'reset' | 'read' | 'mirror' | 'wise';
   /** The track diagram is lit. */ board?: boolean;
@@ -35,33 +35,33 @@ export interface Ethics3Beat extends BaseBeat {
 
 export const BEATS: Ethics3Beat[] = [
   {
-    p: 158, x: 78, act: 'power', board: true,
+    p: 158, x: 52, act: 'power', board: true,
     text: 'Consider one moral choice, judged by three philosophers.',
     dur: 1.8,
   },
   {
-    p: 167, x: 78, act: 'names', board: true, names: true,
+    p: 167, x: 52, act: 'names', board: true, names: true,
     text: 'All three seek the right action, yet their verdicts differ.',
     dur: 2.4,
   },
   {
-    p: 158, x: 78, act: 'run', board: true, names: true, runaway: true,
+    p: 158, x: 52, act: 'run', board: true, names: true, runaway: true,
     text: 'Suppose a runaway trolley is heading towards five people on the track. You stand beside a lever.',
     cite: 'Foot, 1967 · Thomson, 1976',
     dur: 2.5,
   },
   {
-    p: 158, x: 78, act: 'route', board: true, names: true, runaway: true, route: true,
+    p: 158, x: 52, act: 'route', board: true, names: true, runaway: true, route: true,
     text: 'If you pull it, the trolley switches to a side track, where it will kill one person instead.',
     dur: 2.5,
   },
   {
-    p: 167, x: 78, act: 'ask', board: true, names: true, runaway: true, route: true,
+    p: 167, x: 52, act: 'ask', board: true, names: true, runaway: true, route: true,
     text: 'Three major ethical theories address the case. Each asks the same question: what makes an action good?',
     dur: 4.2,
   },
   {
-    p: 158, x: 78, act: 'pull', board: true, names: true, runaway: true, route: true, pulled: true,
+    p: 158, x: 52, act: 'pull', board: true, names: true, runaway: true, route: true, pulled: true,
     text: 'John Stuart Mill’s utilitarianism says to pull the lever. For Mill, the right act produces the most happiness, counting each person equally.',
     cite: 'Consequentialism — the outcome',
     dur: 2.3,
@@ -107,7 +107,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 3.2,
   },
   {
-    p: 260, x: 318, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
+    p: 260, x: 292, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3,
     interact: {
       prompt: 'Which of these does a consequentialist not weigh?',
       odd: {
@@ -125,7 +125,7 @@ export const BEATS: Ethics3Beat[] = [
     dur: 1,
   },
   {
-    p: 260, x: 318, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3, lamps: true,
+    p: 260, x: 292, board: true, names: true, runaway: true, route: true, weights: true, open: true, reflect: true, gloss: 3, lamps: true,
     interact: {
       prompt: 'Is it true that utilitarians and Kant both hold that the end justifies the means?',
       explain: 'False. A utilitarian may let a good end justify the means. Kant forbids it: a person must never be treated merely as a means, whatever the consequences.',

@@ -21,7 +21,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Epi2Beat extends BaseBeat {
   /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 290 at his desk · 312 by the candle · 180 between the portrait and the slate · 140 at the window. */ x?: number;
+  /** Where he stands: 290 at his desk · 312 by the candle · 262 right of the slate, facing the wall · 140 at the window. */ x?: number;
   /** The act across this beat's line (the scene choreographs it). */
   act?: 'write' | 'candle' | 'world' | 'demon' | 'treat' | 'test' | 'exist' | 'rebuild';
   /** He carries the lit candle. */ lit?: boolean;
@@ -54,12 +54,12 @@ export const BEATS: Epi2Beat[] = [
     dur: 1.9,
   },
   {
-    p: 158, x: 180, act: 'world', lit: true, tested: true,
+    p: 158, x: 262, act: 'world', lit: true, tested: true,
     text: 'Truth is a matter of how the world is. Since certainty can accompany a false belief, Descartes seeks beliefs that withstand every possible doubt.',
     dur: 2.9,
   },
   {
-    p: 158, x: 180, act: 'demon', lit: true, tested: true, shadow: true, faked: true,
+    p: 158, x: 262, act: 'demon', lit: true, tested: true, shadow: true, faked: true,
     text: 'Descartes supposes an evil demon who uses all its power to deceive him. His senses, his memories and even simple sums could then be false.',
     cite: 'Descartes, First Meditation, 1641',
     dur: 4.4,
@@ -83,7 +83,7 @@ export const BEATS: Epi2Beat[] = [
     dur: 3.4,
   },
   {
-    p: 167, x: 140, act: 'test', lit: true, tested: true, shadow: true, faked: true, treated: true, ghost: true, failed: true,
+    p: 167, x: 262, act: 'test', lit: true, tested: true, shadow: true, faked: true, treated: true, ghost: true, failed: true,
     text: 'Descartes does not believe the demon exists. The supposition is a test: of each belief, he asks whether a deceiver could mislead him about it.',
     cite: 'Methodological doubt',
     dur: 2.7,

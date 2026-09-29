@@ -22,8 +22,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
+import { attendAt } from './attend';
 import {
-  curtain, valance, table, hat, easel, door, temple,
+  curtain, valance, table, hat, easel, door, leaf, temple,
   PROS, TABLE, HAT, EASEL, TRAP, DOORS, DOOR, BACKDROP,
 } from './metaphysics2Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
@@ -59,7 +60,17 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // COMPOSITION, in stage units: curtains 0–26 and 374–400, the valance 290–314 with
 // the marquee on it; the easel's board 34–158 × 322–396; the table at x 152 (top 456)
 // over the trapdoor; he works at x 196; the temple flat 70–330 × 318–430; the doors
-// at x 270 and 322. Band [288, 514].
+// at x 264 (IT IS NOT) and 318 (IT IS). Band [288, 514].
+//
+// 2026-09-28, the owner: *"If something's happening on scene, the stick man should be
+// looking at it or should be interacting with it"*, and *"the objects … seem to be
+// more cheap"*. So: every easel card goes up at a flourish of his wand while he faces
+// the easel (the second one BEFORE he leaves for the wings); the dove loops out over
+// the easel and puffs in front of him, not behind his back; IT IS NOT is the nearer
+// door, so on b8–b9 he stands to its LEFT at x 238 facing it, and IT IS — lit at the
+// end — is in front of him past it, not behind his body; the doors are real doors
+// (casing, sill, braced feet, a panelled leaf on hinges with a handle); and the hats
+// of Q1 stand clear of the table, which he no longer stands inside.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('metaphysics');
@@ -101,6 +112,7 @@ const CARDS = BEATS.map((b) => b.cards ?? 0);
 const TEMPLE = since(BEATS.findIndex((b) => b.temple));
 const DOORS_ON = since(BEATS.findIndex((b) => b.doors));
 const OPEN = since(BEATS.findIndex((b) => b.open));
+const LEAF_OPEN = BEATS.map((b) => (b.act === 'step' || b.act === 'tries' ? 1 : 0));
 /** The cloth stays up once lifted; the globe stays on the table once drawn out. */
 const CLOTH = since(A_REVEAL.indexOf(1));
 const GLOBE = since(0);
@@ -108,7 +120,7 @@ const HATS = BEATS.map((b) => (b.hats ? 1 : 0));
 const FLIES = BEATS.map((b) => (b.flies ? 1 : 0));
 
 // the three hats of Q1, on the floor in front of the doors
-const HAT_X = [198, 246, 294];
+const HAT_X = [230, 278, 326];
 const HATS_Q = [
   { id: 'horse', label: 'HORSE', correct: false },
   { id: 'unicorn', label: 'UNICORN', correct: false },
@@ -133,6 +145,20 @@ const CARD_LINES = [
 /** Where the globe rests on the table once he has set it down. */
 const GLOBE_REST = { x: 174, y: TABLE.top - 9 };
 const GLOBE_R = 8;
+/**
+ * The dove's flight: out of the hat, a loop out over the easel, and gone in a puff
+ * at DOVE_END — up and in FRONT of him, since he faces the table (it used to fly
+ * off behind his back, where he could not watch his own trick).
+ */
+const DOVE_END = { x: 176, y: 352 };
+function doveX(u: number): number {
+  'worklet';
+  return lerp(HAT.cx, DOVE_END.x, u) - 40 * Math.sin(u * Math.PI);
+}
+function doveY(u: number): number {
+  'worklet';
+  return lerp(HAT.brim - HAT.h, DOVE_END.y, u) - 22 * Math.sin(u * Math.PI);
+}
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -153,7 +179,7 @@ export default function Metaphysics2Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(24);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -170,13 +196,15 @@ export default function Metaphysics2Scene({
     // where he stands: a walk lasts as long as its distance needs
     const walking = Math.abs(X[n] - X[p]) > 1;
     const walkDur = moveTr(X[p], X[n], TR);
-    const walkU = walking ? ease01(b / walkDur) : 1;
+    // on the search beat he first conjures the second card onto the easel, THEN goes
+    const walkAt = A_SEARCH[n] ? 0.22 * L : 0;
+    const walkU = walking ? ease01((b - walkAt) / walkDur) : 1;
     const x = carry(cv, 0, n, X[p], X[n], walkU);
     // he faces the way he walks, never backwards, and turns to what the beat is
     // about only once he has arrived
     const travel = X[n] > X[p] ? 1 : -1;
     const dirV = walking
-      ? lerp(facing(DIR[p], travel, b), DIR[n], clamp01((b - walkDur) / 0.3))
+      ? lerp(facing(DIR[p], travel, b - walkAt), DIR[n], clamp01((b - walkAt - walkDur) / 0.3))
       : facing(DIR[p], DIR[n], b);
     const dir = (dirV < 0 ? -1 : 1) as 1 | -1;
 
@@ -210,13 +238,21 @@ export default function Metaphysics2Scene({
     s = handOn(s, x, dir, TABLE.cx + TABLE.w / 2 - 4, lerp(TABLE.top + 30, TABLE.top + 4, lift), liftHand);
 
     // the curtain pulled back in the wings
-    const peek = A_SEARCH[n] ? st(Math.min(0.6, moveTr(X[p], X[n], TR) / L), 0.85) : 0;
-    s = handOn(s, x, dir, PROS.right + 2, 430, A_SEARCH[n] ? bump(b, L, 0.5, 0.62, 0.98) : 0);
+    const arrive = (walkAt + walkDur) / L;
+    const peek = A_SEARCH[n] ? st(Math.min(0.72, arrive), 0.9) : 0;
+    s = handOn(s, x, dir, PROS.right + 2, 430, A_SEARCH[n] ? bump(b, L, Math.min(0.7, arrive - 0.02), 0.78, 0.98) : 0);
 
     // the whole act sinks through the trapdoor and comes back
     const sweepFrom = A_SWEEP[n] ? moveTr(X[p], X[n], TR) / L : 0;
-    const trap = A_SWEEP[n] ? bump(b, L, sweepFrom, sweepFrom + 0.1, 0.98) : 0;
-    const sink = A_SWEEP[n] ? bump(b, L, sweepFrom + 0.08, sweepFrom + 0.3, 0.92) : 0;
+    const trap = A_SWEEP[n] ? bump(b, L, sweepFrom + 0.12, sweepFrom + 0.22, 0.98) : 0;
+    const sink = A_SWEEP[n] ? bump(b, L, sweepFrom + 0.2, sweepFrom + 0.4, 0.92) : 0;
+
+    // each card goes up on the easel at a flourish of his wand, while he faces it:
+    // the principle as the reveal begins, the second before he leaves for the wings,
+    // the third as he arrives back from them
+    const cardsU = A_SWEEP[n] ? st(sweepFrom, sweepFrom + 0.1) : A_SEARCH[n] ? st(0.03, 0.15) : st(0.02, 0.24);
+    const conjure = A_REVEAL[n] || A_SEARCH[n] ? bump(b, L, 0, 0.05, 0.2) : 0;
+    s = mixStance(s, emoteAny(183, t), conjure);
     s = mixStance(s, emoteAny(183, t), A_SWEEP[n] ? bump(b, L, sweepFrom, sweepFrom + 0.12, sweepFrom + 0.35) : 0);
 
     // the temple lowered and the bow
@@ -224,17 +260,21 @@ export default function Metaphysics2Scene({
     s = { ...s, tilt: s.tilt - 0.42 * bow, neck: s.neck + 0.3 * bow };
 
     // the doors rolled in, and he points at each as it stops
-    const roll1 = A_DOORS[n] ? st(0.0, 0.38) : DOORS_ON[n] ? 1 : 0;
-    const roll2 = A_DOORS[n] ? st(0.28, 0.68) : DOORS_ON[n] ? 1 : 0;
+    // IT IS NOT (the nearer) rolls in first, then IT IS behind it, so neither rolls
+    // through the other
+    const roll1 = A_DOORS[n] ? st(0.28, 0.68) : DOORS_ON[n] ? 1 : 0;
+    const roll2 = A_DOORS[n] ? st(0.0, 0.38) : DOORS_ON[n] ? 1 : 0;
     const signs = A_DOORS[n] ? st(0.66, 0.84) : DOORS_ON[n] ? 1 : 0;
     s = mixStance(s, emoteAny(183, t), A_DOORS[n] ? bump(b, L, 0.4, 0.5, 0.64) + bump(b, L, 0.84, 0.92, 1) : 0);
 
     // IT IS NOT opened: the step onto nothing, and the three tries
     const walkEnd = walking ? moveTr(X[p], X[n], TR) / L : 0;
-    const leaf = A_STEP[n] ? st(walkEnd + 0.02, walkEnd + 0.22) : OPEN[n] ? 1 : 0;
+    // it stands open only while he tries the second way; after that it swings shut on its
+    // spring, so the empty doorway is not a black slab behind the hats
+    const leaf = A_STEP[n] ? st(walkEnd + 0.02, walkEnd + 0.22) : LEAF_OPEN[n];
     s = handOn(s, x, dir, DOORS[1].x + 4, GROUND - 38, A_STEP[n] ? bump(b, L, walkEnd, walkEnd + 0.1, walkEnd + 0.26) : 0);
     const probe = (A_STEP[n] ? bump(b, L, 0.55, 0.64, 0.74) : 0) + (A_TRIES[n] ? bump(b, L, 0.02, 0.14, 0.3) : 0);
-    s = { ...s, footR: { x: s.footR.x + 20 * probe, y: s.footR.y - 6 * probe }, tilt: s.tilt - 0.08 * probe };
+    s = { ...s, footR: { x: s.footR.x + 36 * probe, y: s.footR.y - 6 * probe }, tilt: s.tilt - 0.08 * probe };
     const recoil = A_STEP[n] ? st(0.72, 0.8) : 0;
     s = mixStance(s, emoteAnyLive(318, t, Math.max(0, b - 0.72 * L)), recoil);
     const point = A_TRIES[n] ? bump(b, L, 0.34, 0.44, 0.64) : 0;
@@ -243,10 +283,67 @@ export default function Metaphysics2Scene({
     s = mixStance(s, emoteAny(158, t), think * 0.7);
     const only = A_TRIES[n] ? st(0.86, 1) : OPEN[n] && !A_STEP[n] ? 1 : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At the thing his act is doing, when it does it — the hat he taps, the dove, the
+    // globe, the card going up, the mechanism, the flat coming down, each door as it
+    // rolls in — and at nothing (weight 0, his pose's own head) when the act is done or
+    // his pose carries its own head (the shrug, the bow, the recoil). The generated
+    // gaze aimed every beat at the middle of the picture: the marquee and the valance.
+    // Key times are the act's own stages (fractions of L) and walkDur.
+    // Board rows: the easel's card k sits at about EASEL.y + 5 + 22·k, centred at
+    // EASEL.x + 44 (styles.board). The dove and its puff follow Dove's own path to
+    // (250, 350); the marquee is 300 wide from x 50 (styles.marquee); the thought
+    // frame's centre is 297 · 354 (styles.cloud).
+    const LK = A_DOVE[n]
+      // the hat as he taps it, the dove out of it and round, its puff, the globe drawn
+      // out and set down on the table
+      ? [0.1, HAT.cx, HAT.brim - HAT.h, 1,
+        L * 0.4, doveX(dove), doveY(dove), 1,
+        L * 0.66, DOVE_END.x, DOVE_END.y, 0.9, L * 0.74, gx, gy, 1, L + 0.6, 0, 0, 0]
+      : A_SHAKE[n]
+      // the marquee lighting letter by letter (its leading edge), the empty hat tipped
+      // and shaken, then his own head for the shrug
+      ? [0.1, 50 + 300 * st(0, 0.45), PROS.top + 10, 1, L * 0.42, HAT.cx, HAT.brim - HAT.h, 1, L * 0.86, 0, 0, 0]
+      : A_REVEAL[n]
+      // the principle's card going up, then the mechanism under the cloth he lifts
+      ? [0.05, EASEL.x + 44, EASEL.y + 5, 1, L * 0.25, TABLE.cx, TABLE.top + 24, 1, L + 0.6, 0, 0, 0]
+      : A_SEARCH[n]
+      // ahead to the wings as he walks, then in behind the curtain he pulls back
+      // (the second card as he conjures it up first)
+      ? [0.05, EASEL.x + 44, EASEL.y + 27, 1, walkAt, PROS.right, 425, 0.7, Math.min(L * 0.72, walkAt + walkDur), PROS.right + 8, 430, 1, L * 0.9, 0, 0, 0]
+      : A_SWEEP[n]
+      // the third card as he walks back toward the easel, then the whole act sinking
+      // through the trapdoor and coming back up
+      ? [0.2, EASEL.x + 44, EASEL.y + 49, 0.8, walkDur, TABLE.cx, Math.min(GROUND, TABLE.top - 10 + 70 * sink), 1, L + 0.6, 0, 0, 0]
+      : A_BOW[n]
+      // the painted temple coming down from the flies; his own head for the bow
+      ? [0.1, BACKDROP.x + BACKDROP.w / 2, BACKDROP.y + BACKDROP.h / 2 - 150 * (1 - st(0, 0.6)), 1, L * 0.58, 0, 0, 0]
+      : A_DOORS[n]
+      // each door as it rolls in from the wings, then each sign as he points at it
+      ? [0.1, DOORS[1].x + DOOR.w / 2 + 110 * (1 - roll2), GROUND - DOOR.h / 2, 1,
+        L * 0.3, DOORS[0].x + DOOR.w / 2 + 140 * (1 - roll1), GROUND - DOOR.h / 2, 1,
+        L * 0.64, DOORS[0].x + DOOR.w / 2, SIGN_Y + 7, 1, L * 0.8, DOORS[1].x + DOOR.w / 2, SIGN_Y + 7, 1]
+      : A_STEP[n]
+      // the IT IS NOT door he walks to and opens, then down at the gap where the floor
+      // should be as his foot tests it; his own head for the recoil
+      ? [0.1, DOORS[1].x + DOOR.w / 2, GROUND - 38, 1, L * 0.5, DOORS[1].x + DOOR.w / 2, GROUND + 4, 1, L * 0.78, 0, 0, 0]
+      : A_TRIES[n]
+      // the step onto nothing, the wand pointed in, the empty thought, then IT IS lit
+      ? [0.02, DOORS[1].x + DOOR.w / 2, GROUND + 4, 1, L * 0.34, DOORS[1].x + DOOR.w / 2, GROUND - 42, 1,
+        L * 0.66, 237, 350, 0.85, L * 0.86, DOORS[0].x + DOOR.w / 2, GROUND - DOOR.h / 2, 1]
+      : HATS[n]
+      // Q1: softly at the three hats, once he has walked to them (all at one height)
+      ? [walkDur, HAT_X[1], GROUND - 20, 0.7]
+      : FLIES[n]
+      // Q2: softly at the three cards lowered from the flies (all at one height)
+      ? [0.5, FLY_X[1], PROS.valance + 34, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(E[p], t)), s, tr));
 
     return {
-      fig: lookPose(fig, x, GROUND, K_MAG, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_MAG, dirV, 1, carry(cv, 24, n, lk.x, lk.x, tr), carry(cv, 25, n, lk.y, lk.y, tr), carry(cv, 26, n, 0, lk.w, tr)),
       open: carry(cv, 1, n, n === 0 ? 0 : 1, 1, n === 0 ? st(0, 0.24) : 1),
       dove: carry(cv, 22, n, 0, dove, tr),
       puff: carry(cv, 23, n, 0, puff, tr),
@@ -255,7 +352,7 @@ export default function Metaphysics2Scene({
       globe: GLOBE[n],
       hatTilt: carry(cv, 21, n, 0, hatTilt, tr),
       ask: carry(cv, 4, n, ASK[p], ASK[n], A_SHAKE[n] ? stage(b, L, 0, 0.45) : tr),
-      cards: carry(cv, 5, n, CARDS[p], CARDS[n], st(0.02, 0.24)),
+      cards: carry(cv, 5, n, CARDS[p], CARDS[n], cardsU),
       lift: carry(cv, 6, n, CLOTH[p], lift, tr),
       peek: carry(cv, 15, n, 0, peek, tr),
       trap: carry(cv, 16, n, 0, trap, tr),
@@ -265,7 +362,7 @@ export default function Metaphysics2Scene({
       roll1: carry(cv, 8, n, DOORS_ON[p], roll1, tr),
       roll2: carry(cv, 9, n, DOORS_ON[p], roll2, tr),
       signs: carry(cv, 10, n, DOORS_ON[p], signs, tr),
-      leaf: carry(cv, 11, n, OPEN[p], leaf, tr),
+      leaf: carry(cv, 11, n, LEAF_OPEN[p], leaf, tr),
       point: carry(cv, 20, n, 0, point, tr),
       think: carry(cv, 19, n, 0, think, tr),
       only: carry(cv, 12, n, 0, only, tr),
@@ -447,14 +544,13 @@ const DOVE_PARTS = [
 function Dove({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const st = useAnimatedStyle(() => {
     const u = S.value.dove;
-    const x = lerp(HAT.cx, 250, u) + 30 * Math.sin(u * Math.PI);
-    const y = lerp(HAT.brim - HAT.h, 350, u) - 30 * Math.sin(u * Math.PI);
-    return { opacity: u > 0 && u < 1 ? 1 - S.value.puff * 1.4 : 0, transform: [{ translateX: x }, { translateY: y }] };
+    // it flies leftward, so it is drawn facing left
+    return { opacity: u > 0 && u < 1 ? 1 - S.value.puff * 1.4 : 0, transform: [{ translateX: doveX(u) }, { translateY: doveY(u) }, { scaleX: -1 }] };
   });
   const wing = useAnimatedStyle(() => ({ transform: [{ rotate: `${-30 + 40 * Math.sin(S.value.t * 18)}deg` }] }));
   const puff = useAnimatedStyle(() => ({
     opacity: S.value.puff,
-    transform: [{ translateX: 250 }, { translateY: 350 }, { scale: 0.5 + 1.2 * S.value.puff }],
+    transform: [{ translateX: DOVE_END.x }, { translateY: DOVE_END.y }, { scale: 0.5 + 1.2 * S.value.puff }],
   }));
   if (!on(A_DOVE)) return null;
   return (
@@ -498,13 +594,14 @@ function Temple({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => 
 // ── the doors: rolled in, labelled, and the second opened onto nothing ──────
 
 const DOOR_ART = DOORS.map((d) => door(d.x));
+const LEAF_ART = leaf();
 /** The door signs ride on posts above head height: he works in front of the doors. */
 const SIGN_Y = 374;
 function Doors({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const d1 = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - S.value.roll1) * 140 }] }));
   const d2 = useAnimatedStyle(() => ({ transform: [{ translateX: (1 - S.value.roll2) * 110 }] }));
   const sign = useAnimatedStyle(() => ({ opacity: S.value.signs, transform: [{ translateY: (1 - S.value.signs) * -10 }] }));
-  const leaf = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.82 * S.value.leaf }] }));
+  const leafSt = useAnimatedStyle(() => ({ transform: [{ scaleX: 1 - 0.82 * S.value.leaf }] }));
   const glow = useAnimatedStyle(() => ({ opacity: 0.5 * S.value.only * (0.75 + 0.25 * Math.sin(S.value.t * 3)) }));
   if (!on(DOORS_ON)) return null;
   const top = GROUND - DOOR.h - 6;
@@ -513,21 +610,26 @@ function Doors({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
       <Animated.View style={[StyleSheet.absoluteFill, d1]} pointerEvents="none">
         <Animated.View style={[styles.doorGlow, { left: DOORS[0].x - 8, top: top - 8 }, glow]} />
         <ObjectArt parts={DOOR_ART[0]} tone={WOOD} />
-        <View style={[styles.doorLeaf, { left: DOORS[0].x, top }]}><View style={styles.knob} /></View>
+        <View style={[styles.doorLeaf, { left: DOORS[0].x, top }]}><ObjectArt parts={LEAF_ART} tone={WOOD} /></View>
         <View style={[styles.signPost, { left: DOORS[0].x + DOOR.w / 2 - 0.75, top: SIGN_Y + 14 }]} />
-        <Animated.View style={[styles.doorSign, { left: DOORS[0].x - 6, top: SIGN_Y }, sign]}>
-          <Text style={styles.signText} numberOfLines={1}>{DOORS[0].label}</Text>
-        </Animated.View>
       </Animated.View>
       <Animated.View style={[StyleSheet.absoluteFill, d2]} pointerEvents="none">
         <ObjectArt parts={DOOR_ART[1]} tone={WOOD} />
         {/* behind this door there is no floor: the gap runs through the stage line */}
         <View style={[styles.void, { left: DOORS[1].x, top }]} />
         <View style={[styles.voidFloor, { left: DOORS[1].x }]} />
-        <Animated.View style={[styles.doorLeaf, { left: DOORS[1].x, top, transformOrigin: '0% 50%' }, leaf]}>
-          <View style={styles.knob} />
+        {/* hung on the right, so it swings open away from him */}
+        <Animated.View style={[styles.doorLeaf, { left: DOORS[1].x, top, transformOrigin: '100% 50%' }, leafSt]}>
+          <ObjectArt parts={LEAF_ART} tone={WOOD} />
         </Animated.View>
         <View style={[styles.signPost, { left: DOORS[1].x + DOOR.w / 2 - 0.75, top: SIGN_Y + 14 }]} />
+      </Animated.View>
+      {/* the signs drop in once the doors have stopped, at their resting places, so a
+          word never rides in from the wings (a word off the stage is off every shot) */}
+      <Animated.View style={[StyleSheet.absoluteFill]} pointerEvents="none">
+        <Animated.View style={[styles.doorSign, { left: DOORS[0].x - 6, top: SIGN_Y }, sign]}>
+          <Text style={styles.signText} numberOfLines={1}>{DOORS[0].label}</Text>
+        </Animated.View>
         <Animated.View style={[styles.doorSign, { left: DOORS[1].x - 8, top: SIGN_Y, width: DOOR.w + 16 }, sign]}>
           <Text style={styles.signText} numberOfLines={1}>{DOORS[1].label}</Text>
         </Animated.View>
@@ -544,8 +646,8 @@ function Thought({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) =>
   return (
     <Animated.View style={[styles.cloud, st]} pointerEvents="none">
       <View style={styles.cloudFrame} />
-      <View style={[styles.cloudDot, { left: 4, top: 40, width: 6, height: 6 }]} />
-      <View style={[styles.cloudDot, { left: -2, top: 50, width: 4, height: 4 }]} />
+      <View style={[styles.cloudDot, { left: 30, top: 41, width: 6, height: 6 }]} />
+      <View style={[styles.cloudDot, { left: 34, top: 50, width: 4, height: 4 }]} />
     </Animated.View>
   );
 }
@@ -700,11 +802,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 50, borderTopRightRadius: 50,
   },
 
-  doorLeaf: {
-    position: 'absolute', width: DOOR.w, height: DOOR.h, backgroundColor: PLATE_FACE,
-    borderWidth: 1.5, borderColor: INK, borderRadius: 1.5,
-  },
-  knob: { position: 'absolute', right: 5, top: DOOR.h / 2, width: 5, height: 5, borderRadius: 2.5, backgroundColor: EMBER },
+  doorLeaf: { position: 'absolute', width: DOOR.w, height: DOOR.h },
   void: { position: 'absolute', width: DOOR.w, height: DOOR.h, backgroundColor: INK },
   voidFloor: { position: 'absolute', top: GROUND - 2, width: DOOR.w, height: 14, backgroundColor: INK },
   doorSign: {
@@ -718,7 +816,7 @@ const styles = StyleSheet.create({
   doorGlow: { position: 'absolute', width: DOOR.w + 16, height: DOOR.h + 12, borderRadius: 10, backgroundColor: SAGE },
 
   cloud: {
-    position: 'absolute', left: 272, top: 334, width: 50, height: 40, borderRadius: 16,
+    position: 'absolute', left: 212, top: 330, width: 50, height: 40, borderRadius: 16,
     backgroundColor: PLATE_FACE, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
   },
   cloudFrame: { width: 26, height: 18, borderWidth: 1.5, borderColor: INK, borderStyle: 'dashed', borderRadius: 2 },

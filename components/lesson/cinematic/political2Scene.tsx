@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { ship } from './objects';
 import { BEATS } from './political2Script';
 import {
@@ -22,8 +23,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
+import { attendAt } from './attend';
 import {
-  booth, tollBox, quayWall, lighthouse, bollard, BOOTH, BRACKET, TOLL, WATER, POLES, POLE_TOP, BOLLARDS,
+  booth, tollBox, quayWall, lighthouse, bollard, sloop, galley, BOOTH, BRACKET, TOLL, WATER, POLES, POLE_TOP, BOLLARDS,
 } from './political2Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -53,7 +55,7 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // COMPOSITION, in stage units: the booth 6–62 with its bracket at x 66; the
 // harbourmaster at x 96; the toll box at 138; the water 420–486 behind the quay; the
 // poles at 206 · 262 · 318, a flag's top at 320; the flagship at x 246, its plate at
-// 342–358; the lighthouse at 384. Band [288, 514].
+// 324–342 over the pirate sloop, galleys round it; the lighthouse at 384. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('political');
@@ -177,7 +179,7 @@ export default function Political2Scene({
   const hH = useHeld();
   const hM = useHeld();
   const hR = useHeld();
-  const cv = useCarry(24);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -279,7 +281,34 @@ export default function Political2Scene({
     hs = handOn(hs, HX, hdir, BRACKET.x, BRACKET.y, hang);
     const hung = carry(cv, 3, n, HUNG[p], A_OFFICE[n] ? st(0.79, 0.82) : HUNG[n], tr);
     const hFig = keepHeld(hH, mixStance(carryFrom(hH, n, hold(H[p], t)), hs, tr));
-    const DH = lookPose(hFig, HX, GROUND, K_H, hdir, 1, gazeX.value, gazeY.value, gazeOn.value);
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // The harbourmaster watches what happens on his quay and on his water, when it
+    // happens — the mugger and the purse, the boat he signals in, the merchant's
+    // coin going into the toll box, the pirate and the fleet, each flag as it goes
+    // up, the bracket he hangs his own flag on — and at nothing (weight 0, his
+    // pose's own head) once it is over. The generated gaze aimed every beat at the
+    // middle of the picture, which on this set is the sky over the water.
+    // A ship still off the right edge is watched at the harbour mouth, the
+    // lighthouse's x (384, political2Set). 405 is a ship's hull, 333 the flagship's
+    // plate (styles.shipPlate), 396 the LEGITIMATE stamp (styles.stamp), 455 the
+    // HARBOUR OFFICE sign (styles.sign), 420 a figure's head at K_H. The ship
+    // tracks re-state boatT, flagT and fleetT, which are declared below this line.
+    const LK = A_MUG[n] ? [0.2, mxC, 420, 0.9, L * 0.28, mxC + 13, 405, 1, L * 0.48, rxC - 14, 448, 1, L * 0.8, 0, 0, 0]
+      : A_WAVE[n] ? [L * 0.04, mxC + 13, 410, 0.9, L * 0.44, Math.min(lerp(OFF_R, BOAT_X, st(0.52, 0.94)), 384), 432, 1, L * 0.98, 0, 0, 0]
+      : A_POWER[n] ? [L * 0.06, mxC, 378, 0.8, L * 0.32, wx(Bm), wy(Bm), 1, L * 0.92, 0, 0, 0]
+      : A_AUTH[n] ? [L * 0.06, BOAT_X, 432, 0.8, L * 0.28, rxC, 420, 0.9, L * 0.6, TOLL.x, TOLL.top, 1, L * 0.82, rxC, 420, 1, L, 0, 0, 0]
+      : A_PIRATE[n] ? [L * 0.1, Math.min(lerp(OFF_R + 20, FLAG_X, st(0.1, 0.4)), 384), 405, 1, L * 0.44, FLAG_X, 333, 0.9, L * 0.62, Math.min(FLEET[1] + lerp(FLEET_IN, 0, st(0.62, 0.9)), 384), 410, 0.9, L * 0.86, FLAG_X, 333, 1, L, 0, 0, 0]
+      : A_FLEET[n] ? [L * 0.1, FLAG_X, 333, 1, L * 0.42, FLAG_X - 39, 409, 1, L * 0.7, HX + 24, 396, 0.6, L * 0.95, 0, 0, 0]
+      : A_CROWN[n] ? [L * 0.02, Math.min(lerp(FLAG_X, 540, st(0, 0.4)), 384), 405, 0.8, L * 0.3, POLES[1], lerp(GROUND, POLE_TOP, st(0.24, 0.46)), 0.9, L * 0.52, POLES[0] + 23, POLE_TOP + 15 + lerp(470 - POLE_TOP, 0, st(0.56, 0.88)), 1, L * 0.95, 0, 0, 0]
+      : A_OFFICE[n] ? [L * 0.04, POLES[1] + 23, POLE_TOP + 15 + lerp(470 - POLE_TOP, 0, st(0.06, 0.3)), 1, L * 0.34, POLES[2] + 23, POLE_TOP + 15 + lerp(470 - POLE_TOP, 0, st(0.36, 0.58)), 1, L * 0.62, BRACKET.x, BRACKET.y - 10, 1, L * 0.8, (BOOTH.x0 + BOOTH.x1) / 2, 455, 0.9, L * 0.94, 0, 0, 0]
+      // the questions: a soft look at the middle flag and the middle bollard — the
+      // set the question is about, never the right answer (law and office are the
+      // right-hand ones), so his eyes give nothing away
+      : POLES_Q[n] ? [0.3, POLES[1] + 23, POLE_TOP + 20, 0.6]
+      : BOLL_ON[n] ? [0.3, BOLLARDS[1], 452, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+    const DH = lookPose(hFig, HX, GROUND, K_H, hdir, 1, carry(cv, 24, n, lk.x, lk.x, tr), carry(cv, 25, n, lk.y, lk.y, tr), carry(cv, 26, n, 0, lk.w, tr));
 
     // ── the water: the boat that obeys, the pirate, the fleet ──────────────
     const boatT = A_WAVE[n] ? lerp(OFF_R, BOAT_X, st(0.52, 0.94)) : A_PIRATE[n] ? lerp(BOAT_X, OFF_L - 30, st(0, 0.3)) : n < 1 ? OFF_R : n > 4 ? OFF_L - 30 : BOAT_X;
@@ -401,8 +430,13 @@ const TOLL_ART = tollBox();
 const WALL_ART = quayWall();
 const LIGHT_ART = lighthouse();
 const BOAT_ART = ship(0, 434, 46, 42);
-const FLAGSHIP_ART = ship(0, 398, 90, 84);
-const FLEET_ART = ship(0, 404, 56, 54);
+/**
+ * The pirate's sloop — one small ship, tarred black, a black flag at the masthead —
+ * and round it Alexander's war galleys, each its own size, the biggest with a
+ * foresail: a lone ship against a fleet, which is the whole of Augustine's story.
+ */
+const FLAGSHIP_ART = sloop(0, 428, 0.9);
+const FLEET_ART = [galley(0, 424, 0.56, true), galley(0, 424, 0.5, false), galley(0, 423, 0.38, false)];
 
 // ── the sky and the water ───────────────────────────────────────────────────
 
@@ -475,7 +509,7 @@ function FleetShip({ S, x, k }: { S: SharedValue<any>; x: number; k: number }) {
   }));
   return (
     <Animated.View style={[styles.origin, st]} pointerEvents="none">
-      <ObjectArt parts={FLEET_ART} tone={SEA} />
+      <SetArt parts={FLEET_ART[k]} tone={WOOD} />
       <Animated.View style={[styles.puff, { left: -26, top: 408 }, smoke]} />
     </Animated.View>
   );
@@ -497,7 +531,7 @@ function Flagship({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) =
   return (
     <Animated.View style={[styles.origin, st]} pointerEvents="none">
       <Animated.View style={[styles.origin, hull]}>
-        <ObjectArt parts={FLAGSHIP_ART} tone={NIGHT} />
+        <SetArt parts={FLAGSHIP_ART} tone={NIGHT} />
       </Animated.View>
       <Animated.View style={[styles.puff, styles.bigPuff, smoke]} />
       {on(PLATE) ? (
@@ -699,7 +733,7 @@ const styles = StyleSheet.create({
   },
   bigPuff: { left: -48, top: 400, width: 18, height: 18, borderRadius: 9 },
   shipPlate: {
-    position: 'absolute', left: -32, top: 340, width: 64, height: 18, borderRadius: 3,
+    position: 'absolute', left: -32, top: 324, width: 64, height: 18, borderRadius: 3,
     borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',
   },

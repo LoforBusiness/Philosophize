@@ -1,4 +1,6 @@
 import { oEll, oRect, oBar, book as libBook, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SET OF ethics-ethics-3 — A SIGNAL BOX. Redrawn 2026-09-26, the third lesson of
@@ -7,8 +9,15 @@ import { oEll, oRect, oBar, book as libBook, type ObjPart } from './objects';
 //   the board     the track diagram on the wall: the line coming in, the points, the
 //                 main line on to the five, the branch up to the one. The runaway is a
 //                 lamp on it, and it never reaches either of them.
-//   the levers    three in a frame in the floor at the far left; the last one works
-//                 the points.
+//   the lever     a railway points lever in its ground frame at the far left, drawn
+//                 against photographs of real ones (Wikimedia Commons, "Coombe No. 2
+//                 Ground Frame", "Hermannstadt railway station ground frame"): a long
+//                 black lever rising out of a toothed quadrant on a cast base, with a
+//                 polished grip and the spring catch-rod running up beside it. He
+//                 stands to its LEFT, facing right — so the lever, the diagram, the
+//                 plates and everything the narration names are all in front of him;
+//                 at 78 he used to face left at a lever frame with his back to all of
+//                 it. Pulling it brings the grip towards him.
 //   the table     beside them, with a balance at its near end and a box of weights at
 //                 its far end (Mill). One weight is on the far pan from the start; he
 //                 fetches five from the box from behind the table and sets them on the
@@ -46,22 +55,24 @@ export const FIVE_X = [240, 249, 258, 267, 276];
 export const ONE_X = 268;
 export const TRAIN_STOP = 160;
 
-/** The lever frame: three pivots in the floor; the last one works the points. */
-export const LEVERS = [20, 40, 60];
-export const LEVER_LEN = 40;
-/** The points lever's angle from upright, in degrees: at rest, and pulled. */
-export const LEVER_REST = -8;
-export const LEVER_PULLED = 14;
+/** The points lever: its pivot in the ground frame, and its length to the grip. */
+export const LEVER_X = 70;
+export const LEVER_LEN = 48;
+/** The points lever's angle from upright, in degrees: at rest (leaning away from him), and pulled (towards him). */
+export const LEVER_REST = 10;
+export const LEVER_PULLED = -14;
+/** Where he stands to work it: to its left, facing it. */
+export const LEVER_STAND = 52;
 /** Where the points lever's handle is at an angle. */
 export function handleAt(deg: number): { x: number; y: number } {
   'worklet';
   const a = (deg * Math.PI) / 180;
-  return { x: LEVERS[2] + LEVER_LEN * Math.sin(a), y: GROUND - LEVER_LEN * Math.cos(a) };
+  return { x: LEVER_X + LEVER_LEN * Math.sin(a), y: GROUND - LEVER_LEN * Math.cos(a) };
 }
 
 /** The table on the left, the balance on it, and the box the weights are kept in. */
 export const TABLE = { x0: 100, x1: 180, top: 470 };
-export const BALANCE = { x: 122, beamY: 440, arm: 14, string: 12 };
+export const BALANCE = { x: 122, beamY: 440, arm: 17, string: 18 };
 export const WEIGHT_BOX = { x: 164, top: 462 };
 /** The lectern, and the rule book open on its top. */
 export const LECTERN = { x0: 244, x1: 290, top: 458 };
@@ -73,17 +84,32 @@ export const MIRROR_PLATE = { x0: 334, x1: 394, top: 460, bottom: 486 };
 export const LAMPS = [{ x: 30, y: 318 }, { x: 72, y: 318 }];
 export const LAMP_R = 13;
 
-/** The two levers that are not used, and the frame in the floor. */
-export function leverFrame(): ObjPart[] {
-  const parts: ObjPart[] = [oRect('mass', (LEVERS[0] + LEVERS[2]) / 2, GROUND - 3, LEVERS[2] - LEVERS[0] + 26, 6, 0, 1.5)];
-  for (const px of LEVERS.slice(0, 2)) {
-    const a = (LEVER_REST * Math.PI) / 180;
-    const tx = px + LEVER_LEN * Math.sin(a);
-    const ty = GROUND - LEVER_LEN * Math.cos(a);
-    parts.push(oBar('mass', px, GROUND - 4, tx, ty, 3.5));
-    parts.push(oRect('face', tx, ty - 2, 7, 6, LEVER_REST, 1.5));
+/**
+ * The ground frame the points lever stands in: a cast base on the floor, and the
+ * toothed QUADRANT the lever swings through — an arc plate over the pivot with the
+ * notches its catch drops into at each end of the throw. The lever itself is the
+ * scene's, because it moves.
+ */
+export function leverFrame(): SetPart[] {
+  const cx = LEVER_X;
+  const py = GROUND - 5;
+  const arc: number[] = [];
+  const R = 13;
+  for (let k = 0; k <= 8; k++) {
+    const a = ((-38 + (76 * k) / 8) * Math.PI) / 180;
+    arc.push(cx + R * Math.sin(a), py - R * Math.cos(a));
   }
-  return parts;
+  const notches: ObjPart[] = [-30, 22].map((d) => {
+    const a = (d * Math.PI) / 180;
+    return oEll('line', cx + (R - 2) * Math.sin(a), py - (R - 2) * Math.cos(a), 2.4, 2.4);
+  });
+  return [
+    oPoly('mass', [cx - 5, py + 1, ...arc, cx + 5, py + 1]),
+    oRect('mass', cx, GROUND - 3, 30, 6, 0, 1.5),
+    oRect('face', cx, GROUND - 5.5, 16, 3, 0, 1),
+    ...notches,
+    oEll('lit', cx, py - 1, 3, 3),
+  ];
 }
 
 /** The balance's foot, pillar and pivot, standing on the table. */

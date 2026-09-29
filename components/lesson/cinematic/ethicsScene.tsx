@@ -5,24 +5,27 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './ethicsScript';
 import {
-  ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance,
+  clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, pose, stand, type Bundle, type Stance,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
+import { reachHandTo, handAt } from './interact';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { actStance, emoteAny, emoteAnyLive } from './moves';
 import { useLinger } from './useLinger';
+import { attendAt } from './attend';
 import {
   windowFrame, pot, hallTable, mirrorFrame, bookcase,
   WIN, GLASS, SILL_Y, POT, DIARY, MGLASS, CASE, SHELF_Y,
 } from './ethicsSet';
-import { DEEP, EMBER, TEAL, PAPER_LIT } from '@/components/shared/tone';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ethics-ethics-1, "Why Humans Care About Right and Wrong" — A HALLWAY AT NIGHT.
@@ -32,13 +35,13 @@ import { DEEP, EMBER, TEAL, PAPER_LIT } from '@/components/shared/tone';
 // information is a REFLECTION: conscience is the figure in the mirror, who copies you
 // until the moment it stops copying and starts weighing what you did.
 //
-//   b0–1  he picks a found wallet up off the hall floor; WAS IT RIGHT? clouds the
-//         mirror, then ABOUT YOUR OWN CONDUCT.
+//   b0–1  he bends, picks a found wallet up off the hall floor, looks at it and
+//         pockets it; WAS IT RIGHT? clouds the mirror, then ABOUT YOUR OWN CONDUCT.
 //   b2    the diary on the hall table: what ANIMALS share — SYMPATHY, FAIRNESS.
-//   b3–4  the reflection stops copying him and holds up a balance; FOR and AGAINST
-//         drop into its pans.
-//   b5–6  the bookcase behind him: DARWIN, FREUD, KANT, under WHERE FROM?; then
-//         DISPUTED, and each book's answer — INSTINCT, SOCIETY, REASON.
+//   b3–4  the reflection stops copying him, steps to a balance standing in the glass
+//         and takes hold of its pillar; FOR and AGAINST drop into its pans.
+//   b5–6  the bookcase at the far end of the hall: DARWIN, FREUD, KANT, under WHERE
+//         FROM?; then DISPUTED, and each book's answer — INSTINCT, SOCIETY, REASON.
 //   b7–9  the reflection keeps its balance; the window: WHAT MAKES A LIFE GO WELL?; the diary's YOU page reads REASON;
 //         a seedling in the pot on the sill.
 //   b11   the first question, ON THE STAGE: three notes stuck to the mirror.
@@ -48,10 +51,20 @@ import { DEEP, EMBER, TEAL, PAPER_LIT } from '@/components/shared/tone';
 // WHAT IS NOT CHANGED: every word of narration (ethicsScript.ts keeps every beat's
 // text and order; the voice is keyed by index).
 //
-// COMPOSITION, in stage units: the window 14–140 × 296–362 over a hall table (top
-// 440) with the diary 14–142 × 400–440; the mirror 150–262 × 298–488, its glass
-// 158–254 × 306–480; the reader at x 298 facing it; the bookcase 326–394 from 384,
-// its plate 320–398 × 362–378. Band [290, 514].
+// COMPOSITION, in stage units, RE-HUNG 2026-09-28 so that everything in the hall is
+// in front of him: the bookcase 6–70 from 368, its plate 0–76 × 346–363; the window
+// 82–208 × 296–362 over a hall table (top 440) with the diary 86–206 × 400–440; the
+// mirror 220–320 × 298–488, its glass 228–312 × 306–480; the reader at x 364 facing
+// it, LEFT, all lesson — the bookcase used to stand behind him, so the whole
+// where-does-conscience-come-from part happened at his back. Band [290, 514].
+//
+// REAL THINGS, 2026-09-28: the wallet is a leather bifold with a note showing, and
+// his hand takes it off the floor (actStance 4) — it rides his wrist, he looks at
+// it, and it goes into his pocket behind him, never fading in the open. The balance
+// in the glass stands on a pillar and a foot, and the reflection holds the pillar;
+// it used to hang from the mirror's frame with nothing holding it. The plant is a
+// seedling in a terracotta pot — two seed leaves, then two pairs of true leaves,
+// then a five-petalled flower — where it was a stick with two ink ovals.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('ethics');
@@ -60,30 +73,44 @@ const LIP = lipOf(TONE);
 const WOOD = stageToneOf(TEAL);
 const TR = 0.85;
 
-const LEAD_X = 298;
-/** The reflection stands a little further off, inside the glass. */
+const LEAD_X = 364;
+/** The reflection stands a little further off, inside the glass, at its left. */
 const K_REF = K_FIG * 0.8;
-const REF_X = MGLASS.w / 2;
+const REF_X = 22;
 const REF_GROUND = MGLASS.h - 4;
 
 const WINDOW_ART = windowFrame();
 const POT_ART = pot();
+const POT_TONE = stageToneOf(EMBER);
 const TABLE_ART = hallTable();
 const MIRROR_ART = mirrorFrame();
 const CASE_ART = bookcase();
 
-// the balance the reflection holds up, in the glass's own units
-const BEAM_Y = 24;
-const BEAM_W = 88;
-const PAN_OFF = 23;
+// the balance in the glass, in the glass's own units: a pillar on a foot, standing
+// on the glass's floor, with the beam across its top. The reflection holds the
+// pillar at shoulder height (REF_HOLD) once conscience has stepped out.
+const BAL_X = 46;
+const BEAM_Y = 52;
+const PAN_OFF = 18;
+const BEAM_W = 2 * PAN_OFF + 8;
 const PAN_W = 44;
+const TRAY_W = 30;
+const REF_HOLD = { x: BAL_X - 2, y: REF_GROUND - 60 * K_REF + 2 };
+
+/**
+ * Where the wallet lies on the hall floor: exactly where his right hand reaches at
+ * the bottom of the pick-up (actStance 4, at the moment `down` peaks), so the hand
+ * that bends for it meets it rather than the wallet jumping up to the hand.
+ */
+const REACH_DOWN = handAt(actStance(4, 0, 0.48), { x: LEAD_X, groundY: GROUND, k: K_FIG, dir: -1 }, 1);
+const FLOOR = { x: REACH_DOWN.x, y: GROUND - 5.5 };
 
 const BOOKS = [
   { name: 'DARWIN', from: 'INSTINCT' },
   { name: 'FREUD', from: 'SOCIETY' },
   { name: 'KANT', from: 'REASON' },
 ];
-const BOOK_W = 60;
+const BOOK_W = 56;
 const BOOK_H = 26;
 
 // the question on the stage: three notes stuck to the mirror
@@ -164,7 +191,7 @@ export default function EthicsScene({
 }: SceneApi) {
   const reacting = REACT[i] === 1;
   const held = useHeld();
-  const cv = useCarry(15);
+  const cv = useCarry(18);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -175,15 +202,73 @@ export default function EthicsScene({
       'worklet';
       return ease01((bt.value - d) / 0.45);
     };
-    const leadS = keepHeld(held, mixStance(carryFrom(held, n, hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return ease01(clamp01((bt.value - a) / (z - a)));
+    };
+    // b0 — THE DEED, done with his own hand: he bends and takes the wallet off the
+    // floor (actStance 4 over 1.7s), holds it up in front of him and looks at it,
+    // puts it in his pocket, and by "Afterwards" (2.9s) has settled into thinking.
+    let live = hLive(HPOSE[n], t, bt.value);
+    const pickU = clamp01((bt.value - 0.15) / 1.7);
+    if (n === 0) {
+      let s0 = actStance(4, t, pickU);
+      s0 = mixStance(s0, { ...s0, fistR: { x: 16, y: -22 }, neck: s0.neck + 0.12 }, sec(1.85, 2.15) * (1 - sec(2.45, 2.75)));
+      s0 = mixStance(s0, { ...s0, fistR: { x: 3, y: 3 } }, sec(2.45, 2.75) * (1 - sec(3.0, 3.5)));
+      live = mixStance(s0, hLive(257, t, bt.value), sec(3.0, 3.7));
+    }
+    const leadS = keepHeld(held, mixStance(carryFrom(held, n, hHold(HPOSE[p], t)), live, tr));
     const judge = carry(cv, 5, n, JUDGE[p], JUDGE[n], tr);
-    // the reflection copies him, until conscience steps out and weighs the deed
-    const refS = mixStance(leadS, emoteAnyLive(257, t, bt.value), judge);
+    // the reflection copies him, until conscience steps out and weighs the deed —
+    // and then its hand is on the balance's pillar, holding it.
+    let refS = mixStance(leadS, emoteAnyLive(257, t, bt.value), judge);
+    refS = reachHandTo(refS, { x: REF_X, groundY: REF_GROUND, k: K_REF, dir: 1 }, 1, REF_HOLD.x, REF_HOLD.y, judge);
+    // the wallet: on the floor, then in his hand (b0), then in his pocket
+    const wHeld = n === 0 ? clamp01((pickU - 0.5) / 0.3) : 1;
+    const inHand = handAt(leadS, { x: LEAD_X, groundY: GROUND, k: K_FIG, dir: -1 }, 1);
+    const wX = lerp(FLOOR.x, inHand.x, wHeld);
+    const wY = lerp(FLOOR.y, inHand.y, wHeld);
+
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening in the hall, when it happens — keyed on the voiced line
+    // (ethics-ethics-1 in lib/narration/manifest.ts) and on the scene's own `late()`
+    // entrances — and at nothing (weight 0, his pose's own head) once it is done.
+    // He faces the mirror, so between events his eyes rest on his reflection rather
+    // than on the ceiling. Since the re-hang everything he looks at is in front of
+    // him, the bookcase at the far end included.
+    // Beats are by index because the voice is keyed by index and cannot reorder.
+    const mX = MGLASS.x + MGLASS.w / 2;                 // the mirror's middle
+    const refY = MGLASS.y + REF_GROUND - 83 * K_REF;     // the reflection's head (pelvis 34 + head 49, rig units)
+    const askY = MGLASS.y + 27;                         // WAS IT / RIGHT? in the glass
+    const ownY = MGLASS.y + 55;                         // YOUR OWN / CONDUCT under it
+    const beamY = MGLASS.y + BEAM_Y;                    // the balance's beam
+    const leftX = DIARY.x + DIARY.w / 4;                // the diary's ANIMALS page
+    const rightX = DIARY.x + (3 * DIARY.w) / 4;         // the diary's YOU page
+    const caseX = CASE.x + CASE.w / 2;
+    const tagX = WIN.x + WIN.w - 39;                    // the pot's tag
+    const LK = n === 0 ? [0.1, FLOOR.x, FLOOR.y, 1, 0.8, wX, wY, 1, 2.75, 0, 0, 0, 2.9, mX, refY, 0.8, 4.9, mX, askY, 1, 7.0, 0, 0, 0]
+      : n === 1 ? [0.1, mX, askY, 1, 2.9, mX, ownY, 1, 4.2, mX, refY, 0.6, 5.2, 0, 0, 0]
+      : n === 2 ? [0.5, leftX, DIARY.y + 20, 1, 2.7, leftX, DIARY.y + 31, 1, 4.6, 0, 0, 0]
+      : n === 3 ? [0.2, mX, refY, 1, 1.2, mX, beamY + 8, 1, 3.5, mX, refY, 0.8, 6.4, 0, 0, 0]
+      : n === 4 ? [0.6, mX - PAN_OFF, beamY + 7, 1, 2.6, mX + PAN_OFF, beamY + 9, 1, 3.6, mX, beamY, 0.8, 7.0, 0, 0, 0]
+      : n === 5 ? [0.3, caseX, CASE.top - 14, 0.7, 1.2, mX, beamY + 8, 1, 2.5, mX, refY, 0.9, 6.0, 0, 0, 0]
+      : n === 6 ? [0.5, caseX, CASE.top - 14, 0.8, 2.4, caseX, SHELF_Y[0] - BOOK_H / 2, 0.8, 4.4, caseX, SHELF_Y[1] - BOOK_H / 2, 0.8, 6.6, caseX, SHELF_Y[2] - BOOK_H / 2, 0.8, 8.4, 0, 0, 0]
+      : n === 7 ? [0.4, GLASS.x + 40, GLASS.y + 32, 1, 7.3, 0, 0, 0]
+      : n === 8 ? [0.4, rightX, DIARY.y + 20, 1, 3.9, leftX, DIARY.y + 20, 0.9, 5.6, 0, 0, 0]
+      : n === 9 ? [0.4, POT.cx, POT.top - 8, 1, 3.4, rightX, DIARY.y + 20, 0.8, 5.2, POT.cx, POT.top - 8, 0.9, 6.6, 0, 0, 0]
+      : n === 11 ? [0.3, mX, MGLASS.y + 6 + (3 * NOTE_H + 10) / 2, 0.7]
+      : n === 12 ? [0.3, mX, beamY + 8, 0.7]
+      : n === 13 ? [0.2, POT.cx, POT.top - 16, 1, 2.0, tagX, SILL_Y + 16, 1, 5.6, POT.cx, POT.top - 16, 0.8, 7.5, 0, 0, 0]
+      : n === 14 ? [0.5, POT.cx, POT.top - 24, 1, 1.8, tagX, SILL_Y + 26, 1, 4.5, POT.cx, POT.top - 24, 0.8, 7.9, 0, 0, 0]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, bt.value, 0, 0, 0);
+
     return {
-      lead: lookPose(leadS, LEAD_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      lead: lookPose(leadS, LEAD_X, GROUND, K_FIG, -1, 1, carry(cv, 15, n, lk.x, lk.x, tr), carry(cv, 16, n, lk.y, lk.y, tr), carry(cv, 17, n, 0, lk.w, tr)),
       ref: pose(refS, REF_X, REF_GROUND, K_REF, 1, 1),
-      // picked up: the wallet rises to his hand and is pocketed
-      wallet: n === 0 ? ease01((bt.value - 0.7) / 0.6) : 1,
+      // picked up: the wallet rides his hand, then goes into his pocket (behind him)
+      wHeld,
+      wShow: n === 0 ? 1 - sec(2.8, 2.95) : 0,
       walletOn: carry(cv, 0, n, WALLET[p], WALLET[n], tr),
       head: carry(cv, 1, n, HEAD[p], HEAD[n], n === 0 ? late(1.1) : tr),
       own: carry(cv, 2, n, OWN[p], OWN[n], late(0.8)),
@@ -204,10 +289,20 @@ export default function EthicsScene({
 
   const DL = useDerivedValue<Bundle>(() => SCENE.value.lead);
   const DR = useDerivedValue<Bundle>(() => SCENE.value.ref);
-  const wallet = useAnimatedStyle(() => ({
-    opacity: SCENE.value.walletOn * (1 - SCENE.value.wallet),
-    transform: [{ translateY: -34 * SCENE.value.wallet }, { rotate: `${-20 * SCENE.value.wallet}deg` }],
-  }));
+  // the wallet on the floor, then at his wrist as drawn (so it stays in his hand
+  // whatever the movement layer does with him), then gone into his pocket
+  const wallet = useAnimatedStyle(() => {
+    const w = DL.value.wrR;
+    const h = SCENE.value.wHeld;
+    return {
+      opacity: SCENE.value.walletOn * SCENE.value.wShow,
+      transform: [
+        { translateX: lerp(FLOOR.x, w[0].translateX, h) },
+        { translateY: lerp(FLOOR.y, w[1].translateY + 2, h) },
+        { rotate: `${-12 * h}deg` },
+      ],
+    };
+  });
 
   return (
     <View style={styles.scene}>
@@ -216,7 +311,7 @@ export default function EthicsScene({
       <View style={styles.glass} pointerEvents="none" />
       <NightWords S={SCENE} on={on} />
       <Plant S={SCENE} on={on} />
-      <ObjectArt parts={POT_ART} tone={TONE} />
+      <SetArt parts={POT_ART} tone={POT_TONE} line={1.6} />
       <ObjectArt parts={TABLE_ART} tone={WOOD} />
       <Diary S={SCENE} on={on} />
       <ObjectArt parts={CASE_ART} tone={WOOD} />
@@ -226,8 +321,12 @@ export default function EthicsScene({
       {PICK[i] ? <Notes picked={picked} onPick={onPick} /> : null}
       <View style={styles.ground} pointerEvents="none" />
       {on(WALLET) ? (
-        <Animated.View style={[styles.wallet, wallet]} pointerEvents="none">
-          <View style={styles.walletFlap} />
+        <Animated.View style={[styles.rider, wallet]} pointerEvents="none">
+          <View style={styles.walletNote} />
+          <View style={styles.wallet}>
+            <View style={styles.walletFold} />
+            <View style={styles.walletStitch} />
+          </View>
         </Animated.View>
       ) : null}
       <Stickman D={DL} k={K_FIG} />
@@ -255,17 +354,42 @@ function NightWords({ S, on }: { S: SharedValue<any>; on: (a: readonly number[])
   );
 }
 
+// A SEEDLING, THEN A PLANT, THEN A FLOWER — drawn against a photograph of a seedling
+// in a pot (Wikimedia Commons, "Adenium seedling"): a green stem out of the soil, two
+// round SEED LEAVES low on it first, then pairs of pointed TRUE LEAVES up the stem as
+// it lengthens, and at the tip a five-petalled flower. Green on the night glass with
+// an ink edge, so it reads against the dark; it used to be an ink stick with two ink
+// ovals, which on dark glass read as a lollipop.
+const STEM_MAX = 30;
+/** Where each pair of leaves sits up the stem, and how big it grows. */
+const LEAF_PAIRS = [
+  { h: 7, w: 9, key: 'seed' as const, round: true },
+  { h: 15, w: 12, key: 'plant' as const, round: false },
+  { h: 22, w: 10, key: 'plant' as const, round: false },
+];
+
+function LeafPair({ S, h, w, keyName, round, k }: { S: SharedValue<any>; h: number; w: number; keyName: 'seed' | 'plant'; round: boolean; k: number }) {
+  const st = useAnimatedStyle(() => {
+    // the second true pair opens a little after the first
+    const g = keyName === 'seed' ? S.value.seed : clamp01(S.value.plant * 1.6 - (k - 1) * 0.6);
+    return { opacity: g > 0.02 ? 1 : 0, transform: [{ scale: 0.2 + 0.8 * g }] };
+  });
+  const lh = round ? w * 0.62 : w * 0.46;
+  return (
+    <Animated.View style={[styles.leafPair, { top: POT.top - h - lh / 2, height: lh }, st]}>
+      <View style={[round ? styles.seedLeaf : styles.leafL, { width: w, height: lh, right: 1.2, transform: [{ rotate: round ? '-14deg' : '-26deg' }] }]} />
+      <View style={[round ? styles.seedLeaf : styles.leafR, { width: w, height: lh, left: 1.2, transform: [{ rotate: round ? '14deg' : '26deg' }] }]} />
+    </Animated.View>
+  );
+}
+
 function Plant({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const stem = useAnimatedStyle(() => ({
-    height: 7 * S.value.seed + 13 * S.value.plant + 5 * S.value.bloom,
-  }));
-  const leaves = useAnimatedStyle(() => ({
-    opacity: S.value.seed,
-    transform: [{ translateY: -(4 * S.value.seed + 8 * S.value.plant) }, { scale: 0.6 + 0.4 * S.value.plant }],
+    height: 9 * S.value.seed + 15 * S.value.plant + 6 * S.value.bloom,
   }));
   const flower = useAnimatedStyle(() => ({
-    opacity: S.value.bloom,
-    transform: [{ scale: 0.3 + 0.7 * S.value.bloom }],
+    opacity: S.value.bloom > 0.02 ? 1 : 0,
+    transform: [{ translateY: -STEM_MAX + 6 * (1 - S.value.bloom) }, { scale: 0.2 + 0.8 * S.value.bloom }, { rotate: `${40 * (1 - S.value.bloom)}deg` }],
   }));
   const tag = useAnimatedStyle(() => ({ opacity: S.value.plant }));
   const line2 = useAnimatedStyle(() => ({ opacity: S.value.bloom }));
@@ -274,11 +398,17 @@ function Plant({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
       {on(SEED) ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Animated.View style={[styles.stem, stem]} />
-          <Animated.View style={[styles.leaves, leaves]}>
-            <View style={[styles.leaf, { left: 0, transform: [{ rotate: '-30deg' }] }]} />
-            <View style={[styles.leaf, { left: 10, transform: [{ rotate: '30deg' }] }]} />
-          </Animated.View>
+          {LEAF_PAIRS.map((l, k) => <LeafPair key={k} S={S} h={l.h} w={l.w} keyName={l.key} round={l.round} k={k} />)}
           <Animated.View style={[styles.flower, flower]}>
+            {[0, 1, 2, 3, 4].map((k) => (
+              <View
+                key={k}
+                style={[styles.petal, {
+                  left: 5 + 4 * Math.sin((k * 2 * Math.PI) / 5) - 3.4,
+                  top: 5 - 4 * Math.cos((k * 2 * Math.PI) / 5) - 3.4,
+                }]}
+              />
+            ))}
             <View style={styles.flowerEye} />
           </Animated.View>
         </View>
@@ -322,23 +452,26 @@ function Diary({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
   );
 }
 
-// ── the bookcase behind him: where conscience comes from ────────────────────
+// ── the bookcase at the far end: where conscience comes from ───────────────
+// Its shelves are full of spines (the set); on b5 one book on each shelf is turned
+// face-out in front of them, and it carries the name.
 
 function Books({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const names = useAnimatedStyle(() => ({ opacity: S.value.orig }));
+  const out = useAnimatedStyle(() => ({ opacity: S.value.orig, transform: [{ scale: 0.86 + 0.14 * S.value.orig }] }));
   const plate = useAnimatedStyle(() => ({ opacity: S.value.orig, transform: [{ translateY: (1 - S.value.orig) * -5 }] }));
   const ask = useAnimatedStyle(() => ({ opacity: 1 - S.value.disp }));
   const disputed = useAnimatedStyle(() => ({ opacity: S.value.disp }));
   const tags = useAnimatedStyle(() => ({ opacity: S.value.disp, transform: [{ translateY: (1 - S.value.disp) * 3 }] }));
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {BOOKS.map((b, k) => (
-        <View key={b.name} style={[styles.book, { top: SHELF_Y[k] - BOOK_H }]}>
+      {on(ORIG) ? BOOKS.map((b, k) => (
+        <Animated.View key={b.name} style={[styles.book, { top: SHELF_Y[k] - BOOK_H }, out]}>
           <View style={styles.bookBand} />
           {on(ORIG) ? <Animated.Text style={[styles.bookText, names]} numberOfLines={1}>{b.name}</Animated.Text> : null}
           {on(DISP) ? <Animated.Text style={[styles.bookFrom, tags]} numberOfLines={1}>{b.from}</Animated.Text> : null}
-        </View>
-      ))}
+        </Animated.View>
+      )) : null}
       {on(ORIG) ? (
         <Animated.View style={[styles.casePlate, plate]}>
           <Animated.Text style={[styles.plateText, ask]} numberOfLines={1}>WHERE FROM?</Animated.Text>
@@ -356,7 +489,7 @@ function Books({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
 function Mirror({ S, DR, on }: { S: SharedValue<any>; DR: SharedValue<Bundle>; on: (a: readonly number[]) => boolean }) {
   const head = useAnimatedStyle(() => ({ opacity: S.value.head }));
   const own = useAnimatedStyle(() => ({ opacity: S.value.own, transform: [{ translateY: (1 - S.value.own) * 4 }] }));
-  const balance = useAnimatedStyle(() => ({ opacity: S.value.judge, transform: [{ translateY: (1 - S.value.judge) * -10 }] }));
+  const balance = useAnimatedStyle(() => ({ opacity: S.value.judge }));
   const beam = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.tilt}deg` }] }));
   const panL = useAnimatedStyle(() => ({
     transform: [{ translateY: -PAN_OFF * Math.sin((S.value.tilt * Math.PI) / 180) }],
@@ -367,6 +500,7 @@ function Mirror({ S, DR, on }: { S: SharedValue<any>; DR: SharedValue<Bundle>; o
   const chip = useAnimatedStyle(() => ({ opacity: S.value.reas, transform: [{ translateY: (1 - S.value.reas) * -12 }] }));
   const ghost = useAnimatedStyle(() => ({ opacity: 0.55 + 0.25 * S.value.judge }));
   return (
+    <>
     <View style={styles.mglass} pointerEvents="none">
       <View style={styles.sheen} />
       <Animated.View style={[StyleSheet.absoluteFill, ghost]}>
@@ -384,28 +518,33 @@ function Mirror({ S, DR, on }: { S: SharedValue<any>; DR: SharedValue<Bundle>; o
           ) : null}
         </Animated.View>
       ) : null}
+    </View>
+      {/* The balance stands IN the glass on its own foot, and the reflection holds its
+          pillar. Drawn outside the glass's clip so a pan's word is never cut by the
+          frame's inner edge; everything else of it is inside the glass. */}
       {on(JUDGE) ? (
-        <Animated.View style={[StyleSheet.absoluteFill, balance]}>
-          <View style={styles.cord} />
-          <Animated.View style={[styles.pan, { left: MGLASS.w / 2 - PAN_OFF - PAN_W / 2 }, panL]}>
+        <Animated.View style={[styles.balanceLayer, balance]} pointerEvents="none">
+          <View style={styles.balFoot} />
+          <View style={styles.pillar} />
+          <Animated.View style={[styles.pan, { left: BAL_X - PAN_OFF - PAN_W / 2 }, panL]}>
             <View style={styles.panString} />
             <View style={styles.panTray} />
             {on(REAS) ? (
-              <Animated.View style={[styles.chip, chip]}><Text style={styles.chipText} numberOfLines={1}>FOR</Text></Animated.View>
+              <Animated.View style={[styles.chipRow, chip]}><View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>FOR</Text></View></Animated.View>
             ) : null}
           </Animated.View>
-          <Animated.View style={[styles.pan, { left: MGLASS.w / 2 + PAN_OFF - PAN_W / 2 }, panR]}>
+          <Animated.View style={[styles.pan, { left: BAL_X + PAN_OFF - PAN_W / 2 }, panR]}>
             <View style={styles.panString} />
             <View style={styles.panTray} />
             {on(REAS) ? (
-              <Animated.View style={[styles.chip, chip]}><Text style={styles.chipText} numberOfLines={1}>AGAINST</Text></Animated.View>
+              <Animated.View style={[styles.chipRow, chip]}><View style={styles.chip}><Text style={styles.chipText} numberOfLines={1}>AGAINST</Text></View></Animated.View>
             ) : null}
           </Animated.View>
           <Animated.View style={[styles.beam, beam]} />
           <View style={styles.pivot} />
         </Animated.View>
       ) : null}
-    </View>
+    </>
   );
 }
 
@@ -451,16 +590,32 @@ const styles = StyleSheet.create({
   },
 
   stem: {
-    position: 'absolute', left: POT.cx - 1.25, bottom: STAGE_H - POT.top, width: 2.5, borderRadius: 1.25,
-    backgroundColor: INK,
+    position: 'absolute', left: POT.cx - 1.6, bottom: STAGE_H - POT.top, width: 3.2, borderRadius: 1.6,
+    backgroundColor: OLIVE, borderWidth: 0.8, borderColor: INK,
   },
-  leaves: { position: 'absolute', left: POT.cx - 10, top: POT.top - 8, width: 20, height: 8 },
-  leaf: { position: 'absolute', top: 0, width: 10, height: 6, borderRadius: 5, backgroundColor: INK },
-  flower: {
-    position: 'absolute', left: POT.cx - 6, top: POT.top - 30, width: 12, height: 12, borderRadius: 6,
-    backgroundColor: EMBER, borderWidth: 1.5, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+  leafPair: { position: 'absolute', left: POT.cx - 14, width: 28, flexDirection: 'row', justifyContent: 'center' },
+  seedLeaf: {
+    position: 'absolute', top: 0, borderRadius: 4, backgroundColor: SAGE, borderWidth: 0.9, borderColor: INK,
   },
-  flowerEye: { width: 4, height: 4, borderRadius: 2, backgroundColor: PAPER_LIT },
+  // a pointed leaf: two opposite corners rounded right round, the other two nearly square
+  leafL: {
+    position: 'absolute', top: 0, backgroundColor: SAGE, borderWidth: 0.9, borderColor: INK,
+    borderTopLeftRadius: 8, borderBottomRightRadius: 8, borderTopRightRadius: 0.5, borderBottomLeftRadius: 0.5,
+    transformOrigin: '100% 50%',
+  },
+  leafR: {
+    position: 'absolute', top: 0, backgroundColor: SAGE, borderWidth: 0.9, borderColor: INK,
+    borderTopRightRadius: 8, borderBottomLeftRadius: 8, borderTopLeftRadius: 0.5, borderBottomRightRadius: 0.5,
+    transformOrigin: '0% 50%',
+  },
+  flower: { position: 'absolute', left: POT.cx - 5, top: POT.top - 5, width: 10, height: 10 },
+  petal: {
+    position: 'absolute', width: 6.8, height: 6.8, borderRadius: 3.4, backgroundColor: EMBER, borderWidth: 0.9, borderColor: INK,
+  },
+  flowerEye: {
+    position: 'absolute', left: 2.6, top: 2.6, width: 4.8, height: 4.8, borderRadius: 2.4, backgroundColor: PAPER_LIT,
+    borderWidth: 0.9, borderColor: INK,
+  },
   potTag: {
     position: 'absolute', left: WIN.x + WIN.w - 76, top: SILL_Y + 9, width: 74, paddingVertical: 2,
     borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
@@ -524,20 +679,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.6, color: INK, includeFontPadding: false,
     textAlign: 'center', marginTop: 1,
   },
-  cord: { position: 'absolute', left: MGLASS.w / 2 - 0.75, top: 0, width: 1.5, height: BEAM_Y, borderRadius: 0.75, backgroundColor: INK },
+  balanceLayer: { position: 'absolute', left: MGLASS.x, top: MGLASS.y, width: MGLASS.w, height: MGLASS.h },
+  balFoot: {
+    position: 'absolute', left: BAL_X - 13, top: REF_GROUND - 6, width: 26, height: 6, borderRadius: 2,
+    backgroundColor: SHADE, borderWidth: 1.2, borderColor: INK,
+  },
+  pillar: {
+    position: 'absolute', left: BAL_X - 1.9, top: BEAM_Y, width: 3.8, height: REF_GROUND - 6 - BEAM_Y, borderRadius: 1,
+    backgroundColor: SHADE, borderWidth: 1, borderColor: INK,
+  },
   beam: {
-    position: 'absolute', left: (MGLASS.w - BEAM_W) / 2 + 12, top: BEAM_Y - 1.5, width: BEAM_W - 24, height: 3,
+    position: 'absolute', left: BAL_X - BEAM_W / 2, top: BEAM_Y - 1.5, width: BEAM_W, height: 3,
     borderRadius: 1.5, backgroundColor: INK,
   },
   pivot: {
-    position: 'absolute', left: MGLASS.w / 2 - 3, top: BEAM_Y - 3, width: 6, height: 6, borderRadius: 3,
+    position: 'absolute', left: BAL_X - 3, top: BEAM_Y - 3, width: 6, height: 6, borderRadius: 3,
     backgroundColor: EMBER, borderWidth: 1, borderColor: INK,
   },
   pan: { position: 'absolute', top: BEAM_Y, width: PAN_W, height: 32, alignItems: 'center' },
-  panString: { width: 1.5, height: 12, backgroundColor: INK },
-  panTray: { width: PAN_W - 8, height: 5, borderBottomLeftRadius: 6, borderBottomRightRadius: 6, backgroundColor: INK },
+  panString: { width: 1.5, height: 22, backgroundColor: INK },
+  panTray: { width: TRAY_W, height: 5, borderBottomLeftRadius: 6, borderBottomRightRadius: 6, backgroundColor: INK },
+  chipRow: { position: 'absolute', left: 0, right: 0, top: 9, alignItems: 'center' },
   chip: {
-    position: 'absolute', top: 1, height: 12, paddingHorizontal: 2, borderWidth: 1, borderColor: INK, borderRadius: 2,
+    height: 12, paddingHorizontal: 2, borderWidth: 1, borderColor: INK, borderRadius: 2,
     backgroundColor: PLATE_FACE, alignItems: 'center', justifyContent: 'center',
   },
   chipText: {
@@ -555,11 +719,22 @@ const styles = StyleSheet.create({
   },
   noteTextOnInk: { color: PAPER_LIT },
 
-  wallet: {
-    position: 'absolute', left: LEAD_X - 36, top: GROUND - 9, width: 18, height: 9, borderRadius: 2,
-    borderWidth: 1.5, borderColor: INK, backgroundColor: SHADE,
+  rider: { position: 'absolute', left: 0, top: 0 },
+  // a leather bifold wallet, closed: the fold down one end, a stitched edge, and a
+  // banknote's corner showing over the top
+  walletNote: {
+    position: 'absolute', left: -5, top: -8.5, width: 10, height: 5, borderRadius: 0.8,
+    backgroundColor: SAGE, borderWidth: 0.9, borderColor: INK, transform: [{ rotate: '-6deg' }],
   },
-  walletFlap: { position: 'absolute', left: 8, top: 1, width: 7, height: 4, borderRadius: 1, backgroundColor: EMBER },
+  wallet: {
+    position: 'absolute', left: -8.5, top: -5.5, width: 17, height: 11, borderRadius: 2.5,
+    borderWidth: 1.3, borderColor: INK, backgroundColor: OLIVE, overflow: 'hidden',
+  },
+  walletFold: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3.5, backgroundColor: DEEP },
+  walletStitch: {
+    position: 'absolute', left: 5.5, top: 1.8, right: 1.8, bottom: 1.8, borderRadius: 1.2,
+    borderWidth: 0.7, borderColor: PAPER_LIT, borderStyle: 'dashed',
+  },
 });
 
 export function EthicsLesson({ lesson }: { lesson: Lesson }) {

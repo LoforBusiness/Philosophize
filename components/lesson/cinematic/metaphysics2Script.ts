@@ -83,18 +83,18 @@ export const BEATS: Meta2Beat[] = [
     dur: 3.0,
   },
   {
-    e: 260, x: 296, act: 'step', ask: true, cards: 3, temple: true, doors: true, open: true,
+    e: 260, x: 238, act: 'step', ask: true, cards: 3, temple: true, doors: true, open: true,
     text: 'The goddess calls the second way wholly unlearnable. There’s nothing on it to find or follow.',
     cite: 'The second way',
     dur: 2.3,
   },
   {
-    e: 260, x: 296, act: 'tries', ask: true, cards: 3, temple: true, doors: true, open: true,
+    e: 260, x: 238, act: 'tries', ask: true, cards: 3, temple: true, doors: true, open: true,
     text: 'What is not cannot be walked on, pointed at, or thought about. It is not a genuine alternative to what is.',
     dur: 2.7,
   },
   {
-    e: 178, x: 150, ask: true, cards: 3, temple: true, doors: true, open: true, hats: true,
+    e: 178, x: 196, ask: true, cards: 3, temple: true, doors: true, open: true, hats: true,
     interact: {
       prompt: 'Three hats: a horse, a unicorn, nothing at all. Which can’t even be pictured coming out?',
       explain: 'Nothing at all. A unicorn doesn’t exist, yet you can still picture one leaving the hat, so not existing was never the obstacle. Nothing at all gives the mind no content to picture, which is Parmenides’ point.',

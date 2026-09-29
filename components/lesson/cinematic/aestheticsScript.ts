@@ -42,6 +42,11 @@ export interface AestheticsBeat extends BaseBeat {
   crowd?: boolean;
   /** Hume's true critics, converging on a standard of taste. */
   critics?: boolean;
+  /**
+   * He turns LEFT, to the info board and the scorecards, on the beats where they
+   * change — they stand behind him otherwise, and a look only tilts his head.
+   */
+  face?: -1;
   /** This beat's answer drives the scene. */
   weigh?: 'q1' | 'q2';
   //
@@ -80,6 +85,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 2,
     glow: true,
     taste: true,
+    face: -1,
     text: 'Such a verdict is called a judgement of taste. Philosophers have asked what grounds these judgements for three hundred years.',
     dur: 2.8,
   },
@@ -87,6 +93,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 2,
     glow: true,
     questions: true,
+    face: -1,
     text: 'Two questions follow. What makes this pleasure distinctive, and for whom does the judgement speak?',
     dur: 1.8,
   },
@@ -118,6 +125,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 10,
     glow: true,
     critics: true,
+    face: -1,
     text: 'David Hume held that beauty is no quality in things, and exists only in the mind. Yet he ranked masters above hacks.',
     cite: 'Of the Standard of Taste',
     dur: 2.2,
@@ -128,6 +136,7 @@ export const BEATS: AestheticsBeat[] = [
     glow: true,
     critics: true,
     agree: true,
+    face: -1,
     text: 'Hume placed the standard of taste in the joint verdict of true critics. Practice, comparison and freedom from prejudice make their verdicts converge.',
     dur: 1.9,
   },
@@ -137,6 +146,7 @@ export const BEATS: AestheticsBeat[] = [
     glow: true,
     critics: true,
     circular: true,
+    face: -1,
     text: 'The proposal risks circularity. A true critic is recognised by sound verdicts, yet sound verdicts are defined as those of true critics.',
     dur: 1.8,
   },
@@ -185,6 +195,7 @@ export const BEATS: AestheticsBeat[] = [
     hpose: 1,
     critics: true,
     assent: true,
+    face: -1,
     text: 'The second question concerns whom a judgement of taste speaks for. You rarely stop at saying “I like it”.',
     dur: 1.8,
   },

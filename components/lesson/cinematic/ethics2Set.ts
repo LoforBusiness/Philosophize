@@ -39,11 +39,19 @@ export function railY(x: number): number {
   const u = Math.max(0, Math.min(1, (RAIL.x0 - x) / (RAIL.x0 - RAIL.x1)));
   return RAIL.y0 + (RAIL.y1 - RAIL.y0) * u;
 }
-/** The A-board. */
-export const BOARD = { x: 180, y: 414, w: 84, h: 56 };
+/**
+ * The A-board: the slate inside its frame. RE-STOOD 2026-09-28 at chest height to
+ * his left as he works at the café end, so he faces it and chalks it — it used to
+ * stand behind him while he faced the café, and he chalked, swapped lenses and read
+ * Kant's rule with his back to it.
+ */
+export const BOARD = { x: 186, y: 430, w: 84, h: 50 };
 /** The café: the awning's span, the table, and the owner's chair. */
 export const AWNING = { x0: 258, x1: 400, y: 330 };
-export const TABLE = { cx: 318, top: 468, w: 44 };
+export const TABLE = { cx: 318, top: 468, w: 64 };
+/** Where the three glasses cases lie on the café table, and how big each is. */
+export const CASES = [TABLE.cx - 21, TABLE.cx, TABLE.cx + 21];
+export const CASE_W = 18;
 export const CHAIR = { x: 358, seat: 474 };
 
 /** The shopfront: wall, window, door frame, and a sign band over it. */
@@ -73,17 +81,31 @@ export function steps(): ObjPart[] {
   ];
 }
 
-/** The A-board's two legs and its hinge. */
+/**
+ * The A-board, drawn against a photograph of a café sandwich board (Wikimedia
+ * Commons, "Prefixed menu"): a wooden frame whose two sides run on down to the
+ * pavement as its legs, splayed a little, a rail under the slate and a crossbar
+ * near the foot, the rear leg showing past the far side, and the hinge on top. It
+ * was two sticks under a rectangle. The slate itself is the scene's.
+ */
 export function aBoard(): ObjPart[] {
   const { x, y, w, h } = BOARD;
   return [
-    oBar('mass', x + 10, y + h - 4, x + 2, GROUND, 4),
-    oBar('mass', x + w - 10, y + h - 4, x + w - 2, GROUND, 4),
-    oRect('mass', x + w / 2, y - 3, 16, 5, 0, 2),
+    oBar('dark', x + w + 2, y - 3, x + w + 13, GROUND, 3),
+    oBar('mass', x - 1, y - 4, x - 7, GROUND, 5),
+    oBar('mass', x + w + 1, y - 4, x + w + 7, GROUND, 5),
+    oRect('mass', x + w / 2, y - 3, w + 8, 7, 0, 1.5),
+    oRect('mass', x + w / 2, y + h + 3, w + 6, 6, 0, 1),
+    oRect('mass', x + w / 2, y + h + 13, w + 10, 3.5, 0, 1),
+    oRect('lit', x + w / 2, y - 5, 16, 2, 0, 1),
   ];
 }
 
-/** The café: an awning on two poles, a round table on one leg, and a chair. */
+/**
+ * The café: its front wall with a window, the awning fixed to that wall (it had a
+ * pole at its front edge, which stood right where he now works the A-board), a round
+ * table on one leg, and a chair.
+ */
 export function cafe(): ObjPart[] {
   const { x0, x1, y } = AWNING;
   const stripes: ObjPart[] = [];
@@ -91,7 +113,10 @@ export function cafe(): ObjPart[] {
   const { cx, top, w } = TABLE;
   const { x: chx, seat } = CHAIR;
   return [
-    oBar('mass', x0 + 10, y + 16, x0 + 10, GROUND, 3),
+    oRect('face', (x0 + x1) / 2 + 6, (y + 464) / 2, x1 - x0 - 12, 464 - y, 0, 0),
+    oRect('mass', 372, 400, 40, 44, 0, 2),
+    oRect('lit', 372, 400, 32, 36, 0, 1),
+    oBar('line', 372, 383, 372, 417, 1.5),
     oRect('mass', (x0 + x1) / 2, y + 9, x1 - x0, 18, 0, 2),
     ...stripes,
     oRect('mass', (x0 + x1) / 2, y + 19, x1 - x0, 3, 0, 1),

@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './valid3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
@@ -21,9 +22,10 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf } from './pace';
+import { attendAt } from './attend';
 import {
-  machine, panel, stand as standArt, rack,
-  BODY, HOPPERS, HOPPER_MOUTH, CARD_BOX, CRANK, OUT as SLOT_OUT, LAMPS, GEAR, BOARD, STAND, RACK,
+  machine, panel, stand as standArt, rack, cardBox, toaster as toasterArt,
+  HOPPERS, HOPPER_MOUTH, CARD_BOX, CRANK, OUT as SLOT_OUT, LAMPS, GEAR, BOARD, STAND, RACK,
 } from './valid3Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -32,20 +34,22 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //
 // Redrawn 2026-09-26: the third lesson of the branch in reading order. Every act is
 // laid across its voiced line in seconds (line lengths from the narration manifest).
-// He works the machine from its two ends, standing in front of it: the card box and
-// the first hopper from the left end, the second hopper and the crank from the right,
-// so his hands meet everything they touch and the lamps between stay in full view.
+// He works the machine from its two ends: the card box and the first hopper from the
+// left end, the second hopper and the crank from the right, so his hands meet
+// everything they touch. He is drawn BEHIND the machine, so crossing from end to end
+// he passes behind it and the lamps and their plates stay in full view.
 //
 //   b0   he turns the crank; the gear in the window turns.
 //   b1   the two lamps are labelled VALID and SOUND; he points to VALID.
 //   b2   he points to SOUND.
-//   b3   he takes the two premise cards from the pocket and drops one in each hopper;
+//   b3   he takes the two premise cards from the card box and drops one in each hopper;
 //        each is written on the board as it goes in.
 //   b4   he turns the crank; the conclusion rises out of the slot on top, and onto the
 //        board; VALID lights.
-//   b5   he comes round to the stand and holds up the toaster, which is not gold:
-//        FALSE is stamped on each line, and SOUND stays dark.
-//   b7   Q1: three rubber stamps on the wall.
+//   b5   he comes round to the stand, takes up the toaster, and turns back to hold it
+//        up to the machine and the board, which is not gold: FALSE is stamped on each
+//        line in front of him, and SOUND stays dark.
+//   b7   Q1: three rubber stamps on the wall; he turns to them.
 //   b8   he sets the toaster down, goes back to the machine's left end and pulls the first
 //        premise out of its hopper; the conclusion is struck through.
 //
@@ -96,9 +100,17 @@ const SORT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 /** Per bin, in the sort's own order: invalid · sound · valid, unsound · both faults. */
 const SORT_VALID = [0, 1, 1, 0];
 const SORT_SOUND = [0, 1, 0, 0];
-/** Which way he faces once a beat settles: the crank and the toaster to his right, the hoppers to his left. */
-/** Which way he faces once a beat settles: the machine is to his right from the left end, to his left from the right end. */
-const DIR = BEATS.map((b) => ((b.x ?? 132) >= 282 && (b.x ?? 0) < 300 ? -1 : 1));
+/**
+ * Which way he faces once a beat settles. From the machine's left end (132) it is to
+ * his right, and from its right end (290) to his left. By the stand (316) he faces back
+ * LEFT, toward the machine and the board, once he has the toaster in his hand — the
+ * FALSE stamps and the SOUND lamp are what he holds it up against, and they must be in
+ * front of him (he stood facing the stand, with both behind him). He turns to the stamp
+ * rack on the wall for the question that asks for a stamp.
+ */
+const DIR = BEATS.map((b) => ((b.x ?? 132) < 200 || b.stamps ? 1 : -1));
+/** b5: when he turns from the stand back to the machine, the toaster in his hand. */
+const TOASTER_TURN = 1.35;
 
 const LINES_TEXT = [
   { tag: 'P1', text: 'ALL TOASTERS ARE GOLD' },
@@ -143,9 +155,9 @@ function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x
   }
   return { x: from, from, to: from, u: 1 };
 }
-/** b3: to the first hopper, then to the second. */
+/** b3: a card into the first hopper from the left end, then across to the right end for the second. */
 const LOAD_LEGS = [[290, 1.2]];
-/** b8: the toaster set down, then back behind the machine. */
+/** b8: the toaster set down on the stand, then back across to the machine's left end. */
 const REJECT_LEGS = [[132, 1.0]];
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('logic'));
@@ -154,7 +166,7 @@ export default function Valid3Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(20);
+  const cv = useCarry(23);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -199,6 +211,10 @@ export default function Valid3Scene({
       const then = facing(DIR[n], DIR[n], b);
       dirV = b < start - 0.25 ? was : b < arrive ? lerp(was, tv, sec(start - 0.25, start)) : lerp(tv, then, sec(arrive, arrive + 0.3));
     }
+    if (A_TOASTER[n]) {
+      // walk to the stand facing it, take the toaster, then turn back to the machine
+      dirV = b < TOASTER_TURN ? facing(DIR[p], 1, b) : facing(1, DIR[n], b - TOASTER_TURN);
+    }
     const dir = dirV < 0 ? -1 : 1;
 
     // ── the crank (b0, b4): his hand goes round with the handle ─────────────
@@ -209,7 +225,8 @@ export default function Valid3Scene({
     s = handOn(s, x, dir, handle.x, handle.y, cranking);
     // ── pointing at the lamps (b1, b2) ──────────────────────────────────────
     const pointV = A_VALID[n] ? sec(2.4, 2.9) * (1 - sec(6.4, 6.9)) : 0;
-    s = handOn(s, x, dir, LAMPS.valid, LAMPS.y - 2, pointV);
+    // pointed from above, over the first funnel's rim: his hand is behind the machine's face
+    s = handOn(s, x, dir, LAMPS.valid, LAMPS.y - 34, pointV);
     const pointS = A_SOUND[n] ? sec(0.5, 0.9) * (1 - sec(3.0, 3.4)) : 0;
     // pointed high, over the machine, so the hand never crosses the VALID plate on its way
     s = handOn(s, x, dir, LAMPS.sound + 4, LAMPS.y - 28, pointS);
@@ -222,12 +239,12 @@ export default function Valid3Scene({
     s = handOn(s, x, dir, HOPPERS[1] + 4, HOPPER_MOUTH - 4, drop2);
     // ── the toaster (b5): picked up off the stand and held up to look at ───
     const pickT = A_TOASTER[n] ? pulse(0.9, 1.25, 1.6) : 0;
-    s = handOn(s, x, dir, STAND.x - 2, STAND.top - 8, pickT);
+    s = handOn(s, x, dir, STAND.x - 3, STAND.top - 9, pickT);
     const holdT = A_TOASTER[n] ? sec(1.3, 1.45) : A_REJECT[n] ? 1 - sec(0.5, 0.6) : TOASTER[n];
     // held out in front of his chest, clear of his head, to look at
     s = mixStance(s, { ...s, fistR: { x: 31, y: -12 } }, holdT * (A_TOASTER[n] ? sec(1.4, 2.0) : 1));
     const setT = A_REJECT[n] ? pulse(0.1, 0.45, 0.75) : 0;
-    s = handOn(s, x, dir, STAND.x - 2, STAND.top - 8, setT);
+    s = handOn(s, x, dir, STAND.x - 3, STAND.top - 9, setT);
     // ── pulling the first premise back out (b8) ─────────────────────────────
     const pull = A_REJECT[n] ? pulse(5.6, 6.0, 7.2) : 0;
     s = handOn(s, x, dir, HOPPERS[0] - 2, HOPPER_MOUTH - 4 - 14 * sec(6.0, 6.6), pull);
@@ -242,8 +259,8 @@ export default function Valid3Scene({
     const validLit = A_CRANK[n] ? sec(6.2, 6.6) : SORT[n] ? pickAt(SORT_VALID, pickPos.value) : VALID[n];
     const soundLit = SORT[n] ? pickAt(SORT_SOUND, pickPos.value) : 0;
     const soundNo = A_TOASTER[n] ? sec(5.4, 5.8) : FALSIFIED[n] && !SORT[n] ? 1 : 0;
-    const f1 = A_TOASTER[n] ? sec(1.2, 1.4) : FALSIFIED[n];
-    const f2 = A_TOASTER[n] ? sec(1.6, 1.8) : FALSIFIED[n];
+    const f1 = A_TOASTER[n] ? sec(1.7, 1.9) : FALSIFIED[n];
+    const f2 = A_TOASTER[n] ? sec(2.0, 2.2) : FALSIFIED[n];
     const f3 = A_TOASTER[n] ? sec(2.6, 2.8) : FALSIFIED[n];
     const struck = A_REJECT[n] ? sec(6.7, 7.3) : PULLED[n];
     const lampsOn = A_VALID[n] ? sec(0.3, 1.0) : LAMPS_ON[n];
@@ -252,8 +269,33 @@ export default function Valid3Scene({
     const carrying = A_LOAD[n] ? sec(0.25, 0.35) * (1 - sec(4.0, 4.1)) : 0;
     const cardUp = A_REJECT[n] ? sec(6.0, 6.1) : PULLED[n];
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what his hand is on and at the part of the machine that answers it — the
+    // crank, the gear in its window, a hopper, the line the board writes, the lamp
+    // that lights — each as it happens, and at nothing (weight 0, his pose's own
+    // head) once it is done. The generated gaze aimed every beat at the middle of the
+    // picture, which on this set is the board over his head.
+    //
+    // A board row's middle is BOARD.top + 18 + 19k (2 of border, the row's 8 of top,
+    // half its 16). The toaster in his hand rides his right fist, which the hold above
+    // puts at (31, −12) on a pelvis 37 up, in rig units.
+    const rowX = (BOARD.x0 + BOARD.x1) / 2;
+    const heldX = x + 31 * K_L * dirV;
+    const heldY = GROUND - 49 * K_L;
+    const LK = A_RUN[n] ? [0.3, CRANK.x, CRANK.y, 1, 1.4, GEAR.x, GEAR.y, 0.9, 4.3, 0, 0, 0]
+      : A_VALID[n] ? [0.4, (LAMPS.valid + LAMPS.sound) / 2, LAMPS.y, 0.7, 2.4, LAMPS.valid, LAMPS.y, 1, 4.0, GEAR.x, GEAR.y, 0.9, 5.6, LAMPS.valid, LAMPS.y, 1, 7.0, 0, 0, 0]
+      : A_SOUND[n] ? [0.3, LAMPS.sound, LAMPS.y, 1, 3.4, 0, 0, 0]
+      : A_LOAD[n] ? [0.05, CARD_BOX.x, CARD_BOX.y, 1, 0.5, HOPPERS[0], HOPPER_MOUTH, 1, 1.0, rowX, BOARD.top + 18, 0.9, 2.2, HOPPERS[1], HOPPER_MOUTH, 0.8, 4.3, rowX, BOARD.top + 37, 0.9, 5.8, 0, 0, 0]
+      : A_CRANK[n] ? [0.6, CRANK.x, CRANK.y, 1, 1.5, GEAR.x, GEAR.y, 0.9, 2.2, SLOT_OUT.x, SLOT_OUT.y - 10, 1, 2.8, rowX, BOARD.top + 56, 1, 3.3, rowX, BOARD.top + 28, 0.8, 4.6, rowX, BOARD.top + 56, 0.9, 6.1, LAMPS.valid, LAMPS.y, 1, 7.7, 0, 0, 0]
+      : A_TOASTER[n] ? [0.5, STAND.x, STAND.top - 8, 1, 1.45, heldX, heldY, 1, 1.75, rowX, BOARD.top + 18, 0.9, 2.05, rowX, BOARD.top + 37, 0.9, 2.6, rowX, BOARD.top + 56, 0.9, 3.4, heldX, heldY, 0.9, 5.2, LAMPS.sound, LAMPS.y, 1, 7.9, 0, 0, 0]
+      : STAMPS[n] ? [0.4, (RACK.x0 + RACK.x1) / 2, STAMP_Q[1].y + 10, 0.7]
+      : A_REJECT[n] ? [0.1, STAND.x, STAND.top - 8, 1, 0.9, GEAR.x, GEAR.y, 0.8, 2.4, rowX, BOARD.top + 28, 0.9, 5.4, HOPPERS[0], HOPPER_MOUTH, 1, 6.6, rowX, BOARD.top + 56, 1, 8.0, HOPPERS[0], HOPPER_MOUTH, 0.7, 9.2, 0, 0, 0]
+      : SORT[n] ? [0.4, (LAMPS.valid + LAMPS.sound) / 2, LAMPS.y, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_L, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_L, dirV, 1, carry(cv, 20, n, lk.x, lk.x, tr), carry(cv, 21, n, lk.y, lk.y, tr), carry(cv, 22, n, 0, lk.w, tr)),
       turns: carry(cv, 1, n, 0, turns, tr),
       p1: carry(cv, 2, n, P1_ON[p], p1, tr),
       p2: carry(cv, 3, n, P2_ON[p], p2, tr),
@@ -273,6 +315,7 @@ export default function Valid3Scene({
       carrying: carry(cv, 17, n, 0, carrying, tr),
       cardUp: carry(cv, 18, n, PULLED[p], cardUp, tr),
       stamps: carry(cv, 19, n, STAMPS[p], STAMPS[n], tr),
+      inBox: A_LOAD[n] ? 1 - sec(0.24, 0.27) : FED[n] ? 0 : 1,
       t,
     };
   });
@@ -284,7 +327,7 @@ export default function Valid3Scene({
     return {
       transform: [
         { translateX: lerp(STAND.x, w[0].translateX, h) },
-        { translateY: lerp(STAND.top - 8, w[1].translateY - 6, h) },
+        { translateY: lerp(STAND.top - 6, w[1].translateY - 3, h) },
       ],
     };
   });
@@ -292,6 +335,8 @@ export default function Valid3Scene({
     const w = DF.value.wrR;
     return { opacity: SCENE.value.carrying, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
   });
+  // the premise cards stand in their box until he takes them out
+  const boxCards = useAnimatedStyle(() => ({ opacity: SCENE.value.inBox }));
   const pulled = useAnimatedStyle(() => {
     const w = DF.value.wrR;
     return { opacity: SCENE.value.cardUp, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
@@ -305,21 +350,17 @@ export default function Valid3Scene({
       </View>
       <Board S={SCENE} on={on} />
       <ObjectArt parts={RACK_ART} tone={WOOD} />
-      <ObjectArt parts={STAND_ART} tone={WOOD} />
+      <SetArt parts={STAND_ART} tone={WOOD} />
       <Animated.View style={[styles.rider, toaster]} pointerEvents="none">
-        <View style={styles.toaster}>
-          <View style={[styles.slot, { left: 5 }]} />
-          <View style={[styles.slot, { left: 15 }]} />
-          <View style={styles.lever} />
-        </View>
+        <SetArt parts={TOASTER_ART} tone={STEEL} />
       </Animated.View>
       <View style={styles.ground} pointerEvents="none" />
-      <ObjectArt parts={MACHINE_ART} tone={STEEL} />
-      <ObjectArt parts={PANEL_ART} tone={STEEL} />
-      <Gear S={SCENE} />
-      <Lamps S={SCENE} on={on} />
-      <Crank S={SCENE} />
-      <OutCard S={SCENE} />
+      {/* HE IS BEHIND THE MACHINE, and every word on its front is in front of him
+          (D31). He works it from its two ends and crosses from one to the other, and
+          crossing IN FRONT of it he stood over VALID and SOUND; crossing behind it he
+          shows from the chest up over its top, which is where a man walking round a
+          waist-high machine is. His hand goes into the funnels and the card box, and
+          round the crank, rather than over them. */}
       <Stickman D={DF} k={K_L} />
       <Animated.View style={[styles.rider, cards]} pointerEvents="none">
         <View style={[styles.card, { transform: [{ rotate: '-8deg' }] }]} />
@@ -328,6 +369,16 @@ export default function Valid3Scene({
       <Animated.View style={[styles.rider, pulled]} pointerEvents="none">
         <View style={[styles.card, { transform: [{ rotate: '-12deg' }] }]} />
       </Animated.View>
+      <SetArt parts={MACHINE_ART} tone={STEEL} />
+      <SetArt parts={PANEL_ART} tone={STEEL} />
+      <Animated.View style={[StyleSheet.absoluteFill, boxCards]} pointerEvents="none">
+        <SetArt parts={CARD_ART.cards} tone={WOOD} />
+      </Animated.View>
+      <SetArt parts={CARD_ART.box} tone={WOOD} />
+      <Gear S={SCENE} />
+      <Lamps S={SCENE} on={on} />
+      <Crank S={SCENE} />
+      <OutCard S={SCENE} />
       {STAMPS[i] ? <Stamps picked={picked} onPick={onPick} S={SCENE} /> : null}
     </View>
   );
@@ -337,6 +388,8 @@ const MACHINE_ART = machine();
 const PANEL_ART = panel();
 const STAND_ART = standArt();
 const RACK_ART = rack();
+const CARD_ART = cardBox();
+const TOASTER_ART = toasterArt();
 
 // ── the board: premises, conclusion, FALSE, and the strike ──────────────────
 
@@ -493,12 +546,6 @@ const styles = StyleSheet.create({
   },
   strike: { position: 'absolute', left: 16, top: 6.5, height: 1.8, borderRadius: 0.9, backgroundColor: EMBER },
 
-  toaster: {
-    position: 'absolute', left: -14, top: -12, width: 28, height: 18, borderRadius: 5, backgroundColor: STEEL.STONE,
-    borderWidth: 1.5, borderColor: INK,
-  },
-  slot: { position: 'absolute', top: 2, width: 8, height: 2.5, borderRadius: 1, backgroundColor: INK },
-  lever: { position: 'absolute', right: -3, top: 6, width: 4, height: 6, borderRadius: 1, backgroundColor: INK },
   card: {
     position: 'absolute', left: -6, top: -10, width: 14, height: 10, borderRadius: 1.5, backgroundColor: PAPER_LIT,
     borderWidth: 1, borderColor: INK,

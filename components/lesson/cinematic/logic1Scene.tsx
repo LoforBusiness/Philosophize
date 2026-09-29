@@ -28,6 +28,7 @@ import { handAt, reachHandTo } from './interact';
 import SpeechBox from './SpeechBox';
 import { wanderOff } from './tourFlag';
 import { BOARD_PHASES } from './logic1Boards';
+import { attendAt } from './attend';
 import ChalkPieces from '@/components/professor/ChalkPieces';
 import { layoutRaws, BOARD_W, BOARD_H, type ChalkPiece } from '@/components/professor/chalk';
 import {
@@ -209,10 +210,12 @@ const PHASE_OF: number[] = BOARD_OF.map((k, i) => {
 });
 /** The act of each beat — the ON AIR light is on while the show is. */
 const ACT: number[] = BEATS.map((b) => b.act);
+/** The beats that ask a question — he looks softly at what it is about. */
+const ASKS: number[] = BEATS.map((b) => (b.mc || b.tap ? 1 : 0));
 /** The props that stand on the floor for one board or one exchange. */
 const BUST_ON: number[] = BEATS.map((b) => (b.board === 'syllogism' || b.quote ? 1 : 0));
 /** Where the bust stands: beside the narrator for the syllogism, alone at centre for the quote. */
-const BUST_DX: number[] = BEATS.map((b) => (b.quote ? 200 - 300 : 0));
+const BUST_DX: number[] = BEATS.map((b) => (b.quote ? 200 - 285 : 0));
 const CLOCK_ON: number[] = STACK.map((s) => (s > 0 ? 1 : 0));
 /** The notes on each lectern: rents from the first premise on, the skylines from the reply. */
 const FIRST_PREMISE = BEATS.findIndex((b) => b.act === 4 && b.say?.some((s) => s.who === 'red'));
@@ -283,7 +286,14 @@ function atLectern(s: Stance, x: number, cx: number, side: -1 | 1, free: number)
   }
   return o;
 }
-const BUST_X = 300;
+/**
+ * Where the bust stands: close at the narrator's right hand, where he can present it
+ * as he names Aristotle (the board heads the same syllogism ARISTOTLE), with room
+ * between for his hand. At 300 it stood a hundred units off, unacknowledged, and
+ * read as furniture. (His name cut in the die was tried: at this band's fit it lands
+ * at 5.3pt, and the die is too narrow for it at the 8pt floor.)
+ */
+const BUST_X = 285;
 const BUST = bust(BUST_X);
 const KLEP = klepsydra(262);
 
@@ -299,7 +309,7 @@ export default function Logic1Scene({
 }: SceneApi) {
   // Every interpolated track is CARRIED (AH4/L5), so a tap mid-transition never
   // jumps the remaining distance in one frame.
-  const cv = useCarry(16);
+  const cv = useCarry(19);
 
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -349,6 +359,51 @@ export default function Logic1Scene({
     // the middle of the stage — measured, opacity 0.01 → 1 over 800ms on beat 5.
     const nOn = carry(cv, 5, n, prv.nOn, cur.nOn, cur.nMode === 3 ? ease01(clamp01(tr / 0.2)) : tr);
 
+    // ── WHERE THE NARRATOR LOOKS (attend.ts) ─────────────────────────────────
+    // At what is happening, when it happens: the quarrel he walks in on, the chalk
+    // as it writes, Aristotle's bust as it is named, the water clock at "his trial",
+    // the wax tablet as it is scratched and stamped — and at nothing (weight 0, his
+    // pose's own head) between them.
+    //
+    // The board, the instruments and the tablet are CHROME, drawn in design space
+    // outside the camera, so a point on them is put back into stage units through
+    // this beat's own pinned shot: design x = 200 + s·(x − cx), design y =
+    // GROUND_Y + s·(y − GROUND). The bust's head is bust()'s own: 40 above a top
+    // that is 62 above the floor. A speaker's head is 20 below his crown.
+    const sh = SHOTS[n];
+    const bdX = sh.cx + (FRAME.x + FRAME.w / 2 - 200) / sh.s;
+    const bdY = GROUND + (FRAME.y + FRAME.h / 2 - GROUND_Y) / sh.s;
+    const ctrX = sh.cx + (CTR.x + CTR.w / 2 - 200) / sh.s;
+    const ctrY = GROUND + (CTR.y + 22 - GROUND_Y) / sh.s;
+    const vuX = sh.cx + (PIVOT.x - 200) / sh.s;
+    const vuY = GROUND + (PIVOT.y - ARC_R / 2 - GROUND_Y) / sh.s;
+    const tabX = sh.cx + (TAB.x + TAB.w / 2 - 200) / sh.s;
+    const rowY = GROUND + (ROW_TOP + ROW_H / 2 - GROUND_Y) / sh.s;
+    const rowDY = (ROW_H + ROW_GAP) / sh.s;
+    const headY = GROUND - CROWN_UP + 20;
+    const LK = cur.nMode === 3 ? [0.3, RX, headY, 0.8, 1.9, BX, headY, 0.8, 3.9, 0, 0, 0]
+      : ASKS[n] ? [0.3, ctrX, ctrY, 0.6]
+      : ACT[n] === 2 && !BOARD_OF[n] ? [0.6, ctrX, ctrY, 1, 2.2, vuX, vuY, 0.8, 3.5, ctrX, ctrY, 1, 5.2, 0, 0, 0]
+      : BOARD_OF[n] === 'anatomy' && PHASE_OF[n] === 0 ? [0.35, bdX, bdY, 1, 6.1, 0, 0, 0]
+      : BOARD_OF[n] === 'anatomy' ? [0.35, bdX, bdY, 1, 3.4, bdX, bdY, 0.8, 6.3, 0, 0, 0]
+      : BOARD_OF[n] === 'syllogism' && PHASE_OF[n] === 0 ? [0.35, bdX, bdY, 1, 2.1, BUST_X - 2, GROUND - 102, 1, 3.3, bdX, bdY, 0.9, 5.2, 0, 0, 0]
+      : BOARD_OF[n] === 'syllogism' ? [0.35, bdX, bdY, 1, 4.8, 0, 0, 0]
+      : BOARD_OF[n] === 'loudness' ? [0.35, bdX, bdY, 1, 3.3, bdX, bdY, 0.8, 5.5, 0, 0, 0]
+      : BOARD_OF[n] === 'tworoads' && PHASE_OF[n] === 0 ? [0.35, bdX, bdY, 1, 3.7, 0, 0, 0]
+      : BOARD_OF[n] === 'tworoads' ? [0.35, bdX, bdY, 1, 3.5, 0, 0, 0, 4.2, bdX, bdY, 0.9, 8.4, 0, 0, 0]
+      : STACK[n] === 2 ? [0.15, tabX, rowY, 1, 1.4, tabX, rowY + rowDY, 0.9, 3.4, KLEP.spout[0], KLEP.spout[1] + 12, 1, 6.1, tabX, rowY, 1, 8.9, 0, 0, 0]
+      : STACK[n] === 3 ? [0.3, tabX, rowY + rowDY, 1, 1.6, tabX, rowY, 0.9, 4.2, tabX, rowY + 2 * rowDY, 1, 8.9, 0, 0, 0]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, bt.value, 0, 0, 0);
+    // The look's own carry runs on a short ramp: `tr` is the entrance WALK's length
+    // on the beat he walks in (3.4s), which would hold his eyes half-off the quarrel.
+    const gt = ease01(clamp01(bt.value / 0.6));
+    // As he names Aristotle he opens a hand toward the bust — the man the board quotes,
+    // standing at his right — and lets it fall as the line goes back to the board.
+    const present = BOARD_OF[n] === 'syllogism' && PHASE_OF[n] === 0
+      ? ease01(clamp01((bt.value - 1.8) / 0.45)) * (1 - ease01(clamp01((bt.value - 3.3) / 0.5)))
+      : 0;
+
     return {
       set: carry(cv, 8, n, prv.set, cur.set, gone(prv.set, cur.set)),
       notesR: carry(cv, 11, n, NOTE_R[p], NOTE_R[n], tr),
@@ -358,6 +413,10 @@ export default function Logic1Scene({
       // it takes the place of whichever beat shows it rather than sliding.
       bustDx: BUST_ON[n] ? BUST_DX[n] : BUST_DX[p],
       klep: carry(cv, 10, n, CLOCK_ON[p], CLOCK_ON[n], tr),
+      // THE WATER CLOCK RUNS ONLY WHILE TIME IS THE SUBJECT: from "At his trial", when
+      // a speech in court was timed by one, through the cross-examination. Before
+      // that it stands full and still; it had dripped on a loop all through both beats.
+      drip: STACK[n] === 3 ? 1 : STACK[n] === 2 ? ease01(clamp01((bt.value - 3.2) / 0.3)) : STACK[p] === 3 ? 1 - tr : 0,
       cs: carry(cv, 6, n, SHOTS[p].s, SHOTS[n].s, tr),
       ccx: carry(cv, 7, n, SHOTS[p].cx, SHOTS[n].cx, tr),
       rxm: carry(cv, 13, n, STAGE[p].rx, STAGE[n].rx, tr),
@@ -367,7 +426,7 @@ export default function Logic1Scene({
       // THE NARRATOR IS THE MASCOT — the two speakers are the argument — so he is the
       // one the shared figure layers belong on (gaze, reaction, wander).
       narr: nOn > 0.002
-        ? lookPose(narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn, gazeX.value, gazeY.value, gazeOn.value)
+        ? lookPose(present > 0 ? reachHandTo(narrS, { x: nx, groundY: GROUND, k: K_FIG, dir: NARR_DIR[n] < 0 ? -1 : 1 }, 1, BUST_X - 12, GROUND - 96, present) : narrS, nx, GROUND, K_FIG, NARR_DIR[n], nOn, carry(cv, 16, n, lk.x, lk.x, gt), carry(cv, 17, n, lk.y, lk.y, gt), carry(cv, 18, n, 0, lk.w, gt))
         : BLANK,
     };
   });
@@ -433,7 +492,7 @@ export default function Logic1Scene({
       {showKlep ? (
         <Animated.View style={[StyleSheet.absoluteFill, klepStyle]} pointerEvents="none">
           <ObjectArt parts={KLEP.parts} tone={CLAY} />
-          <Drops clock={clock} />
+          <Drops clock={clock} S={SCENE} />
         </Animated.View>
       ) : null}
 
@@ -463,13 +522,13 @@ export default function Logic1Scene({
   );
 }
 
-/** Three drops falling from the upper pot's spout into the lower pot, on the idle clock. */
-function Drops({ clock }: { clock: SharedValue<number> }) {
+/** Three drops falling from the upper pot's spout into the lower pot, while the clock runs. */
+function Drops({ clock, S }: { clock: SharedValue<number>; S: SharedValue<any> }) {
   const [sx, sy] = KLEP.spout;
   const [mx, my] = KLEP.mouth;
-  const d0 = useAnimatedStyle(() => dropAt(clock.value, 0, sx, sy, mx, my));
-  const d1 = useAnimatedStyle(() => dropAt(clock.value, 0.33, sx, sy, mx, my));
-  const d2 = useAnimatedStyle(() => dropAt(clock.value, 0.66, sx, sy, mx, my));
+  const d0 = useAnimatedStyle(() => dropAt(clock.value, 0, sx, sy, mx, my, S.value.drip));
+  const d1 = useAnimatedStyle(() => dropAt(clock.value, 0.33, sx, sy, mx, my, S.value.drip));
+  const d2 = useAnimatedStyle(() => dropAt(clock.value, 0.66, sx, sy, mx, my, S.value.drip));
   return (
     <>
       <Animated.View style={[styles.drop, d0]} />
@@ -479,13 +538,13 @@ function Drops({ clock }: { clock: SharedValue<number> }) {
   );
 }
 
-function dropAt(t: number, phase: number, sx: number, sy: number, mx: number, my: number) {
+function dropAt(t: number, phase: number, sx: number, sy: number, mx: number, my: number, run: number) {
   'worklet';
   const u = (t * 0.9 + phase) % 1;
   // Falling accelerates; a drop leaves the spout slowly and lands fast.
   const f = u * u;
   return {
-    opacity: u < 0.9 ? 1 : (1 - u) * 10,
+    opacity: run * (u < 0.9 ? 1 : (1 - u) * 10),
     transform: [{ translateX: lerp(sx, mx, u) - 1.5 }, { translateY: lerp(sy, my, f) - 1.5 }],
   };
 }

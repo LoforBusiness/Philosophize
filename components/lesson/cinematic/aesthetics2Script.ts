@@ -7,7 +7,7 @@ import type { BaseBeat } from './cinematicKit';
 // A campsite at night. On the outdoor screen an old portrait moves a listener; a
 // glowing spark of feeling passes from one camper to the next — Tolstoy's infection.
 // At the fire a boy tells of meeting a wolf; the wolf rises in shadow on the tent,
-// the listeners shiver, and so does he. Then he crawls into the tent, and the story
+// the listeners shiver, and so does he. Then he ducks into the tent, and the story
 // goes on without him, in other languages and other centuries.
 //
 // Redrawn 2026-09-26, one of six second lessons redesigned after the first-lesson
@@ -26,7 +26,7 @@ export interface Aes2Beat extends BaseBeat {
   screen?: 'portrait' | 'forms' | 'subtitles' | 'film';
   /** The chain is labelled: ARTIST · WORK · AUDIENCE. */ chain?: boolean;
   /** The shadow wolf is up on the tent wall. */ wolf?: boolean;
-  /** The boy is inside the tent, its flap closed. */ inTent?: boolean;
+  /** The boy has gone into the tent, its flap closed. */ inTent?: boolean;
   /** Q1 on the stage: three thoughts over the fire. */ thoughts?: boolean;
   /** The campers are crying at the film (Q2). */ crying?: boolean;
 }

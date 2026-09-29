@@ -4,7 +4,7 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
-import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './metaphysicsScript';
 import {
   clamp01, ease01, lerp, mixStance, narratorHold, narratorLive, stand, type Bundle,
@@ -17,10 +17,11 @@ import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
-import { handsOnDesk, type Desk } from './solid';
+import { handsOnDesk, handOn, type Desk } from './solid';
 import { useLinger } from './useLinger';
+import { attendAt } from './attend';
 import {
-  projector, controlDesk, dominoBox, dialCentre, CONSOLE, LENS,
+  projector, controlDesk, dominoBox, skyline, leverPivot, leverDeg, CONSOLE, LENS, LEVER,
 } from './metaphysicsSet';
 import { DEEP, EMBER, PAPER_LIT } from '@/components/shared/tone';
 
@@ -36,7 +37,7 @@ import { DEEP, EMBER, PAPER_LIT } from '@/components/shared/tone';
 //          name for it — the first question.
 //   b2–4   the principle of sufficient reason as a slide; NEEDS A REASON tags the sky.
 //   b5–6   Parmenides' slide, NOTHING struck through; then the operator turns the
-//          dial down and the stars go out right to left — and the empty dome is still
+//          master dimmer down and the stars go out right to left — and the empty dome is still
 //          there: STILL SOMETHING.
 //   b7–10  a row of dominoes on the floor falls, each knocked by the one before, from
 //          a box nobody explains; the slide says EACH STATE ← AN EARLIER STATE, then
@@ -48,7 +49,7 @@ import { DEEP, EMBER, PAPER_LIT } from '@/components/shared/tone';
 //
 // THE LESSONS OF THE LOGIC REDESIGN, APPLIED:
 //   · his hands are ON the console (solid.ts, LESSON_RULES Y7): the back hand rests at
-//     the low edge of its sloped top, the front hand on the dial, and a presenting
+//     the low edge of its sloped top, the front hand by the dimmer, and a presenting
 //     hand lands on the top rather than going into it;
 //   · a prop, a slide or a card is mounted on its own beats and on the next only while
 //     it fades (useLinger), so nothing pops out and nothing haunts the must-boxes;
@@ -56,8 +57,12 @@ import { DEEP, EMBER, PAPER_LIT } from '@/components/shared/tone';
 //
 // COMPOSITION, in stage units: the dome is a half-ellipse, centre x 200, spring line
 // 376, radii 186 × 144, so its crown is at 232; its cove ledge runs 374–382. Below it
-// the wall: the projector (sphere centre 44, 432) throws its beam across the dome, the
-// console (centre 298, top 452) stands before the operator at x 336, who faces left.
+// the wall: the projector (a Zeiss dumbbell, hub 50 · 426) throws its beam from its
+// upper ball across the dome, the console (centre 298, top 450) stands before the
+// operator at x 338, who faces left. On b6 his front hand takes the master dimmer
+// (pivot x 311) and pulls it toward him as the stars go out; on b7 it takes it back
+// up while they return, then lets go (2026-09-28, the owner: a hand that turns
+// something visibly meets it). A skyline silhouette runs round the dome's base.
 // The dominoes stand at x 128–237 and their box at 92, with the first push — a "?" —
 // between them. The question plates hang at y 386–410.
 // Nothing dark stands at his head's height (crown ~397): the dome ends at 382.
@@ -70,9 +75,11 @@ const LIP = lipOf(TONE);
 const TR = 0.85;
 
 const DOME = { cx: 200, base: 376, rx: 186, ry: 144 };
-const FIG_X = CONSOLE.cx + 38;
+const FIG_X = CONSOLE.cx + 40; // the console's near edge (half 24) and a stride
 const DESK: Desk = { cx: CONSOLE.cx, top: CONSOLE.top, half: CONSOLE.half, tilt: CONSOLE.tilt, side: 1 };
-const DIAL_C = dialCentre();
+/** The master dimmer he pulls to take the sky down: its pivot on the console top. */
+const PIVOT = leverPivot();
+const SKYLINE = skyline(376);
 const PROJECTOR = projector();
 const DESK_ART = controlDesk();
 const BOX_X = 92;
@@ -158,7 +165,7 @@ export default function MetaphysicsScene({
 }: SceneApi) {
   const reacting = REACT[i] === 1;
   const heldFigS = useHeld();
-  const cv = useCarry(11);
+  const cv = useCarry(14);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -168,13 +175,76 @@ export default function MetaphysicsScene({
 
     const figS = keepHeld(heldFigS, mixStance(carryFrom(heldFigS, n, hHold(HPOSE[p], t)), hLive(HPOSE[n], t, bt.value), tr));
     const free = carry(cv, 9, n, FREE[p], FREE[n], tr);
-    const atDesk = handsOnDesk(figS, FIG_X, DESK, free, 6, 12);
-    // The dial goes down slowly: a hand turning the sky off, not a light switched off.
-    const erase = carry(cv, 0, n, ERASE[p], ERASE[n], ease01(bt.value / 1.4));
+    // The dimmer goes down slowly: a hand taking the sky off, not a light switched off.
+    // It starts once his hand is on it (0.35 s), and on the beat after, his hand takes
+    // it back up while the stars return, then lets go.
+    const erase = carry(cv, 0, n, ERASE[p], ERASE[n], ease01((bt.value - (ERASED[n] ? 0.35 : 0)) / 1.4));
+    const grip = ERASED[n] ? ease01(bt.value / 0.35) : ERASED[p] ? 1 - ease01((bt.value - 1.4) / 0.4) : 0;
+    const la = (leverDeg(erase) * Math.PI) / 180;
+    const knobX = PIVOT.x + Math.sin(la) * LEVER.len;
+    const knobY = PIVOT.y - Math.cos(la) * LEVER.len;
+    // his front hand on the lever's knob, so the hand is what pulls the sky down (Y7)
+    const atDesk = handOn(handsOnDesk(figS, FIG_X, DESK, free * (1 - grip), 6, 12), FIG_X, -1, knobX, knobY, grip, 1);
+
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At the slide as the projector throws it, the dimmer as he pulls it, the stars as
+    // they go out, the dominoes as they fall — and at nothing (weight 0, his pose's
+    // own head) once the thing is done. The generated gaze aimed every beat at the
+    // middle of the picture, which on this set is the empty dome over his head.
+    // Times are seconds into the beat, read off the voiced line (manifest) and the
+    // scene's own event timings below. Slide rows are offsets from SLIDE_C measured
+    // off the slide styles: title −9, caption +16, rule kicker −28, rule lines −13 and
+    // +9, NOTHING −1, the chain line −19 and its ask +8, STILL SOMETHING +2.
+    const b = bt.value;
+    // where the dial has got to in putting the stars out, right to left: STARS' own
+    // threshold (th = 0.06 + 0.56 · (384 − x) / 370) read backwards
+    const sweepX = Math.max(48, Math.min(360, 384 - (370 * (erase - 0.06)) / 0.56));
+    // the domino falling now: each tips 0.2 s after the last and takes 0.26 s (Domino)
+    const fallX = DOM_X[0] + (DOM_X[DOM_X.length - 1] - DOM_X[0]) * clamp01((b - 0.7) / ((DOM_X.length - 1) * 0.2 + 0.26));
+    const LK = n === 0
+      // the question thrown up, then "everything that exists" — across the stars
+      ? [0.3, SLIDE_C.x, SLIDE_C.y - 9, 1, 2.8, lerp(330, 70, clamp01((b - 2.8) / 3.0)), 250, 0.9, 5.9, 0, 0, 0]
+      : n === 1
+      // Leibniz's caption as it fades in (0.25–0.85 s), then "the first question"
+      ? [0.25, SLIDE_C.x, SLIDE_C.y + 16, 1, 2.9, SLIDE_C.x, SLIDE_C.y - 9, 1, 5.4, 0, 0, 0]
+      : RULE_IN[n]
+      // the rule writing itself line by line (0.2–0.7, 0.55–1.05 s), back to it on
+      // "nothing is true without a reason", then the whole sky for "the whole world"
+      ? [0.2, SLIDE_C.x, SLIDE_C.y - 13, 1, 0.6, SLIDE_C.x, SLIDE_C.y + 9, 1, 2.6, SLIDE_C.x, SLIDE_C.y - 13, 0.9, 5.2, lerp(70, 330, clamp01((b - 5.2) / 2.5)), 250, 0.9, 8.4, 0, 0, 0]
+      : NEEDS[n] && !NEEDS[p]
+      // NEEDS A REASON tagging the sky (0.45–0.95 s; the tag's centre, 82 · 352),
+      // the rule on "simpler than something", the stars on "a universe that
+      // exists", and the tag again on "needs a reason"
+      ? [0.4, 82, 352, 1, 1.8, SLIDE_C.x, SLIDE_C.y - 2, 0.9, 4.8, lerp(330, 90, clamp01((b - 4.8) / 1.8)), 252, 0.9, 7.3, 82, 352, 1, 8.0, 0, 0, 0]
+      : PARM_IN[n]
+      // NOTHING, and the strike drawn across it (1.2–1.8 s); then he thinks it over
+      ? [0.3, SLIDE_C.x, SLIDE_C.y - 1, 1, 4.0, 0, 0, 0]
+      : ERASED[n]
+      // his hand on the dimmer, the stars going out right to left after it, STILL
+      // SOMETHING as it is stamped (~1.0 s), the empty dome on "space and time",
+      // the plate again on "even the dark void … is still something"
+      ? [0, knobX, knobY, 1, 0.6, sweepX, 300, 1, 1.3, SLIDE_C.x, SLIDE_C.y + 2, 1, 2.2, DOME.cx, DOME.base - DOME.ry + 20, 0.8, 4.3, SLIDE_C.x, SLIDE_C.y + 2, 1, 7.6, 0, 0, 0]
+      : CHAIN_IN[n]
+      // the box the dominoes come out of, the chain falling left to right
+      // (0.7–1.96 s), then EACH STATE ← AN EARLIER STATE on the slide
+      ? [0.2, BOX_X, GROUND - 12, 1, 0.6, fallX, GROUND - 20, 1, 2.3, SLIDE_C.x, SLIDE_C.y - 19, 0.9, 4.9, 0, 0, 0]
+      : OPEN_LIT[n] && !OPEN_LIT[p]
+      // the fallen chain, the box on "states and laws already exist", the ask
+      // as it lights, and the lit "?" (qMark's centre, 118 · 451) on "at all"
+      ? [0.2, DOM_X[3], GROUND - 10, 0.8, 2.9, BOX_X, GROUND - 12, 1, 4.9, SLIDE_C.x, SLIDE_C.y + 8, 1, 6.0, 118, 451, 1]
+      : PICK[n]
+      // the first question, on the stage: softly, at the chain it is about
+      ? [0.3, DOM_X[2], GROUND - 16, 0.7]
+      : REACT[n]
+      // the order question: softly, at the lit end of the chain as it reaches back
+      ? [0.3, lerp(DOM_X[DOM_X.length - 1], DOM_X[0], clamp01(pickPos.value * 1.2)), GROUND - 16, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
 
     return {
-      fig: lookPose(atDesk, FIG_X, GROUND, K_FIG, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(atDesk, FIG_X, GROUND, K_FIG, -1, 1, carry(cv, 11, n, lk.x, lk.x, tr), carry(cv, 12, n, lk.y, lk.y, tr), carry(cv, 13, n, 0, lk.w, tr)),
       erase,
+      lever: leverDeg(erase),
       twinkle: t,
       stamp: clamp01((erase - 0.55) / 0.25),
       s1: carry(cv, 2, n, S1[p], S1[n], tr),
@@ -205,8 +275,9 @@ export default function MetaphysicsScene({
       <Dome S={SCENE} on={on} />
       <View style={styles.ledge} pointerEvents="none" />
       <View style={styles.cove} pointerEvents="none" />
-      <ObjectArt parts={PROJECTOR} tone={TONE} />
-      <ObjectArt parts={DESK_ART} tone={TONE} />
+      <SetArt parts={PROJECTOR} tone={TONE} />
+      <Lever S={SCENE} />
+      <SetArt parts={DESK_ART} tone={TONE} />
       <DialLights S={SCENE} />
       {on(CHAIN) ? <Dominoes S={SCENE} tags={!PICK[i]} /> : null}
       {PICK[i] ? <Picks picked={picked} onPick={onPick} /> : null}
@@ -224,6 +295,8 @@ function Star({ S, star }: { S: SharedValue<any>; star: (typeof STARS)[number] }
     const tw = 0.6 + 0.4 * Math.sin(S.value.twinkle * 1.6 + star.ph);
     return { opacity: (1 - gone) * tw, transform: [{ scale: 0.5 + 0.5 * (1 - gone) }] };
   });
+  // the brightest stars carry a four-point glint, which is what a star on a dome looks like
+  const g = star.r * 3.4;
   return (
     <Animated.View
       style={[
@@ -231,7 +304,14 @@ function Star({ S, star }: { S: SharedValue<any>; star: (typeof STARS)[number] }
         { left: star.x - star.r, top: star.y - star.r, width: star.r * 2, height: star.r * 2, borderRadius: star.r },
         st,
       ]}
-    />
+    >
+      {star.r >= 3 ? (
+        <>
+          <View style={[styles.glint, { left: star.r - 0.5, top: star.r - g / 2, width: 1, height: g }]} />
+          <View style={[styles.glint, { left: star.r - g / 2, top: star.r - 0.5, width: g, height: 1 }]} />
+        </>
+      ) : null}
+    </Animated.View>
   );
 }
 
@@ -268,8 +348,10 @@ function Dome({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => bo
     <View style={styles.domeClip} pointerEvents="none">
       <View style={styles.domeRim} />
       <View style={styles.dome} />
+      <View style={styles.domeShade} />
       <Animated.View style={[styles.beam, beam]} />
       {STARS.map((s, k) => <Star key={k} S={S} star={s} />)}
+      <SetArt parts={SKYLINE} tone={TONE} />
 
       {on(S1) ? (
         <Animated.View style={[styles.slide, s1]}>
@@ -325,14 +407,19 @@ function DialLight({ S, k }: { S: SharedValue<any>; k: number }) {
   return <Animated.View style={[styles.light, { left: CONSOLE.cx - 8.5 + k * 4 }, st]} />;
 }
 function DialLights({ S }: { S: SharedValue<any> }) {
-  const pointer = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${lerp(-40, -170, S.value.erase)}deg` }],
-  }));
+  return <>{LIGHTS.map((k) => <DialLight key={k} S={S} k={k} />)}</>;
+}
+
+/** The master dimmer: a lever on the console top, pulled toward him as the sky goes down. */
+function Lever({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${S.value.lever}deg` }] }));
   return (
-    <>
-      {LIGHTS.map((k) => <DialLight key={k} S={S} k={k} />)}
-      <Animated.View style={[styles.pointer, pointer]} pointerEvents="none" />
-    </>
+    <Animated.View style={[styles.lever, st]} pointerEvents="none">
+      <View style={styles.leverShaft} />
+      <View style={styles.leverKnob}>
+        <View style={styles.leverGlint} />
+      </View>
+    </Animated.View>
   );
 }
 
@@ -371,7 +458,7 @@ function Dominoes({ S, tags }: { S: SharedValue<any>; tags: boolean }) {
   });
   return (
     <Animated.View style={[StyleSheet.absoluteFill, wrap]} pointerEvents="none">
-      <ObjectArt parts={BOX} tone={TONE} />
+      <SetArt parts={BOX} tone={TONE} />
       {DOM_X.map((_, k) => <Domino key={k} S={S} k={k} />)}
       <Animated.View style={[styles.qMark, qShake]}>
         <Animated.View style={[styles.qMarkLit, qLit]} />
@@ -447,6 +534,13 @@ const styles = StyleSheet.create({
     backgroundColor: DEEP, transform: [{ scaleX: DOME.rx / DOME.ry }],
   },
   star: { position: 'absolute', backgroundColor: PAPER_LIT },
+  glint: { position: 'absolute', backgroundColor: PAPER_LIT, opacity: 0.8 },
+  // the dome's curve: the same ellipse's edge falls into shadow toward the spring line
+  domeShade: {
+    position: 'absolute', left: DOME.cx - DOME.ry, top: DOME.base - DOME.ry,
+    width: DOME.ry * 2, height: DOME.ry * 2, borderRadius: DOME.ry,
+    borderWidth: 11, borderColor: INK, opacity: 0.28, transform: [{ scaleX: DOME.rx / DOME.ry }],
+  },
   // A CSS triangle has a zero-size box, so its pivot is stated in px (§13).
   beam: {
     position: 'absolute', left: LENS.x - BEAM_W / 2, top: LENS.y - BEAM_L, width: 0, height: 0,
@@ -509,15 +603,25 @@ const styles = StyleSheet.create({
   },
   cove: { position: 'absolute', left: 14, right: 14, top: DOME.base - 3, height: 1.5, backgroundColor: EMBER },
 
-  // the console's level lights, and the dial's pointer
+  // the console's level lights
   light: {
     position: 'absolute', top: CONSOLE.top + 20, width: 3, height: 3, borderRadius: 1.5,
     backgroundColor: PAPER_LIT,
   },
-  pointer: {
-    position: 'absolute', left: DIAL_C.x - 0.75, top: DIAL_C.y - 5, width: 1.5, height: 5,
-    borderRadius: 0.75, backgroundColor: INK, transformOrigin: '50% 100%',
+  // the lever: a box as tall as the shaft plus its knob, turning about the pivot at its foot
+  lever: {
+    position: 'absolute', left: PIVOT.x - 4.5, top: PIVOT.y - LEVER.len - 4.5, width: 9, height: LEVER.len + 4.5,
+    transformOrigin: '50% 100%', alignItems: 'center',
   },
+  leverShaft: {
+    position: 'absolute', left: 2.75, top: 4.5, width: 3.5, height: LEVER.len,
+    borderRadius: 1.75, backgroundColor: SHADE, borderWidth: 1.2, borderColor: INK,
+  },
+  leverKnob: {
+    position: 'absolute', left: 0, top: 0, width: 9, height: 9, borderRadius: 4.5,
+    backgroundColor: STONE, borderWidth: 1.8, borderColor: INK,
+  },
+  leverGlint: { position: 'absolute', left: 1.5, top: 1.2, width: 2.6, height: 2.6, borderRadius: 1.3, backgroundColor: PAPER_LIT },
 
   domino: {
     position: 'absolute', top: GROUND - DOM_H, width: DOM_W, height: DOM_H,

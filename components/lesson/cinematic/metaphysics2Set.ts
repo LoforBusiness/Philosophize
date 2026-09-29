@@ -10,6 +10,12 @@ import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
 //   the easel       a showman's card stand at the front left.
 //   the trapdoor    a hatch in the stage floor; the scene opens it.
 //   the doors       two freestanding stage doors on casters, rolled in by the scene.
+//                   Redrawn 2026-09-28 against a photograph of a panelled front door
+//                   (Bredevoort, Markt): a CASING round the opening — two jambs and a
+//                   head — standing on a sill, braced by a foot each side as a stage
+//                   door flat is, with the leaf (the scene's, because it opens) hung
+//                   on visible hinges, raised panels above and below a lock rail, and
+//                   a handle on the latch side. The old drawing was a box on wheels.
 //   the backdrop    a painted temple flat that descends from the flies.
 //
 // STAGE UNITS, GROUND at 500. Zero imports beyond ./objects.
@@ -26,10 +32,14 @@ export const HAT = { cx: 152, brim: 456, w: 30, h: 22 };
 export const EASEL = { x: 52, y: 330, w: 78, h: 64 };
 /** The trapdoor in the floor, under the table: the whole act sinks through it. */
 export const TRAP = { x0: 116, x1: 188 };
-/** The two stage doors, where they stand once rolled in. */
+/**
+ * The two stage doors, where they stand once rolled in: IT IS at the back, IT IS NOT
+ * nearer the table, so that when he tries the second way he stands to its LEFT, facing
+ * it — and IT IS, lit at the end, is in front of him too, past it.
+ */
 export const DOORS = [
-  { x: 270, label: 'IT IS' },
-  { x: 322, label: 'IT IS NOT' },
+  { x: 318, label: 'IT IS' },
+  { x: 264, label: 'IT IS NOT' },
 ];
 export const DOOR = { w: 36, h: 70 };
 /** The painted backdrop's box, once lowered. */
@@ -88,15 +98,26 @@ export function easel(): ObjPart[] {
   ];
 }
 
-/** A stage door on a frame with two casters, drawn at x (its left edge). */
+/** A freestanding stage door, drawn at x (the left edge of its opening): the casing, sill, feet and casters. */
 export function door(x: number): ObjPart[] {
   const { w, h } = DOOR;
   const top = GROUND - h - 6;
+  const foot = GROUND - 4;
   return [
-    oRect('mass', x + w / 2, top + h / 2, w + 6, h, 0, 1.5),
-    oRect('dark', x + w / 2, GROUND - 4, w + 10, 4, 0, 1),
-    oEll('mass', x + 2, GROUND - 2, 5, 5),
-    oEll('mass', x + w - 2, GROUND - 2, 5, 5),
+    // the braced feet a door flat stands on, one each side
+    oBar('face', x - 4, top + h - 14, x - 9, foot, 3),
+    oBar('face', x + w + 4, top + h - 14, x + w + 9, foot, 3),
+    oRect('face', x + w / 2, foot + 0.5, w + 22, 3, 0, 1),
+    // the casing: two jambs and a head with a cornice over it
+    oRect('mass', x - 2.5, top + h / 2 - 2, 5, h + 6, 0, 1),
+    oRect('mass', x + w + 2.5, top + h / 2 - 2, 5, h + 6, 0, 1),
+    oRect('mass', x + w / 2, top - 3.5, w + 10, 7, 0, 1),
+    oRect('face', x + w / 2, top - 8, w + 14, 3, 0, 1),
+    // the sill under the opening
+    oRect('face', x + w / 2, top + h + 1.5, w + 8, 3, 0, 0.5),
+    // the casters it was rolled in on
+    oEll('mass', x - 7, GROUND - 2, 5, 5),
+    oEll('mass', x + w + 7, GROUND - 2, 5, 5),
   ];
 }
 
@@ -115,5 +136,31 @@ export function temple(): ObjPart[] {
     oRect('mass', cx, y + 36, w - 90, 5, 0, 0),
     ...cols,
     oRect('mass', cx, y + h - 8, w - 70, 6, 0, 0),
+  ];
+}
+
+/**
+ * A door's LEAF, in its own box (0,0)–(w,h), for the scene to hang in the opening and
+ * swing: raised panels above and below a lock rail, a lever handle on the latch side
+ * (the left, where he stands) and two hinges on the right, where it swings from.
+ */
+export function leaf(): ObjPart[] {
+  const { w, h } = DOOR;
+  const cx = w / 2;
+  return [
+    oRect('mass', cx, h / 2, w, h, 0, 1),
+    // the upper panel: a sunk frame round a raised field
+    oRect('face', cx, 19, w - 10, 26, 0, 1),
+    oRect('mass', cx, 19, w - 16, 20, 0, 1),
+    // the lower panel
+    oRect('face', cx, 53, w - 10, 22, 0, 1),
+    oRect('mass', cx, 53, w - 16, 16, 0, 1),
+    // the handle: a rose and a lever, on the lock rail
+    oEll('line', 6, 36.5, 4.5, 4.5),
+    oBar('line', 6, 36.5, 12, 36.5, 2.4),
+    oEll('lit', 5.4, 35.9, 1.4, 1.4),
+    // the hinges it swings on
+    oRect('line', w - 1, 9, 2.4, 7, 0, 0.6),
+    oRect('line', w - 1, h - 9, 2.4, 7, 0, 0.6),
   ];
 }

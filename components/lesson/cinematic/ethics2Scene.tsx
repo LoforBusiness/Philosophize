@@ -21,8 +21,9 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
+import { attendAt } from './attend';
 import {
-  shop, steps, aBoard, cafe, STEPS, CLIMB_X, DOOR, BOARD, AWNING, TABLE, CHAIR, railY,
+  shop, steps, aBoard, cafe, STEPS, CLIMB_X, DOOR, BOARD, AWNING, TABLE, CHAIR, CASES, CASE_W, railY,
 } from './ethics2Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -32,15 +33,17 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 // Redrawn 2026-09-26, one of six second lessons. Every act is laid across its voiced
 // line in stages (pace.ts, line lengths from the narration manifest).
 //
-//   b0   he walks along, sees a wallet on the pavement, and picks it up.
-//   b1   three glasses cases open on the café table, one after another.
-//   b2   OUTCOMES is chalked on the A-board; he puts on the first pair.
-//   b3   DUTY and CHARACTER are chalked under it.
+//   b0   he walks in along the pavement, sees a wallet, and picks it up.
+//   b1   three glasses cases open on the café table, one after another: he lifts the
+//        lids of the two nearest him, and she lifts the third.
+//   b2   he goes to the A-board and chalks OUTCOMES on it; he puts on the first pair.
+//   b3   he chalks DUTY and CHARACTER under it.
 //   b4   he swaps the three pairs back and forth; a bracket joins the rows: MIXED.
-//   b5   he takes the wallet to the woman at the table; happiness meters rise over
-//        them both as she takes it.
-//   b6   the meters are marked equal.
-//   b8   the second pair; a rule goes up: KEEP ANY WALLET YOU FIND.
+//   b5   he takes the wallet to the woman at the table; happiness gauges, hung from
+//        the awning over each of them, rise as she takes it.
+//   b6   the gauges are marked equal.
+//   b8   the second pair; a sign is let down on its chains under the awning:
+//        KEEP ANY WALLET YOU FIND.
 //   b9   his own wallet slips from his pocket, she picks it up and keeps it — the rule
 //        willed for everyone — and the rule is struck out.
 //   b10  the third pair; he walks to the shop's front steps and looks up at HONESTY.
@@ -49,8 +52,19 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //   b13  Q2: three street signs.
 //
 // COMPOSITION, in stage units: the shop 0–132 with its steps rising right to a door
-// at 72–122; the A-board 146–230 × 414–470; the café 258–400 under its awning, the
-// table at x 318, her chair at 358; he works at x 250 and 296. Band [288, 514].
+// at 72–122; the A-board 186–270 × 430–480 on its frame; the café front 264–400
+// under its awning, the table 286–350 at x 318, her chair at 358; he finds the
+// wallet at 146, opens the cases at 282, chalks the board from 176 and hands the
+// wallet back at 296. Band [288, 514].
+//
+// RESTAGED 2026-09-28 so that what happens is IN FRONT of him. He chalks the A-board
+// from its LEFT (b2–b4), facing it with the café and her beyond it — so he faces
+// both the thing he works and the person he is with (N21); the board and THE RULE
+// used to be behind him the whole time he faced the café. THE RULE hangs on
+// two chains from the awning now, where it used to float in mid-air, and so do the
+// happiness gauges, which hung over the two heads with nothing holding them. The
+// wallets are leather bifolds with a note showing and the cases are real clamshell
+// glasses cases, each with its pair lying inside; they were 14×9 and 12×7 boxes.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('ethics');
@@ -67,7 +81,7 @@ const LINES = [3.76, 3.68, 6.88, 5.2, 6.04, 7.24, 5.92, 0, 6.88, 8.36, 6.16, 7.7
 /** Both of them at this scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
 const K_E = K_FIG * 0.82;
 /** Where the wallet lies on the pavement. */
-const WALLET = { x: 214, y: GROUND - 5 };
+const WALLET = { x: 160, y: GROUND - 5.5 };
 /** Where his own wallet lands when it slips from his pocket: at her feet. */
 const OWN_AT = { x: 330, y: GROUND - 5 };
 /** Her seat height, in the rig's units. */
@@ -98,10 +112,25 @@ const STRUCK = BEATS.map((b) => (b.struck ? 1 : 0));
 const CLIMBED = BEATS.map((b) => b.climbed ?? 0);
 const THOUGHTS = BEATS.map((b) => (b.thoughts ? 1 : 0));
 const SIGNS = BEATS.map((b) => (b.signs ? 1 : 0));
-/** He faces the café everywhere but on the walk out to the steps. */
+/** He faces the café — and the A-board in front of it — everywhere but on the walk out to the steps. */
 const DIR = BEATS.map((b) => (b.act === 'steps' ? -1 : 1));
 /** Which way each beat leaves him: at the steps he turns back to look up at HONESTY. */
 const END_DIR = BEATS.map(() => 1);
+/** The chalked rows: where row k's first letter is, and its middle. */
+function ROW_Y(k: number): number {
+  'worklet';
+  return BOARD.y + 5 + 15 * k + 7;
+}
+const ROW_X0 = BOARD.x + 6;
+const ROW_W = 60;
+/** The happiness gauges, hung from the awning over each of them, and THE RULE's sign. */
+const AWNING_FOOT = AWNING.y + 20.5;
+const METER_HIS = 300;
+const METER_HERS = 346;
+const METER_TOP = 360;
+const RULE_X = 262;
+const RULE_W = 134;
+const RULE_TOP = 357;
 /** Where each beat leaves him, and at what height: on the top step after the climb. */
 const END_X = BEATS.map((b) => (b.act === 'climb' ? CLIMB_X[3] : b.x ?? 150));
 const END_GY = BEATS.map((b) => ((b.climbed ?? 0) >= 3 ? STEPS[2].top : GROUND));
@@ -182,7 +211,7 @@ export default function Ethics2Scene({
 }: SceneApi) {
   const held = useHeld();
   const heldHer = useHeld();
-  const cv = useCarry(24);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -208,7 +237,7 @@ export default function Ethics2Scene({
     let walkNow = walking;
     if (A_FIND[n]) {
       // strolling in along the pavement until he sees it
-      tx = lerp(120, xn, st(0, 0.4));
+      tx = lerp(30, xn, st(0, 0.4));
       walkNow = b / L < 0.4;
     }
     // b11: across to the foot of the steps, a turn, then up them one at a time,
@@ -248,7 +277,7 @@ export default function Ethics2Scene({
     let s: Stance = walking
       ? travelStance(xp, xn, hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), walkU, WALK, 0)
       : hLive(P[n], t, b);
-    if (A_FIND[n] && walkNow) s = travelStance(120, xn, stand(t), stand(t), stand(t), st(0, 0.4), WALK, 0);
+    if (A_FIND[n] && walkNow) s = travelStance(30, xn, stand(t), stand(t), stand(t), st(0, 0.4), WALK, 0);
     if (A_CLIMB[n] && footU < 1) s = travelStance(xp, CLIMB_X[0], hHold(P[p], t), hHold(P[n], t), hLive(P[n], t, b), footU, WALK, 0);
     if (climbing) {
       s = climbing.s;
@@ -267,10 +296,32 @@ export default function Ethics2Scene({
       footL: { x: s.footL.x - 4 * bend, y: s.footL.y },
     };
     s = handOn(s, x, figGY, dir, WALLET.x, WALLET.y - 4, bend);
-    // looking at the open cases
-    if (A_CASES[n]) s = { ...s, neck: s.neck - 0.25 * st(0.1, 0.4) };
+    // opening the cases: his hand lifts the lids of the two nearest him, one after the other
+    if (A_CASES[n]) {
+      s = { ...s, neck: s.neck - 0.25 * st(0.1, 0.4) };
+      s = handOn(s, x, figGY, dir, CASES[0] - 6, TABLE.top - 9 - 5 * st(0.1, 0.3), bump(b, L, 0.04, 0.12, 0.34));
+      s = handOn(s, x, figGY, dir, CASES[1] - 7, TABLE.top - 9 - 5 * st(0.35, 0.55), bump(b, L, 0.29, 0.37, 0.6));
+    }
+    // CHALKING the A-board (b2, b3): he leans in and looks down at it, and his left
+    // hand (the right still has the wallet in it) rides the chalk's leading edge as each row is written — as far along as his arm
+    // reaches from where he stands, and there it keeps writing.
+    const chalkK = A_LENS1[n] ? 0 : A_ROWS[n] ? (b / L < 0.47 ? 1 : 2) : -1;
+    const chalkF = A_LENS1[n] ? st(0.32, 0.6) : A_ROWS[n] ? (chalkK === 1 ? st(0.05, 0.4) : st(0.5, 0.85)) : 0;
+    const writing = A_LENS1[n] ? bump(b, L, 0.28, 0.33, 0.64)
+      : A_ROWS[n] ? bump(b, L, 0, 0.05, 0.45) + bump(b, L, 0.44, 0.5, 0.91) : 0;
+    if (writing > 0) {
+      const ty = ROW_Y(chalkK < 0 ? 0 : chalkK) + 1.2 * Math.sin(t * 17);
+      const tx2 = ROW_X0 + ROW_W * chalkF;
+      s = { ...s, tilt: s.tilt - 0.32 * writing, neck: s.neck + 0.14 * writing };
+      const pelY = figGY - (34 + s.bob) * K_E;
+      s = mixStance(s, { ...s, fistL: { x: (tx2 - x) / (K_E * dir), y: (ty - pelY) / K_E } }, writing);
+    }
+    // while he works the A-board the found wallet is held back at his hip, so it is never
+    // in front of the rows he is writing (it covered the "3" of 3 CHARACTER)
+    const tuck = HOLDS[n] === 1 ? clamp01(1 - Math.abs(x - (BOARD.x - 10)) / 24) : 0;
+    s = mixStance(s, { ...s, fistR: { x: -6, y: -38 } }, tuck);
     // putting on glasses: a hand to the face
-    const don = (A_LENS1[n] ? bump(b, L, 0.5, 0.62, 0.8) : 0) + (A_KANT[n] ? bump(b, L, 0.05, 0.15, 0.3) : 0);
+    const don =(A_LENS1[n] ? bump(b, L, 0.66, 0.76, 0.9) : 0) + (A_KANT[n] ? bump(b, L, 0.05, 0.15, 0.3) : 0);
     const swapHand = A_SWAP[n] ? st(0.1, 0.2) * (1 - st(0.82, 0.92)) : 0;
     s = mixStance(s, { ...s, fistR: { x: 8, y: -74 } }, clamp01(don + swapHand * (0.6 + 0.4 * Math.sin(t * 8))));
     // handing the wallet across
@@ -296,6 +347,7 @@ export default function Ethics2Scene({
       fistL: { x: r0.fistL.x - 2.5 * shift, y: r0.fistL.y + 2 * shift },
       fistR: { x: r0.fistR.x + 2 * shift, y: r0.fistR.y - 2 * shift },
     };
+    if (A_CASES[n]) h = handOn(h, CHAIR.x, GROUND, -1, CASES[2] + 6, TABLE.top - 9 - 5 * st(0.6, 0.8), bump(b, L, 0.54, 0.62, 0.86));
     const take = A_MILL[n] ? bump(b, L, 0.45, 0.6, 0.85) : 0;
     const stoop = A_KEEP[n] ? bump(b, L, 0.3, 0.45, 0.62) : 0;
     h = handOn(h, CHAIR.x, GROUND, -1, CHAIR.x - 28, GROUND - 40, take);
@@ -309,8 +361,38 @@ export default function Ethics2Scene({
     const drop = A_KEEP[n] ? st(0.16, 0.3) : 0;
     const kept = A_KEEP[n] ? st(0.42, 0.5) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening on the pavement, when it happens — keyed on the same
+    // stages (fractions of the voiced line L) and seconds the scene already acts on —
+    // and at nothing (weight 0, his pose's own head) once it is done.
+    // Since the restaging the A-board is in front of him while he works it (facing
+    // left, b2–b4) and THE RULE hangs in front of him at the café (b8–b9).
+    const herY = GROUND - 65;                   // her head, seated: (seat 30 + head 49) × K_E
+    const meterY = METER_TOP + 14;              // the happiness gauges, hung from the awning
+    const rowX = BOARD.x + 40;                  // the chalked rows; row k at ROW_Y(k)
+    const ruleX = RULE_X + RULE_W / 2;          // THE RULE, hung on its chains
+    const ruleY = RULE_TOP + 12;
+    const honX = DOOR.x + DOOR.w / 2;           // HONESTY over the door
+    const honY = 364;                           //   styles.plaque top 356 + half its 16
+    const plateY = 313;                         // the question plates: styles.plate top 298 + half its 30
+    const LK = A_FIND[n] ? [L * 0.2, WALLET.x, WALLET.y, 1, L * 0.72, x + 12 * dir, figGY - 44, 0.9, L + 0.6, 0, 0, 0]
+      : A_CASES[n] ? [L * 0.1, CASES[0], TABLE.top - 6, 1, L * 0.35, CASES[1], TABLE.top - 6, 1, L * 0.6, CASES[2], TABLE.top - 6, 1, L + 0.6, 0, 0, 0]
+      : A_LENS1[n] ? [0.2, 0, 0, 0, L * 0.3, ROW_X0 + ROW_W * chalkF, ROW_Y(0), 1, L * 0.64, 0, 0, 0, L * 0.9, rowX, ROW_Y(0), 0.8, L + 0.5, 0, 0, 0]
+      : A_ROWS[n] ? [L * 0.05, ROW_X0 + ROW_W * chalkF, ROW_Y(chalkK), 1, L + 0.5, 0, 0, 0]
+      : A_SWAP[n] ? [0.2, 0, 0, 0, L * 0.4, BOARD.x + BOARD.w - 22, BOARD.y - 10, 1, L * 0.72, rowX, ROW_Y(1), 0.8, L + 0.5, 0, 0, 0]
+      : A_MILL[n] ? [0.2, CHAIR.x - 2, herY, 0.9, L * 0.35, x + 34, figGY - 42, 1, L * 0.6, METER_HERS, meterY, 1, L * 0.85, CHAIR.x - 2, herY, 0.8, L + 0.5, 0, 0, 0]
+      : A_EQUAL[n] ? [L * 0.2, METER_HERS, meterY, 1, L * 0.45, METER_HIS, meterY, 0.8, L * 0.72, CHAIR.x - 2, herY, 0.8, L + 0.5, 0, 0, 0]
+      : A_KANT[n] ? [0.2, 0, 0, 0, L * 0.35, ruleX, ruleY, 1, L + 0.5, 0, 0, 0]
+      : A_KEEP[n] ? [L * 0.14, lerp(x + 10, OWN_AT.x, st(0.16, 0.3)), lerp(figGY - 40, OWN_AT.y, st(0.16, 0.3)), 1, L * 0.32, OWN_AT.x, OWN_AT.y - 6, 1, L * 0.5, CHAIR.x - 2, herY, 0.9, L * 0.6, x + 4 * dir, figGY - 30, 0.9, L * 0.76, CHAIR.x - 2, herY, 1, L * 0.84, ruleX, ruleY + 3, 1, L + 0.5, 0, 0, 0]
+      : A_STEPS[n] ? [0.2, 0, 0, 0, walkDur + 0.1, honX, honY, 1, walkDur + 1.5, 0, 0, 0]
+      : A_CLIMB[n] ? [c0 * L - 0.2, x - 16, figGY - 4, 0.9, climbEnd - 0.6, honX, honY, 1, climbEnd + 0.1, 0, 0, 0]
+      : THOUGHTS[n] ? [0.3, THOUGHT_Q[1].x, plateY, 0.7]
+      : SIGNS[n] ? [0.3, SIGN_Q[1].x, plateY, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, figGY, K_E, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, figGY, K_E, dirV, 1, carry(cv, 24, n, lk.x, lk.x, tr), carry(cv, 25, n, lk.y, lk.y, tr), carry(cv, 26, n, 0, lk.w, tr)),
       her: pose(her, CHAIR.x, GROUND - SEAT_H * 0, K_E, -1, 1),
       x, figGY,
       pickUp: carry(cv, 2, n, HOLDS[p] > 0 ? 1 : 0, pickUp, tr),
@@ -319,11 +401,12 @@ export default function Ethics2Scene({
       kept: carry(cv, 5, n, 0, A_KEEP[n] ? kept * (1 - st(0.55, 0.62)) : 0, tr),
       ownOn: carry(cv, 6, n, 0, A_KEEP[n] ? st(0.14, 0.16) * (1 - st(0.58, 0.62)) : 0, tr),
       query: carry(cv, 7, n, 0, A_FIND[n] ? bump(b, L, 0.3, 0.45, 0.8) : 0, tr),
-      cases: carry(cv, 8, n, A_CASES[p] || n > 1 ? 1 : 0, A_CASES[n] ? st(0.1, 0.8) : n > 1 ? 1 : 0, tr),
+      cases: carry(cv, 8, n, A_CASES[p] || n > 1 ? 3 : 0, A_CASES[n] ? st(0.1, 0.3) + st(0.35, 0.55) + st(0.6, 0.8) : n > 1 ? 3 : 0, tr),
+      chalk: writing,
       lens: carry(cv, 9, n, LENS[p],
         A_SWAP[n] ? 1 + 2 * (0.5 - 0.5 * Math.cos(Math.PI * 2 * st(0.15, 0.85))) : LENS[n], tr),
-      specs: carry(cv, 10, n, LENS[p] > 0 ? 1 : 0, A_LENS1[n] ? st(0.58, 0.66) : LENS[n] > 0 ? 1 : 0, tr),
-      rows: carry(cv, 11, n, ROWS[p], A_LENS1[n] ? st(0.05, 0.4) : A_ROWS[n] ? 1 + st(0.05, 0.4) + st(0.5, 0.85) : ROWS[n], tr),
+      specs: carry(cv, 10, n, LENS[p] > 0 ? 1 : 0, A_LENS1[n] ? st(0.74, 0.82) : LENS[n] > 0 ? 1 : 0, tr),
+      rows: carry(cv, 11, n, ROWS[p], A_LENS1[n] ? st(0.32, 0.6) : A_ROWS[n] ? 1 + st(0.05, 0.4) + st(0.5, 0.85) : ROWS[n], tr),
       mixed: carry(cv, 12, n, MIXED[p], A_SWAP[n] ? st(0.4, 0.7) : MIXED[n], tr),
       meters: carry(cv, 13, n, METERS[p], A_MILL[n] ? st(0.05, 0.25) : METERS[n], tr),
       joy: carry(cv, 14, n, METERS[p], A_MILL[n] ? st(0.55, 0.9) : METERS[n], tr),
@@ -361,6 +444,11 @@ export default function Ethics2Scene({
   const armTint = useAnimatedStyle(() => {
     const l = SCENE.value.lens;
     return { backgroundColor: l < 1.5 ? LENS_TONES[1] : l < 2.5 ? LENS_TONES[2] : LENS_TONES[3] };
+  });
+  // a stick of chalk in his hand while he writes on the A-board
+  const chalkStick = useAnimatedStyle(() => {
+    const w = DF.value.wrL;
+    return { opacity: SCENE.value.chalk > 0.05 ? 1 : 0, transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }, { rotate: '-30deg' }] };
   });
   // the found wallet, on the pavement, in his hand, then hers
   const found = useAnimatedStyle(() => {
@@ -410,13 +498,16 @@ export default function Ethics2Scene({
           <View style={styles.glint} />
         </Animated.View>
       </Animated.View>
+      <Animated.View style={[styles.rider, chalkStick]} pointerEvents="none">
+        <View style={styles.chalkNub} />
+      </Animated.View>
       <Animated.View style={[styles.rider, found]} pointerEvents="none">
-        <View style={styles.wallet}><View style={styles.walletFlap} /></View>
+        <Wallet />
       </Animated.View>
       <Animated.View style={[styles.rider, own]} pointerEvents="none">
-        <View style={[styles.wallet, styles.ownWallet]}><View style={styles.walletFlap} /></View>
+        <Wallet own />
       </Animated.View>
-      <Meters S={SCENE} on={on} DF={DF} DH={DH} />
+      <Meters S={SCENE} on={on} />
       {on(THOUGHTS) ? <Plates items={THOUGHT_Q} kind="thought" picked={picked} onPick={onPick} S={SCENE} live={THOUGHTS[i] === 1} /> : null}
       {on(SIGNS) ? <Plates items={SIGN_Q} kind="sign" picked={picked} onPick={onPick} S={SCENE} live={SIGNS[i] === 1} /> : null}
     </View>
@@ -460,12 +551,52 @@ function Cases({ S }: { S: SharedValue<any> }) {
     </>
   );
 }
+/**
+ * A clamshell glasses case, drawn against a photograph of one open (Wikimedia
+ * Commons, "Okulary korekcyjne w etui"): a rounded shell in its lens's colour, a
+ * pale lining, and the pair of glasses lying in it once the lid is lifted — the lid
+ * hinged at the back, swinging up and over. They were 12×7 boxes with a coloured lid.
+ */
 function Case({ S, k }: { S: SharedValue<any>; k: number }) {
-  const lid = useAnimatedStyle(() => ({ transform: [{ rotate: `${-70 * clamp01(S.value.cases * 3 - k)}deg` }] }));
+  const lid = useAnimatedStyle(() => ({ transform: [{ rotate: `${-105 * clamp01(S.value.cases - k)}deg` }] }));
+  const inside = useAnimatedStyle(() => ({ opacity: clamp01((S.value.cases - k) * 2.5) }));
+  const tone = LENS_TONES[k + 1];
   return (
-    <View style={[styles.case, { left: TABLE.cx - 20 + k * 14 }]} pointerEvents="none">
-      <Animated.View style={[styles.caseLid, { backgroundColor: LENS_TONES[k + 1] }, lid]} />
+    <View style={[styles.case, { left: CASES[k] - CASE_W / 2 }]} pointerEvents="none">
+      <View style={[styles.caseShell, { backgroundColor: tone }]} />
+      <Animated.View style={[styles.caseLining, inside]}>
+        <View style={[styles.specRing, { left: 2 }]} />
+        <View style={styles.specBridge} />
+        <View style={[styles.specRing, { left: 8.5 }]} />
+      </Animated.View>
+      <Animated.View style={[styles.caseLid, { backgroundColor: tone }, lid]} />
     </View>
+  );
+}
+
+/** A short chain of links, hanging from the awning's foot: what the sign and the gauges hang by. */
+function Chain({ x, top, len }: { x: number; top: number; len: number }) {
+  const n = Math.max(2, Math.round(len / 3.2));
+  const step = len / n;
+  return (
+    <>
+      {Array.from({ length: n }).map((_, k) => (
+        <View key={k} style={[styles.chainLink, { left: x - 1.5, top: top + k * step, height: step + 0.9 }]} />
+      ))}
+    </>
+  );
+}
+
+/** A leather bifold wallet, closed: the fold down one end, a stitched edge, and a note's corner showing over the top. */
+function Wallet({ own }: { own?: boolean }) {
+  return (
+    <>
+      <View style={styles.walletNote} />
+      <View style={[styles.wallet, own && styles.ownWallet]}>
+        <View style={styles.walletFold} />
+        <View style={styles.walletStitch} />
+      </View>
+    </>
   );
 }
 
@@ -500,11 +631,14 @@ function Row({ S, k, text }: { S: SharedValue<any>; k: number; text: string }) {
 // ── the rule, and the question over the wallet ──────────────────────────────
 
 function Rule({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  // let down on its chains from the awning: it drops the last few units into place
   const st = useAnimatedStyle(() => ({ opacity: S.value.rule, transform: [{ translateY: (1 - S.value.rule) * -8 }] }));
   const strike = useAnimatedStyle(() => ({ transform: [{ scaleX: S.value.struck }, { rotate: '-8deg' }] }));
   if (!on(RULE_ON)) return null;
   return (
     <Animated.View style={[styles.rule, st]} pointerEvents="none">
+      <Chain x={14} top={AWNING_FOOT - RULE_TOP - 1.5} len={RULE_TOP - AWNING_FOOT + 1.5} />
+      <Chain x={RULE_W - 14} top={AWNING_FOOT - RULE_TOP - 1.5} len={RULE_TOP - AWNING_FOOT + 1.5} />
       <Text style={styles.ruleHead} numberOfLines={1}>THE RULE</Text>
       <Text style={styles.ruleText} numberOfLines={1}>KEEP ANY WALLET YOU FIND</Text>
       <Animated.View nativeID="strike-rule" style={[styles.ruleStrike, strike]} />
@@ -523,30 +657,27 @@ function Query({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
 
 // ── the happiness meters over the two of them ───────────────────────────────
 
-function Meters({ S, on, DF, DH }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean; DF: SharedValue<Bundle>; DH: SharedValue<Bundle> }) {
-  const his = useAnimatedStyle(() => {
-    const h = DF.value.head;
-    return { opacity: S.value.meters, transform: [{ translateX: h[0].translateX + 20 }, { translateY: h[1].translateY - 40 }] };
-  });
-  const hers = useAnimatedStyle(() => {
-    // on the side of her head that faces him, so its weight stays on the stage
-    const h = DH.value.head;
-    return { opacity: S.value.meters, transform: [{ translateX: h[0].translateX - 34 }, { translateY: h[1].translateY - 40 }] };
-  });
+/**
+ * The happiness gauges: a glass tube in a frame, each HUNG on a cord from the
+ * awning over the person it measures, let down when Mill's lens goes on. They used
+ * to float over the two heads with nothing holding them.
+ */
+function Meters({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
+  const drop = useAnimatedStyle(() => ({ opacity: S.value.meters, transform: [{ translateY: (1 - S.value.meters) * -14 }] }));
   const fillHis = useAnimatedStyle(() => ({ height: 26 * lerp(0.35, 0.6, S.value.joy) }));
   const fillHers = useAnimatedStyle(() => ({ height: 26 * lerp(0.2, 0.95, S.value.joy) }));
   const eq = useAnimatedStyle(() => ({ opacity: S.value.equal }));
   if (!on(METERS)) return null;
   return (
     <>
-      <Animated.View style={[styles.rider, his]} pointerEvents="none">
-        <View style={styles.meter}><Animated.View style={[styles.meterFill, fillHis]} /></View>
-        {on(EQUAL) ? <Animated.View style={[styles.weight, eq]}><Text style={styles.weightText}>×1</Text></Animated.View> : null}
-      </Animated.View>
-      <Animated.View style={[styles.rider, hers]} pointerEvents="none">
-        <View style={styles.meter}><Animated.View style={[styles.meterFill, fillHers]} /></View>
-        {on(EQUAL) ? <Animated.View style={[styles.weight, eq]}><Text style={styles.weightText}>×1</Text></Animated.View> : null}
-      </Animated.View>
+      {[METER_HIS, METER_HERS].map((mx, k) => (
+        <Animated.View key={mx} style={[styles.gauge, { left: mx - 5 }, drop]} pointerEvents="none">
+          <Chain x={5} top={AWNING_FOOT - METER_TOP - 1} len={METER_TOP - AWNING_FOOT + 1} />
+          <View style={styles.meter}><Animated.View style={[styles.meterFill, k === 0 ? fillHis : fillHers]} /></View>
+          <View style={styles.meterBulb} />
+          {on(EQUAL) ? <Animated.View style={[styles.weight, k === 0 ? styles.weightL : null, eq]}><Text style={styles.weightText}>×1</Text></Animated.View> : null}
+        </Animated.View>
+      ))}
     </>
   );
 }
@@ -593,12 +724,24 @@ const styles = StyleSheet.create({
   },
   glint: { position: 'absolute', left: 2, top: 1.5, width: 3, height: 3, borderRadius: 1.5, backgroundColor: SAGE },
   specArm: { position: 'absolute', left: -10, top: -4, width: 21, height: 2.2, borderRadius: 1.1 },
-  wallet: {
-    position: 'absolute', left: -7, top: -4, width: 14, height: 9, borderRadius: 2, backgroundColor: OLIVE,
-    borderWidth: 1.2, borderColor: INK,
+  walletNote: {
+    position: 'absolute', left: -4.5, top: -8, width: 9, height: 4.5, borderRadius: 0.8,
+    backgroundColor: SAGE, borderWidth: 0.8, borderColor: INK, transform: [{ rotate: '-6deg' }],
   },
-  ownWallet: { backgroundColor: DEEP },
-  walletFlap: { position: 'absolute', left: 6, top: 1, width: 5, height: 3, borderRadius: 1, backgroundColor: EMBER },
+  wallet: {
+    position: 'absolute', left: -8, top: -5, width: 16, height: 10, borderRadius: 2.4,
+    borderWidth: 1.2, borderColor: INK, backgroundColor: OLIVE, overflow: 'hidden',
+  },
+  ownWallet: { backgroundColor: TEAL },
+  walletFold: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3.2, backgroundColor: DEEP },
+  walletStitch: {
+    position: 'absolute', left: 5, top: 1.6, right: 1.6, bottom: 1.6, borderRadius: 1.1,
+    borderWidth: 0.6, borderColor: PAPER_LIT, borderStyle: 'dashed',
+  },
+  chalkNub: {
+    position: 'absolute', left: -1.2, top: -5, width: 2.4, height: 6, borderRadius: 1, backgroundColor: PAPER_LIT,
+    borderWidth: 0.6, borderColor: INK,
+  },
 
   plaque: {
     position: 'absolute', left: DOOR.x - 2, top: 356, width: DOOR.w + 4, height: 16, borderRadius: 3,
@@ -611,11 +754,21 @@ const styles = StyleSheet.create({
   },
   stepLight: { position: 'absolute', height: 3, borderRadius: 1.5, backgroundColor: EMBER, transformOrigin: '0% 50%' },
 
-  case: {
-    position: 'absolute', top: TABLE.top - 7, width: 12, height: 7, borderRadius: 2, backgroundColor: PLATE_FACE,
-    borderWidth: 1.2, borderColor: INK,
+  case: { position: 'absolute', top: TABLE.top - 7, width: CASE_W, height: 7 },
+  caseShell: {
+    position: 'absolute', left: 0, top: 1, width: CASE_W, height: 6, borderRadius: 3,
+    borderWidth: 1.1, borderColor: INK,
   },
-  caseLid: { position: 'absolute', left: -1, top: -4, width: 12, height: 4, borderRadius: 2, transformOrigin: '0% 100%' },
+  caseLining: {
+    position: 'absolute', left: 2, top: -1.5, width: CASE_W - 4, height: 3.5, borderRadius: 1.5,
+    backgroundColor: PAPER_LIT, borderWidth: 0.8, borderColor: INK,
+  },
+  specRing: { position: 'absolute', top: -1.5, width: 5.5, height: 4, borderRadius: 2, borderWidth: 1, borderColor: INK },
+  specBridge: { position: 'absolute', left: 7, top: -0.6, width: 2, height: 1, backgroundColor: INK },
+  caseLid: {
+    position: 'absolute', left: 0, top: -2, width: CASE_W, height: 4, borderTopLeftRadius: 3, borderTopRightRadius: 3,
+    borderBottomLeftRadius: 1, borderBottomRightRadius: 1, borderWidth: 1.1, borderColor: INK, transformOrigin: '100% 100%',
+  },
 
   board: {
     position: 'absolute', left: BOARD.x, top: BOARD.y, width: BOARD.w, height: BOARD.h, borderRadius: 4,
@@ -638,9 +791,10 @@ const styles = StyleSheet.create({
   },
 
   rule: {
-    position: 'absolute', left: 166, top: 356, width: 150, paddingVertical: 3, alignItems: 'center',
+    position: 'absolute', left: RULE_X, top: RULE_TOP, width: RULE_W, paddingVertical: 3, alignItems: 'center',
     borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE, boxShadow: LIP,
   },
+  chainLink: { position: 'absolute', width: 3, borderRadius: 1.5, borderWidth: 0.9, borderColor: INK },
   ruleHead: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.8, color: INK, includeFontPadding: false,
   },
@@ -657,13 +811,19 @@ const styles = StyleSheet.create({
   },
   queryText: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER, includeFontPadding: false },
 
+  gauge: { position: 'absolute', top: METER_TOP, width: 10, height: 34 },
   meter: {
-    position: 'absolute', left: -5, top: -26, width: 10, height: 28, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
+    position: 'absolute', left: 0, top: 0, width: 10, height: 28, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
     backgroundColor: PLATE_FACE, justifyContent: 'flex-end', overflow: 'hidden',
   },
   meterFill: { width: '100%', backgroundColor: SAGE },
+  meterBulb: {
+    position: 'absolute', left: -1, top: 25, width: 12, height: 8, borderRadius: 4, backgroundColor: SAGE,
+    borderWidth: 1.5, borderColor: INK,
+  },
+  weightL: { left: -22 },
   weight: {
-    position: 'absolute', left: 8, top: -16, paddingHorizontal: 2, borderRadius: 2, backgroundColor: DEEP,
+    position: 'absolute', left: 14, top: 4, paddingHorizontal: 2, borderRadius: 2, backgroundColor: DEEP,
   },
   weightText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: PAPER_LIT, includeFontPadding: false,

@@ -4,21 +4,25 @@ import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './politicalScript';
 import {
   WALK, boxMove, clamp01, ease01, lerp, mixStance, moveTr, pose, stand, travelStance, type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, reactPose,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose, hideLeadWhile,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { useLinger } from './useLinger';
-import { emoteAny } from './moves';
+import { emoteAny, gazeAt } from './moves';
+import { reachHandTo } from './interact';
+import { lineOf, stage, bump } from './pace';
+import { attendAt } from './attend';
 import {
-  shop, lightPole, soapbox, newsLegs, SHOPS, SHUTTER, LIGHT, LAMP_R, BOX, NEWS,
+  shop, lightPole, soapbox, newsLegs, farHouses, pavements, road, lampHoods, STREET, SHOPS, SHUTTER, LIGHT, LAMP_R, BOX, NEWS,
 } from './politicalSet';
 import { DEEP, EMBER, SAGE, TEAL, OLIVE, PAPER_LIT } from '@/components/shared/tone';
 
@@ -32,16 +36,22 @@ import { DEEP, EMBER, SAGE, TEAL, OLIVE, PAPER_LIT } from '@/components/shared/t
 // newsboard and a notice on the light pole, and the traffic light is the gauge —
 // green while there is order, dark and then red in the war of all.
 //
-//   b0–1  four neighbours at a crossroads, the lights green; a banner goes up across
-//         the street: WHAT GIVES A STATE THE RIGHT TO RULE?
-//   b2    the lights die; the shutters start to come down; the street plate reads
-//         STATE OF NATURE.
-//   b3    the shutters are down, sprayed SOLITARY · POOR / NASTY · BRUTISH · SHORT;
-//         the neighbours square up.
+//   b0–1  four neighbours chatting in pairs at a crossroads, the lights green; they
+//         turn to look up as a banner goes up across the street: WHAT GIVES A STATE
+//         THE RIGHT TO RULE?
+//   b2    they turn round to the light as it dies; the shutters start to come down;
+//         the street plate reads STATE OF NATURE.
+//   b3    the shutters are down, sprayed SOLITARY · POOR / NASTY · BRUTISH · SHORT as
+//         the words are quoted; they read them, and square up in pairs.
 //   b4    the brawl; the light burns red; the newsboard: WAR OF EVERY MAN AGAINST
 //         EVERY MAN.
-//   b5    an officer walks up to the soapbox; the banner gains its answer: A
-//         COVENANT — ONE POWER KEEPS THE PEACE.
+//   b5    an officer comes down the road out of the far end of the street, growing
+//         as he nears; the fighting stops as they turn to watch him; the banner gains
+//         its answer: A COVENANT — ONE POWER KEEPS THE PEACE.
+//
+// Every event is laid across its beat's voiced line (pace.ts), not a fixed delay.
+// The officer is the lead: `lookPose` with authored attention (attend.ts); the
+// neighbours carry their own looks and turns (TURNS, CIT_LOOK).
 //   b7    the first question: answered, he steps onto the box; the light goes
 //         green, the shutters go up, the fighting stops.
 //   b8    the contract posted on the light pole: NO SIGNATURES — A TEST, NOT A
@@ -56,8 +66,9 @@ import { DEEP, EMBER, SAGE, TEAL, OLIVE, PAPER_LIT } from '@/components/shared/t
 //
 // COMPOSITION, in stage units: the banner 64–336 × 298–330; shops 44–150 and
 // 250–392 from their awnings at 330, shutters 338–440; the light pole at x 24 with
-// its head 320–370; neighbours at x 84, 130, 270, 314; the soapbox at x 200; the
-// newsboard 336–398 from 440; a dusk sky over the road between the shops. Band
+// its head 320–370; neighbours at x 84, 130, 278, 320; the soapbox at x 200; the
+// newsboard 336–398 from 440; a dusk sky over a road receding between the shops,
+// kerbs and dashes in perspective, rooftops closing its far end. Band
 // [290, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -70,17 +81,91 @@ const WALL = stageToneOf(SAGE);
 const DUSK = stageToneOf(TEAL);
 const TR = 0.85;
 
-const CIT_X = [84, 130, 270, 314];
-const CIT_DIR = [1, 1, -1, -1];              // all face the soapbox
+/** Seconds each beat's line is voiced for — lib/narration/manifest.ts, political-political-1. */
+const LINES = [6.76, 4.2, 7.0, 9.44, 8.96, 6.8, 0, 0, 6.52, 8.84, 0, 0];
+
+const CIT_X = [84, 130, 278, 320];
 const CIT_K = K_FIG * 0.82;
-/** The officer: where he walks in from, where he waits, and where he stands on the box. */
-const OFF_FROM = 440;
-const OFF_WAIT = 228;
+/** A neighbour's head centre, and the officer's, at their scales. */
+const CIT_HEAD = GROUND - 75;
+const OFF_HEAD = GROUND - 92;
+
+// ── WHICH WAY EACH NEIGHBOUR FACES, AND WHEN (fractions of the beat's line) ──
+//
+// `[at, d0, d1, d2, d3, at, …]`: from `at` of the line, each neighbour turns to its
+// `d`. They chat in pairs, turn to the banner as it goes up, round to the light as it
+// dies, back on each other as the shutters come down, and to the officer when he
+// comes. Every beat SETTLES facing a person (N21): pairs face each other, and facing
+// the middle faces the neighbour in front.
+const PAIRS = [1, -1, 1, -1];
+const MIDDLE = [1, 1, -1, -1];
+const TURNS: number[][] = [
+  [0.06, ...PAIRS],
+  [0.1, ...MIDDLE],
+  [0.34, -1, -1, -1, -1, 0.6, ...PAIRS],
+  [],
+  [],
+  [0.08, 1, 1, -1, 1, 0.4, ...MIDDLE],
+  [],
+  [],
+  [0.16, -1, 1, -1, -1, 0.55, ...MIDDLE],
+  [0.6, 1, 1, 1, -1],
+  [],
+  [],
+];
+/** Where each neighbour ends each beat — what the next beat starts from. */
+const TURN_END: number[][] = [];
+{
+  let d = MIDDLE.slice();
+  for (const keys of TURNS) {
+    for (let j = 0; j + 4 < keys.length; j += 5) d = [keys[j + 1], keys[j + 2], keys[j + 3], keys[j + 4]];
+    TURN_END.push(d.slice());
+  }
+}
+/**
+ * WHERE THE NEIGHBOURS LOOK — attend.ts's keys, with two stand-ins for a moving
+ * target: x −1 is the neighbour's own partner (0↔1, 2↔3), x −2 the officer, and y
+ * is then ignored. The banner is 64–336 × 298–330, the light's head 320–370 at x 24,
+ * the street plate at 10–68 × 376–400, the shutters' words about y 400 over each
+ * shop, the contract 0–68 × 414–458 and Locke's poster 268–354 × 352–382.
+ */
+const SHOP_MID = [(SHOPS[0].x0 + SHOPS[0].x1) / 2, (SHOPS[1].x0 + SHOPS[1].x1) / 2];
+const CIT_LOOK: number[][] = [
+  [0.1, -1, 0, 0.8],
+  [0.14, 200, 314, 1, 0.86, -1, 0, 0.6],
+  [0.36, LIGHT.x, LIGHT.headTop + 30, 1, 0.62, -1, 0, 0.9, 0.78, 38, 388, 0.8, 0.94, -1, 0, 0.7],
+  [0.04, -3, 400, 1, 0.5, -1, 0, 1],
+  [0.02, -1, 0, 1],
+  [0.06, -2, 0, 1],
+  [0.1, -2, 0, 0.9],
+  [0.1, -2, 0, 1],
+  [0.18, 34, 436, 1, 0.55, -2, 0, 0.9],
+  [0.06, -2, 0, 0.8, 0.6, 311, 367, 1],
+  [0.2, -2, 0, 0.9],
+  [0.1, 0, 0, 0],
+];
+/**
+ * The officer: he comes DOWN THE ROAD, out of the far end of the street, growing as
+ * he nears — so the road is a road he walks on, and he never crosses a neighbour. His
+ * feet ride the right-hand lane: at scale s they are at x `LANE_X + LANE_W·s`, y
+ * `STREET.far + (GROUND − STREET.far)·s`, which puts them on the carriageway at every
+ * depth. He waits at the lane's near end and steps left onto the box.
+ */
+const LANE_X = 198;
+const LANE_W = 28;
+const OFF_S0 = 0.14;
+const OFF_WAIT = LANE_X + LANE_W;
 const OFF_BOX = BOX.cx;
+/** The stride he walks the street with, in his own units (the gait's distance, not the stage's). */
+const OFF_STRIDE = 190;
 
 const SHOP_ART = [shop(0), shop(1)];
 /** Where the road begins, between the shops. */
-const ROAD_Y = 432;
+const ROAD_Y = STREET.far;
+const FAR_ART = farHouses();
+const PAVE_ART = pavements();
+const ROAD_ART = road();
+const HOOD_ART = lampHoods();
 const POLE_ART = lightPole();
 const BOX_ART = soapbox();
 const NEWS_ART = newsLegs();
@@ -160,6 +245,20 @@ function officerPose(t: number): Stance {
   };
 }
 
+/**
+ * A neighbour's facing `b` seconds into a beat: from where the last beat left him,
+ * through each of this beat's turns in order, each eased over 0.4 s.
+ */
+function turnNow(keys: readonly number[], from: number, k: number, b: number, L: number): number {
+  'worklet';
+  let d = from;
+  for (let j = 0; j + 4 < keys.length; j += 5) {
+    const u = clamp01((b - keys[j] * L) / 0.4);
+    d = d + (keys[j + 1 + k] - d) * (u * u * (3 - 2 * u));
+  }
+  return d;
+}
+
 const X = BEATS.map(() => 200);
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('political'));
 
@@ -169,55 +268,156 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
   const held1 = useHeld();
   const held2 = useHeld();
   const held3 = useHeld();
-  const cv = useCarry(11);
+  const cv = useCarry(23);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
-    const tr = ease01(bt.value / TR);
+    const b = bt.value;
+    const tr = ease01(b / TR);
     const t = clock.value;
     const q = clamp01(qv.value);
-    const late = (d: number) => {
+    const L = lineOf(LINES, n);
+    const st = (a: number, z: number) => {
       'worklet';
-      return ease01((bt.value - d) / 0.45);
+      return stage(b, L, a, z);
+    };
+    const bp = (a: number, m: number, z: number) => {
+      'worklet';
+      return bump(b, L, a, m, z);
     };
 
+    // ── THE STREET, ACT BY ACT, ACROSS THE VOICED LINE ────────────────────────
+    // b1 the banner goes up · b2 the lights die after "law, court or ruler", the
+    // shutters start down, the plate on "the state of nature" · b3 the shutters come
+    // the rest of the way and the words are sprayed as they are quoted · b4 the brawl
+    // builds to "strike first", the headline on "every man against every man" · b5
+    // the officer walks up, the fighting falters, the banner's answer on "one
+    // sovereign" · b8 the contract, then its stamp · b9 the bow, then Locke.
+    const nWin = n === 2 ? [0.45, 0.85] : n === 3 ? [0, 0.35] : n === 4 ? [0.1, 0.42] : n === 5 ? [0.22, 0.6] : [0, 0.12];
+    const nature = carry(cv, 1, n, NATURE[p], NATURE[n], st(nWin[0], nWin[1]));
     // up on the box: the first answer puts him there, the order answer takes him down
     const auth = Q1[n] === 1 ? ease01(q) : carry(cv, 0, n, AUTH[p], reacting ? 1 - pickPos.value : AUTH[n], tr);
-    const nature = carry(cv, 1, n, NATURE[p], NATURE[n], tr);
-    const fight = nature * (1 - auth);
-    const bow = carry(cv, 2, n, BOW[p], BOW[n], tr);
+    // once he is on the street they stop fighting each other and watch him
+    const watching = OFFICER[n] ? (!OFFICER[p] ? st(0.3, 0.55) : 1) : 0;
+    const fight = nature * (1 - auth) * (1 - watching);
+    // the subjects bow to the sovereign they authorised, and straighten again
+    const bow = carry(cv, 2, n, 0, BOW[n] && !BOW[p] ? bp(0.06, 0.18, 0.46) : 0, tr);
 
-    const cit = (k: number, held: typeof held0): Bundle => {
+    const banner = carry(cv, 3, n, BANNER[p], n === 1 ? st(0.06, 0.4) : BANNER[n], tr);
+    const plate = carry(cv, 4, n, PLATE[p], n === 2 ? st(0.76, 0.86) : PLATE[n], tr);
+    const spray0 = carry(cv, 5, n, LEDGER[p], n === 3 ? st(0.56, 0.64) : LEDGER[n], tr);
+    const spray1 = carry(cv, 11, n, LEDGER[p], n === 3 ? st(0.7, 0.82) : LEDGER[n], tr);
+    const news = carry(cv, 6, n, NEWS_ON[p], n === 4 ? st(0.7, 0.8) : NEWS_ON[n], tr);
+    const cov = carry(cv, 7, n, COVENANT[p], COVENANT[n] && !COVENANT[p] ? st(0.5, 0.62) : COVENANT[n], tr);
+    const paperNew = PAPER_ON[n] && !PAPER_ON[p];
+    const paper = carry(cv, 8, n, PAPER_ON[p], paperNew ? st(0.08, 0.2) : PAPER_ON[n], tr);
+    const stamp = carry(cv, 12, n, PAPER_ON[p], paperNew ? st(0.62, 0.7) : PAPER_ON[n], tr);
+    const locke = carry(cv, 9, n, LOCKE[p], LOCKE[n] && !LOCKE[p] ? st(0.56, 0.68) : LOCKE[n], tr);
+    // the lights: green while there is order, dark once it goes, red in the war of all
+    const dead = carry(cv, 10, n, NATURE[p] > 0 ? 1 : 0, n === 2 ? st(0.32, 0.4) : NATURE[n] > 0 ? 1 : 0, tr);
+
+    // ── the officer comes down the road on the covenant beat ────────────────
+    // He is posed where he will stand, and the whole figure is carried along the
+    // lane and scaled for its depth (`osc`, drawn by the wrapper in the render):
+    // a figure far down the street is small and high, and grows as he walks up it.
+    const arriving = OFFICER[n] === 1 && OFFICER[p] === 0;
+    const walkDur = moveTr(0, OFF_STRIDE, TR);
+    const walkU = arriving ? clamp01(b / walkDur) : 1;
+    // perspective: his size is the inverse of his distance down the street, so he
+    // stays small a long way and then looms; the distance is eased out a little, or
+    // the last few steps would have to cover half his growth and read as a sprint
+    const nearU = 1 - (1 - walkU) * (1 - walkU);
+    const osc = arriving ? 1 / lerp(1 / OFF_S0, 1, nearU) : 1;
+    let offS = travelStance(arriving ? 0 : OFF_STRIDE, OFF_STRIDE, stand(t), officerPose(t), officerPose(t), ease01(walkU), WALK, 3);
+    const offX = lerp(OFF_WAIT, OFF_BOX, auth);
+    const offGY = GROUND - BOX.h * auth;
+    const feetX = LANE_X + LANE_W * osc;
+    const feetY = STREET.far + (GROUND - STREET.far) * osc;
+    const offHeadX = arriving ? feetX : offX;
+    const offHeadY = arriving ? feetY - 92 * osc : offGY - 92;
+    // He faces the street, and turns round to Locke's poster when it goes up in the
+    // window behind him (b9); he stays turned to it for the question after.
+    const lockeTurn = n === 9 ? st(0.54, 0.62) : n > 9 ? 1 : 0;
+    // walking up the lane he faces the way he walks (C18), then turns to the street
+    const walkDir = arriving ? (b < walkDur ? 1 : 1 - 2 * ease01(clamp01((b - walkDur) / 0.36))) : -1;
+    const offDir = carry(cv, 13, n, n > 9 ? 1 : -1, walkDir + 2 * lockeTurn, tr);
+    // the baton pointed at the contract's stamp as it goes on (b8)
+    const pointStamp = carry(cv, 21, n, 0, paperNew ? bp(0.6, 0.68, 0.88) : 0, tr);
+    offS = pointStamp > 0
+      ? reachHandTo(offS, { x: offX, groundY: offGY, k: K_FIG, dir: -1 }, 1, 22, 452, pointStamp)
+      : offS;
+    // a nod to the subjects as they bow (b9)
+    offS = { ...offS, neck: offS.neck - 0.3 * carry(cv, 22, n, 0, BOW[n] && !BOW[p] ? bp(0.12, 0.22, 0.4) : 0, tr) };
+
+    // ── WHERE THE OFFICER LOOKS (attend.ts) ───────────────────────────────────
+    // At the brawl as he walks up to it, at the banner's new line as it is named, at
+    // the box he will stand on; at the contract going up on the light pole and its
+    // stamp; at the subjects as they bow, and round at Locke's poster — and at nothing
+    // (weight 0) once each is over. Before b5 he is not on the street at all.
+    const brawlX = (CIT_X[1] + CIT_X[2]) / 2;
+    const LK = arriving ? [0.05, brawlX, CIT_HEAD + 10, 1, L * 0.5, 200, 324, 0.9, L * 0.78, BOX.cx, GROUND - BOX.h, 0.9, L * 0.96, 0, 0, 0]
+      : n === 6 ? [0.1, (CIT_X[0] + CIT_X[1]) / 2, CIT_HEAD, 0.7, 2.6, 0, 0, 0]
+      : Q1[n] ? [0.1, BOX.cx, GROUND - BOX.h, 0.6, 1.6, 0, 0, 0]
+      : paperNew ? [L * 0.1, 34, 436, 1, L * 0.62, 22, 452, 1, L * 0.92, 0, 0, 0]
+      : n === 9 ? [L * 0.08, CIT_X[1], CIT_HEAD + 20, 0.9, L * 0.56, 311, 367, 1, L * 0.95, 0, 0, 0]
+      : reacting ? [0.3, BOX.cx, GROUND - BOX.h, 0.5]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+    const offB = lookPose(
+      offS, offX, offGY, K_FIG, offDir, 1,
+      carry(cv, 14, n, lk.x, lk.x, tr), carry(cv, 15, n, lk.y, lk.y, tr), carry(cv, 16, n, 0, lk.w, tr),
+    );
+    // before he is on the street, and while he is far down it, his head is not where
+    // his pose says, so no thought is hung on it
+    const off = hideLeadWhile(offB, !OFFICER[n] || osc < 0.98);
+
+    // ── the neighbours ────────────────────────────────────────────────────────
+    const lookKeys = CIT_LOOK[n];
+    const from = (k: number) => {
       'worklet';
-      const dir = CIT_DIR[k];
-      const live = mixStance(melee(t, k), calm(t, k, bow), 1 - fight);
+      return n > 0 ? TURN_END[p][k] : MIDDLE[k];
+    };
+    const dv0 = carry(cv, 17, n, from(0), turnNow(TURNS[n], from(0), 0, b, L), tr);
+    const dv1 = carry(cv, 18, n, from(1), turnNow(TURNS[n], from(1), 1, b, L), tr);
+    const dv2 = carry(cv, 19, n, from(2), turnNow(TURNS[n], from(2), 2, b, L), tr);
+    const dv3 = carry(cv, 20, n, from(3), turnNow(TURNS[n], from(3), 3, b, L), tr);
+    const cit = (k: number, held: typeof held0, dv: number): Bundle => {
+      'worklet';
+      const dir = dv < 0 ? -1 : 1;
+      let live = mixStance(melee(t, k), calm(t, k, bow), 1 - fight);
+      // squared up in pairs: each steps back from his partner as the fight builds, and
+      // only lunges a third as far, so two fighters never run into one body
+      const x = CIT_X[k] + ((live.adv ?? 0) * 0.35 - 7) * dir * fight;
+      // what he is looking at — a point, his partner's head, the officer's, or his
+      // shop's words — resolved into attend.ts keys and eased between like the lead's
+      const keys: number[] = [];
+      for (let j = 0; j + 3 < lookKeys.length; j += 4) {
+        const code = lookKeys[j + 1];
+        keys.push(
+          lookKeys[j] * L,
+          code === -1 ? CIT_X[k + (k % 2 === 0 ? 1 : -1)] : code === -2 ? offHeadX : code === -3 ? SHOP_MID[k < 2 ? 0 : 1] : code,
+          code === -1 ? CIT_HEAD : code === -2 ? offHeadY : lookKeys[j + 2],
+          lookKeys[j + 3] * (code === -2 && !OFFICER[n] ? 0 : 1),
+        );
+      }
+      // the look is laid on the living stance BEFORE the hold, so a tap mid-look is
+      // blended out of what was on screen like everything else he is doing
+      const lkN = attendAt(keys, b, 0, 0, 0);
+      const gw = lkN.w * (1 - bow * 0.9);
+      if (gw > 0.01) {
+        const g = gazeAt(live, x, GROUND, CIT_K, dir, lkN.x, lkN.y, gw);
+        live = { ...g, tilt: g.tilt + (g.neck - live.neck) * 0.5 };
+      }
       const s = keepHeld(held, mixStance(carryFrom(held, n, live), live, tr));
-      const x = CIT_X[k] + (s.adv ?? 0) * dir * fight;
-      return pose(s, x, GROUND, CIT_K, dir, 1);
+      return pose(s, x, GROUND, CIT_K, dv, 1);
     };
 
-    // the officer walks up from off the right edge on the covenant beat
-    const arriving = OFFICER[n] === 1 && OFFICER[p] === 0;
-    const walkU = arriving ? ease01(bt.value / moveTr(OFF_FROM, OFF_WAIT, TR)) : 1;
-    const baseX = arriving ? lerp(OFF_FROM, OFF_WAIT, walkU) : OFF_WAIT;
-    const offS = travelStance(arriving ? OFF_FROM : OFF_WAIT, OFF_WAIT, stand(t), officerPose(t), officerPose(t), walkU, WALK, 3);
-    const offX = lerp(baseX, OFF_BOX, auth);
-    const offGY = GROUND - BOX.h * auth;
-
     return {
-      c0: cit(0, held0), c1: cit(1, held1), c2: cit(2, held2), c3: cit(3, held3),
-      off: reactPose(offS, offX, offGY, K_FIG, -1, 1),
+      c0: cit(0, held0, dv0), c1: cit(1, held1, dv1), c2: cit(2, held2, dv2), c3: cit(3, held3, dv3),
+      off, osc, feetX, feetY,
       auth, nature, fight,
-      banner: carry(cv, 3, n, BANNER[p], BANNER[n], late(0.3)),
-      plate: carry(cv, 4, n, PLATE[p], PLATE[n], late(0.8)),
-      ledger: carry(cv, 5, n, LEDGER[p], LEDGER[n], late(0.6)),
-      news: carry(cv, 6, n, NEWS_ON[p], NEWS_ON[n], late(0.5)),
-      cov: carry(cv, 7, n, COVENANT[p], COVENANT[n], late(1.2)),
-      paper: carry(cv, 8, n, PAPER_ON[p], PAPER_ON[n], late(0.4)),
-      locke: carry(cv, 9, n, LOCKE[p], LOCKE[n], late(1.6)),
-      // the lights: green while there is order, dark once it goes, red in the war of all
-      dead: carry(cv, 10, n, NATURE[p] > 0 ? 1 : 0, NATURE[n] > 0 ? 1 : 0, late(0.2)),
+      banner, plate, spray0, spray1, news, cov, paper, stamp, locke, dead,
       t,
     };
   });
@@ -227,6 +427,18 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
   const DC2 = useDerivedValue<Bundle>(() => SCENE.value.c2);
   const DC3 = useDerivedValue<Bundle>(() => SCENE.value.c3);
   const DOff = useDerivedValue<Bundle>(() => SCENE.value.off);
+  // the officer's depth on the road: his standing spot is carried to his feet on the
+  // lane and scaled about them, figure and baton together
+  const depth = useAnimatedStyle(() => {
+    const sc = SCENE.value.osc;
+    return {
+      transform: [
+        { translateX: SCENE.value.feetX }, { translateY: SCENE.value.feetY },
+        { scale: sc },
+        { translateX: -OFF_WAIT }, { translateY: -GROUND },
+      ],
+    };
+  });
   const baton = useAnimatedStyle(() => {
     const w = DOff.value.wrR;
     return { transform: [{ translateX: w[0].translateX }, { translateY: w[1].translateY }] };
@@ -236,8 +448,9 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <View style={styles.street} pointerEvents="none" />
-      <View style={styles.road} pointerEvents="none" />
-      {[0, 1, 2].map((k) => <View key={k} style={[styles.dash, { top: ROAD_Y + 12 + k * 18, height: 8 + k * 3 }]} pointerEvents="none" />)}
+      <SetArt parts={FAR_ART} tone={WALL} />
+      <SetArt parts={PAVE_ART} tone={WALL} />
+      <SetArt parts={ROAD_ART} tone={DUSK} />
       <ObjectArt parts={SHOP_ART[0]} tone={WALL} />
       <ObjectArt parts={SHOP_ART[1]} tone={WALL} />
       <Shutters S={SCENE} on={on} />
@@ -245,6 +458,7 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
       <Banner S={SCENE} on={on} />
       <ObjectArt parts={POLE_ART} tone={WOOD} />
       <Lamps S={SCENE} />
+      <ObjectArt parts={HOOD_ART} tone={WOOD} />
       <Plate S={SCENE} on={on} />
       <Contract S={SCENE} on={on} />
       <ObjectArt parts={NEWS_ART} tone={WOOD} />
@@ -256,13 +470,13 @@ export default function PoliticalScene({ clock, bt, bi, qv, pickPos, i }: SceneA
       <Stickman role="crowd" D={DC2} k={CIT_K} />
       <Stickman role="crowd" D={DC3} k={CIT_K} />
       {on(OFFICER) ? (
-        <>
+        <Animated.View style={[styles.depth, depth]} pointerEvents="none">
           <Stickman D={DOff} k={K_FIG} />
           <Animated.View style={[styles.rider, baton]} pointerEvents="none">
             <View style={styles.baton} />
             <View style={styles.batonGrip} />
           </Animated.View>
-        </>
+        </Animated.View>
       ) : null}
     </View>
   );
@@ -295,7 +509,8 @@ const SPRAY = [['SOLITARY', 'POOR'], ['NASTY', 'BRUTISH', 'SHORT']];
 function Shutters({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const h = SHUTTER.bottom - SHUTTER.top;
   const drop = useAnimatedStyle(() => ({ height: h * clamp01(S.value.nature * 1.4) * (1 - S.value.auth) }));
-  const spray = useAnimatedStyle(() => ({ opacity: S.value.ledger }));
+  const spray0 = useAnimatedStyle(() => ({ opacity: S.value.spray0 }));
+  const spray1 = useAnimatedStyle(() => ({ opacity: S.value.spray1 }));
   return (
     <>
       {SHOPS.map((sh, k) => (
@@ -304,7 +519,7 @@ function Shutters({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) =
             {/* the words ride the shutter, anchored to its foot, so rolling it up takes them away */}
             {[0, 1, 2, 3, 4, 5].map((r) => <View key={r} style={[styles.slat, { bottom: 6 + r * 16 }]} />)}
             {on(SPRAY_ON) ? (
-              <Animated.View style={[styles.sprayBox, spray]}>
+              <Animated.View style={[styles.sprayBox, k === 0 ? spray0 : spray1]}>
                 {SPRAY[k].map((w) => <Text key={w} style={styles.spray} numberOfLines={1}>{w}</Text>)}
               </Animated.View>
             ) : null}
@@ -351,15 +566,17 @@ function Plate({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
 
 function Contract({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const st = useAnimatedStyle(() => ({ opacity: S.value.paper, transform: [{ rotate: '-3deg' }, { translateY: (1 - S.value.paper) * -6 }] }));
+  // the stamp comes down on it a beat later, struck rather than faded (the baton points at it)
+  const stamp = useAnimatedStyle(() => ({ opacity: S.value.stamp, transform: [{ rotate: '-8deg' }, { scale: 1.5 - 0.5 * S.value.stamp }] }));
   if (!on(PAPER_ON)) return null;
   return (
     <Animated.View style={[styles.contract, st]} pointerEvents="none">
       <Text style={styles.contractHead} numberOfLines={1}>CONTRACT</Text>
       <View style={styles.signLine} />
       <View style={styles.signLine} />
-      <View style={styles.contractStamp}>
+      <Animated.View style={[styles.contractStamp, stamp]}>
         <Text style={styles.stampText} numberOfLines={1}>A TEST</Text>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -405,11 +622,6 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SHOPS[0].x1, top: 330, width: SHOPS[1].x0 - SHOPS[0].x1, height: ROAD_Y - 330,
     backgroundColor: DUSK.STONE,
   },
-  road: {
-    position: 'absolute', left: SHOPS[0].x1, top: ROAD_Y, width: SHOPS[1].x0 - SHOPS[0].x1, height: GROUND - ROAD_Y,
-    backgroundColor: DUSK.SHADE,
-  },
-  dash: { position: 'absolute', left: BOX.cx - 1.5, width: 3, borderRadius: 1.5, backgroundColor: PAPER_LIT },
 
   bannerWrap: { position: 'absolute', left: 64, top: 298, width: 272 },
   bannerCord: { position: 'absolute', top: 8, width: 26, height: 1.5, backgroundColor: INK },
@@ -459,7 +671,6 @@ const styles = StyleSheet.create({
   signLine: { height: 1.5, backgroundColor: SHADE, marginTop: 5 },
   contractStamp: {
     position: 'absolute', left: 6, bottom: 3, paddingHorizontal: 3, borderWidth: 1.5, borderColor: EMBER, borderRadius: 2,
-    transform: [{ rotate: '-8deg' }],
   },
   stampText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
@@ -490,6 +701,7 @@ const styles = StyleSheet.create({
   },
 
   rider: { position: 'absolute', left: 0, top: 0 },
+  depth: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   baton: { position: 'absolute', left: -2, top: -26, width: 4, height: 26, borderRadius: 2, backgroundColor: INK },
   batonGrip: { position: 'absolute', left: -4, top: -3, width: 8, height: 3, borderRadius: 1.5, backgroundColor: EMBER },
 });

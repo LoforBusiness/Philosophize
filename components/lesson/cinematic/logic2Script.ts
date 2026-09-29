@@ -20,7 +20,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Logic2Beat extends BaseBeat {
   /** The mason's pose under his act. Bands per N2: <100 rig, 100+ held, 300+ played. */ g?: number;
-  /** Where he stands: 300 by the crane, clear of the right-hand stone. */ x?: number;
+  /** Where he stands: 330 by the mast, facing the work, clear of the right-hand stone even when it is dragged out to him; 300 once he has pushed it home. */ x?: number;
   /** The crane's and the mason's act across this beat's line (the scene choreographs it). */
   act?: 'lower1' | 'lower2' | 'lowerKey' | 'trace' | 'stampBase' | 'support' | 'stampTop' | 'carve' | 'tug' | 'pull' | 'rebuild';
   /** How many stones are in place: 1, 2, or 3 with the conclusion on top. */ stones?: number;
@@ -37,43 +37,43 @@ export interface Logic2Beat extends BaseBeat {
 
 export const BEATS: Logic2Beat[] = [
   {
-    g: 167, x: 300, act: 'lower1', stones: 1,
+    g: 167, x: 330, act: 'lower1', stones: 1,
     text: 'In logic, an argument is a set of claims, some of which are offered as reasons for another.',
     dur: 2.6,
   },
   {
-    g: 459, x: 300, act: 'lower2', stones: 2,
+    g: 459, x: 330, act: 'lower2', stones: 2,
     text: 'Every argument, however long, is built from the same basic parts. Once you can identify them, you can analyse any argument.',
     dur: 3.2,
   },
   {
-    g: 167, x: 300, act: 'lowerKey', stones: 3,
+    g: 167, x: 330, act: 'lowerKey', stones: 3,
     text: 'Two stones form a base, and a third rests on top. The top stone stands only because the two below support it.',
     dur: 1.8,
   },
   {
-    g: 459, x: 300, act: 'trace', stones: 3, form: true,
+    g: 459, x: 330, act: 'trace', stones: 3, form: true,
     text: 'This shape is the basic form of an argument: claims below that support a claim above.',
     dur: 1.8,
   },
   {
-    g: 167, x: 300, act: 'stampBase', stones: 3, form: true, premises: true,
+    g: 167, x: 330, act: 'stampBase', stones: 3, form: true, premises: true,
     text: 'The stones at the base are the premises, the reasons offered for a claim. The words “because” and “since” often introduce a premise.',
     dur: 4.2,
   },
   {
-    g: 158, x: 300, act: 'support', stones: 3, form: true, premises: true, conclusion: true,
+    g: 158, x: 330, act: 'support', stones: 3, form: true, premises: true, conclusion: true,
     text: 'The stone on top is the conclusion, the claim the premises support. In a deduction, Aristotle held, the conclusion follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
     dur: 2.8,
   },
   {
-    g: 167, x: 300, act: 'stampTop', stones: 3, form: true, premises: true, conclusion: true, marks: true,
+    g: 167, x: 330, act: 'stampTop', stones: 3, form: true, premises: true, conclusion: true, marks: true,
     text: 'The words “therefore”, “so” and “thus” often introduce a conclusion.',
     dur: 1.8,
   },
   {
-    g: 260, x: 300, stones: 3, form: true, premises: true, conclusion: true, marks: true, stamps: true,
+    g: 260, x: 330, stones: 3, form: true, premises: true, conclusion: true, marks: true, stamps: true,
     interact: {
       prompt: 'Two stamps hang from the hook. Which word would mark the top stone?',
       explain: '“Therefore” marks the conclusion, the claim the reasons support. “Because” marks a premise, one of the reasons given for it.',
@@ -82,18 +82,18 @@ export const BEATS: Logic2Beat[] = [
     dur: 1.0,
   },
   {
-    g: 459, x: 300, act: 'carve', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true,
+    g: 459, x: 330, act: 'carve', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true,
     text: 'This is the standard example of a syllogism, the form of argument Aristotle first analysed.',
     dur: 4.0,
   },
   {
-    g: 167, x: 300, act: 'tug', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true,
+    g: 167, x: 330, act: 'tug', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true,
     text: 'If both premises are true, the conclusion can’t be false. That’s what Aristotle meant by a conclusion that follows of necessity.',
     cite: 'Aristotle, Prior Analytics',
     dur: 4.4,
   },
   {
-    g: 260, x: 300, stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true, controls: true,
+    g: 260, x: 330, stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true, controls: true,
     interact: {
       prompt: 'The crane is about to slide both premises out. What will the top stone have under it?',
       explain: 'Nothing at all. A conclusion is a claim that premises support. Take them away and there’s no inference left, only a bare claim with no reason to believe it.',
@@ -102,7 +102,7 @@ export const BEATS: Logic2Beat[] = [
     dur: 1.0,
   },
   {
-    g: 178, x: 300, act: 'pull', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true, fallen: true,
+    g: 178, x: 356, act: 'pull', stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true, fallen: true,
     text: 'Remove the premises and nothing supports the conclusion. The premises are what give anyone a reason to accept it.',
     dur: 3.8,
   },
@@ -119,7 +119,7 @@ export const BEATS: Logic2Beat[] = [
     dur: 2.6,
   },
   {
-    stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true,
+    x: 300, stones: 3, form: true, premises: true, conclusion: true, marks: true, carved: true, sign: true,
     summary: {
       title: 'The Parts of an Argument',
       points: [

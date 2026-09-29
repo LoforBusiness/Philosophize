@@ -21,7 +21,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Epi4Beat extends BaseBeat {
   /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 96 at the shutter · 150 in the room · 164 and 270 at either end of the desk · 250 at the cord. */ x?: number;
+  /** Where he stands: 96 at the shutter · 112 in the room, under EXPERIENCE · 164 and 270 at either end of the desk · 250 at the cord. */ x?: number;
   /** The act across this beat's line (the scene choreographs it). */
   act?: 'blank' | 'open' | 'fed' | 'simple' | 'shut' | 'compass' | 'meno' | 'recall' | 'kant' | 'forms';
   /** The shutter over the opening is open and the image is on the paper. */ lit?: boolean;
@@ -35,7 +35,7 @@ export interface Epi4Beat extends BaseBeat {
 
 export const BEATS: Epi4Beat[] = [
   {
-    p: 158, x: 150, act: 'blank', plates: 2,
+    p: 158, x: 112, act: 'blank', plates: 2,
     text: 'Does the mind begin empty, or does it contain some knowledge from birth? Empiricists and rationalists give opposing answers.',
     dur: 3.4,
   },

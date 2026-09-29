@@ -1,4 +1,6 @@
-import { oRect, oBar, oTri, type ObjPart } from './objects';
+import { oRect, oBar, type ObjPart } from './objects';
+import { oPoly } from './setShapes';
+import type { SetPart } from './SetArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SET OF aesthetics-aesthetics-2 — A CAMPSITE AT NIGHT, WITH AN OUTDOOR SCREEN.
@@ -20,35 +22,64 @@ const GROUND = 500;
 /** The screen's picture area, and its two posts. */
 export const SCREEN = { x: 16, y: 298, w: 184, h: 96 };
 /** The tent: its peak, and its two feet. */
-export const TENT = { peak: { x: 76, y: 414 }, left: 12, right: 140 };
+/** Tall enough (2026-09-28) that he fits inside its outline ducking in at the door. */
+export const TENT = { peak: { x: 76, y: 404 }, left: 4, right: 148 };
 /** The fire. */
 export const FIRE = { cx: 208, top: 486 };
 /** The three listeners' chairs, and their seat height. */
 export const CHAIRS = [262, 312, 362];
 export const SEAT = 474;
 
-/** The screen's frame and posts. */
+/**
+ * The screen's frame and legs. REDRAWN 2026-09-28 (reference: an outdoor cinema screen
+ * at King's Cross): a deep frame round the picture, on two legs each braced back to a
+ * foot — a board on two sticks does not stand up outdoors.
+ */
 export function screen(): ObjPart[] {
   const { x, y, w, h } = SCREEN;
+  const l = x + 12;
+  const r = x + w - 12;
   return [
-    oBar('mass', x + 10, y + h, x + 10, GROUND, 4),
-    oBar('mass', x + w - 10, y + h, x + w - 10, GROUND, 4),
-    oRect('mass', x + w / 2, y + h / 2, w + 8, h + 8, 0, 2),
+    oBar('mass', l, y + h, l, GROUND, 4),
+    oBar('mass', r, y + h, r, GROUND, 4),
+    oBar('mass', l, y + h + 40, l - 10, GROUND, 2.5),
+    oBar('mass', r, y + h + 40, r - 10, GROUND, 2.5),
+    oRect('mass', l, GROUND - 2, 16, 4, 0, 1),
+    oRect('mass', r - 4, GROUND - 2, 14, 4, 0, 1),
+    oRect('mass', x + w / 2, y + h / 2, w + 10, h + 10, 0, 2),
+    oRect('face', x + w / 2, y + h + 4, w + 6, 3, 0, 1),
   ];
 }
 
-/** The tent: two slopes of canvas, a ridge pole, pegs. */
-export function tent(): ObjPart[] {
+/**
+ * The tent. REDRAWN 2026-09-28 (references: a Whymper tent's crossed poles, a
+ * two-person ridge tent in the Caucasus): the poles CROSS above the ridge, the canvas's
+ * right half is in shade (the lamp is top left), the door's flaps are tied back either
+ * side of it, and a guy rope runs from the ridge to a peg on each side.
+ */
+export function tent(): SetPart[] {
   const { peak, left, right } = TENT;
+  const dx = peak.x;
+  const doorTop = peak.y + 30;
   return [
-    oTri('mass', peak.x, (peak.y + GROUND) / 2, right - left, GROUND - peak.y, 'up'),
-    oBar('dark', peak.x, peak.y + 2, peak.x, GROUND, 2),
-    oBar('mass', peak.x, peak.y - 6, peak.x, peak.y + 4, 3),
-    oBar('dark', left - 6, GROUND - 2, left, GROUND - 8, 2),
-    oBar('dark', right + 6, GROUND - 2, right, GROUND - 8, 2),
+    // the guy ropes, ridge to pegs, drawn first so the canvas covers their ends
+    oBar('line', peak.x - 4, peak.y + 4, left - 6, GROUND - 3, 1),
+    oBar('line', peak.x + 4, peak.y + 4, right + 3, GROUND - 3, 1),
+    oBar('dark', left - 6, GROUND - 1, left - 8, GROUND - 7, 2),
+    oBar('dark', right + 3, GROUND - 1, right + 5, GROUND - 7, 2),
+    // the crossed poles over the ridge
+    oBar('mass', peak.x - 5, peak.y - 6, peak.x + 2, peak.y + 4, 2.6),
+    oBar('mass', peak.x + 5, peak.y - 6, peak.x - 2, peak.y + 4, 2.6),
+    // the canvas, its shaded right half, its seam down the middle
+    oPoly('mass', [peak.x, peak.y, right, GROUND, left, GROUND]),
+    oPoly('face', [peak.x, peak.y + 1, right - 1, GROUND, peak.x, GROUND]),
+    // the door's flaps, rolled and tied back either side of the opening
+    oPoly('dark', [dx - 16, doorTop + 10, dx - 27, GROUND - 6, dx - 18, GROUND]),
+    oPoly('lit', [dx + 16, doorTop + 10, dx + 27, GROUND - 6, dx + 18, GROUND]),
+    oBar('line', dx - 24, doorTop + 34, dx - 17, doorTop + 34, 1.4),
+    oBar('line', dx + 17, doorTop + 34, dx + 24, doorTop + 34, 1.4),
   ];
 }
-
 /** The fire's ring of stones and two crossed logs. */
 export function fireRing(): ObjPart[] {
   const { cx, top } = FIRE;

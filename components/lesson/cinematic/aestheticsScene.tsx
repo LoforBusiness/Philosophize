@@ -20,10 +20,11 @@ import type { SceneApi } from './CinematicPlayer';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
 import { useLinger } from './useLinger';
+import { attendAt } from './attend';
 import {
-  rail, boardPost, telescope, crate, SKY, SUN, BOARD, APPLE, RAIL_Y,
+  rail, boardPost, telescope, crate, ridge, trees, SKY, SUN, BOARD, APPLE, RAIL_Y, RIDGE_FAR, RIDGE_MID, RIDGE_NEAR,
 } from './aestheticsSet';
-import { OLIVE, TEAL, EMBER, PAPER_LIT } from '@/components/shared/tone';
+import { DEEP, OLIVE, TEAL, EMBER, PAPER_LIT, mix } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // aesthetics-aesthetics-1, "Why Things Feel Beautiful" — A HILLTOP LOOKOUT AT SUNSET.
@@ -48,7 +49,12 @@ import { OLIVE, TEAL, EMBER, PAPER_LIT } from '@/components/shared/tone';
 // WHAT IS NOT CHANGED: every word of narration (aestheticsScript.ts keeps every
 // beat's text and order; the voice is keyed by index).
 //
-// COMPOSITION, in stage units: the sky 292–466 with the sun at (322, 420); the rail
+// REVISED 2026-09-28: the view is three ridges in atmospheric layers with the sun
+// half set into the far one (aestheticsSet, against photographs); he turns to the
+// board and the scorecards on the beats they change (`face: -1`) instead of leaving
+// them at his back; the apple's tag hangs from its stalk on a string.
+//
+// COMPOSITION, in stage units: the sky 292–466 with the sun at (322, 426); the rail
 // at 460; the info board 12–172 × 300–376 on one post; the scorecards on the rail
 // at x 110–202; he stands at x 250, the apple at his hand (279, 463) on a crate
 // 258–298; the telescope at x 362; the tourists walk in to x 32 and 64. Band
@@ -61,6 +67,9 @@ const LIP = lipOf(TONE);
 const WOOD = stageToneOf(OLIVE);
 /** The sky at dusk: the palette's tame teal, never the branch's tan (no gold grounds). */
 const DUSK = stageToneOf(TEAL);
+/** The sky paling toward the sun, in two flat steps (no gradients on this stage). */
+const HAZE_1 = mix(DUSK.STONE, PAPER_LIT, 0.3);
+const HAZE_2 = mix(DUSK.STONE, PAPER_LIT, 0.55);
 const TR = 0.85;
 
 const FIG_X = 250;
@@ -86,6 +95,14 @@ const PICKS = [
   { id: 'apple', label: 'THE APPLE', x: APPLE.x - 32, y: APPLE.y - 14, w: 64, h: 34, top: false, correct: false },
 ];
 
+/** The apple's tag hangs on a string from the stalk to its top-left corner (300, 474). */
+const STRING = (() => {
+  const x0 = APPLE.x + 2;
+  const y0 = APPLE.y - APPLE.r - 3;
+  const dx = 303 - x0;
+  const dy = 475 - y0;
+  return { x0, y0, len: Math.hypot(dx, dy), deg: (Math.atan2(dy, dx) * 180) / Math.PI };
+})();
 /** The sunset's tag: high in the sky, clear of the speech boxes over his head. */
 const TAG_Y = 296;
 // what he says, on the two beats he says it (the box sits over his mark)
@@ -114,7 +131,26 @@ const LIKE_BEAT = BEATS.findIndex((b) => !!b.assent);
 const CLAIM_BEAT = BEATS.findIndex((b) => !!b.claim);
 const SAYS = BEATS.map((_, k) => (k === LIKE_BEAT || k === CLAIM_BEAT ? 1 : 0));
 /** He turns to the tourists once they are there: two figures on a stage face each other (N21). */
-const DIR = CROWD.map((v) => (v ? -1 : 1));
+const DIR = BEATS.map((b, k) => (CROWD[k] || b.face === -1 ? -1 : 1));
+/**
+ * The board and the scorecards stand to his LEFT and the sun to his right, and a look
+ * only tilts his head — so on the beats where the board or the cards change (b1–2,
+ * b6–8, b11) the script turns him round to them (`face: -1`), and on the sun's and
+ * the apple's beats he turns back. That is also simply what a person at a lookout does:
+ * reads the sign, then looks at the view again.
+ */
+const CRIT_BEAT = BEATS.findIndex((b) => !!b.critics);
+const AGREE_BEAT = BEATS.findIndex((b) => !!b.agree);
+const CIRC_BEAT = BEATS.findIndex((b) => !!b.circular);
+/** The board's rows, in stage units: its heading, BEAUTIFUL, and the two questions. */
+const BOARD_HEAD_Y = BOARD.y + 13;
+const BOARD_VERDICT_Y = BOARD.y + 30;
+const BOARD_Q1_Y = BOARD.y + 51;
+const BOARD_Q2_Y = BOARD.y + 66;
+/** The scorecards' middle, and the CRITIC ↔ VERDICT plate over them. */
+const CARDS_MID = (CARD_X[0] + CARD_X[2] + CARD_W) / 2;
+const CARDS_Y = RAIL_Y - CARD_H / 2;
+const LOOP_Y = RAIL_Y - CARD_H - 17;
 // R7c — on the sort, the tourists stand in as the chip moves toward FOR EVERYONE.
 const REACT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 
@@ -146,7 +182,7 @@ export default function AestheticsScene({
 }: SceneApi) {
   const reacting = REACT[i] === 1;
   const held0 = useHeld();
-  const cv = useCarry(14);
+  const cv = useCarry(17);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -178,8 +214,33 @@ export default function AestheticsScene({
     const stand0 = carry(cv, 12, n, 1, reacting ? clamp01(pickPos.value * 2) : 1, tr);
     const stand1 = carry(cv, 13, n, 1, reacting ? clamp01(pickPos.value * 2 - 1) : 1, tr);
     const glowV = carry(cv, 1, n, GLOW[p], GLOW[n], tr);
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // The info board (x 12–188) and the scorecards (x 110–202) stand to his LEFT, so
+    // on the beats where they change he is turned round to them (DIR, above) and
+    // reads them: the heading, then BEAUTIFUL; the two questions in turn; the cards
+    // one by one, and the CRITIC ↔ VERDICT plate; the second question's underline.
+    // Facing right he has the sun, the sunset's tag, the apple in his hand, and —
+    // turned again — the tourists. Tag middle: left 290 + half its 98 = SUN.x + 17.
+    // A tourist's head (TOUR_K) is about 82 units above the ground.
+    const LK = PICK[n] ? [0.3, SUN.x, SUN.y, 0.6, 1.5, APPLE.x, APPLE.y, 0.6, 2.7, 0, 0, 0]
+      : n === LIKE_BEAT ? [0.4, BOARD.x + 90, BOARD_Q2_Y, 1, 4.0, 0, 0, 0]
+      : n === CLAIM_BEAT ? [0.2, 0, 0, 0, 1.6, SUN.x, SUN.y, 0.8, 4.4, 0, 0, 0]
+      : REACT[n] ? [0.3, (TOUR_X[0] + TOUR_X[1]) / 2, GROUND - 82, 0.7]
+      : arriving ? [0.3, lerp(TOUR_FROM[1], TOUR_X[1], walkT(1)), GROUND - 82, 1, 4.4, 0, 0, 0]
+      : n === CRIT_BEAT ? [0.4, CARDS_MID, CARDS_Y, 1, 2.6, CARD_X[0] + CARD_W / 2, CARDS_Y, 0.9, 4.2, CARD_X[2] + CARD_W / 2, CARDS_Y, 0.9, 6.6, 0, 0, 0]
+      : n === AGREE_BEAT ? [0.3, CARDS_MID, CARDS_Y, 1, 7.6, 0, 0, 0]
+      : n === CIRC_BEAT ? [0.5, CARDS_MID, LOOP_Y, 1, 4.6, CARDS_MID, CARDS_Y, 0.8, 7.4, 0, 0, 0]
+      : CRIT[n] ? [0.2, 0, 0, 0]
+      : DESI[n] ? [0.7, SUN.x + 17, TAG_Y + 38, 0.9, 3.0, SUN.x, SUN.y, 0.8, 5.0, APPLE.x, APPLE.y, 0.8, 7.2, 0, 0, 0]
+      : UNW[n] ? [0.5, SUN.x + 17, TAG_Y + 20, 0.9, 1.8, SUN.x, SUN.y, 1]
+      : APPLE_ON[n] ? [0.1, APPLE.x, APPLE.y, 1, 4.8, 0, 0, 0]
+      : QUEST[n] ? [0.5, BOARD.x + 80, BOARD_Q1_Y, 1, 2.4, BOARD.x + 80, BOARD_Q2_Y, 1, 4.6, 0, 0, 0]
+      : TASTE[n] ? [0.4, BOARD.x + 70, BOARD_HEAD_Y, 1, 3.4, BOARD.x + 55, BOARD_VERDICT_Y, 0.9, 5.9, 0, 0, 0]
+      : GLOW[n] ? [0.2, SUN.x, SUN.y, 1, 4.6, SUN.x, SUN.y, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, bt.value, 0, 0, 0);
     return {
-      fig: lookPose(figS, FIG_X, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(figS, FIG_X, GROUND, K_FIG, facing(DIR[p], DIR[n], bt.value), 1, carry(cv, 14, n, lk.x, lk.x, tr), carry(cv, 15, n, lk.y, lk.y, tr), carry(cv, 16, n, 0, lk.w, tr)),
       t0: tourist(0),
       t1: tourist(1),
       crowd,
@@ -250,6 +311,17 @@ export default function AestheticsScene({
 
 // ── the view: sky, sun and hills ────────────────────────────────────────────
 
+const FAR_ART = ridge(RIDGE_FAR, SKY.bottom);
+const MID_ART = ridge(RIDGE_MID, 480);
+const NEAR_ART = ridge(RIDGE_NEAR, GROUND);
+const TREE_ART = trees();
+/** Each layer of the view is one flat colour, lighter the farther it is (aestheticsSet). */
+const HAZE = (c: string) => ({ ...DUSK, SHADE: c });
+const FAR_TONE = HAZE(mix(DUSK.STONE, DUSK.SHADE, 0.38));
+const MID_TONE = HAZE(mix(DUSK.SHADE, DEEP, 0.3));
+const TREE_TONE = HAZE(mix(DEEP, DUSK.SHADE, 0.35));
+const NEAR_TONE = HAZE(WOOD.STONE);
+
 function Vista({ S }: { S: SharedValue<any> }) {
   const ring1 = useAnimatedStyle(() => ({
     opacity: 0.45 * S.value.glow,
@@ -260,13 +332,21 @@ function Vista({ S }: { S: SharedValue<any> }) {
     transform: [{ scale: 1 + 0.1 * Math.sin(S.value.twinkle * 1.6 + 1.2) }],
   }));
   return (
-    <View style={styles.sky} pointerEvents="none">
-      <Animated.View style={[styles.ring, { width: 96, height: 96, borderRadius: 48, left: SUN.x - 48, top: SUN.y - SKY.top - 48 }, ring2]} />
-      <Animated.View style={[styles.ring, { width: 64, height: 64, borderRadius: 32, left: SUN.x - 32, top: SUN.y - SKY.top - 32 }, ring1]} />
-      <View style={styles.sun} />
-      <View style={[styles.hill, { left: -80, top: 436 - SKY.top, width: 320, height: 110 }]} />
-      <View style={[styles.hill, styles.hillNear, { left: 190, top: 446 - SKY.top, width: 300, height: 90 }]} />
-    </View>
+    <>
+      <View style={styles.sky} pointerEvents="none">
+        {/* the sky pales toward the horizon, in two flat steps */}
+        <View style={[styles.haze, { top: 396 - SKY.top, backgroundColor: HAZE_1 }]} />
+        <View style={[styles.haze, { top: 414 - SKY.top, backgroundColor: HAZE_2 }]} />
+        <Animated.View style={[styles.ring, { width: 96, height: 96, borderRadius: 48, left: SUN.x - 48, top: SUN.y - SKY.top - 48 }, ring2]} />
+        <Animated.View style={[styles.ring, { width: 64, height: 64, borderRadius: 32, left: SUN.x - 32, top: SUN.y - SKY.top - 32 }, ring1]} />
+        <View style={styles.sun} />
+      </View>
+      {/* the ridges, farthest first: the sun sets into the far one */}
+      <ObjectArt parts={FAR_ART} tone={FAR_TONE} line={0} />
+      <ObjectArt parts={TREE_ART} tone={TREE_TONE} line={0} />
+      <ObjectArt parts={MID_ART} tone={MID_TONE} line={0} />
+      <ObjectArt parts={NEAR_ART} tone={NEAR_TONE} line={0} />
+    </>
   );
 }
 
@@ -363,12 +443,17 @@ function SunTag({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => 
 
 function AppleTag({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
   const tag = useAnimatedStyle(() => ({ opacity: S.value.apple, transform: [{ rotate: '-4deg' }] }));
+  const string = useAnimatedStyle(() => ({ opacity: S.value.apple, transform: [{ rotate: `${STRING.deg}deg` }] }));
   if (!on(APPLE_ON)) return null;
+  // a price tag tied to the apple's stalk on a string, so it reads as the apple's
   return (
-    <Animated.View style={[styles.appleTag, tag]} pointerEvents="none">
-      <Text style={styles.tagHead} numberOfLines={1}>THE APPLE</Text>
-      <Text style={styles.tagText} numberOfLines={1}>TO EAT</Text>
-    </Animated.View>
+    <>
+      <Animated.View style={[styles.appleString, string]} pointerEvents="none" />
+      <Animated.View style={[styles.appleTag, tag]} pointerEvents="none">
+        <Text style={styles.tagHead} numberOfLines={1}>THE APPLE</Text>
+        <Text style={styles.tagText} numberOfLines={1}>TO EAT</Text>
+      </Animated.View>
+    </>
   );
 }
 
@@ -410,8 +495,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SUN.x - SUN.r, top: SUN.y - SKY.top - SUN.r, width: SUN.r * 2, height: SUN.r * 2,
     borderRadius: SUN.r, backgroundColor: EMBER,
   },
-  hill: { position: 'absolute', borderRadius: 200, backgroundColor: DUSK.SHADE },
-  hillNear: { backgroundColor: WOOD.SHADE },
+  haze: { position: 'absolute', left: 0, right: 0, bottom: 0 },
 
   board: {
     position: 'absolute', left: BOARD.x, top: BOARD.y, width: BOARD.w, height: BOARD.h,
@@ -473,6 +557,10 @@ const styles = StyleSheet.create({
   },
   sunLeader: {
     position: 'absolute', left: SUN.x - 290 - 0.75, top: 44, width: 1.5, height: SUN.y - SUN.r - TAG_Y - 44, backgroundColor: INK,
+  },
+  appleString: {
+    position: 'absolute', left: STRING.x0, top: STRING.y0 - 0.6, width: STRING.len, height: 1.2, borderRadius: 0.6,
+    backgroundColor: INK, transformOrigin: '0% 50%',
   },
   appleTag: {
     position: 'absolute', left: 300, top: 474, width: 64, paddingVertical: 2,

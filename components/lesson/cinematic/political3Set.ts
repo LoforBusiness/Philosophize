@@ -1,4 +1,5 @@
 import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
+import { oPoly, type PolyPart } from './setShapes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE SET OF political-political-3 — A COUNCIL ROOM. Redrawn 2026-09-26, the third
@@ -14,7 +15,7 @@ import { oEll, oRect, oBar, oTri, type ObjPart } from './objects';
 //   the box       a glass ballot box on a stand at the right.
 //
 // He works from four spots, each measured against his reach (shoulder 49 above the
-// floor, a hand's reach about 25): 132 at the plinth, 160 at the charter, 232 under
+// floor, a hand's reach about 25): 144 at the plinth (far enough that the crown on its cushion clears his face), 160 at the charter, 232 under
 // the frame and 310 at the ballot box. Nothing stands on the floor between them.
 //
 // The shadow, the crown, the keys, the signature, the slips and the plates are the
@@ -44,7 +45,7 @@ export const DECL = { x0: 250, x1: 296, top: 336, bottom: 386 };
 export const BOX = { x0: 322, x1: 358, top: 440, bottom: 470 };
 export const SLOT = { x: 334, y: 440 };
 /** Where he stands. */
-export const AT_PLINTH = 132;
+export const AT_PLINTH = 144;
 export const AT_CHARTER = 160;
 export const AT_DECL = 232;
 export const AT_BOX = 310;
@@ -102,5 +103,94 @@ export function ballotStand(): ObjPart[] {
     oRect('mass', cx, bottom + 1.5, x1 - x0 + 4, 4, 0, 1),
     oRect('mass', cx, top - 1, x1 - x0 + 4, 4, 0, 1),
     oTri('mass', cx, top - 6, 12, 6, 'up'),
+  ];
+}
+
+// ── the crown, and the gunman's shadow ───────────────────────────────────────
+//
+// THE CROWN. REFERENCE: the Imperial State Crown, photographed. It is not a ring of
+// spikes: from the bottom up it is an ERMINE band (white, spotted black), a jewelled
+// CIRCLET, crosses and fleurs standing on the circlet, a velvet CAP rising inside
+// them, two ARCHES crossing over the cap, and an ORB with a CROSS where they meet.
+// Each piece is drawn about the crown's own origin — the middle of the circlet — so
+// it can sit on the cushion or ride between his hands.
+
+/**
+ * The crown's size on the stage. Drawn at 1 it is 28 wide and 32 tall — the size of
+ * his chest, which is a prop, not a crown. A real crown is about a seventh of a man's
+ * height, so it is struck at a little over half that.
+ */
+export const CROWN_K = 0.56;
+const kp = (parts: ObjPart[], k: number): ObjPart[] => parts.map((p) => {
+  if (p.k === 'bar') return { ...p, x1: p.x1 * k, y1: p.y1 * k, x2: p.x2 * k, y2: p.y2 * k, t: p.t * k };
+  if (p.k === 'rect') return { ...p, x: p.x * k, y: p.y * k, w: p.w * k, h: p.h * k, rad: p.rad * k };
+  return { ...p, x: p.x * k, y: p.y * k, w: p.w * k, h: p.h * k };
+});
+
+/** The velvet cap inside the arches: a dome, drawn in a dark tone behind the metal. */
+export function crownCap(): ObjPart[] {
+  return kp([oEll('face', 0, -7, 20, 17)], CROWN_K);
+}
+/** The metal of the crown: circlet, crosses and fleurs, arches, orb and cross. */
+export function crownMetal(): ObjPart[] {
+  return kp([
+    // the arches, from each end of the circlet up to the orb, and the front one
+    oBar('mass', -10.5, -2, -8, -11, 2.2),
+    oBar('mass', -8, -11, -1, -15.5, 2.2),
+    oBar('mass', 10.5, -2, 8, -11, 2.2),
+    oBar('mass', 8, -11, 1, -15.5, 2.2),
+    oBar('mass', 0, -3, 0, -15, 2.2),
+    // a cross pattée at the front and a fleur each side, standing on the circlet
+    oRect('mass', 0, -5.5, 2.4, 6, 0, 0.6),
+    oRect('mass', 0, -5.5, 6, 2.4, 0, 0.6),
+    oTri('mass', -7, -4.8, 4, 5, 'up'),
+    oTri('mass', 7, -4.8, 4, 5, 'up'),
+    // the circlet
+    oRect('mass', 0, 0, 25, 5.5, 0, 1.5),
+    // the orb and its cross
+    oEll('mass', 0, -17.5, 5.5, 5.5),
+    oBar('mass', 0, -20, 0, -24.5, 1.6),
+    oBar('mass', -2.2, -22.6, 2.2, -22.6, 1.6),
+    // jewels in the circlet
+    oEll('dark', -7.5, 0, 3, 3),
+    oEll('dark', 0, 0, 4, 3.4),
+    oEll('dark', 7.5, 0, 3, 3),
+    oEll('lit', -0.6, -0.6, 1.2, 1),
+  ], CROWN_K);
+}
+/** The ermine band under the circlet: white fur, spotted black. */
+export function crownErmine(): ObjPart[] {
+  return kp([
+    oRect('line', 0, 4.6, 28.4, 6.4, 0, 3.2),
+    oRect('lit', 0, 4.6, 26.2, 4.2, 0, 2.1),
+    oEll('line', -8.5, 4.6, 1.3, 1.8),
+    oEll('line', -2.5, 4.9, 1.3, 1.8),
+    oEll('line', 3.5, 4.4, 1.3, 1.8),
+    oEll('line', 9.5, 4.8, 1.3, 1.8),
+  ], CROWN_K);
+}
+
+/**
+ * THE GUNMAN'S SHADOW, thrown onto the wall through the doorway. REFERENCE: film-noir
+ * stills of a man's shadow on a wall — what makes it read as a threat, not a figure,
+ * is the SILHOUETTE: a brimmed hat, a long coat flaring at the knee, legs set apart,
+ * and one arm held out level with the pistol at the end of it. Solid, one flat tone;
+ * the scene lays it on the wall at a fraction of ink.
+ */
+export function gunmanShadow(): (ObjPart | PolyPart)[] {
+  const x = SHADOW.x;
+  return [
+    oPoly('line', [x - 6, 403, x - 5, 395, x - 1, 393, x + 1, 395.5, x + 3, 393, x + 7, 395, x + 8, 403]),
+    oRect('line', x + 1, 404, 27, 3.2, 0, 1.6),
+    oEll('line', x + 1, 412, 14, 15),
+    oPoly('line', [x - 7, 419, x + 8, 419, x + 9, 432, x + 12, 462, x - 12, 462, x - 9, 432]),
+    oBar('line', x - 4, 460, x - 12, 492, 7),
+    oBar('line', x + 4, 460, x + 11, 492, 7),
+    oBar('line', x - 7, 486, x - 17, 492, 5),
+    oBar('line', x + 9, 488, x + 18, 492, 5),
+    oBar('line', x + 3, 425, x + 27, 424, 6),
+    oRect('line', x + 32, 422, 12, 5, 0, 1),
+    oBar('line', x + 28, 424, x + 26, 431, 4.5),
+    oBar('line', x - 6, 425, x - 10, 452, 5),
   ];
 }

@@ -66,68 +66,68 @@ export interface LessonThoughts {
 
 export const THOUGHTS: Record<string, LessonThoughts> = {
   'aesthetics-aesthetics-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, [250, 387, 3, 250], null, [250, 387, 3, 250], null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, 'Taste, on trial for 300 years.', 'Why does it please?', 'Hungry. Wanting. Not this.', 'The sunset isn’t a snack.', 'Admiring cake without eating it.', 'Beauty’s in my head. Hm.', 'Critics agreeing. Convenient.', 'Critics, vouched by critics.', null, null, 'I never just say I like it.', 'I review sunsets like restaurants.', 'My feeling, your verdict.', null, null],
   },
   'epistemology-knowledge-1': {
     at: [null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, 'Mum asked this for free.', 'Condition one: be true. Easy.', 'And I need a reason. Fine.', 'Three boxes. Tick, tick, tick.', 'Lucky guesses: my exams.', 'Reasons are the rope.', 'I’ve fallen for worse.', 'Right, but by luck. Harsh.', null, null, null, null],
   },
   'metaphysics-being-1': {
-    at: [null, null, null, null, null, null, null, null, null, [320, 385, 2, 326], [321, 387, 2, 327], null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, [322, 387, 1, 328], null, null, null, [323, 387, 3, 335], null, [320, 385, 2, 332], [322, 387, 2, 334], null],
+    say: [null, 'The universe owes us a reason.', 'Even my socks have a reason.', 'Nothing is the lazy option.', null, 'I can’t picture nothing. I tried.', 'Still picturing a dark room.', 'Who knocked the first one over?', 'I’d like to speak to the manager.', null, null, null],
   },
   'ethics-ethics-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, [322, 387, 3, 364], null, null, null, null, null, [322, 383, 3, 364], null, null, [322, 383, 3, 364], null, null, null],
+    say: [null, 'Grading my own homework.', 'My dog feels bad too, sometimes.', 'Mirror, mirror. Judge me gently.', 'Weighing my sins. Light day.', 'My conscience blows the whistle.', 'Three men, one conscience.', 'Not rules. A good life.', 'Reason: our party trick.', 'A lifetime? I have a weekend.', null, null, null, 'Happiness you do, not feel.', 'Flourishing? I’m a plant?', null],
   },
   'political-political-1': {
     at: [null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, null, null, null, null, 'One big boss. For safety.', null, null, 'I don’t remember signing.', 'Locke would rebel.', null, null],
   },
   'epistemology-knowledge-3': {
-    at: [null, [318, 401, 3, 312], null, null, null, null, null, [314, 401, 3, 290], null, null, null, null],
-    say: [null, 'Certain isn’t the same as true.', null, 'A demon. Really?', 'Doubt at maximum.', null, 'So the demon is a tool.', 'One refuses to crack.', 'Doubt that rebuilds.', null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, 'I was certain once. Tuesday.', 'The world didn’t ask how I feel.', 'A demon. Really?', 'Doubting my own elbow now.', null, 'A demon, used as a tool. Handy.', 'One thing won’t crack. Me.', 'Demolition first, then a house.', null, null, null],
   },
   'ethics-ethics-2': {
-    at: [null, [284, 397, 2, 284], null, null, [284, 398, 3, 284], null, null, null, null, null, null, null, null, null, null],
-    say: [null, 'Three verdicts. One wallet.', null, 'Not three religions.', 'I use all three.', null, 'Everyone counts the same.', null, 'Would I want that rule?', 'It defeats itself.', null, 'Who am I becoming, then.', null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    say: [null, 'Three verdicts. One wallet.', 'Three theories, zero agreement.', null, 'I use all three. Badly.', 'Results matter. Who knew.', 'Happiness, counted up.', null, 'Would I want that rule?', 'A rule that eats itself.', 'Who am I becoming, then.', 'Practice makes honest.', null, null, null],
   },
   'metaphysics-being-2': {
-    at: [null, null, null, [324, 398, 3, 330], null, null, [236, 392, 3, 236], null, null, null, null, null, null],
-    say: [null, null, 'Always a reason.', 'Why anything at all?', 'Nothing was simpler.', null, 'Was nothing ever on offer?', null, 'There’s nothing to step on.', 'You can’t point at it.', null, null, null],
+    at: [null, null, null, [324, 398, 3, 330], null, null, null, null, [238, 398, 3, 238], null, [226, 399, 3, 196], null, null],
+    say: [null, 'The universe was optional.', 'Everything needs a receipt.', 'The universe, asked for ID.', 'Nothing: cheaper, simpler, empty.', 'Parmenides, first. Typical.', 'Don’t take the road to nowhere.', null, 'Nothing to step on. Literally.', 'Pointing at nothing. Rude.', null, null, null],
   },
   'aesthetics-aesthetics-2': {
-    at: [null, [118, 398, 3, 166], null, null, null, null, null, null, [76, 396, 3, 76], null],
-    say: [null, 'Art as an infection.', 'I catch the feeling.', 'The room was frightened.', null, null, 'Packed into lines.', 'Nothing else does that.', null, null],
+    at: [null, [118, 398, 3, 166], null, null, null, null, null, null, null, null],
+    say: [null, 'Feelings, not skill. Phew.', 'Art is contagious. Wash hands.', 'Cried wolf. It worked.', null, null, 'A whole mood, flat-packed.', 'He’s gone. The feeling isn’t.', null, null],
   },
   'logic-arguments-4': {
     at: [null, null, null, null, null, null, null, null, null, null, null, null],
     say: [null, 'Two rulers. Don’t swap them.', 'Valid plus true. Unbreakable.', 'Strong isn’t the same as sure.', null, 'The shape does the lifting.', 'I know a Greek who hates olives.', 'Probably is not a promise.', null, null, null, null],
   },
   'political-political-2': {
-    at: [null, [96, 407, 3, 96], null, null, null, null, null, null, null, null, null, null],
-    say: [null, 'Bodies, or minds.', null, 'Entitled to be obeyed.', 'One ship, or a fleet.', 'Only legitimacy splits them.', null, 'Custom and bloodline.', 'Or rules and offices.', null, null, null],
+    at: [null, null, [96, 406, 3, 96], null, null, null, null, null, null, null, null, null],
+    say: [null, 'Force moves bodies only.', 'Power: my way, anyway.', 'I obey the lollipop lady. Why?', 'Fleet-sized theft is an empire.', 'Robbers with paperwork.', null, 'Born a king. Nice work.', 'The chair outlives everyone.', null, null, null],
   },
   'logic-arguments-3': {
     at: [null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, 'Shape, not truth.', null, null, 'But toasters aren’t gold.', 'Ah. Valid, not sound.', null, null, 'So go at the premises.', null, null],
+    say: [null, 'Two exams. I hate exams.', 'Sound: valid, and not lying.', 'Gold toasters. Bold start.', 'It follows. Sadly.', 'Valid. Not a time machine.', null, null, 'Hate the ending? Fix the start.', null, null],
   },
   'ethics-ethics-4': {
     at: [null, null, null, null, null, null, null, null, null, [206, 474, 2, 236], null, null, null, null, null],
     say: [null, 'So there is a question.', 'They differ. Noted.', 'Right because they said so?', 'That’s a leap, not a step.', 'Approval votes on morality?', null, null, 'Flat-earthers didn’t flatten it.', 'Some rules travel everywhere.', 'Favours: universal.', 'Different houses, one floor.', null, null, null],
   },
   'ethics-ethics-3': {
-    at: [null, null, null, null, null, null, null, [226, 406, 2, 226], null, null, [318, 406, 3, 318], null, [318, 406, 3, 318], [318, 406, 3, 318], null],
-    say: [null, 'Same goal. They split.', null, 'One instead of five.', null, 'Five outweigh one.', null, 'Not a sum, then.', 'Duty, whatever follows.', 'Who do I become?', 'What would a wise one do?', null, null, null, null],
+    at: [null, [76, 406, 3, 52], null, null, null, null, null, [226, 408, 2, 226], null, null, null, null, [292, 406, 3, 292], [292, 406, 3, 292], null],
+    say: [null, 'Same goal. They split.', null, 'Five against one.', 'One question, three ways.', 'Five outweigh one.', null, 'Not a sum, then.', 'Duty, whatever follows.', 'Who do I become?', 'What would a wise one do?', null, null, null, null],
   },
   'epistemology-knowledge-4': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, [202, 397, 2, 250], null],
-    say: [null, 'Blank paper.', null, 'Burned, then I know hot.', null, 'Never had to be shown.', 'Before any burn.', 'The boy already knew.', 'Learning is remembering?', null, 'Both half right.', 'The mind has shapes.', null, null],
+    at: [null, null, null, null, null, null, null, null, [312, 397, 3, 270], null, null, null, null, null],
+    say: [null, 'Blank paper. Too clean.', 'My slate has coffee stains.', 'Red from red things. Fair.', null, 'Armchair science. My field.', 'Maths without looking. Nice.', 'The boy knew it all along?', 'I remembered a square?', null, 'Everyone gets a medal.', 'My mind came with furniture.', null, null],
   },
   'metaphysics-being-3': {
-    at: [null, null, [196, 408, 3, 196], null, null, null, null, [196, 407, 2, 196], null, null, [196, 408, 2, 196], null],
-    say: [null, 'You can’t step in twice.', 'So he split the world.', 'Becoming never holds.', 'Shadows for the real thing.', 'The wall is where we live.', null, 'Never quite equal.', 'The copy is only good.', null, null, null],
+    at: [null, [196, 396, 3, 196], null, null, null, null, null, [196, 406, 2, 196], null, null, [196, 406, 2, 196], null],
+    say: [null, 'Wet feet, both times.', 'The real stuff never visits.', 'Opinions, all the way down.', 'I’d have stayed in the cave.', 'The sun is doing a lot of work here.', null, 'My sticks are never quite equal.', 'Demoted: from apple expert.', null, null, null],
   },
   'epistemology-knowledge-5': {
     at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null],
@@ -138,16 +138,16 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     say: [null, 'I tried. Now it’s a thing.', 'Nothing keeps turning up.', 'One road is a trick question.', 'I can’t even say it.', null, 'No change. Like my Mondays.', 'My legs have been lying to me.', null, null, null],
   },
   'aesthetics-aesthetics-3': {
-    at: [null, null, null, null, null, null, null, null, null, null, [274, 398, 1, 274], null],
-    say: [null, 'Not one, anywhere.', 'It hurts and I go anyway.', 'He never says what.', 'Nobody looks away.', 'Drawn well, I can look.', null, 'It never argues.', 'Dangerous, then.', null, null, null],
+    at: [null, null, null, null, null, null, null, null, null, null, [291, 400, 2, 273], null],
+    say: [null, 'We pay to be sad. Odd.', 'Cry, then feel great. Weird deal.', 'Nobody agrees what katharsis is.', 'Worst family reunion ever.', 'Learning hurts nicely.', null, 'Sad for no reason. Music.', 'Plato was scared of a flute.', null, null, null],
   },
   'aesthetics-aesthetics-4': {
     at: [null, null, null, [232, 401, 3, 232], null, null, null, null, [250, 401, 3, 250], null, [250, 401, 3, 250], [250, 401, 3, 250], null],
     say: [null, 'Is my laundry pile art, then?', 'So a photocopier is a master.', 'Art that hands you a feeling.', 'A fake name. Bold.', 'Rejected by the art club.', 'I choose this sandwich. Art.', null, 'Art, because art people say so.', 'My definition was ‘nice’. Hm.', null, null, null],
   },
   'political-political-3': {
-    at: [null, null, [144, 394, 1, 132], null, null, null, null, null, null, null, null, null],
-    say: [null, 'Compelled, or owed.', 'No rules at all.', 'So they covenant.', 'Only while it guards them.', null, null, 'What everyone truly shares.', 'Rules I gave myself.', null, null, null],
+    at: [null, null, [142, 396, 2, 142], null, null, null, null, null, null, null, null, null],
+    say: [null, 'Can versus may. Grammar wins.', 'No state means war. Apparently.', 'Group project. Everyone signs.', 'Break the trust, lose the job.', 'Locke in the fine print.', null, 'Not what I want. Rude.', 'Rules I made. Still rules.', null, null, null],
   },
   'logic-arguments-6': {
     at: [null, null, null, null, [76, 372, 3, 58], null, [76, 372, 3, 58], null, null],
@@ -520,12 +520,12 @@ export const THOUGHTS: Record<string, LessonThoughts> = {
     vis: [6, 118, 368, 3, 118],
   },
   'logic-arguments-2': {
-    at: [null, null, null, null, null, null, null, [324, 398, 3, 300], null, null, [294, 398, 3, 300], null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, [324, 398, 3, 330], null, null, [324, 398, 3, 330], null, [324, 398, 3, 330], null, null, null, null],
+    say: [null, 'Arguments come flat-packed.', 'Two stones doing all the work.', null, 'Reasons: the unpaid interns.', 'Nobody thanks the bottom stone.', '‘Therefore’. Drumroll.', null, 'Poor Socrates. Every textbook.', 'True premises, no way out.', null, 'Pull one. What could go wrong?', null, null],
   },
   'logic-arguments-1': {
-    at: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-    say: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    at: [null, null, null, null, null, null, [209, 390, 3, 209], null, null, null, null, null, null, null, null, null, null, [206, 388, 3, 206], null, null, null, null, null, null, null],
+    say: [null, 'Volume settles nothing.', 'No isn’t a reason.', 'Three rounds, zero reasons.', 'Louder isn’t righter.', 'Nothing here to settle it.', 'Argument: now with structure.', null, null, 'Aristotle, first to write it down.', 'Accept those, and I’m stuck.', null, 'Shouting doesn’t make it true.', null, 'Winning or right. Pick one.', 'Thirty-eight tricks. Noted.', 'Questions, not punches.', 'Horses. Brilliant.', 'Round two. With reasons.', 'Something I can check!', 'Hit the reasons, not him.', 'Same people, better fight.', 'Read their side first. Ugh. Fine.', null, null],
   },
   'political-political-35': {
     at: [null, null, [76, 382, 2, 52], null, [76, 382, 2, 52], null, [76, 382, 2, 52], null, [76, 383, 2, 52], null, null, null],

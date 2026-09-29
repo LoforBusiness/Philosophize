@@ -5,9 +5,10 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './logic2Script';
 import {
-  ease01, lerp, mixStance, narratorHold, narratorLive, stand, type Bundle, type Stance,
+  WALK, ease01, lerp, mixStance, narratorHold, narratorLive, stand, strideStance, type Bundle, type Stance,
 } from './rig';
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, lookPose,
@@ -20,7 +21,10 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import { crane, spares, CRANE, STONE, P1, P2, KEY, BASE_TOP, KEY_TOP } from './logic2Set';
+import { attendAt } from './attend';
+import {
+  crane, spares, ashlar, pendant, CRANE, STONE, P1, P2, KEY, BASE_TOP, KEY_TOP, PENDANT,
+} from './logic2Set';
 import { EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -30,8 +34,9 @@ import { EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 // line (pace.ts, line lengths from the narration manifest): it fetches, lowers,
 // stamps and pulls, and the mason guides it in.
 //
-//   b0–2  the crane fetches the stones from off the yard and lowers them: the first
-//         premise, the second, then the conclusion across both; he tries the top one.
+//   b0–2  the crane fetches the stones from the stockpile off the LEFT of the yard —
+//         in front of him, since he faces the work from beside the mast — and lowers
+//         them: the first premise, the second, then the conclusion across both.
 //   b3    the form is traced round the three in a dashed line.
 //   b4    PREMISE plates on the base; the crane's stamp prints BECAUSE and SINCE.
 //   b5    the CONCLUSION plate; support arrows grow from the base into the top.
@@ -40,19 +45,27 @@ import { EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 //   b8    the stamp prints Socrates' syllogism into the three stones.
 //   b9    ∴ is struck on the top stone; both premises' lamps light and the current
 //         runs up the arrows and lights the conclusion.
-//   b10   Q2: the crane's control box.
-//   b11   the premises slide out from under, and the conclusion falls.
-//   b12   the crane builds it again.
+//   b10   Q2: the crane's pendant control box, hanging from the jib.
+//   b11   the hook drags the first premise out to the left and the conclusion tips
+//         off it onto its end; it drags the second out to the right, toward him — he
+//         puts a hand up and stops it — and the conclusion slides down flat.
+//   b12   the crane lifts the conclusion clear; he pushes the second premise home
+//         (walking the way he faces) and the crane parks the conclusion on it; the
+//         hook fetches the first premise back in by its lug; then the conclusion is
+//         taken across and set on the pair. Nothing moves without a hand or a hook on it.
 //
 // COMPOSITION, in stage units: the jib across the top at 310, the mast at x 366;
-// the premises 56–164 and 168–276 at 466–500, the conclusion 108–224 at 430–464;
-// the mason at x 300. Band [288, 514].
+// the premises 56–164 and 168–276 at 466–500, the conclusion 108–224 at 437–471
+// (set back on the premises' top beds); the pendant 214–284 × 326–404; the mason at
+// x 330, facing left, so every lift, stamp and fall is in front of him. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('logic');
 const { RULE, STONE: STONE_T, SHADE } = TONE;
 const LIP = lipOf(TONE);
 const IRON = stageToneOf(OLIVE);
+/** Dressed limestone: the stones, and the spares by the mast. */
+const ROCK = stageToneOf(SAGE);
 const TR = 0.85;
 
 /** Seconds each beat's line is voiced for — lib/narration/manifest.ts, logic-arguments-2. */
@@ -60,15 +73,65 @@ const LINES = [5.1, 7.5, 6.7, 5.0, 8.0, 9.0, 4.8, 0, 5.1, 7.5, 0, 6.1, 0, 0];
 
 /** The mason's scale: a lone figure at K_FIG fills 46% of this band; this is 37%. */
 const K_M = K_FIG * 0.82;
-/** Where the trolley parks, and where it fetches from (off the yard). */
+/**
+ * Where the trolley parks, and where it fetches from: the stockpile off the LEFT edge,
+ * so a stone is out of frame when it is hooked and travels in toward him. It used to
+ * fetch from x 440, off the right, behind a mason who faces left all lesson.
+ */
 const PARK_T = 300;
-const FETCH_T = 440;
-/** Where the hook grips each stone, from its centre: clear of the plates and tags on it. */
-const GRIP_P1 = 26;
-const GRIP_KEY = 48;
-/** How far the premises slide out when they are pulled from under the conclusion. */
-const OUT_P1 = 54;
-const OUT_P2 = 300;
+const FETCH_T = -70;
+/**
+ * WHERE THE HOOK TAKES EACH STONE, from its centre, and the rule is D31: the hook,
+ * its block and its cable never cross a word. The tops are crowded with tags — BECAUSE
+ * over the first premise's left, SINCE over the second's right, THEREFORE · SO · THUS
+ * along the conclusion from its left end rightward — so the first premise is taken by
+ * a lug on its LEFT END (the cable hangs clear outside it), the second on its top just
+ * left of SINCE, and the conclusion by a lug at its LEFT end, left of where its tags
+ * begin. It gripped at 48 right of centre, and the cable ran down through THUS.
+ */
+const GRIP_P1 = -60;
+const GRIP_P2 = 4;
+const GRIP_KEY = -54;
+/** How far along the conclusion its row of tags begins, from its left end: clear of the lug. */
+const MARKS_IN = 14;
+/** The hook's height when it holds a premise by its end lug (the hook's J mid-height on the end). */
+const LUG_H = BASE_TOP - 4;
+/** The conclusion hangs off its left lug, so it must be fetched from further off: it reaches 112 to the hook's right. */
+const FETCH_KEY = FETCH_T - 80;
+/**
+ * THE REBUILD, on the quote beat, which is unvoiced: its own length, so nothing moves
+ * by itself. The hook lifts the conclusion and parks it on the second premise while
+ * he pushes that one home; fetches the first premise back by its lug; then takes the
+ * conclusion across onto the pair.
+ */
+const RE_L = 7;
+/**
+ * Where the conclusion waits on the second premise: its middle over that stone, so it
+ * balances, but toward the stone's left — centred on the stone, its row of tags ran
+ * out under the mason's head, and its end covered SINCE.
+ */
+const KEY_PARK = P2.cx - 48;
+/**
+ * Where the premises are dragged when they are pulled from under the conclusion: the
+ * first to the left edge (its words stay on the stage, which every shot needs), the second toward him, stopping 20 short
+ * of his body. Between them the conclusion lies flat at KEY_FLAT, clear of both.
+ */
+const OUT_P1 = 53;
+const OUT_P2 = 280;
+const KEY_FLAT = 166;
+/**
+ * THE CONCLUSION TIPS BEFORE IT FALLS. It rests across the joint of the two premises,
+ * so once the first is dragged away it pivots on the second's front arris (168, 471)
+ * until its free end meets the ground — sin a = 29 / 60, 29 being that corner's
+ * height and 60 the key's own length from its left end to it — and then, as the
+ * second is dragged out, slides
+ * down flat with that end on the ground. Radians; negative is anticlockwise.
+ */
+const PIVOT_X = P2.cx - STONE.baseW / 2;
+const PIVOT_Y = BASE_TOP + STONE.d;
+const KEY_PIVOT = PIVOT_X - (KEY.cx - STONE.keyW / 2);
+const TIP = -Math.asin((GROUND - PIVOT_Y) / KEY_PIVOT);
+const TIP_FOOT = PIVOT_X - KEY_PIVOT * Math.cos(TIP);
 /** The hook's height when it carries a load across, and when it waits. */
 const CARRY_H = 372;
 const REST_H = 360;
@@ -105,8 +168,8 @@ const Q1 = [
   { id: 'therefore', label: 'THEREFORE', x: 176, correct: true },
 ];
 const Q2 = [
-  { id: 'reasons', l1: 'STILL ITS', l2: 'REASONS', y: 380, correct: false },
-  { id: 'nothing', l1: 'NOTHING', l2: 'AT ALL', y: 416, correct: true },
+  { id: 'reasons', l1: 'STILL ITS', l2: 'REASONS', y: PENDANT.top + 6, correct: false },
+  { id: 'nothing', l1: 'NOTHING', l2: 'AT ALL', y: PENDANT.top + 42, correct: true },
 ];
 
 function hHold(code: number, t: number): Stance {
@@ -131,14 +194,14 @@ function handOn(s: Stance, x: number, tx: number, ty: number, w: number): Stance
  * load to `tx`, down to `ty`, let go, and up again. Returns the trolley, the hook,
  * and how far the load is still hanging (1 carried, 0 set down).
  */
-function trip(b: number, L: number, a: number, z: number, tx: number, ty: number, from: number) {
+function trip(b: number, L: number, a: number, z: number, tx: number, ty: number, from: number, fetch: number) {
   'worklet';
   const span = z - a;
   const out = stage(b, L, a, a + span * 0.22);
   const back = stage(b, L, a + span * 0.22, a + span * 0.55);
   const down = stage(b, L, a + span * 0.55, a + span * 0.82);
   const up = stage(b, L, a + span * 0.86, z);
-  const T = back > 0 ? lerp(FETCH_T, tx, back) : lerp(from, FETCH_T, out);
+  const T = back > 0 ? lerp(fetch, tx, back) : lerp(from, fetch, out);
   const H = lerp(lerp(REST_H, CARRY_H, out), ty, down) + (REST_H - ty) * up;
   return { T, H, hang: up > 0 ? 0 : back > 0 || out >= 1 ? 1 : 0 };
 }
@@ -157,7 +220,7 @@ export default function Logic2Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(30);
+  const cv = useCarry(33);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -165,13 +228,15 @@ export default function Logic2Scene({
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
-    const L = lineOf(LINES, n);
+    const L = A_RE[n] ? RE_L : lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
       return stage(b, L, a, z);
     };
-    // he follows the second premise out as he pushes it
-    const x = carry(cv, 29, n, X[p], A_PULL[n] ? OUT_P2 + STONE.baseW / 2 + 22 : X[n], A_PULL[n] ? st(0.14, 0.4) : tr);
+    // He stands by the mast facing the work. On the rebuild he pushes the second
+    // premise home, walking the way he faces (C18); `walkU` is that walk.
+    const walkU = A_RE[n] ? st(0.1, 0.32) : 0;
+    const x = carry(cv, 29, n, X[p], X[n], A_RE[n] ? walkU : tr);
 
     // ── the crane ──────────────────────────────────────────────────────────
     let T = PARK_T;
@@ -180,21 +245,24 @@ export default function Logic2Scene({
     let load = 0;                                   // 1 P1 · 2 P2 · 3 KEY · 4 the stamp block · 5 the Q1 bar
     let hits = [0, 0, 0];
     if (A_L1[n]) {
-      const r = trip(b, L, 0, 0.95, P1.cx, BASE_TOP - 12, PARK_T);
+      const r = trip(b, L, 0, 0.95, P1.cx, BASE_TOP - 12, PARK_T, FETCH_T);
       T = r.T; H = r.H; hang = r.hang; load = 1;
     } else if (A_L2[n]) {
-      const r = trip(b, L, 0, 0.95, P2.cx, BASE_TOP - 12, P1.cx);
+      const r = trip(b, L, 0, 0.95, P2.cx, BASE_TOP - 12, P1.cx, FETCH_T);
       T = r.T; H = r.H; hang = r.hang; load = 2;
     } else if (A_LK[n]) {
-      const r = trip(b, L, 0, 0.8, KEY.cx + GRIP_KEY, KEY_TOP - 12, P2.cx);
+      const r = trip(b, L, 0, 0.8, KEY.cx + GRIP_KEY, KEY_TOP - 12, P2.cx, FETCH_KEY);
       T = r.T; H = r.H; hang = r.hang; load = 3;
     } else if (A_SB[n] || A_ST[n] || A_CARVE[n]) {
       // the stamp block, pressed where each word or claim goes
       load = 4;
+      // BECAUSE and SINCE where their tags are, and THEREFORE · SO · THUS left to
+      // right, so a press never comes down through a word already printed
+      const kl = KEY.cx - STONE.keyW / 2;
       const spots = A_SB[n]
-        ? [[P1.cx + 26, BASE_TOP - 14], [P2.cx + 26, BASE_TOP - 14]]
+        ? [[P1.cx - STONE.baseW / 2 + 29, BASE_TOP - 14], [P2.cx + STONE.baseW / 2 - 21, BASE_TOP - 14]]
         : A_ST[n]
-          ? [[KEY.cx - 34, KEY_TOP - 14], [KEY.cx + 6, KEY_TOP - 14], [KEY.cx + 38, KEY_TOP - 14]]
+          ? [[kl + MARKS_IN + 29, KEY_TOP - 14], [kl + MARKS_IN + 72, KEY_TOP - 14], [kl + MARKS_IN + 103, KEY_TOP - 14]]
           : [[P1.cx, BASE_TOP - 14], [P2.cx, BASE_TOP - 14], [KEY.cx, KEY_TOP - 14]];
       const a0 = A_SB[n] ? 0.25 : 0.06;
       const w = (0.96 - a0) / spots.length;
@@ -210,18 +278,35 @@ export default function Logic2Scene({
     } else if (STAMPS[n]) {
       load = 5; T = KEY.cx - 24; H = lerp(REST_H, 346, ease01(b / 1.2));
     } else if (A_PULL[n]) {
-      // the hook drags the first premise out; he pushes the second
+      // the hook drags the first premise out to the left, lets go, goes across and
+      // drags the second out to the right, then parks
       load = 1;
-      T = lerp(PARK_T, P1.cx + GRIP_P1, st(0, 0.1));
-      H = lerp(REST_H, BASE_TOP - 12, st(0.06, 0.14));
-      T = lerp(T, OUT_P1 + GRIP_P1, st(0.14, 0.4));
-      hang = st(0.06, 0.14);
+      T = lerp(PARK_T, P1.cx + GRIP_P1, st(0, 0.08));
+      T = lerp(T, OUT_P1 + GRIP_P1, st(0.13, 0.32));
+      T = lerp(T, P2.cx + GRIP_P2, st(0.4, 0.5));
+      T = lerp(T, OUT_P2 + GRIP_P2, st(0.57, 0.7));
+      T = lerp(T, PARK_T, st(0.86, 0.96));
+      H = REST_H + (LUG_H - REST_H) * st(0.05, 0.13) * (1 - st(0.33, 0.4)) + (BASE_TOP - 12 - REST_H) * st(0.5, 0.57) * (1 - st(0.76, 0.84));
     } else if (A_RE[n]) {
+      // lift the conclusion, park it on the second premise, fetch the first back by
+      // its lug, then take the conclusion across onto the pair
       load = 3;
-      T = lerp(PARK_T, KEY.cx + GRIP_KEY, st(0.3, 0.5));
-      H = lerp(REST_H, GROUND - STONE.h - 12, st(0.45, 0.58));
-      H = lerp(H, KEY_TOP - 12, st(0.62, 0.9));
-      hang = st(0.5, 0.58) * (1 - st(0.9, 0.98));
+      T = lerp(PARK_T, KEY_FLAT + GRIP_KEY, st(0, 0.07));
+      T = lerp(T, KEY_PARK + GRIP_KEY, st(0.2, 0.3));
+      T = lerp(T, OUT_P1 + GRIP_P1, st(0.44, 0.54));
+      T = lerp(T, P1.cx + GRIP_P1, st(0.58, 0.76));
+      T = lerp(T, KEY_PARK + GRIP_KEY, st(0.8, 0.86));
+      T = lerp(T, KEY.cx + GRIP_KEY, st(0.9, 0.95));
+      H = lerp(REST_H, GROUND - STONE.h - 12, st(0.05, 0.11));
+      H = lerp(H, CARRY_H, st(0.11, 0.2));
+      H = lerp(H, KEY_TOP - 12, st(0.3, 0.38));
+      H = lerp(H, REST_H, st(0.38, 0.44));
+      H = lerp(H, LUG_H, st(0.52, 0.58));
+      H = lerp(H, REST_H, st(0.76, 0.8));
+      H = lerp(H, KEY_TOP - 12, st(0.84, 0.88));
+      H = lerp(H, KEY_TOP - 18, st(0.88, 0.9));
+      H = lerp(H, KEY_TOP - 12, st(0.95, 0.98));
+      hang = st(0.105, 0.115) * (1 - st(0.375, 0.385)) + st(0.885, 0.895) * (1 - st(0.975, 0.985));
     }
     T = carry(cv, 0, n, PARK_T, T, tr);
     H = carry(cv, 1, n, REST_H, H, tr);
@@ -239,45 +324,85 @@ export default function Logic2Scene({
     if (load === 1 && hang > 0 && !A_PULL[n]) { p1x = hangX; p1y = hangTop; }
     if (load === 2 && hang > 0) { p2x = hangX; p2y = hangTop; }
     if (load === 3 && hang > 0 && A_LK[n]) { kx = hangX - GRIP_KEY; ky = hangTop; }
-    const slide = A_PULL[n] ? st(0.14, 0.4) : FALLEN[n] ? 1 : 0;
-    const fall = A_PULL[n] ? st(0.4, 0.52) : FALLEN[n] ? 1 : 0;
-    const back = A_RE[n] ? st(0, 0.36) : 0;
     if (A_PULL[n] || FALLEN[n] || A_RE[n]) {
-      const out = A_RE[n] ? 1 - back : slide;
-      p1x = lerp(P1.cx, OUT_P1, out);
-      p2x = lerp(P2.cx, OUT_P2, out);
-      const fell = A_RE[n] ? 1 - st(0.5, 0.58) : fall;
-      ky = lerp(KEY_TOP, GROUND - STONE.h, fell);
-      kTilt = 4 * fell;
-      if (A_RE[n] && hang > 0) { kx = hangX - GRIP_KEY; ky = hangTop; kTilt = 4 * (1 - st(0.5, 0.7)); }
-      if (A_RE[n] && b / L > 0.9) { ky = KEY_TOP; kTilt = 0; }
+      const out1 = A_PULL[n] ? st(0.13, 0.32) : A_RE[n] ? 1 - st(0.58, 0.76) : 1;
+      const out2 = A_PULL[n] ? st(0.57, 0.7) : A_RE[n] ? 1 - st(0.12, 0.32) : 1;
+      p1x = lerp(P1.cx, OUT_P1, out1);
+      p2x = lerp(P2.cx, OUT_P2, out2);
+      // the conclusion: resting → tipped on the second premise's corner → flat
+      const tip = A_PULL[n] ? st(0.24, 0.34) : 1;
+      const flat = A_PULL[n] ? st(0.58, 0.7) : 1;
+      let a = TIP * tip;
+      let cx = PIVOT_X + (-2 * Math.cos(a) + (STONE.h / 2) * Math.sin(a));
+      let cy = PIVOT_Y + (-2 * Math.sin(a) - (STONE.h / 2) * Math.cos(a));
+      if (flat > 0) {
+        a = TIP * (1 - flat);
+        const foot = lerp(TIP_FOOT, KEY_FLAT - STONE.keyW / 2, flat);
+        cx = foot + (STONE.keyW / 2) * Math.cos(a) + (STONE.h / 2) * Math.sin(a);
+        cy = GROUND + (STONE.keyW / 2) * Math.sin(a) - (STONE.h / 2) * Math.cos(a);
+      }
+      kx = cx;
+      ky = cy - STONE.h / 2;
+      kTilt = (a * 180) / Math.PI;
+      if (A_RE[n] && b / L >= 0.38) { kx = KEY_PARK; ky = KEY_TOP; kTilt = 0; }
+      if (A_RE[n] && hang > 0) { kx = hangX - GRIP_KEY; ky = hangTop; kTilt = 0; }
+      if (A_RE[n] && b / L >= 0.98) { kx = KEY.cx; ky = KEY_TOP; kTilt = 0; }
     }
 
     // ── the mason ──────────────────────────────────────────────────────────
     let s: Stance = hLive(G[n], t, b);
-    // signalling the crane down onto each stone
-    const signal = (A_L1[n] || A_L2[n] || A_LK[n]) ? bump(b, L, 0.5, 0.62, 0.84) : 0;
+    // signalling the crane down onto each stone, and the conclusion onto the base
+    const signal = (A_L1[n] || A_L2[n] ? bump(b, L, 0.5, 0.62, 0.84) : 0)
+      + (A_LK[n] ? bump(b, L, 0.46, 0.56, 0.74) : 0)
+      + (A_PULL[n] ? bump(b, L, 0.02, 0.08, 0.2) + bump(b, L, 0.42, 0.48, 0.56) : 0);
     s = mixStance(s, emoteAny(183, t), signal);
-    // trying the top stone once it is set
-    const tryIt = A_LK[n] ? bump(b, L, 0.84, 0.92, 1) : 0;
-    s = handOn(s, x, KEY.cx + STONE.keyW / 2 - 4, KEY_TOP + 10, tryIt);
     // tracing the form along with the line
-    const trace = A_TRACE[n] ? st(0.08, 0.86) : FORM[n] ? 1 : 0;
+    // (on the rebuild the outline waits until the conclusion is back on top)
+    const trace = A_TRACE[n] ? st(0.08, 0.86) : A_RE[n] ? st(0.97, 1) : FORM[n] ? 1 : 0;
     s = mixStance(s, emoteAny(183, t), A_TRACE[n] ? bump(b, L, 0.1, 0.3, 0.9) : 0);
     // pointing up at the conclusion while the support grows
     s = mixStance(s, emoteAny(183, t), A_SUP[n] ? bump(b, L, 0.3, 0.45, 0.8) : 0);
-    // he pushes the second premise out from under
-    const push = A_PULL[n] ? bump(b, L, 0.1, 0.16, 0.42) : 0;
-    s = handOn(s, x, p2x + STONE.baseW / 2 - 2, BASE_TOP + 14, push);
-    s = { ...s, tilt: s.tilt - 0.15 * push };
+    // the second premise is dragged toward him: his hand meets its top corner and stops it
+    const stop = A_PULL[n] ? bump(b, L, 0.6, 0.69, 0.92) : 0;
+    s = handOn(s, x, p2x + STONE.baseW / 2 - 3, BASE_TOP + 3, stop);
+    // the rebuild: he walks the second premise home, his hand on its end, leaning in
+    const push = A_RE[n] ? st(0.1, 0.13) * (1 - st(0.32, 0.4)) : 0;
+    if (A_RE[n] && walkU > 0 && walkU < 1) s = strideStance(X[p], X[n], s, walkU, WALK, 0);
+    s = handOn(s, x, p2x + STONE.baseW / 2 - 2, BASE_TOP + 12, push);
+    s = { ...s, tilt: s.tilt - 0.12 * push };
 
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(G[p], t)), s, tr));
+
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // A mason guiding a crane watches the load: the empty hook going out, the stone
+    // as it comes back and down, the stamp block as it presses, the outline as it is
+    // traced, the lamps and the current as they light, the stone he pushes and the
+    // one that falls — and nothing (weight 0, his pose's own head) once it has
+    // landed. The generated gaze aimed every beat at the middle of the picture,
+    // which on this set is the jib over his head. T and H are the carried trolley
+    // and hook; a hung stone's middle is H + 12 + half its height (the trip above),
+    // the stamp block's face about H + 14. Times are fractions of the voiced line L,
+    // the same fractions the crane's trips are staged on.
+    const LK = A_L1[n] ? [0.1 * L, T, H, 0.7, 0.21 * L, T, H + 12 + STONE.h / 2, 1, 0.8 * L, P1.cx, BASE_TOP + STONE.h / 2, 1, 0.97 * L, 0, 0, 0]
+      : A_L2[n] ? [0.1 * L, T, H, 0.7, 0.21 * L, T, H + 12 + STONE.h / 2, 1, 0.8 * L, P2.cx, BASE_TOP + STONE.h / 2, 1, 0.97 * L, 0, 0, 0]
+      : A_LK[n] ? [0.08 * L, T, H, 0.7, 0.18 * L, T - GRIP_KEY, H + 12 + STONE.h / 2, 1, 0.66 * L, KEY.cx, KEY_TOP + STONE.h / 2, 1, 0.9 * L, 0, 0, 0]
+      : A_TRACE[n] ? [0.08 * L, KEY.cx, GROUND, 0.9, 0.21 * L, P2.cx + STONE.baseW / 2, BASE_TOP + STONE.h / 2, 1, 0.47 * L, KEY.cx, KEY_TOP, 1, 0.73 * L, P1.cx - STONE.baseW / 2, BASE_TOP + STONE.h / 2, 1, 0.95 * L, 0, 0, 0]
+      : A_SB[n] ? [0.04 * L, P1.cx, BASE_TOP + 8, 0.9, 0.25 * L, T, H + 14, 1, 0.97 * L, 0, 0, 0]
+      : A_SUP[n] ? [0.04 * L, KEY.cx, KEY_TOP + 8, 1, 0.28 * L, KEY.cx + 34, BASE_TOP - 8, 1, 0.66 * L, KEY.cx, KEY_TOP + 8, 0.8, 0.95 * L, 0, 0, 0]
+      : A_ST[n] || A_CARVE[n] ? [0.04 * L, T, H + 14, 1, 0.97 * L, 0, 0, 0]
+      : STAMPS[n] ? [0.3, (Q1[0].x + Q1[1].x) / 2 + 32, H + 32, 0.7]
+      : A_TUG[n] ? [0.04 * L, KEY.cx + STONE.keyW / 2 - 22, KEY_TOP + 8, 1, 0.24 * L, P2.cx + STONE.baseW / 2 - 8, BASE_TOP + 8, 1, 0.45 * L, KEY.cx + 34, BASE_TOP - 8, 0.9, 0.68 * L, KEY.cx + STONE.keyW / 2 - 8, KEY_TOP + 8, 1, 0.95 * L, 0, 0, 0]
+      : CONTROLS[n] ? [0.3, KEY.cx, BASE_TOP + STONE.h / 2, 0.7]
+      : A_PULL[n] ? [0.02 * L, T, H, 0.8, 0.13 * L, p1x, BASE_TOP + STONE.h / 2, 1, 0.25 * L, kx, ky + STONE.h / 2, 1, 0.44 * L, T, H, 0.8, 0.56 * L, p2x + 36, BASE_TOP + 10, 1, 0.7 * L, kx, ky + STONE.h / 2, 1, 0.9 * L, 0, 0, 0]
+      : A_RE[n] ? [0.02 * L, kx, ky + STONE.h / 2, 0.7, 0.12 * L, p2x + 44, BASE_TOP + 10, 1, 0.26 * L, kx, ky + STONE.h / 2, 0.8, 0.5 * L, p1x, BASE_TOP + STONE.h / 2, 0.9, 0.86 * L, kx, ky + STONE.h / 2, 0.9, 0.99 * L, 0, 0, 0]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
 
     const hitsC = [
       carry(cv, 2, n, 0, hits[0], tr), carry(cv, 3, n, 0, hits[1], tr), carry(cv, 4, n, 0, hits[2], tr),
     ];
     return {
-      fig: lookPose(fig, x, GROUND, K_M, -1, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_M, -1, 1, carry(cv, 30, n, lk.x, lk.x, tr), carry(cv, 31, n, lk.y, lk.y, tr), carry(cv, 32, n, 0, lk.w, tr)),
       T, H, load,
       block: carry(cv, 24, n, 0, load === 4 ? 1 : 0, tr),
       stampsOn: carry(cv, 25, n, STAMPS[p], STAMPS[n], tr),
@@ -286,15 +411,17 @@ export default function Logic2Scene({
       p2x: carry(cv, 7, n, P2.cx, p2x, tr), p2y: carry(cv, 8, n, BASE_TOP, p2y, tr),
       kx: carry(cv, 9, n, KEY.cx, kx, tr), ky: carry(cv, 10, n, KEY_TOP, ky, tr), kTilt: carry(cv, 11, n, 0, kTilt, tr),
       s1: STONES[n] >= 1 ? 1 : 0,
-      s2: STONES[n] >= 2 ? (A_L2[n] ? st(0.2, 0.3) : 1) : 0,
-      s3: STONES[n] >= 3 ? (A_LK[n] ? st(0.16, 0.26) : 1) : 0,
-      s1in: A_L1[n] ? st(0.18, 0.28) : 1,
+      // A new stone is there from the moment the hook reaches the stockpile, which is
+      // off the left edge — so it is never seen to appear, it is seen to arrive.
+      s2: STONES[n] >= 2 ? (A_L2[n] ? (b / L >= 0.2 ? 1 : 0) : 1) : 0,
+      s3: STONES[n] >= 3 ? (A_LK[n] ? (b / L >= 0.17 ? 1 : 0) : 1) : 0,
+      s1in: A_L1[n] ? (b / L >= 0.2 ? 1 : 0) : 1,
       form: carry(cv, 12, n, FORM[p], FALLEN[n] ? 0 : trace, tr),
       prem: carry(cv, 13, n, PREM[p], A_SB[n] ? st(0, 0.22) : PREM[n], tr),
       because: carry(cv, 14, n, PREM[p], A_SB[n] ? hitsC[0] : PREM[n], tr),
       since: carry(cv, 15, n, PREM[p], A_SB[n] ? hitsC[1] : PREM[n], tr),
       conc: carry(cv, 16, n, CONC[p], A_SUP[n] ? st(0, 0.24) : CONC[n], tr),
-      arrows: carry(cv, 17, n, CONC[p] * (1 - FALLEN[p]), A_SUP[n] ? st(0.28, 0.66) : CONC[n] * (1 - FALLEN[n]), tr),
+      arrows: carry(cv, 17, n, CONC[p] * (1 - FALLEN[p]), A_SUP[n] ? st(0.28, 0.66) : A_RE[n] ? st(0.97, 1) : CONC[n] * (1 - FALLEN[n]), tr),
       marks: [
         carry(cv, 18, n, MARKS[p], A_ST[n] ? hitsC[0] : MARKS[n], tr),
         carry(cv, 19, n, MARKS[p], A_ST[n] ? hitsC[1] : MARKS[n], tr),
@@ -305,7 +432,8 @@ export default function Logic2Scene({
       lampP: carry(cv, 27, n, 0, A_TUG[n] ? st(0.25, 0.42) : SIGN[n] && !FALLEN[n] ? 1 : 0, tr),
       flow: carry(cv, 28, n, 0, A_TUG[n] ? st(0.45, 0.72) : SIGN[n] && !FALLEN[n] ? 1 : 0, tr),
       lampK: carry(cv, 22, n, SIGN[p] * (1 - FALLEN[p]), A_TUG[n] ? st(0.7, 0.8) : SIGN[n] * (1 - FALLEN[n]), tr),
-      dust: carry(cv, 23, n, 0, A_PULL[n] ? bump(b, L, 0.48, 0.55, 0.8) : 0, tr),
+      dust: carry(cv, 23, n, 0, A_PULL[n] ? bump(b, L, 0.33, 0.37, 0.5) + bump(b, L, 0.69, 0.73, 0.88) : 0, tr),
+      dustX: A_PULL[n] && b / L < 0.55 ? TIP_FOOT : KEY_FLAT,
       t,
     };
   });
@@ -318,15 +446,16 @@ export default function Logic2Scene({
       <View style={styles.fence} pointerEvents="none">
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => <View key={k} style={[styles.plank, { left: 4 + k * 40 }]} />)}
       </View>
+      <SetArt parts={SPARE_ART} tone={ROCK} />
       <ObjectArt parts={CRANE_ART} tone={IRON} />
-      <ObjectArt parts={SPARE_ART} tone={TONE} />
       <View style={styles.ground} pointerEvents="none" />
       <Form S={SCENE} on={on} />
       <Arrows S={SCENE} on={on} />
+      {/* the dust goes up BEHIND the stones: in front, its puffs covered the words carved on them (D31) */}
+      <Dust S={SCENE} on={on} />
       <Stone S={SCENE} k={0} on={on} />
       <Stone S={SCENE} k={1} on={on} />
       <Stone S={SCENE} k={2} on={on} />
-      <Dust S={SCENE} on={on} />
       <Stickman D={DF} k={K_M} />
       <Hook S={SCENE} />
       {on(STAMPS) ? <Stamps picked={picked} onPick={onPick} S={SCENE} live={STAMPS[i] === 1} /> : null}
@@ -337,6 +466,9 @@ export default function Logic2Scene({
 
 const CRANE_ART = crane();
 const SPARE_ART = spares();
+const BASE_ART = ashlar(STONE.baseW);
+const KEY_ART = ashlar(STONE.keyW);
+const PENDANT_ART = pendant();
 
 // ── the trolley, the cable, the hook and whatever it carries ────────────────
 
@@ -387,7 +519,7 @@ function Stone({ S, k, on }: { S: SharedValue<any>; k: 0 | 1 | 2; on: (a: readon
   const sign = useAnimatedStyle(() => ({ opacity: k === 2 ? S.value.sign : 0 }));
   return (
     <Animated.View style={[styles.stone, { width: w }, st]} pointerEvents="none">
-      <View style={styles.stoneFace} />
+      <SetArt parts={k === 2 ? KEY_ART : BASE_ART} tone={ROCK} />
       {on(k === 2 ? CONC : PREM) ? (
         <Animated.View style={[styles.rolePlate, plate]}>
           <Text style={styles.roleText} numberOfLines={1}>{k === 2 ? 'CONCLUSION' : 'PREMISE'}</Text>
@@ -479,7 +611,7 @@ function Arrows({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => 
 }
 
 function Dust({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => boolean }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.dust, transform: [{ scale: 0.5 + S.value.dust }] }));
+  const st = useAnimatedStyle(() => ({ opacity: S.value.dust, transform: [{ translateX: S.value.dustX }, { scale: 0.5 + S.value.dust }] }));
   if (!on(FALLEN)) return null;
   return (
     <Animated.View style={[styles.dust, st]} pointerEvents="none">
@@ -523,7 +655,7 @@ function Controls({ picked, onPick, S, live }: { picked: string | null; onPick: 
   const fade = useAnimatedStyle(() => ({ opacity: S.value.controlsOn }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
-      <View style={styles.box} pointerEvents="none" />
+      <SetArt parts={PENDANT_ART} tone={IRON} />
       {Q2.map((q) => (
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
@@ -569,19 +701,15 @@ const styles = StyleSheet.create({
   stampPad: { position: 'absolute', left: 3, right: 3, bottom: -3, height: 3, backgroundColor: INK, borderRadius: 1 },
 
   stone: { position: 'absolute', left: 0, top: 0, height: STONE.h },
-  stoneFace: {
-    position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderWidth: 1.5, borderColor: INK, borderRadius: 3, backgroundColor: PLATE_FACE,
-    boxShadow: LIP,
-  },
   rolePlate: {
-    position: 'absolute', left: 4, top: 3, height: 11, paddingHorizontal: 3, borderRadius: 2, backgroundColor: SHADE,
+    position: 'absolute', left: 5, top: STONE.d + 4, height: 11, paddingHorizontal: 3, borderRadius: 2, backgroundColor: SHADE,
     justifyContent: 'center',
   },
   roleText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
   lamp: {
-    position: 'absolute', right: 4, top: 4, width: 8, height: 8, borderRadius: 4, backgroundColor: SAGE,
+    position: 'absolute', right: STONE.d + 5, top: STONE.d + 5, width: 8, height: 8, borderRadius: 4, backgroundColor: SAGE,
     borderWidth: 1, borderColor: INK,
   },
   connective: {
@@ -592,16 +720,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
   therefore: {
-    position: 'absolute', right: 16, top: 0, fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER,
+    position: 'absolute', right: STONE.d + 16, top: STONE.d + 1, fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 15, color: EMBER,
     includeFontPadding: false,
   },
-  claim: { position: 'absolute', left: 0, right: 0, bottom: 4, alignItems: 'center' },
+  claim: { position: 'absolute', left: 0, right: STONE.d, bottom: 5, alignItems: 'center' },
   claimText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
   },
-  marks: { position: 'absolute', left: 0, right: 0, top: -15, flexDirection: 'row', justifyContent: 'center' },
+  marks: { position: 'absolute', left: MARKS_IN, top: -15, flexDirection: 'row' },
   markTag: {
-    marginHorizontal: 2, paddingHorizontal: 3, height: 12, borderWidth: 1.2, borderColor: EMBER, borderRadius: 2,
+    marginRight: 4, paddingHorizontal: 3, height: 12, borderWidth: 1.2, borderColor: EMBER, borderRadius: 2,
     justifyContent: 'center', backgroundColor: PLATE_FACE,
   },
 
@@ -615,7 +743,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 7, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: EMBER,
   },
   spark: { position: 'absolute', left: -1.5, bottom: 0, width: 6, height: 6, borderRadius: 3, backgroundColor: PAPER_LIT },
-  dust: { position: 'absolute', left: KEY.cx, top: GROUND - 8 },
+  dust: { position: 'absolute', left: 0, top: GROUND - 8 },
   dustPuff: { position: 'absolute', width: 16, height: 12, borderRadius: 8, backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: SHADE },
 
   bar: { position: 'absolute', left: Q1[0].x - 4, top: 356, width: 140, height: 4, borderRadius: 2, backgroundColor: INK },
@@ -632,11 +760,7 @@ const styles = StyleSheet.create({
   faceRight: { backgroundColor: INK },
   onInk: { color: PAPER_LIT },
 
-  box: {
-    position: 'absolute', left: 318, top: 372, width: 76, height: 80, borderRadius: 5, backgroundColor: IRON.SHADE,
-    borderWidth: 1.5, borderColor: INK,
-  },
-  button: { position: 'absolute', left: 324, width: 64, height: 30 },
+  button: { position: 'absolute', left: PENDANT.x0 + 4, width: PENDANT.w - 13, height: 30 },
   buttonFace: {
     flexGrow: 1, borderWidth: 1.5, borderColor: INK, borderRadius: 5, backgroundColor: PLATE_FACE, boxShadow: LIP,
     alignItems: 'center', justifyContent: 'center',

@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './aesthetics3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
@@ -21,11 +22,12 @@ import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage } from './pace';
+import { attendAt } from './attend';
 import {
-  theatre, cord, frame, paintedShip, urn, piano,
+  theatre, cord, frame, paintedShip, urn, pedestal, basin, piano,
   THEATRE, CORD, MASK, STAGE_LAMP, PAINTING, URN, TAP, BASIN, PIANO, KEYS, AT_CORD, AT_PIANO,
 } from './aesthetics3Set';
-import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
+import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT, mix } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // aesthetics-aesthetics-3, "Why Humans Love Music and Stories" — A MUSIC ROOM WITH A
@@ -48,9 +50,13 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //   b10  Q2: the order control lifts and lowers the fallboard as the answer moves (R7c).
 //
 // COMPOSITION, in stage units: the theatre 10–110 from 344, its cord at 114; the
-// painting 150–206 × 340–392; the urn at 236 with its tap at 253 and the basin under
-// it; the piano 300–392 from 420, its keys at 286–302. He stands at 130 by the cord
-// and at 274 between the tap and the keys. Band [288, 514].
+// painting 150–206 × 340–392; the amphora at 234 (400–454) on a marble console on the
+// wall, its spigot at 258 over a wall basin 247–269; the upright piano 286–372 from
+// 404 in three-quarter view, its keyboard 291–367 at 448. He stands at 130 by the cord
+// and at 276 between the spigot and the keys. Band [288, 514].
+//
+// The amphora and the piano were redrawn on 2026-09-28 against references (see
+// aesthetics3Set): the urn had read as a pink egg on a hook, the piano as a cabinet.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('aesthetics');
@@ -59,8 +65,28 @@ const LIP = lipOf(TONE);
 const WALL = stageToneOf(SAGE);
 const WOOD = stageToneOf(OLIVE);
 const CLOTH = stageToneOf(TEAL);
-const CLAY = stageToneOf(EMBER);
+/**
+ * Terracotta: the ember taken a third of the way to the olive, which is a fired-clay
+ * brown rather than the pink the ember's own light tone gives; its shade toward ink.
+ */
+const TERRA = mix(EMBER, OLIVE, 0.3);
+const CLAY = { ...stageToneOf(EMBER), STONE: TERRA, SHADE: mix(TERRA, INK, 0.28) };
+/** White marble: the console and the basin, shaded in the wall's own tone. */
+const MARBLE = { ...WALL, STONE: PAPER_LIT, SHADE: WALL.STONE };
 const TR = 0.85;
+/** Where the notes rise from: just over the keys, left of the middle. */
+const NOTE_X = KEYS.x0 + 16;
+const NOTE_Y = KEYS.y - 12;
+/** The keyboard: fourteen white keys, and the black keys in their twos and threes. */
+const WHITE_N = 14;
+const WHITE_W = (KEYS.x1 - KEYS.x0) / WHITE_N;
+const WHITE_GAPS = Array.from({ length: WHITE_N - 1 }, (_, k) => k);
+const BLACK_AT = WHITE_GAPS.filter((k) => [0, 1, 3, 4, 5].includes(k % 7));
+/** The fallboard, in front view: it comes down over the keys from the lip above them. */
+const FALL_TOP = KEYS.y - 5;
+const FALL_H = 10;
+/** Where the pity and fear show rising inside the amphora: a window on its belly. */
+const URN_WIN = { x: URN.x - 11, y: URN.top + 20, w: 22, h: 26 };
 
 /** Seconds each beat's line is voiced for — lib/narration/manifest.ts, aesthetics-aesthetics-3. */
 const LINES = [6.88, 6.16, 5.2, 6.8, 10.48, 5.76, 0, 9.48, 7.64, 0, 0, 0];
@@ -95,7 +121,7 @@ const LID_AT = [0, 0.5, 1];
 const DIR = BEATS.map((b, k) => (k <= 4 ? -1 : 1));
 
 const Q1_T = [
-  { id: 'catharsis', label: 'CATHARSIS', x: 206, y: 394, w: 60, h: 68, correct: true },
+  { id: 'catharsis', label: 'CATHARSIS', x: URN.x - 30, y: URN.top - 20, w: 60, h: URN.bottom - URN.top + 26, correct: true },
   { id: 'mimesis', label: 'MIMESIS', x: PAINTING.x0 - 2, y: PAINTING.top - 2, w: 56, h: PAINTING.bottom - PAINTING.top + 14, correct: false },
 ];
 
@@ -115,11 +141,14 @@ function handOn(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty
   'worklet';
   return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K_M, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
 }
-/** The fallboard's free edge, for a lid 0 (standing up against the case) to 1 (down over the keys). */
+/**
+ * The fallboard's front edge where his hand takes it, for a lid 0 (up in the case) to
+ * 1 (down over the keys). The piano is seen from the front, so lowering it is the
+ * board coming DOWN over the keyboard; he holds it near the left, where he stands.
+ */
 function lidEdge(lid: number): { x: number; y: number } {
   'worklet';
-  const a = (Math.PI / 2) * (1 - lid);
-  return { x: KEYS.x1 - 16 * Math.cos(a), y: KEYS.y - 4.5 - 16 * Math.sin(a) };
+  return { x: KEYS.x0 + 10, y: FALL_TOP + FALL_H * lid };
 }
 
 const CAM = followMoves(X, BEATS.map(kindOf), seedOf('aesthetics'));
@@ -128,7 +157,7 @@ export default function Aesthetics3Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(13);
+  const cv = useCarry(16);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -178,8 +207,10 @@ export default function Aesthetics3Scene({
     const edge = lidEdge(lid);
     const lower = A_PLATO[n] ? pulse(0.9, 1.3, 3.0) : 0;
     s = handOn(s, x, dir, 1, edge.x, edge.y, lower);
-    // sad for no reason (b7): the head goes down while he plays
-    s = { ...s, neck: s.neck - 0.2 * (A_WILL[n] ? sec(arrive + 2.0, arrive + 3.0) : 0) };
+    // sad for no reason (b7): the head goes down while he plays. A POSITIVE neck is
+    // down in this rig (moves' code 25, "still looking up", is neck −0.10), so this
+    // was tipping his head UP until 2026-09-28.
+    s = { ...s, neck: s.neck + 0.2 * (A_WILL[n] ? sec(arrive + 2.0, arrive + 3.0) : 0) };
 
     // ── the theatre's cord (b1, b4) ─────────────────────────────────────────
     const cordAt = A_CURTAIN[n] || A_RECOG[n] ? arrive + 0.25 : 99;
@@ -190,7 +221,8 @@ export default function Aesthetics3Scene({
     // ── the urn's tap (b2) ──────────────────────────────────────────────────
     const tapT = A_FILL[n] ? arrive + 0.35 : 99;
     const turn = pulse(tapT, tapT + 0.3, tapT + 1.3);
-    s = handOn(s, x, dir, 1, TAP.x + 2, TAP.y - 3 + 2 * Math.sin(Math.PI * sec(tapT + 0.3, tapT + 0.7)), turn);
+    // his hand on the spigot's key, which stands up off the spout (aesthetics3Set)
+    s = handOn(s, x, dir, 1, TAP.x - 3, TAP.y - 5 + 2 * Math.sin(Math.PI * sec(tapT + 0.3, tapT + 0.7)), turn);
 
     // ── a hand out to the storm on the wall (b5), and a tilt of the head at the word (b3) ──
     s = { ...s, tilt: s.tilt + 0.06 * (A_NAMED[n] ? pulse(1.6, 2.2, 4.4) : 0) };
@@ -209,8 +241,27 @@ export default function Aesthetics3Scene({
     const will = A_WILL[n] ? st(0.7, 0.78) : WILL[n];
     const notes = A_MUSIC[n] ? sec(0.9, 1.2) * (1 - sec(3.8, 4.4)) : A_WILL[n] ? sec(arrive + 0.6, arrive + 1.0) : A_PLATO[n] ? 1 - sec(0.2, 1.0) : 0;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // Every key is an event this scene already times: the keys under his hands, the
+    // notes rising off them (Note draws them at x 306–328 from y 432 up), the cord
+    // he pulls (cordAt), the curtains opening on the mask, the tap he turns (tapT)
+    // and the water into the basin, the CATHARSIS plate over the urn, the lamp and
+    // the RECOGNITION plate, the storm, the fallboard's edge as it comes down (live).
+    // On the will beat he lets go at arrive + 2.0, so his own sad head shows.
+    const LK = A_MUSIC[n] ? [0.3, KEYS.x0 + 8, KEYS.y, 1, 1.2, NOTE_X + 12, NOTE_Y - 30, 0.9, 4.2, MASK.x, MASK.y, 0.8, L * 0.92, 0, 0, 0]
+      : A_CURTAIN[n] ? [0.2, CORD.x, CORD.handle - 30, 0.7, cordAt, CORD.x, CORD.handle, 1, cordAt + 0.5, MASK.x, MASK.y, 1, L * 0.93, 0, 0, 0]
+      : A_FILL[n] ? [0.3, URN.x, (URN.top + URN.bottom) / 2, 1, tapT, TAP.x, TAP.y, 1, tapT + 0.5, (BASIN.x0 + BASIN.x1) / 2, BASIN.top, 1, tapT + 2.2, 0, 0, 0]
+      : A_NAMED[n] ? [0.3, URN.x, URN.top - 10, 1, L * 0.55, 0, 0, 0]
+      : A_RECOG[n] ? [0.2, CORD.x, CORD.handle - 30, 0.7, cordAt, CORD.x, CORD.handle, 1, cordAt + 0.5, STAGE_LAMP.x, STAGE_LAMP.y, 1, cordAt + 1.3, MASK.x, MASK.y, 1, L * 0.58, MASK.x, THEATRE.top + 8, 1, L * 0.9, 0, 0, 0]
+      : A_IMAGE[n] ? [0.3, (PAINTING.x0 + PAINTING.x1) / 2, (PAINTING.top + PAINTING.bottom) / 2, 1, L * 0.9, 0, 0, 0]
+      : Q1[n] ? [0.3, (PAINTING.x0 + PAINTING.x1) / 2, (PAINTING.top + PAINTING.bottom) / 2, 0.6, 1.4, URN.x, URN.top + 20, 0.6, 2.6, 0, 0, 0]
+      : A_WILL[n] ? [0.2, KEYS.x0 + 8, KEYS.y, 0.7, arrive + 0.2, KEYS.x0 + 8, KEYS.y, 1, arrive + 0.8, NOTE_X + 12, NOTE_Y - 30, 0.9, arrive + 2.0, 0, 0, 0]
+      : A_PLATO[n] ? [0.2, KEYS.x0 + 8, KEYS.y, 0.8, 0.9, edge.x, edge.y, 1, 3.2, 0, 0, 0]
+      : ORDER[n] ? [0.3, edge.x, edge.y, 0.7]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
     return {
-      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_M, dirV, 1, carry(cv, 13, n, lk.x, lk.x, tr), carry(cv, 14, n, lk.y, lk.y, tr), carry(cv, 15, n, 0, lk.w, tr)),
       open: carry(cv, 1, n, OPEN[p], open, tr),
       level: carry(cv, 2, n, 0, level, tr),
       stream: carry(cv, 3, n, 0, stream, tr),
@@ -242,9 +293,10 @@ export default function Aesthetics3Scene({
       <Curtains S={SCENE} />
       <ObjectArt parts={CORD_ART} tone={CLOTH} />
       <Urn S={SCENE} />
-      <ObjectArt parts={PIANO_ART} tone={WOOD} />
+      <SetArt parts={PIANO_ART} tone={WOOD} />
       <View style={styles.keyboard} pointerEvents="none">
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <View key={k} style={[styles.blackKey, { left: 3 + k * 7 }]} />)}
+        {WHITE_GAPS.map((k) => <View key={`w${k}`} style={[styles.whiteGap, { left: (k + 1) * WHITE_W - 1.4 }]} />)}
+        {BLACK_AT.map((k) => <View key={`b${k}`} style={[styles.blackKey, { left: (k + 1) * WHITE_W - 2.4 }]} />)}
       </View>
       <Fallboard S={SCENE} />
       <Plates S={SCENE} on={on} />
@@ -261,6 +313,8 @@ const CORD_ART = cord();
 const FRAME_ART = frame();
 const SHIP_ART = paintedShip();
 const URN_ART = urn();
+const CONSOLE_ART = pedestal();
+const BASIN_ART = basin();
 const PIANO_ART = piano();
 
 // ── the storm on the wall ────────────────────────────────────────────────────
@@ -319,7 +373,7 @@ function Curtains({ S }: { S: SharedValue<any> }) {
 // ── the urn, its water, the stream from the tap, and the basin ──────────────
 
 function Urn({ S }: { S: SharedValue<any> }) {
-  const water = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - S.value.level) * (URN.bottom - URN.top) }] }));
+  const water = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - S.value.level) * URN_WIN.h }] }));
   const stream = useAnimatedStyle(() => ({ opacity: S.value.stream, transform: [{ scaleY: S.value.stream }] }));
   const basin = useAnimatedStyle(() => ({
     opacity: S.value.basin,
@@ -327,7 +381,9 @@ function Urn({ S }: { S: SharedValue<any> }) {
   }));
   return (
     <>
-      <ObjectArt parts={URN_ART} tone={CLAY} />
+      <SetArt parts={CONSOLE_ART} tone={MARBLE} />
+      <SetArt parts={BASIN_ART} tone={MARBLE} />
+      <SetArt parts={URN_ART} tone={CLAY} />
       <View style={styles.urnInside} pointerEvents="none">
         <Animated.View style={[styles.urnWater, water]} />
       </View>
@@ -340,7 +396,8 @@ function Urn({ S }: { S: SharedValue<any> }) {
 // ── the fallboard over the keys ─────────────────────────────────────────────
 
 function Fallboard({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${90 * (1 - S.value.lid)}deg` }] }));
+  // seen from the front, the board comes down over the keys from the lip above them
+  const st = useAnimatedStyle(() => ({ opacity: S.value.lid > 0.02 ? 1 : 0, transform: [{ scaleY: Math.max(0.02, S.value.lid) }] }));
   return <Animated.View style={[styles.fallboard, st]} pointerEvents="none" />;
 }
 
@@ -359,7 +416,7 @@ function Note({ S, k }: { S: SharedValue<any>; k: number }) {
     const u = ((S.value.t + k * 0.6) % 2.4) / 2.4;
     return {
       opacity: S.value.notes * Math.sin(Math.PI * u),
-      transform: [{ translateX: 306 + 22 * u + 4 * Math.sin(u * 6 + k) }, { translateY: 432 - 60 * u }],
+      transform: [{ translateX: NOTE_X + 22 * u + 4 * Math.sin(u * 6 + k) }, { translateY: NOTE_Y - 60 * u }],
     };
   });
   return (
@@ -480,28 +537,29 @@ const styles = StyleSheet.create({
   curtainR: { left: THEATRE.open.x0 + OPEN_W / 2, transformOrigin: '100% 50%' },
 
   urnInside: {
-    position: 'absolute', left: URN.x - URN.r + 4, top: URN.top + 4, width: 2 * URN.r - 8, height: URN.bottom - URN.top - 4,
-    borderRadius: URN.r - 4, overflow: 'hidden',
+    position: 'absolute', left: URN_WIN.x, top: URN_WIN.y, width: URN_WIN.w, height: URN_WIN.h,
+    borderRadius: URN_WIN.w / 2, overflow: 'hidden',
   },
   urnWater: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 2, backgroundColor: TEAL },
   stream: {
-    position: 'absolute', left: TAP.x + 2, top: TAP.y + 6, width: 2, height: BASIN.top - TAP.y - 4, borderRadius: 1,
+    position: 'absolute', left: TAP.x, top: TAP.y + 5, width: 2, height: BASIN.top + 3 - TAP.y - 5, borderRadius: 1,
     backgroundColor: TEAL, transformOrigin: '50% 0%',
   },
   basinWater: {
-    position: 'absolute', left: BASIN.x0 + 4, top: BASIN.top + 1, width: BASIN.x1 - BASIN.x0 - 8, height: 4, borderRadius: 2,
+    position: 'absolute', left: BASIN.x0 + 3, top: BASIN.top + 2, width: BASIN.x1 - BASIN.x0 - 6, height: 3.5, borderRadius: 2,
     backgroundColor: TEAL,
   },
 
-  // the keys, seen from the front of the case: a white run with its black keys over it
+  // the keys, seen from the front of the case: fourteen white keys with their black keys over them
   keyboard: {
-    position: 'absolute', left: PIANO.x0 + 10, top: KEYS.y - 20, width: 60, height: 9, borderRadius: 1.5,
-    backgroundColor: PAPER_LIT, borderWidth: 1.2, borderColor: INK, overflow: 'hidden',
+    position: 'absolute', left: KEYS.x0, top: KEYS.y - 4, width: KEYS.x1 - KEYS.x0, height: 8, borderRadius: 1,
+    backgroundColor: PAPER_LIT, borderWidth: 1, borderColor: INK, overflow: 'hidden',
   },
-  blackKey: { position: 'absolute', top: 0, width: 3.5, height: 5, borderRadius: 0.5, backgroundColor: INK },
+  whiteGap: { position: 'absolute', top: 0, bottom: 0, width: 0.8, backgroundColor: INK },
+  blackKey: { position: 'absolute', top: -1, width: 3.2, height: 5, borderRadius: 0.5, backgroundColor: INK },
   fallboard: {
-    position: 'absolute', left: KEYS.x1 - 16, top: KEYS.y - 6, width: 16, height: 3, borderRadius: 1.5,
-    backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK, transformOrigin: '100% 50%',
+    position: 'absolute', left: KEYS.x0 - 1, top: FALL_TOP, width: KEYS.x1 - KEYS.x0 + 2, height: FALL_H, borderRadius: 1,
+    backgroundColor: WOOD.SHADE, borderWidth: 1, borderColor: INK, transformOrigin: '50% 0%',
   },
 
   noteStem: { position: 'absolute', left: 3, top: -9, width: 1.4, height: 9, borderRadius: 0.7, backgroundColor: INK },
@@ -514,9 +572,9 @@ const styles = StyleSheet.create({
     position: 'absolute', height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: INK, backgroundColor: PLATE_FACE,
     boxShadow: LIP, alignItems: 'center', justifyContent: 'center',
   },
-  cathPlate: { left: 206, top: 396, width: 60 },
+  cathPlate: { left: URN.x - 30, top: URN.top - 18, width: 60 },
   recogPlate: { left: THEATRE.x0 + 10, top: THEATRE.top + 2, width: THEATRE.x1 - THEATRE.x0 - 20 },
-  willPlate: { left: PIANO.x0 + 10, top: PIANO.top + 1, width: 60 },
+  willPlate: { left: (PIANO.x0 + PIANO.x1) / 2 - 30, top: PIANO.top + 10, width: 60 },
   plateText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },

@@ -20,6 +20,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
+import { attendAt } from './attend';
 import { lineOf, stage, bump } from './pace';
 import {
   stove, windowFrame, slateHanger, desk, saucer,
@@ -52,8 +53,11 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //
 // COMPOSITION, in stage units: the stove 4–56 in the corner, the window 68–122, the
 // portrait at 158, the slate 194–242, the desk 286–382 with the notebook at 304 and
-// the candle at 334. He stands at 290 at the desk, 238 at the slate, 186 at the
-// portrait and 140 at the window. The shadow lives on the wall above the stove and
+// the candle at 334. He stands at 290 at the desk, 262 to look along the wall (all
+// three in front of him), 250 at the slate, 188 at the portrait and 140 at the window,
+// FACING LEFT at every one of them — restaged 2026-09-28 so that everything the
+// narration is about happens in front of him, and his hand reaches what it works on
+// (the wall is hung above him, so he works the lower half of each thing). The shadow lives on the wall above the stove and
 // its arm reaches along y 392–404, under the labels. Band [288, 514].
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -159,10 +163,10 @@ function legAt(b: number, x0: number, legs: readonly (readonly number[])[]): { x
   }
   return { x: from, from, to: from, u: 1 };
 }
-/** b4: slate wiped from 0.1s, then the portrait at 2.0s, then the shutters at 3.7s. */
-const TREAT_LEGS = [[REACH_X.window, 2.3]];
-/** b8: from the desk to the slate, then the portrait, then the window. */
-const REBUILD_LEGS = [[REACH_X.slate, 0.2], [REACH_X.window, 4.5]];
+/** b4: a step in to the slate (wiped ~0.95s), along to the portrait (turned ~2.95s), along to the window (shut ~4.5s). */
+const TREAT_LEGS = [[REACH_X.slate, 0], [REACH_X.portrait, 1.55], [REACH_X.window, 3.45]];
+/** b8: from the desk to the slate (chalk ~2.6s), the portrait (~4.75s), then the window (~6.35s). */
+const REBUILD_LEGS = [[REACH_X.slate, 0.2], [REACH_X.portrait, 3.4], [REACH_X.window, 5.25]];
 /** Where he stands to reach the candle on the desk. */
 const CANDLE_X = CANDLE.x - 22;
 /** b7: across to the candle's side of the desk, then a step back to the notebook. */
@@ -174,7 +178,7 @@ export default function Epistemology2Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(27);
+  const cv = useCarry(30);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -211,9 +215,9 @@ export default function Epistemology2Scene({
     const travel = leg ? (leg.to > leg.from ? 1 : -1) : xn > xp ? 1 : -1;
     const moving = walking ? walkU < 1 : leg ? leg.u < 1 && leg.to !== leg.from : false;
     const settle = walking ? clamp01((b - walkDur) / 0.3) : 1;
-    const toSlate = A_TREAT[n] ? sec(0, 0.3) * (1 - sec(1.1, 1.4)) : A_REBUILD[n] ? sec(2.2, 2.5) * (1 - sec(3.4, 3.7)) : 0;
+    // every stop along the wall is worked facing left now, so an in-beat walk needs no turn
     const dirV = inBeat
-      ? lerp(facing(DIR[p], DIR[n], b), 1, toSlate)
+      ? facing(DIR[p], DIR[n], b)
       : walking
         ? lerp(facing(DIR[p], travel, b), DIR[n], settle)
         : facing(DIR[p], DIR[n], b);
@@ -249,25 +253,29 @@ export default function Epistemology2Scene({
 
     // ── b4: wipe the slate, turn the portrait, close the shutters ─────────
     const slateMid = { x: (SLATE.x0 + SLATE.x1) / 2, y: (SLATE.top + SLATE.bottom) / 2 };
-    const wipe = A_TREAT[n] ? pulse(0.3, 0.5, 1.1) : 0;
-    const wipeX = SLATE.x0 + 14 + 8 * Math.sin(t * 9);
-    s = handOn(s, x, dir, 1, wipeX, slateMid.y, wipe);
-    const turnP = A_TREAT[n] ? pulse(1.4, 1.65, 2.2) : 0;
-    s = handOn(s, x, dir, 1, PORTRAIT.cx + PORTRAIT.w / 2 - 2, PORTRAIT.cy + 6, turnP);
-    const shut = A_TREAT[n] ? pulse(3.1, 3.35, 4.0) : 0;
-    s = handOn(s, x, dir, 1, lerp(WINDOW.x1, (WINDOW.x0 + WINDOW.x1) / 2 + 4, sec(3.35, 3.85)), (WINDOW.top + WINDOW.bottom) / 2 + 12, shut);
+    // the wall is hung high for a man this size, so each hand works the LOWER half of
+    // its thing — the reach he actually has — and lands on it rather than waving at it
+    const wipe = A_TREAT[n] ? pulse(0.75, 0.95, 1.5) : 0;
+    const wipeX = SLATE.x1 - 14 + 6 * Math.sin(t * 9);
+    s = handOn(s, x, dir, 1, wipeX, SLATE.bottom - 8, wipe);
+    const pCorner = { x: PORTRAIT.cx + PORTRAIT.w / 2 - 3, y: PORTRAIT.cy + PORTRAIT.h / 2 - 5 };
+    const turnP = A_TREAT[n] ? pulse(2.7, 2.95, 3.4) : 0;
+    s = handOn(s, x, dir, 1, pCorner.x, pCorner.y, turnP);
+    const shut = A_TREAT[n] ? pulse(4.3, 4.5, 5.1) : 0;
+    s = handOn(s, x, dir, 1, lerp(WINDOW.x1 - 2, (WINDOW.x0 + WINDOW.x1) / 2 + 6, sec(4.5, 5.0)), WINDOW.bottom - 10, shut);
 
     // ── b6: shaking his head at the shadow ─────────────────────────────────
-    const nope = A_TEST[n] ? pulse(0.6, 1.0, 2.6) : 0;
+    // after he has walked back to where he can see the whole wall (2.2s)
+    const nope = A_TEST[n] ? pulse(2.5, 2.9, 4.3) : 0;
     s = { ...s, neck: s.neck + 0.12 * nope * Math.sin(t * 9) };
 
     // ── b8: chalk, portrait, shutters, the other way round ────────────────
     const chalk = A_REBUILD[n] ? pulse(2.4, 2.6, 3.4) : 0;
-    s = handOn(s, x, dir, 1, SLATE.x0 + 6 + 14 * sec(2.6, 3.3), slateMid.y + 2 * Math.sin(t * 13), chalk);
-    const turnB = A_REBUILD[n] ? pulse(3.7, 3.95, 4.4) : 0;
-    s = handOn(s, x, dir, 1, PORTRAIT.cx + PORTRAIT.w / 2 - 2, PORTRAIT.cy + 6, turnB);
-    const open = A_REBUILD[n] ? pulse(5.3, 5.55, 6.3) : 0;
-    s = handOn(s, x, dir, 1, lerp((WINDOW.x0 + WINDOW.x1) / 2 + 4, WINDOW.x1, sec(5.55, 6.05)), (WINDOW.top + WINDOW.bottom) / 2 + 12, open);
+    s = handOn(s, x, dir, 1, SLATE.x1 - 22 + 14 * sec(2.6, 3.3), SLATE.bottom - 10 + 2 * Math.sin(t * 13), chalk);
+    const turnB = A_REBUILD[n] ? pulse(4.5, 4.75, 5.2) : 0;
+    s = handOn(s, x, dir, 1, pCorner.x, pCorner.y, turnB);
+    const open = A_REBUILD[n] ? pulse(6.1, 6.35, 7.0) : 0;
+    s = handOn(s, x, dir, 1, lerp((WINDOW.x0 + WINDOW.x1) / 2 + 6, WINDOW.x1 - 2, sec(6.35, 6.85)), WINDOW.bottom - 10, open);
 
     const fig = keepHeld(held, mixStance(carryFrom(held, n, hHold(P[p], t)), s, tr));
 
@@ -286,9 +294,9 @@ export default function Epistemology2Scene({
       return A_DEMON[n] ? st(m, m + 0.05) : FAKED[n] && !REBUILT[n] ? 1 : 0;
     };
     const faked = [fk(0.56), fk(0.69), fk(0.82)];
-    const shutters = A_TREAT[n] ? sec(3.35, 3.85) : A_REBUILD[n] ? 1 - sec(5.55, 6.05) : TREATED[n] && !REBUILT[n] ? 1 : 0;
-    const turned = A_TREAT[n] ? sec(1.65, 2.05) : A_REBUILD[n] ? 1 - sec(3.95, 4.35) : TREATED[n] && !REBUILT[n] ? 1 : 0;
-    const wiped = A_TREAT[n] ? sec(0.5, 1.1) : A_REBUILD[n] ? 1 - sec(2.6, 3.3) : TREATED[n] && !REBUILT[n] ? 1 : 0;
+    const shutters = A_TREAT[n] ? sec(4.5, 5.0) : A_REBUILD[n] ? 1 - sec(6.35, 6.85) : TREATED[n] && !REBUILT[n] ? 1 : 0;
+    const turned = A_TREAT[n] ? sec(2.95, 3.35) : A_REBUILD[n] ? 1 - sec(4.75, 5.15) : TREATED[n] && !REBUILT[n] ? 1 : 0;
+    const wiped = A_TREAT[n] ? sec(0.95, 1.5) : A_REBUILD[n] ? 1 - sec(2.6, 3.3) : TREATED[n] && !REBUILT[n] ? 1 : 0;
     // the marks over each: a question (b2), a cross (b6), a tick when it is put back (b8)
     const q = (k: number) => {
       'worklet';
@@ -300,12 +308,43 @@ export default function Epistemology2Scene({
     };
     const tick = (k: number) => {
       'worklet';
-      const at = [6.0, 4.4, 3.3][k];
+      const at = [6.8, 5.2, 3.3][k];
       return A_REBUILD[n] ? sec(at, at + 0.3) : REBUILT[n];
     };
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening, when it happens, and at nothing (weight 0, his pose's own
+    // head) when nothing is: the pen, the candle in his hand, each thing on the wall
+    // as the question, the shadow's reach or the cross lands on it, and what his hand
+    // is doing to it. The candle in his hand is at his fist: (15, -20) from the pelvis,
+    // raised 24 more, and the flame 22 over the wrist. The shadow's head is (30, 344).
+    const winMid = { x: (WINDOW.x0 + WINDOW.x1) / 2, y: (WINDOW.top + WINDOW.bottom) / 2 };
+    const LK = A_WRITE[n] ? [0.2, NOTEBOOK.x, NOTEBOOK.y - 4, 1, 4.2, 0, 0, 0, 6.7, NOTEBOOK.x, NOTEBOOK.y - 4, 1]
+      : A_CANDLE[n] ? [0.2, CANDLE.x, CANDLE.y - 8, 1,
+        1.4, x + dirV * 15 * K_D, GROUND - (54 + 24 * raise) * K_D - 22, 1, L * 0.9, 0, 0, 0]
+      : A_WORLD[n] ? [0.2, 0, 0, 0, L * 0.3, winMid.x, winMid.y, 1,
+        L * 0.58, THINGS[0].x, LABEL_Y + 8, 1, L * 0.68, THINGS[1].x, LABEL_Y + 8, 1,
+        L * 0.78, THINGS[2].x, LABEL_Y + 8, 0.9, L * 0.95, 0, 0, 0]
+      : A_DEMON[n] ? [0.3, (STOVE.x0 + STOVE.x1) / 2, 344, 1, L * 0.52, winMid.x, winMid.y, 1,
+        L * 0.65, PORTRAIT.cx, PORTRAIT.cy, 1, L * 0.78, slateMid.x, slateMid.y, 0.9, L * 0.97, 0, 0, 0]
+      : A_TREAT[n] ? [0.1, slateMid.x, slateMid.y, 1, 1.9, PORTRAIT.cx, PORTRAIT.cy, 1,
+        3.6, winMid.x, winMid.y, 1, 5.3, 0, 0, 0]
+      // b6: a light look while he shakes his head at the shadow (a full one would
+      // override the shake, which lives in the neck), then the candle up to each
+      : A_TEST[n] ? [0.3, 0, 0, 0, 2.3, (STOVE.x0 + STOVE.x1) / 2, 344, 0.4, 4.3, 0, 0, 0,
+        L * 0.56, winMid.x, winMid.y, 1, L * 0.68, PORTRAIT.cx, PORTRAIT.cy, 1,
+        L * 0.8, slateMid.x, slateMid.y, 0.9, L * 0.97, 0, 0, 0]
+      : A_EXIST[n] ? [0.2, 0, 0, 0, 2.6, CANDLE.x, CANDLE.y, 1, 4.2, NOTEBOOK.x, NOTEBOOK.y - 4, 1]
+      : A_REBUILD[n] ? [0.2, 0, 0, 0, 2.1, slateMid.x, slateMid.y, 1, 4.3, PORTRAIT.cx, PORTRAIT.cy, 1,
+        5.9, winMid.x, winMid.y, 1, L * 0.97, 0, 0, 0]
+      // the questions: the notes (top 298, 30 tall) and the tags (top 300, 44 tall)
+      : NOTES[n] ? [0.3, NOTE_Q[1].x, 313, 0.6]
+      : TAGS[n] ? [0.3, TAG_Q[1].x, 322, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_D, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_D, dirV, 1, carry(cv, 27, n, lk.x, lk.x, tr), carry(cv, 28, n, lk.y, lk.y, tr), carry(cv, 29, n, 0, lk.w, tr)),
       holding: carry(cv, 1, n, HELD[p], holding, tr),
       glow: carry(cv, 2, n, LIT[p], A_CANDLE[n] ? sec(2.8, 3.6) : LIT[n], tr),
       grow: carry(cv, 3, n, SHADOW[p], grow, tr),

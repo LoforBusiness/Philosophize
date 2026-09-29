@@ -46,17 +46,44 @@ export const LANTERN = { x: 266, y: 436 };
 /** The sticks, stood in their block on the table. */
 export const STICKS = { x: 240, base: 450 };
 /** The high window grate onto the river. */
-export const GRATE = { x0: 298, x1: 374, top: 330, bottom: 352 };
+export const GRATE = { x0: 298, x1: 374, top: 322, bottom: 358 };
 /** The easel, and the canvas on it. */
 export const CANVAS = { x0: 318, x1: 378, top: 384, bottom: 432 };
 
-/** The four treads, stacked blocks down to the floor, and the rail beside them. */
+/**
+ * The stairs, redrawn 2026-09-28 against a photographed wooden staircase (Cassiobury
+ * Park, the Met): every step is a TREAD with a rounded nosing standing proud of the
+ * RISER under it, the tread's top lit and the riser in shade, so a step reads as a
+ * step rather than a block; a balustrade of turned balusters carries the handrail
+ * between a NEWEL POST at the foot and one at the landing, each with a cap.
+ */
 export function stairs(): ObjPart[] {
-  const parts: ObjPart[] = TREADS.map((t) => oRect('mass', t.x1 / 2, (t.top + GROUND) / 2, t.x1, GROUND - t.top, 0, 1));
+  const parts: ObjPart[] = [];
+  TREADS.forEach((t, k) => {
+    const below = k === 0 ? GROUND : TREADS[k - 1].top;
+    // the step's mass, the riser face under the nosing, the tread board and its nosing
+    parts.push(oRect('mass', t.x1 / 2, (t.top + GROUND) / 2, t.x1, GROUND - t.top, 0, 1));
+    parts.push(oRect('face', t.x1 - 2, (t.top + 4 + below) / 2, 4, below - t.top - 4, 0, 0.5));
+    parts.push(oRect('mass', (t.x1 + 3) / 2, t.top + 2, t.x1 + 3, 4, 0, 2));
+  });
+  TREADS.forEach((t) => {
+    // the lit top of each tread, and the shadow its nosing throws on the riser
+    parts.push(oRect('lit', t.x1 / 2, t.top + 1, t.x1 - 4, 1.4, 0, 0.7));
+    parts.push(oRect('dark', t.x1 - 2, t.top + 5, 4, 2, 0, 0.5));
+  });
+  // the balusters, one on each tread, up to the rail
+  for (const t of TREADS.slice(0, 3)) {
+    const bx = t.x1 - 9;
+    parts.push(oBar('line', bx, t.top, bx, railY(bx) + 2, 1.8));
+  }
   parts.push(
-    oBar('line', RAIL.x0, TREADS[0].top, RAIL.x0, RAIL.y0 - 2, 2.5),
-    oBar('line', RAIL.x1, TREADS[3].top, RAIL.x1, RAIL.y1 - 2, 2.5),
-    oBar('line', RAIL.x0 + 3, RAIL.y0 + 2, RAIL.x1 - 3, RAIL.y1 - 2, 3),
+    // the newel posts: foot and landing, each with a cap
+    oRect('mass', RAIL.x0, (GROUND + RAIL.y0 - 6) / 2, 6, GROUND - RAIL.y0 + 6, 0, 1),
+    oEll('mass', RAIL.x0, RAIL.y0 - 8, 9, 7),
+    oRect('mass', RAIL.x1, (TREADS[3].top + RAIL.y1 - 6) / 2, 6, TREADS[3].top - RAIL.y1 + 6, 0, 1),
+    oEll('mass', RAIL.x1, RAIL.y1 - 8, 9, 7),
+    // the handrail between them
+    oBar('mass', RAIL.x0 - 2, RAIL.y0 - 2, RAIL.x1 + 2, RAIL.y1 - 2, 4),
   );
   return parts;
 }

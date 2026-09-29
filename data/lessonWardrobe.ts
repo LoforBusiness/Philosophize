@@ -53,7 +53,7 @@ export const WARDROBE: Record<string, [string, string]> = {
   'aesthetics-aesthetics-39': ['smoker', 'plain'],
   'aesthetics-aesthetics-40': ['plain', 'plain'],
   'aesthetics-aesthetics-41': ['plain', 'plain'],
-  'epistemology-knowledge-1': ['plain', 'smoker'],
+  'epistemology-knowledge-1': ['plain', 'plain'],
   'epistemology-knowledge-2': ['plain', 'plain'],
   'epistemology-knowledge-3': ['scholar', 'plain'],
   'epistemology-knowledge-4': ['smoker', 'plain'],

@@ -19,7 +19,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Pol3Beat extends BaseBeat {
   /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 132 at the plinth · 160 at the charter · 232 under the Declaration · 310 at the ballot box. */ x?: number;
+  /** Where he stands: 144 at the plinth · 160 at the charter · 232 under the Declaration · 310 at the ballot box. */ x?: number;
   /** The act across this beat's line (the scene choreographs it). */
   act?: 'gunman' | 'power' | 'nature' | 'covenant' | 'trust' | 'decl' | 'rousseau' | 'own';
   /** POWER is on the doorway's plate and LEGITIMACY on the plinth's. */ named?: boolean;
@@ -34,28 +34,28 @@ export interface Pol3Beat extends BaseBeat {
 
 export const BEATS: Pol3Beat[] = [
   {
-    p: 158, x: 132, act: 'gunman',
+    p: 158, x: 144, act: 'gunman',
     text: 'A gunman can make you obey. What, if anything, makes you owe obedience to a government?',
     dur: 1.8,
   },
   {
-    p: 167, x: 132, act: 'power', named: true,
+    p: 167, x: 144, act: 'power', named: true,
     text: 'Power is the capacity to compel obedience. Legitimacy is the right to rule, which creates a duty to obey.',
     dur: 2.3,
   },
   {
-    p: 158, x: 132, act: 'nature', named: true, war: true,
+    p: 158, x: 144, act: 'nature', named: true, war: true,
     text: 'Social contract theory begins with a state of nature, a condition with no government. Hobbes argued that without a common power, it becomes a state of war.',
     cite: 'The social contract',
     dur: 3.5,
   },
   {
-    p: 158, x: 132, act: 'covenant', named: true, war: true, signed: true,
+    p: 158, x: 144, act: 'covenant', named: true, war: true, signed: true,
     text: 'Hobbes held that people escape the war by covenant, agreeing to set up a sovereign who keeps the peace.',
     dur: 1.8,
   },
   {
-    p: 158, x: 132, act: 'trust', named: true, war: true, signed: true, keys: true,
+    p: 158, x: 144, act: 'trust', named: true, war: true, signed: true, keys: true,
     text: 'John Locke argued that people consent to government to protect their natural rights. Government holds power in trust, and loses the right to rule by breaking the trust.',
     cite: 'Locke, 1689',
     dur: 3.9,

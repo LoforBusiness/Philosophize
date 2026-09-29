@@ -5,6 +5,7 @@ import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import SetArt from './SetArt';
 import { BEATS } from './epistemology4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, narratorHold, narratorLive, stand, travelStance,
@@ -20,9 +21,11 @@ import { followMoves, kindOf, seedOf } from './camera';
 import { emoteAny, emoteAnyLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
+import { attendAt } from './attend';
 import { lineOf, stage } from './pace';
 import {
-  tree, treeAt, outsideGround, wall, desk, paperRail, sun, OUTSIDE, TREE, WALL_X, HOLE, PAPER, DESK, SHEET, CORD,
+  appleTrunk, appleCrown, imageTrunk, imageCrown, outsideGround, wall, desk, paperRail, sun,
+  OUTSIDE, TREE, WALL_X, HOLE, PAPER, DESK, SHEET, CORD,
 } from './epistemology4Set';
 import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/tone';
 
@@ -51,8 +54,17 @@ import { DEEP, EMBER, OLIVE, SAGE, TEAL, PAPER_LIT } from '@/components/shared/t
 //
 // COMPOSITION, in stage units: outside 0–62; the wall 62–76, its opening at (76, 440);
 // the paper 282–392 × 356–438; the desk 176–244 with its sheet at 180–240; the cord at
-// 268. He stands at 96 at the shutter, 150 in the room, 164 and 270 at the ends of
+// 268. He stands at 96 at the shutter, 112 in the room, 164 and 270 at the ends of
 // the desk, 250 at the cord. Band [288, 514].
+//
+// RESTAGED 2026-09-28 — the owner: "if something's happening on scene, the stick man
+// should be looking at it." Twice the payoff of opening the shutter (b1, b10) happened
+// at his back: he faced the opening while the image landed on the paper behind him.
+// Now he opens it and TURNS (eased, through a profile) to watch the image arrive. He
+// starts the lesson at 112, under EXPERIENCE, so both plates go up in front of him;
+// the plates hang lower (top 340, not 316), over the opening and the desk they name
+// rather than in the sky over the room; and the tree outside is redrawn against a
+// photograph (epistemology4Set.ts) — it read as a mushroom.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('epistemology');
@@ -96,7 +108,19 @@ const SORT = BEATS.map((b) => (b.interact?.sort ? 1 : 0));
 /** How much of the paper reason's grid claims, in the bins' own order: none, some, all. */
 const REASON_SHARE = [0, 0.5, 1];
 /** Which way he faces once a beat settles. */
-const DIR = BEATS.map((b) => (b.act === 'open' || b.act === 'kant' || b.act === 'meno' || b.act === 'recall' ? -1 : 1));
+// Where a beat ENDS facing. b1 (open) and b10 (kant) work the shutter facing left and
+// then turn to the paper, so both end facing right; the scene turns them in the beat.
+const DIR = BEATS.map((b) => (b.act === 'meno' || b.act === 'recall' ? -1 : 1));
+/** When b1 and b10 turn from the shutter to the paper, as the image starts to land. */
+const TURN_OPEN = 3.0;
+const TURN_KANT = 4.1;
+/** The plates' top, and their centre line — the look targets read it. */
+const PLATE_TOP = 340;
+const PLATE_Y = PLATE_TOP + 7;
+/** The image on the paper: the same tree, small, laid out in the paper's own units. */
+const IMG = { x: 30, y: 44 };
+/** The red apple in the image, in STAGE units: flipped about IMG.y inside a view 6 down the paper. */
+const IMG_APPLE = { x: PAPER.x0 + IMG.x + 6.5, y: PAPER.top + 6 + 2 * IMG.y - (IMG.y - 18 + 3.5) };
 
 const NAME_Q = [
   { id: 'locke', label: 'LOCKE', x: 309, y: 366, correct: true },
@@ -161,7 +185,7 @@ export default function Epistemology4Scene({
   clock, bt, bi, i, picked, onPick, gazeX, gazeY, gazeOn, pickPos,
 }: SceneApi) {
   const held = useHeld();
-  const cv = useCarry(23);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -203,15 +227,21 @@ export default function Epistemology4Scene({
     let dirV = walking
       ? lerp(facing(DIR[p], xn > xp ? 1 : -1, b), DIR[n], clamp01((b - walkDur) / 0.3))
       : facing(DIR[p], DIR[n], b);
+    // b1: walk to the shutter facing it, open it, then turn to the paper for the image
+    if (A_OPEN[n]) dirV = b < TURN_OPEN ? facing(DIR[p], -1, b) : facing(-1, 1, b - TURN_OPEN);
     if (A_SIMPLE[n]) dirV = 1 - 2 * sec(2.7, 2.95) + 2 * sec(4.9, 5.15);
     if (A_SHUT[n]) dirV = lerp(facing(DIR[p], -1, b), 1, sec(0.8, 1.0));
     if (leg && !A_SHUT[n]) {
       const tv = leg.to !== leg.from ? (leg.to > leg.from ? 1 : -1) : DIR[n];
       dirV = moving ? tv : lerp(tv, DIR[n], sec(0.0, 0.01));
       if (A_MENO[n]) dirV = lerp(facing(DIR[p], 1, b), -1, sec(2.05, 2.35));
-      if (A_KANT[n]) dirV = facing(DIR[p], -1, b);
+      if (A_KANT[n]) dirV = b < TURN_KANT ? facing(DIR[p], -1, b) : facing(-1, 1, b - TURN_KANT);
       if (A_FORMS[n]) dirV = facing(DIR[p], 1, b);
     }
+    // what is on screen at a tap is where the facing starts, so a tap mid-turn eases on
+    // from it instead of mirroring him (the carry, over the first third of a second)
+    const du = clamp01(b / 0.36);
+    dirV = carry(cv, 26, n, DIR[p], dirV, du * du * (3 - 2 * du));
     const dir = dirV < 0 ? -1 : 1;
 
     // ── b1: pointing at the blank paper, the shutter, a tap to his head ─────
@@ -257,8 +287,38 @@ export default function Epistemology4Scene({
     const grid = A_FORMS[n] ? sec(3.5, 4.8) : GRID[n];
     const share = SORT[n] ? pickAt(REASON_SHARE, pickPos.value) : 1;
 
+    // ── WHERE HE LOOKS (attend.ts) ───────────────────────────────────────────
+    // At what is happening, when it happens, and at nothing (weight 0, his pose's own
+    // head) when nothing is: the paper, the opening as he opens it, the image as it
+    // lands, the apple outside, his own hand in the beam, the compass point, the
+    // doubled square, the cord and the grid coming down. The image on the paper sits
+    // about IMG (30, 44) into it; the apple assembles about (84, 40); the plates are
+    // EXPERIENCE at x 120 and REASON at x 209, both at PLATE_Y. The apple in the image
+    // on the paper (upside down) is IMG_APPLE.
+    const paperMid = { x: (PAPER.x0 + PAPER.x1) / 2, y: (PAPER.top + PAPER.bottom) / 2 };
+    const LK = A_BLANK[n] ? [0.3, paperMid.x, paperMid.y, 1, 4.9, 120, PLATE_Y, 0.9, 5.8, 209, PLATE_Y, 0.9, L * 0.95, 0, 0, 0]
+      // b1: the opening as he opens it; he turns (3.0s) and watches the image land; the
+      // red apple in it ("from sensation"); nothing as he taps his head
+      : A_OPEN[n] ? [0.2, HOLE.x, HOLE.y - 2, 1, 3.2, PAPER.x0 + 30, PAPER.top + 44, 0.9,
+        4.8, IMG_APPLE.x, IMG_APPLE.y, 0.9, 6.1, 0, 0, 0]
+      : A_FED[n] ? [0.3, 120, PLATE_Y, 0.8, 2.4, PAPER.x0 + 30, PAPER.top + 44, 1, L * 0.92, 0, 0, 0]
+      : A_SIMPLE[n] ? [0.4, PAPER.x0 + 30, PAPER.top + 44, 1, 2.8, HOLE.x + 12, HOLE.y, 1,
+        4.9, PAPER.x0 + 84, PAPER.top + 40, 1, L * 0.93, 0, 0, 0]
+      : A_SHUT[n] ? [0.05, HOLE.x, HOLE.y - 2, 1, 1.0, 0, 0, 0, 2.4, 209, PLATE_Y, 0.8, 5.6, 0, 0, 0]
+      // b6: he follows the compass point round the circle
+      : A_COMPASS[n] ? [0.6, CIRC.x + CIRC.r * Math.cos(ang), CIRC.y + CIRC.r * 0.5 * Math.sin(ang), 1, 6.7, 0, 0, 0]
+      : A_MENO[n] ? [0.3, 0, 0, 0, 2.2, SQ.x, SQ.y, 1, 8.4, SQ.x, SQ.y - 14, 0.8, L * 0.94, 0, 0, 0]
+      : A_RECALL[n] ? [0.3, SQ.x, SQ.y, 1, 4.9, 0, 0, 0]
+      : NAMES[n] ? [0.3, paperMid.x, paperMid.y, 0.7]
+      : A_KANT[n] ? [0.2, 0, 0, 0, 1.8, HOLE.x, HOLE.y - 2, 1, 4.3, PAPER.x0 + 30, PAPER.top + 44, 0.9]
+      : A_FORMS[n] ? [0.2, 0, 0, 0, 2.4, CORD.x, CORD.handle, 1,
+        3.6, paperMid.x, lerp(PAPER.top, paperMid.y, grid), 1, L * 0.93, 0, 0, 0]
+      : SORT[n] ? [0.3, paperMid.x, paperMid.y, 0.6]
+      : [0.2, 0, 0, 0];
+    const lk = attendAt(LK, b, 0, 0, 0);
+
     return {
-      fig: lookPose(fig, x, GROUND, K_E, dirV, 1, gazeX.value, gazeY.value, gazeOn.value),
+      fig: lookPose(fig, x, GROUND, K_E, dirV, 1, carry(cv, 23, n, lk.x, lk.x, tr), carry(cv, 24, n, lk.y, lk.y, tr), carry(cv, 25, n, 0, lk.w, tr)),
       lit: carry(cv, 1, n, LIT[p], lit, tr),
       image: carry(cv, 2, n, LIT[p], image, tr),
       red: carry(cv, 3, n, 0, red, tr),
@@ -293,7 +353,8 @@ export default function Epistemology4Scene({
       <View style={styles.sky} pointerEvents="none" />
       <ObjectArt parts={SUN_ART} tone={WOOD} />
       <ObjectArt parts={GROUND_ART} tone={LEAF} />
-      <ObjectArt parts={TREE_ART} tone={LEAF} />
+      <SetArt parts={TRUNK_ART} tone={WOOD} />
+      <SetArt parts={CROWN_ART} tone={LEAF} />
       <View style={styles.treeApple} pointerEvents="none" />
       <ObjectArt parts={WALL_ART} tone={WALL} />
       <Shutter S={SCENE} />
@@ -315,11 +376,13 @@ export default function Epistemology4Scene({
   );
 }
 
-const TREE_ART = tree();
+const TRUNK_ART = appleTrunk();
+const CROWN_ART = appleCrown();
 const GROUND_ART = outsideGround();
-/** The image on the paper: the same tree, small, laid out in the paper's own units. */
-const IMG = { x: 30, y: 44 };
-const IMG_ART = treeAt(IMG.x, IMG.y, 0.72);
+/** The image's crown is centred a little above IMG, so the flipped tree stays on the paper. */
+const IMG_S = 0.62;
+const IMG_TRUNK = imageTrunk(IMG.x, IMG.y - 10, IMG_S);
+const IMG_CROWN = imageCrown(IMG.x, IMG.y - 10, IMG_S);
 const WALL_ART = wall();
 const DESK_ART = desk();
 const RAIL_ART = paperRail();
@@ -389,7 +452,8 @@ function Paper({ S, on }: { S: SharedValue<any>; on: (a: readonly number[]) => b
         {/* the tree outside, upside down, as a camera obscura throws it */}
         <View style={styles.imgGround} />
         <View style={styles.flip}>
-          <ObjectArt parts={IMG_ART} tone={LEAF} />
+          <SetArt parts={IMG_TRUNK} tone={WOOD} line={1.4} />
+          <SetArt parts={IMG_CROWN} tone={LEAF} line={1.4} />
           <Animated.View style={[styles.imgRed, red]} />
         </View>
       </Animated.View>
@@ -502,7 +566,7 @@ const styles = StyleSheet.create({
     backgroundColor: WOOD.SHADE, borderWidth: 1.2, borderColor: INK, transformOrigin: '50% 0%',
   },
   plate: {
-    position: 'absolute', top: 316, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
+    position: 'absolute', top: PLATE_TOP, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: INK,
     backgroundColor: PLATE_FACE, boxShadow: LIP, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   plateGlow: { backgroundColor: SAGE },

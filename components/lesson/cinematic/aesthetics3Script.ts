@@ -5,7 +5,7 @@ import type { BaseBeat } from './cinematicKit';
 // Theme: A MUSIC ROOM, A PUPPET THEATRE, AN URN WITH A TAP AND AN UPRIGHT PIANO.
 //
 // He plays two notes on an upright piano, then pulls the cord of a puppet theatre and
-// its curtains open on a tragic mask. An urn on the wall fills with pity and fear, and
+// its curtains open on a tragic mask. An amphora on a wall console fills with pity and fear, and
 // he opens its tap to let them go: catharsis. He pulls the cord again and the stage
 // lamp lights the mask, ignorance to knowledge: recognition. A storm at sea hangs on
 // the wall, an accurate image of a painful thing. At the piano the notes are sad for
@@ -19,7 +19,7 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Aes3Beat extends BaseBeat {
   /** His pose under the act. Bands per N2: <100 rig, 100+ held, 300+ played. */ p?: number;
-  /** Where he stands: 130 at the theatre's cord · 274 between the urn's tap and the piano. */ x?: number;
+  /** Where he stands: 130 at the theatre's cord · 276 between the urn's spigot and the piano. */ x?: number;
   /** The act across this beat's line (the scene choreographs it). */
   act?: 'music' | 'curtain' | 'fill' | 'named' | 'recognise' | 'image' | 'will' | 'plato';
   /** The theatre's curtains are open on the mask. */ open?: boolean;
@@ -34,7 +34,7 @@ export interface Aes3Beat extends BaseBeat {
 
 export const BEATS: Aes3Beat[] = [
   {
-    p: 158, x: 274, act: 'music',
+    p: 158, x: 276, act: 'music',
     text: 'Every human culture on record has made music and told stories. No society studied by anthropologists lacks either.',
     dur: 2.2,
   },
@@ -44,13 +44,13 @@ export const BEATS: Aes3Beat[] = [
     dur: 1.8,
   },
   {
-    p: 158, x: 274, act: 'fill', open: true, drained: true, tour: [],
+    p: 158, x: 276, act: 'fill', open: true, drained: true, tour: [],
     text: 'Aristotle held that a tragedy arouses pity and fear in its audience, and then releases them.',
     cite: 'Catharsis',
     dur: 3.1,
   },
   {
-    p: 158, x: 274, act: 'named', open: true, drained: true, named: true,
+    p: 158, x: 276, act: 'named', open: true, drained: true, named: true,
     text: 'The effect is called katharsis, a term Aristotle never explained. Readers still disagree about what it means.',
     dur: 1.8,
   },
@@ -75,18 +75,18 @@ export const BEATS: Aes3Beat[] = [
     dur: 1,
   },
   {
-    p: 158, x: 274, act: 'will', open: true, drained: true, named: true, lit: true, will: true,
+    p: 158, x: 276, act: 'will', open: true, drained: true, named: true, lit: true, will: true,
     text: 'Music can make you sad without giving you any reason to be sad. Arthur Schopenhauer held that music expresses the will, the blind striving behind everything in nature.',
     cite: 'Music before reason',
     dur: 4,
   },
   {
-    p: 158, x: 274, act: 'plato', open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
+    p: 158, x: 276, act: 'plato', open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
     text: 'Plato, over two thousand years earlier, argued that music shapes character before reason develops. So he thought music dangerous.',
     dur: 1.8,
   },
   {
-    p: 263, x: 274, open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
+    p: 263, x: 276, open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
     quote: {
       id: 'lq-aesthetics-aesthetics-3-1',
       text: 'Music is not, like the other arts, a copy of the Ideas, but a copy of the will itself.',
@@ -99,7 +99,7 @@ export const BEATS: Aes3Beat[] = [
     dur: 3.4,
   },
   {
-    p: 260, x: 274, open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
+    p: 260, x: 276, open: true, drained: true, named: true, lit: true, will: true, lid: 0.5,
     interact: {
       prompt: 'Put these in order, from lightest hand to heaviest.',
       order: {
