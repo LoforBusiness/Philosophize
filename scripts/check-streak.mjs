@@ -343,7 +343,7 @@ head('THE CEREMONY PLAYS IN ORDER, AND NOTHING PLAYS AS A CHORD');
   // the check equals itself, which is the trap `validate-sound` records about
   // re-deriving footfalls.ts's own formula.
   const src = fs.readFileSync(path.join('components', 'gamification', 'StreakCeremony.tsx'), 'utf8');
-  const names = ['T_HOLD', 'D_FALL', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'D_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA', 'COUNT_MS'];
+  const names = ['T_TEAR', 'D_TEAR', 'T_HOLD', 'D_FALL', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'D_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA'];
   const lines = names
     .map((n) => (new RegExp(`^const ${n} = ([^;]+);`, 'm').exec(src) ?? [])[0])
     .filter(Boolean);
@@ -354,7 +354,7 @@ head('THE CEREMONY PLAYS IN ORDER, AND NOTHING PLAYS AS A CHORD');
     const T = new Function(`${lines.join('\n')}\nreturn {${names.join(',')}};`)();
 
     // 1 · every step strictly after the one before it
-    const order = ['T_HOLD', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA'];
+    const order = ['T_TEAR', 'T_HOLD', 'T_LAND', 'T_INK', 'T_SWEEP', 'T_RAIL', 'T_DAY', 'T_TAIL', 'T_CTA'];
     const wrong = [];
     for (let i = 1; i < order.length; i++) {
       if (!(T[order[i]] > T[order[i - 1]])) wrong.push(`${order[i - 1]}(${T[order[i - 1]]}) → ${order[i]}(${T[order[i]]})`);
@@ -368,9 +368,13 @@ head('THE CEREMONY PLAYS IN ORDER, AND NOTHING PLAYS AS A CHORD');
     if (T.T_INK > T.T_LAND) ok('the legend appears after the die is down', `contact ${T.T_LAND}ms → ink ${T.T_INK}ms`);
     else bad('the legend rides in with the falling die', `ink ${T.T_INK}ms vs contact ${T.T_LAND}ms`);
 
-    // 3 · the count is finished before the closing line asks for attention
-    if (T.T_LAND + T.COUNT_MS <= T.T_TAIL) ok('the number has finished counting before the tail line', `${T.T_LAND + T.COUNT_MS}ms ≤ ${T.T_TAIL}ms`);
-    else bad('the tail line arrives while the number is still moving', `${T.T_LAND + T.COUNT_MS}ms > ${T.T_TAIL}ms`);
+    // 3 · THE NEW COUNT IS UNCOVERED BEFORE THE DIE LANDS ON IT. Since the
+    // second design (2026-09-29) the count does not tick up under the seal: it is
+    // yesterday's page tearing off the pad, and the die then stamps TODAY's page.
+    // A die landing while the old page is still on the pad would stamp the day
+    // being torn away, which is the strike saying the wrong number.
+    if (T.T_TEAR + T.D_TEAR <= T.T_LAND) ok('the page has turned before the die lands', `${T.T_TEAR + T.D_TEAR}ms ≤ contact ${T.T_LAND}ms`);
+    else bad('the die lands on a page still being torn off', `tear ends ${T.T_TEAR + T.D_TEAR}ms > contact ${T.T_LAND}ms`);
 
     // 4 · A CEREMONY NOBODY CAN GET PAST IS A TOLL. This plays on every first
     // lesson of the day, so it has to be over in about the time it takes to read

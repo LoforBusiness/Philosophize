@@ -1,223 +1,167 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withSequence, withTiming, withDelay,
-  Easing, type SharedValue,
+  useSharedValue, useAnimatedStyle, withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ramp, rampFace, mix, PAPER_LIT } from '@/components/shared/tone';
+import { mix, PAPER_LIT, LOCK_FACE, LOCK_EDGE, SHINE } from '@/components/shared/tone';
+import { LINE, WOOD, WOOD_LIT, WOOD_SHADE, SHEET_SHADE } from '@/components/shared/drawn';
 import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
-import { LIP } from '@/constants/design';
+import { C, LIP } from '@/constants/design';
 import { cue } from '@/lib/feedback';
 
-const INK = '#1A1A1A';
-const INK_SOFT = '#6B6B6B';
-const PAPER = '#FAFAF7';
-const FAINT = '#E4E1D8';
+const INK = C.ink;
+const INK_SOFT = C.inkSoft;
+const PAPER = C.paper;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE STREAK CEREMONY — the day being struck into the ledger.
+// THE STREAK CEREMONY: the day torn off and stamped.
 //
 // This takes the whole screen, immediately after Finish and BEFORE the XP
-// summary, in the same slot RankUpScreen already owns. It is the one animation
-// that decides whether somebody comes back tomorrow, and until now it was a
-// paragraph-sized panel three quarters of the way down a scrolling receipt.
+// receipt, in the slot RankUpScreen owns on a rank-up. It is the one animation
+// that decides whether somebody comes back tomorrow.
 //
-// ── WHAT THE READER SAID, AND WHICH HALF WAS WHICH ──────────────────────────
+// ── THE SECOND DESIGN (2026-09-29) ─────────────────────────────────────────
 //
-//   "I like the stamp, but it looks kinda boring. And, also, I don't like the
-//    words on the screen. It implies that the user should be done for the day
-//    and doesn't make them want to try doing another lesson. And, also, there is
-//    no really big animation for the increase in streak."
+// "It looks pretty cheap and it does not look very unique." It did: the hero was
+// a gradient BALL with a typewriter legend on it, in an app that had since
+// stopped drawing gradients anywhere else, and the burst was the same rectangle
+// confetti every celebration screen on earth throws.
 //
-// Three faults, and the middle one was hiding in plain sight: the legend on the
-// stamp read **DAY DONE**. It was chosen by measuring four candidates against
-// the real `.ttf` and taking the one that fitted — a genuinely good method
-// applied to the wrong question. Nothing ever asked whether the words told the
-// reader to stop, and they did, on the one screen whose entire job is to make
-// tomorrow feel worth turning up for.
+// The streak already HAS an object, and it is not a coin. The streak tab and the
+// Home and Profile panels draw it as a tear-off calendar (TearCalendar.tsx). So
+// the ceremony is that object doing the one thing a tear-off calendar does:
 //
-// It reads IN INK now. That is not a softer way of saying the same thing: a day
-// DONE is a task closed, and a day IN INK is a mark on a record that is still
-// being written. It also sets at 17.25px against DAY DONE's 12.5 — the words
-// that do not say "finished" are shorter, so fixing the meaning made the stamp
-// 38% more legible. `check:streak` re-measures the fit against the chord.
+//   1. THE PAD, BEFORE    the page still reads yesterday's count.
+//   2. THE TEAR           the page pivots from its top-left corner as the right
+//                         side rips along the perforation, then drops away and
+//                         falls off the screen. The new count is underneath.
+//   3. THE DIE FALLS      a wooden rubber stamp, ACCELERATING — `Easing.in` is
+//                         the half everyone gets backwards; decelerating into
+//                         the paper reads as a thing inflating, not landing.
+//   4. CONTACT            the thud (`cue('seal')` on T_STRIKE), the pad squashes,
+//                         impact strokes leave the die and ember sparks fly.
+//   5. THE INK            the die lifts and leaves IN INK pressed onto the new
+//                         page. Ink that arrives once the die is up was left by
+//                         it; ink that arrives with it is painted on the die.
+//   6. THE GLINT          a flat shine crosses the binding.
+//   7. THE CHAIN DRAWS    through the days already earned, arriving under today,
+//                         which is struck as it gets there.
 //
-// ── WHY A CEREMONY AND NOT A BIGGER PANEL ───────────────────────────────────
-//
-// Duolingo's own write-up of their streak animation puts the gain at +1.7% D7
-// retention for the ANIMATION ALONE, and their stated method is that the object
-// itself changes on a milestone — "like a power-up" — rather than a number
-// getting bigger. You cannot do that in 90pt of a ScrollView underneath an XP
-// counter. The screen is the room the strike needs.
-//
-// ── THE ORDER IS THE DESIGN ─────────────────────────────────────────────────
-//
-// Each step begins as the one before it lands. RankUpScreen states the same rule
-// and it is the reason that screen works; played as a chord this is the same
-// information and a fraction of the feeling.
-//
-//   1. THE PAGE, BEFORE    — the week drawn with today's slot EMPTY and the
-//                            count still reading the OLD streak. The strike has
-//                            to have something to change or it is decoration.
-//   2. THE DIE FALLS       — from 1.6x and high above, ACCELERATING. `Easing.in`
-//                            is the half everyone gets backwards; `Easing.out`
-//                            decelerates into the paper, which reads as a thing
-//                            inflating rather than landing.
-//   3. CONTACT             — squash, recoil, settle. The press ring leaves the
-//                            rim. The PAGE KICKS three units and comes back.
-//                            Gold leaf scatters. This is the frame everything
-//                            else keys off.
-//   4. THE INK SPREADS     — the legend appears AFTER the die is down, never
-//                            with it: ink that fades in during the fall is
-//                            painted on the object; ink that arrives once it has
-//                            landed was left behind by it.
-//   5. THE COUNT           — from the old streak, starting ON CONTACT. Brilliant
-//                            names this in their own write-up: the count has to
-//                            be "seamlessly aligned" with the strike or it reads
-//                            as a clock running rather than as something the
-//                            reader caused.
-//   6. THE FOIL SWEEP      — a specular band travels across the face. One
-//                            translating gradient, clipped to the disc. It is
-//                            the cheapest "this is metal" signal there is, and
-//                            the only one a static gradient cannot give.
-//   7. THE CHAIN DRAWS     — through the days already earned, arriving under
-//                            today, which is struck in miniature as it gets
-//                            there. The sequence ends on the day just won.
-//
-// ── LEAF, NOT CONFETTI ─────────────────────────────────────────────────
-//
-// The burst is cut from the ember's own ramp plus sand — RankUpScreen's rule ("cut
-// from the order, not from ink: a celebration that does not know what it is
-// celebrating"), one metal along. Flakes leave from the seal's RIM rather than
-// its centre, which is the other thing that screen learned the hard way:
-// launched from the middle they cross the face and read as the mark shattering.
-//
-// ── WHY THE COUNT IS setState AND NOT A WORKLET ─────────────────────────────
-//
-// Reanimated cannot drive a Text's CONTENT from the UI thread, only its style.
-// A count-up has to cross to JS whatever it does, so it is an interval rather
-// than a shared value pretending to be one. It runs ~700ms and ticks at most a
-// dozen times; the seal, the leaf, the sweep and the rail all animate every
-// frame and stay on the UI thread where they belong.
+// ONE CLOCK RUNS ALL OF IT, as on RankUpScreen: `t` is ms since mount and every
+// part is a function of it, so a tap that skips runs the same clock to the same
+// end and nothing can be left half-played. Only Views; no gradients.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const METAL = ramp(STREAK_EMBER);
-const FACE = rampFace(METAL);
-const RAIL = mix(STREAK_EMBER, PAPER, 0.62);
-const GROOVE: [string, string, string] = [
-  mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
-];
-const LIGHT_START = { x: 0.15, y: 0 } as const;
-const LIGHT_END = { x: 0.85, y: 1 } as const;
-
-// ── the seal, at ceremony scale ─────────────────────────────────────────────
-// The reward panel draws this object at a 54 face; here it is the hero, so it is
-// drawn at 152 and every part of it scales from that one number rather than
-// being retyped. BOX leaves room for the collar and for the press ring to travel
-// beyond the rim without being clipped.
-const SEAL = 152;
-const BOX = 196;
+// ── the pad ─────────────────────────────────────────────────────────────────
+const PAD_W = 188;
+const BAND_H = 46;
+const PAGE_H = 168;
+const RING = 12;
+const R = 12;
 
 // ── WHAT THE STAMP SAYS ─────────────────────────────────────────────────────
 //
-// A blank disc is a token; a disc with a legend on it is a STAMP, and the legend
-// is most of what makes the strike land. Set crooked on purpose — a hand-held
-// stamp never comes down square, and a legend at a true zero degrees reads as a
-// logo rather than as an impression.
+// IN INK, not DAY DONE. A day DONE is a task closed; a day IN INK is a mark on a
+// record still being written, and this screen's job is tomorrow. The legend is
+// crooked on purpose — a hand-held stamp never comes down square.
 //
-// THE LENGTH IS THE BOX, NOT A PREFERENCE. Two stacked lines straddle the
-// centre, so the worst line sits half a line-height out, where the chord through
-// the ring is narrowest. Measured against the real Special Elite `.ttf` in plain
-// Node (the same reader `check:fits` uses — a character count is not a width):
-//
-//   IN INK     fits to 17.25px at the panel's 44 ring     <- ships
-//   NO GAP     17.25px                                    considered
-//   AND ON     16.50px                                    considered
-//   DAY DONE   12.50px                                    what this replaces
-//   UNBROKEN    6.25px — one line, and unreadable for it
-//
-// `check:streak` re-derives the chord from the constants below, so a longer
-// legend fails the build rather than the phone.
+// THE LENGTH IS THE BOX. Two stacked lines straddle the centre, so the worst line
+// sits half a line-height out, where the chord through the ring is narrowest.
+// `check:streak` re-derives that chord against the real Special Elite `.ttf`, so a
+// longer legend fails the build rather than the phone.
 const STAMP = ['IN', 'INK'] as const;
-const STAMP_RING = 116;
-const STAMP_SIZE = 44;
+const STAMP_RING = 76;
+const STAMP_SIZE = 24;
 const STAMP_TILT = '-8deg';
+/** Where the impression sits on the page: its centre, in page coordinates. */
+const STAMP_X = PAD_W - 48;
+const STAMP_Y = PAGE_H - 44;
+/** The die's rubber is a shade wider than the ring it prints. */
+const DIE_W = STAMP_RING + 12;
 
 // ── the week ────────────────────────────────────────────────────────────────
-// Fixed geometry, not measured. A rail runs from the centre of one token to the
-// centre of another, and a centre is not knowable inside a `space-between` row.
-// Seven equal columns of a known width makes the arithmetic exact, and costs no
-// layout pass and no state.
+// Fixed geometry, not measured: a rail runs from one token's centre to another's,
+// and a centre is not knowable inside a `space-between` row.
 const PITCH = 42;
 const DISC = 26;
+const LABEL_H = 14;
+const LABEL_GAP = 7;
 
 // ── the timeline, in ms from mount. Each is the moment that step BEGINS ──────
-const T_HOLD = 320;                      // the page, before — long enough to read
-const D_FALL = 260;
-const T_LAND = T_HOLD + D_FALL;          // 580 — CONTACT
-const T_INK = T_LAND + 70;
-const T_SWEEP = T_LAND + 240;
-const T_RAIL = T_LAND + 520;
-const D_RAIL = 430;
+const T_TEAR = 260;                      // the pad, before — long enough to read
+const D_TEAR = 520;
+const T_HOLD = 560;                      // the die appears, high and falling
+const D_FALL = 240;
+const T_LAND = T_HOLD + D_FALL;          // 800 — CONTACT
+const T_INK = T_LAND + 90;
+const T_SWEEP = T_LAND + 260;
+const T_RAIL = T_LAND + 550;
+const D_RAIL = 400;
 const T_DAY = T_RAIL + D_RAIL - 90;      // the day lands as the chain reaches it
-const T_TAIL = T_DAY + 340;
-const T_CTA = T_TAIL + 260;
-const COUNT_MS = 700;
+const T_TAIL = T_DAY + 320;
+const T_CTA = T_TAIL + 240;
+const T_END = T_CTA + 400;
 
-/** Exported so the caller can time a sound to the frame the die lands on. */
+/**
+ * Exported so the sound is timed to the frame the die lands on. The clip's pluck
+ * at 0.86s is the day token landing on the week — `T_DAY − T_LAND` above.
+ */
 export const T_STRIKE = T_LAND;
 
-// ── gold leaf ───────────────────────────────────────────────────────────────
-// Deterministic per mount so a flake never re-randomises mid-flight, and spread
-// by a decorrelated hash — stepping x and y from one index marches them into a
-// diagonal streak instead of a burst.
+const clamp01 = (x: number) => {
+  'worklet';
+  return x < 0 ? 0 : x > 1 ? 1 : x;
+};
+const span = (t: number, a: number, d: number) => {
+  'worklet';
+  return clamp01((t - a) / d);
+};
+const backOut = (u: number) => {
+  'worklet';
+  const k = 1.9;
+  const v = u - 1;
+  return 1 + (k + 1) * v * v * v + k * v * v;
+};
+
+// ── the sparks and the impact strokes ───────────────────────────────────────
 const hash = (n: number) => {
   const v = Math.sin(n * 12.9898) * 43758.5453;
   return v - Math.floor(v);
 };
 
-interface Flake {
-  angle: number; dist: number; w: number; h: number;
-  spin: number; delay: number; drop: number; tone: number;
-}
+interface Spark { angle: number; dist: number; size: number; delay: number; drop: number; tone: number; gem: boolean; }
 
-/** Flakes leave from the RIM, not the centre — see the header. */
-const START_R = SEAL / 2 - 4;
-
-function makeFlakes(n: number): Flake[] {
-  const out: Flake[] = [];
+function makeSparks(n: number): Spark[] {
+  const out: Spark[] = [];
   for (let i = 0; i < n; i++) {
-    const base = (i / n) * Math.PI * 2;
+    // An upward fan: the die is on the page, so nothing flies down into it.
+    const angle = Math.PI + (i / (n - 1)) * Math.PI + (hash(i * 3.1) - 0.5) * 0.3;
     out.push({
-      angle: base + (hash(i * 3.1) - 0.5) * 0.55,
-      dist: 30 + hash(i * 7.7) * 108,
-      // Leaf, not confetti: thin and small. A scrap the size of RankUpScreen's
-      // reads as paper, which is the one material this burst must not be.
-      w: 3 + hash(i * 5.3) * 3.5,
-      h: 6 + hash(i * 9.1) * 7,
-      spin: (hash(i * 2.3) - 0.5) * 820,
-      delay: hash(i * 4.7) * 0.16,
-      drop: 34 + hash(i * 8.9) * 60,
-      tone: Math.floor(hash(i * 6.1) * 4),
+      angle,
+      dist: 60 + hash(i * 7.7) * 90,
+      size: 8 + hash(i * 5.3) * 7,
+      delay: hash(i * 4.7) * 70,
+      drop: 40 + hash(i * 8.9) * 70,
+      tone: Math.floor(hash(i * 6.1) * 3),
+      gem: hash(i * 9.9) > 0.45,
     });
   }
   return out;
 }
 
-function Leaf({ f, burst, tones }: { f: Flake; burst: SharedValue<number>; tones: string[] }) {
+function SparkView({ p, t, tones }: { p: Spark; t: SharedValue<number>; tones: string[] }) {
   const st = useAnimatedStyle(() => {
-    const u = Math.max(0, Math.min(1, (burst.value - f.delay) / (1 - f.delay)));
-    const out = 1 - Math.pow(1 - u, 2.2);        // fast away, easing to a stop
-    const r = START_R + f.dist * out;
+    const u = span(t.value, T_LAND + p.delay, 900);
+    const out = 1 - Math.pow(1 - u, 2.4);
+    const r = DIE_W / 2 + p.dist * out;
     return {
-      opacity: u <= 0 ? 0 : 1 - Math.max(0, (u - 0.6) / 0.4),
+      opacity: u <= 0 ? 0 : 1 - span(u, 0.6, 0.4),
       transform: [
-        { translateX: Math.cos(f.angle) * r },
-        { translateY: Math.sin(f.angle) * r + f.drop * out * out },
-        { rotate: `${f.spin * out}deg` },
-        { scale: 0.5 + 0.5 * Math.min(1, u * 4) },
+        { translateX: Math.cos(p.angle) * r },
+        { translateY: Math.sin(p.angle) * r * 0.8 + p.drop * u * u },
+        { rotate: `${(p.gem ? 45 : 0) + out * 260}deg` },
+        { scale: 0.4 + 0.6 * span(u, 0, 0.1) },
       ],
     };
   });
@@ -225,15 +169,10 @@ function Leaf({ f, burst, tones }: { f: Flake; burst: SharedValue<number>; tones
     <Animated.View
       pointerEvents="none"
       style={[
+        styles.spark,
         {
-          position: 'absolute',
-          width: f.w,
-          height: f.h,
-          borderRadius: 0.5,
-          backgroundColor: tones[f.tone],
-          // The paper flake needs an edge or it is invisible on paper.
-          borderWidth: f.tone === 3 ? 0.8 : 0,
-          borderColor: METAL.shade,
+          width: p.size, height: p.size, marginLeft: -p.size / 2, marginTop: -p.size / 2,
+          borderRadius: p.gem ? 2 : p.size / 2, backgroundColor: tones[p.tone],
         },
         st,
       ]}
@@ -241,10 +180,55 @@ function Leaf({ f, burst, tones }: { f: Flake; burst: SharedValue<number>; tones
   );
 }
 
+/** Comic impact strokes: short, thick, radiating from the die, gone in 260ms. */
+function Stroke({ k, n, t }: { k: number; n: number; t: SharedValue<number> }) {
+  const a = Math.PI + 0.25 + (k / (n - 1)) * (Math.PI - 0.5);
+  const st = useAnimatedStyle(() => {
+    const u = span(t.value, T_LAND, 260);
+    const r = DIE_W / 2 + 6 + u * 22;
+    return {
+      opacity: u <= 0 || u >= 1 ? 0 : 1 - u * u,
+      transform: [
+        { translateX: Math.cos(a) * r },
+        { translateY: Math.sin(a) * r },
+        { rotate: `${(a * 180) / Math.PI}deg` },
+        { scaleX: 0.4 + 0.6 * (1 - u) },
+      ],
+    };
+  });
+  return <Animated.View pointerEvents="none" style={[styles.stroke, st]} />;
+}
+
+/** One page of the pad, reading `value`. The numeral is struck, not printed. */
+function Page({ value }: { value: number }) {
+  const digits = String(value).length;
+  const fs = digits <= 2 ? 90 : digits === 3 ? 66 : 50;
+  const depth = 4;
+  return (
+    <View style={styles.pageFace}>
+      <View style={styles.numBox}>
+        {[1, 2, 3].map((k) => (
+          <Text
+            key={k}
+            aria-hidden
+            numberOfLines={1}
+            style={[
+              styles.num, styles.numDepth,
+              { fontSize: fs, lineHeight: fs * 1.15, left: (depth * k) / 3, top: (depth * k) / 3 },
+            ]}
+          >
+            {value}
+          </Text>
+        ))}
+        <Text numberOfLines={1} style={[styles.num, { fontSize: fs, lineHeight: fs * 1.15 }]}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
 // ── the words ───────────────────────────────────────────────────────────────
-// Nothing here may say the day is finished. The eyebrow names the RUN, which is
-// the thing the week rail underneath is already drawing, and the tail always
-// points at something ahead of the reader.
+// Nothing here may say the day is finished. The eyebrow names the RUN, which the
+// week rail underneath is already drawing, and the tail always points ahead.
 const LANDMARK: Record<number, string> = {
   7: 'a week', 30: 'a month', 100: 'a hundred', 365: 'a year',
 };
@@ -257,13 +241,9 @@ function eyebrowFor(prevStreak: number, restSpent: number): string {
 }
 
 /**
- * THE LINE THAT REPLACES "DONE".
- *
- * Ordered so the strongest true thing wins. The invitation is second because it
- * is the only line that can ask for another lesson, and it is offered ONLY when
- * one actually exists. That used to exclude a free reader on their one lesson a
- * day; since the hard paywall (2026-09-25) everybody who finishes a lesson holds
- * the Pass, so the reward passes `moreToday` always and the milestone lines below
+ * THE LINE THAT REPLACES "DONE". The invitation is offered only when another
+ * lesson actually exists; since the hard paywall everybody finishing a lesson
+ * holds the Pass, so the reward always passes `moreToday` and the landmark lines
  * are for a caller that one day cannot.
  */
 function tailFor(streak: number, moreToday: boolean): string {
@@ -273,11 +253,8 @@ function tailFor(streak: number, moreToday: boolean): string {
     const gap = next - streak;
     return `${gap} more and it is ${LANDMARK[next] ?? `${next} days`}.`;
   }
-  // Past every landmark and out of lessons: name the next DAY rather than asking
-  // for a return visit. "Come back tomorrow" was written here first and
-  // `check:streak` refused it, correctly — pointing at what is ahead is the
-  // mechanism of a streak, but asking the reader to leave and return is the
-  // screen closing the session, which is the whole fault being fixed.
+  // Name the next DAY rather than asking for a return visit: "come back
+  // tomorrow" is the screen closing the session, and check:streak refuses it.
   return `Day ${streak + 1} is next.`;
 }
 
@@ -300,199 +277,141 @@ export default function StreakCeremony({
   streak, prevStreak, restSpent, activeDays, restDays, pendingRest, today, since,
   moreToday, onDone,
 }: Props) {
-  const [shown, setShown] = useState(prevStreak);
+  const t = useSharedValue(0);
   const [ready, setReady] = useState(false);
   const [down, setDown] = useState(false);
   const skipped = useRef(false);
-  const counting = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hitMilestone = STREAK_MILESTONES.includes(streak as 7 | 30 | 100 | 365);
-  // A landmark day gets more of everything the ordinary day gets — the object
-  // itself changes, which is Duolingo's own stated milestone rule.
-  const flakes = useMemo(() => makeFlakes(hitMilestone ? 44 : 26), [hitMilestone]);
-  const tones = useMemo(() => [METAL.lit, STREAK_EMBER, METAL.shade, STREAK_WASH], []);
-
-  const sealIn = useSharedValue(0);
-  const sealScale = useSharedValue(1.6);
-  const sealDrop = useSharedValue(-120);
-  const shadow = useSharedValue(0);
-  const press = useSharedValue(0);
-  const burst = useSharedValue(0);
-  const kick = useSharedValue(0);
-  const stampIn = useSharedValue(0);
-  const sweep = useSharedValue(0);
-  const chain = useSharedValue(0);
-  const dayIn = useSharedValue(0);
-  const dayScale = useSharedValue(1.55);
-  const dayPress = useSharedValue(0);
-  const tail = useSharedValue(0);
-  const cta = useSharedValue(0);
+  // A landmark day gets more of everything the ordinary day gets.
+  const sparks = useMemo(() => makeSparks(hitMilestone ? 18 : 11), [hitMilestone]);
+  const tones = useMemo(() => [STREAK_EMBER, mix(STREAK_EMBER, PAPER, 0.4), PAPER_LIT], []);
+  const bandText = hitMilestone ? (LANDMARK[streak] ?? 'STREAK').toUpperCase() : 'DAY STREAK';
 
   useEffect(() => {
-    sealIn.value = withDelay(T_HOLD, withTiming(1, { duration: 90 }));
-    // ACCELERATING ON THE WAY DOWN. See the header — this is the single choice
-    // that separates a die landing from a bubble inflating.
-    sealScale.value = withDelay(T_HOLD, withSequence(
-      withTiming(0.94, { duration: D_FALL, easing: Easing.in(Easing.cubic) }),
-      withTiming(1.06, { duration: 130, easing: Easing.out(Easing.quad) }),
-      withTiming(1, { duration: 260, easing: Easing.out(Easing.quad) }),
-    ));
-    sealDrop.value = withDelay(T_HOLD, withSequence(
-      withTiming(4, { duration: D_FALL, easing: Easing.in(Easing.cubic) }),
-      withTiming(0, { duration: 390, easing: Easing.out(Easing.quad) }),
-    ));
-    // The shadow tightens as the die approaches the page — the depth cue that
-    // says this is falling rather than merely shrinking.
-    shadow.value = withDelay(T_HOLD, withTiming(1, { duration: D_FALL, easing: Easing.in(Easing.cubic) }));
-    press.value = withDelay(T_LAND, withTiming(1, { duration: 560, easing: Easing.out(Easing.quad) }));
-    burst.value = withDelay(T_LAND, withTiming(1, { duration: 1150, easing: Easing.linear }));
-    // THE PAGE TAKES THE BLOW. Three units, one bounce. Game-feel calls this
-    // screen shake; at premium restraint it is the difference between the page
-    // being hit and the seal merely arriving on top of it.
-    kick.value = withDelay(T_LAND, withSequence(
-      withTiming(3, { duration: 70, easing: Easing.out(Easing.quad) }),
-      withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) }),
-    ));
-    stampIn.value = withDelay(T_INK, withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }));
-    // Twice on a landmark, so the metal reads as richer rather than merely bigger.
-    sweep.value = withDelay(T_SWEEP, hitMilestone
-      ? withSequence(
-          withTiming(1, { duration: 620, easing: Easing.inOut(Easing.quad) }),
-          withTiming(0, { duration: 0 }),
-          withTiming(1, { duration: 620, easing: Easing.inOut(Easing.quad) }),
-        )
-      : withTiming(1, { duration: 700, easing: Easing.inOut(Easing.quad) }));
-    chain.value = withDelay(T_RAIL, withTiming(1, { duration: D_RAIL, easing: Easing.out(Easing.cubic) }));
-    dayIn.value = withDelay(T_DAY, withTiming(1, { duration: 90 }));
-    dayScale.value = withDelay(T_DAY, withSequence(
-      withTiming(0.9, { duration: 170, easing: Easing.in(Easing.cubic) }),
-      withTiming(1.08, { duration: 120, easing: Easing.out(Easing.quad) }),
-      withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) }),
-    ));
-    dayPress.value = withDelay(T_DAY + 170, withTiming(1, { duration: 460, easing: Easing.out(Easing.quad) }));
-    tail.value = withDelay(T_TAIL, withTiming(1, { duration: 320 }));
-    cta.value = withDelay(T_CTA, withTiming(1, { duration: 280 }));
-    // THE STRIKE IS HEARD AND FELT ON THE FRAME IT LANDS, which is the whole
-    // reason `T_STRIKE` is exported. Scheduled rather than fired from a worklet:
-    // `cue` reads a store and touches the haptics API, and neither belongs on
-    // the UI thread. Cleared on unmount so a reader who taps straight through
-    // does not get a thump on a screen they have already left.
+    t.value = withTiming(T_END, { duration: T_END, easing: Easing.linear });
+    // THE STRIKE IS HEARD AND FELT ON THE FRAME IT LANDS. Scheduled rather than
+    // fired from a worklet: `cue` reads a store and touches the haptics API, and
+    // neither belongs on the UI thread. Cleared on unmount, so a reader who taps
+    // straight through does not get a thump on a screen they have left.
     const strike = setTimeout(() => cue('seal'), T_STRIKE);
     const id = setTimeout(() => setReady(true), T_CTA + 280);
     return () => { clearTimeout(strike); clearTimeout(id); };
-  }, [
-    sealIn, sealScale, sealDrop, shadow, press, burst, kick, stampIn, sweep,
-    chain, dayIn, dayScale, dayPress, tail, cta, hitMilestone,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // THE COUNT STARTS ON CONTACT, not on a delay of its own — otherwise on a slow
-  // frame the number can start moving before the seal has landed and the two
-  // read as unrelated events.
-  useEffect(() => {
-    if (streak === prevStreak) { setShown(streak); return; }
-    const steps = Math.min(streak - prevStreak, 12);
-    if (steps <= 0) { setShown(streak); return; }
-    const every = COUNT_MS / steps;
-    let i = 0;
-    counting.current = setTimeout(() => {
-      const id = setInterval(() => {
-        i += 1;
-        setShown(prevStreak + Math.round(((streak - prevStreak) * i) / steps));
-        if (i >= steps) clearInterval(id);
-      }, every);
-      counting.current = null;
-    }, T_LAND);
-    return () => { if (counting.current) clearTimeout(counting.current); };
-  }, [streak, prevStreak]);
-
-  // A tap runs the whole thing to its end state, for anyone who has seen it
-  // before. Same affordance RankUpScreen offers, and for the same reason: a
-  // ceremony nobody can get past is a toll.
+  // A tap runs the same clock to its end state. A ceremony nobody can get past,
+  // on a screen met every day, is a toll.
   const skip = () => {
     if (skipped.current || ready) return;
     skipped.current = true;
-    if (counting.current) { clearTimeout(counting.current); counting.current = null; }
-    const q = { duration: 220, easing: Easing.out(Easing.cubic) };
-    sealIn.value = withTiming(1, q);
-    sealScale.value = withTiming(1, q);
-    sealDrop.value = withTiming(0, q);
-    shadow.value = withTiming(1, q);
-    press.value = withTiming(1, q);
-    burst.value = withTiming(1, { duration: 300, easing: Easing.linear });
-    kick.value = withTiming(0, q);
-    stampIn.value = withTiming(1, q);
-    sweep.value = withTiming(1, q);
-    chain.value = withTiming(1, q);
-    dayIn.value = withTiming(1, q);
-    dayScale.value = withTiming(1, q);
-    dayPress.value = withTiming(1, q);
-    tail.value = withTiming(1, q);
-    cta.value = withTiming(1, q);
-    setShown(streak);
+    t.value = withTiming(T_END, { duration: 320, easing: Easing.out(Easing.cubic) });
     setReady(true);
   };
 
-  const pageStyle = useAnimatedStyle(() => ({ transform: [{ translateY: kick.value }] }));
-  const sealStyle = useAnimatedStyle(() => ({
-    opacity: sealIn.value,
-    transform: [{ translateY: sealDrop.value }, { scale: sealScale.value }],
-  }));
-  // Wide and soft while it is high, tight and dark as it arrives — and it has to
-  // finish TUCKED UNDER the seal. Rendered, the first version settled as a grey
-  // ellipse sitting in the gap below the disc, which reads as a smudge on the
-  // page rather than as contact: a shadow separated from the thing casting it is
-  // not a shadow. It closes to 60% of the seal's width and rides up under it.
-  const shadowStyle = useAnimatedStyle(() => ({
-    opacity: 0.04 + shadow.value * 0.11,
-    transform: [
-      // DOWN AND TO THE RIGHT. One light, top-left, and it never moves — the
-      // rule every pin, badge, certificate and quote plate in the app is struck
-      // by. A shadow centred under the disc is lit from directly above, which is
-      // a second light source, and it is what made this read as a smudge rather
-      // than as the seal sitting on the page.
-      { translateX: shadow.value * 9 },
-      { translateY: shadow.value * 7 },
-      { scaleX: 1.15 - shadow.value * 0.55 },
-      { scaleY: 0.5 - shadow.value * 0.26 },
-    ],
-  }));
-  // THE PRESS leaves the seal's own edge, so it starts at scale 1 and grows —
-  // starting from nothing would read as a second object arriving rather than as
-  // the shock of the first one landing.
-  const pressStyle = useAnimatedStyle(() => ({
-    opacity: (1 - press.value) * 0.5,
-    transform: [{ scale: 1 + press.value * 0.55 }],
-  }));
-  const stampStyle = useAnimatedStyle(() => ({
-    opacity: stampIn.value,
-    transform: [{ rotate: STAMP_TILT }, { scale: 1 + (1 - stampIn.value) * 0.06 }],
-  }));
-  // The specular band crosses the whole face and a little beyond, so it enters
-  // and leaves rather than appearing in the middle of the metal.
-  const sweepStyle = useAnimatedStyle(() => ({
-    opacity: sweep.value > 0 && sweep.value < 1 ? 1 : 0,
-    transform: [{ translateX: -SEAL + sweep.value * (SEAL * 2) }, { rotate: '18deg' }],
-  }));
-  const dayStyle = useAnimatedStyle(() => ({
-    opacity: dayIn.value,
-    transform: [{ scale: dayScale.value }],
-  }));
-  const dayPressStyle = useAnimatedStyle(() => ({
-    opacity: (1 - dayPress.value) * 0.55,
-    transform: [{ scale: 1 + dayPress.value * 1.05 }],
-  }));
-  const tailStyle = useAnimatedStyle(() => ({ opacity: tail.value }));
-  const ctaStyle = useAnimatedStyle(() => ({
-    opacity: cta.value,
-    transform: [{ translateY: (1 - cta.value) * 10 }],
-  }));
+  const tagStyle = useAnimatedStyle(() => {
+    const u = span(t.value, 0, 360);
+    return { opacity: u, transform: [{ translateY: (1 - u) * -10 }] };
+  });
 
-  // TODAY IS UNIONED IN, and this is not a nicety. The reward flow writes
-  // NOTHING until Continue is pressed — everything here is a preview computed
-  // from the store without touching it — so `activeDays` does not contain today
-  // yet, and a week built straight from the store would draw today as an empty
-  // ring at the exact instant the screen is congratulating the reader for
-  // filling it. This screen's job is the state AFTER this lesson counts.
+  // The whole pad takes the blow: a squash on contact and one bounce.
+  const padStyle = useAnimatedStyle(() => {
+    const u = span(t.value, 0, 380);
+    const c = span(t.value, T_LAND, 260);
+    const hit = c > 0 && c < 1 ? Math.sin(Math.PI * c) : 0;
+    return {
+      opacity: u,
+      transform: [
+        { translateY: (1 - u) * 16 + hit * 4 },
+        { scaleX: 1 + hit * 0.02 },
+        { scaleY: 1 - hit * 0.035 },
+      ],
+    };
+  });
+
+  // THE TEAR. Pivot about the top-left corner while the right side rips (ease
+  // in — the paper resists and then gives), then released: it falls, still
+  // turning, and leaves the screen.
+  const oldPage = useAnimatedStyle(() => {
+    const u = span(t.value, T_TEAR, D_TEAR);
+    const rip = span(u, 0, 0.42);
+    const fall = span(u, 0.42, 0.58);
+    const lean = rip * rip * 16 + fall * 30;
+    return {
+      opacity: u >= 1 ? 0 : 1 - span(fall, 0.55, 0.45),
+      transform: [
+        { translateX: fall * 46 },
+        { translateY: fall * fall * 380 },
+        { rotate: `${lean}deg` },
+      ],
+    };
+  });
+  // The new count, uncovered, gives one small beat as the page clears it.
+  const newNum = useAnimatedStyle(() => {
+    const u = span(t.value, T_TEAR + D_TEAR * 0.45, 320);
+    return { transform: [{ scale: u <= 0 ? 1 : 1 + 0.06 * Math.sin(Math.PI * u) }] };
+  });
+
+  // THE DIE. Falls accelerating from off the top, squashes on contact, lifts
+  // away accelerating and fades.
+  const dieStyle = useAnimatedStyle(() => {
+    const f = span(t.value, T_HOLD, D_FALL);
+    const c = span(t.value, T_LAND, 90);
+    const l = span(t.value, T_INK, 380);
+    const squash = c > 0 && c < 1 ? Math.sin(Math.PI * c) * 0.1 : 0;
+    return {
+      opacity: f <= 0 ? 0 : 1 - span(l, 0.45, 0.55),
+      transform: [
+        { translateY: -300 * (1 - f * f) - 170 * l * l },
+        { scaleY: 1 - squash },
+        { scaleX: 1 + squash * 0.5 },
+      ],
+    };
+  });
+  const inkStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_INK, 140);
+    return { opacity: u, transform: [{ rotate: STAMP_TILT }, { scale: 1.06 - 0.06 * u }] };
+  });
+
+  // A flat shine crosses the binding, clipped by the band.
+  const glintStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_SWEEP, hitMilestone ? 900 : 600);
+    const pass = hitMilestone ? (u * 2) % 1 : u;
+    return {
+      opacity: u > 0 && u < 1 ? 1 : 0,
+      transform: [{ translateX: -60 + pass * (PAD_W + 120) }, { rotate: '22deg' }],
+    };
+  });
+
+  const labelStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_INK, 300);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 6 }] };
+  });
+  const weekStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_RAIL - 200, 300);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 8 }] };
+  });
+  const dayStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_DAY, 260);
+    return { opacity: u > 0 ? 1 : 0, transform: [{ scale: u <= 0 ? 0.3 : backOut(u) }] };
+  });
+  const dayPing = useAnimatedStyle(() => {
+    const u = span(t.value, T_DAY, 460);
+    return { opacity: u <= 0 || u >= 1 ? 0 : 0.8 * (1 - u), transform: [{ scale: 1 + u * 1.1 }] };
+  });
+  const tailStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_TAIL, 320);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 6 }] };
+  });
+  const ctaStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_CTA, 280);
+    return { opacity: u, transform: [{ translateY: (1 - u) * 10 }] };
+  });
+
+  // TODAY IS UNIONED IN, and this is not a nicety. The reward flow writes NOTHING
+  // until Continue is pressed, so `activeDays` does not contain today yet, and a
+  // week built straight from the store would draw today as an empty ring at the
+  // instant the screen is congratulating the reader for filling it.
   const week = buildWeek({
     active: new Set([...activeDays, today]),
     rest: new Set([...restDays, ...(pendingRest ?? [])]),
@@ -501,8 +420,8 @@ export default function StreakCeremony({
   });
   const todayIdx = week.findIndex((d) => d.key === today);
   // The chain runs from the first day of the CURRENT run in this week to today.
-  // Walking backwards from today rather than forwards from Monday is what stops
-  // a lit Monday, a missed Tuesday and a lit Wednesday being drawn as one run.
+  // Walking backwards from today is what stops a lit Monday, a missed Tuesday and
+  // a lit Wednesday being drawn as one run.
   let runStart = todayIdx;
   while (runStart > 0) {
     const p = week[runStart - 1];
@@ -511,81 +430,85 @@ export default function StreakCeremony({
   }
   const railLeft = runStart * PITCH + PITCH / 2;
   const railFull = Math.max(0, (todayIdx - runStart) * PITCH);
-  const chainStyle = useAnimatedStyle(() => ({ width: railFull * chain.value }));
+  const chainStyle = useAnimatedStyle(() => {
+    const u = span(t.value, T_RAIL, D_RAIL);
+    return { width: railFull * (1 - Math.pow(1 - u, 3)) };
+  });
 
   return (
     <Pressable style={styles.root} onPress={skip}>
-      <Animated.View style={[styles.center, pageStyle]}>
-        <Text style={styles.eyebrow}>{eyebrowFor(prevStreak, restSpent)}</Text>
-
-        {/* ── 1-4 · the die, the press, the leaf, the ink ──────────────────── */}
-        <View style={styles.markWrap}>
-          <Animated.View pointerEvents="none" style={[styles.shadow, shadowStyle]} />
-
-          <Animated.View style={[styles.seal, sealStyle]}>
-            <Animated.View pointerEvents="none" style={[styles.pressRing, pressStyle]} />
-            {hitMilestone ? <View pointerEvents="none" style={styles.collar} /> : null}
-            <LinearGradient
-              colors={[FACE[0][1], FACE[1][1], FACE[2][1]]}
-              locations={[0, 0.52, 1]}
-              start={LIGHT_START}
-              end={LIGHT_END}
-              style={styles.sealFace}
-            >
-              {/* THE FOIL SWEEP, clipped to the disc by the face's own radius. */}
-              <Animated.View pointerEvents="none" style={[styles.sweep, sweepStyle]}>
-                <LinearGradient
-                  colors={['rgba(255,252,245,0)', 'rgba(255,252,245,0.55)', 'rgba(255,252,245,0)']}
-                  locations={[0, 0.5, 1]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={StyleSheet.absoluteFill}
-                />
-              </Animated.View>
-
-              {/* THE IMPRESSION — a ruled ring and a crooked legend inside it.
-                  The words are PAPER with an ink shadow down-right: sand
-                  reads 3.53:1 on the ember and paper 4.85:1, and the
-                  shadow keeps the letters crisp across the lit corner. */}
-              <Animated.View pointerEvents="none" style={[styles.stamp, stampStyle]}>
-                <View style={styles.stampRing} />
-                {STAMP.map((word) => (
-                  <Text key={word} style={styles.stampWord}>{word}</Text>
-                ))}
-              </Animated.View>
-            </LinearGradient>
-          </Animated.View>
-
-          {/* Above the seal in paint order so leaf lands ON the metal, not under
-              it — and outside the seal's transform so the squash never scales a
-              flake in flight. */}
-          <View pointerEvents="none" style={styles.leafOrigin}>
-            {flakes.map((f, i) => <Leaf key={i} f={f} burst={burst} tones={tones} />)}
-          </View>
+      <Animated.View style={[styles.tagWrap, tagStyle]}>
+        <View style={styles.tagLip} />
+        <View style={styles.tag}>
+          <Text style={styles.tagText}>{eyebrowFor(prevStreak, restSpent)}</Text>
         </View>
+      </Animated.View>
 
-        {/* ── 5 · the count ────────────────────────────────────────────────── */}
-        <Text style={styles.count}>{shown}</Text>
-        <Text style={styles.dayWord}>{shown === 1 ? 'DAY' : 'DAYS'}</Text>
+      <View style={styles.center}>
+        {/* ── the pad ─────────────────────────────────────────────────────── */}
+        <Animated.View style={[styles.pad, padStyle]}>
+          {/* the sheets under the pages, so it reads as a pad and not a card */}
+          <View style={[styles.under, { top: BAND_H + 10, left: 6 }]} />
+          <View style={[styles.under, { top: BAND_H + 5, left: 3 }]} />
+
+          {/* today's page, with the impression the die leaves on it */}
+          <View style={styles.pageNew}>
+            <Animated.View style={[styles.fill, newNum]}>
+              <Page value={streak} />
+            </Animated.View>
+            <Animated.View pointerEvents="none" style={[styles.stamp, inkStyle]}>
+              <View style={styles.stampRing} />
+              {STAMP.map((word) => (
+                <Text key={word} style={styles.stampWord}>{word}</Text>
+              ))}
+            </Animated.View>
+          </View>
+
+          {/* yesterday's page, torn off */}
+          {prevStreak !== streak ? (
+            <Animated.View style={[styles.pageOld, oldPage]} pointerEvents="none">
+              <Page value={prevStreak} />
+            </Animated.View>
+          ) : null}
+
+          {/* the binding, drawn last so the pages tear out from under it */}
+          <View style={styles.band}>
+            <Animated.View pointerEvents="none" style={[styles.glint, glintStyle]} />
+            <Text style={styles.bandText} numberOfLines={1}>{bandText}</Text>
+          </View>
+          {[0.28, 0.72].map((f) => (
+            <View key={f} style={[styles.ring, { left: PAD_W * f - RING / 2 }]} />
+          ))}
+
+          {/* the die, and what it throws off on contact */}
+          <View pointerEvents="none" style={styles.dieOrigin}>
+            {Array.from({ length: 5 }, (_, i) => <Stroke key={i} k={i} n={5} t={t} />)}
+            {sparks.map((p, i) => <SparkView key={i} p={p} t={t} tones={tones} />)}
+            <Animated.View style={[styles.die, dieStyle]}>
+              <View style={styles.dieKnob} />
+              <View style={styles.dieNeck} />
+              <View style={styles.dieBlock}>
+                <View style={styles.dieBlockLit} />
+              </View>
+              <View style={styles.dieRubber} />
+            </Animated.View>
+          </View>
+        </Animated.View>
+
+        <Animated.Text style={[styles.daysLabel, labelStyle]}>
+          {streak === 1 ? 'DAY IN A ROW' : 'DAYS IN A ROW'}
+        </Animated.Text>
 
         {restSpent > 0 && (
-          <Text style={styles.restNote}>
+          <Animated.Text style={[styles.restNote, labelStyle]}>
             {restSpent === 1 ? 'A day of rest covered yesterday.' : `${restSpent} rest days covered the gap.`}
-          </Text>
+          </Animated.Text>
         )}
 
-        {/* ── 7 · the chain, and today struck at the end of it ─────────────── */}
-        <View style={[styles.week, { width: 7 * PITCH }]}>
+        {/* ── the chain, and today struck at the end of it ─────────────────── */}
+        <Animated.View style={[styles.week, { width: 7 * PITCH }, weekStyle]}>
           {railFull > 0 ? (
-            <Animated.View style={[styles.railWrap, { left: railLeft }, chainStyle]}>
-              <LinearGradient
-                colors={GROOVE}
-                locations={[0, 0.45, 1]}
-                start={LIGHT_START}
-                end={LIGHT_END}
-                style={styles.rail}
-              />
-            </Animated.View>
+            <Animated.View style={[styles.rail, { left: railLeft }, chainStyle]} />
           ) : null}
 
           {week.map((d, i) => {
@@ -597,38 +520,30 @@ export default function StreakCeremony({
                   {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
                 </Text>
                 {isToday ? (
-                  <Animated.View style={[styles.discBox, dayStyle]}>
-                    <Animated.View pointerEvents="none" style={[styles.dayPressRing, dayPressStyle]} />
-                    <LinearGradient
-                      colors={[FACE[0][1], FACE[1][1], FACE[2][1]]}
-                      locations={[0, 0.52, 1]}
-                      start={LIGHT_START}
-                      end={LIGHT_END}
-                      style={styles.disc}
-                    />
-                  </Animated.View>
-                ) : d.state === 'done' ? (
-                  <LinearGradient
-                    colors={[FACE[0][1], FACE[1][1], FACE[2][1]]}
-                    locations={[0, 0.52, 1]}
-                    start={LIGHT_START}
-                    end={LIGHT_END}
-                    style={styles.disc}
-                  />
+                  <View style={styles.discBox}>
+                    <View style={[styles.disc, styles.future]} />
+                    <Animated.View pointerEvents="none" style={[styles.dayPing, dayPing]} />
+                    <Animated.View style={[styles.disc, styles.done, styles.discOver, dayStyle]}>
+                      <View style={styles.discGlint} />
+                    </Animated.View>
+                  </View>
                 ) : (
                   <View
                     style={[
                       styles.disc,
+                      d.state === 'done' && styles.done,
                       d.state === 'rest' && styles.rested,
                       d.state === 'missed' && styles.missed,
                       d.state === 'future' && styles.future,
                     ]}
-                  />
+                  >
+                    {d.state === 'done' ? <View style={styles.discGlint} /> : null}
+                  </View>
                 )}
               </View>
             );
           })}
-        </View>
+        </Animated.View>
 
         {/* ── the line that used to say the day was over ───────────────────── */}
         <Animated.View style={tailStyle}>
@@ -638,11 +553,10 @@ export default function StreakCeremony({
             <Text style={styles.tail}>{tailFor(streak, moreToday)}</Text>
           )}
         </Animated.View>
-      </Animated.View>
+      </View>
 
       {/* THE WAY OUT, on a ledge rather than a fade. Dimming on press is what a
-          DISABLED control does; every other button in the app depresses into its
-          own lip. */}
+          DISABLED control does; every other button in the app depresses. */}
       <Animated.View style={ctaStyle} pointerEvents={ready ? 'auto' : 'none'}>
         <View style={{ paddingBottom: LIP.button }}>
           <View pointerEvents="none" style={styles.btnLip} />
@@ -660,125 +574,155 @@ export default function StreakCeremony({
   );
 }
 
+const PAD_H = BAND_H + PAGE_H;
+
 const styles = StyleSheet.create({
-  // CLIPPED, because the leaf is thrown further than the screen is wide. A flake
-  // leaves the rim at 72 and travels up to 138 more, which is 210 from a centre
-  // that sits 195 from the edge — so without this the burst extends the document
-  // and the whole page can be scrolled sideways. Flakes fading out past the edge
-  // is what a burst should do; a page that scrolls is not.
-  root: { flex: 1, backgroundColor: PAPER, paddingHorizontal: 28, paddingBottom: 40, paddingTop: 60, overflow: 'hidden' },
+  // CLIPPED, because the torn page falls off the bottom and the sparks are
+  // thrown wide; without this the page grows a scrollbar under the reader.
+  root: { flex: 1, backgroundColor: PAPER, paddingHorizontal: 28, paddingBottom: 40, paddingTop: 58, overflow: 'hidden' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  eyebrow: {
-    fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 4,
-    color: INK_SOFT, marginBottom: 26,
+  tagWrap: { alignSelf: 'center', paddingBottom: 3 },
+  tagLip: { position: 'absolute', left: 0, right: 0, top: 3, bottom: 0, borderRadius: 999, backgroundColor: INK },
+  tag: {
+    borderRadius: 999, paddingHorizontal: 16, paddingVertical: 7,
+    borderWidth: LINE, borderColor: INK, backgroundColor: STREAK_DEEP,
+  },
+  tagText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 2.4, color: PAPER },
+
+  pad: { width: PAD_W, height: PAD_H + 12, marginTop: 10 },
+  under: {
+    position: 'absolute', width: PAD_W, height: PAGE_H,
+    borderRadius: R, borderWidth: LINE, borderColor: INK, backgroundColor: PAPER_LIT,
+    boxShadow: `0px 3px 0px ${SHEET_SHADE}`,
+  },
+  pageNew: {
+    position: 'absolute', left: 0, top: BAND_H, width: PAD_W, height: PAGE_H,
+    borderBottomLeftRadius: R, borderBottomRightRadius: R,
+    borderWidth: LINE, borderColor: INK, backgroundColor: PAPER_LIT, overflow: 'hidden',
+  },
+  pageOld: {
+    position: 'absolute', left: 0, top: BAND_H, width: PAD_W, height: PAGE_H,
+    borderBottomLeftRadius: R, borderBottomRightRadius: R,
+    borderWidth: LINE, borderColor: INK, backgroundColor: PAPER_LIT,
+    transformOrigin: '0% 0%',
+  },
+  fill: { flex: 1 },
+  pageFace: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 42, paddingRight: 46 },
+  numBox: { alignItems: 'center', justifyContent: 'center' },
+  // LINING FIGURES: Playfair's defaults are old-style, and 3, 4, 5, 7 and 9 hang
+  // below the baseline.
+  num: {
+    fontFamily: 'PlayfairDisplay_700Bold', includeFontPadding: false, textAlign: 'center',
+    fontVariant: ['lining-nums'], color: INK,
+  },
+  numDepth: { position: 'absolute', color: mix(STREAK_EMBER, INK, 0.45) },
+
+  band: {
+    position: 'absolute', left: 0, top: 0, width: PAD_W, height: BAND_H + LINE,
+    borderTopLeftRadius: R, borderTopRightRadius: R,
+    borderWidth: LINE, borderColor: INK, backgroundColor: STREAK_EMBER,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  },
+  bandText: { fontFamily: 'Inter_700Bold', fontSize: 14, letterSpacing: 2.6, color: PAPER_LIT, marginTop: 4 },
+  glint: { position: 'absolute', left: 0, top: -30, width: 22, height: BAND_H + 60, backgroundColor: SHINE },
+  ring: {
+    position: 'absolute', top: -RING * 0.9, width: RING, height: RING * 2.1, borderRadius: RING / 2,
+    borderWidth: LINE * 0.8, borderColor: INK, backgroundColor: PAPER_LIT,
   },
 
-  markWrap: { width: BOX, height: BOX, alignItems: 'center', justifyContent: 'center' },
-  shadow: {
-    position: 'absolute', bottom: (BOX - SEAL) / 2 - 6,
-    width: SEAL, height: 26, borderRadius: 13, backgroundColor: INK,
-  },
-  seal: { width: SEAL, height: SEAL, alignItems: 'center', justifyContent: 'center' },
-  sealFace: {
-    width: SEAL, height: SEAL, borderRadius: SEAL / 2,
-    borderWidth: 1.5, borderColor: METAL.rim,
-    alignItems: 'center', justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  sweep: {
-    position: 'absolute', top: -SEAL * 0.5,
-    width: SEAL * 0.42, height: SEAL * 2,
-  },
   stamp: {
-    position: 'absolute', width: STAMP_RING, height: STAMP_RING,
-    alignItems: 'center', justifyContent: 'center',
-    // OPTICALLY CENTRED, NOT BOX-CENTRED. Flex centres the two line boxes on the
-    // ring exactly; the INK still sits high, because Special Elite carries its
-    // caps near the top of the em box and reserves the rest for descenders an
-    // all-caps legend never uses.
-    paddingTop: 8,
+    position: 'absolute', left: STAMP_X - STAMP_RING / 2, top: STAMP_Y - STAMP_RING / 2,
+    width: STAMP_RING, height: STAMP_RING, alignItems: 'center', justifyContent: 'center',
+    // OPTICALLY CENTRED: Special Elite carries its caps near the top of the em
+    // box, so two all-caps lines centred on their boxes sit high.
+    paddingTop: 4,
   },
   stampRing: {
     position: 'absolute', width: STAMP_RING, height: STAMP_RING, borderRadius: STAMP_RING / 2,
-    borderWidth: 2, borderColor: STREAK_WASH, opacity: 0.55,
+    borderWidth: 3, borderColor: STREAK_EMBER,
   },
   stampWord: {
     fontFamily: 'SpecialElite_400Regular',
     fontSize: STAMP_SIZE,
     lineHeight: STAMP_SIZE * 1.06,
     letterSpacing: 0.6,
-    // Paper, not sand: the legend sits on the ember face, where sand is 3.53:1.
-    color: PAPER,
-    // includeFontPadding is what put the league numeral low in its disc. A
-    // typewriter face carries deep, asymmetric padding, so two stacked lines
-    // inside a ring are centred on the box rather than on the glyphs without it.
+    // Ink, pressed: the ember itself, which reads 4.85:1 on the white page.
+    color: STREAK_EMBER,
     includeFontPadding: false,
     textAlign: 'center',
-    textShadowColor: 'rgba(26, 26, 26, 0.4)',
-    textShadowOffset: { width: 1, height: 1.6 },
-    textShadowRadius: 1.2,
-  },
-  collar: {
-    position: 'absolute', width: SEAL + 20, height: SEAL + 20, borderRadius: (SEAL + 20) / 2,
-    borderWidth: 3, borderColor: STREAK_DEEP,
-  },
-  pressRing: {
-    position: 'absolute', width: SEAL, height: SEAL, borderRadius: SEAL / 2,
-    borderWidth: 3, borderColor: STREAK_EMBER,
-  },
-  leafOrigin: {
-    position: 'absolute', left: BOX / 2, top: BOX / 2,
-    width: 0, height: 0, alignItems: 'center', justifyContent: 'center',
   },
 
-  count: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 84,
-    color: STREAK_EMBER,
-    marginTop: 18,
-    includeFontPadding: false,
+  // The die's origin is the stamp's centre in pad coordinates.
+  dieOrigin: { position: 'absolute', left: STAMP_X, top: BAND_H + STAMP_Y, width: 0, height: 0 },
+  die: { position: 'absolute', left: -DIE_W / 2, top: -96, width: DIE_W, height: 100, alignItems: 'center', transformOrigin: '50% 100%' },
+  dieKnob: {
+    width: 34, height: 34, borderRadius: 17, borderWidth: LINE, borderColor: INK, backgroundColor: WOOD_LIT,
   },
-  dayWord: {
-    fontFamily: 'Inter_700Bold', fontSize: 11, color: INK_SOFT,
-    letterSpacing: 3.4, marginTop: 4,
+  dieNeck: {
+    width: 16, height: 22, marginTop: -3, borderWidth: LINE, borderColor: INK, backgroundColor: WOOD,
   },
+  dieBlock: {
+    width: DIE_W - 8, height: 30, marginTop: -2, borderRadius: 6,
+    borderWidth: LINE, borderColor: INK, backgroundColor: WOOD, overflow: 'hidden',
+    borderBottomWidth: 6, borderBottomColor: WOOD_SHADE,
+  },
+  dieBlockLit: { position: 'absolute', left: 6, top: 4, width: DIE_W - 36, height: 5, borderRadius: 3, backgroundColor: WOOD_LIT },
+  dieRubber: {
+    width: DIE_W, height: 12, marginTop: -2, borderRadius: 4,
+    borderWidth: LINE, borderColor: INK, backgroundColor: STREAK_DEEP,
+  },
+  stroke: {
+    position: 'absolute', left: -9, top: -2.5, width: 18, height: 5, borderRadius: 2.5, backgroundColor: INK,
+  },
+  spark: { position: 'absolute', left: 0, top: 0, borderWidth: 1.6, borderColor: INK },
 
+  daysLabel: {
+    fontFamily: 'Inter_700Bold', fontSize: 12, color: INK_SOFT, letterSpacing: 3.2, marginTop: 22,
+  },
   restNote: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 13,
-    color: INK_SOFT, marginTop: 12, textAlign: 'center',
+    color: INK_SOFT, marginTop: 10, textAlign: 'center',
   },
 
-  week: { flexDirection: 'row', marginTop: 26 },
+  week: { flexDirection: 'row', marginTop: 24 },
   dayCol: { alignItems: 'center' },
-  dayLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, color: INK_SOFT, marginBottom: 7 },
-  dayLabelOn: { color: INK, fontFamily: 'Inter_700Bold' },
-  // The rail sits behind the tokens and is measured from the row's own left
-  // edge, so its top must clear the weekday labels above it.
-  railWrap: { position: 'absolute', top: 24, height: 10, overflow: 'hidden', borderRadius: 5 },
-  rail: { flex: 1, borderRadius: 5 },
-  discBox: { width: DISC, height: DISC, alignItems: 'center', justifyContent: 'center' },
-  disc: { width: DISC, height: DISC, borderRadius: DISC / 2 },
-  dayPressRing: {
-    position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
-    borderWidth: 1.5, borderColor: STREAK_EMBER,
+  dayLabel: {
+    fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: LABEL_H, color: INK_SOFT, marginBottom: LABEL_GAP,
   },
-  rested: { backgroundColor: STREAK_WASH, borderWidth: 1, borderColor: STREAK_EMBER },
-  missed: { borderWidth: 1.5, borderColor: FAINT },
-  future: { borderWidth: 1.5, borderColor: FAINT, opacity: 0.55 },
+  dayLabelOn: { color: INK, fontFamily: 'Inter_700Bold' },
+  // Behind the tokens, through their centres.
+  rail: {
+    position: 'absolute', top: LABEL_H + LABEL_GAP + DISC / 2 - 6, height: 12, borderRadius: 6,
+    borderWidth: LINE, borderColor: INK, backgroundColor: mix(STREAK_EMBER, PAPER, 0.55),
+  },
+  discBox: { width: DISC, height: DISC, alignItems: 'center', justifyContent: 'center' },
+  disc: { width: DISC, height: DISC, borderRadius: DISC / 2, overflow: 'hidden' },
+  discOver: { position: 'absolute', left: 0, top: 0 },
+  done: {
+    backgroundColor: STREAK_EMBER, borderWidth: LINE, borderColor: INK,
+    borderBottomWidth: 5, borderBottomColor: STREAK_DEEP,
+  },
+  discGlint: { position: 'absolute', left: 5, top: 4, width: 7, height: 4, borderRadius: 2, backgroundColor: SHINE },
+  dayPing: {
+    position: 'absolute', width: DISC, height: DISC, borderRadius: DISC / 2,
+    borderWidth: 3, borderColor: STREAK_EMBER,
+  },
+  rested: { backgroundColor: STREAK_WASH, borderWidth: LINE, borderColor: STREAK_EMBER },
+  missed: { backgroundColor: LOCK_FACE, borderWidth: LINE, borderColor: LOCK_EDGE },
+  future: { borderWidth: LINE, borderColor: LOCK_EDGE, backgroundColor: PAPER_LIT },
 
   milestone: {
     fontFamily: 'Inter_700Bold', fontSize: 12, color: STREAK_EMBER,
-    letterSpacing: 2.6, marginTop: 26, textAlign: 'center',
+    letterSpacing: 2.6, marginTop: 24, textAlign: 'center',
   },
   tail: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 15,
-    color: INK_SOFT, marginTop: 26, textAlign: 'center',
+    color: INK_SOFT, marginTop: 24, textAlign: 'center',
   },
 
   btn: { borderRadius: 14, paddingVertical: 18, alignItems: 'center', backgroundColor: STREAK_EMBER },
   btnLip: { position: 'absolute', left: 0, right: 0, top: LIP.button, bottom: 0, borderRadius: 14, backgroundColor: STREAK_DEEP },
-  // The button's face is the ember, so its label is paper (4.85:1). Sand is the
-  // lettering for the DEEP end of this ramp, not for the lit one.
+  // The button's face is the ember, so its label is paper (4.85:1).
   btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: PAPER },
 });

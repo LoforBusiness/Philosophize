@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Modal, View, Text, ScrollView, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withDelay, withTiming, Easing,
+  useSharedValue, useAnimatedStyle, withDelay, withTiming, withSequence, Easing, type SharedValue,
 } from 'react-native-reanimated';
-import StreakBook from '@/components/gamification/StreakBook';
 import StreakCeremony from '@/components/gamification/StreakCeremony';
 import RankUpScreen, { T_BURST } from '@/components/gamification/RankUpScreen';
 import RewardLoafer, { pickLine } from '@/components/gamification/RewardLoafer';
 import BadgeEarned, { BadgeEarnedHeading } from '@/components/gamification/BadgeEarned';
+import Button from '@/components/ui/Button';
 import { RANKS, rankForXP, type RankDef } from '@/data/ranks';
 import type { BadgeDef } from '@/data/badges';
-import { getLessonUnitInfo } from '@/data';
+import { getLessonById, getLessonUnitInfo } from '@/data';
 import { landOnBranch } from './lessonNav';
 import { useUserDataStore, previewDailyActivity, previewNewBadges, daysBetween, type DayInfo } from '@/stores/userDataStore';
-import { restDaysHeld } from '@/constants/streak';
+import { restDaysHeld, STREAK_EMBER, STREAK_DEEP } from '@/constants/streak';
 import NotifyPrompt from './NotifyPrompt';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -22,6 +22,9 @@ import { bankedLesson } from '@/lib/analytics/lessonClock';
 import {
   XP_PER_LESSON_COMPLETION, XP_PER_CORRECT_ANSWER, XP_PER_PERFECT_LESSON,
 } from '@/constants/xp';
+import { C, BRANCH, type BranchKey } from '@/constants/design';
+import { TEAL, DEEP, SHINE, LOCK_EDGE, lipOf, mix } from '@/components/shared/tone';
+import { LINE } from '@/components/shared/drawn';
 import { track } from '@/lib/posthog';
 import { cue } from '@/lib/feedback';
 import { lessonHasSound } from '@/components/lesson/cinematic/lessonSound';
@@ -36,12 +39,6 @@ interface Props {
   onDone: () => void;
 }
 
-// Light reward screen: ink text/marks on paper; the ink button keeps paper text.
-const Ink = '#1A1A1A';
-const InkSoft = '#6B6B6B';
-const Rule = '#E4E1D8';
-const Paper = '#FAFAF7';
-
 function dateStr(d: Date) {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
@@ -52,31 +49,26 @@ function dateStr(d: Date) {
 // what the store will write cannot afford its own idea of the shape.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE NUMBER, INKED ON.
+// THE RECEIPT, STRUCK (2026-09-29).
 //
-// It used to arrive on a spring — scale 0.6 → 1 at damping 11, which overshoots and
-// wobbles, and a wobbling number reads as a cheap toy rather than as a result. This
-// draws it instead: a paper-coloured cover slides off left-to-right, so the digits
-// appear the way a stroke appears under a nib, while the value counts up underneath.
-// No bounce anywhere in it.
+// "I want you to redesign the other part of the reward, how it looks, how it's
+// animated." It was a grey page: an eyebrow, a handwritten number wiped on, a
+// ruled tally in 10px capitals and a flat black button — the one screen every
+// lesson ends on, drawn in none of the app's own furniture.
 //
-// IT IS SET IN CAVEAT, WHICH IS WHY THE DIGITS GET THEIR OWN CELLS.
+// It is built from the depth kit now, the way the tabs are: a hero card on a
+// ledge in the LESSON'S BRANCH HUE (R18 strikes every control in it, so the
+// payout is the same colour as the questions that earned it), a teal XP coin that
+// bumps on every tick of the count and turns over when it lands, the tally as
+// three chips that drop onto the card one after another, and two tiles for the
+// accuracy and the day streak. Every piece arrives on a spring that overshoots
+// and settles, in reading order, top to bottom.
 //
-// Playfair is the app's headline face and it was wrong here — a high-contrast Didone
-// number is the most PRINTED thing on a screen whose whole identity is a pen. Caveat
-// is the hand, and the moment the number is handwritten the count-up has to change
-// too: a script face has no tabular figures at all, its 1 is less than half the width
-// of its 6, so a value climbing 0 → 7 → 43 → 60 re-centres itself on almost every
-// frame. The count wasn't "quick", it was sliding around underneath itself.
-//
-// So each digit gets a fixed cell, right-aligned, as many cells as the FINAL value
-// needs and blank ones to the left until it reaches them. Nothing moves horizontally
-// for the whole count — the digits just change, which is what a counter should do.
+// WHAT DID NOT MOVE: the leaning figure and his bubble (RewardLoafer, untouched,
+// in the same slot with the same props), the badges, the permission ask, and
+// every sound time — the count still starts at XP_AFTER_CHIME and ticks
+// XP_TICKS times.
 // ─────────────────────────────────────────────────────────────────────────────
-const XP_SIZE = 104;
-// Caveat's digits run about 0.5em; the cell is a shade wider so the widest of them
-// has room to centre without touching its neighbour or the wipe's clip edge.
-const XP_CELL = Math.round(XP_SIZE * 0.54);
 
 /**
  * How many ticks the count-up makes, whatever it is counting.
@@ -85,8 +77,7 @@ const XP_CELL = Math.round(XP_SIZE * 0.54);
  * interval either, because the count eases out — the number slows down at the end
  * and evenly-spaced ticks would keep hammering while it had stopped moving.
  * Ticking every Nth UNIT ties the sound to the digits, so the run rattles as the
- * number races and thins out as it settles, which is the count made audible
- * rather than a metronome laid over it.
+ * number races and thins out as it settles.
  */
 const XP_TICKS = 14;
 
@@ -94,98 +85,150 @@ const XP_TICKS = 14;
  * How far into the rank-up sound its burst falls, in ms.
  *
  * Matches `H = 1.33` in `riseAndBurst()` in scripts/make-sounds.mjs. The sound
- * BUILDS while RankUpScreen's ring fills and bursts as it closes, so it is
- * started this much before `T_BURST` — 120ms after the screen appears, which is
- * the moment the ring starts filling.
+ * BUILDS while RankUpScreen's stones light and bursts as the new pin comes up, so
+ * it is started this much before `T_BURST` — 120ms after the screen appears.
  */
 const RANKUP_PEAK = 1330;
 
 /**
  * When the XP number starts counting, in ms after the screen appears.
  *
- * Set by the SOUND, which is the unusual direction but the right one here: the
- * lesson-complete sound in scripts/make-sounds.mjs swooshes into its chord at
- * 300ms and the chord's attack has spent itself by about 800. The counter comes
- * in just after that, so the reader hears an ending and then a tally rather than
- * both at once.
+ * Set by the SOUND: the lesson-complete sound swooshes into its chord at 300ms
+ * and the chord's attack has spent itself by about 800. The counter comes in just
+ * after, so the reader hears an ending and then a tally rather than both at once.
  */
 const XP_AFTER_CHIME = 950;
+const COUNT_MS = 980;
 
-function InkedNumber({ value, delay, tick }: { value: number; delay: number; tick?: boolean }) {
+// ── the number ───────────────────────────────────────────────────────────────
+// FIXED CELLS. A count set in proportional figures re-centres itself on almost
+// every frame — a 1 is half the width of a 6 — so each digit gets a cell as wide
+// as the widest, as many as the FINAL value needs, right-aligned. Nothing moves
+// sideways for the whole count; the digits just change. A cell the count has
+// not reached yet shows a faint 0, the way an odometer does, so the prefix never
+// floats beside an empty gap.
+const XP_SIZE = 70;
+const XP_CELL = Math.round(XP_SIZE * 0.62);
+
+const backOut = (u: number) => {
+  'worklet';
+  const k = 1.9;
+  const v = u - 1;
+  return 1 + (k + 1) * v * v * v + k * v * v;
+};
+
+/** Arrives on a spring that overshoots and settles — a thing landing. */
+function Pop({ delay, children, style, lift = 18 }: {
+  delay: number; children: ReactNode; style?: StyleProp<ViewStyle>; lift?: number;
+}) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withTiming(1, { duration: 420, easing: Easing.linear }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const st = useAnimatedStyle(() => {
+    const u = v.value;
+    return {
+      opacity: Math.min(1, u * 4),
+      transform: [{ translateY: (1 - Math.min(1, u * 1.6)) * lift }, { scale: u <= 0 ? 0.7 : 0.7 + 0.3 * backOut(u) }],
+    };
+  });
+  return <Animated.View style={[style, st]}>{children}</Animated.View>;
+}
+
+/**
+ * A number that counts up from zero after `delay`. `onTick` fires on every
+ * sounded step so the thing beside it can bump in time with the sound; the
+ * count itself is a leaf of a few <Text> nodes, which is cheap to re-render.
+ */
+function CountUp({ value, delay, size, color, tick, onTick, onLand, prefix = '', suffix = '' }: {
+  value: number; delay: number; size: number; color: string; tick?: boolean;
+  onTick?: () => void; onLand?: () => void; prefix?: string; suffix?: string;
+}) {
   const [shown, setShown] = useState(0);
-  const wipe = useSharedValue(0);
   const cells = Math.max(1, String(Math.max(0, value)).length);
-  const w = cells * XP_CELL;
+  const cell = Math.round(size * 0.62);
 
   useEffect(() => {
-    wipe.value = withDelay(delay, withTiming(1, { duration: 760, easing: Easing.out(Easing.cubic) }));
-    if (value <= 0) return;
-    const DURATION = 980;
+    if (value <= 0) { onLand?.(); return; }
     const t0 = Date.now() + delay;
     const stride = Math.max(1, Math.ceil(value / XP_TICKS));
     let sounded = 0;   // the value the last tick was struck at
     let step = 0;      // where we are in the three-note cycle
     const id = setInterval(() => {
-      const t = Math.min(1, (Date.now() - t0) / DURATION);
+      const t = Math.min(1, (Date.now() - t0) / COUNT_MS);
       if (t < 0) return;
       const eased = 1 - Math.pow(1 - t, 3);
       const next = Math.round(eased * value);
       setShown(next);
       // The last tick fires on arrival even when the remainder is short of a
       // stride, so the run always resolves on the final number.
-      if (tick && next > sounded && (next - sounded >= stride || t >= 1)) {
+      if (next > sounded && (next - sounded >= stride || t >= 1)) {
         sounded = next;
-        cue('tick', step++);
+        if (tick) cue('tick', step++);
+        onTick?.();
       }
-      if (t >= 1) clearInterval(id);
+      if (t >= 1) { clearInterval(id); onLand?.(); }
     }, 16);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const cover = useAnimatedStyle(() => ({ transform: [{ translateX: wipe.value * (w + 12) }] }));
-
-  // Right-aligned into the fixed cells: 7 is [ ][7], 60 is [6][0], and the 6 lands in
-  // the cell the blank was holding rather than shoving the 7 sideways.
   const digits = String(shown).padStart(cells, ' ').split('');
-
+  const lh = Math.round(size * 1.12);
   return (
-    <View style={[styles.xpNumWrap, { width: w, height: Math.round(XP_SIZE * 1.02) }]}>
-      {digits.map((d, k) => (
-        <Text key={k} style={[styles.xpNumber, { left: k * XP_CELL, width: XP_CELL }]}>
-          {d === ' ' ? '' : d}
-        </Text>
-      ))}
-      <Animated.View style={[styles.wipeCover, cover]} pointerEvents="none" />
+    <View style={styles.countRow}>
+      {prefix ? <Text style={[styles.countFig, { fontSize: size, lineHeight: lh, color }]}>{prefix}</Text> : null}
+      <View style={{ width: cells * cell, height: lh }}>
+        {digits.map((d, k) => (
+          <Text
+            key={k}
+            style={[
+              styles.countFig, styles.countCell,
+              { left: k * cell, width: cell, fontSize: size, lineHeight: lh, color: d === ' ' ? LOCK_EDGE : color },
+            ]}
+          >
+            {d === ' ' ? '0' : d}
+          </Text>
+        ))}
+      </View>
+      {suffix ? <Text style={[styles.countFig, { fontSize: size, lineHeight: lh, color }]}>{suffix}</Text> : null}
     </View>
   );
 }
 
-/** A rule that draws itself on, left to right. */
-function DrawnRule({ delay, width = '100%' as const }: { delay: number; width?: any }) {
-  const v = useSharedValue(0);
-  useEffect(() => {
-    v.value = withDelay(delay, withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) }));
-  }, []);
-  const st = useAnimatedStyle(() => ({ transform: [{ scaleX: v.value }] }));
-  return <Animated.View style={[styles.drawnRule, { width }, st]} />;
-}
-
-/** One line of the tally, sliding up as it lands. */
-function TallyRow({ label, amount, delay }: { label: string; amount: number; delay: number }) {
-  const v = useSharedValue(0);
-  useEffect(() => {
-    v.value = withDelay(delay, withTiming(1, { duration: 340, easing: Easing.out(Easing.cubic) }));
-  }, []);
+/**
+ * The XP coin: flat teal, ink rim, a ledge, a glint. It bumps on each tick of
+ * the count and turns over once when the count lands.
+ */
+function XpCoin({ bump, spin }: { bump: SharedValue<number>; spin: SharedValue<number> }) {
   const st = useAnimatedStyle(() => ({
-    opacity: v.value,
-    transform: [{ translateY: (1 - v.value) * 7 }],
+    transform: [
+      { perspective: 500 },
+      { rotateY: `${spin.value * 360}deg` },
+      { scale: 1 + bump.value * 0.14 },
+    ],
   }));
   return (
-    <Animated.View style={[styles.tallyRow, st]}>
-      <Text style={styles.tallyLabel}>{label}</Text>
-      <View style={styles.tallyLead} />
-      <Text style={styles.tallyAmount}>+{amount}</Text>
+    <Animated.View style={[styles.coin, st]}>
+      <View style={styles.coinGlint} />
+      <Text style={styles.coinText}>XP</Text>
     </Animated.View>
+  );
+}
+
+/** A small struck card: a coloured band with a label, a white face under it. */
+function Tile({ hue, label, children }: { hue: string; label: string; children: ReactNode }) {
+  return (
+    <View style={[styles.tileWrap]}>
+      <View style={[styles.tileLip, { backgroundColor: lipOf(hue) }]} />
+      <View style={styles.tile}>
+        <View style={[styles.tileBand, { backgroundColor: hue }]}>
+          <Text style={styles.tileLabel} numberOfLines={1}>{label}</Text>
+        </View>
+        <View style={styles.tileBody}>{children}</View>
+      </View>
+    </View>
   );
 }
 
@@ -443,6 +486,21 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     return () => clearTimeout(id);
   }, [sounded, phase]);
 
+  // The coin beside the count: a bump on every sounded tick, one turn on landing.
+  // Written from the count's own interval, so the bump IS the tick, not a guess
+  // at when it might be.
+  const bump = useSharedValue(0);
+  const spin = useSharedValue(0);
+  const onXpTick = () => {
+    bump.value = withSequence(
+      withTiming(1, { duration: 55, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 170, easing: Easing.out(Easing.quad) }),
+    );
+  };
+  const onXpLand = () => {
+    spin.value = withTiming(1, { duration: 560, easing: Easing.out(Easing.cubic) });
+  };
+
   // ── EVERY HOOK IS ABOVE THIS LINE ─────────────────────────────────────────
   //
   // Section 17, rule 1, and it is the rule that has cost this app the most: a
@@ -500,77 +558,102 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
     );
   }
 
+  // The lesson's own branch hue, the colour its questions were struck in (R18).
+  const found = getLessonById(lessonId);
+  const hue = BRANCH[(branchSlug ?? found?.branch.slug ?? '') as BranchKey] ?? C.HUE;
+  const title = found?.lesson.title ?? null;
+  const accuracy = total > 0 ? Math.round((100 * correct) / total) : null;
+  const chipLabel = (label: string) =>
+    label === 'LESSON COMPLETE' ? 'Finished' : label === 'NOTHING MISSED' ? 'Perfect' : label.toLowerCase().replace(/^(\d+) answered right$/, '$1 right');
+
   return (
     <Modal visible animationType="fade" transparent={false} onRequestClose={handleContinue}>
       <View style={styles.root}>
         {/* SCROLLS ONLY WHEN IT HAS TO. `flexGrow` + centred content keeps the
-            unchanged screen exactly where it was, but a 104px number, a
-            three-line tally, the streak week AND up to three badge cards do not
-            fit a short phone — and this view has no overflow, so the surplus
-            would have been silently cropped rather than reachable. */}
+            screen where it is, but the cards AND up to three badge cards do not
+            fit a short phone, and this view has no overflow, so the surplus
+            would be silently cropped rather than reachable. */}
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.center}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.eyebrow}>LESSON COMPLETE</Text>
-          <DrawnRule delay={120} width={54} />
+          <Pop delay={40} lift={-10} style={styles.tagWrap}>
+            <View style={styles.tagLip} />
+            <View style={[styles.tag, { backgroundColor: hue }]}>
+              <Text style={styles.tagText}>LESSON COMPLETE</Text>
+            </View>
+          </Pop>
+          {title ? (
+            <Pop delay={120} lift={8}>
+              <Text style={styles.title} numberOfLines={2}>{title}</Text>
+            </Pop>
+          ) : null}
 
-          {/* the number, drawn on */}
-          <View style={styles.xpBlock}>
-            {/* 620ms, not 260. THE FINISHING SOUND GETS TO FINISH FIRST.
-                The completion phrase lifts and lands inside about 600ms, and the
-                XP counter's ticks are supposed to follow it, not play over the top
-                of it — an ending and a tally arriving together are two things
-                happening at once instead of one thing after another. The 360ms it
-                costs the number is not dead air either: the eyebrow and its rule
-                are already on screen, so it reads as a beat of anticipation before
-                the score, which is what the pause is for on every reward screen
-                that has ever felt good. */}
-            <InkedNumber value={xp} delay={XP_AFTER_CHIME} tick={sounded} />
-            <Text style={styles.xpLabel}>XP EARNED</Text>
+          {/* THE HERO: what the lesson paid, on the branch's own ledge. */}
+          <Pop delay={220} style={styles.heroWrap}>
+            <View style={[styles.heroLip, { backgroundColor: lipOf(hue) }]} />
+            <View style={styles.hero}>
+              <View style={[styles.heroBand, { backgroundColor: hue }]}>
+                <Text style={styles.heroBandText}>XP EARNED</Text>
+              </View>
+              <View style={styles.heroBody}>
+                <XpCoin bump={bump} spin={spin} />
+                <CountUp
+                  value={xp}
+                  delay={XP_AFTER_CHIME}
+                  size={XP_SIZE}
+                  color={C.ink}
+                  tick={sounded}
+                  onTick={onXpTick}
+                  onLand={onXpLand}
+                  prefix="+"
+                />
+              </View>
+
+              {/* …and where it came from: one chip per part, dropping on in turn. */}
+              {tallyAdds && (
+                <View style={styles.chips}>
+                  {parts.map((p, k) => (
+                    <Pop key={p.label} delay={1000 + k * 260} lift={-14} style={styles.chipWrap}>
+                      <View style={[styles.chipLip, { backgroundColor: mix(hue, C.paper, 0.45) }]} />
+                      <View style={[styles.chip, { borderColor: C.ink }]}>
+                        <Text style={[styles.chipAmount, { color: hue }]}>+{p.amount}</Text>
+                        <Text style={styles.chipLabel}>{chipLabel(p.label)}</Text>
+                      </View>
+                    </Pop>
+                  ))}
+                </View>
+              )}
+            </View>
+          </Pop>
+
+          {/* THE STREAK, AS A RECEIPT. The celebrating is done by StreakCeremony,
+              which has just had the whole screen; saying it twice would make the
+              second telling the flat one. So this is a tile, and the same tile
+              whether or not a ceremony played on the way here. */}
+          <View style={styles.tiles}>
+            <Pop delay={420} style={styles.tileSlot}>
+              <Tile hue={DEEP} label="ACCURACY">
+                {accuracy === null ? (
+                  <Text style={styles.tileValue}>—</Text>
+                ) : (
+                  <CountUp value={accuracy} delay={1150} size={30} color={C.ink} suffix="%" />
+                )}
+                {total > 0 ? <Text style={styles.tileSub}>{correct} of {total} right</Text> : null}
+              </Tile>
+            </Pop>
+            <Pop delay={560} style={styles.tileSlot}>
+              <Tile hue={STREAK_EMBER} label="STREAK">
+                <Text style={styles.tileValue}>{info?.streak ?? 0}</Text>
+                <Text style={styles.tileSub}>{(info?.streak ?? 0) === 1 ? 'day in a row' : 'days in a row'}</Text>
+              </Tile>
+            </Pop>
           </View>
-
-          {/* …and where it came from */}
-          {tallyAdds && (
-            <View style={styles.tally}>
-              {parts.map((p, k) => (
-                <TallyRow key={p.label} label={p.label} amount={p.amount} delay={1000 + k * 190} />
-              ))}
-            </View>
-          )}
-
-          {total > 0 && !tallyAdds && (
-            <Text style={styles.correct}>
-              {correct} / {total} correct
-            </Text>
-          )}
-
-          {/* THE STREAK, AS A RECEIPT RATHER THAN A CELEBRATION.
-
-              This used to be where the whole thing happened — a panel three
-              quarters of the way down a scrolling receipt, under an XP counter.
-              The celebrating is done by StreakCeremony, which has just had the
-              entire screen to do it in; saying it twice would make the second
-              telling the flat one. So both cases read the same line now, and the
-              only difference the reader sees is whether they were shown a
-              ceremony on the way here.
-
-              The rest-day note moved into the ceremony with it: a rest day is
-              spent silently and the reader is told AFTER their streak was saved,
-              never asked beforehand, because a prompt at that moment turns a
-              kindness into one more decision on a day they already missed. */}
-          {info && (
-            <View style={styles.streakSmallRow}>
-              <StreakBook value={info.streak} size={52} />
-              <Text style={styles.streakSmall}>{info.streak}-day streak</Text>
-            </View>
-          )}
 
           {/* THE ONE PERMISSION ASK, and this is where it is spent — see
               NotifyPrompt. It renders itself away unless the OS has actually
-              refused so far and the reader has not been asked before, so it
-              appears once in a lifetime and never for anyone already granted. */}
+              refused so far and the reader has not been asked before. */}
           <NotifyPrompt />
 
           {/* …and anything the lesson just struck. */}
@@ -589,13 +672,9 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
           <RewardLoafer line={pickLine(`${lessonId}:${info?.streak ?? 0}`)} delay={1700} />
         </View>
 
-        <Pressable
-          onPress={handleContinue}
-          disabled={advancing}
-          style={({ pressed }) => [styles.btn, (pressed || advancing) && { opacity: 0.8 }]}
-        >
-          <Text style={styles.btnText}>Continue →</Text>
-        </Pressable>
+        <Pop delay={700} lift={12}>
+          <Button label="Continue →" size="lg" onPress={handleContinue} disabled={advancing} />
+        </Pop>
       </View>
     </Modal>
   );
@@ -604,90 +683,88 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Paper,
-    paddingHorizontal: 28,
+    backgroundColor: C.paper,
+    paddingHorizontal: 24,
     paddingBottom: 40,
-    paddingTop: 56,
+    paddingTop: 52,
   },
   scroll: { flex: 1 },
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 6 },
-  badges: { alignSelf: 'stretch', marginTop: 4 },
+  badges: { alignSelf: 'stretch', marginTop: 8 },
 
-  eyebrow: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    letterSpacing: 3.4,
-    color: InkSoft,
-    marginBottom: 10,
+  tagWrap: { alignSelf: 'center', paddingBottom: 3 },
+  tagLip: { position: 'absolute', left: 0, right: 0, top: 3, bottom: 0, borderRadius: 999, backgroundColor: C.ink },
+  tag: {
+    borderRadius: 999, paddingHorizontal: 16, paddingVertical: 7,
+    borderWidth: LINE, borderColor: C.ink,
   },
-  drawnRule: { height: 2, backgroundColor: Ink, transformOrigin: '0% 50%' },
-
-  xpBlock: { alignItems: 'center', marginTop: 10 },
-  xpNumWrap: { position: 'relative', overflow: 'hidden' },
-  xpNumber: {
-    position: 'absolute',
-    top: 0,
-    fontFamily: 'Caveat_700Bold',
-    fontSize: XP_SIZE,
-    color: Ink,
-    lineHeight: Math.round(XP_SIZE * 1.02),
-    textAlign: 'center',
-    // Caveat has no tabular figures — the fixed cells above are what hold the count
-    // still. Android's default font padding would also shove the baseline down inside
-    // a box sized by arithmetic (D29).
-    includeFontPadding: false,
-  },
-  wipeCover: { position: 'absolute', left: -3, top: 0, bottom: 0, right: -8, backgroundColor: Paper },
-  xpLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    color: InkSoft,
-    letterSpacing: 3.4,
-    marginTop: 2,
+  tagText: { fontFamily: 'Inter_700Bold', fontSize: 11.5, letterSpacing: 2.4, color: C.paper },
+  title: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 21, lineHeight: 27, color: C.ink,
+    textAlign: 'center', marginTop: 12, paddingHorizontal: 12,
   },
 
-  // The tally: a printed receipt for the number above it.
-  tally: { alignSelf: 'stretch', marginTop: 16, paddingHorizontal: 10, gap: 8 },
-  tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  tallyLabel: {
-    fontFamily: 'Inter_500Medium', fontSize: 10.5, letterSpacing: 1.6, color: InkSoft,
+  heroWrap: { alignSelf: 'stretch', marginTop: 18, paddingBottom: 6 },
+  heroLip: { position: 'absolute', left: 0, right: 0, top: 6, bottom: 0, borderRadius: 18 },
+  hero: {
+    backgroundColor: '#FFFFFF', borderRadius: 18, borderWidth: LINE, borderColor: C.ink, overflow: 'hidden',
   },
-  tallyLead: { flex: 1, height: 1, backgroundColor: Rule },
-  tallyAmount: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, color: Ink, fontVariant: ['tabular-nums'],
+  heroBand: {
+    paddingVertical: 8, alignItems: 'center',
+    borderBottomWidth: LINE, borderBottomColor: C.ink,
+  },
+  heroBandText: { fontFamily: 'Inter_700Bold', fontSize: 12, letterSpacing: 3, color: C.paper },
+  heroBody: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14,
+    paddingTop: 14, paddingBottom: 6,
   },
 
-  correct: { fontFamily: 'Inter_700Bold', fontSize: 15, color: Ink, marginTop: 14 },
+  countRow: { flexDirection: 'row', alignItems: 'center' },
+  countFig: {
+    fontFamily: 'PlayfairDisplay_700Bold', textAlign: 'center',
+    fontVariant: ['lining-nums'], includeFontPadding: false,
+  },
+  countCell: { position: 'absolute', top: 0 },
 
-  streakHeading: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    color: InkSoft,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    marginTop: 10,
-    marginBottom: 2,
+  coin: {
+    width: 58, height: 58, borderRadius: 29, backgroundColor: TEAL,
+    borderWidth: LINE, borderColor: C.ink, borderBottomWidth: 6, borderBottomColor: DEEP,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
-  restNote: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12.5,
-    color: InkSoft,
-    marginTop: 6,
-    textAlign: 'center',
+  coinGlint: { position: 'absolute', left: 10, top: 7, width: 14, height: 7, borderRadius: 4, backgroundColor: SHINE },
+  coinText: { fontFamily: 'Inter_700Bold', fontSize: 17, color: '#FFFFFF', letterSpacing: 0.5 },
+
+  chips: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6,
+    paddingHorizontal: 8, paddingBottom: 16, paddingTop: 4,
   },
-  weekWrap: { alignSelf: 'stretch', paddingHorizontal: 8, marginTop: 6 },
-  streakSmallRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
-  streakSmall: { fontFamily: 'Inter_500Medium', fontSize: 15, color: InkSoft },
+  chipWrap: { paddingBottom: 3 },
+  chipLip: { position: 'absolute', left: 0, right: 0, top: 3, bottom: 0, borderRadius: 999 },
+  chip: {
+    flexDirection: 'row', alignItems: 'baseline', gap: 5,
+    backgroundColor: '#FFFFFF', borderRadius: 999, borderWidth: 2,
+    paddingHorizontal: 9, paddingVertical: 4,
+  },
+  chipAmount: { fontFamily: 'Inter_700Bold', fontSize: 13, fontVariant: ['tabular-nums'] },
+  chipLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: C.inkSoft },
+
+  tiles: { flexDirection: 'row', alignSelf: 'stretch', gap: 12, marginTop: 14 },
+  tileSlot: { flex: 1 },
+  tileWrap: { paddingBottom: 5 },
+  tileLip: { position: 'absolute', left: 0, right: 0, top: 5, bottom: 0, borderRadius: 16 },
+  tile: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: LINE, borderColor: C.ink, overflow: 'hidden',
+  },
+  tileBand: { paddingVertical: 6, alignItems: 'center', borderBottomWidth: LINE, borderBottomColor: C.ink },
+  tileLabel: { fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 2.2, color: C.paper },
+  tileBody: { alignItems: 'center', paddingTop: 8, paddingBottom: 10 },
+  tileValue: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, lineHeight: 34, color: C.ink,
+    fontVariant: ['lining-nums'], includeFontPadding: false,
+  },
+  tileSub: { fontFamily: 'Inter_500Medium', fontSize: 12, color: C.inkSoft, marginTop: 2 },
 
   // He leans on the right-hand edge, standing on the line above the button.
-  // Room above him so the thought never lands on the streak week beneath it.
+  // Room above him so the thought never lands on the cards beneath it.
   loaferRow: { alignSelf: 'stretch', marginTop: 10, marginBottom: 4 },
-
-  btn: {
-    backgroundColor: Ink,
-    borderRadius: 14,
-    paddingVertical: 18,
-    alignItems: 'center',
-  },
-  btnText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: Paper },
 });
