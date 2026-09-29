@@ -18,7 +18,7 @@ import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/
 import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey } from '@/constants/design';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
-import { openReview } from '@/components/lesson/lessonNav';
+import { openReview, backFromBranch } from '@/components/lesson/lessonNav';
 import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
@@ -328,7 +328,7 @@ export default function BranchDetailScreen() {
       <SafeAreaView style={styles.safe} edges={['top']}>
         {/* Top bar */}
         <View style={styles.topBar}>
-          <Pressable onPress={() => router.back()} hitSlop={10} style={styles.backRow}>
+          <Pressable onPress={() => backFromBranch(branch.slug)} hitSlop={10} style={styles.backRow}>
             <SketchIcon name="back" size={18} color={C.inkSoft} />
             <Text style={styles.brand}>{branch.name.toUpperCase()}</Text>
           </Pressable>

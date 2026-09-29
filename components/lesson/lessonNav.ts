@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { subjectOfBranch } from '@/data/subjects';
 
 // ── THE TWO WAYS INTO AND OUT OF A LESSON THAT CAN STRAND THE LEARN TAB ─────
 //
@@ -80,6 +81,20 @@ export function openReview(branchSlug: string, unitSlug: string) {
  */
 export function openSubject(slug: string, from?: 'home') {
   router.push(`/(app)/branches/subject/${slug}${from ? `?from=${from}` : ''}` as never, { withAnchor: true });
+}
+
+/**
+ * Back from a branch's road to its SUBJECT page (2026-09-29), however the road was
+ * reached. `dismissTo` pops to the subject page when it is in the stack
+ * (`[grid, subject, road]` → `[grid, subject]`) and, when it is not — a road reached
+ * from Home's Continue card or the reward's landing sits straight on the grid —
+ * replaces the ROAD with it: `[grid, road]` → `[grid, subject]`. Both leave the grid
+ * underneath. What is replaced is the screen on top, never the list at the root, so
+ * this is not the replace this file's header warns about.
+ */
+export function backFromBranch(branchSlug: string) {
+  const subject = subjectOfBranch(branchSlug)?.slug ?? 'philosophy';
+  router.dismissTo(`/(app)/branches/subject/${subject}` as never);
 }
 
 /**

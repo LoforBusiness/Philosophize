@@ -160,6 +160,29 @@ else {
   }
 }
 
+// ── AND A ROAD GOES BACK TO ITS SUBJECT (2026-09-29) ─────────────────────────
+//
+// The Learn tab became a grid of subjects, and a branch's road sits one level
+// deeper: grid → subject → road. A road reached from OUTSIDE — Home's Continue card,
+// the reward's landOnBranch — has only the grid under it (the anchor), so a plain
+// `router.back()` would skip the subject page the reader expects to return to.
+// `backFromBranch` is `dismissTo` the subject page: it pops to it when it is in the
+// stack and REPLACES THE ROAD with it when it is not — the one replace this file
+// allows, because what it removes is the road on top, never the list at the root.
+if (fs.existsSync(NAV)) {
+  const navSrc = strip(fs.readFileSync(NAV, 'utf8'));
+  if (!/export function openSubject\(/.test(navSrc)) door.push('lessonNav has no openSubject — Home has no door into a subject page');
+  if (!/export function backFromBranch\([\s\S]*?router\.dismissTo\(/.test(navSrc)) {
+    door.push('lessonNav has no backFromBranch that dismisses to the subject page');
+  }
+}
+{
+  const BR = 'app/(app)/branches/[branchSlug]/index.tsx';
+  const brSrc = strip(fs.readFileSync(BR, 'utf8'));
+  if (/router\.back\(\)/.test(brSrc)) door.push(`${BR} still goes back with router.back() — a road entered from Home would skip its subject page`);
+  if (!/backFromBranch\(/.test(brSrc)) door.push(`${BR} does not call backFromBranch`);
+}
+
 console.log('ENTRIES INTO THE LEARN STACK FROM OUTSIDE IT\n');
 if (!entries.length) console.log('  ok    nothing outside the branches stack opens a deeper /branches/ href directly');
 for (const e of entries) console.log(`  FAIL  ${e.rel}\n          ${e.call}`);
