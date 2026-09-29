@@ -73,6 +73,16 @@ export function openReview(branchSlug: string, unitSlug: string) {
 }
 
 /**
+ * Open a subject's page (2026-09-29) — from Home's carousel, or anywhere else outside
+ * the Learn stack. Anchored for openLesson's reason: from a cold tab the subject grid
+ * must be underneath, or back hands the press to the tab navigator and strands the
+ * Learn tab on this page.
+ */
+export function openSubject(slug: string) {
+  router.push(`/(app)/branches/subject/${slug}` as never, { withAnchor: true });
+}
+
+/**
  * After a lesson, put its branch in front of the reader with the list under it.
  *
  * `path` is where the stack is NOW (the caller's `usePathname()`). On an ordinary
