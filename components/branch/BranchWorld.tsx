@@ -87,6 +87,15 @@ export interface WorldLesson {
   /** Not openable, but the Pass would fix it — so the tap can offer the Pass
    *  rather than doing nothing. A lesson simply not reached yet is NOT this. */
   needsPass?: boolean;
+  /**
+   * A SIGNPOST rather than a lesson (2026-09-29): the end of a coming-soon subject's
+   * road. Drawn as a board on two posts carrying its title, and not pressable — there
+   * is nothing behind it yet, and a card that looks tappable and does nothing is the
+   * worst answer a stop can give.
+   */
+  signpost?: boolean;
+  /** A stop with nothing drawn at it — where a coming-soon road's walk starts from. */
+  hidden?: boolean;
 }
 
 /** What is mounted right now: which ground chunk, which sign, which place. */
@@ -510,8 +519,30 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
       {shown.map((mk) => {
         const i = mk.i;
         const l = lessons[i];
-        if (!l) return null;
+        if (!l || l.hidden) return null;
         const here = i === at;
+        if (l.signpost) {
+          const px = mk.x + SIGN_DX;
+          const py = groundAt(px);
+          return (
+            <View
+              key={mk.lessonId}
+              pointerEvents="none"
+              accessibilityRole="text"
+              accessibilityLabel={l.title}
+              style={{ position: 'absolute', left: px - 80, top: py - SIGN_H + 5, width: 160, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end' }}
+            >
+              <View style={styles.board}>
+                <Text style={styles.boardText}>{l.title}</Text>
+                <Text style={styles.boardSub} numberOfLines={1}>{l.unitTitle}</Text>
+              </View>
+              <View style={styles.posts}>
+                <View style={styles.post} />
+                <View style={styles.post} />
+              </View>
+            </View>
+          );
+        }
         const tone = !l.accessible ? FAINT : INK;
         // The sign stands to the RIGHT of where the figure stands, on its own
         // patch of ground — so its foot is planted at ITS x, not the figure's.
@@ -570,4 +601,18 @@ const styles = StyleSheet.create({
     color: '#C9C5BA', textAlign: 'center', marginTop: 3, includeFontPadding: false,
   },
   foot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2.5, backgroundColor: PAPER, marginTop: -1 },
+  // The coming-soon signpost: a plank on two posts, planted on the ground line.
+  board: {
+    width: 150, paddingVertical: 8, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
+    backgroundColor: PAPER, alignItems: 'center',
+  },
+  boardText: {
+    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 2, color: INK, includeFontPadding: false,
+  },
+  boardSub: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11, color: SOFT,
+    marginTop: 2, maxWidth: 136, includeFontPadding: false,
+  },
+  posts: { flexDirection: 'row', justifyContent: 'space-between', width: 110 },
+  post: { width: 5, height: 34, backgroundColor: INK, borderBottomLeftRadius: 1, borderBottomRightRadius: 1 },
 });

@@ -31,6 +31,13 @@ function doneIn(subject: Subject, done: Record<string, number>): number {
   return subject.courses.reduce((n, c) => n + (done[c] ?? 0), 0);
 }
 
+/** The grid's rows: two tiles each. */
+function pairs<T>(xs: readonly T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < xs.length; i += 2) out.push(xs.slice(i, i + 2));
+  return out;
+}
+
 export default function LearnScreen() {
   const { width } = useWindowDimensions();
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
@@ -51,14 +58,17 @@ export default function LearnScreen() {
 
           <View nativeID="learn-grid">
             <SubjectTile subject={lead} done={doneIn(lead, done)} size={width - 2 * PAGE_PAD} wide onPress={() => open(lead)} />
-            {/* A wrapped row STRETCHES its children by default, and a Card's face
-                does not stretch with its ledge — so the row sits flex-start and each
-                tile keeps its own height (§14 found the same on the Pass tiles). */}
-            <View style={styles.grid}>
-              {rest.map((s) => (
-                <SubjectTile key={s.slug} subject={s} done={doneIn(s, done)} size={tile} onPress={() => open(s)} />
-              ))}
-            </View>
+            {/* ROWS OF TWO, EACH STRETCHED TO ITS TALLER TILE. On a 320dp phone
+                "Personal Growth" takes two lines and "Psychology" one, and a wrapped
+                grid left the pair at two heights. Card relays a stretch to its face,
+                so an explicit row makes a level pair. */}
+            {pairs(rest).map((row) => (
+              <View key={row[0].slug} style={styles.row}>
+                {row.map((s) => (
+                  <SubjectTile key={s.slug} subject={s} done={doneIn(s, done)} size={tile} onPress={() => open(s)} />
+                ))}
+              </View>
+            ))}
           </View>
 
           <Text style={styles.footer}>More subjects are on the way.</Text>
@@ -78,10 +88,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, lineHeight: 20,
     color: C.inkSoft, marginTop: 2, marginBottom: 16,
   },
-  grid: {
-    flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start',
-    gap: GRID_GAP, marginTop: GRID_GAP + 4,
-  },
+  row: { flexDirection: 'row', alignItems: 'stretch', gap: GRID_GAP, marginTop: GRID_GAP + 4 },
   footer: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: C.inkSoft,
     textAlign: 'center', marginTop: 26,

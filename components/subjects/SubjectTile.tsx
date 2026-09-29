@@ -55,12 +55,13 @@ export default function SubjectTile({
   const art = size - 2 * TILE_PAD;
   return (
     <Card pad={0} onPress={onPress} ledge={lipOf(subject.hue)} accessibilityLabel={`Open ${label}`}
-      containerStyle={{ width: size }}>
-      <View style={{ padding: TILE_PAD }}>
+      containerStyle={{ width: size, alignSelf: 'stretch' }}>
+      <View style={styles.body}>
         <View style={[styles.panel, { backgroundColor: t.tile, height: art * 0.78 }]}>
           <SubjectArt art={subject.slug} hue={subject.hue} size={art * 0.74} />
         </View>
         <Text style={styles.name} numberOfLines={2}>{tileTitle(subject, size)}</Text>
+        <View style={styles.grow} />
         <View style={styles.tagRow}>{soon ? <SoonTag /> : <DoneTag done={done} />}</View>
       </View>
     </Card>
@@ -74,6 +75,11 @@ const styles = StyleSheet.create({
     color: C.ink, marginTop: 10,
   },
   tagRow: { marginTop: 8, minHeight: 20 },
+  // The row stretches both tiles to the taller one's height (Card relays the growth
+  // to its face), and the tag sits at the FOOT, so two tiles side by side end level
+  // when only one name wraps — found at 320dp, where "Personal Growth" takes two lines.
+  body: { padding: TILE_PAD, flexGrow: 1 },
+  grow: { flexGrow: 1 },
   wideRow: { flexDirection: 'row', alignItems: 'center', padding: TILE_PAD, gap: TILE_PAD },
   wideText: { flex: 1 },
   kicker: { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 1.6, color: C.inkSoft },

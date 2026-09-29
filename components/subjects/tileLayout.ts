@@ -25,6 +25,21 @@ export const TILE_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 17, lin
 export const CARD_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 21, lineHeight: 26 } as const;
 export const MAST_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 28, lineHeight: 34 } as const;
 
+/** The small label pills (tag.tsx). */
+export const PILL = { fontSize: 9, letterSpacing: 0.8, padX: 7 } as const;
+
+export const BRANCH_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 18, lineHeight: 22 } as const;
+/** How many lines a branch card gives its name: "Political Philosophy" needs two on a narrow phone. */
+export const BRANCH_NAME_LINES = 2;
+/** A branch card's drawing, per phone width. */
+export function branchArt(screenW: number): number {
+  return screenW < 360 ? 72 : WIDE_ART - 16;
+}
+/** The room a branch card leaves its words: the page less padding, art, gaps and arrow. */
+export function branchTextWidth(screenW: number): number {
+  return screenW - 2 * PAGE_PAD - 2 * TILE_PAD - branchArt(screenW) - 2 * TILE_PAD - 12;
+}
+
 /** A grid tile's side, two to a row. */
 export function tileSize(screenW: number): number {
   return Math.floor((screenW - 2 * PAGE_PAD - GRID_GAP) / 2);

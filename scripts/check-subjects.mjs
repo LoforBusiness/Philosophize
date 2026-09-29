@@ -124,6 +124,25 @@ for (const W of [320, 360, 390, 430]) {
     const m = fitsIn(s.name, L.MAST_TITLE.fontSize, W - 2 * L.PAGE_PAD, 2);
     ok(m.ok, `${W}dp · ${s.slug}'s masthead name`, m.why);
   }
+  // THE PILLS AND THE BRANCH CARDS — both found cut on the 320dp render, not here.
+  const INTER_B = loadFont('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf');
+  const pill = (text, px, spacing, padX) => INTER_B.width(text, px) + spacing * text.length + 2 * padX + 3;
+  const soonW = pill('COMING SOON', L.PILL.fontSize, L.PILL.letterSpacing, L.PILL.padX);
+  ok(soonW <= inner, `${W}dp · the COMING SOON pill fits one line in a grid tile`, `${soonW.toFixed(0)} of ${inner}`);
+  const bText = L.branchTextWidth(W);
+  const DATA = await import('@/data');
+  for (const b of DATA.ALL_BRANCHES) {
+    const n = fitsIn(b.name, L.BRANCH_TITLE.fontSize, bText, L.BRANCH_NAME_LINES);
+    ok(n.ok, `${W}dp · the ${b.slug} card's name`, n.why);
+    const line = S.COURSE_LINE[b.slug];
+    const PFI = loadFont('node_modules/@expo-google-fonts/playfair-display/400Regular_Italic/PlayfairDisplay_400Regular_Italic.ttf');
+    const dl = wrap(line ?? '', 12.5, bText, PFI);
+    ok(!!line && dl.length <= 2 && Math.max(...dl.map((x) => PFI.width(x, 12.5))) <= bText,
+      `${W}dp · the ${b.slug} card's line fits its two lines`, `${dl.length} line(s)`);
+    const units = `${b.paths.length} UNITS`;
+    const row = pill(units, 10, 1.4, 0) + 8 + pill('88 DONE', 10, 1, 8) + 14;
+    ok(row <= bText, `${W}dp · the ${b.slug} card's units and done count share one row`, `${row.toFixed(0)} of ${bText.toFixed(0)}`);
+  }
   const live = S.SUBJECTS.filter((s) => s.status === 'live');
   for (const s of live) {
     const w = fitsIn(s.name, L.CARD_TITLE.fontSize, wideText, 1);

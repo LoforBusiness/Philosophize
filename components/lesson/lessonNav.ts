@@ -78,8 +78,8 @@ export function openReview(branchSlug: string, unitSlug: string) {
  * must be underneath, or back hands the press to the tab navigator and strands the
  * Learn tab on this page.
  */
-export function openSubject(slug: string) {
-  router.push(`/(app)/branches/subject/${slug}` as never, { withAnchor: true });
+export function openSubject(slug: string, from?: 'home') {
+  router.push(`/(app)/branches/subject/${slug}${from ? `?from=${from}` : ''}` as never, { withAnchor: true });
 }
 
 /**

@@ -88,6 +88,20 @@ export const SUBJECTS: readonly Subject[] = [
   },
 ];
 
+/**
+ * The line under each course's name on a subject page. Measured by check:subjects at
+ * two lines on a 320dp phone — the ethics line was cut there as "…how humans shoul…",
+ * which is a clamp running out rather than a clamp chosen.
+ */
+export const COURSE_LINE: Record<BranchKey, string> = {
+  metaphysics: 'Reality, existence & the nature of being',
+  epistemology: 'Knowledge, belief, truth & justification',
+  logic: 'Reasoning, arguments & valid thinking',
+  ethics: 'Morality, right action & how to live',
+  aesthetics: 'Beauty, art, creativity & aesthetic experience',
+  'political-philosophy': 'Society, power, justice & political systems',
+};
+
 export function getSubject(slug: string): Subject | undefined {
   return SUBJECTS.find((s) => s.slug === slug);
 }
