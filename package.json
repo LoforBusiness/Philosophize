@@ -216,7 +216,8 @@
     "make:professor-voice": "node scripts/make-professor-voice.mjs",
     "sheet:professor": "node --import ./scripts/lib/register.mjs scripts/sheet-professor.mjs",
     "check:paywall-flow": "node scripts/check-paywall-flow.mjs",
-    "check:subjects": "node --import ./scripts/lib/register.mjs scripts/check-subjects.mjs"
+    "check:subjects": "node --import ./scripts/lib/register.mjs scripts/check-subjects.mjs",
+    "sheet:subjects": "node scripts/sheet-subjects.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

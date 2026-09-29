@@ -65,5 +65,39 @@ ok(S.getSubject('no-such-subject') === undefined, 'an unknown slug is undefined,
 ok(S.subjectOfBranch('ethics')?.slug === 'philosophy', 'a branch knows its subject');
 ok(S.subjectOfBranch('no-such-branch') === undefined, 'an unknown branch has no subject');
 
+head('§5 · the drawings');
+// Every subject and every branch has a scene; every part of every scene stays inside
+// the 100-box it is authored in (a part outside it is cropped by the tile silently);
+// and every scene is a still life of at least two objects, with its spark.
+const A = await import('@/components/subjects/subjectArt');
+for (const s of S.SUBJECTS) ok(!!A.ART[s.slug], `${s.slug} has a drawing`);
+for (const b of Object.keys(D.BRANCH)) ok(!!A.ART[b], `branch ${b} has a drawing`);
+// A shape's real reach: a bar by its caps, anything else by its rotated half-extents
+// (a box turned θ reaches |w cos θ|/2 + |h sin θ|/2 across) — not by its longest side,
+// which reported a wide briefcase as 28 units below its own tile.
+const extent = (p) => {
+  if (p.k === 'bar') {
+    return [Math.min(p.x1, p.x2) - p.t / 2, Math.min(p.y1, p.y2) - p.t / 2, Math.max(p.x1, p.x2) + p.t / 2, Math.max(p.y1, p.y2) + p.t / 2];
+  }
+  const r = ((p.rot || 0) * Math.PI) / 180;
+  const hx = Math.abs((p.w / 2) * Math.cos(r)) + Math.abs((p.h / 2) * Math.sin(r));
+  const hy = Math.abs((p.w / 2) * Math.sin(r)) + Math.abs((p.h / 2) * Math.cos(r));
+  return [p.x - hx, p.y - hy, p.x + hx, p.y + hy];
+};
+for (const [key, sc] of Object.entries(A.ART)) {
+  const laid = A.artIn(key, 0, 0, 100, 100);
+  let worst = 0;
+  for (const layer of laid.layers) for (const p of layer) {
+    const [x0, y0, x1, y1] = extent(p);
+    worst = Math.max(worst, -x0, -y0, x1 - 100, y1 - 100);
+  }
+  ok(worst <= 0.5, `${key} stays inside its box`, worst > 0.5 ? `${worst.toFixed(1)} units out` : '');
+  ok(sc.layers.length >= 2, `${key} is a still life of at least two objects`, `${sc.layers.length} layer(s)`);
+  ok(sc.spark && sc.spark.s > 0, `${key} carries its spark`);
+}
+const wide = A.artIn('logic', 0, 0, 200, 100);
+ok(Math.abs(wide.spark.s - A.ART.logic.spark.s) < 1e-6 && Math.abs(wide.spark.x - (50 + A.ART.logic.spark.x)) < 1e-6,
+  'a wide box lays a drawing into its largest SQUARE, centred, never stretched');
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);
