@@ -8116,6 +8116,14 @@ Technology and History & Politics are announced and empty. Spec:
     grid's tiles are small. Worth a `dumpsys gfxinfo` look on the phone.
   - Every object drawn against a Commons reference (`npm run ref`); economics is a
     supply-and-demand board and coins because ethics owns the balance scale.
+  - **Every poster is a PLACE, not a shared backdrop** (same day, second pass). The
+    first pass put all 13 on one lit disc with sparkles, and the owner: *"the
+    background of these cards look all the same and kind of look AI with the star
+    look. And also the round circle."* Each now has its own setting from a reference —
+    Imprint's philosophy cover is an arched niche, and so is ours — drawn in the
+    poster's hue with NO ink outline, so it stays behind the outlined object. Nothing
+    floats: the ember lives on a clasp, a flag, a seal. The head, the briefcase and the
+    hourglass were re-proportioned against references at the same time.
   - **The wallpaper is a 132dp TILE** (`npm run make:wallpaper` → `assets/images/wallpaper/`,
     `DoodleGround.tsx`), laid as a GRID of small images sharing one bitmap, fixed
     behind the scroll view. Its colours are `WALL`/`WALL_DOODLE` in tone.ts, a
