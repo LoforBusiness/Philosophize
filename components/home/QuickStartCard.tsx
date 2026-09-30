@@ -1,29 +1,17 @@
-import { useMemo } from 'react';
-import { View, Text, StyleSheet, ImageBackground, type ImageSourcePropType } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Image, Dimensions, type LayoutChangeEvent } from 'react-native';
 import { openLesson } from '@/components/lesson/lessonNav';
 import { openIntro } from '@/components/professor/openIntro';
-import { LinearGradient } from 'expo-linear-gradient';
 import Card from '@/components/ui/Card';
 import { mix } from '@/components/shared/tone';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { pickQuickStart, quickStartArtIndex } from '@/lib/utils/quickStart';
-
-// Five skies, one per day. The rotation is on the DATE only, so finishing a
-// lesson swaps the lesson under the same sky rather than changing everything at
-// once. Relative requires — Metro resolves asset requires by path.
-const ART: ImageSourcePropType[] = [
-  require('../../assets/images/quickstart/01-summit.jpg'),
-  require('../../assets/images/quickstart/02-gorge.jpg'),
-  require('../../assets/images/quickstart/03-library.jpg'),
-  require('../../assets/images/quickstart/04-tide.jpg'),
-  require('../../assets/images/quickstart/05-citadel.jpg'),
-];
-
-import { Dimensions } from 'react-native';
+import { subjectOfBranch } from '@/data/subjects';
+import { QS_ART } from './quickStartArt';
+import { qsLayout, QS_CANVAS, type QsSubject } from './quickStartScenes';
 import {
   qsCardHeight,
-  QS_SCRIM,
-  qsScrimStops,
+  QS_BODY_DP,
   QS_CREAM,
   QS_FAINT,
   QS_TAB_INK,
@@ -39,12 +27,16 @@ const Faint = QS_FAINT;
 // Module scope, not per render: Home does not survive a rotation, and the stops
 // only change when the height does.
 const QS_CARD_H = qsCardHeight(Dimensions.get('window').height);
-const SCRIM_STOPS = qsScrimStops(QS_CARD_H);
 
-// The scrim, the height and the tab colour all live in constants/quickStartArt.ts
-// because scripts/check-quickstart-contrast.mjs reads that file and measures
-// those exact numbers against all five skies. Editing them here instead would
-// make the check a measurement of something that is no longer shipped.
+// THE PICTURE POINTS AT WHERE THE CARD GOES (2026-09-29). Each subject has three
+// drawn scenes (components/home/quickStartScenes.ts, rendered by `npm run
+// make:quickstart`), and the day picks one — on the DATE only, so finishing a lesson
+// swaps the lesson under the same picture rather than changing everything at once.
+//
+// There is no scrim. Every scene stands on a horizon with a dark ground below it,
+// and the card slides the picture so that horizon lands just above the title: the
+// words sit on the scene's own ground, a flat colour, so their contrast is decided
+// by construction (`npm run check:quickstart` measures it) and never by the art.
 
 interface Props {
   style?: object;
@@ -72,11 +64,23 @@ export default function QuickStartCard({ style }: Props) {
     () => pickQuickStart(lessonsByUnit, dayNumber, startingBranch),
     [lessonsByUnit, dayNumber, startingBranch],
   );
-  const art = ART[quickStartArtIndex(dayNumber, ART.length)];
+  // The card is as wide as Home gives it; until it has measured, the window less
+  // the page's padding is within a few points of the truth.
+  const [w, setW] = useState(Dimensions.get('window').width - 32);
+  const onLayout = (e: LayoutChangeEvent) => {
+    const next = Math.round(e.nativeEvent.layout.width);
+    if (next > 0 && next !== w) setW(next);
+  };
 
   // The intro comes first, and it is offered even to a reader with nothing left to
   // read, so the card's early return sits BELOW it.
   const intro = !introSeen;
+  // The intro is a philosophy lecture, so it opens on philosophy's pictures.
+  const subject = ((intro ? 'philosophy' : subjectOfBranch(pick?.branch.slug ?? '')?.slug) ?? 'philosophy') as QsSubject;
+  const set = QS_ART[subject] ?? QS_ART.philosophy;
+  const art = set[quickStartArtIndex(dayNumber, set.length)];
+  const L = qsLayout(w, QS_CARD_H, QS_BODY_DP);
+  const size = QS_CANVAS * L.s;
   if (!intro && !pick) return null;
 
   // Through lessonNav, ANCHORED: pushed plainly from Home into a Learn tab not yet
@@ -86,9 +90,11 @@ export default function QuickStartCard({ style }: Props) {
     : () => pick && openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
   // The intro's words. Short on purpose: the title is 34pt in a card that is 236pt
   // wide on a 320dp phone, and it has two lines.
-  const tab = intro ? 'QUICK START · INTRO' : `QUICK START · ${pick!.branch.name.toUpperCase()}`;
+  // The tab says only what the card is: a long branch name up there ran into the
+  // picture on a narrow phone, so where it goes is in the line under the title.
+  const tab = intro ? 'QUICK START · INTRO' : 'QUICK START';
   const title = intro ? 'Your first lecture' : pick!.lesson.title;
-  const meta = intro ? 'WITH THE PROFESSOR · 1 MIN' : `${pick!.unit.name} · ${pick!.lesson.estimatedMinutes} MIN`;
+  const meta = intro ? 'WITH THE PROFESSOR · 1 MIN' : `${pick!.branch.name} · ${pick!.lesson.estimatedMinutes} MIN`;
   const cta = intro ? '▶   START THE INTRO' : '▶   START LESSON';
 
   return (
@@ -96,11 +102,16 @@ export default function QuickStartCard({ style }: Props) {
     // the one big thing on Home you press, so it stands on a solid ledge and sinks
     // onto it rather than shrinking. The hard offset shadow it carried is gone.
     <Card tone="ink" onPress={open} pad={0} style={styles.card} containerStyle={style} accessibilityLabel={`Start ${title}`}>
-      <ImageBackground source={art} style={styles.bg} imageStyle={styles.img} resizeMode="cover">
-        {/* Stops are computed from the card's height: the body is a fixed number
-            of dp, so its FRACTION shrinks as the card grows, and a hard-coded
-            stop would drift further from the type on every taller phone. */}
-        <LinearGradient colors={QS_SCRIM} locations={SCRIM_STOPS} style={StyleSheet.absoluteFill} />
+      <View style={[styles.bg, { backgroundColor: art.ground }]} onLayout={onLayout}>
+        {/* Above the picture — only on a card tall enough to show past its top —
+            the scene's own sky; below it, its ground, which is the card's face. */}
+        <View pointerEvents="none" style={[styles.sky, { height: Math.max(0, L.top) + 2, backgroundColor: art.sky }]} />
+        <Image
+          source={art.source}
+          style={{ position: 'absolute', left: L.left, top: L.top, width: size, height: size }}
+          resizeMode="stretch"
+          accessibilityIgnoresInvertColors
+        />
 
         {/* The label rides an ink tab rather than the picture. Loose on the thin
             top wash it measured 1.36:1 over four of the five skies; on ink it is
@@ -134,7 +145,7 @@ export default function QuickStartCard({ style }: Props) {
             </View>
           </View>
         </View>
-      </ImageBackground>
+      </View>
     </Card>
   );
 }
@@ -145,10 +156,8 @@ const styles = StyleSheet.create({
     // clipped to the face's corners.
     overflow: 'hidden',
   },
-  // width must be stated: an ImageBackground with no width takes the picture's
-  // own intrinsic width, not the space it was given.
-  bg: { width: '100%', height: QS_CARD_H, justifyContent: 'space-between' },
-  img: { borderRadius: 14 },
+  bg: { width: '100%', height: QS_CARD_H, justifyContent: 'space-between', overflow: 'hidden', borderRadius: 14 },
+  sky: { position: 'absolute', left: 0, right: 0, top: 0 },
 
   top: { paddingHorizontal: 14, paddingTop: 14, flexDirection: 'row' },
   tab: {
@@ -172,8 +181,6 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 40,
     color: Cream,
-    textShadowColor: 'rgba(0,0,0,0.55)',
-    textShadowRadius: 8,
   },
   meta: {
     fontFamily: 'Inter_500Medium',

@@ -218,6 +218,7 @@
     "check:paywall-flow": "node scripts/check-paywall-flow.mjs",
     "check:subjects": "node --import ./scripts/lib/register.mjs scripts/check-subjects.mjs",
     "make:wallpaper": "node scripts/make-wallpaper.mjs",
+    "make:quickstart": "node scripts/make-quickstart-art.mjs",
     "sheet:subjects": "node scripts/sheet-subjects.mjs",
     "check:dialogue": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-dialogue.mjs"
   },

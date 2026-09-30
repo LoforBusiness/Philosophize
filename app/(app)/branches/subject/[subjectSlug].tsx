@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, useWindowDimensions } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Image, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import Card from '@/components/ui/Card';
 import SubjectMasthead from '@/components/subjects/SubjectMasthead';
@@ -16,7 +15,9 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { C } from '@/constants/design';
 import DoodleGround from '@/components/shared/DoodleGround';
 import { WALL } from '@/components/shared/tone';
-import { SCRIM_TOP, SCRIM_MID, SCRIM_DEEP, ArtCream, ArtSoft, ArtFaint } from '@/constants/branchArt';
+import { ArtCream, ArtSoft, ArtFaint } from '@/constants/branchArt';
+import { QS_ART } from '@/components/home/quickStartArt';
+import { qsLayout, QS_CANVAS } from '@/components/home/quickStartScenes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A SUBJECT'S PAGE (2026-09-29) — its drawing, its name, and then its courses.
@@ -36,8 +37,13 @@ import { SCRIM_TOP, SCRIM_MID, SCRIM_DEEP, ArtCream, ArtSoft, ArtFaint } from '@
 // ─────────────────────────────────────────────────────────────────────────────
 
 
-/** The library, for the intro card: a lecture belongs in one. Already in the bundle. */
-const INTRO_ART = require('../../../../assets/images/quickstart/03-library.jpg');
+/**
+ * The intro card wears Home's Quick Start picture of a philosopher's study at night —
+ * the same drawn scene, laid the same way (qsLayout): its horizon lands just above
+ * the words, which sit on the scene's own dark ground rather than on a scrim.
+ */
+const INTRO_ART = QS_ART.philosophy[2];
+const INTRO_H = 288;
 
 export default function SubjectScreen() {
   const { subjectSlug, from } = useLocalSearchParams<{ subjectSlug: string; from?: string }>();
@@ -46,6 +52,20 @@ export default function SubjectScreen() {
   const introSeen = useUserDataStore((s) => s.seenProfessorIntro);
   const done = useMemo(() => branchCountsFromUnits(lessonsByUnit), [lessonsByUnit]);
   const { width } = useWindowDimensions();
+  // The card's width and the height of its words, both measured: the picture's
+  // horizon is placed against where the words actually start.
+  const [introW, setIntroW] = useState(width - 32);
+  const [introBodyH, setIntroBodyH] = useState(150);
+  const introL = qsLayout(introW, INTRO_H, introBodyH, 12, 10);
+  const introSize = QS_CANVAS * introL.s;
+  const onIntroLayout = (e: LayoutChangeEvent) => {
+    const w = Math.round(e.nativeEvent.layout.width);
+    if (w > 0 && w !== introW) setIntroW(w);
+  };
+  const onIntroBody = (e: LayoutChangeEvent) => {
+    const h = Math.round(e.nativeEvent.layout.height);
+    if (h > 0 && h !== introBodyH) setIntroBodyH(h);
+  };
 
   // BACK GOES WHERE THE READER CAME FROM. Opened from Home's carousel, the page sits
   // on the Learn grid (it was pushed anchored, so the Learn tab is never stranded),
@@ -104,9 +124,14 @@ export default function SubjectScreen() {
                 accessibilityLabel="Start the introduction"
               >
                 <View nativeID="learn-intro">
-                  <ImageBackground source={INTRO_ART} style={styles.introBg} imageStyle={styles.introImg} resizeMode="cover">
-                    <LinearGradient colors={[SCRIM_TOP, SCRIM_MID, SCRIM_DEEP]} locations={[0, 0.4, 1]} style={StyleSheet.absoluteFill} />
-                    <View style={styles.introBody}>
+                  <View style={[styles.introBg, { backgroundColor: INTRO_ART.ground }]} onLayout={onIntroLayout}>
+                    <View pointerEvents="none" style={[styles.introSky, { height: Math.max(0, introL.top) + 2, backgroundColor: INTRO_ART.sky }]} />
+                    <Image
+                      source={INTRO_ART.source}
+                      style={{ position: 'absolute', left: introL.left, top: introL.top, width: introSize, height: introSize }}
+                      resizeMode="stretch"
+                    />
+                    <View style={styles.introBody} onLayout={onIntroBody}>
                       <Text style={styles.introKicker}>BEFORE THE FIRST COURSE</Text>
                       <Text style={styles.introName}>Your first lecture</Text>
                       <Text style={styles.introDesc} numberOfLines={3}>
@@ -116,7 +141,7 @@ export default function SubjectScreen() {
                         <Text style={styles.introCtaText}>▶   START THE INTRO</Text>
                       </View>
                     </View>
-                  </ImageBackground>
+                  </View>
                 </View>
               </Card>
             </View>
@@ -164,17 +189,16 @@ const styles = StyleSheet.create({
   },
   missing: { fontFamily: 'Inter_500Medium', fontSize: 14, color: C.inkSoft, marginTop: 40 },
   introCard: { overflow: 'hidden' },
-  introBg: { width: '100%', height: 232, justifyContent: 'flex-end' },
-  introImg: { borderRadius: 14 },
+  introBg: { width: '100%', height: INTRO_H, justifyContent: 'flex-end', overflow: 'hidden', borderRadius: 14 },
+  introSky: { position: 'absolute', left: 0, right: 0, top: 0 },
   introBody: { paddingHorizontal: 16, paddingBottom: 14 },
   introKicker: { fontFamily: 'Inter_500Medium', fontSize: 9, color: ArtFaint, letterSpacing: 2 },
   introName: {
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: ArtCream, marginTop: 2,
-    textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 7,
   },
   introDesc: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 12.5, color: ArtSoft,
-    marginTop: 3, lineHeight: 17, textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 6,
+    marginTop: 3, lineHeight: 17,
   },
   introCta: {
     alignSelf: 'flex-start', marginTop: 12, backgroundColor: ArtCream, borderRadius: 10,
