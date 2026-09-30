@@ -29,7 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   ASSETS, LESSONS, beatsOf, spoken, parseWav, headerFaults, measureAudio, audioFaults, weightOf, sha256hex,
-  readRenders, writeRenders,
+  readRenders, writeRenders, voiceFault,
 } from './lib/narration.mjs';
 
 const DRY = process.argv.includes('--dry-run');
@@ -55,6 +55,11 @@ for (const it of items) {
     const beat = scripts.get(m[1])[Number(m[2])];
     if (!beat || !spoken(beat)) why.push(`beat ${Number(m[2])} is not a spoken beat`);
     else if (beat.text !== it.text) why.push(`rendered from "${it.text}", and the beat now reads "${beat.text}"`);
+    else {
+      // A dialogue line must be in its speaker's voice (LESSON_RULES AP2).
+      const vf = voiceFault(beat, it.voice);
+      if (vf) why.push(vf);
+    }
   }
   const src = path.join(renderDir, `${it.key}.wav`);
   let wav = null, measured = null;
@@ -73,7 +78,7 @@ for (const it of items) {
     console.log(`  REFUSED ${it.key}\n          ${why.join('\n          ')}`);
     continue;
   }
-  plan.push({ key: it.key, text: it.text, wav });
+  plan.push({ key: it.key, text: it.text, wav, voice: it.voice });
   const pace = measured.speechS / weightOf(it.text);
   console.log(`  ok      ${it.key}  ${measured.dur.toFixed(2)}s · longest clipped run ${measured.maxRun} · loudest 50 ms ${measured.loudest50.toFixed(1)} dBFS · pace ${pace.toFixed(3)} · longest pause ${measured.pauseS.toFixed(2)}s`);
 }
@@ -91,7 +96,7 @@ for (const p of plan) {
   const dest = path.join(ASSETS, `${p.key}.wav`);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, p.wav);
-  records[p.key] = { text: p.text, wav: sha256hex(p.wav) };
+  records[p.key] = p.voice ? { text: p.text, wav: sha256hex(p.wav), voice: p.voice } : { text: p.text, wav: sha256hex(p.wav) };
 }
 writeRenders(records);
 console.log(`\ninstalled ${plan.length} take(s) and recorded them in assets/narration/renders.json.`);

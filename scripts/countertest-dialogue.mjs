@@ -136,5 +136,22 @@ for (const c of CASES) {
   else console.log(`ok    ${c.name} — caught by ${c.rule}`);
 }
 
-console.log(bad ? `\n${bad} counter-test(s) failed` : `\nall ${CASES.length} defects caught, clean fixture passes`);
+// THE INSTALLER'S DOOR, as a pure function: install-narration refuses a take whose
+// voice is not its beat's speaker's (Review Focus 3 of the plan).
+const { voiceFault } = await import('./lib/narration.mjs');
+const VOICE_CASES = [
+  ['a top-hat beat in Algieba', { speaker: 'tophat' }, 'en-GB-Chirp3-HD-Algieba', false],
+  ['a cap beat in Algieba', { speaker: 'cap' }, 'en-GB-Chirp3-HD-Algieba', true],
+  ['a cap beat with no voice named', { speaker: 'cap' }, undefined, true],
+  ['a narrated beat with no voice named', {}, undefined, false],
+  ['a narrated beat in Algieba', {}, 'en-GB-Chirp3-HD-Algieba', false],
+  ['a narrated beat in Sadachbia', {}, 'en-GB-Chirp3-HD-Sadachbia', true],
+];
+for (const [name, beat, voice, faulty] of VOICE_CASES) {
+  const got = Boolean(voiceFault(beat, voice));
+  if (got !== faulty) { bad += 1; console.log(`FAIL  voiceFault: ${name} — expected ${faulty ? 'a refusal' : 'a pass'}`); }
+  else console.log(`ok    voiceFault: ${name} — ${faulty ? 'refused' : 'passes'}`);
+}
+
+console.log(bad ? `\n${bad} counter-test(s) failed` : `\nall ${CASES.length + VOICE_CASES.length} cases right, clean fixture passes`);
 process.exit(bad ? 1 : 0);

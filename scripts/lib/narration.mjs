@@ -26,7 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const ASSETS = path.join(ROOT, 'assets', 'narration');
@@ -668,6 +668,27 @@ export function audioFaults(m, text) {
 // and times the clip against it, so a line rewritten after its render would reveal the
 // new words while the voice said the old ones, and every check would still agree.
 
+// ── WHOSE VOICE A LINE IS IN ────────────────────────────────────────────────
+//
+// A narrated lesson is read in one voice; a DIALOGUE lesson (LESSON_RULES group AP)
+// in each speaker's own, from components/lesson/cinematic/cast.ts. A take rendered in
+// the wrong one plays perfectly and says the right words, so nothing downstream can
+// hear the mistake: install-narration refuses it here, and renders.json keeps the
+// voice so check:dialogue can re-derive it later.
+const CAST_TS = path.join(ROOT, 'components', 'lesson', 'cinematic', 'cast.ts');
+const { voiceFor } = await import(pathToFileURL(CAST_TS).href);
+export { voiceFor };
+
+/**
+ * Why a take in `voice` may not stand for `beat`, or null when it may. A narrated
+ * beat's take may leave the voice unnamed (every take before dialogue lessons did).
+ */
+export function voiceFault(beat, voice) {
+  const want = voiceFor(beat.speaker).name;
+  if (!voice) return beat.speaker ? `${beat.speaker} speaks as ${want}, and the take names no voice` : null;
+  return voice === want ? null : `rendered as ${voice}, but ${beat.speaker ?? 'the narrator'} speaks as ${want}`;
+}
+
 export const RENDERS_FILE = 'renders.json';
 
 export function readRenders(dir = ASSETS) {
@@ -677,7 +698,10 @@ export function readRenders(dir = ASSETS) {
 
 export function writeRenders(records, dir = ASSETS) {
   const sorted = {};
-  for (const key of Object.keys(records).sort()) sorted[key] = { text: records[key].text, wav: records[key].wav };
+  for (const key of Object.keys(records).sort()) {
+    const { text, wav, voice } = records[key];
+    sorted[key] = voice ? { text, wav, voice } : { text, wav };
+  }
   fs.writeFileSync(path.join(dir, RENDERS_FILE), `${JSON.stringify(sorted, null, 2)}\n`);
 }
 
