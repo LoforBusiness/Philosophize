@@ -41,6 +41,7 @@ import SortBins from './SortBins';
 import OrderTiles from './OrderTiles';
 import OddOneOut from './OddOneOut';
 import NarrationText from './NarrationText';
+import { SpokenBy } from './SpeakerTag';
 import ThinkerPeek from './ThinkerPeek';
 import { LESSON_FOCUS } from '@/data/lessonFocus';
 import { swishTrack } from './gestures';
@@ -1688,6 +1689,7 @@ export default function CinematicPlayer({
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
                 {beat.text ? (
+                  <SpokenBy who={beat.speaker}>
                   <NarrationText
                     text={beat.text}
                     lessonId={lesson.id}
@@ -1700,6 +1702,7 @@ export default function CinematicPlayer({
                       setPeek((cur) => (cur === pid ? null : pid));
                     }}
                   />
+                  </SpokenBy>
                 ) : null}
                 {/* The snapshot lives UNDER the paragraph rather than floating
                     over it: group S spends its whole length on words being
