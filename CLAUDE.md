@@ -1101,7 +1101,7 @@ To add a new branch: create an `index.ts` in the branch directory, export a
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-nine** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **seventy** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1112,7 +1112,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-professor` · `check-subjects` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-wander` · `check-chair` · `check-skin` · `check-thoughts` · `check-marks` · `check-objects` · `check-professor` · `check-subjects` · `check-dialogue` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1240,7 +1240,7 @@ they belong to, so the rule book has them and this file did not:
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **246 cinematic lessons — every lesson in the app** (animated stickman
+  gating; **247 cinematic lessons — every lesson in the app** (animated stickman
   scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `sort` · `poll` ·
   `plot` · `order` · `odd` (§17, group R). **The analogue family is the
@@ -2532,7 +2532,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 246 of the 246 lessons are here now,
+**This is the format the app converged ON** — 247 of the 247 lessons are here now,
 and the card runner they replaced is unreachable (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8163,3 +8163,35 @@ binary; its thinker link now opens the card over Home), per-subject intros, and
 the orphaned `HabitCard.tsx` / `DailyReflection.tsx`, kept only because
 `check-ui` and `check-thinkers` read them. The store still holds
 `savedQuotes` and `philosopherViews` so nothing a reader saved was destroyed.
+
+### Economics is live, and its lessons are DIALOGUE lessons (2026-09-29)
+
+> *"I want three total voices within the lessons … I want the stick man to be the
+> people talking and learning and describing."*
+
+**Economics & Finance has one course, *Foundations of Economics* (BranchKey
+`economics`, deep navy `#335172`), holding one lesson, `economics-foundations-1`
+"What Is Economics?", and its road ends in a MORE COMING SOON sign (`Branch.more`).**
+It is the first DIALOGUE lesson — LESSON_RULES group AP:
+
+- **Three people talk and nobody narrates.** The cast is `cast.ts`: the top hat
+  (Algieba, en-GB), the plain mascot (Sadachbia, en-GB), the newsboy cap
+  (Zubenelgenubi, en-AU). A beat's `speaker` puts that face beside the words
+  (`SpeakerTag.tsx`) and picks the voice; no line names one.
+- **Rendering is a repo script now**: `node scripts/render-narration.mjs <lesson> <dir>
+  [beat@rate]` sends every line through the character ledger in its speaker's voice and
+  writes the job `install-narration` takes; `renders.json` records each take's voice.
+  The lesson cost 860 characters with two retakes (a loud onset and a plosive spike,
+  both seen on the waveform before install); the September ledger stood at 337,154 of
+  900,000 after it.
+- **The narrated-lesson layers stay off** (thoughts, marks, wander, chair, visitor,
+  wardrobe rows): the generators skip any lesson whose script has a `speaker`
+  (`scripts/lib/dialogue.mjs`), and `check:dialogue` fails a row in their tables.
+- **Philosophy keeps every invariant it had.** The 41-per-branch level rule and the
+  unit-review rule read philosophy's six out of `data/subjects.ts`; the professor's
+  intro gates philosophy lessons only (he lectures on philosophy); the Pass says "across
+  N courses".
+- **Two traps, both measured.** A re-measure of one lesson DROPS the corpus's
+  `wardrobeReach` and `poseReach` records from `mustBoxes.ts.json` — splice the new
+  rows into a backup instead of keeping the harness's file. And a stickman's legs are a
+  third of him, so a counter at a person's waist hides a stall-holder to the cap (AP10).

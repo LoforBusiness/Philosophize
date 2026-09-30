@@ -10837,3 +10837,84 @@ placed against his standing head), and `make:wander` gives no plan to a chair be
 the beat after one (an early tap hurries the putaway into it). Run order:
 `make:chair`, then `make:thoughts`, `make:wander`, `make:marks`. `check:chair` §3 fails
 when the committed table is not what `make:chair` writes today.
+
+## Group AP · A dialogue lesson: the people on the stage are the ones talking
+
+> *"I want three total voices within the lessons … This is a little bit different than
+> the original, where there is narration below and a stick man is above doing random
+> actions. This I want the stick man to be the people talking and learning and
+> describing."* (2026-09-29)
+
+A DIALOGUE lesson has no narrator. Three stickmen speak — to each other, and one of them
+to the reader — inside a real-life scenario, handling real, reference-drawn objects. The
+first is `economics-foundations-1`, "What Is Economics?", at a market stall. The cast is
+`components/lesson/cinematic/cast.ts`; `npm run check:dialogue` holds AP1, AP2, AP6 and
+AP8, counter-tested by `node scripts/countertest-dialogue.mjs`.
+
+### AP1 · Every spoken line has exactly one speaker, from the cast
+
+A spoken beat carries `speaker: 'tophat' | 'cap' | 'plain'`. The player draws that
+speaker's face beside the words (`SpeakerTag.tsx`), so the reader knows whose line it is
+before reading it. A beat with no speaker in a dialogue lesson is a narrator slipping
+back in.
+
+### AP2 · A voice is locked to a costume
+
+The Top Hat is `en-GB-Chirp3-HD-Algieba`, the plain mascot `en-GB-Chirp3-HD-Sadachbia`,
+the newsboy cap `en-AU-Chirp3-HD-Zubenelgenubi` — in every dialogue lesson, forever, so a
+reader learns the three people by ear. No line names a voice: `scripts/render-narration.mjs`
+reads it from the cast, `install-narration` refuses a take in any other, and
+`renders.json` records the voice each take was made in. In the scene each figure's
+costume is forced with `wear=` and marked `{/* cast: <speaker> */}`, because the wardrobe
+table would otherwise re-deal it.
+
+### AP3 · A subject's first lesson is a foundation lesson
+
+What the subject is, why it is worth the reader's time, and at most three ideas — never a
+deep dive. Economics opens on scarcity, opportunity cost, and prices as signals.
+
+### AP4 · The economist talks to the reader; the others talk to each other
+
+The Top Hat addresses the reader ("you"); the shopper and the stall-holder speak to one
+another, in the first person, as themselves. The wording is intellectual and precise and
+personal. A character's "I" is not the narrator's seminar "we" (group V), so
+`check:voice` does not read a dialogue lesson's spoken lines for it; its explanations,
+prompts and summary are still the lesson's own voice and still read.
+
+### AP5 · Every object is drawn from a fetched reference
+
+Group AM, unchanged: `npm run ref`, then `objects.ts`, then `npm run sheet:objects`.
+Hands meet what they hold: an object passes from hand to hand at a point both arms reach
+(the rig's safe reach is about 23 stage units from the shoulder at K 0.76), which is why
+the stall-holder walks to the shopper's end of the counter to trade.
+
+### AP6 · No `order` control; ask by tapping the stage
+
+Questions are easy to read and one tap: the things on the counter, the rows on a board.
+A dialogue lesson never uses `order`.
+
+### AP7 · Simple on purpose
+
+At most two figures move at once; everyone faces whom he talks to; a listener holds a
+listening pose that is alive (N21) but still. The lesson is pared back so there is less
+to go wrong, not decorated to cover for it.
+
+### AP8 · The narrated-lesson layers stay off
+
+No thought bubbles, pen marks, wander, lawn chair, visitor or wardrobe row: with three
+people talking they are clutter, and a bubble over a speaking man contradicts him. The
+generators skip dialogue lessons (`scripts/lib/dialogue.mjs`, read from the scripts), and
+`check:dialogue` fails a row in any of their tables.
+
+### AP9 · Written for the ear, paced by the voice
+
+Every line passes the prose checks (J, V, AC, AD) before a character is spent on it.
+Pauses are written into `markup` (`[pause short]`, `[pause]`), which must reduce to the
+on-screen `text`. Each voice has its own pace in the cast. The scene paces every act
+across the line's measured length (`pace.ts`), so the lines are voiced BEFORE the scene is
+staged, not after.
+
+### AP10 · A counter is at the hip, not at a person's waist
+
+A stickman's legs are a third of him. At a real waist height a counter hides everything
+of the stall-holder but his cap; at the hip he reads as a man working a stall.
