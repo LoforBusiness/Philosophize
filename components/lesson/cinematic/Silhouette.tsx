@@ -59,6 +59,17 @@ function boxStyle(x: number, y: number, w: number, h: number, rot: number): View
   return { position: 'absolute', left: x - w / 2, top: y - h / 2, width: w, height: h, transform: [{ rotate: `${rot}deg` }] };
 }
 
+/** A triangle part's three corners on the stage: its box's local corners, turned by `rot`. */
+export function triCorners(p: Extract<Part, { k: 'tri' }>): [number, number][] {
+  const w = p.w / 2, h = p.h / 2;
+  const local: [number, number][] = p.dir === 'up' ? [[0, -h], [w, h], [-w, h]]
+    : p.dir === 'down' ? [[-w, -h], [w, -h], [0, h]]
+      : p.dir === 'left' ? [[-w, 0], [w, -h], [w, h]]
+        : [[-w, -h], [w, 0], [-w, h]];
+  const a = ((p.rot || 0) * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+  return local.map(([x, y]) => [p.x + x * c - y * s, p.y + x * s + y * c]);
+}
+
 function Piece({ p, grow, color }: { p: Part; grow: number; color?: string }) {
   const fill = color ?? p.fill;
   if (p.k === 'ell') {
@@ -84,8 +95,26 @@ function Piece({ p, grow, color }: { p: Part; grow: number; color?: string }) {
     const rot = (Math.atan2(p.y2 - p.y1, p.x2 - p.x1) * 180) / Math.PI;
     return <View pointerEvents="none" style={[boxStyle((p.x1 + p.x2) / 2, (p.y1 + p.y2) / 2, len + t, t, rot), { borderRadius: t / 2, backgroundColor: fill }]} />;
   }
-  const w = p.w + 3 * grow;
-  const h = p.h + 3 * grow;
+  if (grow > 0) {
+    // A triangle's OUTLINE is the triangle plus a capsule along each edge, which is
+    // exactly the shape grown by `grow` all round. It used to be the triangle's box
+    // scaled up by 3·grow about its centre, which pushes every corner out by more than
+    // the line and grows the whole shape past the neighbour it is buried against — so
+    // a café cup (a trapezoid built from two buried triangles) stood on a black
+    // backing wider than the cup, and a table tent grew black feet (LESSON_RULES AM11).
+    const v = triCorners(p);
+    return (
+      <>
+        <Piece p={{ ...p }} grow={0} color={fill} />
+        {v.map(([ax, ay], i) => {
+          const [bx, by] = v[(i + 1) % 3];
+          return <Piece key={i} p={{ k: 'bar', x1: ax, y1: ay, x2: bx, y2: by, t: 2 * grow, fill }} grow={0} />;
+        })}
+      </>
+    );
+  }
+  const w = p.w;
+  const h = p.h;
   const T = 'transparent';
   const edge: ViewStyle = p.dir === 'up'
     ? { borderLeftWidth: w / 2, borderRightWidth: w / 2, borderBottomWidth: h, borderLeftColor: T, borderRightColor: T, borderBottomColor: fill }

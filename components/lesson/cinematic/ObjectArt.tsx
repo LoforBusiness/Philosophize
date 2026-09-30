@@ -31,10 +31,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, type ViewStyle } from 'react-native';
 import { Shapes, Outlined, type Part } from './Silhouette';
-import { paint, bodyOf, marksOf, type ObjPart, type ObjTone } from './objects';
+import { paint, bodyOf, marksOf, outlineFor, OUTLINE, type ObjPart, type ObjTone } from './objects';
 
-/** The outline weight the stage is drawn at. `stageSkin`'s plates use the same. */
-export const OBJECT_LINE = 2.2;
+/**
+ * The outline weight a LARGE object is drawn at, and the cap on every other: a small
+ * one is outlined in proportion to its own size (`outlineFor`, LESSON_RULES AM11).
+ */
+export const OBJECT_LINE = OUTLINE.max;
 
 export default function ObjectArt({
   parts,
@@ -58,7 +61,7 @@ export default function ObjectArt({
   const marks = marksOf(painted as unknown as ObjPart[]) as unknown as Part[];
   return (
     <View pointerEvents="none" style={[{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }, style]}>
-      <Outlined parts={body} width={line} line={ink} />
+      <Outlined parts={body} width={outlineFor(parts, line)} line={ink} />
       <Shapes parts={marks} />
     </View>
   );

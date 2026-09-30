@@ -5219,6 +5219,18 @@ how big a scene's art is.
 `node scripts/countertest-objects.mjs` stages every defect on a COPY, so the working
 tree is never edited (group AL's rule).
 
+> **AND THE OUTLINE WAS A BACKING, NOT AN EDGE (AM12, 2026-09-30).** *"the mugs … you
+> can see a background of black."* Two renderer faults, no drawing at fault: `Silhouette`
+> grew a triangle by scaling its box by 3 × the line, so every trapezoid (a cup, a pot, a
+> tent — two buried triangles) stood on a black wedge wider than itself; and the line
+> was 2.2 on everything, so on a 22-unit cup the outline was 48% of the ink. A grown
+> triangle is now itself plus a capsule along each edge, and the weight is
+> `outlineFor()` — 4.5% of √(w·h), 0.7…2.2 — struck by `ObjectArt` and `SetArt`.
+> `sheet:objects` drew everything at 56 units, which is what hid it: `SIZE=22` draws
+> the size a scene uses. `REPLAY_OBJECTS=<file> npm run check:replay` dumps every
+> object drawing as the scenes place it. The 59 stale must-box stamps were renewed by
+> `scripts/restamp-outline.mjs`, because a thinner outline can only make a box looser.
+
 ### Four brawlers froze after the first tap (L9)
 
 `politicalScene`'s citizens shared ONE `useHeld()` and blended `carryFrom` by `auth`:

@@ -10606,6 +10606,36 @@ It decides how big a scene's art is, so it is in `muststamp`'s SHARED list besid
 `Target.tsx` and `Silhouette.tsx`. A change to how objects are drawn resizes them in
 every scene that draws one, and those scenes' must-boxes go stale with it.
 
+### AM12 · An outline is the object's EDGE, never a backing behind it
+
+> *"for the cafe one, the mugs, you can see like a black outline that goes further
+> outside of the mugs … you can see a background of black … I only want to see the
+> actual object, not a black outline around it that isn't actually part of it."*
+> (2026-09-30)
+
+Two faults, both in the renderer rather than in any drawing, and both measured before
+anything changed (`scripts/lib/objectink.mjs` rasterises a drawing the way
+`Silhouette.tsx` draws it):
+
+1. **A GROWN TRIANGLE STUCK OUT PAST EVERYTHING.** `Silhouette` grew a triangle by
+   scaling its box by 3 × the outline about its centre, which pushes every corner out
+   by more than the line and grows the shape past the part it is buried against. A cup
+   or a pot is a trapezoid built from two buried triangles (`trapezoid()`), so it stood
+   on a black wedge wider than itself, and a table tent grew black feet. **A triangle's
+   outline is the triangle plus a capsule along each edge** — the exact shape grown by
+   the line all round — and that is what `Silhouette` draws now (`triCorners`).
+2. **ONE WEIGHT ON EVERYTHING.** The outline was 2.2 stage units on a 150-unit menu
+   board and on a 22-unit cup alike; on the cup the ring was **48% of all the ink**.
+   The weight is a share of the drawing's own size now — `outlineFor()` in `objects.ts`,
+   4.5% of √(width × height) of its body, between 0.7 and 2.2 — and a caller's `line`
+   is a cap on it, never a floor. `ObjectArt` and `SetArt` both strike it.
+
+`check:objects` §7 holds all of it: the renderer draws a grown triangle from its
+corners, both components strike `outlineFor`, and no library object at 20, 56 or 140
+units has ink further from its fill than the outline reaches. `SIZE=22 npm run
+sheet:objects` draws an object at the size a scene places it, which is where a line
+weight is judged — the default 56 is what hid this.
+
 ### AA10 · The visitor may not walk THROUGH the lead
 
 > *"a lot of overlapping happens above the stickman, this again is absolutely

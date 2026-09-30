@@ -6,6 +6,7 @@
 //   REPLAY_VERBOSE=1 npm run check:replay                 # the advisory lists too
 //   REPLAY_DEBUG=1 …                                      # stack of a style that throws
 //   REPLAY_SOURCE="<scene>=<other file>" …                # run a scene from other source
+//   REPLAY_OBJECTS=<file> …                               # every ObjectArt/SetArt drawing as placed (AM12)
 //
 // A reader on logic-arguments-9 ("Fallacies of Distraction"): "it looks as if an
 // animation above the stickman keeps on repeating itself". It did. The straw copy
@@ -417,6 +418,15 @@ const hasChild = (c) => {
  * root, each link carrying its static styles and animated tokens, so an element's
  * effective opacity can be multiplied down its ancestors frame by frame.
  */
+/**
+ * Every object drawing the scene mounts (REPLAY_OBJECTS): an `<ObjectArt parts=…>` is a
+ * stub here, so its props are the drawing exactly as the scene placed it — which is
+ * the only place the SIZE an object is drawn at can be read, since the scenes compute
+ * it from their own constants. Keyed by source line so a rider drawn on every beat is
+ * one entry.
+ */
+const OBJECTS_SEEN = new Map();
+
 function walkTree(root, inst, file) {
   const elements = [];
   const visit = (node, chainSoFar, key, owner) => {
@@ -436,6 +446,10 @@ function walkTree(root, inst, file) {
       try { out = type(props); } finally { CUR = prev; }
       visit(out, chainSoFar, `${key}>`, kid);
       return;
+    }
+    if (process.env.REPLAY_OBJECTS && props && Array.isArray(props.parts) && props.parts.length && props.parts[0] && typeof props.parts[0].role === 'string') {
+      const where = node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}:${key}` : key;
+      if (!OBJECTS_SEEN.has(where)) OBJECTS_SEEN.set(where, { file: path.basename(file), parts: props.parts, line: props.line });
     }
     const { statics, tokens } = styleParts(props.style);
     const src = node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}` : '';
@@ -823,6 +837,14 @@ function checkLesson({ id, file }) {
     const f = process.env.REPLAY_SLIDE;
     const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
     cur[id] = snaps.map((s) => (s.figs || []).map((fg) => ({ src: fg.src, k: fg.k, ...fg.slide })));
+    fs.writeFileSync(f, JSON.stringify(cur));
+  }
+
+  // REPLAY_OBJECTS=<file> records every object drawing the lesson mounted, as placed.
+  if (process.env.REPLAY_OBJECTS) {
+    const f = process.env.REPLAY_OBJECTS;
+    const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    cur[id] = [...OBJECTS_SEEN.values()].filter((o) => o.file === path.basename(sceneFile)).map((o) => ({ parts: o.parts, line: o.line }));
     fs.writeFileSync(f, JSON.stringify(cur));
   }
 

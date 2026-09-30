@@ -72,7 +72,7 @@ const TONE = T.stageTone(BRANCH);
 const INK = '#1A1A1A';
 const PAPER = '#FAFAF7';
 const SOFT = '#8A8177';
-const LINE = 2.2;                                  // the outline weight the scenes use
+const INK_LIB = await import(pathToFileURL(path.join(REPO, 'scripts/lib/objectink.mjs')).href);
 
 // ── the four primitives, as path data ───────────────────────────────────────
 //
@@ -122,13 +122,21 @@ function triD(x, y, w, h, dir, rot = 0) {
   return `M ${P(a, 0)} L ${P(-a, -b)} L ${P(-a, b)} Z`;
 }
 
-/** One part → path data, at its own geometry grown by `g` (Silhouette's `Piece`). */
+/**
+ * One part → path data, at its own geometry grown by `g` (Silhouette's `Piece`). A
+ * grown triangle is SEVERAL paths — the triangle and a capsule along each edge — so it
+ * comes back as an array, each filled on its own (their windings need not agree).
+ */
 export function partD(p, g = 0) {
   if (p.k === 'ell') return ellD(p.x, p.y, p.w + 2 * g, p.h + 2 * g, p.rot);
   if (p.k === 'rect') return rectD(p.x, p.y, p.w + 2 * g, p.h + 2 * g, p.rot, p.rad + g);
   if (p.k === 'bar') return barD(p.x1, p.y1, p.x2, p.y2, p.t + 2 * g);
-  return triD(p.x, p.y, p.w + 3 * g, p.h + 3 * g, p.dir, p.rot);
+  const tri = triD(p.x, p.y, p.w, p.h, p.dir, p.rot);
+  if (!g) return tri;
+  const v = INK_LIB.triCorners(p);
+  return [tri, ...v.map(([ax, ay], i) => barD(ax, ay, v[(i + 1) % 3][0], v[(i + 1) % 3][1], 2 * g))];
 }
+const each = (d, fn) => (Array.isArray(d) ? d.forEach(fn) : fn(d));
 
 /**
  * Draw one object into a canvas. The order is `Outlined`'s: every BODY part grown in
@@ -143,7 +151,8 @@ function drawObject(cv, parts, ox, oy, zoom) {
   const marks = O.marksOf(parts);
   const painted = O.paint(parts, TONE);
   const fillOf = (p) => painted[parts.indexOf(p)].fill;
-  for (const p of body) cv.path(partD(p, LINE), INK, ox, oy, zoom);
+  const line = O.outlineFor(parts);               // the weight ObjectArt strikes it at (AM11)
+  for (const p of body) each(partD(p, line), (d) => cv.path(d, INK, ox, oy, zoom));
   for (const p of body) cv.path(partD(p), fillOf(p), ox, oy, zoom);
   for (const p of marks) cv.path(partD(p), fillOf(p), ox, oy, zoom);
 }
@@ -174,7 +183,9 @@ for (const n of list) {
 }
 
 const WITH_FIG = process.env.FIG !== '0';
-const SMALL = 56;                      // about what a lesson draws one at
+// SIZE=22 draws the small column at the size a scene places the object — the café cup
+// is 22 — which is where an outline weight is judged (AM11).
+const SMALL = +(process.env.SIZE || 56);
 const BIG = 4;                         // the magnification for the second reading
 const CELL = 120;
 const HEAD = 20;

@@ -274,6 +274,41 @@ if (plain > PLAIN_BUDGET) {
   }
 }
 
+// ── 7 · AN OUTLINE IS THE OBJECT'S EDGE, NEVER A BACKING (AM12) ─────────────
+// *"you can see a background of black"* — the café cup stood on a black wedge wider
+// than itself, and its ring of outline was 48% of all the ink drawn. Held three ways:
+// the renderer grows a triangle from its corners (not by scaling its box), the two
+// object components strike the size-scaled weight, and no library object at a small,
+// a middling and a large size has ink further from its fill than the outline reaches.
+const OUTLINE_SIZES = [20, 56, 140];
+const SPILL_MAX = 0.25;                      // stage units² — the chamfer's own error
+let outlineWorst = 0;
+{
+  const readSrc = (env, rel) => fs.readFileSync(process.env[env] || path.join(REPO, rel), 'utf8');
+  const code = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const sil = code(readSrc('SILHOUETTE_SRC', 'components/lesson/cinematic/Silhouette.tsx'));
+  if (/\+\s*3\s*\*\s*grow/.test(sil) || !/triCorners\(/.test(sil)) {
+    note('OUTLINE', 'Silhouette grows a triangle by scaling its box — its corners poke past the outline; draw it as the triangle plus a capsule along each edge (AM12)');
+  }
+  for (const rel of ['components/lesson/cinematic/ObjectArt.tsx', 'components/lesson/cinematic/SetArt.tsx']) {
+    const env = rel.endsWith('ObjectArt.tsx') ? 'OBJECTART_SRC' : 'SETART_SRC';
+    if (!/outlineFor\(/.test(code(readSrc(env, rel)))) note('OUTLINE', `${path.basename(rel)} does not strike outlineFor() — one weight on every size is a backing on a small object (AM12)`);
+  }
+  if (typeof O.outlineFor !== 'function') note('OUTLINE', 'objects.ts has no outlineFor()');
+  else {
+    const { measureInk } = await import(pathToFileURL(path.join(REPO, 'scripts/lib/objectink.mjs')).href);
+    const small = O.outlineFor(O.OBJECTS.coffeeCup ? O.OBJECTS.coffeeCup(0, 0, 22, 17) : [O.oRect('mass', 0, 0, 22, 17)]);
+    if (small > 1.0) note('OUTLINE', `a 22-unit cup is outlined at ${small.toFixed(2)} — the weight is not following the object's size`);
+    for (const n of names) for (const s of OUTLINE_SIZES) {
+      const parts = O.OBJECTS[n](50, 50, s, s);
+      const m = measureInk(parts, O.outlineFor(parts), 160);
+      if (!m) continue;
+      outlineWorst = Math.max(outlineWorst, m.spill);
+      if (m.spill > SPILL_MAX) note('OUTLINE', `${n} at ${s}: ${m.spill.toFixed(2)} u² of outline lies further out than the line reaches (AM12)`);
+    }
+  }
+}
+
 // `OBJECTS_LIST=1` prints the remaining bare rectangles, which is the worklist for the
 // next pass. It is a REPORT, never a verdict: roughly two in five are correctly
 // rectangles (AM8), and the only way to tell which is to read the scene.
@@ -290,6 +325,7 @@ if (!bad.length) {
   console.log('  ok    the lamp is top-left in all of them');
   console.log(`  ok    the corpus is not growing new bare rectangles  ${plain} ≤ ${PLAIN_BUDGET}`);
   console.log(`  ok    every natural colour obeys the lamp and holds a word on its lit face  ${Object.keys(O.NATURAL).length} colours`);
+  console.log(`  ok    every outline hugs its object and follows its size  worst stray ${outlineWorst.toFixed(2)} u² (AM12)`);
   console.log('\nthe objects are drawings. whether they are GOOD drawings is `npm run sheet:objects`.');
   process.exit(0);
 }

@@ -180,6 +180,51 @@ export function paint(parts: readonly ObjPart[], tone: ObjTone, ink: string = IN
  * or a rim becomes a black band and a porthole becomes a blot.
  */
 export const bodyOf = (parts: readonly ObjPart[]) => parts.filter((p) => p.role === 'mass' || p.role === 'face');
+/**
+ * HOW HEAVY AN OBJECT'S OUTLINE IS: the edge of the object, never a backing behind it
+ * (LESSON_RULES AM11).
+ *
+ * The outline used to be one weight, 2.2 stage units, on everything — right on a
+ * 150-unit menu board and wrong on a 22-unit café cup, where the ring round each part
+ * was nearly half of all the ink drawn: the owner saw *"a black outline that goes
+ * further outside of the mugs … a background of black."* So the weight is a share of
+ * the object's own size (the square root of its body's width × height), capped at the
+ * stage weight a large object is drawn at and floored where an edge still reads at
+ * phone size. A caller's own `line` is a CAP on this, never a floor under it.
+ */
+export const OUTLINE = { max: 2.2, min: 0.7, share: 0.045 } as const;
+
+/** The body parts' extent on the stage: x0, y0, x1, y1. */
+export function bodyBox(parts: readonly { k: string; role?: string }[]): [number, number, number, number] | null {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const raw of parts) {
+    if (raw.role !== 'mass' && raw.role !== 'face') continue;
+    const p = raw as Record<string, any>;
+    if (p.k === 'bar') {
+      const t = p.t / 2;
+      x0 = Math.min(x0, p.x1 - t, p.x2 - t); x1 = Math.max(x1, p.x1 + t, p.x2 + t);
+      y0 = Math.min(y0, p.y1 - t, p.y2 - t); y1 = Math.max(y1, p.y1 + t, p.y2 + t);
+    } else if (p.k === 'poly') {
+      for (let i = 0; i + 1 < p.pts.length; i += 2) {
+        x0 = Math.min(x0, p.pts[i]); x1 = Math.max(x1, p.pts[i]);
+        y0 = Math.min(y0, p.pts[i + 1]); y1 = Math.max(y1, p.pts[i + 1]);
+      }
+    } else {
+      x0 = Math.min(x0, p.x - p.w / 2); x1 = Math.max(x1, p.x + p.w / 2);
+      y0 = Math.min(y0, p.y - p.h / 2); y1 = Math.max(y1, p.y + p.h / 2);
+    }
+  }
+  return isFinite(x0) ? [x0, y0, x1, y1] : null;
+}
+
+/** The outline weight one drawing is struck at — see `OUTLINE`. */
+export function outlineFor(parts: readonly { k: string; role?: string }[], cap: number = OUTLINE.max): number {
+  const b = bodyBox(parts);
+  if (!b) return Math.min(cap, OUTLINE.min);
+  const size = Math.sqrt(Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]));
+  return Math.min(cap, OUTLINE.max, Math.max(OUTLINE.min, OUTLINE.share * size));
+}
+
 /** The parts drawn ON the body, in paint order after it. */
 export const marksOf = (parts: readonly ObjPart[]) => parts.filter((p) => p.role !== 'mass' && p.role !== 'face');
 

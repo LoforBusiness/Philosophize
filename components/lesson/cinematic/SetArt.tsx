@@ -18,7 +18,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, type ViewStyle } from 'react-native';
 import { Shapes, type Part } from './Silhouette';
-import { paint, type ObjPart, type ObjTone } from './objects';
+import { paint, outlineFor, type ObjPart, type ObjTone } from './objects';
 import { triangulate, growTri, triBox, edgesOf, type PolyPart } from './setShapes';
 import { OBJECT_LINE } from './ObjectArt';
 
@@ -81,9 +81,11 @@ export default function SetArt({
   const painted = paint(parts as unknown as ObjPart[], tone, ink) as unknown as (SetPart & { fill: string })[];
   const body = painted.filter(isBody);
   const marks = painted.filter((p) => !isBody(p));
+  // the outline is a share of the drawing's own size, `line` its cap (LESSON_RULES AM11)
+  const weight = outlineFor(parts, line);
   return (
     <View pointerEvents="none" style={[{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }, style]}>
-      {body.map((p, i) => <Piece key={`l${i}`} p={p} grow={line} color={ink} />)}
+      {body.map((p, i) => <Piece key={`l${i}`} p={p} grow={weight} color={ink} />)}
       {body.map((p, i) => <Piece key={`b${i}`} p={p} grow={0} />)}
       {marks.map((p, i) => <Piece key={`m${i}`} p={p} grow={0} />)}
     </View>
