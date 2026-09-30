@@ -466,8 +466,11 @@ head('THE MONTH GRID');
   if (perRun) ok('the rail is one element per RUN, not a stub per cell');
   else bad('the rail is drawn per cell again', 'that is the design the reader called half-hard');
 
-  const wraps = /const openL = a === 0 && !!prevRowEnd\?\.inRun;/.test(cal)
-    && /const openR = b === 6 && !!nextRowStart\?\.inRun;/.test(cal);
+  // Since the capsule redesign (2026-09-29) EARLIER runs are drawn as bands too,
+  // so a band stays open across the edge only while the next row carries on
+  // the SAME run — the current one into the current one, an old one into an old one.
+  const wraps = /const openL = a === 0 && lit\(prevRowEnd\) && !!prevRowEnd\?\.inRun === now;/.test(cal)
+    && /const openR = b === 6 && lit\(nextRowStart\) && !!nextRowStart\?\.inRun === now;/.test(cal);
   if (wraps) ok('and a run that crosses a week boundary runs off the row edge');
   else bad('the rail stops at the row edge again', 'a run is one thing; the week break is not');
 

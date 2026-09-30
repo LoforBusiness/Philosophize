@@ -1,3 +1,4 @@
+import type { GlyphName } from '@/components/shared/Glyph';
 // Single source of truth for rest days ("streak freezes").
 //
 // A rest day is spent automatically to cover a missed calendar day, so a streak
@@ -124,10 +125,14 @@ export const SLATE_LIT = '#95928A';
 /**
  * Milestones the calendar marks and the reward screen celebrates.
  *
- * Kept short on purpose. A landmark every week stops being a landmark; these are
- * the four a reader actually says out loud.
+ * THEY ARE THE SOCIETIES' THRESHOLDS, and there are ten of them since
+ * 2026-09-29. It was four (a week, a month, a hundred days, a year) on the
+ * reasoning that a landmark every week stops being a landmark. The owner asked
+ * for ten societies, and the rule below — one ladder, not two — means each one
+ * has to be a day the reward screen marks. The gaps widen as the run grows, so
+ * the early ones come quickly and the late ones stay rare.
  */
-export const STREAK_MILESTONES = [7, 30, 100, 365] as const;
+export const STREAK_MILESTONES = [3, 7, 14, 30, 50, 75, 100, 150, 250, 365] as const;
 
 /** The next milestone above `n`, or null once they are all behind you. */
 export function nextMilestone(n: number): number | null {
@@ -141,21 +146,20 @@ export function nextMilestone(n: number): number | null {
 // at 365 days you stop being someone with a big number and start being a MEMBER of
 // something, and the app says so out loud. This is that, in this app's own terms.
 //
-// WHY THESE NAMES AND NOT RANK NAMES. `data/ranks.ts` already has 25 tiers from
-// Novice to Grand Philosopher, and those are earned with XP — they say how much you
-// have LEARNED. These say how faithfully you have shown up, which is a different
-// virtue and deserves different words. Every one is a real school or discipline
-// whose defining trait is the habit itself:
+// WHY THESE NAMES AND NOT RANK NAMES. `data/ranks.ts` has the XP ladder, and
+// those say how much you have LEARNED. These say how faithfully you have shown
+// up, which is a different virtue and deserves different words.
 //
-//   Peripatetic  Aristotle's school, named for the covered walk its members paced
-//                while arguing. It means, literally, "given to walking" — which is
-//                also what the mascot does, so the first tier a reader reaches is
-//                named after the thing they have been watching all along.
-//   Stoic        the discipline of turning up whether or not you feel like it.
-//   Ascetic      practice sustained past the point where it is still novel.
-//   Immovable    Aristotle's unmoved mover, the thing that causes motion in
-//                everything else without itself being moved. A year without a
-//                missed day has earned the joke.
+// A SCHOLAR'S CLUB, NOT A PHILOSOPHY SCHOOL (2026-09-29). The first four were
+// Peripatetic, Stoic, Ascetic and Immovable — real schools of philosophy, which
+// was apt while the app taught nothing else and stopped being apt the day
+// Economics arrived. The owner chose the scholar's-club set from three and asked
+// for ten tiers topping out at a year. The names climb in standing, from someone
+// who has just arrived to someone who keeps the place, and not one of them names
+// a subject. (It also retires a collision: Peripatetic was rank 23 as well.)
+//
+// Each carries a glyph, so a society is an EMBLEM on the streak screen and not
+// only a word — the same reason every rank and badge is a struck mark.
 //
 // THE THRESHOLDS ARE STREAK_MILESTONES, deliberately, and not a second ladder
 // beside them. Two sets of landmarks in one feature means the reward screen
@@ -166,13 +170,21 @@ export interface StreakTier {
   name: string;
   /** One line, shown under the name. Not a slogan — a description of the reader. */
   blurb: string;
+  /** Its emblem, from components/shared/Glyph. */
+  glyph: GlyphName;
 }
 
 export const STREAK_TIERS: readonly StreakTier[] = [
-  { at: 7, name: 'Peripatetic', blurb: 'A week of showing up. You walk while you think.' },
-  { at: 30, name: 'Stoic', blurb: 'A month. You come whether or not you feel like it.' },
-  { at: 100, name: 'Ascetic', blurb: 'A hundred days. It stopped being novel long ago.' },
-  { at: 365, name: 'Immovable', blurb: 'A year unbroken. Nothing moves you. You move everything else.' },
+  { at: 3, name: 'The Newcomers', glyph: 'seed', blurb: 'Three days running. You found the door and came back through it.' },
+  { at: 7, name: 'The Regulars', glyph: 'candle', blurb: 'A week of showing up. They know your face here now.' },
+  { at: 14, name: 'The Studious', glyph: 'book', blurb: 'Two weeks. Learning something is part of your day.' },
+  { at: 30, name: 'The Devoted', glyph: 'lamp', blurb: 'A month. You come whether or not you feel like it.' },
+  { at: 50, name: 'The Diligent', glyph: 'quill', blurb: 'Fifty days. The habit holds on the days you would rather skip.' },
+  { at: 75, name: 'The Learned', glyph: 'scroll', blurb: 'Seventy-five days. It stopped being new a long time ago.' },
+  { at: 100, name: 'The Scholars', glyph: 'cap', blurb: 'A hundred days. Very few readers get this far.' },
+  { at: 150, name: 'The Fellows', glyph: 'key', blurb: 'A hundred and fifty days. You have a key to the reading room.' },
+  { at: 250, name: 'The Luminaries', glyph: 'star', blurb: 'Two hundred and fifty days. Others steer by the example.' },
+  { at: 365, name: 'The Keepers', glyph: 'torch', blurb: 'A year unbroken. You keep the lamp lit for everyone else.' },
 ] as const;
 
 /** The tier a streak of `n` days has earned, or null below the first one. */

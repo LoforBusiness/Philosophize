@@ -8,7 +8,7 @@ import Animated, {
 import Stickman from '@/components/lesson/cinematic/Stickman';
 import { pose, type Bundle } from '@/components/lesson/cinematic/rig';
 import { emoteAnyLive } from '@/components/lesson/cinematic/moves';
-import { STREAK_EMBER, SLATE, SLATE_LIT, type StreakTier } from '@/constants/streak';
+import { STREAK_EMBER, SLATE, SLATE_LIT, STREAK_TIERS, type StreakTier } from '@/constants/streak';
 import {
   INK, PAPER, PAPER_LIT, DEEP, SAND, TEAL, OLIVE, SAGE, EMBER, EMBER_LIT,
   FLOOR, FLAT_EDGE, mix,
@@ -315,9 +315,12 @@ const PL_H = 40;
 function plaqueFs(name: string, max: number): number {
   return Math.min(max, (PL_W - 16) / (name.length * 0.76));
 }
+/** A plaque is too small for the article: THE REGULARS reads as REGULARS on a nail. */
+const short = (t: StreakTier) => t.name.replace(/^The /, '');
 function Plaque({ tier, next, alive }: { tier: StreakTier | null; next: StreakTier | null; alive: boolean }) {
   const nail = { x: PL_X + PL_W / 2, y: 12 };
   const held = tier && alive;
+  const waiting = next ?? STREAK_TIERS[0];
   return (
     <>
       <Stroke x1={nail.x} y1={nail.y} x2={PL_X + 18} y2={PL_Y + 1} w={1.4} />
@@ -327,18 +330,18 @@ function Plaque({ tier, next, alive }: { tier: StreakTier | null; next: StreakTi
         <View style={slab(PL_X, PL_Y, PL_W, PL_H, DEEP, mix(DEEP, INK, 0.5), 6, 3)}>
           <Lit w={PL_W} h={PL_H} r={6} color={mix(DEEP, PAPER_LIT, 0.18)} />
           <Text style={styles.plaqueKicker}>SOCIETY</Text>
-          <Text style={[styles.plaqueName, { fontSize: plaqueFs(tier!.name, 14) }]} numberOfLines={1}>
-            {tier!.name.toUpperCase()}
+          <Text style={[styles.plaqueName, { fontSize: plaqueFs(short(tier!), 14) }]} numberOfLines={1}>
+            {short(tier!).toUpperCase()}
           </Text>
         </View>
       ) : (
         <View style={styles.plaqueEmpty}>
-          <Text style={styles.plaqueEmptyKicker}>AT {next?.at ?? 7} DAYS</Text>
+          <Text style={styles.plaqueEmptyKicker}>AT {waiting.at} DAYS</Text>
           <Text
-            style={[styles.plaqueEmptyName, { fontSize: plaqueFs(next?.name ?? 'Peripatetic', 12.5) }]}
+            style={[styles.plaqueEmptyName, { fontSize: plaqueFs(short(waiting), 12.5) }]}
             numberOfLines={1}
           >
-            {(next?.name ?? 'Peripatetic').toUpperCase()}
+            {short(waiting).toUpperCase()}
           </Text>
         </View>
       )}

@@ -5,7 +5,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { mix, PAPER_LIT, LOCK_FACE, LOCK_EDGE, SHINE } from '@/components/shared/tone';
 import { LINE, WOOD, WOOD_LIT, WOOD_SHADE, SHEET_SHADE } from '@/components/shared/drawn';
-import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, nextMilestone, STREAK_MILESTONES } from '@/constants/streak';
+import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, STREAK_TIERS, nextTier } from '@/constants/streak';
 import { buildWeek } from '@/lib/utils/streakCalendar';
 import { C, LIP } from '@/constants/design';
 import { cue } from '@/lib/feedback';
@@ -229,10 +229,6 @@ function Page({ value }: { value: number }) {
 // ── the words ───────────────────────────────────────────────────────────────
 // Nothing here may say the day is finished. The eyebrow names the RUN, which the
 // week rail underneath is already drawing, and the tail always points ahead.
-const LANDMARK: Record<number, string> = {
-  7: 'a week', 30: 'a month', 100: 'a hundred', 365: 'a year',
-};
-
 export const EYEBROWS = ['THE RUN BEGINS', 'THE RUN HOLDS', 'THE RUN CONTINUES'] as const;
 
 function eyebrowFor(prevStreak: number, restSpent: number): string {
@@ -247,11 +243,11 @@ function eyebrowFor(prevStreak: number, restSpent: number): string {
  * are for a caller that one day cannot.
  */
 function tailFor(streak: number, moreToday: boolean): string {
-  const next = nextMilestone(streak);
+  const next = nextTier(streak);
   if (moreToday) return 'Another one is ready when you are.';
   if (next) {
-    const gap = next - streak;
-    return `${gap} more and it is ${LANDMARK[next] ?? `${next} days`}.`;
+    const gap = next.at - streak;
+    return `${gap} more to ${next.name}.`;
   }
   // Name the next DAY rather than asking for a return visit: "come back
   // tomorrow" is the screen closing the session, and check:streak refuses it.
@@ -282,11 +278,14 @@ export default function StreakCeremony({
   const [down, setDown] = useState(false);
   const skipped = useRef(false);
 
-  const hitMilestone = STREAK_MILESTONES.includes(streak as 7 | 30 | 100 | 365);
+  // THE DAY A SOCIETY ADMITS THEM. Every society lands on a milestone (one
+  // ladder, not two — constants/streak.ts), so this is the milestone day too.
+  const joined = STREAK_TIERS.find((t) => t.at === streak) ?? null;
+  const hitMilestone = joined !== null;
   // A landmark day gets more of everything the ordinary day gets.
   const sparks = useMemo(() => makeSparks(hitMilestone ? 18 : 11), [hitMilestone]);
   const tones = useMemo(() => [STREAK_EMBER, mix(STREAK_EMBER, PAPER, 0.4), PAPER_LIT], []);
-  const bandText = hitMilestone ? (LANDMARK[streak] ?? 'STREAK').toUpperCase() : 'DAY STREAK';
+  const bandText = joined ? joined.name.replace(/^The /, '').toUpperCase() : 'DAY STREAK';
 
   useEffect(() => {
     t.value = withTiming(T_END, { duration: T_END, easing: Easing.linear });
@@ -548,7 +547,7 @@ export default function StreakCeremony({
         {/* ── the line that used to say the day was over ───────────────────── */}
         <Animated.View style={tailStyle}>
           {hitMilestone ? (
-            <Text style={styles.milestone}>{streak} DAYS · A LANDMARK</Text>
+            <Text style={styles.milestone}>JOINED · {joined?.name.toUpperCase()}</Text>
           ) : (
             <Text style={styles.tail}>{tailFor(streak, moreToday)}</Text>
           )}

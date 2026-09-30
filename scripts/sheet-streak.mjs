@@ -51,9 +51,9 @@ const SCREENS = [
   // to be in the file — the point of loading the real screen is that a component
   // can be imported, typechecked and still render nothing.
   { key: 'tab', q: 's=tab',
-    want: ['DAYS RUNNING', 'THE SOCIETY', 'AUGUST', 'STUDIED', 'RESTED', 'MISSED', 'REST DAYS'] },
+    want: ['DAYS RUNNING', 'THE SOCIETY', 'AUGUST', 'DAYS STUDIED', 'EARLIER', 'REST DAY', 'REST DAYS'] },
   { key: 'panel', q: 's=panel', want: ['DAYS RUNNING', 'NEXT', 'REST DAY HELD'] },
-  { key: 'calendar', q: 's=cal', want: ['STUDIED', 'RESTED', 'MISSED'], rail: true },
+  { key: 'calendar', q: 's=cal', want: ['STREAK', 'EARLIER', 'REST DAY'], rail: true },
   { key: 'celebration', q: 's=celebrate&run=7', want: ['STREAK EXTENDED', 'DAYS'] },
   // THE CEREMONY, which is what a first lesson of the day actually raises now.
   // Three readings, because the three differ in what they DRAW and not merely in
@@ -61,7 +61,7 @@ const SCREENS = [
   // sweep), and the one where another lesson is genuinely available — the only
   // state whose tail line is allowed to ask for one.
   { key: 'ceremony', q: 's=ceremony&run=12', want: ['THE RUN CONTINUES', 'IN', 'INK', 'DAYS', 'Continue'] },
-  { key: 'ceremony-landmark', q: 's=ceremony&run=7', want: ['THE RUN CONTINUES', 'A LANDMARK'] },
+  { key: 'ceremony-landmark', q: 's=ceremony&run=7', want: ['THE RUN CONTINUES', 'JOINED · THE REGULARS'] },
   { key: 'ceremony-more', q: 's=ceremony&run=12&more=1', want: ['ready when you are'] },
   // A streak that has gone out: everything that was gilt must be slate.
   { key: 'lapsed', q: 's=tab&lapsed=1&run=0', want: ['STREAK LAPSED'] },
@@ -115,11 +115,10 @@ const PROBE = `(() => {
       }
     }
 
-    // THE RAIL. An absolutely-positioned gradient, wider than it is tall, sitting
-    // inside a week row. Identified by shape rather than by a class name, because
-    // a class name is a thing this file could get wrong quietly.
-    if (s.position === 'absolute' && s.backgroundImage.includes('gradient')
-        && r.height < 20 && r.width > 12) {
+    // THE BAND. Since the capsule redesign (2026-09-29) a run is a flat band the
+    // height of a day, not a thin gradient rail, so it can no longer be told
+    // apart by shape from a day token — the grid tags each band instead.
+    if (el.getAttribute('data-testid') === 'streak-band' && r.width > 12) {
       rails.push({ x0: Math.round(r.left), x1: Math.round(r.right), y: Math.round(r.top + r.height / 2) });
     }
   }

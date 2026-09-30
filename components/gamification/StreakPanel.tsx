@@ -26,7 +26,7 @@ import {
 //                  Home's panel and Profile's both drew the streak in flat ink.
 //                  The one licensed colour in the app existed for this object
 //                  and was not on it.
-//   THE SOCIETY    STREAK_TIERS — Peripatetic, Stoic, Ascetic, Immovable — with
+//   THE SOCIETY    STREAK_TIERS — ten of them, The Newcomers to The Keepers — with
 //                  `nextTier` already written. A reader could only find out
 //                  there was something to reach by opening a third screen.
 //   THE REST DAYS  a real streak-freeze mechanic with an earn rate and a cap,

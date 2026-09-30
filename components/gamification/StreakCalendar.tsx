@@ -6,11 +6,12 @@ import Animated, {
   cancelAnimation, Easing,
   type SharedValue,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import SketchIcon from '@/components/shared/SketchIcon';
 import Meter from '@/components/ui/Meter';
-import { STREAK_EMBER, STREAK_DEEP, STREAK_WASH, SLATE, STREAK_MILESTONES } from '@/constants/streak';
-import { ramp, rampFace, mix, PAPER_LIT, FLAT_EDGE } from '@/components/shared/tone';
+import { STREAK_EMBER, STREAK_DEEP, SLATE, STREAK_MILESTONES } from '@/constants/streak';
+import { mix, PAPER_LIT, FLAT_EDGE, SAND } from '@/components/shared/tone';
+import { LINE } from '@/components/shared/drawn';
+import { C } from '@/constants/design';
 import {
   buildMonth,
   shiftMonth,
@@ -18,26 +19,16 @@ import {
   type CalendarDay,
 } from '@/lib/utils/streakCalendar';
 
-const INK = '#1A1A1A';
-const INK_SOFT = '#6B6B6B';
-const PAPER = '#FAFAF7';
-const FAINT = '#E4E1D8';
+const INK = C.ink;
+const INK_SOFT = C.inkSoft;
+const PAPER = C.paper;
+const FAINT = '#C9C5BA';
 
 // ── THE GRID ARRIVES ON FOCUS, AND IT IS ONE SHARED VALUE ───────────────────
 //
-// Both of these were Moti: the cells carried `from={{ scale: 0.8, opacity: 0 }}`
-// and today's ring carried a looping `animate`. Moti's `from` fires on MOUNT,
-// and a tab screen mounts once -- so the bloom played on the first visit and
-// never again, and once this screen joined the warm-up it played at startup
-// behind the launch animation instead. The loop was worse: nothing stopped it,
-// so a ring nobody could see went on breathing on the UI thread for the rest of
-// the session. That is the defect StreakMascot's frame callback already names --
-// "a small cost and a permanent one, which is the worse kind".
-//
-// Reanimated rather than a focus-flag prop, because `freezeOnBlur` suspends a
-// blurred screen's RENDERS: a state change made on the way out is not committed
-// until the way back in, by which time it has been overwritten. A shared value
-// is set imperatively and does not need a render to happen at all.
+// Moti's `from` fires on MOUNT and a tab screen mounts once, so an entrance
+// written that way played at startup behind the launch animation and never
+// again. A shared value is set imperatively on focus and needs no render.
 const BLOOM_STEP = 8;      // ms between one cell and the next
 const BLOOM_HOLD = 240;    // where the last cell starts, however long the month
 const BLOOM_CELL = 200;    // how long one cell takes
@@ -47,99 +38,55 @@ const PULSE_MS = 1800;
 // ─────────────────────────────────────────────────────────────────────────────
 // THE STREAK MONTH.
 //
-// A grid of the month the reader is in: which days they studied, which they
-// missed, which a rest day covered, and where they are now.
+// Which days the reader studied, which they missed, which a rest day covered,
+// and where they are now.
 //
-// ── WHAT WAS WRONG WITH THE ONE BEFORE THIS ─────────────────────────────────
+// ── THE THIRD DESIGN (2026-09-29) ──────────────────────────────────────────
 //
-// A reader: *"you can see where it connects where the user has a streak, but
-// that doesn't really look good at premium. It looks like a half hard design."*
-// Three things, and the first is what made it read as unfinished:
+// "I don't really like how the calendar looks and the circles and just
+// everything there looks very cheap and the color really doesn't go very good."
+// Measured against the rest of the app, it was the last surface still drawn the
+// old way: every studied day a separate GRADIENT disc (lit corner to shaded
+// corner) sitting on a pale gradient rail behind it, so a week of study read as
+// seven marbles on a smear — and 2026-09-16 took exactly that tan-edged gradient
+// off every other surface for reading as AI.
 //
-//   THE RAIL WAS DRAWN PER CELL. Each day painted its own stub of band, inset a
-//   quarter of a cell and pulled 6pt past its own edge to meet its neighbour's
-//   stub. Where two lit days sat side by side that worked; everywhere else it
-//   left a pale tab poking out of a disc into empty paper, which reads as a
-//   rendering fault rather than as a chain. It is ONE element per RUN now,
-//   measured across the row.
+// It is the depth kit now, the construction the tabs and the lessons share:
 //
-//   IT COULD NOT WRAP. `joinLeft`/`joinRight` were disabled at the row edges —
-//   correct, given per-cell stubs, and it meant a run crossing a Sunday simply
-//   stopped and started again with nothing said. A run is one thing; the week
-//   boundary is an accident of how weeks are printed. The rail runs off the edge
-//   of the row now and picks up at the start of the next.
+//   THE CURRENT RUN IS ONE CAPSULE per row — a flat ember band with the app's
+//   ink outline and a hard ledge, the day numbers set on it in paper. One object
+//   per run, not a chain of tokens, which is how the best streak calendars draw
+//   it: the run IS the shape. A lone studied day is simply a capsule one day
+//   long, which is a disc.
+//   EARLIER RUNS are the same capsule in a quiet tint, with no ledge — real, but
+//   not the one being kept.
+//   A REST DAY is a hollow link: a white disc set into the band with its number
+//   in ember. The chain survives it and the reader did not study.
+//   TODAY, UNFED, is a white disc with an ink rim and one slow breathing ring —
+//   the only cell the reader can still change.
+//   A MISSED DAY is its number in grey and nothing else. Quiet on purpose: the
+//   band breaking is the whole story and a wall of accusations is what makes
+//   people delete an app.
+//   A MILESTONE — the day a society admitted them — wears a small sand seal on
+//   its corner.
 //
-//   EVERY DAY WAS THE SAME FLAT CIRCLE. The rank pins, the badges, the
-//   certificates and the quote plates are all STRUCK — a lit corner, a shaded
-//   one, a rim, one light from the top left (tone.ts). The calendar was the last
-//   surface still drawing flat fills, in the one place a reader looks to feel
-//   good about what they have done. Every lit day is struck now, off the same
-//   `ramp()` every other object here uses.
+// ── IT STILL MEASURES ITSELF ────────────────────────────────────────────────
 //
-// ── AND TWO THINGS IT DID NOT SAY AT ALL ────────────────────────────────────
-//
-// MILESTONES. `STREAK_MILESTONES` — 7, 30, 100, 365 — existed and the grid was
-// blind to them, so the day a reader's run hit a week looked exactly like the
-// day before it. The day a milestone LANDS wears a collar: a ring struck outside
-// the token, deliberately the same gesture a capstone rank pin and a tier-V
-// badge already carry (§7). A ring around a struck thing means "this one is the
-// far end of something".
-//
-// TODAY, UNFED. It was a hollow ink ring — quieter than a lit day, in a grid
-// where it is the only cell the reader can still do anything about. It breathes
-// now, one slow ring, the single moving thing on the screen.
-//
-// ── WHY MISSED DAYS ARE STILL QUIET ─────────────────────────────────────────
-//
-// A missed day is a hollow ring in faint ink, not a red X and not a hole. The
-// grid is a place a reader comes to feel good about coming back; a wall of
-// accusations is what makes people delete an app rather than open it. The rail
-// breaking is already the whole story — it does not need underlining.
-//
-// Days before the reader joined are BLANK, not missed, for the same reason
-// (lib/utils/streakCalendar.ts, `since`).
-//
-// ── THE GRID MEASURES ITSELF, AND THAT IS LOAD-BEARING ──────────────────────
-//
-// A rail spans from the centre of one cell to the centre of another, and a
-// centre is not knowable inside a `space-between` row — which is exactly why the
-// old one could only ever draw stubs anchored to a cell's own box. One
-// `onLayout` on the grid gives every cell an exact pitch, and every rail, cap
-// and collar below is arithmetic from it. The state lives HERE rather than on
-// the screen, which is §19's rule from the Profile work: a measurement a child
-// needs belongs to the child.
+// A capsule spans from one cell's centre to another's, and a centre is not
+// knowable inside a flex row, so one `onLayout` gives every cell an exact pitch
+// and every band and seal is arithmetic from it. A run that crosses a Sunday runs
+// off the row edge and picks up at the start of the next: a run is one thing,
+// the week boundary is an accident of printing.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** The struck material every lit day is cut from. One light, top-left, always. */
-const METAL = ramp(STREAK_EMBER);
-const FACE = rampFace(METAL);
 /**
- * THE RAIL, AND WHY IT IS NOT A WASH.
- *
- * The obvious tone for a band behind the tokens is the material's own wash, and
- * the first build used it: the gilt's wash measured 1.24:1 on paper, which is the
- * FLOOR for a faint fill (design.ts records `HUE_SOFT` failing at 1.04 and the
- * six mastery bars having no visible remainder at all). Rendered, the rail was
- * technically present and could not be seen — the run measured correctly across
- * every row and read as nothing.
- *
- * That is the wrong floor for this object. A progress track may be faint because
- * it is the part that has NOT happened; this rail is the streak itself, the one
- * thing in the grid the reader is here to look at. 2.34:1 is a band on paper.
- *
- * The groove still runs the face BACKWARDS (StruckNiche's rule: a groove is
- * bright where a dome is dark), and it stops at a lit tint of its own rather
- * than at PAPER_LIT — running a three-stop gradient out to white put half the
- * rail's length at 1.0:1 and was most of why it disappeared.
+ * AN EARLIER RUN'S BAND. The ember taken toward paper — 2.34:1 on paper, so it is
+ * a band and not a rumour (a beige wash measured 1.18 and read as nothing), and
+ * still well under the current run's ember, so the run being kept out-ranks the
+ * ones that ended. `check:streak` holds both.
  */
-const RAIL = mix(STREAK_EMBER, PAPER, 0.62); // 2.34:1 on paper
-const GROOVE: [string, string, string] = [
-  mix(RAIL, INK, 0.16), RAIL, mix(RAIL, PAPER_LIT, 0.5),
-];
-
-/** The one light, as LinearGradient endpoints. Matches tone.LIGHT everywhere. */
-const LIGHT_START = { x: 0.15, y: 0 } as const;
-const LIGHT_END = { x: 0.85, y: 1 } as const;
+const RAIL = mix(STREAK_EMBER, PAPER, 0.62);
+const RAIL_EDGE = mix(STREAK_EMBER, INK, 0.25);
 
 interface Props {
   activeDays: readonly string[];
@@ -148,36 +95,31 @@ interface Props {
   today: string;
   /** The reader's first day, so pre-history draws blank rather than failed. */
   since: string | null;
-  /** Cell diameter. The sheet uses the default; the reward screen goes smaller. */
+  /** Cell diameter. */
   size?: number;
   /**
    * Fired with the month now on screen, so a caller can show ITS figures rather
-   * than always this month's.
-   *
-   * The grid owns the paging (it is the thing with the arrows) and lifting that
-   * state out would make every caller carry it, so the month is reported instead
-   * of controlled. A caller that does not care simply omits this.
+   * than always this month's. The grid owns the paging, so the month is reported
+   * rather than controlled.
    */
   onMonth?: (year: number, month: number) => void;
   /**
-   * True while the scroll this grid sits in is MOVING. Today's ring is the
-   * only thing here that animates for ever, and one animated node is enough
-   * to force Android's overscroll stretch to re-rasterise the whole page
-   * every frame of the bounce -- see the note by the reaction below.
+   * True while the scroll this grid sits in is MOVING. Today's ring is the only
+   * thing here that animates for ever, and one animated node is enough to force
+   * Android's overscroll stretch to re-rasterise the whole page every frame of
+   * the bounce — see the note by the reaction below.
    */
   hold?: SharedValue<boolean>;
 }
 
 const DAY_MS = 86400000;
 const keyOf = (t: number) => new Date(t).toISOString().slice(0, 10);
+const lit = (c: CalendarDay | undefined) => !!c && (c.state === 'done' || c.state === 'rest');
 
 /**
- * How long the run was, as of each day in the month.
- *
- * Walked backwards through active-or-rested days from each date, which is the
- * same rule `inRun` uses — so a milestone lands on the day the counter would
- * have said it. Bounded by the longest milestone plus one, because nothing past
- * that changes an answer this grid needs.
+ * How long the run was, as of each day in the month — walked backwards through
+ * active-or-rested days, the rule `inRun` uses, so a milestone lands on the day
+ * the counter would have said it. Bounded by the longest milestone plus one.
  */
 function runLengths(cells: readonly CalendarDay[], active: Set<string>, rest: Set<string>) {
   const out = new Map<string, number>();
@@ -197,14 +139,19 @@ function runLengths(cells: readonly CalendarDay[], active: Set<string>, rest: Se
   return out;
 }
 
-/** Contiguous spans of `inRun` within one row, as [firstCol, lastCol]. */
-function spansIn(row: readonly CalendarDay[]): [number, number][] {
-  const out: [number, number][] = [];
+/**
+ * Contiguous lit spans within one row, as [firstCol, lastCol, isCurrentRun].
+ * A span splits where `inRun` changes, so the current run and an older one never
+ * share a band.
+ */
+function spansIn(row: readonly CalendarDay[]): [number, number, boolean][] {
+  const out: [number, number, boolean][] = [];
   let start = -1;
   for (let i = 0; i <= row.length; i++) {
-    const on = i < row.length && !!row[i]?.inRun;
+    const on = i < row.length && lit(row[i]);
+    const breaks = on && start >= 0 && !!row[i].inRun !== !!row[start].inRun;
+    if (start >= 0 && (!on || breaks)) { out.push([start, i - 1, !!row[start].inRun]); start = -1; }
     if (on && start < 0) start = i;
-    if (!on && start >= 0) { out.push([start, i - 1]); start = -1; }
   }
   return out;
 }
@@ -231,13 +178,11 @@ export default function StreakCalendar({
     return s;
   }, [runs]);
 
-  // Reported in an effect, not during render: calling a parent's setState while
-  // this component is rendering is the classic cross-component update warning, and
-  // on the first paint it would fire before the parent had finished mounting.
+  // Reported in an effect, not during render: a parent's setState during this
+  // render is the cross-component update warning.
   useEffect(() => { onMonth?.(at.year, at.month); }, [at.year, at.month, onMonth]);
 
-  // Never page forward past the month the reader is in — there is nothing there,
-  // and an empty grid of futures reads as a bug.
+  // Never page forward past the month the reader is in.
   const canForward = offset < 0;
 
   const onGrid = (e: LayoutChangeEvent) => {
@@ -245,30 +190,16 @@ export default function StreakCalendar({
     if (w !== gridW) setGridW(w);
   };
   const pitch = gridW > 0 ? gridW / 7 : 0;
-  const railH = Math.round(size * 0.3);
+  const rowH = size + 12;
 
-  // See the note by BLOOM_STEP. Cancelled on the way out so the repeat cannot
-  // outlive the visit.
   const bloom = useSharedValue(0);
   const pulse = useSharedValue(0);
 
-  // ── AND THE RING HOLDS ITS BREATH WHILE THE PAGE IS MOVING ────────────────
+  // ── THE RING HOLDS ITS BREATH WHILE THE PAGE IS MOVING ────────────────────
   //
-  // `pulse` is one small ring on one cell, so it looks far too cheap to matter.
-  // What matters is not its cost but the fact that it is NEVER STILL. Android
-  // 12+ overscroll is a StretchEffect, which is a RenderEffect: the scrolling
-  // subtree has to be captured into an offscreen buffer for the shader to
-  // distort it, and that capture is reusable only while nothing inside it
-  // changes. ONE node dirtied every frame is exactly as damaging as a hundred,
-  // because it invalidates the same buffer.
-  //
-  // PAUSED WHERE IT STANDS AND RESUMED IN PHASE, not restarted. `cancelAnimation`
-  // leaves the value exactly where it was, so the styles reading it stop re-running
-  // altogether and the node goes clean -- and the resume finishes the cycle that
-  // was interrupted before handing back to the repeat, so the ring never jumps
-  // (group L). Restarting it from 0 would be one line shorter and would blink at
-  // the reader on the frame they stopped scrolling, which is the moment they are
-  // most likely to be looking at it.
+  // One node dirtied every frame invalidates Android's overscroll capture as
+  // surely as a hundred. Paused where it stands and resumed in phase, so the ring
+  // never jumps on the frame the reader stops scrolling (group L).
   useAnimatedReaction(
     () => !!hold?.value,
     (held, was) => {
@@ -277,10 +208,10 @@ export default function StreakCalendar({
         cancelAnimation(pulse);
         return;
       }
-      const at = pulse.value;
+      const from = pulse.value;
       pulse.value = withTiming(
         1,
-        { duration: PULSE_MS * (1 - at), easing: Easing.linear },
+        { duration: PULSE_MS * (1 - from), easing: Easing.linear },
         (done) => {
           if (!done) return;
           pulse.value = 0;
@@ -294,24 +225,9 @@ export default function StreakCalendar({
 
   // ── AND THE ENTRANCE IS PACKED AWAY WHEN IT IS OVER ────────────────────────
   //
-  // `bloom` is finished 440ms after arrival and never moves again, but every one
-  // of the month's cells stayed an `Animated.View` carrying a live mapper for the
-  // whole visit — forty-two animated render nodes to play a fade that ended
-  // before the reader's thumb had reached the glass.
-  //
-  // That is the same shape as the TodayRing note below, one level out, and it is
-  // what the phone said was costing the scroll. Traced on an S24 Ultra while
-  // scrolling this screen, the render thread ran `prepareTree` at 23.6ms a frame
-  // and asked Vulkan for **5,851 new images in five seconds — about forty-four
-  // every frame**, freeing 4,223 in the same window. Forty-four is this grid:
-  // forty-two day cells and the furniture around them, each re-acquiring backing
-  // store every frame to animate nothing. Home, for contrast, draws FOUR TIMES
-  // the geometry (15,626 rounded-rect ops against 3,828) and allocates zero.
-  //
-  // So once the bloom is spent the cells are rendered as plain Views. The flip is
-  // a remount of forty-two nodes, which is why it is timed to land in the quiet
-  // after the entrance rather than under a finger, and it is invisible: both
-  // versions draw the identical thing at opacity 1 and scale 1.
+  // Forty-two animated wrappers each re-acquiring backing store every frame to
+  // animate nothing was measured on an S24 costing the scroll. Once the bloom is
+  // spent the grid is re-rendered without them; both draw the identical thing.
   const [settled, setSettled] = useState(false);
 
   useFocusEffect(
@@ -323,10 +239,6 @@ export default function StreakCalendar({
       pulse.value = withRepeat(
         withTiming(1, { duration: PULSE_MS, easing: Easing.linear }), -1, false,
       );
-      // A plain timer rather than a `withTiming` callback: `runOnJS` from the
-      // animation's completion would fire on the UI thread's schedule, and this
-      // is a React state flip that only has to happen SOME time after the fade,
-      // never on a particular frame. The 60 is slack, not tuning.
       const t = setTimeout(() => setSettled(true), BLOOM_MS + 60);
       return () => {
         clearTimeout(t);
@@ -340,35 +252,30 @@ export default function StreakCalendar({
     <View>
       <View style={styles.head}>
         {/* The set has `back` and no forward twin, so forward is `back` turned
-            around. Cheaper and more consistent than drawing a second glyph that
-            would have to match its weight by eye. */}
-        <Pressable onPress={() => setOffset((o) => o - 1)} hitSlop={12} style={styles.arrow}>
-          <SketchIcon name="back" size={18} color={INK_SOFT} />
+            around, on the same raised chip. */}
+        <Pressable onPress={() => setOffset((o) => o - 1)} hitSlop={10} style={styles.arrow}>
+          <SketchIcon name="back" size={16} color={INK} />
         </Pressable>
-        <Text style={styles.month}>{month.label.toUpperCase()}</Text>
+        <Text style={styles.month}>{month.label}</Text>
         <Pressable
           onPress={() => canForward && setOffset((o) => o + 1)}
-          hitSlop={12}
-          style={[styles.arrow, styles.flip, !canForward && styles.arrowOff]}
+          hitSlop={10}
+          style={[styles.arrow, !canForward && styles.arrowOff]}
           disabled={!canForward}
         >
-          <SketchIcon name="back" size={18} color={canForward ? INK_SOFT : FAINT} />
+          <View style={styles.flip}>
+            <SketchIcon name="back" size={16} color={canForward ? INK : FAINT} />
+          </View>
         </Pressable>
       </View>
 
-      {/* THE MONTH'S SHAPE, as one struck bar rather than a sentence.
-          It replaces "18 of 27 days so far", which was the THIRD printing of the
-          same figure on this screen — the card above already says "18 days
-          practised" beside "1 rest days used". A bar says the same thing and
-          also the part a number cannot: how much of the month is still open. */}
+      {/* THE MONTH'S SHAPE, as one bar: how much of it is studied and how much is
+          still open, which a number cannot say. */}
       <View style={styles.tallyRow}>
-        {/* The app's one bar (components/ui/Meter), flat with its shine. It was a
-            lit-to-shade gradient along the fill, which is the look the depth pass
-            of 2026-09-16 took off every bar outside the rank ladder. */}
         <Meter
           pct={month.doneThisMonth / Math.max(1, month.elapsedThisMonth)}
-          color={METAL.base}
-          height={10}
+          color={STREAK_EMBER}
+          height={12}
           track={FLAT_EDGE}
           style={styles.meter}
         />
@@ -383,48 +290,44 @@ export default function StreakCalendar({
           <Text key={i} style={[styles.label, pitch > 0 ? { width: pitch } : { flex: 1 }]}>{l}</Text>
         ))}
       </View>
-      <View style={styles.labelRule} />
 
-      {/* SIX EXPLICIT ROWS OF SEVEN, not one wrapping container.
-          `flexWrap` with a fixed cell width lets the CONTAINER decide how many
-          cells fit — at 34dp in a 298dp column that is eight, and the calendar
-          renders a week with eight days in it. It looked fine on the phone this
-          was written against and would have been wrong on a wider one. A week
-          has seven days; the layout should not be able to disagree. */}
+      {/* SIX EXPLICIT ROWS OF SEVEN, not one wrapping container: with a fixed cell
+          width `flexWrap` lets the container decide how many cells fit, and a
+          week has seven days whatever the phone. */}
       <View onLayout={onGrid}>
         {[0, 1, 2, 3, 4, 5].map((r) => {
           const row = month.cells.slice(r * 7, r * 7 + 7);
           const prevRowEnd = r > 0 ? month.cells[r * 7 - 1] : undefined;
           const nextRowStart = r < 5 ? month.cells[r * 7 + 7] : undefined;
           return (
-            <View key={r} style={[styles.row, { height: size + 10 }]}>
-              {/* THE RAIL, one element per run, behind everything. */}
-              {pitch > 0 ? spansIn(row).map(([a, b], k) => {
-                // A run that reaches a row edge and continues on the next row
-                // runs OFF that edge rather than stopping short of it. That is
-                // the whole of "it wraps": the eye carries the line round.
-                const openL = a === 0 && !!prevRowEnd?.inRun;
-                const openR = b === 6 && !!nextRowStart?.inRun;
-                const left = openL ? 0 : (a + 0.5) * pitch;
-                const right = openR ? gridW : (b + 0.5) * pitch;
+            <View key={r} style={[styles.row, { height: rowH }]}>
+              {/* THE BAND, one element per run per row, behind the numbers. */}
+              {pitch > 0 ? spansIn(row).map(([a, b, now], k) => {
+                // A run that reaches a row edge and carries on runs OFF the edge.
+                const openL = a === 0 && lit(prevRowEnd) && !!prevRowEnd?.inRun === now;
+                const openR = b === 6 && lit(nextRowStart) && !!nextRowStart?.inRun === now;
+                const left = openL ? -2 : (a + 0.5) * pitch - size / 2;
+                const right = openR ? gridW + 2 : (b + 0.5) * pitch + size / 2;
+                const r0 = size / 2;
                 return (
-                  <LinearGradient
+                  <View
                     key={k}
-                    colors={GROOVE}
-                    locations={[0, 0.45, 1]}
-                    start={LIGHT_START}
-                    end={LIGHT_END}
+                    testID="streak-band"
+                    pointerEvents="none"
                     style={[
-                      styles.rail,
+                      styles.band,
+                      now ? styles.bandNow : styles.bandPast,
                       {
                         left,
                         width: Math.max(0, right - left),
-                        height: railH,
-                        top: (size + 10 - railH) / 2,
-                        borderTopLeftRadius: openL ? 0 : railH / 2,
-                        borderBottomLeftRadius: openL ? 0 : railH / 2,
-                        borderTopRightRadius: openR ? 0 : railH / 2,
-                        borderBottomRightRadius: openR ? 0 : railH / 2,
+                        height: size + (now ? 4 : 0),
+                        top: (rowH - size) / 2 - (now ? 1 : 0),
+                        borderTopLeftRadius: openL ? 0 : r0,
+                        borderBottomLeftRadius: openL ? 0 : r0,
+                        borderTopRightRadius: openR ? 0 : r0,
+                        borderBottomRightRadius: openR ? 0 : r0,
+                        borderLeftWidth: openL ? 0 : now ? LINE : 1.6,
+                        borderRightWidth: openR ? 0 : now ? LINE : 1.6,
                       },
                     ]}
                   />
@@ -436,23 +339,17 @@ export default function StreakCalendar({
                   key={i}
                   style={[styles.slot, pitch > 0 ? { width: pitch } : { flex: 1 }]}
                 >
-                  {/* The SLOT is what holds the column; a blank day draws
-                      nothing, so it does not need a component to draw it. Eleven
-                      of the forty-two on an average month were mounting one and
-                      registering its hooks to return null. */}
                   {c.key === null ? null : settled ? (
-                    <StaticCell
-                      cell={c}
-                      size={size}
-                      milestone={milestone.has(c.key)}
-                      pulse={pulse}
-                    />
+                    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+                      <CellFace cell={cell(c)} size={size} milestone={milestone.has(c.key)} isToday={c.key === today} pulse={pulse} />
+                    </View>
                   ) : (
                     <Cell
                       cell={c}
                       size={size}
                       index={r * 7 + i}
                       milestone={milestone.has(c.key)}
+                      isToday={c.key === today}
                       bloom={bloom}
                       pulse={pulse}
                     />
@@ -464,286 +361,180 @@ export default function StreakCalendar({
         })}
       </View>
 
-      {/* THE KEY. Three marks is one more than a reader will infer, and the rest
-          day is the one nobody guesses — it is the mark that says the streak
-          survived a day you did not study, which is the whole reason the app has
-          rest days at all. */}
+      {/* THE KEY. The rest day is the mark nobody guesses — it says the streak
+          survived a day you did not study, which is why rest days exist. */}
       <View style={styles.key}>
-        <Legend fill={METAL.base} label="STUDIED" />
-        <Legend fill={STREAK_WASH} rim={STREAK_EMBER} label="RESTED" />
-        <Legend fill={PAPER} rim={FAINT} label="MISSED" />
+        <View style={styles.keyItem}>
+          <View style={[styles.keyPill, styles.bandNow]} />
+          <Text style={styles.keyLabel}>STREAK</Text>
+        </View>
+        <View style={styles.keyItem}>
+          <View style={[styles.keyPill, styles.bandPast, { borderWidth: 1.4 }]} />
+          <Text style={styles.keyLabel}>EARLIER</Text>
+        </View>
+        <View style={styles.keyItem}>
+          <View style={styles.keyRest} />
+          <Text style={styles.keyLabel}>REST DAY</Text>
+        </View>
       </View>
     </View>
   );
 }
 
-function Legend({ fill, rim, label }: { fill: string; rim?: string; label: string }) {
-  return (
-    <View style={styles.keyItem}>
-      <View
-        style={[
-          styles.keyDot,
-          { backgroundColor: fill },
-          rim ? { borderWidth: 1, borderColor: rim } : null,
-        ]}
-      />
-      <Text style={styles.keyLabel}>{label}</Text>
-    </View>
-  );
-}
+/** Identity, named so the settled branch reads the same as the animated one. */
+const cell = (c: CalendarDay) => c;
 
 /**
- * TODAY, UNFED, BREATHES -- AND IT IS A COMPONENT SO THAT ONE RING COSTS ONE
- * MAPPER.
- *
- * This style used to be declared in `Cell` and rendered by one cell in
- * forty-two, which is a whole frame's work for nothing: `useAnimatedStyle`
- * registers its mapper in an UNCONDITIONAL effect (react-native-reanimated,
- * hook/useAnimatedStyle.js -- `startMapper(fun, inputs)`), so it re-runs
- * whenever the values it reads change whether or not the style was ever
- * attached to a view. `pulse` is a `withRepeat(..., -1)` and never stops, and
- * `buildMonth` returns "always 42 cells so the grid never reflows". So the
- * breathing ring was running forty-two worklets a frame, forty-one of them into
- * an empty descriptor set, allocating a style object each time -- on the UI
- * thread, which is the thread Android scrolls with.
- *
- * The rule, and it is not about this ring: a style driven by an animation that
- * never ends belongs in the component that renders it UNCONDITIONALLY. Declared
- * one level up and rendered behind a `?`, it costs the branch that was not taken.
+ * TODAY, UNFED, BREATHES — and it is its own component so one ring costs one
+ * mapper. A style driven by an animation that never ends belongs in the
+ * component that renders it unconditionally; declared a level up and rendered
+ * behind a `?`, it runs in all forty-two cells.
  */
 function TodayRing({ size, pulse }: { size: number; pulse: SharedValue<number> }) {
   const ringStyle = useAnimatedStyle(() => ({
-    opacity: 0.5 * (1 - pulse.value),
-    transform: [{ scale: 1 + 0.26 * pulse.value }],
+    opacity: 0.55 * (1 - pulse.value),
+    transform: [{ scale: 1 + 0.3 * pulse.value }],
   }));
   return (
     <Animated.View
       pointerEvents="none"
       style={[
-        {
-          position: 'absolute',
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          borderWidth: 2,
-          borderColor: STREAK_EMBER,
-        },
+        { position: 'absolute', width: size, height: size, borderRadius: size / 2, borderWidth: 3, borderColor: STREAK_EMBER },
         ringStyle,
       ]}
     />
   );
 }
 
-/**
- * THE SAME DAY, WITHOUT THE ENTRANCE.
- *
- * Rendered once `settled` is true — see the note on it above. It draws exactly
- * what `Cell` draws, minus the animated wrapper and its mapper, which is the
- * whole point: after 440ms those two carry no information and the phone was
- * paying for forty-two of them on every frame of every scroll.
- *
- * It is a SEPARATE COMPONENT rather than a branch inside `Cell`, because the
- * difference is a hook. Making `useAnimatedStyle` conditional is §17's first
- * rule broken; swapping the component is free and cannot change a hook count.
- */
-function StaticCell({
-  cell, size, milestone, pulse,
-}: {
-  cell: CalendarDay; size: number; milestone: boolean; pulse: SharedValue<number>;
-}) {
-  if (cell.key === null) return null;
-  return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <CellFace cell={cell} size={size} milestone={milestone} pulse={pulse} />
-    </View>
-  );
-}
-
 function Cell({
-  cell, size, index, milestone, bloom, pulse,
+  cell: c, size, index, milestone, isToday, bloom, pulse,
 }: {
-  cell: CalendarDay; size: number; index: number; milestone: boolean;
+  cell: CalendarDay; size: number; index: number; milestone: boolean; isToday: boolean;
   bloom: SharedValue<number>; pulse: SharedValue<number>;
 }) {
-  // HOOKS ABOVE THE EARLY RETURN. A blank cell returns null, and a hook below
-  // that line changes the hook count between renders -- §17's first rule, and
-  // the one that took down a whole route tree the last time it was broken.
-  //
-  // `bloom` settles at 1 and stops, so this mapper goes idle with it. That is
-  // the whole reason it is allowed to live here and the ring's is not -- see
-  // TodayRing.
+  // HOOKS ABOVE THE EARLY RETURN (§17 rule 1).
   const start = Math.min(index * BLOOM_STEP, BLOOM_HOLD) / BLOOM_MS;
   const span = BLOOM_CELL / BLOOM_MS;
   const inStyle = useAnimatedStyle(() => {
     const raw = (bloom.value - start) / span;
     const u = raw < 0 ? 0 : raw > 1 ? 1 : raw;
     const k = 1 - u;
-    const e = 1 - k * k * k;                 // decelerate, the app's entrance curve
+    const e = 1 - k * k * k;
     return { opacity: e, transform: [{ scale: 0.8 + 0.2 * e }] };
   });
-  if (cell.key === null) return null;
-
+  if (c.key === null) return null;
   return (
     <Animated.View
-      style={[
-        { width: size, height: size, alignItems: 'center', justifyContent: 'center' },
-        inStyle,
-      ]}
+      style={[{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }, inStyle]}
     >
-      <CellFace cell={cell} size={size} milestone={milestone} pulse={pulse} />
+      <CellFace cell={c} size={size} milestone={milestone} isToday={isToday} pulse={pulse} />
     </Animated.View>
   );
 }
 
 /**
- * WHAT A DAY LOOKS LIKE. No hooks, on purpose: it is rendered by `Cell` while the
- * entrance is playing and by `StaticCell` afterwards, and a hook here would make
- * the swap between the two a change of hook count.
+ * WHAT A DAY LOOKS LIKE, on top of its band. No hooks, on purpose: it is drawn
+ * by `Cell` during the entrance and on its own afterwards, and a hook here would
+ * make the swap a change of hook count.
  */
-function CellFace({ cell, size, milestone, pulse }: {
-  cell: CalendarDay; size: number; milestone: boolean; pulse: SharedValue<number>;
+function CellFace({ cell: c, size, milestone, isToday, pulse }: {
+  cell: CalendarDay; size: number; milestone: boolean; isToday: boolean; pulse: SharedValue<number>;
 }) {
-  const lit = cell.state === 'done';
-  const rested = cell.state === 'rest';
-  const isToday = cell.state === 'today';
-  // A DAY YOU STUDIED IN JUNE IS NOT THE RUN YOU ARE KEEPING NOW, and the rail
-  // alone was carrying that distinction — which means it was invisible for any
-  // day whose neighbours happen not to be lit. The current run's tokens are SET:
-  // they wear the metal's own rim. A past day is struck from the same material
-  // and simply not mounted. It is a real difference at a glance and it takes
-  // nothing away from the day — which matters, because the grid is the place a
-  // reader comes to feel good about days they already did.
+  const done = c.state === 'done';
+  const rested = c.state === 'rest';
+  const unfed = c.state === 'today';
+  const fs = Math.round(size * 0.4);
 
   return (
     <>
-      {/* THE COLLAR — a milestone landed on this day. Struck OUTSIDE the token,
-          for the reason §7 gives about the rank pin's own collar: the part of a
-          flourish that sits behind the thing it decorates is not subtle, it is
-          absent. */}
-      {milestone && (lit || rested) ? (
-        <View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            width: size + 7,
-            height: size + 7,
-            borderRadius: (size + 7) / 2,
-            borderWidth: 1.5,
-            borderColor: STREAK_DEEP,
-          }}
-        />
+      {unfed ? <TodayRing size={size} pulse={pulse} /> : null}
+      {unfed ? <View style={[styles.todayDisc, { width: size, height: size, borderRadius: size / 2 }]} /> : null}
+      {rested ? (
+        <View style={[styles.restDisc, { width: size - 10, height: size - 10, borderRadius: (size - 10) / 2 }]} />
       ) : null}
 
-      {/* TODAY, UNFED, BREATHES. The only cell the reader can still change, and
-          the only moving thing on the screen — which is what makes it read as an
-          invitation rather than as one more empty ring. */}
-      {isToday ? (
-        <TodayRing size={size} pulse={pulse} />
-      ) : null}
+      <Text
+        style={[
+          styles.num,
+          { fontSize: fs },
+          done && (c.inRun ? styles.numNow : styles.numPast),
+          rested && styles.numRest,
+          unfed && styles.numToday,
+          c.state === 'missed' && styles.numMissed,
+          c.state === 'future' && styles.numFuture,
+        ]}
+      >
+        {c.day}
+      </Text>
 
-      {lit ? (
-        <LinearGradient
-          colors={[FACE[0][1], FACE[1][1], FACE[2][1]]}
-          locations={[0, 0.52, 1]}
-          start={LIGHT_START}
-          end={LIGHT_END}
-          style={[
-            styles.disc,
-            {
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-              borderColor: cell.inRun ? METAL.rim : 'transparent',
-            },
-          ]}
-        >
-          <Text style={[styles.num, styles.numLit, { fontSize: size * 0.4 }]}>{cell.day}</Text>
-        </LinearGradient>
-      ) : (
-        <View
-          style={[
-            styles.disc,
-            { width: size, height: size, borderRadius: size / 2 },
-            rested && styles.rest,
-            cell.state === 'missed' && styles.missed,
-            isToday && styles.today,
-          ]}
-        >
-          {/* A RESTED DAY IS A BRIDGE, NOT A HALF-LIT DAY. The rail runs straight
-              through it and the token is the material's own wash inside the
-              metal's rim — so it reads as a link in the chain that happens to be
-              hollow, which is exactly what a rest day is. */}
-          <Text
-            style={[
-              styles.num,
-              { fontSize: size * 0.4 },
-              rested && styles.numRest,
-              cell.state === 'future' && styles.numFuture,
-              isToday && styles.numToday,
-            ]}
-          >
-            {cell.day}
-          </Text>
-        </View>
-      )}
+      {/* Today, studied: a small paper tick under the number on the band. */}
+      {isToday && done ? <View style={styles.todayMark} /> : null}
+
+      {/* THE DAY A SOCIETY ADMITTED THEM: a small sand seal on the corner. */}
+      {milestone && (done || rested) ? (
+        <View pointerEvents="none" style={[styles.seal, { left: size - 10, top: -5 }]} />
+      ) : null}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  arrow: { padding: 4 },
+  arrow: {
+    width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: PAPER_LIT, borderWidth: 2, borderColor: C.edge,
+    boxShadow: `0px 2px 0px ${C.edge}`,
+  },
   flip: { transform: [{ scaleX: -1 }] },
   arrowOff: { opacity: 0.45 },
-  month: { fontFamily: 'Inter_700Bold', fontSize: 12, color: INK, letterSpacing: 2 },
+  month: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 19, color: INK },
 
-  tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
+  tallyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14 },
   meter: { flex: 1 },
   tally: { includeFontPadding: false },
-  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 17, color: STREAK_EMBER },
+  tallyBig: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18, color: STREAK_EMBER },
   tallyOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: INK_SOFT },
 
-  labels: { flexDirection: 'row', marginTop: 16, marginBottom: 5 },
+  labels: { flexDirection: 'row', marginTop: 16, marginBottom: 4 },
   label: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 9.5,
-    color: SLATE,
-    textAlign: 'center',
-    letterSpacing: 1.2,
+    fontFamily: 'Inter_700Bold', fontSize: 10, color: SLATE, textAlign: 'center', letterSpacing: 1.2,
   },
-  // A ruled line under the weekday heads, so the grid reads as a printed table
-  // rather than as loose type above loose circles.
-  labelRule: { height: 1, backgroundColor: FAINT, marginBottom: 8 },
 
   row: { flexDirection: 'row', alignItems: 'center' },
   slot: { alignItems: 'center', justifyContent: 'center' },
 
   // ONE element per run, measured across the row — never a per-cell stub.
-  rail: { position: 'absolute' },
-
-  disc: {
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'transparent',
+  band: { position: 'absolute', borderTopWidth: LINE, borderColor: INK },
+  bandNow: {
+    backgroundColor: STREAK_EMBER, borderColor: INK, borderTopWidth: LINE,
+    borderBottomWidth: 5, borderBottomColor: STREAK_DEEP,
   },
-  rest: { backgroundColor: STREAK_WASH, borderColor: STREAK_EMBER },
-  // Quiet on purpose: a hollow ring, not an accusation.
-  missed: { borderColor: FAINT },
-  today: { borderWidth: 2, borderColor: INK, backgroundColor: PAPER },
+  bandPast: {
+    backgroundColor: RAIL, borderColor: RAIL_EDGE, borderTopWidth: 1.6, borderBottomWidth: 1.6,
+  },
 
-  num: { fontFamily: 'Inter_500Medium', color: INK_SOFT },
-  // PAPER, NOT SAND, AND THE PALETTE CHANGE IS WHY. Sand on the old purple
-  // measured 10.52:1; sand on the ember that replaced it measures 3.53:1, under
-  // the floor for a number. Paper reads 4.85:1 on the same ground. The warm
-  // cream still belongs on the DEEP end of the ramp (5.50:1) — it is only the
-  // lit face it cannot sit on, which is the trap §19 records for the quote
-  // plate's byline, and check:streak measures it rather than assuming.
-  numLit: { color: PAPER, fontFamily: 'Inter_700Bold' },
-  numRest: { color: INK, fontFamily: 'Inter_500Medium' },
-  numFuture: { color: FAINT },
+  todayDisc: { position: 'absolute', backgroundColor: PAPER_LIT, borderWidth: LINE, borderColor: INK },
+  restDisc: { position: 'absolute', backgroundColor: PAPER_LIT, borderWidth: 1.6, borderColor: STREAK_DEEP },
+
+  num: { fontFamily: 'Inter_500Medium', color: INK_SOFT, includeFontPadding: false },
+  // Paper on the ember band reads 4.85:1; ink on an earlier run's tint far more.
+  numNow: { color: PAPER_LIT, fontFamily: 'Inter_700Bold' },
+  numPast: { color: INK, fontFamily: 'Inter_700Bold' },
+  numRest: { color: STREAK_EMBER, fontFamily: 'Inter_700Bold' },
   numToday: { color: INK, fontFamily: 'Inter_700Bold' },
+  numMissed: { color: INK_SOFT },
+  numFuture: { color: FAINT },
+  todayMark: {
+    position: 'absolute', bottom: 3, width: 10, height: 3, borderRadius: 2, backgroundColor: PAPER_LIT,
+  },
+  seal: {
+    position: 'absolute', width: 13, height: 13, borderRadius: 7,
+    backgroundColor: SAND, borderWidth: 1.6, borderColor: INK,
+  },
 
-  key: { flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 14 },
-  keyItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  keyDot: { width: 9, height: 9, borderRadius: 5 },
-  keyLabel: { fontFamily: 'Inter_700Bold', fontSize: 8.5, color: SLATE, letterSpacing: 1.1 },
+  key: { flexDirection: 'row', justifyContent: 'center', gap: 18, marginTop: 14 },
+  keyItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  keyPill: { width: 22, height: 12, borderRadius: 6, borderWidth: 1.6, borderBottomWidth: 3 },
+  keyRest: { width: 12, height: 12, borderRadius: 6, backgroundColor: PAPER_LIT, borderWidth: 1.6, borderColor: STREAK_DEEP },
+  keyLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, color: SLATE, letterSpacing: 1.1 },
 });

@@ -10,17 +10,18 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import StreakCalendar from '@/components/gamification/StreakCalendar';
 import StreakMascot from '@/components/gamification/StreakMascot';
-import Meter from '@/components/ui/Meter';
+import SocietyCard from '@/components/gamification/SocietyCard';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import {
-  STREAK_EMBER, STREAK_DEEP, STREAK_WASH,
+  STREAK_EMBER,
   restDaysHeld, restEarnEvery, restCap, tierFor, nextTier,
 } from '@/constants/streak';
 import { effectiveStreak, streakIsAlive, restDaysToSpend } from '@/lib/utils/streak';
 import { moodFor } from '@/lib/utils/streakMood';
 import { daysInMonth, dayKey } from '@/lib/utils/streakCalendar';
 import { C, TYPE, SPACE, RADIUS, type TypeKey } from '@/constants/design';
+import { FLOOR, FLOOR_CUT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THE STREAK SCREEN.
@@ -125,8 +126,6 @@ export default function StreakScreen() {
     // perfect — congratulating them for a month they were not here for.
     return { practised, rested, missed, perfect: missed === 0 && practised > 0 };
   }, [activeDays, restDays, month.y, month.m, today, since]);
-
-  const toNext = next ? next.at - shown : 0;
 
   // ── NOTHING ON THIS PAGE ANIMATES WHILE THE PAGE IS MOVING ────────────────
   //
@@ -338,30 +337,9 @@ export default function StreakScreen() {
           </View>
 
           {/* ── THE SOCIETY ─────────────────────────────────────────────────
-              What the streak has made you, and what it would make you next. */}
-          <View style={styles.card}>
-            <Text style={styles.cardHead}>THE SOCIETY</Text>
-            {tier ? (
-              <Text style={styles.tierBlurb}>{tier.blurb}</Text>
-            ) : (
-              <Text style={styles.tierBlurb}>
-                Seven days admits you to the Peripatetics. Aristotle&rsquo;s lot. They
-                walked while they argued, which is more than you have done today.
-              </Text>
-            )}
-            {next ? (
-              <View style={styles.nextRow}>
-                {/* The app's one progress bar (components/ui/Meter): a chunky
-                    flat rule with a shine, in the streak's own ember. */}
-                <Meter pct={shown / next.at} color={STREAK_EMBER} height={12} />
-                <Text style={styles.nextText}>
-                  {toNext} {toNext === 1 ? 'day' : 'days'} to {next.name}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.nextText}>Every society has admitted you. There are no more.</Text>
-            )}
-          </View>
+              What the streak has made you, struck on its own plate so it reads
+              as the most important thing under the mascot (SocietyCard). */}
+          <SocietyCard streak={shown} alive={alive} />
 
           {/* ── THE MONTH ───────────────────────────────────────────────────
               Figures first, then the grid they describe. */}
@@ -369,18 +347,18 @@ export default function StreakScreen() {
             <View style={styles.statRow}>
               <View style={styles.stat}>
                 <Text style={[styles.statNum, { color: alive ? STREAK_EMBER : C.ink }]}>{stats.practised}</Text>
-                <Text style={styles.statWord}>days practised</Text>
+                <Text style={styles.statWord}>{stats.practised === 1 ? 'DAY STUDIED' : 'DAYS STUDIED'}</Text>
+                {/* A month with no miss in it wears a tag on the figure it earned. */}
+                {stats.perfect ? (
+                  <View style={styles.perfect}>
+                    <Text style={styles.perfectText}>PERFECT</Text>
+                  </View>
+                ) : null}
               </View>
-              <View style={styles.statDivide} />
               <View style={styles.stat}>
                 <Text style={styles.statNum}>{stats.rested}</Text>
-                <Text style={styles.statWord}>rest days used</Text>
+                <Text style={styles.statWord}>{stats.rested === 1 ? 'REST DAY USED' : 'REST DAYS USED'}</Text>
               </View>
-              {stats.perfect ? (
-                <View style={styles.perfect}>
-                  <Text style={styles.perfectText}>PERFECT</Text>
-                </View>
-              ) : null}
             </View>
 
             <StreakCalendar
@@ -430,21 +408,22 @@ const styles = StyleSheet.create({
     borderColor: C.edge, padding: SPACE[3], gap: SPACE[2],
   },
   cardHead: { ...role('micro'), letterSpacing: 2, color: C.inkSoft },
-  tierBlurb: { ...role('body'), color: C.ink },
 
-  nextRow: { gap: SPACE[1] },
-  nextText: { ...role('micro'), color: C.inkSoft },
 
-  statRow: { flexDirection: 'row', alignItems: 'center' },
-  stat: { flex: 1 },
-  statDivide: { width: 1, height: 30, backgroundColor: C.hairline, marginHorizontal: SPACE[2] },
-  statNum: { ...role('title'), color: C.ink },
-  statWord: { ...role('micro'), color: C.inkSoft },
-  perfect: {
-    paddingHorizontal: SPACE[2], paddingVertical: 4,
-    borderRadius: RADIUS.pill, backgroundColor: STREAK_WASH,
+  // Two cut-in wells, the Pass chart's Free column construction: a flat floor
+  // under a dark top hairline, so the figures sit IN the card, not on it.
+  statRow: { flexDirection: 'row', alignItems: 'stretch', gap: SPACE[2] },
+  stat: {
+    flex: 1, backgroundColor: FLOOR, borderRadius: 12,
+    borderTopWidth: 2, borderTopColor: FLOOR_CUT, paddingVertical: SPACE[2], paddingHorizontal: SPACE[3],
   },
-  perfectText: { ...role('micro'), letterSpacing: 1.5, color: STREAK_DEEP, fontFamily: 'Inter_700Bold' },
+  statNum: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 26, lineHeight: 30, color: C.ink },
+  statWord: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, color: C.inkSoft, marginTop: 2 },
+  perfect: {
+    position: 'absolute', top: SPACE[2], right: SPACE[2], paddingHorizontal: 7, paddingVertical: 3,
+    borderRadius: RADIUS.pill, backgroundColor: STREAK_EMBER, borderWidth: 1.6, borderColor: C.ink,
+  },
+  perfectText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, color: C.paper },
 
   restNum: { ...role('title'), color: C.ink },
   restText: { ...role('body'), color: C.inkSoft },
