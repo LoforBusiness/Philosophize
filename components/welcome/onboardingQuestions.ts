@@ -1,40 +1,46 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // The three welcome questions, and what they do.
 //
-// Every answer carries a small WEIGHT VECTOR over the six branches rather than
-// naming one, and the three answers are summed. A one-answer-to-one-branch map
-// would need each question to be a complete partition of the subject, which is
-// how onboarding quizzes end up asking the same thing three times in different
-// words. Weights let each question ask something genuinely different — why you
-// came, what you want to be better at, what you would sit and think about — and
-// still add up to a single steer.
+// Every answer carries a small WEIGHT VECTOR over the seven subjects rather than
+// naming one, and the three answers are summed. A one-answer-to-one-subject map
+// would need each question to be a complete partition, which is how onboarding
+// quizzes end up asking the same thing three times in different words. Weights let
+// each question ask something genuinely different — why you came, what you want to
+// be better at, what you would sit and think about — and still add up to a single
+// steer.
 //
-// Nothing here gates anything. The winner is a SUGGESTION: Quick Start prefers
-// it, and all six branches stay open exactly as before.
+// SINCE 2026-09-30 THE STEER IS A SUBJECT. Every subject is one road (data/subjects.ts)
+// and the key is its road's slug, which is what Quick Start matches. The questions used
+// to weigh philosophy's six branches, which are retired; every subject must still win
+// at least one of the 64 answer combinations (scratchpad/onboard-new.mjs enumerates
+// them — philosophy 14, psychology 12, personal growth 8, business 7, economics 10,
+// science 6, history 7).
+//
+// Nothing here gates anything. The winner is a SUGGESTION: Quick Start prefers it until
+// the reader finishes a lesson anywhere, and every subject stays open exactly as before.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type BranchSlug =
-  | 'metaphysics'
-  | 'epistemology'
-  | 'logic'
-  | 'ethics'
-  | 'aesthetics'
-  | 'political-philosophy';
+  | 'philosophy'
+  | 'psychology'
+  | 'personal-growth'
+  | 'business'
+  | 'economics'
+  | 'science'
+  | 'history';
 
 /**
- * Tie-break order, and it is deliberate rather than alphabetical: on a perfect
- * three-way tie a beginner is better served starting where the questions are
- * most famous and least technical. Logic and political philosophy are further
- * down for the same reason — they are the two that most reward already knowing
- * why you care.
+ * Tie-break order: the subjects' own order (data/subjects.ts), so the same answers
+ * always give the same subject.
  */
 export const BRANCH_PRIORITY: BranchSlug[] = [
-  'metaphysics',
-  'ethics',
-  'epistemology',
-  'aesthetics',
-  'logic',
-  'political-philosophy',
+  'philosophy',
+  'psychology',
+  'personal-growth',
+  'business',
+  'economics',
+  'science',
+  'history',
 ];
 
 export interface OnboardingOption {
@@ -55,24 +61,24 @@ export const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
     prompt: 'What pulled you here?',
     options: [
       {
-        id: 'free',
-        text: 'Whether anything I choose is really mine to choose',
-        weights: { metaphysics: 3, ethics: 1 },
+        id: 'people',
+        text: 'Understanding why people do what they do',
+        weights: { psychology: 3, business: 1 },
       },
       {
-        id: 'true',
-        text: 'How to tell what is actually true',
-        weights: { epistemology: 3, logic: 1 },
+        id: 'better',
+        text: 'Building better habits, and a better me',
+        weights: { 'personal-growth': 3, psychology: 1 },
       },
       {
-        id: 'right',
-        text: 'How we ought to treat each other',
-        weights: { ethics: 3, 'political-philosophy': 1 },
+        id: 'money',
+        text: 'Knowing how money and markets really work',
+        weights: { economics: 3, business: 1 },
       },
       {
-        id: 'beauty',
-        text: 'Why some things move me and others do not',
-        weights: { aesthetics: 3, metaphysics: 1 },
+        id: 'world',
+        text: 'Finding out how the world works',
+        weights: { science: 3, history: 1 },
       },
     ],
   },
@@ -81,24 +87,24 @@ export const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
     prompt: 'Which would you rather get better at?',
     options: [
       {
-        id: 'arguments',
-        text: 'Spotting when an argument does not hold',
-        weights: { logic: 3, epistemology: 1 },
+        id: 'lead',
+        text: 'Leading people and building something of my own',
+        weights: { business: 3, 'personal-growth': 1 },
       },
       {
-        id: 'hard-calls',
-        text: 'Deciding what is right when it is genuinely hard',
-        weights: { ethics: 3 },
+        id: 'think',
+        text: 'Thinking clearly about the big questions',
+        weights: { philosophy: 3, science: 1 },
       },
       {
-        id: 'seeing',
-        text: 'Seeing what a piece of work is actually doing',
-        weights: { aesthetics: 3 },
+        id: 'decide',
+        text: 'Making smarter choices with my money',
+        weights: { economics: 3, 'personal-growth': 1 },
       },
       {
-        id: 'society',
-        text: 'Arguing well about how a society should run',
-        weights: { 'political-philosophy': 3, ethics: 1 },
+        id: 'news',
+        text: 'Understanding the news, and how we got here',
+        weights: { history: 3, economics: 1 },
       },
     ],
   },
@@ -107,31 +113,24 @@ export const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
     prompt: 'Which question would you rather sit with?',
     options: [
       {
-        id: 'something',
-        text: 'Why is there something rather than nothing?',
-        weights: { metaphysics: 3 },
+        id: 'good-life',
+        text: 'What makes a life a good one?',
+        weights: { philosophy: 3, 'personal-growth': 1 },
       },
       {
-        id: 'know',
-        text: 'Can I ever really know anything?',
-        weights: { epistemology: 3, logic: 1 },
+        id: 'mind',
+        text: 'Why do we fool ourselves so easily?',
+        weights: { psychology: 3 },
       },
       {
-        id: 'obey',
-        text: 'Who has the right to tell me what to do?',
-        weights: { 'political-philosophy': 3 },
+        id: 'past',
+        text: 'How did the world end up the way it is?',
+        weights: { history: 3, economics: 1 },
       },
-      // Logic's SECOND strong answer, and it needs one. Every other branch is
-      // named at weight 3 by two different questions; logic had only "spotting
-      // when an argument does not hold", so the most logic-minded answers
-      // possible still lost — epistemology was lifted alongside it every time
-      // and won the tie-break. A branch no combination can reach is a branch the
-      // questions may as well not mention. (The probe counts this: all 64
-      // combinations are enumerated and every branch must win at least one.)
       {
-        id: 'contradiction',
-        text: 'Can something be true and false at the same time?',
-        weights: { logic: 3 },
+        id: 'universe',
+        text: 'What is the universe actually made of?',
+        weights: { science: 3, philosophy: 1 },
       },
     ],
   },

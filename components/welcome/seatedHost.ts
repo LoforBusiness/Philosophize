@@ -221,7 +221,7 @@ function crossedHold(t: number): Stance {
 interface Gesture { x: number; y: number; tilt: number; neck: number; beat: number }
 
 const GESTURES: Gesture[] = [
-  // "So… you want to learn philosophy?" — an open hand, offered forward.
+  // "So… you want to learn something new?" — an open hand, offered forward.
   { x: 29, y: -21, tilt: -0.04, neck: 0.02, beat: 0 },
   // "Or possibly… a well-distinguished individual" — the hand to his own chest.
   { x: 9, y: -30, tilt: 0.02, neck: -0.06, beat: 0 },

@@ -39,7 +39,7 @@ const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 
 /** What he says, in order. `|` turns the bubble's page; it is not spoken. */
 const LINES = [
-  { key: 'l1', text: 'So… you want to learn philosophy?' },
+  { key: 'l1', text: 'So… you want to learn something new?' },
   { key: 'l2', text: "Or possibly… you're already a well-distinguished individual, | getting back into it." },
   { key: 'l3', text: "Whichever the case, you're here to learn." },
   { key: 'l4', text: 'And I have the perfect program for you, | to achieve your goals in vast knowledge of the subject!' },

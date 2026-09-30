@@ -16,7 +16,8 @@ import { touch } from '@/lib/feedback';
 // THE THREE WELCOME QUESTIONS.
 //
 // A beginner used to meet six branches and 222 lessons with no steer at all.
-// These ask why they came, and point them at one branch to start in. Nothing is
+// These ask why they came, and point them at one SUBJECT to start in (since
+// 2026-09-30 — every subject is one road, and the answers weigh the seven). Nothing is
 // locked either way — see onboardingQuestions.ts.
 //
 // WHY IT IS MOUNTED AT THE ROOT AND NOT INSIDE THE WELCOME ANIMATION. A reader
@@ -41,7 +42,7 @@ import { touch } from '@/lib/feedback';
 // Three things changed, and only one of them is decoration:
 //
 // 1. EVERY ANSWER IS COLOURED BY WHERE IT POINTS. Each option already carries a
-//    weight vector over the six branches — that is the whole mechanism of this
+//    weight vector over the seven subjects — that is the whole mechanism of this
 //    screen — and `BRANCH` in constants/design.ts is the app's licensed colour
 //    for exactly that fact. So an answer is tinted with the subject it leans
 //    toward: the screen stops being a form and becomes a set of four doors with
@@ -67,7 +68,7 @@ const SETTLE_MS = 460;
 
 /** The branch an answer leans toward hardest — what colours its card. */
 function leadBranch(o: OnboardingOption): BranchKey {
-  let best: BranchKey = 'metaphysics';
+  let best: BranchKey = 'philosophy';
   let top = -Infinity;
   for (const [slug, w] of Object.entries(o.weights)) {
     if ((w ?? 0) > top) { top = w ?? 0; best = slug as BranchKey; }
@@ -134,7 +135,7 @@ export default function OnboardingGate() {
           <Text style={styles.lede}>
             {returning
               ? 'Three questions, and the app will point you somewhere that fits. Everything stays open either way.'
-              : 'Three questions, so we can point you somewhere worth starting. Nothing is locked — all six branches stay open.'}
+              : 'Three questions, so we can point you somewhere worth starting. Nothing is locked — every subject stays open.'}
           </Text>
 
           {/* The rail, and the count. Two ways of saying the same thing, because
@@ -227,7 +228,7 @@ function Option({
           ]}
         >
           {/* A colour chip rather than a coloured border alone: at a 2px edge the
-              six branch hues are hard to tell apart, and telling them apart is
+              seven road hues are hard to tell apart, and telling them apart is
               the only reason they are here. */}
           <View style={[styles.pip, { backgroundColor: chosen ? C.paper : hue }]} />
           <Text style={[styles.optText, chosen && { color: C.paper }]}>{option.text}</Text>

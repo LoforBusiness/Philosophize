@@ -34,7 +34,7 @@ import { hostVoice } from './hostVoice';
 // his legs", sits very distinguished — and then talks, in the narrator's voice, with
 // good pauses:
 //
-//   So you want to learn philosophy? · Or possibly you're already a well-distinguished
+//   So you want to learn something new? · Or possibly you're already a well-distinguished
 //   individual getting back into philosophy. · Whichever the case, you're here to
 //   learn. And I have the perfect program for you to achieve your goals in vast
 //   knowledge of philosophy. · The only thing I ask of you is mental effort and
