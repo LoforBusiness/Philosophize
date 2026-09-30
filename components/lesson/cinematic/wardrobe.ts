@@ -351,51 +351,28 @@ const CANE: Piece[] = [
 ];
 
 /**
- * THE FOURTH SPEAKER (2026-09-30): a professional woman — chignon and blazer.
+ * THE FOURTH SPEAKER (2026-09-30): a woman, and the hair bun is ALL she wears.
  *
- * The owner added a woman's voice (Kore) to the dialogue cast. The first drawing was a
- * ponytail and a flared A-line skirt, and they threw it out in one message: *"Looks too
- * childish. The skirt is way too wide. I want a more professional look. Like a
- * professional corporate woman worker."* A ponytail and a triangle skirt is the sign on
- * a door, which is a drawing of a girl.
+ * The owner added a woman's voice (Kore) to the dialogue cast, and three drawings were
+ * thrown out on the way here. A ponytail and a flared A-line skirt: *"Looks too
+ * childish. The skirt is way too wide."* A chignon, a blazer with paper lapels and a
+ * pencil skirt: *"The skirt … does not fit the body."* The chignon and the blazer alone:
+ * *"I only want her to have the hair bun, nothing else, because anything on the
+ * stickman's body looks bad."*
  *
- * She is solid ink with no face, so two different tools carry it:
+ * That last sentence is the rule, and it is the wardrobe's own silhouette rule arriving
+ * from the owner: NOTHING IS DRAWN ON THE BODY. Every costume that has survived in this
+ * file sits on the HEAD or is held in a HAND; shirts, waistcoats, coat tails, a satchel,
+ * a skirt and a jacket have all been drawn and cut. Do not dress a torso.
  *
- *   · THE SILHOUETTE says woman and says adult. THE CHIGNON is hair put UP, low at the
- *     nape — it overlaps the skull, so it grows out of it rather than following it (the
- *     rule that cut the satchel), and it is behind her, clear of a raised hand. Loose
- *     shoulder-length hair and a bob were both drawn: at lesson size each only made the
- *     head heavier. THERE IS NO SKIRT: a narrow pencil skirt replaced the A-line and the
- *     owner cut that too — *"the skirt … does not fit the body"* — because a level panel
- *     at the hip cannot follow two legs that swing. The hair alone says woman.
- *   · PAPER LINES say suit, which no outline can. `paper: true` is the seam a hat uses
- *     where ink meets ink (AA6); here it draws the two LAPELS as a V on the chest, a
- *     white BLOUSE stepped into the top of the V. Two hairlines and a wedge, and a black
- *     torso becomes a tailored jacket.
- *
- * Every piece sits CLOSE to the joint it hangs from. A shoulder piece turns with the
- * head, so a full-length jacket body would swing off the spine on every nod; the
- * shoulders are 12 deep under the neck and the torso's own line carries the rest.
- *
- * A BRIEFCASE WAS DRAWN AND CUT. In the hand it is the clearest "office" signal there
- * is — and it is waved in the air by every gesture that hand makes, which is a gag, and
- * she has to be able to hold what a lesson hands her.
+ * THE BUN is hair put up, low at the nape — it overlaps the skull, so it grows out of it
+ * rather than following it, and it is behind her, clear of a raised hand. Loose hair and
+ * a bob were drawn too and only made the head heavier at lesson size.
  *
  * Not in ROLL: it is a CAST costume (cast.ts), dealt to nobody by make:wardrobe.
  */
-// FIVE PIECES (seven with the skirt, before it was cut). It matters because Stickman draws a costume through a FIXED number of slots
-// (WORN_SLOTS, a hook count) and silently drops whatever is past it. The first version
-// of this was eleven and looked complete on the sheet, which draws every piece; on a
-// phone she would have lost her lapels. `check:wardrobe` holds
-// every costume to the slot count now. INK first, PAPER last.
-const CHIGNON: Piece[] = [
+const BUN: Piece[] = [
   { at: 'head', x: -18, y: 7, w: 19, h: 17, r: 8.5 },            // the knot, low at the nape
-];
-const SUIT: Piece[] = [
-  { at: 'neck', x: 0, y: 9, w: 27, h: 12, r: 3 },                // squared shoulders
-  { at: 'neck', x: 0, y: 6.5, w: 8.5, h: 5, paper: true },       // the blouse, in the top of the V
-  { at: 'neck', x: 3.2, y: 12, w: 1.5, h: 15, rot: 20, paper: true },   // lapel
-  { at: 'neck', x: -3.2, y: 12, w: 1.5, h: 15, rot: -20, paper: true }, // lapel
 ];
 
 // ── THE COSTUMES ────────────────────────────────────────────────────────────
@@ -431,7 +408,7 @@ export const COSTUMES: Costume[] = [
   { id: 'stroller', label: 'newsboy cap', pieces: [...FLAT_CAP] },
   { id: 'ringmaster', label: 'wide brim · monocle · cane', pieces: [...WIDE_BRIM, ...MONOCLE, ...CANE] },
   { id: 'smoker', label: 'fez', pieces: [...FEZ] },
-  { id: 'blazer', label: 'chignon · blazer', pieces: [...CHIGNON, ...SUIT] },
+  { id: 'bun', label: 'hair bun', pieces: [...BUN] },
 ];
 
 export const BY_ID: Record<string, Costume> =

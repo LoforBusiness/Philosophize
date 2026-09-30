@@ -132,7 +132,7 @@ const CASES = [
   { name: 'two cast members with one trait', rule: 'AP14', mut: { cast: (c) => c.replace("trait: 'oblivious'", "trait: 'kind'") } },
   { name: 'a cast member with no character', rule: 'AP14', mut: { cast: (c) => c.replace(/character: 'The kind one.*/, "character: 'Kind.',") } },
   { name: 'two cast members in one voice', rule: 'AP2', mut: { cast: (c) => c.replace('en-US-Chirp3-HD-Kore', 'en-GB-Chirp3-HD-Algieba').replace("languageCode: 'en-US'", "languageCode: 'en-GB'") } },
-  { name: 'a cast costume the wardrobe does not have', rule: 'AP2', mut: { cast: (c) => c.replace("costume: 'blazer', label", "costume: 'bonnet' as never, label") } },
+  { name: 'a cast costume the wardrobe does not have', rule: 'AP2', mut: { cast: (c) => c.replace("costume: 'bun', label", "costume: 'bonnet' as never, label") } },
 ];
 
 let bad = 0;

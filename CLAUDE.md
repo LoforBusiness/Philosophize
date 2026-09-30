@@ -8246,16 +8246,13 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **THE CAST IS FOUR, AND EACH IS A CHARACTER (2026-09-30).** The owner added a woman's
   voice — `en-US-Chirp3-HD-Kore` — and a trait for each: the top hat TEACHES (as a
   story), the newsboy cap is KIND, the plain mascot is PASSIVE-AGGRESSIVE, and the
-  woman (`blazer`) is OBLIVIOUS. `cast.ts` carries `trait` and `character` beside each
-  voice and a script is written from them (AP14). **She is drawn as a PROFESSIONAL**
-  (`wardrobe.ts`, costume `blazer`, outside `ROLL` so `make:wardrobe` deals it to nobody):
-  a low chignon and a blazer, with NO skirt (a pencil skirt was drawn and cut: *"the skirt … does not fit the body"*). The first drawing — a ponytail and a flared
-  A-line skirt — came back *"too childish … the skirt is way too wide … a professional
-  corporate woman"*, and the redraw found the tool for it: the OUTLINE can only say woman
-  and adult (hair up), and a SUIT is said by `paper` lines inside
-  the ink — two lapels and a blouse in the V. Loose hair and a bob only
-  made the head heavier at lesson size; a briefcase read perfectly and was waved about by
-  every gesture of the hand holding it, so it was cut.
+  woman (`bun`) is OBLIVIOUS. `cast.ts` carries `trait` and `character` beside each
+  voice and a script is written from them (AP14). **A low hair BUN is all she wears**
+  (`wardrobe.ts`, costume `bun`, outside `ROLL` so `make:wardrobe` deals it to nobody).
+  Three drawings were rejected first — a ponytail and flared skirt (*"too childish"*), a
+  blazer and pencil skirt (*"the skirt … does not fit the body"*), the blazer alone — and
+  the last note is the rule: *"anything on the stickman's body looks bad."* **Nothing is
+  drawn on a stickman's body**; a costume sits on the head or is held in a hand.
   **A lesson casts two, three or four — whoever it has a job for (AP13)**, never one and
   never a figure who does not speak; `check:dialogue` holds both, and that no two cast
   members share a voice, a costume or a trait. `economics-foundations-1` keeps its three
