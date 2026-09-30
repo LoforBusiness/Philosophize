@@ -36,6 +36,7 @@ import { walkOf } from './lib/scenefig.mjs';
 import { soloFigure, leadBox, windowsFor } from './lib/figroom.mjs';
 import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 import {
   W, GROUND_Y, SIT_REACH, PLAY_SECONDS, poseTier, freeFloor, roomFor, stepSeconds, pausesOf,
   hash01, facingOf, HANDS_ON_PROP,
@@ -75,6 +76,8 @@ let planned = 0;
 let freeBeats = 0;
 
 for (const [id, file] of Object.entries(LESSONS)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(id)) continue;
   const stem = file.replace(/Script\.ts$/, '');
   if (!fs.existsSync(`${DIR}/${stem}Scene.tsx`)) continue;
   if (!soloFigure(id)) { tally.solo += 1; continue; }

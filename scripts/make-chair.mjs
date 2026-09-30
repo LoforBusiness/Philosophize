@@ -36,6 +36,7 @@ import { markBox } from './lib/marks.mjs';
 import { grave } from './lib/liveliness.mjs';
 import { poseTier, freeFloor, hash01, facingOf, HANDS_ON_PROP } from './lib/wanderrule.mjs';
 import { soloFigure, leadBox, windowsFor, sceneExists } from './lib/figroom.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 
 const DRY = process.argv.includes('--dry');
 const DIR = 'components/lesson/cinematic';
@@ -89,6 +90,8 @@ const ROUTE = 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'
 const route = fs.readFileSync(ROUTE, 'utf8');
 const byBranch = {};
 for (const m of route.matchAll(/'([a-z-]+-[a-z]+-(\d+))':\s*([A-Za-z0-9]+)/g)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(m[1])) continue;
   const b = m[1].split('-')[0];
   (byBranch[b] = byBranch[b] || []).push({ id: m[1], n: +m[2] });
 }

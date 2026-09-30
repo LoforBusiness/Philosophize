@@ -51,6 +51,7 @@ import { loadTs } from './lib/loadts.mjs';
 import { loadRig, skullRise, loadHats } from './lib/loadrig.mjs';
 import { sceneOf, walkOf, scaleOf, crownOf, wordsOf, sealsOf, glyphBoxesOf, ANSWER_LIFT } from './lib/scenefig.mjs';
 import { windowOf } from './lib/tourrule.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 
 const DRY = process.argv.includes('--dry');
 const DIR = 'components/lesson/cinematic';
@@ -403,6 +404,8 @@ function choosePair(all, n, busy) {
 let clear = 0; let overArt = 0; let nowhere = 0; let visLines = 0; let shown = 0; let held = 0;
 const ups = []; const sides = []; const replyUps = []; const rows = []; const floaters = []; const perLesson = [];
 for (const [id, beats] of Object.entries(J.words)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(id)) continue;
   const band = bandOf(id);
   if (!band) continue;
   const graded = GRADED.get(id) || [];

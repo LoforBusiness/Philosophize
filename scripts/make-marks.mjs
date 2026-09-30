@@ -49,6 +49,7 @@ import { poseTrack } from './lib/posetrack.mjs';
 import { STYLES, markBox, contentTokens, sameStem, frozenBeats, thoughtBeats, bandOf, questionOf, answerWords, labelNamed, cameraWindow, penPoints, targetsOf, markFits } from './lib/marks.mjs';
 import { windowOf } from './lib/tourrule.mjs';
 import { loadTs } from './lib/loadts.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 
 const REPO = process.cwd();
 const DIR = path.join(REPO, 'components/lesson/cinematic');
@@ -77,6 +78,8 @@ let frozenTotal = 0, marked = 0;
 const refused = { graded: 0, prequestion: 0, thought: 0, nolabel: 0, nofit: 0, nobox: 0, toured: 0, offframe: 0, unaudited: 0, unseen: 0 };
 
 for (const [id, file] of Object.entries(LESSONS)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(id)) continue;
   if (OWN_PLAYER.has(id)) continue;
   const stem = file.replace(/Script\.ts$/, '');
   const beats = beatsOf(file);

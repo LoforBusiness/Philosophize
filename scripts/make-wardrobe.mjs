@@ -34,6 +34,7 @@ import { mustBox, renderTable, STAGE_W } from './lib/mustrule.mjs';
 import { loadRig } from './lib/loadrig.mjs';
 import { corpus } from './lib/gestures.mjs';
 import { widestOn, secondFor, ROLL, SOBER } from './lib/wardroberule.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
 const { transform } = await import(
@@ -181,6 +182,8 @@ const CYCLE = [
 const route = fs.readFileSync(ROUTE, 'utf8');
 const lessons = [];
 for (const m of route.matchAll(/'([a-z-]+-[a-z]+-(\d+))':\s*([A-Za-z0-9]+)/g)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(m[1])) continue;
   const comp = m[3].replace(/Lesson$/, '');
   lessons.push({
     id: m[1], n: +m[2], branch: m[1].split('-')[0],

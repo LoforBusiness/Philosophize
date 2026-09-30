@@ -45,6 +45,7 @@
 // `mustprobe` already marks anything drawn to be cut.
 import fs from 'node:fs';
 import path from 'node:path';
+import { isDialogue } from './lib/dialogue.mjs';
 
 const DIR = 'components/lesson/cinematic';
 const OUT = 'data/lessonVisitor.ts';
@@ -75,6 +76,8 @@ const route = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson
 
 const lessons = [];
 for (const m of route.matchAll(/'([a-z-]+-[a-z]+-(\d+))':\s*([A-Za-z0-9]+)/g)) {
+  // A DIALOGUE lesson (LESSON_RULES AP8) carries none of the narrated-lesson layers.
+  if (isDialogue(m[1])) continue;
   const comp = m[3].replace(/Lesson$/, '');
   lessons.push({ id: m[1], n: +m[2], stem: `${comp[0].toLowerCase()}${comp.slice(1)}` });
 }

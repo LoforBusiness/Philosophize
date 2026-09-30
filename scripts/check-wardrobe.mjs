@@ -42,6 +42,7 @@ import { pathToFileURL } from 'node:url';
 import { grave } from './lib/liveliness.mjs';
 import { STAGE_W } from './lib/mustrule.mjs';
 import { SOBER as RULE_SOBER } from './lib/wardroberule.mjs';
+import { isDialogue } from './lib/dialogue.mjs';
 
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
@@ -69,6 +70,9 @@ const route = fs.readFileSync(
 
 const lessons = [];
 for (const m of route.matchAll(/'([a-z-]+-[a-z]+-(\d+))':\s*([A-Za-z0-9]+)/g)) {
+  // A DIALOGUE lesson forces each figure's costume in its scene, and check:dialogue
+  // (AP2) holds it; it has no row in the wardrobe table on purpose (AP8).
+  if (isDialogue(m[1])) continue;
   const comp = m[3].replace(/Lesson$/, '');
   lessons.push({
     id: m[1], n: +m[2], branch: m[1].split('-')[0],

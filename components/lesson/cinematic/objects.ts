@@ -593,8 +593,8 @@ export const cave = (x: number, y: number, w: number, h: number) => fit(CAVE, x,
 // plain board. The stripes run front to back, so from the front they are vertical
 // bands; the scallops are half-discs hanging off the valance's lower edge.
 const STALL: ObjPart[] = [
-  oBar('mass', 8, 16, 8, 100, 3),                               // the two posts, BEHIND the counter
-  oBar('mass', 92, 16, 92, 100, 3),                             // (body, so the counter covers them)
+  oBar('mass', 8, 16, 8, 100, 3),                               // the two posts, down to the ground
+  oBar('mass', 92, 16, 92, 100, 3),
   ...trapezoid('mass', 50, 13, 84, 100, 18),                    // the canopy, sloping to the front
   oRect('lit', 22, 13, 9, 16, 0, 0),                            // its stripes: paper and the
   oRect('lit', 41, 13, 9, 16, 0, 0),                            // branch's own tone, as every
@@ -605,12 +605,22 @@ const STALL: ObjPart[] = [
   oEll('mass', 31, 28, 12, 10), oEll('mass', 43.5, 28, 12, 10),
   oEll('mass', 56, 28, 12, 10), oEll('mass', 68.5, 28, 12, 10),
   oEll('mass', 81, 28, 12, 10), oEll('mass', 93.5, 28, 12, 10),
-  oRect('mass', 50, 64, 96, 5, 0, 1),                           // the counter's top edge, lit
-  oRect('face', 50, 83, 96, 34, 0, 1.5),                        // and its front board, in shade
-  oBar('line', 6, 76, 94, 76, 1.8),                             // the boards of the front
-  oBar('line', 6, 89, 94, 89, 1.8),
 ];
 export const stall = (x: number, y: number, w: number, h: number) => fit(STALL, x, y, w, h);
+
+// ── COUNTER ──────────────────────────────────────────────────────────────────
+//
+// REFERENCE. The stall's counter is its own object because the stall-holder stands
+// BETWEEN the two: the canopy and its posts behind him, the counter in front of him,
+// waist-high — a counter any higher hides the person selling. A lit top edge with
+// thickness, a boarded front in shade, and the boards' seams.
+const COUNTER: ObjPart[] = [
+  oRect('mass', 50, 8, 100, 14, 0, 1.5),                        // the top, lit, with its thickness
+  oRect('face', 50, 58, 96, 84, 0, 2),                          // the boarded front, in shade
+  oBar('line', 4, 40, 96, 40, 2.4),                             // the seams between the boards
+  oBar('line', 4, 70, 96, 70, 2.4),
+];
+export const counter = (x: number, y: number, w: number, h: number) => fit(COUNTER, x, y, w, h);
 
 // ── PIE ──────────────────────────────────────────────────────────────────────
 //
@@ -699,6 +709,6 @@ export const apple = (x: number, y: number, w: number, h: number) => fit(APPLE, 
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
   door, shelf, flag, bridge, window, wheel, coin, leaf, plinth, column, cave,
-  stall, pie, loaf, note, chalkboard, apple,
+  stall, counter, pie, loaf, note, chalkboard, apple,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;

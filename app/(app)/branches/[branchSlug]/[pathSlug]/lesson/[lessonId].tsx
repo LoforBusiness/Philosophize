@@ -225,6 +225,7 @@ import { Logic41Lesson } from '@/components/lesson/cinematic/logic41Scene';
 import { Ethics41Lesson } from '@/components/lesson/cinematic/ethics41Scene';
 import { Aesthetics41Lesson } from '@/components/lesson/cinematic/aesthetics41Scene';
 import { Political41Lesson } from '@/components/lesson/cinematic/political41Scene';
+import { Econ1Lesson } from '@/components/lesson/cinematic/econ1Scene';
 import { Metaphysics26Lesson } from '@/components/lesson/cinematic/metaphysics26Scene';
 import { Epistemology26Lesson } from '@/components/lesson/cinematic/epistemology26Scene';
 import { Logic24Lesson } from '@/components/lesson/cinematic/logic24Scene';
@@ -529,6 +530,8 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'ethics-ethics-41': Ethics41Lesson,
   'aesthetics-aesthetics-41': Aesthetics41Lesson,
   'political-political-41': Political41Lesson,
+  // Economics & Finance — the first dialogue lesson (LESSON_RULES group AP).
+  'economics-foundations-1': Econ1Lesson,
   'metaphysics-being-26': Metaphysics26Lesson,
   'epistemology-knowledge-26': Epistemology26Lesson,
   'logic-arguments-24': Logic24Lesson,
