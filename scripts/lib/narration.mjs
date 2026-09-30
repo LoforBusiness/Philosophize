@@ -286,6 +286,8 @@ export const LESSONS = {
   'political-political-39': 'political39Script.ts',
   'political-political-40': 'political40Script.ts',
   'political-political-41': 'political41Script.ts',
+  // Economics & Finance — a DIALOGUE lesson: each line in its speaker's voice (cast.ts).
+  'economics-foundations-1': 'econ1Script.ts',
 };
 
 /** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */

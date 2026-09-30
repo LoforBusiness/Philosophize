@@ -207,7 +207,14 @@ const eye = [];
 for (const f of fs.readdirSync(DIR).filter((x) => x.endsWith('Script.ts'))) {
   const src = fs.readFileSync(path.join(DIR, f), 'utf8');
   const id = f.replace('Script.ts', '');
+  // A DIALOGUE LESSON HAS NO NARRATOR (LESSON_RULES AP4). Its lines are spoken by the
+  // people on the stage, as themselves — "Then I'll take the book" is a shopper, not a
+  // narrator slipping into a seminar "we" — so V1 and V7 do not read its spoken lines.
+  // Its explanations, prompts and summary are still the lesson's own voice, and are
+  // still read.
+  const dialogue = /^\s{4}speaker:\s*'/m.test(src);
   for (const [i, b] of beatsOf(src).entries()) {
+    if (dialogue) break;
     if (isFirstPerson(narratorVoice(b))) hits.push({ id, i, b: b.trim() });
   }
   for (const w of wordingOf(src)) {
@@ -217,7 +224,7 @@ for (const f of fs.readdirSync(DIR).filter((x) => x.endsWith('Script.ts'))) {
       if (m) slang.push({ id, kind: w.kind, hit: m[0], s: w.s.trim() });
     }
   }
-  for (const t of spokenOf(src)) {
+  for (const t of dialogue ? [] : spokenOf(src)) {
     for (const sen of t.split(/(?<=[.!?][”"’']?)\s+/)) if (EYE.test(sen.trim())) eye.push({ id, s: sen.trim() });
   }
 }

@@ -1127,6 +1127,41 @@
     "text": "Beauty remains possible in art, but it no longer decides what counts as art.",
     "wav": "e645e1473978e136d21d005046b7355db06e09e07d43618397337bd065386a45"
   },
+  "economics-foundations-1/beat-00": {
+    "text": "One ten-pound note. And I want everything on this table.",
+    "wav": "a7e92219c21b9498d8178bc3c005b80f71798c43adbf09530006aaaa677c240f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-1/beat-01": {
+    "text": "Everyone does, mate. The pie is six pounds, and the book is eight.",
+    "wav": "7f0dc847f762a9679712beaeb2f94df18c42f12533712290a4a571d142f5eefe",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-1/beat-02": {
+    "text": "What you’re watching has a name. Economics is the study of how people choose, when they can’t have it all.",
+    "wav": "77ea4a443927574766fb902589818ec700ef1b46671d54ebcef53ca58e90dab6",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-1/beat-03": {
+    "text": "Your wants never run out, but your money, your time and the bread on that stall all do. That gap is called scarcity.",
+    "wav": "f2054e70b0bc341110d9077f0fc8aa38b3f17d432c9160e0844a3f24478510f0",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-1/beat-04": {
+    "text": "Then I’ll take the book.",
+    "wav": "92eb5b24419f58545d5440d52caeb519b2b67336a28112a27ebddaadacb37c5c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-1/beat-06": {
+    "text": "Every choice has an opportunity cost. Spend an hour at this market, and you can’t spend that hour anywhere else.",
+    "wav": "c2744bf7fa89c13de5c640c506be04ca62451df848dec284d111fa627927d489",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-1/beat-07": {
+    "text": "One loaf left, and two hungry customers. Right, time to think about my price.",
+    "wav": "6f6d9a8b4fce5a94c7f37a0253e5e78b09c968a98657e1d6158ddbe1980689c9",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "epistemology-knowledge-1/beat-00": {
     "text": "You claim to know many things. But what separates knowing something from merely believing it?",
     "wav": "0b9af1d849e2f9d4045e08edefd7810b3bc824d5b0336e92960c5736abe0e7d0"
