@@ -688,7 +688,11 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
   const snaps = [];
   const strips = new Map();
   const detached = new Map();
-  const steps = Math.round(REST / DT);
+  // A beat whose action is paced over a voiced line longer than REST (LINES in the
+  // scene, AP16) has not settled at REST: it is read at the end of its own line instead,
+  // which is where a reader who lets the voice finish sees it.
+  const paced = (() => { try { const m = fs.readFileSync(sceneFile, 'utf8').match(/const LINES = \[([^\]]*)\];/); return m ? m[1].split(',').map((x) => Number(x.trim()) || 0) : []; } catch { return []; } })();
+  const stepsOf = (n) => Math.round(Math.max(REST, (paced[n] || 0) + 0.5) / DT);
 
   for (let n = 0; n <= upto; n++) {
     api.i = n; api.beat = BEATS[n]; api.bi.value = n; api.bt.value = 0; api.picked = null;
@@ -758,6 +762,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       }
       m.prev = cur;
     });
+    const steps = stepsOf(n);
     for (let f = 0; f <= steps; f++) {
       FRAME++;
       if (process.env.REPLAY_SLIDE) slideSample();

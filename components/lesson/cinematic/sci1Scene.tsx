@@ -87,7 +87,7 @@ const K = K_FIG * 0.76;
  * landing and bounces run to 2.6; b9's is 7.67s and the helper steps off the ladder
  * a little after it ends.
  */
-const LINES = [3.52, 3.68, 5.33, 0, 2.6, 3.88, 6.05, 5.69, 0, 8.2, 0, 0];
+const LINES = [4.03, 4.95, 5.38, 0, 2.6, 4.2, 5.7, 5.22, 0, 8.35, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen, arms folded.
@@ -133,8 +133,8 @@ const SC_D = BEATS.map(() => 1);
 const HP_D = BEATS.map(() => 1);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const SK_P = [TALK, LISTEN, NOD, LEAN, LISTEN, TALK, FOLD, LISTEN, FOLD, NOD, LISTEN, LISTEN];
-const SC_P = [LISTEN, LISTEN, EXPLAIN, LISTEN, LEAN, NOD, EXPLAIN, EXPLAIN, LISTEN, EXPLAIN, NOD, LISTEN];
-const HP_P = [LISTEN, TALK, LISTEN, NOD, TALK, LISTEN, NOD, LISTEN, NOD, LEAN, NOD, LISTEN];
+const SC_P = [LISTEN, LISTEN, EXPLAIN, LISTEN, LEAN, NOD, EXPLAIN, EXPLAIN, FOLD, EXPLAIN, NOD, LISTEN];
+const HP_P = [LISTEN, TALK, LISTEN, NOD, TALK, LISTEN, NOD, FOLD, NOD, LEAN, NOD, LISTEN];
 
 // ── the ladder, and where a foot stands on it ────────────────────────────────
 const LAD = { x: 250, y: 462, w: 42, h: 76 };

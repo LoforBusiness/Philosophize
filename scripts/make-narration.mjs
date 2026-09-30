@@ -166,7 +166,7 @@ let fails = 0;
 const blocks = [];
 const renders = readRenders();
 for (const lessonId of Object.keys(LESSONS)) {
-  const { lines, missing } = lessonLines(lessonId);
+  const { lines, missing, beats } = lessonLines(lessonId);
   for (const i of missing) { console.log(`  MISSING assets/narration/${keyOf(lessonId, i)}.wav`); fails += 1; }
   if (missing.length) continue;
   const clipAbs = path.join(ASSETS, lessonId, LESSON_CLIP);
@@ -178,7 +178,7 @@ for (const lessonId of Object.keys(LESSONS)) {
     // MP3 must be built from this WAV, at this offset. The take must also be clean, and
     // recorded as rendered from these very words. check:narration judges a line with
     // the same function, so the two agree.
-    const { faults, w } = lineFaults({ text: l.text, wav: l.wav, record: renders[l.key], clip, beat: l.beat, at: l.at });
+    const { faults, w } = lineFaults({ text: l.text, wav: l.wav, record: renders[l.key], clip, beat: l.beat, at: l.at, dialogue: !!beats?.[l.beat]?.speaker });
     if (faults.length) {
       for (const f of faults) console.log(`  ${f.kind} ${base}: ${f.say}`);
       fails += 1;

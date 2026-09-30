@@ -11111,3 +11111,45 @@ lesson (AP3) in the house format (AP12), and ends at a MORE COMING SOON sign (`m
   lemonade stand (business), a ladder and two balls (science), a broken shop window
   (history), beside the economics market stall. `check:subjects` holds the one-road shape.
 
+
+### AP16 · A voiced line is a person talking: it finishes, at a person's pace, and breathes
+
+> *"a couple of times I noticed the speech ended abruptly … before the narration actually
+> finished talking … the speed of how fast words are said make it seem really real or
+> really not real … form the words of how long pauses happen and how fast words are
+> spoken to sound as real as a human would actually talk."* (2026-09-30)
+
+Measured on all 59 lines of the seven first lessons before anything changed
+(`deliveryOf` in `scripts/lib/narration.mjs`), and three separate things were true:
+
+1. **THIRTEEN TAKES STOPPED MID-WORD.** Chirp 3 HD sometimes ends a take while the last
+   word is still sounding: the final 50 ms sits 15–28 dB under the line's loudest frame,
+   where a take that ends on its own has fallen 40 dB or more. Two more ended cleanly
+   and then caught the first hiss of a breath. **A take must fall at least `END_DROP_DB`
+   (33 dB) by its last 50 ms** — `CUT OFF`. It is retaken, never trimmed.
+2. **THE PACE RAN FROM 3.8 TO 6.4 SYLLABLES A SECOND OF SPEECH.** A person talking
+   relaxed is about 4 to 5 (articulation rate: syllables over the time spent speaking,
+   pauses taken out). **A line speaks at 3.9–5.0** — `TOO FAST`, `TOO SLOW` — and a
+   retake aims at 4.5 (`RATE_AIM`) by scaling the speaking rate. The cast's default rates
+   in `cast.ts` were lowered so a first take lands there: all four voices ran at 4.7–5.4
+   at their old rates.
+3. **THE PLAYER COULD CUT A GOOD TAKE SHORT.** Its fallback pause was a wall-clock timer
+   armed once at `play()`, so a line whose sound started late — a seek that has to
+   decode into the MP3, a buffering stall — was paused before its last words. The
+   fallback is re-armed from every status update against the position the audio has
+   reached (`lib/narration/real.ts`); `check:narration` fails a player that goes back.
+
+And **a sentence end inside a line gets a breath**: at least one pause of 0.25 s or more
+for every full stop, question mark, exclamation or colon with more to say after it
+(`NO BREATH`). A voice that runs through a full stop is reading, not talking; the fix is
+`[pause]` in the beat's `markup` (AC rules — only pauses, and the words must stay the
+screen's).
+
+All four are held on every DIALOGUE line by `check:narration` ("each dialogue line is
+delivered like a person talking"), and `install-narration` refuses a take that breaks
+one. `node scripts/retake-delivery.mjs <render dir> [lesson …]` measures every dialogue
+line, re-renders the failures through the character ledger at the rate that fixes them
+and retries a stubborn take at a nudged rate — a request Google has not seen — leaving a
+job of passing takes to install. **And `check:narration` now fails a finding no group
+reports**: the delivery rules first went in with no group and printed nothing, the same
+silence a rule without a checker has (U).

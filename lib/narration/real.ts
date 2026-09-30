@@ -50,6 +50,17 @@ const END_PAD_S = 0.2;
  * In audio time it lands between the release's end and the next line.
  */
 const END_SLACK_MS = 40;
+/**
+ * HOW LATE THE FIRST SOUND MAY BE before the timer stops trusting the wall clock
+ * (2026-09-30). The timer used to be armed once, in wall-clock time from `play()`:
+ * `dur + END_PAD_S` plus 100 ms. A seek into an MP3 that has to decode its way to the
+ * line, or a player that buffers for a moment, starts the SOUND later than that — and
+ * the timer then paused the line before its last words: *"the speech ended abruptly …
+ * before the narration actually finished talking."* It is armed generously now and
+ * RE-ARMED from every status update against the position the audio has actually
+ * reached, so it counts audio time, not wall time (LESSON_RULES AP16).
+ */
+const START_SLACK_MS = 800;
 
 let loaded: { lessonId: string; player: AudioPlayer } | null = null;
 let current: { lessonId: string; beat: number; player: AudioPlayer; cancel?: () => void } | null = null;
@@ -134,12 +145,18 @@ function play(lessonId: string, beat: number) {
           try { player.pause(); } catch {}
         }
       };
+      let fallback = setTimeout(finish, (line.dur + END_PAD_S) * 1000 + LATENCY_MS + START_SLACK_MS);
       const watch = player.addListener('playbackStatusUpdate', (status) => {
         const t = status.currentTime;
         if (t < end - 0.05) heard = true;
-        else if (heard && t >= end + END_PAD_S) finish();
+        else if (heard && t >= end + END_PAD_S) { finish(); return; }
+        // The fallback follows the AUDIO: whatever is left of this line from where the
+        // sound has got to, never a wall-clock guess made before it started.
+        if (heard && !over && t >= line.at) {
+          clearTimeout(fallback);
+          fallback = setTimeout(finish, Math.max(0, end + END_PAD_S - t) * 1000 + END_SLACK_MS);
+        }
       });
-      const fallback = setTimeout(finish, (line.dur + END_PAD_S) * 1000 + LATENCY_MS + END_SLACK_MS);
       me.cancel = finish;
     }).catch(() => {
       if (current === me) current = null;

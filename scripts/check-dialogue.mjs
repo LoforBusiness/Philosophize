@@ -147,6 +147,31 @@ if (fs.existsSync(rendersFile)) {
   }
 }
 
+// AP16 — THE STAGE ACTS FOR THE WHOLE LINE. A scene paces each beat's action over the
+// seconds in its `LINES` table, copied from the manifest because a scene cannot import
+// it. When a line is re-voiced it gets longer or shorter, and a table left behind has the
+// picture finish while the voice is still talking — the owner's rule is that the stage
+// keeps acting for the whole voiced line. So every voiced beat's pace covers its line.
+{
+  const manifestFile = path.join(ROOT, 'lib', 'narration', 'manifest.ts');
+  if (fs.existsSync(manifestFile)) {
+    const src = fs.readFileSync(manifestFile, 'utf8');
+    for (const l of lessons) {
+      if (!l.sceneFile) continue;
+      const m = fs.readFileSync(l.sceneFile, 'utf8').match(/const LINES = \[([^\]]*)\];/);
+      if (!m) { fail('AP16', l.id, 'its scene has no LINES table to pace each beat over its voiced line'); continue; }
+      const lines = m[1].split(',').map((x) => Number(x.trim()));
+      const at = src.indexOf(`"${l.id}": {`);
+      if (at < 0) continue;
+      const block = src.slice(at, src.indexOf('\n  },', at));
+      for (const e of block.matchAll(/\n {4}(\d+): \{[\s\S]*?dur: ([\d.]+),/g)) {
+        const i = Number(e[1]), dur = Number(e[2]);
+        if (!(lines[i] >= dur - 0.05)) fail('AP16', l.id, `beat ${i}'s action is paced over ${lines[i] ?? 0}s and its voiced line runs ${dur}s: copy the line's length into LINES`);
+      }
+    }
+  }
+}
+
 const wired = wiredLessons().length;
 if (errs.length) {
   console.log(`\ncheck:dialogue — ${errs.length} problem(s) in ${lessons.length} dialogue lesson(s)\n`);

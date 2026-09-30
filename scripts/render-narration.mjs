@@ -33,7 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { LESSONS, beatsOf, spoken, keyOf, voiceFor } from './lib/narration.mjs';
+import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
 
@@ -62,7 +62,9 @@ beats.forEach((b, i) => {
     process.exit(1);
   }
   const v = voiceFor(b.speaker);
-  lines.push({ i, key: keyOf(lessonId, i), text: b.text, markup, voice: v, rate: only.get(i) ?? v.rate });
+  // A dialogue line is asked for with a long pause after it, so the voice finishes its
+  // last word instead of being trimmed into it (AP16).
+  lines.push({ i, key: keyOf(lessonId, i), text: b.text, markup: b.speaker ? endingMarkup(markup) : markup, dialogue: !!b.speaker, voice: v, rate: only.get(i) ?? v.rate });
 });
 if (!lines.length) { console.error('no spoken beats to render'); process.exit(1); }
 
@@ -92,7 +94,9 @@ try {
     const j = await res.json();
     const dest = path.join(outDir, `${l.key}.wav`);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, Buffer.from(j.audioContent, 'base64'));
+    const audio = Buffer.from(j.audioContent, 'base64');
+    // …and the silence that pause bought is cut back, so the line does not end in dead air.
+    fs.writeFileSync(dest, l.dialogue ? trimTail(audio) : audio);
     items.push({ key: l.key, text: l.text, voice: l.voice.name, encodings: ['LINEAR16'] });
     console.log(`${l.key}  ${l.voice.name} @${l.rate}  ${fs.statSync(dest).size} bytes`);
   }

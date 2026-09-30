@@ -29,7 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   ASSETS, LESSONS, beatsOf, spoken, parseWav, headerFaults, measureAudio, audioFaults, weightOf, sha256hex,
-  readRenders, writeRenders, voiceFault,
+  readRenders, writeRenders, voiceFault, deliveryOf, deliveryFaults,
 } from './lib/narration.mjs';
 
 const DRY = process.argv.includes('--dry-run');
@@ -71,6 +71,9 @@ for (const it of items) {
     if (w.pcm && w.pcm.length && w.rate) {
       measured = measureAudio(w.pcm, w.rate);
       why.push(...audioFaults(measured, it.text).map((f) => `${f.kind}: ${f.say}`));
+      // A dialogue take must also be DELIVERED like a person talking (LESSON_RULES AP16).
+      const b = m ? scripts.get(m[1])?.[Number(m[2])] : null;
+      if (b?.speaker) why.push(...deliveryFaults(deliveryOf(w.pcm, w.rate, it.text)).map((f) => `${f.kind}: ${f.say}`));
     }
   }
   if (why.length) {

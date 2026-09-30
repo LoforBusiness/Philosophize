@@ -78,7 +78,7 @@ const K = K_FIG * 0.76;
  * the handling need it — b1 (5.36s line), b2 (3.84), b7 (4.00), b8 (6.65) and b10
  * (5.08) run a little past their lines.
  */
-const LINES = [3.6, 6.0, 5.2, 4.2, 5.63, 0, 7.19, 4.6, 7.6, 0, 5.4, 0, 0];
+const LINES = [4.79, 6, 5.2, 5.2, 7.3, 0, 7.8, 4.86, 9.2, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, arms folded, counting the points.
@@ -125,9 +125,9 @@ const LEGS: number[][][] = BEATS.map((_, n) => (
       : NO_LEGS
 ));
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const PL_P = [TALK, HIPS, TALK, LISTEN, LISTEN, LISTEN, NOD, FOLD, LISTEN, LISTEN, LISTEN, LISTEN, LISTEN];
+const PL_P = [TALK, HIPS, TALK, LISTEN, LISTEN, FOLD, NOD, FOLD, LISTEN, LISTEN, LISTEN, LISTEN, LISTEN];
 const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, COUNT, LISTEN, NOD, LISTEN, LISTEN];
-const CP_P = [LISTEN, TALK, LISTEN, TALK, LISTEN, LISTEN, NOD, LISTEN, LISTEN, LISTEN, TALK, LISTEN, LISTEN];
+const CP_P = [LISTEN, TALK, LISTEN, TALK, LISTEN, FOLD, NOD, LISTEN, LISTEN, LISTEN, TALK, LISTEN, LISTEN];
 
 // ── the counter and what is on it ────────────────────────────────────────────
 const TOP = 477;                                   // the counter's top, at his hip

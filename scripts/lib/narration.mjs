@@ -338,6 +338,50 @@ export const weightOf = (text) => (text.match(/\S+/g) || []).reduce((n, w) => n 
 
 export const sha256hex = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
+// ── ENDING A DIALOGUE TAKE (AP16) ───────────────────────────────────────────
+//
+// Chirp 3 HD trims a take to the voice, and more often than not it trims INTO the last
+// word: 63% of 401 older takes end with their final 50 ms under 33 dB below their loudest.
+// Asked for the same words with a long pause after them, it finishes the word and then
+// falls silent — measured on three of the lines it had cut, all three ended 97–101 dB down
+// with it, where a short pause left two of the three cut. So a dialogue line is rendered
+// with `[pause long]` after it (a pause tag, which the AC rules allow in markup), and the
+// silence that buys is then cut back to TAIL_KEEP_S so a line does not end in dead air.
+
+/** The markup a dialogue line is rendered from: its own, with a long pause after it. */
+export const endingMarkup = (markup) => (/\[pause(?: short| long)?\]\s*$/.test(markup) ? markup : `${markup} [pause long]`);
+
+/** Silence kept after the last sound of a take, once the long pause has done its work. */
+export const TAIL_KEEP_S = 0.25;
+
+/** A 16-bit mono WAV with its silence after the last sound cut to TAIL_KEEP_S. */
+export function trimTail(buf) {
+  const w = parseWav(buf);
+  if (!w.pcm || !w.rate) return buf;
+  const F = Math.max(1, Math.round(w.rate * 0.01));
+  const nf = Math.floor(w.pcm.length / F);
+  const db = new Float64Array(nf);
+  let top = -120;
+  for (let f = 0; f < nf; f += 1) {
+    let e = 0;
+    for (let k = f * F; k < (f + 1) * F; k += 1) e += w.pcm[k] * w.pcm[k];
+    db[f] = 10 * Math.log10(e / F / (32768 * 32768) + 1e-12);
+    if (db[f] > top) top = db[f];
+  }
+  let last = nf - 1;
+  while (last > 0 && db[last] < top - 50) last -= 1;
+  const keep = Math.min(w.pcm.length, (last + 1) * F + Math.round(w.rate * TAIL_KEEP_S));
+  if (keep >= w.pcm.length) return buf;
+  const pcm = w.pcm.subarray(0, keep);
+  const out = Buffer.alloc(44 + pcm.length * 2);
+  out.write('RIFF', 0, 'ascii'); out.writeUInt32LE(36 + pcm.length * 2, 4); out.write('WAVE', 8, 'ascii');
+  out.write('fmt ', 12, 'ascii'); out.writeUInt32LE(16, 16); out.writeUInt16LE(1, 20); out.writeUInt16LE(1, 22);
+  out.writeUInt32LE(w.rate, 24); out.writeUInt32LE(w.rate * 2, 28); out.writeUInt16LE(2, 32); out.writeUInt16LE(16, 34);
+  out.write('data', 36, 'ascii'); out.writeUInt32LE(pcm.length * 2, 40);
+  for (let i = 0; i < pcm.length; i += 1) out.writeInt16LE(pcm[i], 44 + i * 2);
+  return out;
+}
+
 // ── READING A WAV ────────────────────────────────────────────────────────────
 
 /** Chirp 3 HD's LINEAR16: 16-bit mono PCM at 24 kHz. */
@@ -669,6 +713,99 @@ export function audioFaults(m, text) {
   return out;
 }
 
+// ── HOW A LINE IS DELIVERED: A PERSON, TALKING (LESSON_RULES AP16) ──────────
+//
+// The owner, 2026-09-30, on the seven dialogue lessons: the speech *"ended abruptly …
+// before the narration actually finished talking"*, and *"the speed of how fast words
+// are said make it seem really real or really not real … form the words of how long
+// pauses happen and how fast words are spoken to sound as real as a human would."*
+//
+// Measured on all 59 lines first, and both were real:
+//
+//   · THIRTEEN TAKES STOPPED MID-WORD. Chirp 3 HD sometimes ends a take while the last
+//     word is still sounding — its final 50 ms at 15–28 dB under the line's loudest
+//     frame, where every take that ends on its own has fallen 40 dB or more. Eleven of
+//     the thirteen were the top hat's (Algieba at 0.95). The release the encoder lays
+//     after a take (RELEASE_S) smooths a click; it cannot finish a word.
+//   · THE SPEED RAN FROM 3.8 TO 6.3 SYLLABLES A SECOND OF SPEECH. Relaxed conversation
+//     is about 4 to 5 (articulation rate: syllables over time spent speaking, pauses
+//     taken out). Above 5.0 the voice gabbles — *"How lovely. And how often will you
+//     water it?"* was 6.25 — and under 3.9 it drags.
+//
+// So a DIALOGUE take (every lesson made from now on, AP12) must end on its own, speak at
+// a person's pace, and PAUSE AT EVERY SENTENCE END: a full stop the voice runs straight
+// through is the other half of sounding read out. A retake is a new request (see above):
+// the speaking rate that brings a line into the band is the nudge.
+
+/** The last 50 ms of a take, against its loudest 10 ms frame: 15–28 dB when cut off, ≤ −40 when it ends. */
+export const END_DROP_DB = 33;
+/** Syllables per second of SPEECH (pauses taken out). A person talking: about 4 to 5. */
+export const RATE_MIN = 3.9;
+export const RATE_MAX = 5.0;
+/** Where a retake aims: the middle of a person's pace. */
+export const RATE_AIM = 4.5;
+/** The shortest silence that counts as the breath at a sentence end. */
+export const SENTENCE_PAUSE_S = 0.25;
+
+/** A word's syllables, by vowel groups — close enough to rank a line's pace. */
+export function syllablesOf(word) {
+  let w = String(word).toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  if (w.length <= 3) return 1;
+  w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '');
+  const m = w.match(/[aeiouy]{1,2}/g);
+  return Math.max(1, m ? m.length : 1);
+}
+
+/** Sentence ends INSIDE a line: a full stop, question or exclamation mark, or colon, with more to say after it. */
+export const sentenceBreaks = (text) => (String(text).match(/[.!?:](?=["’”)]?\s+\S)/g) || []).length;
+
+/** How a take is delivered: its pace, its pauses, and how it ends. */
+export function deliveryOf(pcm, rate, text) {
+  const F = Math.max(1, Math.round(rate * 0.01));
+  const nf = Math.floor(pcm.length / F);
+  const frame = new Float64Array(nf);
+  let top = -120;
+  for (let f = 0; f < nf; f += 1) {
+    let e = 0;
+    for (let k = f * F; k < (f + 1) * F; k += 1) e += pcm[k] * pcm[k];
+    frame[f] = 10 * Math.log10(e / F / (32768 * 32768) + 1e-12);
+    if (frame[f] > top) top = frame[f];
+  }
+  const floor = Math.max(top - 32, -50);
+  let first = -1, last = -1;
+  for (let f = 0; f < nf; f += 1) if (frame[f] > floor) { if (first < 0) first = f; last = f; }
+  const pauses = [];
+  let quiet = 0;
+  for (let f = first; f >= 0 && f <= last; f += 1) {
+    if (frame[f] > floor) { if (quiet >= 12) pauses.push(quiet / 100); quiet = 0; } else quiet += 1;
+  }
+  const spanS = first < 0 ? 0 : (last - first + 1) / 100;
+  const talkS = Math.max(0.1, spanS - pauses.reduce((a, p) => a + p, 0));
+  const syl = (String(text).match(/\S+/g) || []).reduce((a, w) => a + syllablesOf(w), 0);
+  const tail = frame.slice(Math.max(0, nf - 5));
+  let tailE = 0;
+  for (const d of tail) tailE += 10 ** (d / 10);
+  const endDb = 10 * Math.log10(tailE / Math.max(1, tail.length) + 1e-12) - top;
+  return {
+    rate: syl / talkS,
+    pauses,
+    breaths: pauses.filter((p) => p >= SENTENCE_PAUSE_S).length,
+    breaks: sentenceBreaks(text),
+    endDb,
+  };
+}
+
+/** What makes a dialogue take sound read out rather than spoken, as { kind, say }. */
+export function deliveryFaults(d) {
+  const out = [];
+  if (d.endDb > -END_DROP_DB) out.push({ kind: 'CUT OFF', say: `the take stops while the last word is still sounding: its last 50 ms is ${(-d.endDb).toFixed(0)} dB under its loudest, where a finished take falls ${END_DROP_DB} or more — retake it` });
+  if (d.rate > RATE_MAX) out.push({ kind: 'TOO FAST', say: `${d.rate.toFixed(2)} syllables a second of speech, over a person's ${RATE_MAX} — retake at a slower speaking rate` });
+  if (d.rate < RATE_MIN) out.push({ kind: 'TOO SLOW', say: `${d.rate.toFixed(2)} syllables a second of speech, under a person's ${RATE_MIN} — retake at a quicker speaking rate` });
+  if (d.breaths < d.breaks) out.push({ kind: 'NO BREATH', say: `${d.breaks} sentence end(s) inside the line and only ${d.breaths} pause(s) of ${SENTENCE_PAUSE_S}s or more — a voice that runs through a full stop is reading, not talking: mark the stop with [pause] in the beat's markup` });
+  return out;
+}
+
 // ── WHAT EACH TAKE WAS RENDERED FROM ────────────────────────────────────────
 //
 // assets/narration/renders.json: for every installed WAV, the words it was rendered
@@ -721,7 +858,7 @@ export function writeRenders(records, dir = ASSETS) {
  * there is none). make-narration and check-narration both call this, so the two cannot
  * disagree about a line.
  */
-export function lineFaults({ text, wav, record, clip, beat, at }) {
+export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false }) {
   const faults = [];
   const w = parseWav(wav);
   for (const say of headerFaults(w)) faults.push({ kind: 'HEADER', say });
@@ -740,6 +877,8 @@ export function lineFaults({ text, wav, record, clip, beat, at }) {
   if (w.pcm && w.pcm.length && w.rate) {
     m = measureAudio(w.pcm, w.rate);
     faults.push(...audioFaults(m, text));
+    // A DIALOGUE line is a person talking, so it is also held to how it is delivered (AP16).
+    if (dialogue) faults.push(...deliveryFaults(deliveryOf(w.pcm, w.rate, text)));
   }
   return { faults, m, w, sha };
 }

@@ -120,7 +120,7 @@ for (const id of table) {
     if (!missing.length && Math.abs(e.at - l.at) > 0.0005) {
       note(key, 'OFFSET', `the manifest starts this line at ${e.at.toFixed(3)}s and it lands at ${l.at.toFixed(3)}s in ${LESSON_CLIP}: run scripts/encode-narration.mjs, then scripts/make-narration.mjs`);
     }
-    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at });
+    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at, dialogue: !!beats[i].speaker });
     for (const f of faults) note(key, f.kind, f.say);
     lines += 1;
     if (!m) continue;
@@ -180,6 +180,11 @@ let timing = '';
   if (![pad, slack, lat].every(Number.isFinite)) note(who, 'PLAYER', 'END_PAD_S, END_SLACK_MS or LATENCY_MS could not be read out of the player');
   else {
     if (/else if \(heard\)\s*finish\(\)/.test(src)) note(who, 'PLAYER', 'the status listener pauses as soon as the line nears its end, which clips its last sound');
+    // The fallback must follow the AUDIO, re-armed from the position each status update
+    // reports, or a line whose sound starts late is paused before its last words (AP16).
+    if (!/clearTimeout\(fallback\);\s*fallback = setTimeout\(finish, Math\.max\(0, end \+ END_PAD_S - t\)/.test(src)) {
+      note(who, 'PLAYER', 'the fallback pause is a wall-clock guess armed once at play(): a line whose sound starts late is paused before its last words; re-arm it from each status update');
+    }
     if (pad < RELEASE_S + 0.03) note(who, 'PLAYER', `END_PAD_S ${pad}s does not clear the ${RELEASE_S}s release after every take`);
     if (late > GAP_S - 0.05) note(who, 'PLAYER', `the fallback pause lands ${late.toFixed(2)}s past a line, into the next one at ${GAP_S}s`);
     timing = `release ${RELEASE_S}s · pause +${pad}s · fallback +${late.toFixed(2)}s · next line +${GAP_S}s`;
@@ -197,7 +202,16 @@ const GROUPS = [
   ['each take is clean', ['HEADER', 'CLIPPED RUN', 'CLIPPING', 'BURST', 'PACE', 'STALL', 'SILENCE'],
     'no clipped run, no burst, a pace that fits the words, no stall'],
   ['nothing is left behind', ['ORPHAN'], 'no record or file that no line plays'],
+  ['each dialogue line is delivered like a person talking (AP16)', ['CUT OFF', 'TOO FAST', 'TOO SLOW', 'NO BREATH'],
+    "every take ends on its own, at a person's pace, with a breath at every sentence end"],
 ];
+// A finding no group reports is a rule that fails in silence — which is how the
+// delivery rules first went in, and read clean. Every kind must belong to a group.
+{
+  const known = new Set(GROUPS.flatMap((g) => g[1]));
+  const lost = [...new Set(findings.map((x) => x.kind))].filter((k) => !known.has(k));
+  if (lost.length) bad(`finding kind(s) no group reports: ${lost.join(', ')}`, 'add them to GROUPS');
+}
 if (lines === 0) bad('measured no lines at all', 'a check that reads nothing must not look clean');
 
 for (const [title, kinds, fine] of GROUPS) {

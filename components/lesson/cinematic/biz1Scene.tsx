@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, business-foundations-1), except b4, whose hand-offs run
  * on about a second after its 4.36s line. 0 for a beat with no voice.
  */
-const LINES = [4.72, 5.12, 3.84, 6.59, 5.6, 0, 5.39, 5.2, 5.27, 0, 4.28, 0, 0];
+const LINES = [5.51, 5.92, 4.77, 7.68, 6.66, 0, 5.43, 6.8, 6.81, 0, 5.1, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.
@@ -99,6 +99,7 @@ const EXPLAIN = 259;
 const LISTEN = 159;
 const NOD = 263;
 const LEAN = 177;
+const WAIT = 161;
 
 const ACT = BEATS.map((b) => b.act ?? '');
 const is = (a: string) => ACT.map((v) => (v === a ? 1 : 0));
@@ -130,7 +131,7 @@ const PT_D = [1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1];
 const AD_D = BEATS.map(() => 1);
 const MK_D = BEATS.map(() => -1);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const PT_P = [LISTEN, TALK, NOD, LISTEN, TALK, LISTEN, NOD, TALK, LISTEN, NOD, NOD, LISTEN, LISTEN];
+const PT_P = [LISTEN, TALK, NOD, LISTEN, TALK, LISTEN, NOD, TALK, LISTEN, NOD, NOD, WAIT, LISTEN];
 const MK_P = [TALK, NOD, TALK, LISTEN, LISTEN, LEAN, NOD, LISTEN, NOD, LISTEN, TALK, NOD, LISTEN];
 const AD_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, NOD, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, LISTEN, LISTEN];
 

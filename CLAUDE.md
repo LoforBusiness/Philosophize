@@ -8341,3 +8341,16 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   can use it. Every subject wins at least one of the 64 answer combinations. Readers
   who already answered are not asked again (`ONBOARDING_VERSION` stays 1).
 
+- **Quick Start never disappears** (2026-09-30): with one lesson on each road, a reader
+  who had read all seven met a Home with no Quick Start — `pickQuickStart` returned null
+  once nothing was left. It offers a lesson to READ IT AGAIN now (`pick.again`), and
+  `check:subjects` §11 runs the pick against a finished library. The philosopher's-study
+  picture's window was a pill whose night ran out below its round bottom; it is an arch
+  on a flat bottom with a sill.
+- **A voiced line is a person talking (AP16, 2026-09-30).** Thirteen of the 59 dialogue
+  takes stopped mid-word, the pace ran 3.8–6.4 syllables a second of speech, and the
+  player's wall-clock fallback could pause a line that started late before its last
+  words. `check:narration` holds every dialogue line to: ends on its own (last 50 ms 33 dB
+  down), 3.9–5.0 syllables a second, a breath at every sentence end; the fallback now
+  follows the audio position. `scripts/retake-delivery.mjs` re-renders what fails; the
+  cast's default rates in `cast.ts` were lowered so a first take lands at ~4.5.
