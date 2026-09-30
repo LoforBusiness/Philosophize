@@ -1,6 +1,7 @@
 import { supabase } from './client';
 import { useUserDataStore, DAY_HISTORY_CAP, type SavedQuote, type ProfileQuote, type AppSettings, type XpEvent } from '@/stores/userDataStore';
 import { branchCountsFromUnits, unitsFromBranchCounts } from '@/data';
+import { mergeSubjectDays } from '@/lib/utils/subjectBreadth';
 
 // The slice of userDataStore mirrored to the cloud — matches the store's
 // `partialize`, so "what we persist locally" and "what we sync" stay identical.
@@ -30,6 +31,8 @@ export interface CloudState {
   onboardingVersion: number;
   joinedAt: number | null;
   earnedBadges: string[];
+  /** Last day a lesson was finished in each subject. Merged per key to the later day. */
+  subjectDays: Record<string, string>;
   unitsReviewed: string[];
   badgesInitialized: boolean;
   /** The professor's intro has been watched. OR-merged: seen anywhere is seen. */
@@ -45,7 +48,7 @@ export interface CloudState {
 
 const SYNC_FIELDS: (keyof CloudState)[] = [
   'savedQuotes', 'profileQuote', 'philosopherViews', 'philosopherLessons', 'lessonsByUnit', 'lessonsByBranch', 'beliefResultId',
-  'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'unitsReviewed', 'badgesInitialized',
+  'streak', 'totalXP', 'xpEvents', 'rankIndex', 'lastLessonDate', 'joinedAt', 'earnedBadges', 'subjectDays', 'unitsReviewed', 'badgesInitialized',
   'seenProfessorIntro',
   'displayName', 'email', 'bio', 'portrait', 'profileBackground', 'nameFont', 'settings',
   'restDaysEarned', 'restDaysUsed', 'startingBranch', 'onboardingVersion',
@@ -236,6 +239,8 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
   const unitsReviewed = Array.from(
     new Set([...(local.unitsReviewed ?? []), ...(remote.unitsReviewed ?? [])]),
   );
+  // The LATER day per subject: a lesson finished on either device was finished.
+  const subjectDays = mergeSubjectDays(local.subjectDays, remote.subjectDays);
   const earnedBadges = Array.from(
     new Set([...(local.earnedBadges ?? []), ...(remote.earnedBadges ?? [])])
   );
@@ -341,6 +346,7 @@ export function mergeStates(local: CloudState, remote: Partial<CloudState>): Clo
     lastLessonDate,
     joinedAt,
     earnedBadges,
+    subjectDays,
     unitsReviewed,
     badgesInitialized,
     seenProfessorIntro,

@@ -27,7 +27,7 @@ import { useAuthSession } from '@/lib/supabase/useSession';
 import { LEGACY_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { rankProgress, rankOrder, rankDegree } from '@/data/ranks';
-import { BADGES } from '@/data/badges';
+import { BADGES, caseOf } from '@/data/badges';
 import { useUserDataStore, progressStats } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { generateUserBio } from '@/lib/utils/userBio';
@@ -322,7 +322,8 @@ export default function ProfileScreen() {
     .reverse()
     .map((id) => BADGES.find((b) => b.id === id))
     .filter((b): b is (typeof BADGES)[number] => !!b);
-  const upNext = BADGES.filter((b) => !earnedBadges.includes(b.id));
+  // A retired badge is never "up next": nothing can earn it any more.
+  const upNext = BADGES.filter((b) => !b.retired && !earnedBadges.includes(b.id));
   return [...earnedFirst, ...upNext]
     .slice(0, 8)
     .map((b) => ({ ...b, earned: earnedBadges.includes(b.id) }));
@@ -655,7 +656,7 @@ export default function ProfileScreen() {
           {/* THE ONE QUESTION A CASE OF FIFTY RAISES. The grid showed eight
               medals and no total, so "how much of this is mine" — the only thing
               a trophy shelf is for — was the fact not on the page. */}
-          <ShelfCount earned={earnedBadges.length} total={BADGES.length} />
+          <ShelfCount earned={earnedBadges.length} total={caseOf(earnedBadges).length} />
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
               <View key={b.id} style={styles.badge}>

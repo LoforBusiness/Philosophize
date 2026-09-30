@@ -21,7 +21,7 @@ import { Art, Ins, PAGE_CSS, markSvg, nodesSvg, roll, shoot, svg } from './lib/i
 
 const BOX = Number(process.env.PIN) || 100;
 const GRID = 52; // the size the badge case draws them at
-const FAMILIES = ['lessons', 'streak', 'thinkers', 'quotes', 'mastery', 'xp'];
+const FAMILIES = ['lessons', 'subjects', 'streak', 'thinkers', 'quotes', 'mastery', 'xp'];
 const { badges } = roll();
 
 function medal(family, tier, glyph, size, earned = true) {
@@ -30,7 +30,7 @@ function medal(family, tier, glyph, size, earned = true) {
   return svg(nodesSvg(a.back) + nodesSvg(a.medal) + nodesSvg(a.front) + markSvg(a.mark, glyph), size);
 }
 
-let body = `<div class="h">6 FAMILIES DOWN × 5 TIERS ACROSS (${Ins.TIER_ORDER.join(' · ')}) · LAST COLUMN LOCKED</div>`;
+let body = `<div class="h">${FAMILIES.length} FAMILIES DOWN × 5 TIERS ACROSS (${Ins.TIER_ORDER.join(' · ')}) · LAST COLUMN LOCKED</div>`;
 body += `<div class="g" style="grid-template-columns:repeat(6,${BOX + 6}px)">`;
 for (const f of FAMILIES) {
   const mine = badges.filter((b) => b.family === f);
@@ -50,4 +50,4 @@ const dest = path.join(os.tmpdir(), 'badge-sheet.png');
 const width = Math.max(28 + 6 * (BOX + 12), 28 + 12 * (GRID + 10));
 const height = 70 + FAMILIES.length * (BOX + 20) + Math.ceil(badges.length / 12) * (GRID + 6);
 shoot(`<html><head><style>${PAGE_CSS}</style></head><body>${body}</body></html>`, dest, width, height);
-console.log(`6 families x 5 tiers + ${badges.length} badges -> ${dest}  (${width}x${height})`);
+console.log(`${FAMILIES.length} families x 5 tiers + ${badges.length} badges -> ${dest}  (${width}x${height})`);

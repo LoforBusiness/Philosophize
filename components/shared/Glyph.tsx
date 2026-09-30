@@ -4,6 +4,7 @@ import Svg, { Path, Circle, Line, Polyline, Polygon, Rect } from 'react-native-s
 
 export type GlyphName =
   | 'candle'
+  | 'globe'
   | 'book'
   | 'quill'
   | 'scroll'
@@ -319,6 +320,16 @@ export default memo(function Glyph({ name, size = 28, color = '#1A1A1A', weight 
             <Circle {...s} cx={13} cy={14} r={0.9} fill={color} />
             <Circle {...s} cx={19} cy={14} r={0.9} fill={color} />
             <Path {...s} d="M12.5 18 C14 20.5 18 20.5 19.5 18" />
+          </>
+        );
+      case 'globe':
+        return (
+          <>
+            {/* The Grand Tour: a globe — its rim, one meridian and the equator. Three
+                strokes, because at badge weight a fourth line closes the gores up. */}
+            <Circle {...s} cx={16} cy={16} r={11.5} />
+            <Path {...s} d="M16 4.5 C10 7.5 10 24.5 16 27.5 C22 24.5 22 7.5 16 4.5 Z" />
+            <Line {...s} x1={4.5} y1={16} x2={27.5} y2={16} />
           </>
         );
       case 'ring':

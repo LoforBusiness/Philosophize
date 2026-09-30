@@ -18,7 +18,7 @@ import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef, rankOr
 import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import {
   BADGES, FAMILY_LABEL, FAMILY_ORDER, badgeCriterion, badgeProgress, badgeProgressLabel,
-  isEarned, type BadgeDef, type BadgeFamily, type ProgressStats,
+  caseOf, isStruck, type BadgeDef, type BadgeFamily, type ProgressStats,
 } from '@/data/badges';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserDataStore, progressStats } from '@/stores/userDataStore';
@@ -54,16 +54,19 @@ type BadgeRow =
  * earned-first: the next one to go after should be visible right where you left
  * off, and a list that reshuffles itself as you earn things loses that.
  */
-function buildBadgeRows(stats: ProgressStats): BadgeRow[] {
+function buildBadgeRows(stats: ProgressStats, held: readonly string[]): BadgeRow[] {
   const out: BadgeRow[] = [];
+  // The reader's own case: every live badge, and a retired one only if they hold it —
+  // so a family the app has retired simply is not there for a reader who never won one.
+  const shown = caseOf(held);
   for (const family of FAMILY_ORDER) {
-    const list = BADGES.filter((b) => b.family === family);
+    const list = shown.filter((b) => b.family === family);
     if (!list.length) continue;
     out.push({
       k: `h-${family}`,
       type: 'head',
       family,
-      done: list.filter((b) => isEarned(b, stats)).length,
+      done: list.filter((b) => isStruck(b, stats, held)).length,
       total: list.length,
     });
     for (let i = 0; i < list.length; i += 3) {
@@ -75,14 +78,15 @@ function buildBadgeRows(stats: ProgressStats): BadgeRow[] {
 
 /** One medal in the case: the mark, its name, and — if locked — how far off. */
 function BadgeCell({
-  badge, stats, width, onPress,
+  badge, stats, held, width, onPress,
 }: {
   badge: BadgeDef;
   stats: ProgressStats;
+  held: readonly string[];
   width: number;
   onPress: () => void;
 }) {
-  const earned = isEarned(badge, stats);
+  const earned = isStruck(badge, stats, held);
   const pct = badgeProgress(badge, stats);
   return (
     <Pressable onPress={onPress} style={[styles.cell, { width }]} hitSlop={4}>
@@ -109,13 +113,14 @@ function BadgeCell({
 
 /** A single badge, treated as a page — the same move the ranks tab makes. */
 function BadgeDetail({
-  badge, stats, onBack,
+  badge, stats, held, onBack,
 }: {
   badge: BadgeDef;
   stats: ProgressStats;
+  held: readonly string[];
   onBack: () => void;
 }) {
-  const earned = isEarned(badge, stats);
+  const earned = isStruck(badge, stats, held);
   return (
     <View style={styles.detailInner}>
       <Pressable onPress={onBack} hitSlop={10} style={styles.detailBack}>
@@ -174,6 +179,8 @@ export default function RanksBadgesSheet() {
   const xp = useUserDataStore((s) => s.totalXP);
   const rankIndex = useUserDataStore((s) => s.rankIndex);
   const activeDays = useUserDataStore((s) => s.activeDays);
+  const subjectDays = useUserDataStore((s) => s.subjectDays);
+  const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const xpEvents = useUserDataStore((s) => s.xpEvents);
   // The sheet only exists while it is open, so mounting IS coming into view —
   // no focus plumbing needed here, unlike the Profile tab which stays mounted.
@@ -204,21 +211,22 @@ export default function RanksBadgesSheet() {
   const stats: ProgressStats = useMemo(
     () => progressStats({
       lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP,
-      activeDays, rankIndex,
+      activeDays, rankIndex, subjectDays,
     }),
     [lessonsByBranch, lessonsByUnit, savedQuotes, philosopherViews, quizScores, streak, totalXP,
-      activeDays, rankIndex],
+      activeDays, rankIndex, subjectDays],
   );
 
   // Rows for the badge grid: a header per family, then its medals three across.
   // A FlatList, not a ScrollView — fifty medals is a hundred SVG views, and this
   // app has already paid once for building every row before it would scroll.
-  const badgeRows = useMemo(() => buildBadgeRows(stats), [stats]);
+  const badgeRows = useMemo(() => buildBadgeRows(stats, earnedBadges), [stats, earnedBadges]);
+  const inCaseCount = useMemo(() => caseOf(earnedBadges).length, [earnedBadges]);
 
   if (!visible) return null;
 
   const { current, index } = awardedRank(rankIndex, totalXP);
-  const earnedCount = BADGES.filter((b) => isEarned(b, stats)).length;
+  const earnedCount = caseOf(earnedBadges).filter((b) => isStruck(b, stats, earnedBadges)).length;
   const badgeW = (width - 32 - 2 * BADGE_GAP) / 3;
 
   return (
@@ -254,7 +262,7 @@ export default function RanksBadgesSheet() {
                   <Text style={[styles.tabText, tab === 'ranks' && styles.tabTextOn]}>Ascent</Text>
                 </Pressable>
                 <Pressable onPress={() => setTab('badges')} style={[styles.tab, tab === 'badges' && styles.tabOn]}>
-                  <Text style={[styles.tabText, tab === 'badges' && styles.tabTextOn]}>Badges ({BADGES.length})</Text>
+                  <Text style={[styles.tabText, tab === 'badges' && styles.tabTextOn]}>Badges ({inCaseCount})</Text>
                 </Pressable>
               </View>
 
@@ -357,12 +365,12 @@ export default function RanksBadgesSheet() {
                   <View style={styles.caseHead}>
                     <Text style={styles.caseCount}>
                       {earnedCount}
-                      <Text style={styles.caseOf}> / {BADGES.length}</Text>
+                      <Text style={styles.caseOf}> / {inCaseCount}</Text>
                     </Text>
                     <View style={styles.caseBarWrap}>
                       <Text style={styles.caseLabel}>STRUCK</Text>
                       <View style={styles.caseTrack}>
-                        <View style={[styles.caseFill, { width: `${(earnedCount / BADGES.length) * 100}%` }]} />
+                        <View style={[styles.caseFill, { width: `${(earnedCount / Math.max(1, inCaseCount)) * 100}%` }]} />
                       </View>
                     </View>
                   </View>
@@ -389,6 +397,7 @@ export default function RanksBadgesSheet() {
                               key={b.id}
                               badge={b}
                               stats={stats}
+                              held={earnedBadges}
                               width={badgeW}
                               onPress={() => setSelectedBadge(b)}
                             />
@@ -429,7 +438,7 @@ export default function RanksBadgesSheet() {
                   transition={{ type: 'timing', duration: 240 }}
                   style={styles.detail}
                 >
-                  <BadgeDetail badge={selectedBadge} stats={stats} onBack={() => setSelectedBadge(null)} />
+                  <BadgeDetail badge={selectedBadge} stats={stats} held={earnedBadges} onBack={() => setSelectedBadge(null)} />
                 </MotiView>
               )}
             </AnimatePresence>

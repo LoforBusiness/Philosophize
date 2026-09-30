@@ -61,6 +61,25 @@ const FROZEN = [
   'lotus-bloom', 'deep-well', 'the-first-whole', 'three-whole', 'the-whole-tree',
   'moonrise', 'the-ages', 'order-bronze', 'order-jade', 'order-lapis',
   'order-crimson', 'order-amethyst', 'order-aurum',
+  // 2026-09-30: the SUBJECTS family, appended — ids nobody held, so no migration.
+  'second-subject', 'four-subjects', 'all-seven', 'the-grand-tour',
+];
+
+// ─── 1b. the retired roll ────────────────────────────────────────────────────
+// On 2026-09-30 every subject became one road, and the Thinkers tab, saved quotes and
+// philosophy's six branches were gone. These thirty-seven can no longer be earned, so
+// they are RETIRED: still in the roll (the ids are frozen), never awarded again, and
+// shown only to a reader who holds one. Un-retiring one is a decision, so the list is
+// written down here rather than read back out of the file it checks.
+const RETIRED = [
+  'oval-seeker', 'crowned-star', 'circle-of-stars', 'crossed-paths', 'the-colosseum',
+  'the-lens', 'the-infinite', 'moonrise', 'the-ages',
+  'half-circle', 'open-page', 'the-vessel', 'flourish', 'the-amphora', 'the-vessel-ii',
+  'the-rings', 'facets', 'mandala', 'compass-rose',
+  'balance', 'delta-rise', 'dottarget-forty', 'target-hundred', 'the-anvil',
+  'crossroads', 'the-arch', 'the-fountain', 'peak-climber', 'marble-pillar',
+  'the-obelisk-ii', 'the-keystone', 'tender-heart', 'lotus-bloom', 'deep-well',
+  'the-first-whole', 'three-whole', 'the-whole-tree',
 ];
 
 const src = fs.readFileSync(path.join(ROOT, 'data/badges.ts'), 'utf8');
@@ -78,6 +97,65 @@ if (missing.length) errs.push(`badge ids dropped (they are persisted + cloud-syn
 if (invented.length) errs.push(`badge ids invented without a migration: ${invented.join(', ')}`);
 if (dupes.length) errs.push(`duplicate badge ids: ${[...new Set(dupes)].join(', ')}`);
 if (ids.length !== FROZEN.length) errs.push(`expected ${FROZEN.length} badges, found ${ids.length}`);
+
+{
+  const roll = src.slice(src.indexOf('export const BADGES'));
+  const entries = roll.split(/\n  \{\n/).slice(1);
+  const flagged = entries.filter((e) => /\n    retired: true,/.test(e)).map((e) => (e.match(/id: '([^']+)'/) || [])[1]);
+  const gone = RETIRED.filter((id) => !flagged.includes(id));
+  const extra = flagged.filter((id) => !RETIRED.includes(id));
+  if (gone.length) errs.push(`retired in the written roll but not flagged: ${gone.join(', ')}`);
+  if (extra.length) errs.push(`flagged retired but not in the written roll: ${extra.join(', ')}`);
+  const subjects = entries.filter((e) => /family: 'subjects'/.test(e));
+  if (subjects.some((e) => /retired: true/.test(e))) errs.push('a SUBJECTS badge is retired — that family is the one the roads can award');
+  if (subjects.length < 4) errs.push(`the SUBJECTS family has ${subjects.length} badges, expected at least 4`);
+  console.log(`${flagged.length} retired (shown only to holders), ${ids.length - flagged.length} live, ${subjects.length} in SUBJECTS.\n`);
+}
+
+// The retired badge is never awarded and never "up next" — held in the code that
+// awards and suggests, not left to whoever reads the flag next.
+{
+  const store = fs.readFileSync(path.join(ROOT, 'stores/userDataStore.ts'), 'utf8');
+  const awards = (store.match(/BADGES\.filter\(\(b\) => [^)]*\)/g) || []);
+  if (!awards.length || awards.some((a) => !a.includes('!b.retired'))) errs.push('stores/userDataStore.ts can award a badge without asking whether it is retired');
+  const profile = fs.readFileSync(path.join(ROOT, 'app/(app)/profile/index.tsx'), 'utf8');
+  if (!/upNext = BADGES\.filter\(\(b\) => !b\.retired/.test(profile)) errs.push('Profile can offer a retired badge as "up next"');
+  const sheet = fs.readFileSync(path.join(ROOT, 'components/shared/RanksBadgesSheet.tsx'), 'utf8');
+  if (/BADGES\.length/.test(sheet) || !/caseOf\(/.test(sheet)) errs.push('the badge case counts the whole roll, retired badges included — count caseOf(held)');
+}
+
+// ─── 1c. seven subjects in a week, run rather than read ─────────────────────
+{
+  const tsm = (await import('typescript')).default;
+  const brSrc = fs.readFileSync(path.join(ROOT, 'lib/utils/subjectBreadth.ts'), 'utf8');
+  if (/^import /m.test(brSrc)) errs.push('lib/utils/subjectBreadth.ts must keep zero imports so it can be run here');
+  const B = {};
+  new Function('exports', tsm.transpileModule(brSrc, {
+    compilerOptions: { module: tsm.ModuleKind.CommonJS, target: tsm.ScriptTarget.ES2020 },
+  }).outputText)(B);
+  const seven = (start) => Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((k, i) => {
+    const d = new Date(Date.UTC(2026, 8, start + i));
+    return [k, d.toISOString().slice(0, 10)];
+  }));
+  const cases = [
+    ['nothing yet', {}, 0],
+    ['seven days in a row', seven(24), 7],
+    ['all on one day', Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((k) => [k, '2026-09-30'])), 7],
+    ['the first falls eight days before the last', { ...seven(24), a: '2026-09-22' }, 6],
+    // the edge: seven days apart is EIGHT days of reading, one more than a week
+    ['the first falls seven days before the last', { ...seven(24), a: '2026-09-23' }, 6],
+    ['across a month end', { a: '2026-09-28', b: '2026-10-04' }, 2],
+    ['a malformed day is ignored', { a: '2026-09-30', b: 'yesterday' }, 1],
+  ];
+  for (const [label, days, want] of cases) {
+    const got = B.subjectsInWeek(days);
+    if (got !== want) errs.push(`subjectsInWeek, ${label}: ${got}, expected ${want}`);
+  }
+  const merged = B.mergeSubjectDays({ a: '2026-09-20', b: '2026-09-29' }, { a: '2026-09-25', c: '2026-09-01' });
+  if (JSON.stringify(merged) !== JSON.stringify({ a: '2026-09-25', b: '2026-09-29', c: '2026-09-01' })) {
+    errs.push(`mergeSubjectDays does not keep the later day per subject: ${JSON.stringify(merged)}`);
+  }
+}
 
 // Every glyph must exist, and no two badges may share a mark — the badges are
 // meant to be fifty distinct objects.
@@ -116,7 +194,7 @@ new Function('exports', ts.transpileModule(insSrc, {
 }).outputText)(I);
 const tonesFor = (tier) => A.tonesOf(I.ORDER[I.TIER_ORDER[tier - 1]]);
 
-const FAMILIES = ['lessons', 'streak', 'thinkers', 'quotes', 'xp', 'mastery'];
+const FAMILIES = ['lessons', 'subjects', 'streak', 'thinkers', 'quotes', 'xp', 'mastery'];
 
 console.log('mark clearance inside the recessed face, in units of the 100-box:\n');
 console.log('  family      alone   dressed');

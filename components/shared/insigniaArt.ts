@@ -252,6 +252,24 @@ export function stele(w: number, top: number, bot: number, cx = 50): Pt[] {
   return out;
 }
 
+/**
+ * A heraldic LOZENGE with its sides let out: a superellipse |x/rx|^p + |y/ry|^p = 1.
+ * At p = 1 it is a true diamond, and a square mark's corners run into its sides; a
+ * little above 1 the sides fill out while it still stands on a point.
+ */
+export function lozenge(ry: number, rx: number, p: number, cx = 50, cy = 50, n = 64): Pt[] {
+  const out: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const c = Math.cos(a), sn = Math.sin(a);
+    out.push([
+      cx + rx * Math.sign(c) * Math.pow(Math.abs(c), 2 / p),
+      cy + ry * Math.sign(sn) * Math.pow(Math.abs(sn), 2 / p),
+    ]);
+  }
+  return out;
+}
+
 /** A swallow-tailed flag. */
 export function pennant(w: number, top: number, bot: number, notch: number, cx = 50): Pt[] {
   const x0 = cx - w / 2, x1 = cx + w / 2;
@@ -709,11 +727,13 @@ export function rankArt(orderIndex: number, degree: number, t: Tones): RankArt {
 //   IV   + the laurel grown, and three stars over the crown
 //   V    + a fanned glory of light behind everything, and two glints
 
-export type Family = 'lessons' | 'streak' | 'thinkers' | 'quotes' | 'xp' | 'mastery';
+export type Family = 'lessons' | 'subjects' | 'streak' | 'thinkers' | 'quotes' | 'xp' | 'mastery';
 
 /** Each family's medal, at full size, centred on (50, 50). */
 export const FAMILY_SHAPES: Record<Family, () => Pt[]> = {
   lessons: () => stele(69, 6, 92),
+  // a heraldic LOZENGE — the one silhouette in the case that stands on a point
+  subjects: () => lozenge(45, 46, 1.45),
   streak: () => pennant(64, 6, 94, 17),
   thinkers: () => circle(43),
   quotes: () => exlibris(74, 9, 91, 13),
@@ -725,6 +745,7 @@ export const FAMILY_SHAPES: Record<Family, () => Pt[]> = {
 export const FAMILY_MARK: Record<Family, { size: number; dy: number }> = {
   // the stele is the narrowest face once dressed, so its mark is the smallest
   lessons: { size: 0.36, dy: 5 },
+  subjects: { size: 0.36, dy: 0 },
   streak: { size: 0.38, dy: -4 },
   thinkers: { size: 0.42, dy: 0 },
   quotes: { size: 0.41, dy: -1 },

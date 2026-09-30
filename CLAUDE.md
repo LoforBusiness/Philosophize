@@ -195,7 +195,7 @@ Philosophize/
 │   ├── ranks.ts                 # 40 ranks in 8 orders of 5; rankForXP(),
 │   │                            #   awardedRank(), rankOrder(), rankDegree()
 │   ├── rankLore.ts              # the 8 Circles + a one-line epithet per rank
-│   └── badges.ts                # 70 badges, 5 tiers + goal(stats)/need pairs
+│   └── badges.ts                # 74 on the roll (37 live, 37 retired), 5 tiers
 ├── stores/                      # Zustand: lessonStore, uiStore, subscriptionStore,
 │                                #   userDataStore (persisted + cloud-synced)
 ├── lib/
@@ -806,7 +806,8 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 **Stars:** 100% score = 3 stars. ≥70% = 2 stars. Any completion = 1 star.
 
 **Progression systems (live):**
-- **Badges** — **70** in `data/badges.ts`, each `{ id, name, glyph, family, tier,
+- **Badges** — **74** on the roll in `data/badges.ts` (37 live, 37 retired on
+  2026-09-30 — see §23), each `{ id, name, glyph, family, tier,
   goal(stats), need }`; evaluated by `recomputeBadges()` and shown in
   `RanksBadgesSheet`. **Five tiers**, struck in four of the rank orders plus gold
   (`constants/insignia.ts`), so both reward ladders speak one language — **and
@@ -1316,7 +1317,7 @@ they belong to, so the rule book has them and this file did not:
   > from that rule now: two undressed lessons running do not read as a repeated
   > costume, they read as the mascot, and the fallback had been emitting them all
   > along whenever nothing fitted.
-- **Gamification:** 70 badges in 5 tiers, **48 ranks in 8 coloured orders, each
+- **Gamification:** 37 live badges in 5 tiers (74 on the roll), **48 ranks in 8 coloured orders, each
   order struck in a better material and six worked shapes cycling inside every
   one of them** (§7), a conferred-rank ceremony that shows
   the pin they held handing over to the pin they just earned, a three-badge
@@ -8295,9 +8296,19 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   `check-review` (a review per unit), `check-echo` and `check-ui` (colour sets) the
   retired six by name. A reader's progress in them is KEPT and COUNTED —
   `branchCountsFromUnits` runs over live and retired branches alike — so totals, badges
-  and the cloud snapshot lose nothing; it is simply not shown. **The badges still count
-  the six retired branches** (`branchMastery`), and what they should count on the new
-  roads is an open decision for the owner.
+  and the cloud snapshot lose nothing; it is simply not shown.
+- **Thirty-seven badges are RETIRED, and a SUBJECTS family replaces them** (owner's pick,
+  2026-09-30). Everything the app can no longer award — thinkers met and eras, quotes
+  kept, quizzes aced, and every branch/unit mastery badge — carries `retired: true`:
+  still on the frozen roll, never awarded again (`recomputeBadges` and the reward
+  preview both skip it), never "up next", and in the case ONLY for a reader who holds it
+  (`caseOf(held)`, `isStruck`). Lessons, streak, XP and the six rank-circle badges
+  stay. SUBJECTS is a lozenge (`lozenge()` in insigniaArt.ts): A Second Subject, Four
+  Subjects, All Seven, and The Grand Tour — seven subjects inside seven days, read off
+  `subjectDays` (the last day per subject, persisted and cloud-merged to the later day)
+  by the zero-import `lib/utils/subjectBreadth.ts`. A retired philosophy branch counts
+  as philosophy. `validate-badges` holds the retired roll as a written list and RUNS
+  the week arithmetic, including the seven-days-apart edge.
 - **Seven live road colours, found as a set** (`constants/design.ts`,
   `scratchpad/roadhues2.mjs`): each the nearest colour to its subject's hue passing every
   branch floor, with the pairwise floors held over the LIVE seven; the retired six are
@@ -8312,7 +8323,9 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   ladder and two balls (What Is Science?) and a broken shop window (What Is History?).
   Each uses three of the four cast members, the top hat teaching in all six. Voiced
   through the ledger for 5,089 characters (342,243 of 900,000 for September after it).
-- **Still philosophy-only, and flagged for the owner**: the seated welcome says "So… you
-  want to learn philosophy?", and the onboarding questions steer to a philosophy branch
-  (`startingBranch`, now ignored by Quick Start because no live road matches).
+- **The welcome speaks to all seven** (2026-09-30): the host's first line was re-recorded
+  alone as "So… you want to learn something new?", and the three onboarding questions
+  now weigh the seven SUBJECTS — `startingBranch` is a road slug again, so Quick Start
+  can use it. Every subject wins at least one of the 64 answer combinations. Readers
+  who already answered are not asked again (`ONBOARDING_VERSION` stays 1).
 

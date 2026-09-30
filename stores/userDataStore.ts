@@ -5,6 +5,7 @@ import { BADGES, isEarned, type BadgeDef, type ProgressStats } from '@/data/badg
 import { eraGroupOfId } from '@/data/philosophers';
 import {
   ALL_BRANCHES,
+  LEGACY_BRANCHES,
   getLessonUnitInfo,
   branchCountsFromUnits,
   unitsFromBranchCounts,
@@ -17,7 +18,9 @@ import {
 } from '@/constants/xp';
 import { restCap, restDaysHeld, restEarnEvery } from '@/constants/streak';
 import { mentionsFor } from '@/data/lessonMentions';
-import { restDaysToSpend } from '@/lib/utils/streak';
+import { restDaysToSpend, todayKey } from '@/lib/utils/streak';
+import { subjectsInWeek } from '@/lib/utils/subjectBreadth';
+import { subjectOfBranch } from '@/data/subjects';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
 import { branchMastery } from '@/lib/utils/branchMastery';
@@ -383,6 +386,15 @@ interface UserDataState {
   joinedAt: number | null;                    // epoch ms of first app open
   earnedBadges: string[];
   /**
+   * The LAST day ('YYYY-MM-DD') a lesson was finished in each subject, keyed by the
+   * subject's slug — the SUBJECTS badges' "seven subjects in a week" reads it. A map
+   * of last days rather than a log, because a badge is only awarded at the moment a
+   * lesson lands, and at that moment the last days are all it needs. Merged per key
+   * to the later day in the cloud. Added 2026-09-30, so it starts empty for everybody,
+   * which is fine for a family whose roads opened the same day.
+   */
+  subjectDays: Record<string, string>;
+  /**
    * Unit ids whose REVIEW has been finished (data/unitReviews.ts).
    *
    * A list rather than a count, for the same reason `earnedBadges` is one: the cloud
@@ -641,6 +653,8 @@ export interface StatSource {
   // already playing.
   activeDays: string[];
   rankIndex: number;
+  /** Optional so an older caller still compiles; absent reads as no subject yet. */
+  subjectDays?: Record<string, string>;
 }
 
 /**
@@ -655,6 +669,24 @@ export interface StatSource {
 /** How many badges a reader may pin to their profile. Three fits the strip
  *  beside the rank pin at every phone width without the row wrapping. */
 export const SHOWCASE_MAX = 3;
+
+/** The subject a branch belongs to; a retired philosophy branch is philosophy. */
+export function subjectKeyOf(branchSlug: string): string | null {
+  const live = subjectOfBranch(branchSlug);
+  if (live) return live.slug;
+  return LEGACY_BRANCHES.some((b) => b.slug === branchSlug) ? 'philosophy' : null;
+}
+
+/** subjectDays with today's lesson written in — the store's write and the preview's. */
+export function withSubjectDay(
+  days: Record<string, string> | undefined,
+  lessonId: string,
+  today: string,
+): Record<string, string> {
+  const info = getLessonUnitInfo(lessonId);
+  const subject = info ? subjectKeyOf(info.branchSlug) : null;
+  return subject ? { ...(days ?? {}), [subject]: today } : { ...(days ?? {}) };
+}
 
 export function progressStats(s: StatSource): ProgressStats {
   const lessons = Object.values(s.lessonsByBranch).reduce((a, b) => a + b, 0);
@@ -707,7 +739,18 @@ export function progressStats(s: StatSource): ProgressStats {
   const authors = new Set<string>();
   for (const q of s.savedQuotes) if (q.philosopherId) authors.add(q.philosopherId);
 
+  // SUBJECTS walked into: a road with a lesson finished. Philosophy's retired six
+  // branches count as philosophy, so a reader who read there has started it.
+  const subjects = new Set<string>();
+  for (const [slug, n] of Object.entries(s.lessonsByBranch)) {
+    if (!(n > 0)) continue;
+    const subject = subjectKeyOf(slug);
+    if (subject) subjects.add(subject);
+  }
+
   return {
+    subjectsStarted: subjects.size,
+    subjectsInWeek: subjectsInWeek(s.subjectDays),
     totalXP, lessons, quotes, philosophers, streak: s.streak, mastery,
     quizAces, eras: eras.size, quoteBranches: quoteBranches.size,
     branchesTouched, branchesHalf, unitsComplete,
@@ -752,8 +795,9 @@ export function previewNewBadges(
     totalXP: s.totalXP + xpEarned,
     activeDays: s.activeDays,
     rankIndex: s.rankIndex,
+    subjectDays: withSubjectDay(s.subjectDays, lessonId, todayKey()),
   });
-  return BADGES.filter((b) => isEarned(b, after) && !s.earnedBadges.includes(b.id));
+  return BADGES.filter((b) => !b.retired && isEarned(b, after) && !s.earnedBadges.includes(b.id));
 }
 
 export const useUserDataStore = create<UserDataState>()(
@@ -789,6 +833,7 @@ export const useUserDataStore = create<UserDataState>()(
       installReported: false,
       joinedAt: null,
       earnedBadges: [],
+      subjectDays: {},
       unitsReviewed: [],
       showcaseBadges: [],
       badgesInitialized: false,
@@ -962,6 +1007,7 @@ export const useUserDataStore = create<UserDataState>()(
             // Keep the per-branch mirror consistent with the per-unit source.
             lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
             philosopherLessons,
+            subjectDays: withSubjectDay(state.subjectDays, lessonId, todayKey()),
             totalXP: state.totalXP + xpEarned,
             xpEvents: stampEvent(state.xpEvents, state.totalXP + xpEarned),
           };
@@ -1056,7 +1102,8 @@ export const useUserDataStore = create<UserDataState>()(
       recomputeBadges: () => {
         const state = get();
         const stats = progressStats(state);
-        const now = BADGES.filter((b) => isEarned(b, stats)).map((b) => b.id);
+        // A RETIRED badge is never awarded again — only kept by whoever holds it.
+        const now = BADGES.filter((b) => !b.retired && isEarned(b, stats)).map((b) => b.id);
         // Only emit for badges earned through real progress — never the one-time
         // backfill that runs on first hydrate (badgesInitialized still false).
         const newlyEarned = state.badgesInitialized
@@ -1164,6 +1211,7 @@ export const useUserDataStore = create<UserDataState>()(
           installReported: true,
           joinedAt: null,
           earnedBadges: [],
+          subjectDays: {},
           unitsReviewed: [],
           badgesInitialized: true,
           seenProfessorIntro: false,
@@ -1225,6 +1273,7 @@ export const useUserDataStore = create<UserDataState>()(
           installReported: true,
           joinedAt: null,
           earnedBadges: [],
+          subjectDays: {},
           badgesInitialized: true,
           seenProfessorIntro: false,
           displayName: 'Philosopher',
@@ -1298,6 +1347,7 @@ export const useUserDataStore = create<UserDataState>()(
         installReported: state.installReported,
         joinedAt: state.joinedAt,
         earnedBadges: state.earnedBadges,
+        subjectDays: state.subjectDays,
         unitsReviewed: state.unitsReviewed,
         showcaseBadges: state.showcaseBadges,
         badgesInitialized: state.badgesInitialized,
@@ -1397,6 +1447,7 @@ export const useUserDataStore = create<UserDataState>()(
           ...p,
           activeDays,
           restDays: p.restDays ?? [],
+          subjectDays: p.subjectDays ?? {},
           lessonsByUnit,
           lessonsByBranch,
           totalXP,

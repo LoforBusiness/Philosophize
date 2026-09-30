@@ -707,7 +707,7 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
     const t = A.tonesOf(I.ORDER[I.ORDERS[o]]);
     for (let d = 0; d < 6; d++) scan(A.rankArt(o, d, t).nodes, `rank ${o}/${d}`);
   }
-  for (const f of ['lessons', 'streak', 'thinkers', 'quotes', 'xp', 'mastery']) {
+  for (const f of ['lessons', 'subjects', 'streak', 'thinkers', 'quotes', 'xp', 'mastery']) {
     for (let tier = 1; tier <= 5; tier++) {
       const a = A.badgeArt(f, tier, A.tonesOf(I.ORDER[I.TIER_ORDER[tier - 1]]));
       scan([...a.back, ...a.front], `badge ${f}/${tier}`);

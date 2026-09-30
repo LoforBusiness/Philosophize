@@ -28,7 +28,7 @@ import type { GlyphName } from '@/components/shared/Glyph';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Which SHAPE the medal is struck in. Six families, six silhouettes. */
-export type BadgeFamily = 'lessons' | 'streak' | 'thinkers' | 'quotes' | 'xp' | 'mastery';
+export type BadgeFamily = 'lessons' | 'subjects' | 'streak' | 'thinkers' | 'quotes' | 'xp' | 'mastery';
 
 /**
  * WHAT THE MEDAL IS STRUCK IN — five tiers, iron → bronze → jade → crimson →
@@ -72,6 +72,16 @@ export interface ProgressStats {
   daysPractised: number;
   quoteAuthors: number;      // distinct thinkers represented in saved quotes
   rank: number;              // the rank INDEX held (0-based), for the order badges
+  // ── added 2026-09-30, when every subject became one road ────────────────
+  /** Subjects with at least one lesson finished (0–7). Philosophy counts its retired branches. */
+  subjectsStarted: number;
+  /**
+   * The most subjects finished inside any seven days. Read off each subject's LAST
+   * day (`subjectDays` in the store), so it is the subjects whose last lesson falls
+   * within six days of the latest one — which is what it is at the moment a lesson
+   * lands, and that is the only moment a badge is awarded.
+   */
+  subjectsInWeek: number;
 }
 
 export interface BadgeDef {
@@ -89,9 +99,28 @@ export interface BadgeDef {
   need: number;
   /** Plural noun for the progress line: "8 / 12 thinkers". '%' renders bare. */
   unit: string;
+  /**
+   * RETIRED: the app can no longer award it (2026-09-30 — the Thinkers tab, saved
+   * quotes and philosophy's six branches are gone). It stays in the roll because the
+   * id is frozen and a reader who earned it keeps it, and it is shown ONLY to them.
+   */
+  retired?: true;
 }
 
 export const isEarned = (b: BadgeDef, s: ProgressStats) => b.goal(s) >= b.need;
+
+/**
+ * Is this badge in the reader's case at all? Every live badge is; a retired one only
+ * for somebody who holds it. `held` is the store's earnedBadges.
+ */
+export const inCase = (b: BadgeDef, held: readonly string[]) => !b.retired || held.includes(b.id);
+
+/** Struck in the case: earned by the numbers, or — for a retired badge — held. */
+export const isStruck = (b: BadgeDef, s: ProgressStats, held: readonly string[]) =>
+  b.retired ? held.includes(b.id) : isEarned(b, s);
+
+/** The badges a reader's case shows, in roll order. */
+export const caseOf = (held: readonly string[]) => BADGES.filter((b) => inCase(b, held));
 
 /** 0..1, for the bar under a locked badge. */
 export const badgeProgress = (b: BadgeDef, s: ProgressStats) =>
@@ -112,6 +141,7 @@ export function badgeCriterion(b: BadgeDef) {
 
 export const FAMILY_LABEL: Record<BadgeFamily, string> = {
   lessons: 'LESSONS FINISHED',
+  subjects: 'SUBJECTS',
   // Not 'DAYS RUNNING' any more: this family now holds both the consecutive-day
   // badges and the total-days-turned-up ones, and a header that promises a
   // streak over a badge earned by NOT needing one is a small lie in a big font.
@@ -123,8 +153,10 @@ export const FAMILY_LABEL: Record<BadgeFamily, string> = {
 };
 
 /** Display order of the families in the grid. */
+// SUBJECTS sits second because it is what the one-road app is FOR. The two retired
+// families come last and only ever appear for a reader who holds one of them.
 export const FAMILY_ORDER: BadgeFamily[] = [
-  'lessons', 'streak', 'thinkers', 'quotes', 'mastery', 'xp',
+  'lessons', 'subjects', 'streak', 'mastery', 'xp', 'thinkers', 'quotes',
 ];
 
 const mastery = (slug: string) => (s: ProgressStats) => s.mastery[slug] ?? 0;
@@ -287,42 +319,49 @@ export const BADGES: BadgeDef[] = [
     caption: 'You have met somebody.',
     glyph: 'bust', family: 'thinkers', tier: 1,
     goal: (s) => s.philosophers, need: 5, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'crowned-star', name: 'A Small Circle',
     caption: 'Twenty names you would now recognise.',
     glyph: 'star', family: 'thinkers', tier: 2,
     goal: (s) => s.philosophers, need: 20, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'circle-of-stars', name: 'The Symposium',
     caption: 'Fifty guests, and the conversation is still going.',
     glyph: 'ring', family: 'thinkers', tier: 3,
     goal: (s) => s.philosophers, need: 50, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'crossed-paths', name: 'The Academy Roll',
     caption: 'A hundred thinkers opened, one at a time.',
     glyph: 'chain', family: 'thinkers', tier: 4,
     goal: (s) => s.philosophers, need: 100, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'the-colosseum', name: 'The Great Hall',
     caption: 'Half of everyone in here.',
     glyph: 'dome', family: 'thinkers', tier: 4,
     goal: (s) => s.philosophers, need: 175, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'the-lens', name: 'Two Hundred and Fifty',
     caption: 'At this point the gaps are the interesting part.',
     glyph: 'orbit', family: 'thinkers', tier: 5,
     goal: (s) => s.philosophers, need: 250, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'the-infinite', name: 'Every Voice',
     caption: 'All three hundred and twenty-two of them.',
     glyph: 'infinity', family: 'thinkers', tier: 5,
     goal: (s) => s.philosophers, need: 322, unit: 'thinkers',
+    retired: true,
   },
 
   // ── QUOTES KEPT · the folio ─────────────────────────────────────────────────
@@ -331,36 +370,42 @@ export const BADGES: BadgeDef[] = [
     caption: 'A commonplace book starts with one line.',
     glyph: 'page', family: 'quotes', tier: 1,
     goal: (s) => s.quotes, need: 3, unit: 'quotes',
+    retired: true,
   },
   {
     id: 'open-page', name: 'The Florilegium',
     caption: 'Medieval readers called a gathering of quotations a bouquet.',
     glyph: 'flower', family: 'quotes', tier: 2,
     goal: (s) => s.quotes, need: 10, unit: 'quotes',
+    retired: true,
   },
   {
     id: 'the-vessel', name: 'The Commonplace Book',
     caption: 'Twenty-five lines worth carrying around.',
     glyph: 'amphora', family: 'quotes', tier: 3,
     goal: (s) => s.quotes, need: 25, unit: 'quotes',
+    retired: true,
   },
   {
     id: 'flourish', name: 'The Anthology',
     caption: 'Fifty. Enough to notice what you keep choosing.',
     glyph: 'quill', family: 'quotes', tier: 4,
     goal: (s) => s.quotes, need: 50, unit: 'quotes',
+    retired: true,
   },
   {
     id: 'the-amphora', name: 'The Full Cellar',
     caption: 'Eighty-five kept lines.',
     glyph: 'harp', family: 'quotes', tier: 5,
     goal: (s) => s.quotes, need: 85, unit: 'quotes',
+    retired: true,
   },
   {
     id: 'the-vessel-ii', name: 'Every Line Worth Keeping',
     caption: 'Every saveable quote in the app is in your collection.',
     glyph: 'book', family: 'quotes', tier: 5,
     goal: (s) => s.quotes, need: 132, unit: 'quotes',
+    retired: true,
   },
 
   // ── VOICES KEPT · distinct thinkers in the collection ───────────────────────
@@ -369,18 +414,21 @@ export const BADGES: BadgeDef[] = [
     caption: 'Ten different thinkers, not ten lines from the same one.',
     glyph: 'knot', family: 'quotes', tier: 2,
     goal: (s) => s.quoteAuthors, need: 10, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'facets', name: 'Forty Voices',
     caption: 'A collection with an argument in it.',
     glyph: 'prism', family: 'quotes', tier: 4,
     goal: (s) => s.quoteAuthors, need: 40, unit: 'thinkers',
+    retired: true,
   },
   {
     id: 'mandala', name: 'Ninety Voices',
     caption: 'Nobody assembles this by accident.',
     glyph: 'maze', family: 'quotes', tier: 5,
     goal: (s) => s.quoteAuthors, need: 90, unit: 'thinkers',
+    retired: true,
   },
 
   // ── THE COLLECTION’S REACH ──────────────────────────────────────────────────
@@ -389,6 +437,7 @@ export const BADGES: BadgeDef[] = [
     caption: 'A saved line from every branch of the tree.',
     glyph: 'wheel', family: 'quotes', tier: 3,
     goal: (s) => s.quoteBranches, need: 6, unit: 'branches',
+    retired: true,
   },
 
   // ── EXPERIENCE · the octagon ────────────────────────────────────────────────
@@ -459,30 +508,35 @@ export const BADGES: BadgeDef[] = [
     caption: 'Every question about one thinker, right.',
     glyph: 'scales', family: 'xp', tier: 1,
     goal: (s) => s.quizAces, need: 1, unit: 'quizzes',
+    retired: true,
   },
   {
     id: 'delta-rise', name: 'Ten Aced',
     caption: 'Ten thinkers you can be examined on.',
     glyph: 'pyramid', family: 'xp', tier: 2,
     goal: (s) => s.quizAces, need: 10, unit: 'quizzes',
+    retired: true,
   },
   {
     id: 'dottarget-forty', name: 'Forty Aced',
     caption: 'The quiz has stopped being a coin toss.',
     glyph: 'dottarget', family: 'xp', tier: 3,
     goal: (s) => s.quizAces, need: 40, unit: 'quizzes',
+    retired: true,
   },
   {
     id: 'target-hundred', name: 'A Hundred Aced',
     caption: 'A hundred perfect scores.',
     glyph: 'target', family: 'xp', tier: 4,
     goal: (s) => s.quizAces, need: 100, unit: 'quizzes',
+    retired: true,
   },
   {
     id: 'the-anvil', name: 'Two Hundred Aced',
     caption: 'Beaten out one at a time.',
     glyph: 'anvil', family: 'xp', tier: 5,
     goal: (s) => s.quizAces, need: 200, unit: 'quizzes',
+    retired: true,
   },
 
   // ── BRANCHES OPENED ─────────────────────────────────────────────────────────
@@ -491,12 +545,14 @@ export const BADGES: BadgeDef[] = [
     caption: 'You have looked down three of the six roads.',
     glyph: 'signpost', family: 'mastery', tier: 1,
     goal: (s) => s.branchesTouched, need: 3, unit: 'branches',
+    retired: true,
   },
   {
     id: 'the-arch', name: 'All Six Opened',
     caption: 'Every branch of the tree has been started.',
     glyph: 'bridge', family: 'mastery', tier: 2,
     goal: (s) => s.branchesTouched, need: 6, unit: 'branches',
+    retired: true,
   },
 
   // ── UNITS FINISHED ──────────────────────────────────────────────────────────
@@ -505,30 +561,35 @@ export const BADGES: BadgeDef[] = [
     caption: 'One unit, end to end.',
     glyph: 'fountain', family: 'mastery', tier: 1,
     goal: (s) => s.unitsComplete, need: 1, unit: 'units',
+    retired: true,
   },
   {
     id: 'peak-climber', name: 'Four Units',
     caption: 'Four finished end to end.',
     glyph: 'ladder', family: 'mastery', tier: 2,
     goal: (s) => s.unitsComplete, need: 4, unit: 'units',
+    retired: true,
   },
   {
     id: 'marble-pillar', name: 'Ten Units',
     caption: 'A third of the curriculum, finished properly.',
     glyph: 'obelisk', family: 'mastery', tier: 3,
     goal: (s) => s.unitsComplete, need: 10, unit: 'units',
+    retired: true,
   },
   {
     id: 'the-obelisk-ii', name: 'Eighteen Units',
     caption: 'Two thirds, and the hard ones are what is left.',
     glyph: 'sundial', family: 'mastery', tier: 4,
     goal: (s) => s.unitsComplete, need: 18, unit: 'units',
+    retired: true,
   },
   {
     id: 'the-keystone', name: 'Every Unit',
     caption: 'All twenty-eight, finished end to end.',
     glyph: 'cube', family: 'mastery', tier: 5,
     goal: (s) => s.unitsComplete, need: 28, unit: 'units',
+    retired: true,
   },
 
   // ── BRANCHES HALF DONE ──────────────────────────────────────────────────────
@@ -537,18 +598,21 @@ export const BADGES: BadgeDef[] = [
     caption: 'Halfway down a single road.',
     glyph: 'heart', family: 'mastery', tier: 2,
     goal: (s) => s.branchesHalf, need: 1, unit: 'branches',
+    retired: true,
   },
   {
     id: 'lotus-bloom', name: 'Half of Three',
     caption: 'Three subjects at the halfway mark.',
     glyph: 'lotus', family: 'mastery', tier: 3,
     goal: (s) => s.branchesHalf, need: 3, unit: 'branches',
+    retired: true,
   },
   {
     id: 'deep-well', name: 'Half of Everything',
     caption: 'All six branches at fifty percent or better.',
     glyph: 'drop', family: 'mastery', tier: 4,
     goal: (s) => s.branchesHalf, need: 6, unit: 'branches',
+    retired: true,
   },
 
   // ── BRANCHES COMPLETED ──────────────────────────────────────────────────────
@@ -557,18 +621,21 @@ export const BADGES: BadgeDef[] = [
     caption: 'A hundred percent of one subject.',
     glyph: 'wave', family: 'mastery', tier: 3,
     goal: (s) => s.branchesComplete, need: 1, unit: 'branches',
+    retired: true,
   },
   {
     id: 'three-whole', name: 'Three Branches Complete',
     caption: 'Half the tree, finished.',
     glyph: 'tree', family: 'mastery', tier: 4,
     goal: (s) => s.branchesComplete, need: 3, unit: 'branches',
+    retired: true,
   },
   {
     id: 'the-whole-tree', name: 'The Whole Tree',
     caption: 'Every branch at a hundred percent.',
     glyph: 'bell', family: 'mastery', tier: 5,
     goal: (s) => s.branchesComplete, need: 6, unit: 'branches',
+    retired: true,
   },
 
   // ── ERAS MET ────────────────────────────────────────────────────────────────
@@ -577,12 +644,14 @@ export const BADGES: BadgeDef[] = [
     caption: 'Thinkers from three different ages of the world.',
     glyph: 'spiral', family: 'thinkers', tier: 2,
     goal: (s) => s.eras, need: 3, unit: 'eras',
+    retired: true,
   },
   {
     id: 'the-ages', name: 'Every Era',
     caption: 'Ancient, medieval, modern, contemporary and eastern.',
     glyph: 'cap', family: 'thinkers', tier: 4,
     goal: (s) => s.eras, need: 5, unit: 'eras',
+    retired: true,
   },
 
   // ── THE ORDERS · what your own pin is struck in ─────────────────────────────
@@ -621,6 +690,35 @@ export const BADGES: BadgeDef[] = [
     caption: 'There is nothing above it. That is the point.',
     glyph: 'key', family: 'mastery', tier: 5,
     goal: (s) => s.rank + 1, need: 43, unit: 'ranks',
+  },
+
+  // ── SUBJECTS · the lozenge ──────────────────────────────────────────────────
+  // Added 2026-09-30, when every subject became one road. What the case can ask of
+  // a reader now is BREADTH — how many of the seven they have walked into, and all
+  // seven inside one week. Each one is a lesson finished, on a road that exists.
+  {
+    id: 'second-subject', name: 'A Second Subject',
+    caption: 'Curiosity does not stay in one room.',
+    glyph: 'flag', family: 'subjects', tier: 1,
+    goal: (s) => s.subjectsStarted, need: 2, unit: 'subjects',
+  },
+  {
+    id: 'four-subjects', name: 'Four Subjects',
+    caption: 'More than half the shelf, opened.',
+    glyph: 'scroll', family: 'subjects', tier: 2,
+    goal: (s) => s.subjectsStarted, need: 4, unit: 'subjects',
+  },
+  {
+    id: 'all-seven', name: 'All Seven',
+    caption: 'Every road on the map, walked at least once.',
+    glyph: 'owl', family: 'subjects', tier: 3,
+    goal: (s) => s.subjectsStarted, need: 7, unit: 'subjects',
+  },
+  {
+    id: 'the-grand-tour', name: 'The Grand Tour',
+    caption: 'A finishing tour of Europe, taken as seven subjects in a week.',
+    glyph: 'globe', family: 'subjects', tier: 4,
+    goal: (s) => s.subjectsInWeek, need: 7, unit: 'subjects in a week',
   },
 ];
 
