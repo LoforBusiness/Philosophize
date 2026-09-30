@@ -19,6 +19,7 @@ import {
 import { EMBER_INK } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 import type { ObjectName } from './objects';
+import type { Speaker } from './cast';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared kit for cinematic lessons — the parts that are identical across every
@@ -605,6 +606,18 @@ export interface BaseBeat {
    * safe: a beat whose camera already showed the rectangle is left exactly alone.
    */
   must?: readonly [x: number, y: number, w: number, h: number];
+  /**
+   * Who says this beat's line, in a DIALOGUE lesson (LESSON_RULES group AP). The
+   * player draws that speaker's face beside the words, and the line is rendered in
+   * the speaker's voice (cast.ts). Absent on every narrated lesson, which renders
+   * exactly as it did before dialogue lessons existed.
+   */
+  speaker?: Speaker;
+  /**
+   * The line as the VOICE should read it, when that differs from `text` only by
+   * pause markup (`[pause short]`, `[pause]`). The screen always shows `text`.
+   */
+  markup?: string;
   dur: number;
 }
 

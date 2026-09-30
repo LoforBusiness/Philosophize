@@ -144,7 +144,9 @@ function layoutOf(file) {
  * proved the measurement valid.
  */
 const PROSE_KEYS = ['text', 'cite', 'explain', 'prompt', 'reads', 'author', 'work', 'era', 'label',
-  'closing', 'title', 'chip', 'lo', 'hi', 'left', 'right', 'axis'];
+  'closing', 'title', 'chip', 'lo', 'hi', 'left', 'right', 'axis',
+  // A dialogue line's pause markup is what the VOICE reads; it never reaches the stage.
+  'markup'];
 
 function proselessScript(file) {
   const src = fs.readFileSync(file, 'utf8');

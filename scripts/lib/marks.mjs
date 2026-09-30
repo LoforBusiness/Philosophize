@@ -13,7 +13,7 @@ export const STAGE_W = 400;
 export const STYLES = ['ring', 'underline', 'bracket', 'box', 'arrowL', 'arrowR'];
 
 /** Keys a beat carries that are prose or structure rather than a channel the scene reads. */
-export const PROSE = new Set(['text', 'cite', 'say', 'quote', 'tap', 'mc', 'interact', 'summary', 'must', 'dur']);
+export const PROSE = new Set(['text', 'cite', 'say', 'quote', 'tap', 'mc', 'interact', 'summary', 'must', 'dur', 'speaker', 'markup']);
 
 /** Where a mark of `style` is drawn around a label box `[x, y, w, h]`. */
 export function markBox(style, [x, y, w, h]) {
