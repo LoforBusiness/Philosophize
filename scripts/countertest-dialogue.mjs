@@ -98,7 +98,13 @@ function build(mut = {}) {
   w(path.join(CIN, 'fixScene.tsx'), mut.scene ?? SCENE);
   w(path.join(CIN, 'oldScript.ts'), OLD_SCRIPT);
   w(path.join(CIN, 'oldScene.tsx'), 'export function OldLesson() { return null; }\n');
-  fs.copyFileSync(path.join(REPO, CIN, 'cast.ts'), path.join(root, CIN, 'cast.ts'));
+  // The cast and the wardrobe it names are the REAL ones, copied; `mut.cast` stages a
+  // defect in the copy (AP13/AP14), so the working tree is never edited.
+  const cast = fs.readFileSync(path.join(REPO, CIN, 'cast.ts'), 'utf8');
+  const staged = mut.cast ? mut.cast(cast) : cast;
+  if (mut.cast && staged === cast) throw new Error('a cast mutation changed nothing — the counter-test would prove nothing');
+  w(path.join(CIN, 'cast.ts'), staged);
+  fs.copyFileSync(path.join(REPO, CIN, 'wardrobe.ts'), path.join(root, CIN, 'wardrobe.ts'));
   for (const t of TABLES) w(path.join('data', `${t}.ts`), table(t, (mut.tables ?? {})[t] ?? ''));
   w(path.join('assets', 'narration', 'renders.json'), JSON.stringify(mut.renders ?? RENDERS, null, 2));
   return root;
@@ -122,6 +128,11 @@ const CASES = [
   { name: 'a line in the wrong voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'econ-fixture-1/beat-01': { ...RENDERS['econ-fixture-1/beat-01'], voice: 'en-GB-Chirp3-HD-Algieba' } } } },
   { name: 'a dialogue line with no recorded voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'econ-fixture-1/beat-02': { text: 'That gap is called scarcity.', wav: 'x' } } } },
   { name: 'a narrated line in a dialogue voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'old-fixture-1/beat-00': { ...RENDERS['old-fixture-1/beat-00'], voice: 'en-AU-Chirp3-HD-Zubenelgenubi' } } } },
+  { name: 'a figure staged who never speaks', rule: 'AP13', mut: { script: SCRIPT.replace("speaker: 'tophat'", "speaker: 'cap'") } },
+  { name: 'two cast members with one trait', rule: 'AP14', mut: { cast: (c) => c.replace("trait: 'oblivious'", "trait: 'kind'") } },
+  { name: 'a cast member with no character', rule: 'AP14', mut: { cast: (c) => c.replace(/character: 'The kind one.*/, "character: 'Kind.',") } },
+  { name: 'two cast members in one voice', rule: 'AP2', mut: { cast: (c) => c.replace('en-US-Chirp3-HD-Kore', 'en-GB-Chirp3-HD-Algieba').replace("languageCode: 'en-US'", "languageCode: 'en-GB'") } },
+  { name: 'a cast costume the wardrobe does not have', rule: 'AP2', mut: { cast: (c) => c.replace("costume: 'ponytail', label", "costume: 'bonnet' as never, label") } },
 ];
 
 let bad = 0;

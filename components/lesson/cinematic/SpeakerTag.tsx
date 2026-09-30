@@ -1,6 +1,6 @@
 // WHO IS SPEAKING — the face beside a dialogue lesson's words (LESSON_RULES group AP).
 //
-// A dialogue lesson has three stickmen talking and one line of words under the stage,
+// A dialogue lesson has several stickmen talking and one line of words under the stage,
 // so the reader needs to know whose line it is before they have read it. The tag is
 // that speaker's own head — the rig's head disc wearing the costume's head pieces,
 // taken from wardrobe.ts rather than redrawn — on a small white disc, so the top hat,

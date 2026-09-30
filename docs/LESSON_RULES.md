@@ -10846,15 +10846,16 @@ when the committed table is not what `make:chair` writes today.
 > actions. This I want the stick man to be the people talking and learning and
 > describing."* (2026-09-29)
 
-A DIALOGUE lesson has no narrator. Three stickmen speak — to each other, and one of them
-to the reader — inside a real-life scenario, handling real, reference-drawn objects. The
-first is `economics-foundations-1`, "What Is Economics?", at a market stall. The cast is
-`components/lesson/cinematic/cast.ts`; `npm run check:dialogue` holds AP1, AP2, AP6 and
-AP8, counter-tested by `node scripts/countertest-dialogue.mjs`.
+A DIALOGUE lesson has no narrator. Stickmen speak — to each other, and the teacher among
+them to the reader — inside a real-life scenario, handling real, reference-drawn objects.
+The first is `economics-foundations-1`, "What Is Economics?", at a market stall. The cast
+of FOUR is `components/lesson/cinematic/cast.ts` (a lesson uses as many as it needs,
+AP13); `npm run check:dialogue` holds AP1, AP2, AP6, AP8, AP13 and AP14, counter-tested
+by `node scripts/countertest-dialogue.mjs`.
 
 ### AP1 · Every spoken line has exactly one speaker, from the cast
 
-A spoken beat carries `speaker: 'tophat' | 'cap' | 'plain'`. The player draws that
+A spoken beat carries `speaker: 'tophat' | 'cap' | 'plain' | 'ponytail'`. The player draws that
 speaker's face beside the words (`SpeakerTag.tsx`), so the reader knows whose line it is
 before reading it. A beat with no speaker in a dialogue lesson is a narrator slipping
 back in.
@@ -10862,8 +10863,9 @@ back in.
 ### AP2 · A voice is locked to a costume
 
 The Top Hat is `en-GB-Chirp3-HD-Algieba`, the plain mascot `en-GB-Chirp3-HD-Sadachbia`,
-the newsboy cap `en-AU-Chirp3-HD-Zubenelgenubi` — in every dialogue lesson, forever, so a
-reader learns the three people by ear. No line names a voice: `scripts/render-narration.mjs`
+the newsboy cap `en-AU-Chirp3-HD-Zubenelgenubi`, and the ponytail — the woman, added
+2026-09-30 — `en-US-Chirp3-HD-Kore`: in every dialogue lesson, forever, so a reader
+learns the four people by ear. No two share a voice or a costume (`check:dialogue`). No line names a voice: `scripts/render-narration.mjs`
 reads it from the cast, `install-narration` refuses a take in any other, and
 `renders.json` records the voice each take was made in. In the scene each figure's
 costume is forced with `wear=` and marked `{/* cast: <speaker> */}`, because the wardrobe
@@ -10874,9 +10876,16 @@ table would otherwise re-deal it.
 What the subject is, why it is worth the reader's time, and at most three ideas — never a
 deep dive. Economics opens on scarcity, opportunity cost, and prices as signals.
 
-### AP4 · The economist talks to the reader; the others talk to each other
+### AP4 · They talk to each other; only the teacher may turn to the reader
 
-The Top Hat addresses the reader ("you"); the shopper and the stall-holder speak to one
+> *"when they speak, it is more to each other, or it is for teaching, in a very
+> entertaining way, like a story. And they are always interacting with each other."*
+> (2026-09-30)
+
+Every line is said TO somebody on the stage, and answered by somebody on it: the people
+in a lesson are always dealing with one another. The Top Hat is the one who may also turn
+and address the reader ("you"), and when he does it is to teach — told as the story of
+what just happened in front of them, never as a lecture over it. The others speak to one
 another, in the first person, as themselves. The wording is intellectual and precise and
 personal. A character's "I" is not the narrator's seminar "we" (group V), so
 `check:voice` does not read a dialogue lesson's spoken lines for it; its explanations,
@@ -10919,6 +10928,68 @@ staged, not after.
 
 A stickman's legs are a third of him. At a real waist height a counter hides everything
 of the stall-holder but his cap; at the hip he reads as a man working a stall.
+
+### AP13 · Cast as many as the lesson needs — two, three or four
+
+> *"since there are four stickmen, there does not need to be four stickmen in one
+> lesson … four is a lot of different actions in stickmen. If there only needs to be
+> two, then let there only be two. If three looks good, or four looks good. It is your
+> judgment."* (2026-09-30)
+
+The cast has four members and a lesson uses the ones it has a JOB for. Decide it from the
+scenario, before writing a line:
+
+- **Two** is a complete lesson: somebody who does the thing and somebody who makes sense
+  of it. Most ideas need no more.
+- **Three** when the example itself takes two people — a buyer and a seller, two sides
+  of a quarrel — and a third explains.
+- **Four** only when each of the four does something the other three could not. Four
+  figures is four sets of walking, facing and listening to stage (AP7 still caps the
+  movers at two), so it has to buy a lesson that three could not tell.
+
+Never fewer than two — one voice alone is a narrator again — and nobody stands on the
+stage who never speaks: a silent extra is a whole figure's worth of motion for nothing.
+`check:dialogue` holds both. Which members is a casting decision too (AP14): pick for
+the friction the idea needs, not in a fixed order.
+
+### AP14 · Four people, four characters
+
+> *"for that stickman voice, I want him to be more passive-aggressive … the other … to
+> be more of a teaching voice … I want him to be kind … I want her to be more
+> oblivious. These are the different character traits I want for the different stick
+> men."* (2026-09-30)
+
+| | voice | is | which sounds like |
+|---|---|---|---|
+| **Top hat** | Algieba, en-GB | the TEACHER | He names the idea the others have just walked into and says why it matters — as a story, patient, precise, a little amused. |
+| **Newsboy cap** | Zubenelgenubi, en-AU | KIND | Assumes the best of everybody, helps before he is asked, takes a loss without complaint. |
+| **Plain** | Sadachbia, en-GB | PASSIVE-AGGRESSIVE | Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine." |
+| **Ponytail** | Kore, en-US | OBLIVIOUS | Cheerful and one step behind: misses the point, takes the figure of speech literally, asks what the reader was too polite to ask. |
+
+The traits live in `cast.ts` beside the voices (`trait`, `character`), and a script is
+written FROM them:
+
+- **A line belongs to one person.** If it could be handed to any of the four unchanged,
+  it is narration with a name on it. The same fact said kindly, said with a needle in it
+  and said by somebody who has missed the point is three different lines.
+- **The character is how the lesson MOVES.** The oblivious one's wrong turn is the
+  misconception the lesson exists to correct; the passive-aggressive one says the
+  objection out loud; the kind one pays the cost the idea is about; the teacher names
+  what just happened. Cast for that.
+- **The needle points at the other characters and the situation, never at the reader**,
+  and never at how clever anybody is (CLAUDE.md §7: attendance, not ability). Oblivious
+  is not stupid: she is never the butt for long, and she is often the one who is right
+  by accident.
+- **A trait is a lean, not a tic.** One dry aside in a lesson lands; one in every line
+  is a catchphrase. The teacher may be warm; the kind one may be firm.
+- **The ponytail is a woman and is drawn as one** by her silhouette — a ponytail off the
+  back of the skull and a flared skirt (`wardrobe.ts`, costume `ponytail`) — because a
+  solid-ink figure with no face can only say it with its outline.
+
+`economics-foundations-1` was written before the traits were named, and its three
+speakers are left as they were voiced; the traits bind every lesson written from here.
+`check:dialogue` holds that every member has a trait and a character and that no two
+share one.
 
 ### AP11 · A thing may be the colour it actually is
 
@@ -10964,9 +11035,9 @@ named or that the build showed were load-bearing:
 1. **One real place, and the whole lesson happens in it.** A Saturday market stall, not
    a sequence of diagrams. The idea is something the people there DO — pay, run out,
    change a price — and the words name what the reader is watching.
-2. **Three people, each always the same voice and costume**, the words under the stage
-   with the speaker's face beside them. The Top Hat explains to the reader; the other two
-   live the example.
+2. **Two to four people (AP13), each always the same voice, costume and character
+   (AP14)**, the words under the stage with the speaker's face beside them. The Top Hat
+   teaches; the others live the example, and they are always dealing with each other.
 3. **Few objects, each one real** — drawn from a fetched reference (AP5), coloured as it
    is (AP11), and used: handed over, set down, counted. An object nobody touches is
    decoration.

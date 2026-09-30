@@ -350,6 +350,35 @@ const CANE: Piece[] = [
   { at: 'handR', x: -1, y: -1, w: 11, h: 3, r: 1.5 },
 ];
 
+/**
+ * THE FOURTH SPEAKER (2026-09-30): a ponytail and an A-line skirt.
+ *
+ * The owner added a woman's voice (Kore) to the dialogue cast and asked for "a
+ * different stickman that more would resemble a woman". He is solid ink with no face,
+ * so nothing drawn INSIDE the outline can say it (rule 1 at the top of this file) —
+ * it has to be said by the SILHOUETTE, and both of these change it:
+ *
+ *   · THE PONYTAIL leaves the back of the skull and hangs behind the shoulders. Its
+ *     root OVERLAPS the head disc, so it is visibly growing out of it rather than
+ *     following it (the rule that cut the satchel), and it is on the side she is NOT
+ *     facing, so it never crosses a raised hand.
+ *   · THE SKIRT is two leaning slabs that meet over the hips and flare to the knee:
+ *     an A, the one shape no other costume here makes below the waist. It is centred
+ *     ON the pelvis and the thighs come out of it, so it is worn, not carried.
+ *
+ * Not in ROLL: it is a CAST costume (cast.ts), dealt to nobody by make:wardrobe.
+ */
+const PONYTAIL: Piece[] = [
+  { at: 'head', x: -17, y: -9, w: 15, h: 15, r: 7.5 },          // the tie, half on the skull
+  { at: 'head', x: -25, y: 7, w: 9, h: 30, r: 4.5, rot: 14 },   // the tail, down past the shoulder
+];
+const SKIRT: Piece[] = [
+  { at: 'pelvis', x: -11, y: 9, w: 14, h: 26, r: 2, rot: 32 },
+  { at: 'pelvis', x: 11, y: 9, w: 14, h: 26, r: 2, rot: -32 },
+  { at: 'pelvis', x: 0, y: 11, w: 24, h: 20 },                   // the panel between them
+  { at: 'pelvis', x: 0, y: 19.5, w: 46, h: 5, r: 1.5 },          // the hem, flat and wide
+];
+
 // ── THE COSTUMES ────────────────────────────────────────────────────────────
 //
 // Kept deliberately small. Ten looks that each read at a hundred pixels beat
@@ -383,6 +412,7 @@ export const COSTUMES: Costume[] = [
   { id: 'stroller', label: 'newsboy cap', pieces: [...FLAT_CAP] },
   { id: 'ringmaster', label: 'wide brim · monocle · cane', pieces: [...WIDE_BRIM, ...MONOCLE, ...CANE] },
   { id: 'smoker', label: 'fez', pieces: [...FEZ] },
+  { id: 'ponytail', label: 'ponytail · skirt', pieces: [...PONYTAIL, ...SKIRT] },
 ];
 
 export const BY_ID: Record<string, Costume> =

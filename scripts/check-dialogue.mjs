@@ -2,11 +2,11 @@
 //
 //   npm run check:dialogue
 //
-// A dialogue lesson has no narrator under the stage: three stickmen speak, each in a
+// A dialogue lesson has no narrator under the stage: its stickmen speak, each in a
 // voice locked to his costume (components/lesson/cinematic/cast.ts). The failures this
 // format invites are all SILENT — a line read in the wrong voice, a top hat the
 // wardrobe table quietly swapped for a fez, a thought bubble a generator dropped on a
-// stage that already has three people talking — so each is a rule here:
+// stage that already has people talking — so each is a rule here:
 //
 //   AP1  every spoken beat names one speaker, from the cast
 //   AP2  each figure wears its speaker's costume, forced in the scene with `wear=`
@@ -14,6 +14,8 @@
 //        its speaker's voice, and no narrated line in a dialogue voice
 //   AP6  no `order` control
 //   AP8  no row in any table the narrated-lesson player layers read
+//   AP13 at least two speakers, and nobody staged who never speaks
+//   AP14 every cast member has a trait and a character, and no two share one
 //
 // Which lessons are dialogue lessons comes from scripts/lib/dialogue.mjs, which reads
 // it out of the scripts. DIALOGUE_ROOT points the whole check at another tree, which is
@@ -49,6 +51,27 @@ const spoken = (b) => typeof b.text === 'string' && b.text.trim().length > 0
 
 const lessons = dialogueLessons();
 const ids = new Set(lessons.map((l) => l.id));
+
+// AP2 + AP14 — THE CAST ITSELF. Each member is one voice, one costume and one
+// character, and no two share any of the three: two people in one voice are one
+// person to the ear, and two with one trait are one person to the script.
+{
+  const { BY_ID } = await import(pathToFileURL(path.join(ROOT, 'components', 'lesson', 'cinematic', 'wardrobe.ts')).href);
+  const seen = { voice: new Map(), costume: new Map(), trait: new Map() };
+  for (const who of SPEAKERS) {
+    const m = CAST[who];
+    if (!m) { fail('AP2', 'cast', `${who} is in SPEAKERS and has no entry in CAST`); continue; }
+    if (!BY_ID[m.costume]) fail('AP2', 'cast', `${who} wears "${m.costume}", which is not a costume in wardrobe.ts`);
+    if (!/^[a-z]{2}-[A-Z]{2}-Chirp3-HD-[A-Za-z]+$/.test(m.voice?.name ?? '')) fail('AP2', 'cast', `${who}'s voice "${m.voice?.name}" is not a Chirp 3 HD voice name`);
+    else if (!m.voice.name.startsWith(`${m.voice.languageCode}-`)) fail('AP2', 'cast', `${who}'s voice ${m.voice.name} does not belong to its languageCode ${m.voice.languageCode}`);
+    if (!m.trait) fail('AP14', 'cast', `${who} has no trait`);
+    if (!m.character || m.character.length < 60) fail('AP14', 'cast', `${who} has no character a script could be written from`);
+    for (const [k, v] of [['voice', m.voice?.name], ['costume', m.costume], ['trait', m.trait]]) {
+      if (seen[k].has(v)) fail(k === 'trait' ? 'AP14' : 'AP2', 'cast', `${who} and ${seen[k].get(v)} share one ${k} (${v})`);
+      else seen[k].set(v, who);
+    }
+  }
+}
 
 for (const l of lessons) {
   const beats = beatsOf(l.scriptFile);
@@ -87,6 +110,12 @@ for (const l of lessons) {
     }
   }
   for (const who of used) if (!onStage.has(who)) fail('AP2', l.id, `${who} speaks but no figure on the stage is marked as ${who}`);
+
+  // AP13 — the cast is as many as the lesson needs: at least two (one voice is a
+  // narrator again), and nobody staged who never says a word — a silent fourth figure
+  // is four people's worth of movement for three people's worth of lesson.
+  if (used.size < 2) fail('AP13', l.id, `has ${used.size} speaker(s); a dialogue needs at least two`);
+  for (const who of onStage) if (!used.has(who)) fail('AP13', l.id, `${who} is on the stage and never speaks; cast only who the lesson needs`);
 
   // AP8 — none of the narrated-lesson layers has a row for it.
   for (const t of TABLES) {

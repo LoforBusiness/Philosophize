@@ -8223,7 +8223,7 @@ the orphaned `HabitCard.tsx` / `DailyReflection.tsx`, kept only because
 "What Is Economics?", and its road ends in a MORE COMING SOON sign (`Branch.more`).**
 It is the first DIALOGUE lesson — LESSON_RULES group AP:
 
-- **Three people talk and nobody narrates.** The cast is `cast.ts`: the top hat
+- **People talk and nobody narrates.** The cast is `cast.ts` (three here, four since 2026-09-30): the top hat
   (Algieba, en-GB), the plain mascot (Sadachbia, en-GB), the newsboy cap
   (Zubenelgenubi, en-AU). A beat's `speaker` puts that face beside the words
   (`SpeakerTag.tsx`) and picks the voice; no line names one.
@@ -8243,6 +8243,18 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **It is the house format now (2026-09-30).** *"This is how I want future lessons to be
   made for all subjects."* LESSON_RULES AP12 lists what made it work; AP11 lets an object
   be the colour it is (`NATURAL` + `tint()` in `objects.ts`, held by `check:objects`).
+- **THE CAST IS FOUR, AND EACH IS A CHARACTER (2026-09-30).** The owner added a woman's
+  voice — `en-US-Chirp3-HD-Kore` — and a trait for each: the top hat TEACHES (as a
+  story), the newsboy cap is KIND, the plain mascot is PASSIVE-AGGRESSIVE, and the
+  ponytail is OBLIVIOUS. `cast.ts` carries `trait` and `character` beside each voice and
+  a script is written from them (AP14). She is drawn as a woman by her SILHOUETTE — a
+  ponytail off the back of the skull and a flared skirt (`wardrobe.ts`, costume
+  `ponytail`, outside `ROLL` so `make:wardrobe` deals it to nobody); the first skirt was
+  two slabs no wider than a thigh and read as heavy legs until it flared past them.
+  **A lesson casts two, three or four — whoever it has a job for (AP13)**, never one and
+  never a figure who does not speak; `check:dialogue` holds both, and that no two cast
+  members share a voice, a costume or a trait. `economics-foundations-1` keeps its three
+  as voiced.
 - **Two traps, both measured.** A re-measure of one lesson DROPS the corpus's
   `wardrobeReach` and `poseReach` records from `mustBoxes.ts.json` — splice the new
   rows into a backup instead of keeping the harness's file. And a stickman's legs are a
