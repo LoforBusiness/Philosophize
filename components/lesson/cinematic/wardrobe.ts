@@ -351,7 +351,7 @@ const CANE: Piece[] = [
 ];
 
 /**
- * THE FOURTH SPEAKER (2026-09-30): a professional woman — chignon, blazer, pencil skirt.
+ * THE FOURTH SPEAKER (2026-09-30): a professional woman — chignon and blazer.
  *
  * The owner added a woman's voice (Kore) to the dialogue cast. The first drawing was a
  * ponytail and a flared A-line skirt, and they threw it out in one message: *"Looks too
@@ -365,18 +365,17 @@ const CANE: Piece[] = [
  *     nape — it overlaps the skull, so it grows out of it rather than following it (the
  *     rule that cut the satchel), and it is behind her, clear of a raised hand. Loose
  *     shoulder-length hair and a bob were both drawn: at lesson size each only made the
- *     head heavier. THE PENCIL SKIRT is one straight panel to the knee, 20 across — the
- *     A-line was 46 — so the legs come out of a flat hem close together.
+ *     head heavier. THERE IS NO SKIRT: a narrow pencil skirt replaced the A-line and the
+ *     owner cut that too — *"the skirt … does not fit the body"* — because a level panel
+ *     at the hip cannot follow two legs that swing. The hair alone says woman.
  *   · PAPER LINES say suit, which no outline can. `paper: true` is the seam a hat uses
  *     where ink meets ink (AA6); here it draws the two LAPELS as a V on the chest, a
- *     white BLOUSE stepped into the top of the V, and the JACKET'S HEM across the hip.
- *     Three hairlines and a wedge, and a black torso becomes a tailored jacket over a
- *     skirt.
+ *     white BLOUSE stepped into the top of the V. Two hairlines and a wedge, and a black
+ *     torso becomes a tailored jacket.
  *
  * Every piece sits CLOSE to the joint it hangs from. A shoulder piece turns with the
- * head and a hip piece stays level, so a full-length jacket body anchored at either end
- * would swing off the spine on every nod; the shoulders are 12 deep under the neck, the
- * jacket 16 over the hip, and the torso's own waist is between them.
+ * head, so a full-length jacket body would swing off the spine on every nod; the
+ * shoulders are 12 deep under the neck and the torso's own line carries the rest.
  *
  * A BRIEFCASE WAS DRAWN AND CUT. In the hand it is the clearest "office" signal there
  * is — and it is waved in the air by every gesture that hand makes, which is a gag, and
@@ -384,21 +383,19 @@ const CANE: Piece[] = [
  *
  * Not in ROLL: it is a CAST costume (cast.ts), dealt to nobody by make:wardrobe.
  */
-// SEVEN PIECES, because Stickman draws a costume through a FIXED number of slots
+// FIVE PIECES (seven with the skirt, before it was cut). It matters because Stickman draws a costume through a FIXED number of slots
 // (WORN_SLOTS, a hook count) and silently drops whatever is past it. The first version
 // of this was eleven and looked complete on the sheet, which draws every piece; on a
-// phone she would have lost her lapels, her hem and her skirt. `check:wardrobe` holds
+// phone she would have lost her lapels. `check:wardrobe` holds
 // every costume to the slot count now. INK first, PAPER last.
 const CHIGNON: Piece[] = [
   { at: 'head', x: -18, y: 7, w: 19, h: 17, r: 8.5 },            // the knot, low at the nape
 ];
 const SUIT: Piece[] = [
   { at: 'neck', x: 0, y: 9, w: 27, h: 12, r: 3 },                // squared shoulders
-  { at: 'pelvis', x: 0, y: 4.5, w: 20, h: 37, r: 2 },            // jacket and skirt, one panel
   { at: 'neck', x: 0, y: 6.5, w: 8.5, h: 5, paper: true },       // the blouse, in the top of the V
   { at: 'neck', x: 3.2, y: 12, w: 1.5, h: 15, rot: 20, paper: true },   // lapel
   { at: 'neck', x: -3.2, y: 12, w: 1.5, h: 15, rot: -20, paper: true }, // lapel
-  { at: 'pelvis', x: 0, y: 2.5, w: 22, h: 1.5, paper: true },    // the jacket's hem: skirt below it
 ];
 
 // ── THE COSTUMES ────────────────────────────────────────────────────────────
@@ -434,7 +431,7 @@ export const COSTUMES: Costume[] = [
   { id: 'stroller', label: 'newsboy cap', pieces: [...FLAT_CAP] },
   { id: 'ringmaster', label: 'wide brim · monocle · cane', pieces: [...WIDE_BRIM, ...MONOCLE, ...CANE] },
   { id: 'smoker', label: 'fez', pieces: [...FEZ] },
-  { id: 'blazer', label: 'chignon · blazer · pencil skirt', pieces: [...CHIGNON, ...SUIT] },
+  { id: 'blazer', label: 'chignon · blazer', pieces: [...CHIGNON, ...SUIT] },
 ];
 
 export const BY_ID: Record<string, Costume> =

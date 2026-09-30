@@ -8249,11 +8249,11 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   woman (`blazer`) is OBLIVIOUS. `cast.ts` carries `trait` and `character` beside each
   voice and a script is written from them (AP14). **She is drawn as a PROFESSIONAL**
   (`wardrobe.ts`, costume `blazer`, outside `ROLL` so `make:wardrobe` deals it to nobody):
-  a low chignon, a blazer and a pencil skirt. The first drawing — a ponytail and a flared
+  a low chignon and a blazer, with NO skirt (a pencil skirt was drawn and cut: *"the skirt … does not fit the body"*). The first drawing — a ponytail and a flared
   A-line skirt — came back *"too childish … the skirt is way too wide … a professional
   corporate woman"*, and the redraw found the tool for it: the OUTLINE can only say woman
-  and adult (hair up, a straight narrow skirt), and a SUIT is said by `paper` lines inside
-  the ink — two lapels, a blouse in the V, the jacket's hem. Loose hair and a bob only
+  and adult (hair up), and a SUIT is said by `paper` lines inside
+  the ink — two lapels and a blouse in the V. Loose hair and a bob only
   made the head heavier at lesson size; a briefcase read perfectly and was waved about by
   every gesture of the hand holding it, so it was cut.
   **A lesson casts two, three or four — whoever it has a job for (AP13)**, never one and

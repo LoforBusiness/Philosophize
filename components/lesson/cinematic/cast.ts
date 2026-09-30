@@ -68,7 +68,7 @@ export const CAST: Record<Speaker, CastMember> = {
     character: 'The passive-aggressive one. Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine". He needles the OTHER CHARACTERS and the situation — never the reader, and never how clever somebody is (§7).',
   },
   // The fourth voice (2026-09-30): an American woman, drawn as a professional — hair up
-  // in a chignon, a blazer and a pencil skirt (wardrobe.ts CHIGNON, SUIT).
+  // in a chignon and a blazer, no skirt (wardrobe.ts CHIGNON, SUIT).
   blazer: {
     costume: 'blazer', label: 'Blazer', voice: { name: 'en-US-Chirp3-HD-Kore', languageCode: 'en-US', rate: 1 },
     trait: 'oblivious',

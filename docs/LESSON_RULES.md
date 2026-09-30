@@ -10983,13 +10983,14 @@ written FROM them:
 - **A trait is a lean, not a tic.** One dry aside in a lesson lands; one in every line
   is a catchphrase. The teacher may be warm; the kind one may be firm.
 - **The fourth is a woman and is drawn as a PROFESSIONAL one** (`wardrobe.ts`, costume
-  `blazer`): hair up in a low chignon, a blazer and a narrow knee-length pencil skirt.
+  `blazer`): hair up in a low chignon and a blazer, and NO SKIRT.
   The first drawing was a ponytail and a flared A-line skirt, and the owner rejected it
   in a line — *"Looks too childish. The skirt is way too wide. I want a more
   professional look."* A solid-ink figure with no face says woman and adult with its
-  OUTLINE (the chignon, the straight skirt) and says suit with PAPER LINES inside it —
-  two lapels, a blouse in the V, the jacket's hem — which is the hat seam's trick (AA6)
-  doing a second job.
+  OUTLINE (the chignon) and says suit with PAPER LINES inside it — two lapels and a
+  blouse in the V — which is the hat seam's trick (AA6) doing a second job. A narrow
+  pencil skirt was drawn next and cut as well: *"the skirt … does not fit the body"*. A
+  level panel at the hip cannot follow legs that swing, and the hair already says woman.
 
 `economics-foundations-1` was written before the traits were named, and its three
 speakers are left as they were voiced; the traits bind every lesson written from here.
