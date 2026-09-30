@@ -578,9 +578,127 @@ const CAVE: ObjPart[] = [
 ];
 export const cave = (x: number, y: number, w: number, h: number) => fit(CAVE, x, y, w, h);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// THE MARKET, for Economics lesson 1 (2026-09-29). Every one drawn against pictures
+// fetched with `npm run ref` (scratchpad/ref/econ-*): Shepherd's Bush Market's striped
+// canopies, a lattice apple pie, a scored bakery loaf, a Bank of England note, a
+// framed chalk A-board, and apples in a crate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── STALL ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A market stall is three things and the canopy is the one that names it:
+// a STRIPED awning that slopes down toward the shopper and ends in a SCALLOPED
+// valance, two thin posts holding it up, and a counter under it whose FRONT is a
+// plain board. The stripes run front to back, so from the front they are vertical
+// bands; the scallops are half-discs hanging off the valance's lower edge.
+const STALL: ObjPart[] = [
+  oBar('mass', 8, 16, 8, 100, 3),                               // the two posts, BEHIND the counter
+  oBar('mass', 92, 16, 92, 100, 3),                             // (body, so the counter covers them)
+  ...trapezoid('mass', 50, 13, 84, 100, 18),                    // the canopy, sloping to the front
+  oRect('lit', 22, 13, 9, 16, 0, 0),                            // its stripes: paper and the
+  oRect('lit', 41, 13, 9, 16, 0, 0),                            // branch's own tone, as every
+  oRect('lit', 59, 13, 9, 16, 0, 0),                            // market canopy is two colours
+  oRect('lit', 78, 13, 9, 16, 0, 0),
+  oRect('mass', 50, 25, 100, 6),                                // the valance's band
+  oEll('mass', 6, 28, 12, 10), oEll('mass', 18.5, 28, 12, 10), // and its scallops
+  oEll('mass', 31, 28, 12, 10), oEll('mass', 43.5, 28, 12, 10),
+  oEll('mass', 56, 28, 12, 10), oEll('mass', 68.5, 28, 12, 10),
+  oEll('mass', 81, 28, 12, 10), oEll('mass', 93.5, 28, 12, 10),
+  oRect('mass', 50, 64, 96, 5, 0, 1),                           // the counter's top edge, lit
+  oRect('face', 50, 83, 96, 34, 0, 1.5),                        // and its front board, in shade
+  oBar('line', 6, 76, 94, 76, 1.8),                             // the boards of the front
+  oBar('line', 6, 89, 94, 89, 1.8),
+];
+export const stall = (x: number, y: number, w: number, h: number) => fit(STALL, x, y, w, h);
+
+// ── PIE ──────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. Seen from the side and a little above, a pie is a TIN that tapers to
+// its foot, a thick crust RIM round the top, and a LATTICE of pastry strips over a
+// darker filling. The lattice is the field mark: without it the same shape is a
+// cake, a tart or a hat. Drawn in the LIT role, the pale of baked pastry, because
+// a strip in the body's own role is painted under the filling and vanishes.
+const PIE: ObjPart[] = [
+  ...trapezoid('face', 50, 70, 74, 96, 26),                     // the tin, tapering to its foot
+  oEll('mass', 50, 52, 98, 42),                                 // the crust rim, seen from above
+  oEll('dark', 50, 52, 80, 30),                                 // the filling inside it
+  oBar('lit', 26, 46, 48, 61, 5),                               // the lattice, one way —
+  oBar('lit', 40, 41, 66, 59, 5),
+  oBar('lit', 58, 40, 76, 53, 5),
+  oBar('lit', 74, 46, 52, 61, 5),                               // — and across it
+  oBar('lit', 60, 41, 34, 59, 5),
+  oBar('lit', 42, 40, 24, 53, 5),
+];
+export const pie = (x: number, y: number, w: number, h: number) => fit(PIE, x, y, w, h);
+
+// ── LOAF ─────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A bakery loaf is a DOME much wider than it is tall, sitting on a flat
+// base, with SCORES slashed across the top at a slant — the scores are what say
+// bread rather than stone.
+const LOAF: ObjPart[] = [
+  oEll('mass', 50, 62, 96, 62),                                 // the dome
+  oRect('face', 50, 88, 80, 10, 0, 5),                          // the flat, darker base
+  oBar('dark', 26, 52, 36, 38, 4.5),                            // three scores, slanting
+  oBar('dark', 44, 50, 54, 36, 4.5),
+  oBar('dark', 62, 52, 72, 38, 4.5),
+  oEll('lit', 34, 48, 12, 6, -20),                              // the lamp's sheen on the crust
+];
+export const loaf = (x: number, y: number, w: number, h: number) => fit(LOAF, x, y, w, h);
+
+// ── NOTE ─────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. Every banknote shares one layout: a ruled BORDER, a PORTRAIT in an
+// oval on one side, a large VALUE numeral on the other. The portrait and the numeral
+// are what turn a paper rectangle into money.
+const NOTE: ObjPart[] = [
+  oRect('mass', 50, 50, 100, 56, 0, 4),                         // the note
+  oRect('lit', 50, 50, 88, 44, 0, 2),                           // its field inside the border
+  oEll('mass', 28, 50, 26, 34),                                 // the portrait's oval
+  oEll('line', 28, 44, 10, 12),                                 // the head and shoulders in it
+  oEll('line', 28, 60, 18, 10),
+  oBar('line', 62, 38, 62, 62, 4),                              // the value: a 1 …
+  oEll('line', 78, 50, 16, 24),                                 // … and a 0
+  oEll('lit', 78, 50, 8, 16),
+];
+export const note = (x: number, y: number, w: number, h: number) => fit(NOTE, x, y, w, h);
+
+// ── CHALKBOARD ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A shop's A-board is a slate panel in a WOODEN FRAME standing on two
+// splayed legs, with chalk writing on the slate. The frame and the splay are the
+// field marks: a dark rectangle alone is a screen.
+const CHALKBOARD: ObjPart[] = [
+  oBar('mass', 20, 70, 10, 100, 6),                             // the legs, splayed
+  oBar('mass', 80, 70, 90, 100, 6),
+  oRect('mass', 50, 40, 86, 76, 0, 3),                          // the wooden frame
+  oRect('dark', 50, 40, 70, 60, 0, 1.5),                        // the slate in it
+  oBar('lit', 26, 24, 52, 24, 3),                               // chalk: a heading line
+  oBar('lit', 26, 42, 70, 42, 2.4),                             // and two prices
+  oBar('lit', 26, 56, 62, 56, 2.4),
+];
+export const chalkboard = (x: number, y: number, w: number, h: number) => fit(CHALKBOARD, x, y, w, h);
+
+// ── APPLE ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. An apple is round but NOT a circle: it is a little wider than tall with
+// a DIMPLE at the top where the STALK comes out, often with a leaf. The dimple and
+// the stalk are what separate it from a ball or a tomato.
+const APPLE: ObjPart[] = [
+  oEll('mass', 36, 60, 56, 70),                                 // two lobes make the shoulders
+  oEll('mass', 64, 60, 56, 70),                                 // and the dimple between them
+  oEll('mass', 50, 66, 70, 62),
+  oBar('line', 50, 34, 55, 14, 3.5),                            // the stalk
+  oEll('face', 67, 18, 22, 11, -25),                            // a leaf
+  oEll('lit', 34, 52, 10, 18, -15),                             // the shine
+];
+export const apple = (x: number, y: number, w: number, h: number) => fit(APPLE, x, y, w, h);
+
 /** Every object, by name — what `sheet-objects` and `check:objects` walk. */
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
   door, shelf, flag, bridge, window, wheel, coin, leaf, plinth, column, cave,
+  stall, pie, loaf, note, chalkboard, apple,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;
