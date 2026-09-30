@@ -46,8 +46,8 @@ interface Props {
  * The one big invitation on the home screen: the next lesson this learner can
  * actually open, on a different branch each day, over a photograph.
  *
- * Renders nothing at all once every lesson in every branch is finished — a card
- * that says "start a lesson" and can't is worse than no card.
+ * Once every lesson on every road is finished it offers one to READ AGAIN rather
+ * than disappearing (`pick.again`) — Home without its biggest card reads as broken.
  *
  * AND UNTIL THE PROFESSOR'S INTRO HAS BEEN WATCHED, IT IS THE INTRO (2026-09-25).
  * The same card, the same sky, the same ledge — it is the first door into the
@@ -95,7 +95,7 @@ export default function QuickStartCard({ style }: Props) {
   const tab = intro ? 'QUICK START · INTRO' : 'QUICK START';
   const title = intro ? 'Your first lecture' : pick!.lesson.title;
   const meta = intro ? 'WITH THE PROFESSOR · 1 MIN' : `${pick!.branch.name} · ${pick!.lesson.estimatedMinutes} MIN`;
-  const cta = intro ? '▶   START THE INTRO' : '▶   START LESSON';
+  const cta = intro ? '▶   START THE INTRO' : pick!.again ? '▶   READ IT AGAIN' : '▶   START LESSON';
 
   return (
     // ON THE TEAL LEDGE (2026-09-16), like the app's primary button: the card is

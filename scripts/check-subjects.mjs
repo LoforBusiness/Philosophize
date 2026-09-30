@@ -275,5 +275,23 @@ head('§10 · the Home shelf: pre-drawn posters, one card a swipe, flush picture
   ok(/padding: pad === 0 \? 0 : SPACE\[pad\]/.test(cardSrc), "Card's pad={0} lays a picture flush against its border");
 }
 
+head('§11 · Quick Start never disappears');
+{
+  // *"the quick start pictures and quick start box is completely gone"* (2026-09-30):
+  // with one lesson on each road, a reader who had read all seven met a Home with no
+  // Quick Start at all. The card offers a lesson to read again instead.
+  const Q = await import('@/lib/utils/quickStart');
+  const { ALL_BRANCHES } = await import('@/data');
+  const fresh = Q.pickQuickStart({}, 20000, null);
+  ok(!!fresh && !fresh.again, 'a new reader is offered a lesson to start');
+  const all = {};
+  for (const b of ALL_BRANCHES) for (const u of b.paths) all[u.id] = u.lessons.length;
+  const days = [20000, 20001, 20002, 20003].map((d) => Q.pickQuickStart(all, d, null));
+  ok(days.every((p) => p && p.again), 'a reader who has finished every lesson is still offered one, to read again');
+  const fs = await import('node:fs');
+  const qsCard = fs.readFileSync('components/home/QuickStartCard.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+  ok(/pick!?\.again/.test(qsCard), 'the card says READ IT AGAIN rather than START on a lesson already read');
+}
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);

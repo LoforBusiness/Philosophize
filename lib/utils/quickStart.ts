@@ -8,6 +8,8 @@ export interface QuickStartPick {
   /** 1-based position of this lesson within its branch, for "LESSON 7 OF 29". */
   indexInBranch: number;
   branchTotal: number;
+  /** Every lesson on every road is finished, and this is one to read AGAIN. */
+  again?: boolean;
 }
 
 /**
@@ -75,7 +77,26 @@ export function pickQuickStart(
     const next = nextInBranch(branch, lessonsByUnit);
     if (next) open.push(next);
   }
-  if (open.length === 0) return null; // nothing left anywhere — every lesson done
+  // NOTHING LEFT ANYWHERE, AND THE CARD STAYS (2026-09-30). It used to return null
+  // here and Home lost its biggest card — which, with one lesson on each of seven
+  // roads, is what happened to anybody who had read all seven: *"the quick start
+  // pictures and quick start box is completely gone."* A finished library still has
+  // lessons worth reading again, so the card offers one, on the same two clocks as
+  // below, and says so (`again`).
+  if (open.length === 0) {
+    const all: QuickStartPick[] = [];
+    for (const branch of ALL_BRANCHES) {
+      const branchTotal = branch.paths.reduce((n, u) => n + u.lessons.length, 0);
+      let at = 0;
+      for (const unit of branch.paths) for (const lesson of unit.lessons) {
+        at += 1;
+        all.push({ branch, unit, lesson, indexInBranch: at, branchTotal, again: true });
+      }
+    }
+    if (!all.length) return null;
+    const read = Object.values(lessonsByUnit).reduce((n, v) => n + (v > 0 ? v : 0), 0);
+    return all[shuffleSeed(dayNumber + read) % all.length];
+  }
 
   const done = Object.values(lessonsByUnit).reduce((n, v) => n + (v > 0 ? v : 0), 0);
 

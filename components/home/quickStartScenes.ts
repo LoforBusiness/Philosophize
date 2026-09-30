@@ -266,10 +266,17 @@ function philosophyStudy(): QsScene {
     wood: '#8A5A3B', woodL: '#A87048', woodD: '#5E3C28', page: '#F4ECDC', pageSh: '#D8CDB6', brass: '#CC9A45', brassD: '#9A6F2E',
     flame: '#F2B24A', flameD: '#E0662F', ink: '#1F1C28', laurel: '#7F9A6A', bust: '#E9E4DA', bustSh: '#B7B3C2' };
   const T = HORIZON - 12; // the desk top
-  // The arched window, set right of the tab, with the moon and a few stars.
-  const win = rect(560, 260, 300, 380, C.frame, 150) + path('M580 630 V410 Q580 280 710 280 Q840 280 840 410 V630 Z', C.night)
+  // The arched window, set right of the tab, with the moon and a few stars. THE VIEW
+  // ENDS AT THE SILL (2026-09-30): the frame was a pill — round at the bottom as well
+  // as the top — and the square-cornered night inside it ran out below its curve, so the
+  // sky seemed to carry on down the wall: *"the outside isn't properly framed to be
+  // outside the window."* The frame is an arch on a flat bottom now, the night stops at
+  // its bottom rail, and a sill sits under it.
+  const win = path('M560 640 V410 Q560 260 710 260 Q860 260 860 410 V640 Z', C.frame)
+    + path('M580 620 V410 Q580 280 710 280 Q840 280 840 410 V620 Z', C.night)
     + circle(778, 360, 34, C.moon) + circle(794, 350, 30, C.night)
-    + stars(9, 7, 600, 300, 830, 600, C.star) + rect(704, 280, 12, 350, C.frame) + rect(580, 452, 260, 12, C.frame);
+    + stars(9, 7, 600, 300, 830, 600, C.star) + rect(704, 280, 12, 340, C.frame) + rect(580, 452, 260, 12, C.frame)
+    + rect(540, 628, 340, 18, C.woodL) + rect(548, 646, 324, 8, C.woodD);
   // The desk and what is on it.
   const desk = rect(0, T, QS_CANVAS, 22, C.woodL) + rect(0, T + 22, QS_CANVAS, 14, C.woodD);
   // An open book, pages falling from the gutter.
