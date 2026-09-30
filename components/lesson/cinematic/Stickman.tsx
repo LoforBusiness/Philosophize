@@ -63,10 +63,12 @@ interface Props {
  * renders — a lesson once threw on its final tap because a hook sat below an
  * early return, and it took down the reward modal with it. Mapping hooks over
  * `wear.length` would be the same defect with a costume change as the trigger.
- * Six slots is the largest costume plus one; unused ones cost a worklet that
- * returns `opacity: 0` and nothing else.
+ * Eight slots is the largest costume plus one (the cast's `blazer` is seven, since
+ * 2026-09-30); unused ones cost a worklet that returns `opacity: 0` and nothing else.
+ * A costume with MORE pieces than this loses the rest in silence, so `check:wardrobe`
+ * reads this number and fails one that does not fit.
  */
-const WORN_SLOTS = 6;
+const WORN_SLOTS = 8;
 
 /** The stage's own ground, so a `paper` piece reads as a gap rather than a mark. */
 const PAPER = '#FAFAF7';

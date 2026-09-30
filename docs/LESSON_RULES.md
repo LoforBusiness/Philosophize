@@ -10855,7 +10855,7 @@ by `node scripts/countertest-dialogue.mjs`.
 
 ### AP1 · Every spoken line has exactly one speaker, from the cast
 
-A spoken beat carries `speaker: 'tophat' | 'cap' | 'plain' | 'ponytail'`. The player draws that
+A spoken beat carries `speaker: 'tophat' | 'cap' | 'plain' | 'blazer'`. The player draws that
 speaker's face beside the words (`SpeakerTag.tsx`), so the reader knows whose line it is
 before reading it. A beat with no speaker in a dialogue lesson is a narrator slipping
 back in.
@@ -10863,7 +10863,7 @@ back in.
 ### AP2 · A voice is locked to a costume
 
 The Top Hat is `en-GB-Chirp3-HD-Algieba`, the plain mascot `en-GB-Chirp3-HD-Sadachbia`,
-the newsboy cap `en-AU-Chirp3-HD-Zubenelgenubi`, and the ponytail — the woman, added
+the newsboy cap `en-AU-Chirp3-HD-Zubenelgenubi`, and the blazer — the woman, added
 2026-09-30 — `en-US-Chirp3-HD-Kore`: in every dialogue lesson, forever, so a reader
 learns the four people by ear. No two share a voice or a costume (`check:dialogue`). No line names a voice: `scripts/render-narration.mjs`
 reads it from the cast, `install-narration` refuses a take in any other, and
@@ -10964,7 +10964,7 @@ the friction the idea needs, not in a fixed order.
 | **Top hat** | Algieba, en-GB | the TEACHER | He names the idea the others have just walked into and says why it matters — as a story, patient, precise, a little amused. |
 | **Newsboy cap** | Zubenelgenubi, en-AU | KIND | Assumes the best of everybody, helps before he is asked, takes a loss without complaint. |
 | **Plain** | Sadachbia, en-GB | PASSIVE-AGGRESSIVE | Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine." |
-| **Ponytail** | Kore, en-US | OBLIVIOUS | Cheerful and one step behind: misses the point, takes the figure of speech literally, asks what the reader was too polite to ask. |
+| **Blazer** | Kore, en-US | OBLIVIOUS | Cheerful and one step behind: misses the point, takes the figure of speech literally, asks what the reader was too polite to ask. |
 
 The traits live in `cast.ts` beside the voices (`trait`, `character`), and a script is
 written FROM them:
@@ -10982,9 +10982,14 @@ written FROM them:
   by accident.
 - **A trait is a lean, not a tic.** One dry aside in a lesson lands; one in every line
   is a catchphrase. The teacher may be warm; the kind one may be firm.
-- **The ponytail is a woman and is drawn as one** by her silhouette — a ponytail off the
-  back of the skull and a flared skirt (`wardrobe.ts`, costume `ponytail`) — because a
-  solid-ink figure with no face can only say it with its outline.
+- **The fourth is a woman and is drawn as a PROFESSIONAL one** (`wardrobe.ts`, costume
+  `blazer`): hair up in a low chignon, a blazer and a narrow knee-length pencil skirt.
+  The first drawing was a ponytail and a flared A-line skirt, and the owner rejected it
+  in a line — *"Looks too childish. The skirt is way too wide. I want a more
+  professional look."* A solid-ink figure with no face says woman and adult with its
+  OUTLINE (the chignon, the straight skirt) and says suit with PAPER LINES inside it —
+  two lapels, a blouse in the V, the jacket's hem — which is the hat seam's trick (AA6)
+  doing a second job.
 
 `economics-foundations-1` was written before the traits were named, and its three
 speakers are left as they were voiced; the traits bind every lesson written from here.

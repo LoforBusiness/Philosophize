@@ -99,7 +99,7 @@ function textOf(stem) {
 
 const SOBER = new Set(RULE_SOBER);
 const applied = side.wardrobeReach || {};
-const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [], cross: [] };
+const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [], cross: [], slots: [] };
 
 /**
  * The visitor cues, if any. AA7 checks HIM where he stands, which `fits` cannot:
@@ -126,6 +126,24 @@ const HEAD_R = 20;
 // The tightest honest fit in the wardrobe is wide_brim at 0.22 units proud, so
 // anything under half a unit is a rounding difference rather than a gap.
 const SEAT_SLACK = 0.5;
+
+// AA11 — A COSTUME HAS NO MORE PIECES THAN THE FIGURE HAS SLOTS. Stickman draws a
+// costume through a FIXED number of hooks (WORN_SLOTS) and drops whatever is past it
+// without a word, and this sheet-and-check side draws every piece — so an eleven-piece
+// suit looked complete here and would have reached a phone as a bun and two shoulders.
+{
+  const stick = fs.readFileSync(path.join(REPO, DIR, 'Stickman.tsx'), 'utf8');
+  const m = /const WORN_SLOTS = ([0-9]+);/.exec(stick);
+  if (!m) bad.slots.push('Stickman.tsx declares no WORN_SLOTS to hold a costume to');
+  else for (const c of W.COSTUMES) {
+    if (c.pieces.length > +m[1]) bad.slots.push(`${c.id} has ${c.pieces.length} pieces and the figure draws ${m[1]}`);
+    // PAPER is drawn over the ink it separates, so it has to come after it.
+    const firstPaper = c.pieces.findIndex((q) => q.paper);
+    if (firstPaper >= 0 && c.pieces.slice(firstPaper).some((q) => !q.paper && q.at !== 'handR' && q.at !== 'handL' && !q.ring)) {
+      bad.slots.push(`${c.id} lists an ink piece after a paper one; the ink would cover the line`);
+    }
+  }
+}
 for (const c of W.COSTUMES) {
   // HEADWEAR, not everything anchored to the head. A monocle's CHAIN hangs to
   // y +33 and satisfies any overlap test on its own, so with the chain counted
@@ -306,6 +324,7 @@ report('band', 'AA2 no costume reaches outside its lesson band (H59)');
 report('twins', 'AA3 neighbours never dress the same (Q)');
 report('heavy', 'AA4 a grave lesson wears nothing loud (N11)');
 report('floats', 'AA6 no hat floats — headwear overlaps the skull', 'see seatY() in wardrobe.ts');
+report('slots', 'AA11 every costume fits the slots the figure draws, ink before paper');
 report('visitor', 'AA7 the visitor fits where he actually stands', 'run: npm run make:visitor && npm run make:wardrobe');
 // ── AA10 · HE MAY NOT WALK THROUGH THE LEAD ─────────────────────────────────
 //

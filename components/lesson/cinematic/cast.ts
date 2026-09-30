@@ -23,9 +23,9 @@
 //
 // ZERO IMPORTS, like rig.ts and tone.ts, so the scripts read it in plain Node.
 
-export type Speaker = 'tophat' | 'cap' | 'plain' | 'ponytail';
+export type Speaker = 'tophat' | 'cap' | 'plain' | 'blazer';
 
-export const SPEAKERS: readonly Speaker[] = ['tophat', 'cap', 'plain', 'ponytail'];
+export const SPEAKERS: readonly Speaker[] = ['tophat', 'cap', 'plain', 'blazer'];
 
 export interface Voice {
   /** Google's voice name, exactly as the Text-to-Speech API takes it. */
@@ -37,7 +37,7 @@ export interface Voice {
 
 export interface CastMember {
   /** The wardrobe costume id this speaker always wears (wardrobe.ts COSTUMES). */
-  costume: 'magistrate' | 'stroller' | 'plain' | 'ponytail';
+  costume: 'magistrate' | 'stroller' | 'plain' | 'blazer';
   /** What the face tag is read out as to a screen reader. */
   label: string;
   voice: Voice;
@@ -67,10 +67,10 @@ export const CAST: Record<Speaker, CastMember> = {
     trait: 'passive-aggressive',
     character: 'The passive-aggressive one. Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine". He needles the OTHER CHARACTERS and the situation — never the reader, and never how clever somebody is (§7).',
   },
-  // The fourth voice (2026-09-30): an American woman, in a ponytail and a skirt — the
-  // one silhouette here that is not a hat (wardrobe.ts PONYTAIL, SKIRT).
-  ponytail: {
-    costume: 'ponytail', label: 'Ponytail', voice: { name: 'en-US-Chirp3-HD-Kore', languageCode: 'en-US', rate: 1 },
+  // The fourth voice (2026-09-30): an American woman, drawn as a professional — hair up
+  // in a chignon, a blazer and a pencil skirt (wardrobe.ts CHIGNON, SUIT).
+  blazer: {
+    costume: 'blazer', label: 'Blazer', voice: { name: 'en-US-Chirp3-HD-Kore', languageCode: 'en-US', rate: 1 },
     trait: 'oblivious',
     character: 'The oblivious one. Cheerful, and one step behind: she misses the point, takes the figure of speech literally, and asks the question the reader was too polite to ask. Never stupid — her wrong turn is the one the lesson is about to correct.',
   },
