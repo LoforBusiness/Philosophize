@@ -69,7 +69,7 @@ export const PASS_LINES: readonly PassLine[] = [
     id: 'lessons',
     label: `All ${SHAPE.lessons} lessons`,
     free: null,
-    pass: `All ${SHAPE.lessons}, across ${SHAPE.branches} branches`,
+    pass: `All ${SHAPE.lessons}, across ${SHAPE.branches} courses`,
   },
   {
     id: 'narrated',

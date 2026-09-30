@@ -77,7 +77,7 @@ export const SUBJECTS: readonly Subject[] = [
   {
     slug: 'economics', name: 'Economics & Finance', short: 'Economics',
     blurb: 'Money, markets and why prices move',
-    hue: '#3A6E86', status: 'soon', courses: [],
+    hue: '#3A6E86', status: 'live', courses: ['economics'],
   },
   {
     slug: 'science', name: 'Science & Technology', short: 'Science & Tech',
@@ -103,6 +103,7 @@ export const COURSE_LINE: Record<BranchKey, string> = {
   ethics: 'Morality, right action & how to live',
   aesthetics: 'Beauty, art, creativity & aesthetic experience',
   'political-philosophy': 'Society, power, justice & political systems',
+  economics: 'Scarcity, choice & why prices move',
 };
 
 export function getSubject(slug: string): Subject | undefined {

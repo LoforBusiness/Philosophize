@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
+import { subjectOfBranch } from '@/data/subjects';
 import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
@@ -648,7 +649,11 @@ export default function LessonScreen() {
   // into the lesson and nothing needs doing in `onUnlocked`. Where it would not
   // (a Pass holder further along a unit than they have read), `LessonLocked`
   // names the lesson to open instead, and shows no paywall.
-  if (!introSeen && !testing && !afterIntro) {
+  // The professor lectures on PHILOSOPHY (professorScript.ts names its six branches),
+  // so he stands in front of a philosophy lesson only; another subject's lesson opens
+  // straight onto its own gate.
+  const philosophyLesson = subjectOfBranch(result?.branch.slug ?? '')?.slug === 'philosophy';
+  if (!introSeen && !testing && !afterIntro && philosophyLesson) {
     return (
       <ScreenTransition bg={Page}>
         <ProfessorIntro onDone={() => { markIntroSeen(); setAfterIntro(true); }} />

@@ -162,6 +162,8 @@ const PREFIX: Record<string, BranchKey> = {
   ethics: 'ethics',
   aesthetics: 'aesthetics',
   political: 'political-philosophy',
+  // Economics & Finance's first course: scenes are named econ<N>Scene.
+  econ: 'economics',
   // The three older scenes, from before scenes were named for their branch.
   valid: 'logic',
   strong: 'logic',

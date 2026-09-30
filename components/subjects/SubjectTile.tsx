@@ -32,7 +32,7 @@ export default function SubjectTile({
 }) {
   const soon = subject.status === 'soon';
   const label = `${subject.name}${soon ? ', coming soon' : ''}`;
-  const badge = soon ? 'SOON' : `${subject.courses.length} COURSES`;
+  const badge = soon ? 'SOON' : `${subject.courses.length} ${subject.courses.length === 1 ? 'COURSE' : 'COURSES'}`;
   const artH = wide ? heroArtHeight(size) : tileArtHeight(size);
 
   return (

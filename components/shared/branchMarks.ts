@@ -23,6 +23,7 @@ export const BRANCH_SHORT: Record<string, string> = {
   metaphysics: 'METAPHYSICS',
   aesthetics: 'AESTHETICS',
   'political-philosophy': 'POLITICS',
+  economics: 'ECONOMICS',
 };
 
 export const BRANCH_ICON: Record<string, SketchIconName> = {
@@ -32,6 +33,7 @@ export const BRANCH_ICON: Record<string, SketchIconName> = {
   metaphysics: 'spiral',
   aesthetics: 'palette',
   'political-philosophy': 'building',
+  economics: 'database',
 };
 
 // ── AND THE SEVEN SUBJECTS (2026-09-29) ─────────────────────────────────────

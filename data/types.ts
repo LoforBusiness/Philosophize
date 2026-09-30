@@ -202,6 +202,8 @@ export interface Branch {
   icon: string;
   color: string;
   paths: Path[];
+  /** More courses or lessons are on the way: the road ends in a MORE COMING SOON sign. */
+  more?: boolean;
 }
 
 // ─── Session state ───────────────────────────────────────────────────────────

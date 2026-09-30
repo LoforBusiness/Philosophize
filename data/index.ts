@@ -5,6 +5,7 @@ import epistemologyBranch from './branches/epistemology';
 import metaphysicsBranch from './branches/metaphysics';
 import aestheticsBranch from './branches/aesthetics';
 import politicalBranch from './branches/political-philosophy';
+import economicsBranch from './branches/economics';
 
 export const ALL_BRANCHES: Branch[] = [
   logicBranch,
@@ -13,6 +14,7 @@ export const ALL_BRANCHES: Branch[] = [
   metaphysicsBranch,
   aestheticsBranch,
   politicalBranch,
+  economicsBranch,
 ];
 
 export function getBranchBySlug(slug: string): Branch | undefined {

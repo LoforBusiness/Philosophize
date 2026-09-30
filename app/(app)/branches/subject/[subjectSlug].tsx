@@ -93,7 +93,7 @@ export default function SubjectScreen() {
                 </Text>
               </View>
             </View>
-          ) : !introSeen ? (
+          ) : !introSeen && subject.slug === 'philosophy' ? (
             <View style={styles.pad}>
               <Text style={styles.section}>START HERE</Text>
               <Card
@@ -122,7 +122,7 @@ export default function SubjectScreen() {
             </View>
           ) : (
             <View style={styles.pad} nativeID="subject-courses">
-              <Text style={styles.section}>{subject.courses.length} COURSES</Text>
+              <Text style={styles.section}>{subject.courses.length} {subject.courses.length === 1 ? 'COURSE' : 'COURSES'}</Text>
               <View style={styles.list}>
                 {subject.courses.map((slug) => {
                   const branch = getBranchBySlug(slug);

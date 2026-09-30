@@ -15,13 +15,16 @@ import { useUserDataStore } from '@/stores/userDataStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
-import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey } from '@/constants/design';
+import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
+import { subjectOfBranch } from '@/data/subjects';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 import { openReview, backFromBranch } from '@/components/lesson/lessonNav';
 import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+/** A course with no photograph: an empty source, so the masthead shows its own hue. */
+const NO_ART = { uri: '' };
 
 interface BranchPres {
   desc: string;
@@ -35,6 +38,7 @@ const PRES: Record<string, BranchPres> = {
   ethics: { desc: 'Morality, right action & how humans should live', glyph: 'scales', pills: ['MORALITY', 'VIRTUE', 'JUSTICE'] },
   aesthetics: { desc: 'Beauty, art, creativity & aesthetic experience', glyph: 'gem', pills: ['BEAUTY', 'ART', 'TASTE'] },
   'political-philosophy': { desc: 'Society, power, justice & political systems', glyph: 'flag', pills: ['SOCIETY', 'POWER', 'JUSTICE'] },
+  economics: { desc: 'Scarcity, choice & why prices move', glyph: 'book', pills: ['SCARCITY', 'CHOICE', 'PRICES'] },
 };
 const ORDER = ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', 'political-philosophy'];
 
@@ -184,6 +188,24 @@ export default function BranchDetailScreen() {
       });
     }
   }
+  // MORE ON THE WAY. A course that is still being written ends its road in a sign
+  // rather than in its last lesson, so finishing that lesson walks the figure up to
+  // it. It is never tappable (BranchWorld draws a signpost with no press), it takes
+  // the last unit's ids so the road starts no new unit for it, and `firstUndone`
+  // lands on it once every lesson is done — which is where the reader should stand.
+  const lastUnit = units[units.length - 1]?.unit;
+  if (branch?.more && lastUnit) {
+    worldLessons.push({
+      id: `${branch.slug}-more`,
+      title: 'MORE COMING SOON',
+      unitId: lastUnit.id,
+      unitSlug: lastUnit.slug,
+      unitTitle: lastUnit.name,
+      done: false,
+      accessible: false,
+      signpost: true,
+    });
+  }
 
   /**
    * Where a stop sits on the road.
@@ -295,7 +317,10 @@ export default function BranchDetailScreen() {
   }
 
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
-  const roman = ROMAN[Math.max(0, ORDER.indexOf(branch.slug))];
+  const subject = subjectOfBranch(branch.slug);
+  const kicker = !subject || subject.slug === 'philosophy'
+    ? `BRANCH ${ROMAN[Math.max(0, ORDER.indexOf(branch.slug))]}`
+    : `${subject.short.toUpperCase()} · COURSE ${ROMAN[Math.max(0, (subject.courses as readonly string[]).indexOf(branch.slug))]}`;
 
   const openLesson = (unit: Unit, lesson: Lesson) =>
     router.push(`/(app)/branches/${branch.slug}/${unit.slug}/lesson/${lesson.id}`);
@@ -414,13 +439,13 @@ export default function BranchDetailScreen() {
               `constants/branchArt.ts` and CLAUDE.md §19 — the scrim's three stops
               were measured, not chosen, and stay exactly as imported. */}
           <ImageBackground
-            source={BRANCH_ART[branch.slug]}
-            style={styles.masthead}
+            source={BRANCH_ART[branch.slug] ?? NO_ART}
+            style={[styles.masthead, !BRANCH_ART[branch.slug] && { backgroundColor: BRANCH[branch.slug as BranchKey] ?? C.ink }]}
             imageStyle={styles.mastImg}
             resizeMode="cover"
           >
             <LinearGradient colors={MAST_SCRIM} style={StyleSheet.absoluteFill} />
-            <Text style={styles.mastKicker}>BRANCH {roman}</Text>
+            <Text style={styles.mastKicker}>{kicker}</Text>
             <Text style={styles.mastTitle}>{branch.name.toUpperCase()}</Text>
             <Text style={styles.mastSub}>{pres.desc}</Text>
             {pres.pills.length > 0 && (
