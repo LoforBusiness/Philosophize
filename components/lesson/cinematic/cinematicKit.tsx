@@ -837,6 +837,23 @@ export function carry(
 }
 
 /**
+ * Where carry slot `k` STARTS this beat — the value that was on screen at the tap —
+ * without writing the slot. A figure that WALKS needs it: the walk has to begin where
+ * he stands, not where the script says the last beat left him, or a tap mid-walk and a
+ * step back both put him there in one frame. `prev` is the source on the lesson's very
+ * first beat, when nothing has been drawn. Call it before that slot's `carry`.
+ */
+export function carrySource(cv: Carry, k: number, n: number, prev: number): number {
+  'worklet';
+  if (cv.seen.value !== n) {
+    cv.seen.value = n;
+    for (let j = 0; j < cv.from.length; j++) cv.from[j].value = cv.last[j].value;
+  }
+  const a = cv.from[k].value;
+  return a === a ? a : prev;
+}
+
+/**
  * WHAT THE SCENE LOOKS LIKE AT THE OPTION THE READER IS INDICATING.
  *
  * `SceneApi.pickPos` is 0..1 across a `poll`'s or a `sort`'s options in the

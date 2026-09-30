@@ -202,5 +202,27 @@ head('§8 · quotes are not a feature outside lessons any more (2026-09-29)');
   ok(!/id: 'thinkers'|id: 'quotations'|id: 'quizzes'/.test(pass), 'the Pass chart\'s free tiles no longer name thinkers, quotations or quizzes');
 }
 
+head('§9 · the branch badges count philosophy\'s branches only (2026-09-29 review)');
+{
+  // "One Branch Complete", "The Whole Tree", "Every Unit" and their siblings were
+  // written for philosophy's six branches of 41 lessons. Economics opened with ONE
+  // lesson, so counting it would make finishing that lesson "100% of a branch" — and a
+  // badge, once earned, is kept and cloud-synced for ever. progressStats reads its
+  // branch and unit figures through lib/utils/branchMastery.ts, and this holds it.
+  const fs = await import('node:fs');
+  const M = await import('@/lib/utils/branchMastery');
+  const econDone = M.branchMastery({ economics: 1 }, {});
+  ok(!('economics' in econDone.mastery), 'a course of another subject is not a branch the badges count',
+    Object.keys(econDone.mastery).join(' '));
+  ok(Object.keys(econDone.mastery).length === 6, "the badges count philosophy's six branches");
+  ok(econDone.unitsComplete === 0, 'finishing the economics unit completes no badge unit',
+    `${M.branchMastery({}, { 'economics-foundations': 1 }).unitsComplete} unit(s)`);
+  const ethicsAll = M.branchMastery({ ethics: 41 }, {});
+  ok(ethicsAll.mastery.ethics === 100, 'a finished philosophy branch still counts', `ethics ${ethicsAll.mastery.ethics}%`);
+  const src = fs.readFileSync('stores/userDataStore.ts', 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+  ok(/branchMastery\(/.test(src) && !/for \(const b of ALL_BRANCHES\)/.test(src),
+    'progressStats takes its branch figures from branchMastery, not from every branch');
+}
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);

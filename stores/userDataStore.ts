@@ -20,6 +20,7 @@ import { mentionsFor } from '@/data/lessonMentions';
 import { restDaysToSpend } from '@/lib/utils/streak';
 import { track } from '@/lib/posthog';
 import { writePinnedQuote } from '@/lib/widget/pin';
+import { branchMastery } from '@/lib/utils/branchMastery';
 
 // A quote the user has bookmarked. Self-contained so the profile/stats
 // screens never need to look the philosopher back up.
@@ -664,12 +665,9 @@ export function progressStats(s: StatSource): ProgressStats {
   // count it for something. Those actions grant real XP into `totalXP` today, so
   // adding it again here would pay for the same bookmark twice.
   const totalXP = s.totalXP;
-  const mastery: Record<string, number> = {};
-  for (const b of ALL_BRANCHES) {
-    const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
-    const done = s.lessonsByBranch[b.slug] ?? 0;
-    mastery[b.slug] = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-  }
+  // PHILOSOPHY'S branches and units only — see lib/utils/branchMastery.ts: a
+  // one-lesson Economics course counted here would award branch badges for ever.
+  const { mastery, unitsComplete } = branchMastery(s.lessonsByBranch, s.lessonsByUnit);
 
   // Aced at least once. `best`/`total` are the RECORD, not the last attempt, so
   // this cannot be lost by replaying a quiz badly.
@@ -693,13 +691,6 @@ export function progressStats(s: StatSource): ProgressStats {
   const branchesTouched = Object.values(mastery).filter((v) => v > 0).length;
   const branchesHalf = Object.values(mastery).filter((v) => v >= 50).length;
 
-  // A unit is finished when its completed count reaches its lesson count.
-  let unitsComplete = 0;
-  for (const b of ALL_BRANCHES) {
-    for (const p of b.paths) {
-      if (p.lessons.length > 0 && (s.lessonsByUnit[p.id] ?? 0) >= p.lessons.length) unitsComplete++;
-    }
-  }
 
   const branchesComplete = Object.values(mastery).filter((v) => v >= 100).length;
 

@@ -309,7 +309,7 @@ export const MUST_STAMP: Record<string, string> = {
   'aesthetics-aesthetics-7': 'b3c64b56af93',
   'aesthetics-aesthetics-8': '1079635fedc7',
   'aesthetics-aesthetics-9': '67d3424cf1e2',
-  'economics-foundations-1': '2b6f0b5c5836',
+  'economics-foundations-1': '2d4af0dbbb7a',
   'epistemology-knowledge-1': '2377c8c1d823',
   'epistemology-knowledge-10': '6d987ce5ff52',
   'epistemology-knowledge-11': '4304ccdb4312',

@@ -12,7 +12,7 @@ import {
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, facing,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
@@ -146,13 +146,16 @@ function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: 
   return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
 }
 /**
- * One figure's walk and facing for a beat: he walks from where the last beat left
- * him, FACING THE WAY HE GOES (C18), then turns to face whom the beat has him face.
+ * One figure's walk and facing for a beat. He walks from WHERE HE IS ON SCREEN — `src`,
+ * read out of the carry — not from where the script says the last beat left him: a
+ * tap mid-walk, or a step back, would otherwise put him there in one frame (group L;
+ * the final review found 100-unit jumps). He faces the way he goes (C18), then turns
+ * to whom the beat has him face.
  */
-function walkOf(xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, from: number, t: number, b: number) {
+function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
-  const xp = n > 0 ? xs[p] : from;
+  const xp = src;
   const xn = xs[n];
   const walking = Math.abs(xn - xp) > 1;
   const walkDur = walking ? moveTr(xp, xn, TR) : 0;
@@ -193,8 +196,10 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     };
 
     // ── the shopper ─────────────────────────────────────────────────────────
-    const wp = walkOf(PL_X, PL_D, PL_P, n, -24, t, b);
-    const xPl = n === 0 ? lerp(wp.xp, wp.xn, wp.walkU) : carry(cv, 0, n, wp.xp, lerp(wp.xp, wp.xn, wp.walkU), wp.walking ? 1 : tr);
+    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    const src0 = carrySource(cv, 0, n, -24);
+    const wp = walkOf(src0, PL_X, PL_D, PL_P, n, t, b);
+    const xPl = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
     let sp = wp.s;
     // b0: the note held out as he arrives
     if (A_ENTER[n]) sp = hand(sp, xPl, wp.dirV, 1, xPl + 16, GROUND - 58, st(0.7, 0.9));
@@ -214,8 +219,10 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
-    const wt = walkOf(TH_X, TH_D, TH_P, n, -40, t, b);
-    const xTh = n === 0 ? wt.xn : carry(cv, 1, n, wt.xp, lerp(wt.xp, wt.xn, wt.walkU), wt.walking ? 1 : tr);
+    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    const src1 = carrySource(cv, 1, n, -40);
+    const wt = walkOf(src1, TH_X, TH_D, TH_P, n, t, b);
+    const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
     let stp = wt.s;
     // b2: he tips his hat once he has arrived
     if (A_ARRIVE[n]) {
@@ -230,8 +237,10 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, tr) : mixStance(prevTh, stp, tr));
 
     // ── the stall-holder, behind his counter ────────────────────────────────
-    const wc = walkOf(CP_X, CP_D, CP_P, n, CP_X[0], t, b);
-    const xCp = n === 0 ? wc.xn : carry(cv, 2, n, wc.xp, lerp(wc.xp, wc.xn, wc.walkU), wc.walking ? 1 : tr);
+    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    const src2 = carrySource(cv, 2, n, CP_X[0]);
+    const wc = walkOf(src2, CP_X, CP_D, CP_P, n, t, b);
+    const xCp = carry(cv, 2, n, wc.xp, wc.xn, wc.walking ? wc.walkU : tr);
     let sc = wc.s;
     // b0: a hand resting on his counter, squaring the goods
     if (A_ENTER[n]) sc = hand(sc, xCp, wc.dirV, 1, xCp - 14, TOP - 4, 0.75);
