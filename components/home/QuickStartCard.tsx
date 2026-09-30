@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, type LayoutChangeEvent } from 'react-native';
 import { openLesson } from '@/components/lesson/lessonNav';
-import { openIntro } from '@/components/professor/openIntro';
+import { openIntro, PROFESSOR_INTRO_ON } from '@/components/professor/openIntro';
 import Card from '@/components/ui/Card';
 import { mix } from '@/components/shared/tone';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -74,7 +74,7 @@ export default function QuickStartCard({ style }: Props) {
 
   // The intro comes first, and it is offered even to a reader with nothing left to
   // read, so the card's early return sits BELOW it.
-  const intro = !introSeen;
+  const intro = PROFESSOR_INTRO_ON && !introSeen;
   // The intro is a philosophy lecture, so it opens on philosophy's pictures.
   const subject = ((intro ? 'philosophy' : subjectOfBranch(pick?.branch.slug ?? '')?.slug) ?? 'philosophy') as QsSubject;
   const set = QS_ART[subject] ?? QS_ART.philosophy;

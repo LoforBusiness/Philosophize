@@ -50,7 +50,11 @@ const ASK_CEILING = 0.20;
 /** How many lessons declare their picture in one line. May only go UP. */
 const THEME_FLOOR = 58;
 
-const { ALL_BRANCHES } = await import('@/data');
+// The live roads AND philosophy's six retired branches (2026-09-30): the retired ones
+// are out of the app, not out of the rule book — they stay unlike their neighbours
+// until each is rebuilt.
+const DATA = await import('@/data');
+const ALL_BRANCHES = [...DATA.LEGACY_BRANCHES, ...DATA.ALL_BRANCHES];
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {

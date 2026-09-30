@@ -2,9 +2,12 @@
 // THE SUBJECTS — what Ashmere teaches, in one list (2026-09-29).
 //
 // The owner took the app from philosophy alone to seven subjects, Brilliant's shape:
-// swipe through them on Home, browse them as tiles on Learn, open one to reach its
-// courses. Philosophy is the only one with courses today — its six branches, each a
-// walked road — and the other six open onto a road that ends at a Coming-soon sign.
+// swipe through them on Home, browse them as tiles on Learn, open one to walk its road.
+//
+// ONE ROAD PER SUBJECT (2026-09-30): "I only want one road for each subject, not a
+// bunch of different ones." So `courses` holds exactly one branch for every subject,
+// all seven are live, and a tap on a subject opens that road directly. Philosophy's
+// six old branches are retired (data/index.ts LEGACY_BRANCHES) until they are rebuilt.
 //
 // Home's carousel, the Learn grid and every subject page read THIS list, so they
 // cannot disagree about what a subject is called, what colour it is or whether it
@@ -54,12 +57,12 @@ export const SUBJECTS: readonly Subject[] = [
     slug: 'philosophy', name: 'Philosophy', short: 'Philosophy',
     blurb: 'Reality, knowledge, right and wrong',
     hue: '#2A4343', status: 'live',
-    courses: ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', 'political-philosophy'],
+    courses: ['philosophy'],
   },
   {
     slug: 'psychology', name: 'Psychology', short: 'Psychology',
     blurb: 'How minds think, feel and decide',
-    hue: '#4E5578', status: 'soon', courses: [],
+    hue: '#4E5578', status: 'live', courses: ['psychology'],
   },
   {
     // U+2060 WORD JOINER after the hyphen: the name wrapped as 'Self-' / 'Help' on
@@ -67,12 +70,12 @@ export const SUBJECTS: readonly Subject[] = [
     // a joiner is default-ignorable, so it draws nothing and only forbids the break.
     slug: 'personal-growth', name: 'Personal Growth & Self-\u2060Help', short: 'Personal Growth',
     blurb: 'Habits, focus and a better you',
-    hue: '#6E7A4A', status: 'soon', courses: [],
+    hue: '#6E7A4A', status: 'live', courses: ['personal-growth'],
   },
   {
     slug: 'business', name: 'Business & Leadership', short: 'Business',
     blurb: 'Leading people and building things',
-    hue: '#7A5A2E', status: 'soon', courses: [],
+    hue: '#7A5A2E', status: 'live', courses: ['business'],
   },
   {
     slug: 'economics', name: 'Economics & Finance', short: 'Economics',
@@ -82,12 +85,12 @@ export const SUBJECTS: readonly Subject[] = [
   {
     slug: 'science', name: 'Science & Technology', short: 'Science & Tech',
     blurb: 'How the world works, and what we built',
-    hue: '#2F6F73', status: 'soon', courses: [],
+    hue: '#2F6F73', status: 'live', courses: ['science'],
   },
   {
     slug: 'history', name: 'History & Politics', short: 'History',
     blurb: 'Power, people and how we got here',
-    hue: '#8E5646', status: 'soon', courses: [],
+    hue: '#8E5646', status: 'live', courses: ['history'],
   },
 ];
 
@@ -104,7 +107,18 @@ export const COURSE_LINE: Record<BranchKey, string> = {
   aesthetics: 'Beauty, art, creativity & aesthetic experience',
   'political-philosophy': 'Society, power, justice & political systems',
   economics: 'Scarcity, choice & why prices move',
+  philosophy: 'The questions underneath everything else',
+  psychology: 'How minds think, feel & decide',
+  'personal-growth': 'Habits, focus & a better you',
+  business: 'Leading people & building things',
+  science: 'How the world works & what we built',
+  history: 'Power, people & how we got here',
 };
+
+/** The one road a subject has. */
+export function roadOf(subject: Subject): BranchKey {
+  return subject.courses[0];
+}
 
 export function getSubject(slug: string): Subject | undefined {
   return SUBJECTS.find((s) => s.slug === slug);

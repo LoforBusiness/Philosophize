@@ -226,6 +226,12 @@ import { Ethics41Lesson } from '@/components/lesson/cinematic/ethics41Scene';
 import { Aesthetics41Lesson } from '@/components/lesson/cinematic/aesthetics41Scene';
 import { Political41Lesson } from '@/components/lesson/cinematic/political41Scene';
 import { Econ1Lesson } from '@/components/lesson/cinematic/econ1Scene';
+import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
+import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
+import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
+import { Biz1Lesson } from '@/components/lesson/cinematic/biz1Scene';
+import { Sci1Lesson } from '@/components/lesson/cinematic/sci1Scene';
+import { Hist1Lesson } from '@/components/lesson/cinematic/hist1Scene';
 import { Metaphysics26Lesson } from '@/components/lesson/cinematic/metaphysics26Scene';
 import { Epistemology26Lesson } from '@/components/lesson/cinematic/epistemology26Scene';
 import { Logic24Lesson } from '@/components/lesson/cinematic/logic24Scene';
@@ -264,6 +270,7 @@ import { useUIStore } from '@/stores/uiStore';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import HardPaywall from '@/components/paywall/HardPaywall';
 import ProfessorIntro from '@/components/professor/ProfessorIntro';
+import { PROFESSOR_INTRO_ON } from '@/components/professor/openIntro';
 import { openedLesson, closedLesson } from '@/lib/analytics/lessonClock';
 
 const Page = '#FAFAF7';
@@ -532,6 +539,13 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'political-political-41': Political41Lesson,
   // Economics & Finance — the first dialogue lesson (LESSON_RULES group AP).
   'economics-foundations-1': Econ1Lesson,
+  // One road per subject (2026-09-30): each subject's first lesson, a dialogue lesson.
+  'philosophy-foundations-1': Phil1Lesson,
+  'psychology-foundations-1': Psych1Lesson,
+  'personal-growth-foundations-1': Growth1Lesson,
+  'business-foundations-1': Biz1Lesson,
+  'science-foundations-1': Sci1Lesson,
+  'history-foundations-1': Hist1Lesson,
   'metaphysics-being-26': Metaphysics26Lesson,
   'epistemology-knowledge-26': Epistemology26Lesson,
   'logic-arguments-24': Logic24Lesson,
@@ -656,7 +670,7 @@ export default function LessonScreen() {
   // so he stands in front of a philosophy lesson only; another subject's lesson opens
   // straight onto its own gate.
   const philosophyLesson = subjectOfBranch(result?.branch.slug ?? '')?.slug === 'philosophy';
-  if (!introSeen && !testing && !afterIntro && philosophyLesson) {
+  if (PROFESSOR_INTRO_ON && !introSeen && !testing && !afterIntro && philosophyLesson) {
     return (
       <ScreenTransition bg={Page}>
         <ProfessorIntro onDone={() => { markIntroSeen(); setAfterIntro(true); }} />

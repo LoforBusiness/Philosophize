@@ -14,6 +14,7 @@
 //
 // Run: node scripts/validate-cinematic.mjs
 import fs from 'node:fs';
+import { LEGACY as RETIRED } from './lib/legacy.mjs';
 import path from 'node:path';
 import { MEASURE } from './lib/mustprobe.mjs';
 import { mustStamp } from './lib/muststamp.mjs';
@@ -409,7 +410,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 247;
+const SOLID_FLOOR = 253;
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //
@@ -486,14 +487,11 @@ for (const branch of fs.readdirSync(BRANCHES).sort()) {
 
 if (tally.length) {
   const errs = [];
-  // LEVEL IS A PHILOSOPHY RULE. Its six branches were levelled on purpose (§5) and
-  // must stay level; another subject's course grows on its own schedule — Economics
-  // opened with one lesson on 2026-09-29. The set is read out of data/subjects.ts,
-  // not retyped, so a course moved between subjects cannot slip past this.
-  const subjectsSrc = fs.readFileSync(path.join(process.cwd(), 'data', 'subjects.ts'), 'utf8');
-  const philo = subjectsSrc.match(/slug: 'philosophy'[\s\S]*?courses: \[([^\]]*)\]/)?.[1] ?? '';
-  const PHILOSOPHY = new Set([...philo.matchAll(/'([a-z-]+)'/g)].map((m) => m[1]));
-  if (PHILOSOPHY.size !== 6) throw new Error(`data/subjects.ts: expected philosophy's six courses, read ${[...PHILOSOPHY].join(', ') || 'none'}`);
+  // LEVEL IS A RULE ABOUT PHILOSOPHY'S SIX OLD BRANCHES. They were levelled on purpose
+  // (§5) and stay level while they wait to be rebuilt; a subject's one road
+  // (2026-09-30) grows on its own schedule and opens with a single lesson. The set is
+  // read out of data/index.ts (scripts/lib/legacy.mjs), not retyped.
+  const PHILOSOPHY = RETIRED;
   const level = tally.filter((t) => PHILOSOPHY.has(t.branch));
   const nL = [...new Set(level.map((t) => t.lessons))];
   const nC = [...new Set(level.map((t) => t.cine))];

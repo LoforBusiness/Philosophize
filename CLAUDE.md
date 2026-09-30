@@ -1244,7 +1244,9 @@ they belong to, so the rule book has them and this file did not:
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
 
-- **Content:** 6 branches · **28 units** · **246 lessons**. **341 philosophers**
+- **Content (since 2026-09-30): seven roads, one per subject, each with its first
+  dialogue lesson (§23).** Philosophy's old library — 6 branches · **28 units** · **246
+  lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing.
 - **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
@@ -2205,6 +2207,10 @@ for a new reason: a trial that ENDS mid-lesson must not eject the reader
 
 ### The professor's intro, and why nothing plays it but the reader
 
+> **OFF SINCE 2026-09-30** (`PROFESSOR_INTRO_ON`): it lectures on philosophy's six
+> branches, which the app no longer shows (§23). Everything below is how it works
+> when it is switched back on.
+
 A professor stickman in a mortarboard walks into a lecture room, stops beside a
 chalkboard on an easel, and speaks six lines (about 36 seconds, the lessons' voice)
 on what the lessons are and what they are worth off the page — and as he speaks,
@@ -2540,7 +2546,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 247 of the 247 lessons are here now,
+**This is the format the app converged ON** — 253 of the 253 lessons are here now (the 246 retired ones included),
 and the card runner they replaced is unreachable (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8108,10 +8114,14 @@ Consequences to remember:
 > *"I have been thinking and decided I want to go all in on different subjects …
 > a similar design … as how Brilliant does theirs."*
 
-**Ashmere teaches seven subjects now.** Philosophy is live; Psychology, Personal
-Growth & Self-Help, Business & Leadership, Economics & Finance, Science &
-Technology and History & Politics are announced and empty. Spec:
-`docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
+**Ashmere teaches seven subjects now, and since 2026-09-30 each is ONE ROAD** with
+its first lesson on it (see "One road per subject" at the end of this section). Spec
+for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
+
+> **THE BULLETS BELOW DESCRIBE 2026-09-29, AND FOUR OF THEM ARE HISTORY NOW**: the
+> subject PAGE, the professor's intro on it, the back-to-subject navigation and the
+> coming-soon road are gone. They are kept for the findings in them (the POP_TO params
+> trap, the poster and wallpaper work). Read the last subsection for what is true.
 
 - **`data/subjects.ts` is the one list.** Name, short name, blurb, hue, status,
   courses. Home's carousel, the Learn grid and every subject page read it; a new
@@ -8133,9 +8143,8 @@ Technology and History & Politics are announced and empty. Spec:
   already in the Learn stack. `check:nav` holds all of it. Android's hardware back
   simply pops the stack (nothing handles BackHandler), so it can differ from the
   on-screen arrow here — deliberately not "fixed" to match.
-- **A coming-soon subject is a road, not a dead tile**: `ComingSoonRoad` is
-  `BranchWorld` with a hidden start stop and a `signpost` stop; the stickman
-  walks to a COMING SOON sign and stands there.
+- **A coming-soon subject was a road, not a dead tile** (`ComingSoonRoad`, deleted
+  2026-09-30 once every subject had a lesson).
 - **The drawings are POSTERS now (`components/subjects/posters.ts`, 2026-09-29, same
   day).** The owner: the subject cards were *"pretty boring … you could get more
   reference photos"*, and the pure-white Home and Learn *"not very exciting"*. Nine
@@ -8261,3 +8270,49 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   `wardrobeReach` and `poseReach` records from `mustBoxes.ts.json` — splice the new
   rows into a backup instead of keeping the harness's file. And a stickman's legs are a
   third of him, so a counter at a person's waist hides a stall-holder to the cap (AP10).
+
+### One road per subject, six first lessons (2026-09-30)
+
+> *"I now want one lesson for every single subject … I no longer want all the different
+> branches like epistemology, metaphysics, political philosophy … I only want one road
+> for each subject, not a bunch of different ones."*
+
+- **Every subject is live and is ONE road** (`data/subjects.ts`: `courses` holds one
+  branch; `roadOf(subject)`). The roads are `data/branches/<subject slug>/` —
+  philosophy, psychology, personal-growth, business, economics, science, history — each
+  one unit (`<slug>-foundations`) with one lesson (`<slug>-foundations-1`) and
+  `more: true`, so the road ends at MORE COMING SOON. `ALL_BRANCHES` is these seven, in
+  subject order. LESSON_RULES AP15; `check:subjects` holds it.
+- **A tap on a subject opens its road.** The subject page is deleted. Learn's grid and
+  `openSubject` push `/(app)/branches/<road>` (Home's shelf adds `from=home`); the
+  road's back arrow is `backFromBranch()` — `dismissTo('/(app)/branches')`, which pops
+  any older road too — then `router.navigate('/(app)')` when `from=home`. The masthead
+  wears the subject's poster (`CARD_POSTER`) and reads SUBJECT I…VII. `check:nav`.
+- **Philosophy's six old branches are RETIRED** (`LEGACY_BRANCHES`): 246 narrated lessons
+  no screen lists and `getLessonById` does not find. Their files, scenes and voices stay
+  (the owner will have them rebuilt as dialogue lessons), and so do the rules they were
+  written under — `scripts/lib/legacy.mjs` gives `validate-cinematic` (level 41),
+  `check-review` (a review per unit), `check-echo` and `check-ui` (colour sets) the
+  retired six by name. A reader's progress in them is KEPT and COUNTED —
+  `branchCountsFromUnits` runs over live and retired branches alike — so totals, badges
+  and the cloud snapshot lose nothing; it is simply not shown. **The badges still count
+  the six retired branches** (`branchMastery`), and what they should count on the new
+  roads is an open decision for the owner.
+- **Seven live road colours, found as a set** (`constants/design.ts`,
+  `scratchpad/roadhues2.mjs`): each the nearest colour to its subject's hue passing every
+  branch floor, with the pairwise floors held over the LIVE seven; the retired six are
+  held among themselves. Tightest live pair psychology/economics, ΔE 11.4.
+- **The professor's intro is OFF** (`PROFESSOR_INTRO_ON = false`, openIntro.ts): its
+  recording says "Philosophy has six branches". Quick Start is a lesson card and a free
+  reader meets the paywall directly. Re-record it about seven subjects to turn it back
+  on; `check:paywall-flow` is parked until then.
+- **The six first lessons** (AP3, AP12; scripts `phil1 psych1 growth1 biz1 sci1 hist1`):
+  a bicycle repair stand (What Is Philosophy?), a café taste test (What Is Psychology?),
+  two flowerpots (How Do People Change?), a lemonade stand (What Is a Business?), a
+  ladder and two balls (What Is Science?) and a broken shop window (What Is History?).
+  Each uses three of the four cast members, the top hat teaching in all six. Voiced
+  through the ledger for 5,089 characters (342,243 of 900,000 for September after it).
+- **Still philosophy-only, and flagged for the owner**: the seated welcome says "So… you
+  want to learn philosophy?", and the onboarding questions steer to a philosophy branch
+  (`startingBranch`, now ignored by Quick Start because no live road matches).
+

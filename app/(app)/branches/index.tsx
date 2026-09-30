@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenTransition from '@/components/shared/ScreenTransition';
 import SubjectTile from '@/components/subjects/SubjectTile';
 import { PAGE_PAD, GRID_GAP, tileSize } from '@/components/subjects/tileLayout';
-import { SUBJECTS, type Subject } from '@/data/subjects';
+import { SUBJECTS, roadOf, type Subject } from '@/data/subjects';
 import { branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { C } from '@/constants/design';
@@ -17,11 +17,10 @@ import { WALL } from '@/components/shared/tone';
 //
 // This tab listed philosophy's six branches until the owner took Ashmere to seven
 // subjects. It is Brilliant's course page now: the subjects as tiles, two to a row,
-// and a tap opens that subject's page — where philosophy's six branches, and the
-// professor's intro before them, now live.
+// and a tap opens that subject's ROAD — one road per subject since 2026-09-30.
 //
-// PHILOSOPHY GETS THE FULL WIDTH because it is the one subject with courses today,
-// which is also what makes seven tiles lay out: one across the top and six below.
+// PHILOSOPHY GETS THE FULL WIDTH because seven tiles lay out as one across the top
+// and six below, and it is the subject the app began with.
 //
 // The route is still `branches`, on purpose. Every lesson link, the road, the unit
 // reviews and the stack's `anchor: 'index'` are written against it, and renaming a
@@ -46,7 +45,8 @@ export default function LearnScreen() {
   const done = useMemo(() => branchCountsFromUnits(lessonsByUnit), [lessonsByUnit]);
   const tile = tileSize(width);
   const [lead, ...rest] = SUBJECTS;
-  const open = (s: Subject) => router.push(`/(app)/branches/subject/${s.slug}` as never);
+  // One road per subject (2026-09-30): a tile opens the road itself.
+  const open = (s: Subject) => router.push(`/(app)/branches/${roadOf(s)}` as never);
 
   return (
     <ScreenTransition bg={WALL}>
@@ -57,7 +57,7 @@ export default function LearnScreen() {
         </View>
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>Subjects</Text>
-          <Text style={styles.lede}>Pick one to open its courses.</Text>
+          <Text style={styles.lede}>Pick one to walk its road.</Text>
 
           <View nativeID="learn-grid">
             <SubjectTile subject={lead} done={doneIn(lead, done)} size={width - 2 * PAGE_PAD} wide onPress={() => open(lead)} />

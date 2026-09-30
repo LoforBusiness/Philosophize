@@ -6,16 +6,55 @@ import metaphysicsBranch from './branches/metaphysics';
 import aestheticsBranch from './branches/aesthetics';
 import politicalBranch from './branches/political-philosophy';
 import economicsBranch from './branches/economics';
+import philosophyBranch from './branches/philosophy';
+import psychologyBranch from './branches/psychology';
+import personalGrowthBranch from './branches/personal-growth';
+import businessBranch from './branches/business';
+import scienceBranch from './branches/science';
+import historyBranch from './branches/history';
 
+/**
+ * THE ROADS A READER CAN WALK: one for each subject (2026-09-30), in the subjects'
+ * own order (data/subjects.ts).
+ *
+ * The owner folded philosophy's six branches into one road — "I only want one road
+ * for each subject, not a bunch of different ones" — and that road holds the new
+ * introduction alone until the old lessons are rebuilt as dialogue lessons. So this
+ * list is what the app can open, count and offer.
+ */
 export const ALL_BRANCHES: Branch[] = [
+  philosophyBranch,
+  psychologyBranch,
+  personalGrowthBranch,
+  businessBranch,
+  economicsBranch,
+  scienceBranch,
+  historyBranch,
+];
+
+/**
+ * PHILOSOPHY'S SIX RETIRED BRANCHES and their 246 narrated lessons. NOT reachable in
+ * the app: no screen lists them and `getLessonById` does not search them, so a stale
+ * link or a saved id opens nothing. They are kept — files, scenes, voices — because
+ * each will be rebuilt as a dialogue lesson on philosophy's one road, and the checks
+ * go on holding them to every rule they were written under. A reader's progress in
+ * their units stays in `lessonsByUnit`, untouched and unshown.
+ */
+export const LEGACY_BRANCHES: Branch[] = [
   logicBranch,
   ethicsBranch,
   epistemologyBranch,
   metaphysicsBranch,
   aestheticsBranch,
   politicalBranch,
-  economicsBranch,
 ];
+
+/**
+ * Every branch a reader may hold PROGRESS in: the live roads and the retired six.
+ * The per-unit and per-branch counts are kept over all of them, so nothing a reader
+ * finished is dropped from their totals, their badges or their cloud snapshot.
+ */
+const PROGRESS_BRANCHES: Branch[] = [...ALL_BRANCHES, ...LEGACY_BRANCHES];
 
 export function getBranchBySlug(slug: string): Branch | undefined {
   return ALL_BRANCHES.find((b) => b.slug === slug);
@@ -63,7 +102,7 @@ export function branchCountsFromUnits(
   lessonsByUnit: Record<string, number>
 ): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const branch of ALL_BRANCHES) {
+  for (const branch of PROGRESS_BRANCHES) {
     let total = 0;
     for (const path of branch.paths) {
       total += Math.max(0, Math.min(path.lessons.length, lessonsByUnit[path.id] ?? 0));
@@ -166,7 +205,7 @@ export function unitsFromBranchCounts(
   lessonsByBranch: Record<string, number>
 ): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const branch of ALL_BRANCHES) {
+  for (const branch of PROGRESS_BRANCHES) {
     let remaining = Math.max(0, lessonsByBranch[branch.slug] ?? 0);
     for (const path of branch.paths) {
       const take = Math.min(path.lessons.length, remaining);

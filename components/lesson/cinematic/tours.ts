@@ -52,6 +52,8 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'aesthetics-aesthetics-6': [null, [[0, 238, 400, 274, 0.72, 9]], null, null, null, null, null, null, null, null, null],
   'aesthetics-aesthetics-7': [[[65, 397, 45, 109, 1.2, 9]], [[52, 276, 322, 230, 0.94, 9]], null, [[0, 98, 400, 412, 0.91, 9]], null, null, [[31, 228, 341, 278, 0.74, 9]], null, null, null, null, null, null, null, null],
   'aesthetics-aesthetics-8': [null, null, null, [[35, 389, 145, 117, 0.93, 9]], null, [[0, 138, 400, 372, 0.82, 9]], [[241, 348, 116, 2, 1.2, 9]], null, null, null, null, null, [[30, 393, 160, 113, 1.2, 9]], null, null, [[31, 390, 135, 116, 0.93, 9]], [[0, 138, 400, 372, 1.2, 9]], null],
+  'business-foundations-1': [[[218, 417, 98, 88, 1.2, 9]], null, [[220, 417, 130, 88, 0.55, 9]], [[0, 403, 318, 102, 0.93, 9]], [[173, 406, 154, 99, 0.93, 9]], null, null, null, [[178, 407, 139, 98, 0.55, 9]], null, null, null],
+  'economics-foundations-1': [[[69, 416, 257, 89, 1.08, 9]], null, [[11, 406, 308, 99, 0.89, 9]], [[0, 306, 400, 208, 0.86, 9]], [[22, 406, 336, 99, 0.76, 9]], null, [[22, 406, 243, 99, 1.15, 9]], [[0, 306, 400, 208, 1.15, 9]], null, null],
   'epistemology-knowledge-1': [null, [[0, 290, 400, 224, 0.97, 9]], null, null, null, null, null, null, null, null, null, null],
   'epistemology-knowledge-10': [null, null, null, null, [[0, 256, 400, 256, 1.2, 9]], [[69, 393, 132, 113, 1.2, 9]], null, null, null, null],
   'epistemology-knowledge-11': [[[100, 231, 206, 74, 1.2, 9]], null, [[97, 238, 225, 268, 1.02, 9]], null, null, null, [[212, 269, 100, 37, 0.55, 9]], null, null, null, null, null],
@@ -142,6 +144,8 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'metaphysics-being-39': [null, null, null, null, null, [[70, 393, 62, 113, 1.2, 9]], null, null],
   'metaphysics-being-5': [null, null, null, [[115, 430, 267, 30, 0.74, 9]], null, null, null, null, null, null],
   'metaphysics-being-9': [null, null, null, [[153, 388, 52, 118, 1.2, 9]], null, null, [[0, 196, 400, 316, 0.91, 9]], null, null, null],
+  'personal-growth-foundations-1': [null, null, null, null, null, null, null, null, null, null, [[41, 406, 249, 99, 1.12, 9]], [[54, 406, 238, 99, 0.6, 9]]],
+  'philosophy-foundations-1': [[[75, 416, 228, 89, 1.2, 9]], null, [[118, 416, 179, 89, 0.97, 9]], [[13, 406, 288, 99, 0.81, 9]], null, null, null, [[45, 407, 253, 98, 1.1, 9]], null, null, null, null],
   'political-political-10': [null, null, null, null, null, [[0, 232, 400, 280, 1.04, 9]], null, null, null, null, null, null, null],
   'political-political-11': [null, null, null, [[0, 298, 400, 214, 1.2, 9]], null, null, null, null, null, null, null, null, null],
   'political-political-12': [null, null, [[109, 389, 129, 117, 1.2, 9]], [[58, 390, 107, 116, 0.55, 9]], null, null, null, null, null, null],
@@ -160,6 +164,8 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'political-political-4': [null, [[0, 288, 400, 226, 1.2, 9]], null, null, null, null, null, null, null, null],
   'political-political-8': [null, null, null, null, null, null, null, null, [[0, 56, 400, 460, 0.71, 9]], null, null, null, null, null, null, null, null],
   'political-political-9': [null, null, null, null, null, null, [[50, 414, 289, 91, 0.94, 9]], null, null],
+  'psychology-foundations-1': [null, [[120, 421, 210, 84, 0.57, 9]], [[160, 421, 215, 84, 0.55, 9]], null, [[0, 306, 400, 208, 1.2, 9]], null, null, null, [[41, 407, 308, 98, 0.66, 9]], null, null, null],
+  'science-foundations-1': [null, null, null, null, null, [[22, 364, 289, 145, 0.71, 9]], null, null, null, null, [[164, 406, 149, 99, 0.72, 9]]],
 };
 
 export const TOUR_STAMP: Record<string, string> = {
@@ -187,6 +193,8 @@ export const TOUR_STAMP: Record<string, string> = {
   'aesthetics-aesthetics-6': '79d94bad6c0e',
   'aesthetics-aesthetics-7': 'b3c64b56af93',
   'aesthetics-aesthetics-8': '1079635fedc7',
+  'business-foundations-1': '1b37a5b52f02',
+  'economics-foundations-1': '2d4af0dbbb7a',
   'epistemology-knowledge-1': '2377c8c1d823',
   'epistemology-knowledge-10': '6d987ce5ff52',
   'epistemology-knowledge-11': '4304ccdb4312',
@@ -277,6 +285,8 @@ export const TOUR_STAMP: Record<string, string> = {
   'metaphysics-being-39': 'f84522c2c350',
   'metaphysics-being-5': '17561246a9aa',
   'metaphysics-being-9': 'a92897299200',
+  'personal-growth-foundations-1': '4a69db6b5ba9',
+  'philosophy-foundations-1': 'abf31d91e372',
   'political-political-10': 'eddc69d75500',
   'political-political-11': '99eaced10d69',
   'political-political-12': '1a0d8dab14bf',
@@ -295,4 +305,6 @@ export const TOUR_STAMP: Record<string, string> = {
   'political-political-4': '8001b88394cb',
   'political-political-8': 'eb24b9f5d8c3',
   'political-political-9': '8c0c86d84104',
+  'psychology-foundations-1': '4b8b95188230',
+  'science-foundations-1': '8f90087631b4',
 };

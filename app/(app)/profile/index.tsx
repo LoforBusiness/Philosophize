@@ -24,7 +24,7 @@ import { profileNameStyle, profileNameText } from '@/data/profileFonts';
 import StreakPanel from '@/components/gamification/StreakPanel';
 import { signOut } from '@/lib/supabase/auth';
 import { useAuthSession } from '@/lib/supabase/useSession';
-import { ALL_BRANCHES } from '@/data';
+import { LEGACY_BRANCHES } from '@/data';
 import { ALL_PHILOSOPHERS } from '@/data/philosophers';
 import { rankProgress, rankOrder, rankDegree } from '@/data/ranks';
 import { BADGES } from '@/data/badges';
@@ -219,7 +219,7 @@ export default function ProfileScreen() {
   // The title under the name: a philosophy reader is named for their top branch
   // (ETHICIST), anyone else for their subject.
   const topBranch = useMemo(() => {
-    const best = ALL_BRANCHES.map((b) => ({ slug: b.slug, n: lessonsByBranch[b.slug] ?? 0 }))
+    const best = LEGACY_BRANCHES.map((b) => ({ slug: b.slug, n: lessonsByBranch[b.slug] ?? 0 }))
       .sort((a, b) => b.n - a.n)[0];
     return best && best.n > 0 ? best.slug : null;
   }, [lessonsByBranch]);
@@ -253,7 +253,7 @@ export default function ProfileScreen() {
     .sort((a, b) => b.score - a.score), [philosopherViews]);
   const topPhilosopher = philScores[0] ?? null;
 
-  const branchInterest = useMemo(() => ALL_BRANCHES.map((b) => {
+  const branchInterest = useMemo(() => LEGACY_BRANCHES.map((b) => {
     const lessons = lessonsByBranch[b.slug] ?? 0;
     const views = ALL_PHILOSOPHERS.filter((p) => p.branchSlugs.includes(b.slug)).reduce(
       (a, p) => a + (philosopherViews[p.id] ?? 0),

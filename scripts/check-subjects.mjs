@@ -26,7 +26,9 @@ head('§1 · the seven subjects');
 const WANT = ['philosophy', 'psychology', 'personal-growth', 'business', 'economics', 'science', 'history'];
 ok(JSON.stringify(S.SUBJECTS.map((s) => s.slug)) === JSON.stringify(WANT),
   "the subjects are the seven, in the owner's order", S.SUBJECTS.map((s) => s.slug).join(' · '));
-ok(S.SUBJECTS.filter((s) => s.status === 'live').map((s) => s.slug).join() === 'philosophy,economics', 'the live subjects are philosophy and economics (a subject goes live on purpose, here)');
+// ALL SEVEN SINCE 2026-09-30: each subject opened with its first lesson on one road.
+ok(S.SUBJECTS.every((s) => s.status === 'live'), 'every subject is live (a subject goes live on purpose, here)',
+  S.SUBJECTS.filter((s) => s.status !== 'live').map((s) => s.slug).join(' '));
 
 head('§2 · every subject is complete');
 for (const s of S.SUBJECTS) {
@@ -34,7 +36,9 @@ for (const s of S.SUBJECTS) {
   ok(s.short.length <= s.name.length, `${s.slug}'s short name is not longer than its name`);
   ok(/^#[0-9A-F]{6}$/i.test(s.hue), `${s.slug}'s hue is a hex`, s.hue);
   if (s.status === 'soon') ok(s.courses.length === 0, `${s.slug} is coming soon and lists no course`);
-  else ok(s.courses.length > 0, `${s.slug} is live and lists its courses`);
+  // ONE ROAD PER SUBJECT (the owner, 2026-09-30): "I only want one road for each
+  // subject, not a bunch of different ones."
+  else ok(s.courses.length === 1, `${s.slug} is live and has exactly one road`, s.courses.join(' '));
 }
 
 head('§3 · the colours');
@@ -60,9 +64,23 @@ for (let i = 0; i < S.SUBJECTS.length; i++) {
 
 head('§4 · courses');
 for (const s of S.SUBJECTS) for (const c of s.courses) ok(c in D.BRANCH, `${s.slug} course ${c} is a real branch`);
-ok(S.getSubject('philosophy')?.courses.length === 6, 'philosophy lists the six branches');
+{
+  const DATA4 = await import('@/data');
+  const live = DATA4.ALL_BRANCHES.map((b) => b.slug);
+  ok(JSON.stringify(live) === JSON.stringify(S.SUBJECTS.map((x) => x.courses[0])),
+    "the roads a reader can walk are the subjects' roads, in the subjects' order", live.join(' · '));
+  ok(DATA4.LEGACY_BRANCHES.length === 6 && DATA4.LEGACY_BRANCHES.every((b) => !live.includes(b.slug)),
+    "philosophy's six old branches are retired: kept, and on no road");
+  ok(DATA4.getLessonById('ethics-ethics-1') === null, 'a retired lesson cannot be opened by id');
+  const oneEach = Object.fromEntries(DATA4.LEGACY_BRANCHES.flatMap((b) => b.paths.map((p) => [p.id, 1])));
+  const kept = Object.values(DATA4.branchCountsFromUnits(oneEach)).reduce((a, b) => a + b, 0);
+  ok(kept === 28, 'progress in the retired units is still counted, so nothing a reader finished is dropped',
+    `${kept} of 28 units' lessons`);
+  for (const b of DATA4.ALL_BRANCHES) ok(b.more === true, `${b.slug}'s road ends at a MORE COMING SOON sign`);
+}
 ok(S.getSubject('no-such-subject') === undefined, 'an unknown slug is undefined, not a throw');
-ok(S.subjectOfBranch('ethics')?.slug === 'philosophy', 'a branch knows its subject');
+ok(S.subjectOfBranch('philosophy')?.slug === 'philosophy' && S.subjectOfBranch('personal-growth')?.slug === 'personal-growth', 'a road knows its subject');
+ok(S.subjectOfBranch('ethics') === undefined, 'a retired branch belongs to no subject');
 ok(S.subjectOfBranch('no-such-branch') === undefined, 'an unknown branch has no subject');
 
 head('§5 · the posters');
@@ -131,22 +149,12 @@ for (const W of [320, 360, 390, 430]) {
   const pill = (text, px, spacing, padX) => INTER_B.width(text, px) + spacing * text.length + 2 * padX + 3;
   const soonW = pill('COMING SOON', L.PILL.fontSize, L.PILL.letterSpacing, L.PILL.padX);
   ok(soonW <= inner, `${W}dp · the COMING SOON pill fits one line in a grid tile`, `${soonW.toFixed(0)} of ${inner}`);
-  const bText = L.branchTextWidth(W);
+  // The branch CARDS went with the subject page (2026-09-30): a subject opens its road
+  // directly. What is left of them is the line under the road's name on its masthead.
   const DATA = await import('@/data');
-  for (const b of DATA.ALL_BRANCHES) {
-    const n = fitsIn(b.name, L.BRANCH_TITLE.fontSize, bText, L.BRANCH_NAME_LINES);
-    ok(n.ok, `${W}dp · the ${b.slug} card's name`, n.why);
-    const line = S.COURSE_LINE[b.slug];
-    const PFI = loadFont('node_modules/@expo-google-fonts/playfair-display/400Regular_Italic/PlayfairDisplay_400Regular_Italic.ttf');
-    const dl = wrap(line ?? '', 12.5, bText, PFI);
-    ok(!!line && dl.length <= 2 && Math.max(...dl.map((x) => PFI.width(x, 12.5))) <= bText,
-      `${W}dp · the ${b.slug} card's line fits its two lines`, `${dl.length} line(s)`);
-    const units = `${b.paths.length} UNITS`;
-    const row = pill(units, 10, 1.4, 0) + 8 + pill('88 DONE', 10, 1, 8) + 14;
-    ok(row <= bText, `${W}dp · the ${b.slug} card's units and done count share one row`, `${row.toFixed(0)} of ${bText.toFixed(0)}`);
-  }
-  const live = S.SUBJECTS.filter((s) => s.status === 'live');
-  for (const s of live) {
+  for (const b of DATA.ALL_BRANCHES) ok(!!S.COURSE_LINE[b.slug], `the ${b.slug} road has a line for its masthead`);
+  // Only the LEAD subject is drawn full width (the Learn grid: one across, six below).
+  for (const s of [S.SUBJECTS[0]]) {
     const w = fitsIn(s.name, L.CARD_TITLE.fontSize, wideText, 1);
     ok(w.ok, `${W}dp · ${s.slug}'s wide tile name`, w.why);
   }

@@ -253,7 +253,8 @@ export const ERA: Record<EraKey, string> = {
 export type BranchKey =
   | 'metaphysics' | 'epistemology' | 'logic'
   | 'ethics' | 'aesthetics' | 'political-philosophy'
-  | 'economics';
+  | 'economics'
+  | 'philosophy' | 'psychology' | 'personal-growth' | 'business' | 'science' | 'history';
 
 // ── AND THE SEARCH ABOVE WAS RUN AGAIN, INSIDE THE OWNER'S SIX (2026-09-15) ──
 //
@@ -299,6 +300,21 @@ export const BRANCH: Record<BranchKey, string> = {
   // track visible on paper; C* 22.3, L* 33.6. Lighter blues passed the rest and
   // collapsed into logic on the disc.
   economics: '#335172',
+  // ONE ROAD PER SUBJECT (2026-09-30). The owner folded philosophy's six branches into
+  // a single road and opened the other five subjects, so each subject's road is a
+  // branch of its own. Each hue is the nearest colour to its SUBJECT's hue
+  // (data/subjects.ts) that passes every floor check-ui holds a branch to, chosen as a
+  // set (scratchpad/roadhues2.mjs) so that the seven LIVE roads — these six and
+  // economics — are tellable apart: tightest pair psychology/economics at ΔE 11.4.
+  // The six above them are philosophy's retired branches; their scenes still strike in
+  // these colours, but no screen shows them beside a live road, so the pairwise floors
+  // are held over the live seven (check-ui).
+  philosophy: '#36515D',            // slate teal — the subject's DEEP, lifted off the accent
+  psychology: '#5A5A7E',            // dusk slate
+  'personal-growth': '#636C3C',     // moss
+  business: '#785A30',              // bronze
+  science: '#306F72',               // lab teal
+  history: '#905748',               // brick
 };
 
 export type TypeKey = 'display' | 'title' | 'body' | 'label' | 'micro';

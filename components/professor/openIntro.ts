@@ -10,6 +10,17 @@ import { openSubject } from '@/components/lesson/lessonNav';
 // so the intro can put the reader back exactly there when it is over.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * THE INTRO IS OFF (2026-09-30). Its six recorded lines say "Philosophy has six
+ * branches" and name logic, ethics and epistemology; since philosophy became one road
+ * among seven subjects that is no longer true, and the owner chose to switch it off
+ * until it is re-recorded about all seven. Both doors and the lesson route's backstop
+ * read this, so nothing offers or plays it. Everything else — the film, its voice,
+ * the `seenProfessorIntro` flag and its sync — stays, so turning it back on is this
+ * one line. A free reader who taps a lesson now meets the paywall directly.
+ */
+export const PROFESSOR_INTRO_ON = false;
+
 export type IntroFrom = 'home' | 'learn';
 
 export function openIntro(from: IntroFrom): void {

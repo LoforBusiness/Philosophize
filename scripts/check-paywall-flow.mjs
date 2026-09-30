@@ -18,6 +18,17 @@
 // It needs Metro and a Chrome, like every §21 harness, so it is not in `npm run
 // check`; ports 8853/9393 by default (sheet-pass's). It writes app/previewflow.tsx
 // on the way in and deletes it on the way out.
+//
+// ── PARKED SINCE 2026-09-30 ──────────────────────────────────────────────────
+// The intro is switched OFF (`PROFESSOR_INTRO_ON` in components/professor/openIntro.ts)
+// because its recording describes philosophy's six branches, and the subject page the
+// intro card lived on is gone (one road per subject). Cases 1–4 and 7 describe screens
+// that no longer exist. Rebuild this harness when the intro is re-recorded and turned
+// back on; until then it refuses to run rather than reporting on a flow that is off.
+if (!process.env.PAYWALL_FLOW_FORCE) {
+  console.log('check:paywall-flow is parked: the professor\'s intro is off (openIntro.ts PROFESSOR_INTRO_ON).');
+  process.exit(0);
+}
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { LEGACY, LIVE } from './lib/legacy.mjs';
 
 const REPO = process.cwd();
 const { transform } = await import(
@@ -333,11 +334,21 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
   //
   // 11 is the measured minimum of the shipped set (metaphysics/logic at 11.4).
   // It is a high-water mark like every other budget here: it may go UP.
-  for (let i = 0; i < branches.length; i++) {
-    for (let j = i + 1; j < branches.length; j++) {
-      const [na, va] = branches[i], [nb, vb] = branches[j];
-      ok(dE(va, vb) >= 11, `BRANCH.${na} and BRANCH.${nb} are tellable apart`,
-        `ΔE ${dE(va, vb).toFixed(1)}, need 11`);
+  //
+  // TWO SETS SINCE 2026-09-30, EACH HELD TO THE FLOOR WITHIN ITSELF. Tellable-apart
+  // is a rule about colours that share a view. The seven LIVE roads (one per subject)
+  // do; philosophy's six retired branches did, and still strike their own scenes. A
+  // retired branch and a live road are never on one screen — the retired lessons are
+  // out of the app until rebuilt — so history's brick is allowed to be the forum's
+  // sienna, which is what "the same subject, one road now" looks like.
+  for (const [setName, set] of [['live', branches.filter(([n]) => LIVE.has(n))], ['retired', branches.filter(([n]) => LEGACY.has(n))]]) {
+    ok(set.length === (setName === 'live' ? LIVE.size : 6), `every ${setName} branch has a colour`, `${set.length}`);
+    for (let i = 0; i < set.length; i++) {
+      for (let j = i + 1; j < set.length; j++) {
+        const [na, va] = set[i], [nb, vb] = set[j];
+        ok(dE(va, vb) >= 11, `BRANCH.${na} and BRANCH.${nb} are tellable apart`,
+          `ΔE ${dE(va, vb).toFixed(1)}, need 11`);
+      }
     }
   }
 
@@ -947,11 +958,14 @@ for (const [name, hue] of ERA_FACES) {
     const [l1, a1, b1] = lab(a); const [l2, a2, b2] = lab(b);
     return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
   };
+  // Within each set that shares a view — the live roads, and the retired six (see 2d).
   let worst = Infinity; let worstPair = '';
-  for (let i = 0; i < marks.length; i++) {
-    for (let j = i + 1; j < marks.length; j++) {
-      const d = dE(marks[i][1].mark, marks[j][1].mark);
-      if (d < worst) { worst = d; worstPair = `${marks[i][0]}/${marks[j][0]}`; }
+  for (const set of [marks.filter(([n]) => LIVE.has(n)), marks.filter(([n]) => LEGACY.has(n))]) {
+    for (let i = 0; i < set.length; i++) {
+      for (let j = i + 1; j < set.length; j++) {
+        const d = dE(set[i][1].mark, set[j][1].mark);
+        if (d < worst) { worst = d; worstPair = `${set[i][0]}/${set[j][0]}`; }
+      }
     }
   }
   // 14, DOWN FROM 24, and it tracks the SOURCE rather than being loosened on its
@@ -1196,14 +1210,17 @@ function stripJs(src) {
   //
   // `disc` lifts the source by a constant 0.08 and touches nothing else, so the
   // set keeps its own internal contrast. These are the floors that pins it there.
-  const faces = BR.map((h) => disc(h).face);
   const rims = BR.map((h) => disc(h).rim);
 
+  // Within each set that shares a view — the live roads, and the retired six (see 2d).
   let worstPair = Infinity, pairAt = '';
-  for (let i = 0; i < faces.length; i++) {
-    for (let j = i + 1; j < faces.length; j++) {
-      const d = dE(faces[i], faces[j]);
-      if (d < worstPair) { worstPair = d; pairAt = `${faces[i]}/${faces[j]}`; }
+  for (const keep of [LIVE, LEGACY]) {
+    const faces = Object.entries(D.BRANCH).filter(([n]) => keep.has(n)).map(([, h]) => disc(h).face);
+    for (let i = 0; i < faces.length; i++) {
+      for (let j = i + 1; j < faces.length; j++) {
+        const d = dE(faces[i], faces[j]);
+        if (d < worstPair) { worstPair = d; pairAt = `${faces[i]}/${faces[j]}`; }
+      }
     }
   }
   // 12 is design.ts's own floor between two branches (11) plus the headroom the
@@ -1255,7 +1272,7 @@ function stripJs(src) {
   // too. glow's spread was about 2 L. The source's is 9 since the palette moved
   // into the owner's family -- it was 15 -- and disc keeps whatever it is given,
   // which is the property being asserted. Floor 7.
-  const Ls = faces.map((f) => lab(f)[0]);
+  const Ls = BR.map((h) => lab(disc(h).face)[0]);
   const lRange = Math.max(...Ls) - Math.min(...Ls);
   ok(lRange >= 7, 'and the six still differ in lightness, not only in hue',
     `${lRange.toFixed(0)} L apart, floor 7 — this is what glow flattened`);

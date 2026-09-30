@@ -11030,8 +11030,8 @@ entry's base and shade.
 > lessons in philosophy."* (2026-09-30)
 
 **Every new lesson, in every subject, is a dialogue lesson** — AP1 to AP11 — and not a
-narrated one. The 246 narrated philosophy lessons stay as they are until somebody asks
-for one to change. The interactions and objects will be different in every lesson; what
+narrated one. The 246 narrated philosophy lessons are retired from the app (AP15) and
+wait to be rebuilt this way. The interactions and objects will be different in every lesson; what
 carries over is how "What Is Economics?" is BUILT, and these are the parts the owner
 named or that the build showed were load-bearing:
 
@@ -11055,3 +11055,29 @@ named or that the build showed were load-bearing:
    chair or visitor (AP8). Less that can go wrong, and less to read.
 8. **A first lesson is a foundation** (AP3): what the subject is and why it matters, at
    most three ideas.
+
+### AP15 · One road per subject, and a subject opens on its road
+
+> *"I no longer want all the different branches like epistemology, metaphysics, political
+> philosophy. I don't want all these separate. I want it all on one path … I only want one
+> road for each subject, not a bunch of different ones."* (2026-09-30)
+
+Every subject is ONE road (`data/subjects.ts`: `courses` holds exactly one branch), and
+a tap on a subject — Home's shelf or the Learn grid — opens that road; there is no page
+of courses between them. Each road opened with its subject's first lesson, a foundation
+lesson (AP3) in the house format (AP12), and ends at a MORE COMING SOON sign (`more`).
+
+- **A new lesson goes on its subject's road**, appended to the end of its unit (§11 of
+  CLAUDE.md: position is load-bearing). A subject never grows a second road.
+- **Philosophy's six old branches are RETIRED, not deleted** (`data/index.ts`
+  `LEGACY_BRANCHES`). No screen lists them, `getLessonById` does not find them, and a
+  reader's progress in them is kept and counted (badges, totals, the cloud snapshot) but
+  not shown. The rules they were written under still hold them (`scripts/lib/legacy.mjs`
+  scopes the level, review and colour-set rules), because each will be rebuilt as a
+  dialogue lesson on philosophy's road — rebuilt, not revived: a lesson comes back as a
+  new dialogue lesson, with a new id on the new road.
+- **The six first lessons are one per subject, one real place each**: a bicycle repair
+  stand (philosophy), a café taste test (psychology), two flowerpots (personal growth), a
+  lemonade stand (business), a ladder and two balls (science), a broken shop window
+  (history), beside the economics market stall. `check:subjects` holds the one-road shape.
+

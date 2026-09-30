@@ -10,6 +10,7 @@
 // options carry no correct answer cannot be finished.
 // ─────────────────────────────────────────────────────────────────────────────
 import fs from 'node:fs';
+import { LEGACY } from './lib/legacy.mjs';
 import { loadTs } from './lib/loadts.mjs';
 import path from 'node:path';
 import { loadFont } from './lib/ttfwidth.mjs';
@@ -43,10 +44,9 @@ for (const id of Object.keys(UNIT_REVIEWS)) {
 // 2026-09-29 with one lesson — gets its reviews when its units exist, and until then
 // a review after one lesson would be the lesson played twice. The set is read out of
 // data/subjects.ts so it cannot drift from the subject list.
-const subjectsSrc = fs.readFileSync('data/subjects.ts', 'utf8');
-const philo = subjectsSrc.match(/slug: 'philosophy'[\s\S]*?courses: \[([^\]]*)\]/)?.[1] ?? '';
-const PHILOSOPHY = new Set([...philo.matchAll(/'([a-z-]+)'/g)].map((m) => m[1]));
-if (PHILOSOPHY.size !== 6) throw new Error(`data/subjects.ts: expected philosophy's six courses, read ${[...PHILOSOPHY].join(', ') || 'none'}`);
+// Since 2026-09-30 "philosophy's units" are its six RETIRED branches' (data/index.ts
+// LEGACY_BRANCHES, read by scripts/lib/legacy.mjs): a one-lesson road has no review.
+const PHILOSOPHY = LEGACY;
 for (const [id, u] of units) {
   if (!UNIT_REVIEWS[id] && PHILOSOPHY.has(u.branch)) note('MISSING', `${u.branch} · ${u.name} ('${id}') has no review`);
 }

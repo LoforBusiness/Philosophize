@@ -18,7 +18,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { View, Text, StyleSheet } from 'react-native';
 import { C, ERA, TYPE, SPACE, RADIUS, BRANCH, type EraKey, type BranchKey } from '@/constants/design';
-import { ALL_BRANCHES } from '@/data';
+import { LEGACY_BRANCHES } from '@/data';
 import { timelinePos, yearLabel, FIRST_YEAR, LAST_YEAR, type Lifespan } from '@/lib/utils/lifespan';
 import ThinkerSeal from './ThinkerSeal';
 import Card from '@/components/ui/Card';
@@ -120,7 +120,7 @@ export function BranchSpread({ slugs, era }: { slugs: string[]; era: string }) {
   // because the whole point of showing all six is that a reader can read the
   // ones that are NOT lit. Halving the count doubles the width and every name
   // fits. The 3-lit-of-6 reading survives the wrap.
-  const rows = [ALL_BRANCHES.slice(0, 3), ALL_BRANCHES.slice(3, 6)];
+  const rows = [LEGACY_BRANCHES.slice(0, 3), LEGACY_BRANCHES.slice(3, 6)];
   return (
     <View style={styles.spreadWrap}>
       {rows.map((row, i) => (

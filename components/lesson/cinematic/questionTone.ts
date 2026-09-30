@@ -37,6 +37,12 @@ export function branchOfLesson(lessonId: string | null | undefined): BranchKey |
     case 'aesthetics': return 'aesthetics';
     case 'political': return 'political-philosophy';
     case 'economics': return 'economics';
+    case 'philosophy': return 'philosophy';
+    case 'psychology': return 'psychology';
+    case 'personal': return 'personal-growth';
+    case 'business': return 'business';
+    case 'science': return 'science';
+    case 'history': return 'history';
     default: return null;
   }
 }

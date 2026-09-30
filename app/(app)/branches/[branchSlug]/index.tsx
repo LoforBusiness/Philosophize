@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
-import { useLocalSearchParams, router, useFocusEffect, useNavigation } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView, AnimatePresence } from 'moti';
@@ -16,7 +16,9 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
 import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
-import { subjectOfBranch } from '@/data/subjects';
+import { subjectOfBranch, SUBJECTS, COURSE_LINE } from '@/data/subjects';
+import Poster from '@/components/subjects/Poster';
+import type { PosterKey } from '@/components/subjects/posters';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
 import { openReview, backFromBranch } from '@/components/lesson/lessonNav';
@@ -39,6 +41,13 @@ const PRES: Record<string, BranchPres> = {
   aesthetics: { desc: 'Beauty, art, creativity & aesthetic experience', glyph: 'gem', pills: ['BEAUTY', 'ART', 'TASTE'] },
   'political-philosophy': { desc: 'Society, power, justice & political systems', glyph: 'flag', pills: ['SOCIETY', 'POWER', 'JUSTICE'] },
   economics: { desc: 'Scarcity, choice & why prices move', glyph: 'book', pills: ['SCARCITY', 'CHOICE', 'PRICES'] },
+  // One road per subject (2026-09-30).
+  philosophy: { desc: COURSE_LINE.philosophy, glyph: 'book', pills: ['MEANING', 'REASONS', 'TRUTH'] },
+  psychology: { desc: COURSE_LINE.psychology, glyph: 'book', pills: ['MIND', 'BEHAVIOUR', 'EVIDENCE'] },
+  'personal-growth': { desc: COURSE_LINE['personal-growth'], glyph: 'book', pills: ['HABITS', 'FOCUS', 'CHANGE'] },
+  business: { desc: COURSE_LINE.business, glyph: 'book', pills: ['VALUE', 'PROFIT', 'LEADING'] },
+  science: { desc: COURSE_LINE.science, glyph: 'book', pills: ['GUESS', 'TEST', 'BUILD'] },
+  history: { desc: COURSE_LINE.history, glyph: 'book', pills: ['EVIDENCE', 'SOURCES', 'POWER'] },
 };
 const ORDER = ['metaphysics', 'epistemology', 'logic', 'ethics', 'aesthetics', 'political-philosophy'];
 
@@ -66,10 +75,8 @@ interface UnitModel {
 }
 
 export default function BranchDetailScreen() {
-  const { branchSlug } = useLocalSearchParams<{ branchSlug: string }>();
-  // The route under this road, read at the press: backFromBranch pops one when it is
-  // this road's subject page, so that page keeps its own params (from=home).
-  const navigation = useNavigation();
+  // `from=home`: the road was opened from Home's shelf, so its back arrow returns there.
+  const { branchSlug, from } = useLocalSearchParams<{ branchSlug: string; from?: string }>();
   const branch = getBranchBySlug(branchSlug);
   const hue = BRANCH[branchSlug as keyof typeof BRANCH] ?? C.HUE;
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
@@ -94,6 +101,8 @@ export default function BranchDetailScreen() {
   // Cleared whenever they finish a lesson, so the road goes back to tracking
   // where they actually are rather than where they last looked.
   const [focusUnitId, setFocusUnitId] = useState<string | null>(null);
+  // The masthead's measured box, which its poster is drawn for.
+  const [mastBox, setMastBox] = useState({ w: 0, h: 0 });
 
 
   // Progress is per-unit: each unit tracks its own completed count. Since the
@@ -318,9 +327,17 @@ export default function BranchDetailScreen() {
 
   const pres = PRES[branch.slug] ?? { desc: branch.description, glyph: 'book' as GlyphName, pills: [] };
   const subject = subjectOfBranch(branch.slug);
-  const kicker = !subject || subject.slug === 'philosophy'
-    ? `BRANCH ${ROMAN[Math.max(0, ORDER.indexOf(branch.slug))]}`
-    : `${subject.short.toUpperCase()} · COURSE ${ROMAN[Math.max(0, (subject.courses as readonly string[]).indexOf(branch.slug))]}`;
+  // One road per subject: the kicker counts the subject, not a branch or a course.
+  const kicker = subject
+    ? `SUBJECT ${ROMAN[Math.max(0, SUBJECTS.indexOf(subject))]}`
+    : `BRANCH ${ROMAN[Math.max(0, ORDER.indexOf(branch.slug))]}`;
+  // The masthead wears the subject's own POSTER — the picture on the tile that was
+  // tapped — so arriving confirms what was opened. Drawn for the masthead's own box
+  // (Poster grows its frame to the box's shape), because the shelf's pre-drawn card
+  // PNG cover-cropped here came out as one enlarged corner of the drawing. A retired
+  // branch keeps its photograph.
+  const mastArt = BRANCH_ART[branch.slug];
+  const posterKey = !mastArt && subject ? (subject.slug as PosterKey) : null;
 
   const openLesson = (unit: Unit, lesson: Lesson) =>
     router.push(`/(app)/branches/${branch.slug}/${unit.slug}/lesson/${lesson.id}`);
@@ -358,8 +375,10 @@ export default function BranchDetailScreen() {
         <View style={styles.topBar}>
           <Pressable
             onPress={() => {
-              const st = navigation.getState();
-              backFromBranch(branch.slug, st ? (st.routes[st.index - 1] as { name: string; params?: object } | undefined) : undefined);
+              // Pop to the grid first, so the Learn tab is left on its list; then, for a
+              // road opened from Home's shelf, bring Home forward.
+              backFromBranch();
+              if (from === 'home') router.navigate('/(app)');
             }}
             hitSlop={10}
             style={styles.backRow}
@@ -439,11 +458,18 @@ export default function BranchDetailScreen() {
               `constants/branchArt.ts` and CLAUDE.md §19 — the scrim's three stops
               were measured, not chosen, and stay exactly as imported. */}
           <ImageBackground
-            source={BRANCH_ART[branch.slug] ?? NO_ART}
-            style={[styles.masthead, !BRANCH_ART[branch.slug] && { backgroundColor: BRANCH[branch.slug as BranchKey] ?? C.ink }]}
+            source={mastArt ?? NO_ART}
+            style={[styles.masthead, !mastArt && { backgroundColor: BRANCH[branch.slug as BranchKey] ?? C.ink }]}
             imageStyle={styles.mastImg}
             resizeMode="cover"
+            onLayout={(e) => {
+              const { width: w, height: h } = e.nativeEvent.layout;
+              if (Math.round(w) !== mastBox.w || Math.round(h) !== mastBox.h) setMastBox({ w: Math.round(w), h: Math.round(h) });
+            }}
           >
+            {posterKey && subject && mastBox.w > 0 ? (
+              <Poster art={posterKey} hue={subject.hue} width={mastBox.w} height={mastBox.h} style={[StyleSheet.absoluteFill, styles.mastPoster]} />
+            ) : null}
             <LinearGradient colors={MAST_SCRIM} style={StyleSheet.absoluteFill} />
             <Text style={styles.mastKicker}>{kicker}</Text>
             <Text style={styles.mastTitle}>{branch.name.toUpperCase()}</Text>
@@ -826,6 +852,9 @@ const styles = StyleSheet.create({
     minHeight: 232,
   },
   mastImg: { borderTopLeftRadius: RADIUS.card, borderTopRightRadius: RADIUS.card },
+  // The poster sits BEHIND the masthead's words, so it is quietened to a backdrop:
+  // at full strength its drawing ran through the subject's name.
+  mastPoster: { opacity: 0.32 },
   mastKicker: { ...role('micro'), color: ArtGold, letterSpacing: 4 },
   mastTitle: {
     ...role('display'),

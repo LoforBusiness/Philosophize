@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { subjectOfBranch } from '@/data/subjects';
+import { getSubject } from '@/data/subjects';
 
 // ── THE TWO WAYS INTO AND OUT OF A LESSON THAT CAN STRAND THE LEARN TAB ─────
 //
@@ -74,40 +74,30 @@ export function openReview(branchSlug: string, unitSlug: string) {
 }
 
 /**
- * Open a subject's page (2026-09-29) — from Home's carousel, or anywhere else outside
- * the Learn stack. Anchored for openLesson's reason: from a cold tab the subject grid
- * must be underneath, or back hands the press to the tab navigator and strands the
- * Learn tab on this page.
+ * Open a subject — which is to say its ROAD (2026-09-30: one road per subject, and a
+ * tap on a subject goes straight to it). From Home's carousel, or anywhere else
+ * outside the Learn stack. Anchored for openLesson's reason: from a cold tab the
+ * subject grid must be underneath, or back hands the press to the tab navigator and
+ * strands the Learn tab on this road.
+ *
+ * `from: 'home'` rides on the road as a param, so its back arrow knows to return the
+ * reader to Home (the road screen does that; this file never navigates).
  */
 export function openSubject(slug: string, from?: 'home') {
-  router.push(`/(app)/branches/subject/${slug}${from ? `?from=${from}` : ''}` as never, { withAnchor: true });
+  const road = getSubject(slug)?.courses[0] ?? slug;
+  router.push(`/(app)/branches/${road}${from ? `?from=${from}` : ''}` as never, { withAnchor: true });
 }
 
 /**
- * Back from a branch's road to its SUBJECT page (2026-09-29), however the road was
- * reached. `dismissTo` pops to the subject page when it is in the stack
- * (`[grid, subject, road]` → `[grid, subject]`) and, when it is not — a road reached
- * from Home's Continue card or the reward's landing sits straight on the grid —
- * replaces the ROAD with it: `[grid, road]` → `[grid, subject]`. Both leave the grid
- * underneath. What is replaced is the screen on top, never the list at the root, so
- * this is not the replace this file's header warns about.
+ * Back from a road to the subject GRID, however the road was reached.
  *
- * AND WHEN THE SUBJECT PAGE IS DIRECTLY BELOW, IT IS A PLAIN BACK — found by the
- * final review and reproduced against the real router. `dismissTo` is POP_TO, which
- * rebuilds the found route's params from the action, so it stripped the page's
- * `from=home`: Home → Philosophy → Ethics → back → back ended on the Learn grid, and
- * with an older road already in the stack, on THAT road. `below` is the route under
- * the road (the screen passes its stack's `routes[index - 1]`); popping one keeps
- * its params exactly as they were.
+ * `dismissTo` the list: it pops everything above the grid — this road, and any older
+ * road a landing left under it — so the Learn tab is always left on its grid. A plain
+ * `router.back()` would stop on that older road. The grid is always in the stack,
+ * because every entry from outside is anchored (above).
  */
-export function backFromBranch(branchSlug: string, below?: { name: string; params?: object }) {
-  const subject = subjectOfBranch(branchSlug)?.slug ?? 'philosophy';
-  const params = (below?.params ?? {}) as { subjectSlug?: string };
-  if (below?.name === 'subject/[subjectSlug]' && params.subjectSlug === subject) {
-    router.back();
-    return;
-  }
-  router.dismissTo(`/(app)/branches/subject/${subject}` as never);
+export function backFromBranch() {
+  router.dismissTo('/(app)/branches' as never);
 }
 
 /**

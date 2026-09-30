@@ -288,6 +288,13 @@ export const LESSONS = {
   'political-political-41': 'political41Script.ts',
   // Economics & Finance — a DIALOGUE lesson: each line in its speaker's voice (cast.ts).
   'economics-foundations-1': 'econ1Script.ts',
+  // One road per subject (2026-09-30): each subject's first lesson, all DIALOGUE lessons.
+  'philosophy-foundations-1': 'phil1Script.ts',
+  'psychology-foundations-1': 'psych1Script.ts',
+  'personal-growth-foundations-1': 'growth1Script.ts',
+  'business-foundations-1': 'biz1Script.ts',
+  'science-foundations-1': 'sci1Script.ts',
+  'history-foundations-1': 'hist1Script.ts',
 };
 
 /** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */

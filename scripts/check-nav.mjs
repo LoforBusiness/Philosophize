@@ -160,34 +160,30 @@ else {
   }
 }
 
-// ── AND A ROAD GOES BACK TO ITS SUBJECT (2026-09-29) ─────────────────────────
+// ── AND A ROAD GOES BACK TO THE GRID (2026-09-30) ────────────────────────────
 //
-// The Learn tab became a grid of subjects, and a branch's road sits one level
-// deeper: grid → subject → road. A road reached from OUTSIDE — Home's Continue card,
-// the reward's landOnBranch — has only the grid under it (the anchor), so a plain
-// `router.back()` would skip the subject page the reader expects to return to.
-// `backFromBranch` is `dismissTo` the subject page: it pops to it when it is in the
-// stack and REPLACES THE ROAD with it when it is not — the one replace this file
-// allows, because what it removes is the road on top, never the list at the root.
+// One road per subject: the stack is grid → road, and the subject page between them
+// is gone. A road can still be reached from OUTSIDE — Home's shelf, Home's Quick Start
+// landing, the reward's landOnBranch — and any of those can leave an OLDER road under
+// the new one. A plain `router.back()` would stop on it. `backFromBranch` is
+// `dismissTo` the list, which pops everything above the grid. It is the one
+// navigation lessonNav makes that is not an anchored push, and it removes what is on
+// top, never the list at the root.
 if (fs.existsSync(NAV)) {
   const navSrc = strip(fs.readFileSync(NAV, 'utf8'));
-  if (!/export function openSubject\(/.test(navSrc)) door.push('lessonNav has no openSubject — Home has no door into a subject page');
-  if (!/export function backFromBranch\([\s\S]*?router\.dismissTo\(/.test(navSrc)) {
-    door.push('lessonNav has no backFromBranch that dismisses to the subject page');
-  }
-  // AND A PLAIN BACK WHEN THE SUBJECT PAGE IS DIRECTLY BELOW (final review): POP_TO
-  // rebuilds the found route's params, so dismissTo alone stripped `from=home` and
-  // Home → Philosophy → Ethics → back → back ended on the grid — or on an older road.
+  if (!/export function openSubject\(/.test(navSrc)) door.push('lessonNav has no openSubject — Home has no door onto a subject\'s road');
   const bfb = /export function backFromBranch\([\s\S]*?\n\}/.exec(navSrc)?.[0] ?? '';
-  if (!/below/.test(bfb) || !/router\.back\(\)/.test(bfb)) {
-    door.push('backFromBranch does not pop one when its subject page is directly below — dismissTo alone drops that page\'s from=home');
+  if (!/router\.dismissTo\(\s*['"`]\/\(app\)\/branches['"`]/.test(bfb)) {
+    door.push('backFromBranch does not dismiss to the grid (/(app)/branches) — an older road under this one would be where back lands');
   }
+  if (/branches\/subject\//.test(navSrc)) door.push('lessonNav still opens a subject PAGE — there is one road per subject and the page is gone');
 }
 {
   const BR = 'app/(app)/branches/[branchSlug]/index.tsx';
   const brSrc = strip(fs.readFileSync(BR, 'utf8'));
-  if (/router\.back\(\)/.test(brSrc)) door.push(`${BR} still goes back with router.back() — a road entered from Home would skip its subject page`);
+  if (/router\.back\(\)/.test(brSrc)) door.push(`${BR} still goes back with router.back() — it would stop on an older road left under this one`);
   if (!/backFromBranch\(/.test(brSrc)) door.push(`${BR} does not call backFromBranch`);
+  if (fs.existsSync('app/(app)/branches/subject')) door.push('app/(app)/branches/subject still exists — a subject opens its road directly');
 }
 
 console.log('ENTRIES INTO THE LEARN STACK FROM OUTSIDE IT\n');
