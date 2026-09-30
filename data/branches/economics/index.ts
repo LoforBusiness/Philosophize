@@ -9,7 +9,7 @@ const economicsBranch: Branch = {
   name: 'Foundations of Economics',
   description: 'Scarcity, choice, and why prices move.',
   icon: '💷',
-  color: '#1E7E93',
+  color: '#335172',
   paths: units,
   more: true,
 };

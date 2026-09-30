@@ -486,9 +486,18 @@ for (const branch of fs.readdirSync(BRANCHES).sort()) {
 
 if (tally.length) {
   const errs = [];
-  const nL = [...new Set(tally.map((t) => t.lessons))];
-  const nC = [...new Set(tally.map((t) => t.cine))];
-  const show = (key) => tally.map((t) => `${t.branch} ${t[key]}`).join(' · ');
+  // LEVEL IS A PHILOSOPHY RULE. Its six branches were levelled on purpose (§5) and
+  // must stay level; another subject's course grows on its own schedule — Economics
+  // opened with one lesson on 2026-09-29. The set is read out of data/subjects.ts,
+  // not retyped, so a course moved between subjects cannot slip past this.
+  const subjectsSrc = fs.readFileSync(path.join(process.cwd(), 'data', 'subjects.ts'), 'utf8');
+  const philo = subjectsSrc.match(/slug: 'philosophy'[\s\S]*?courses: \[([^\]]*)\]/)?.[1] ?? '';
+  const PHILOSOPHY = new Set([...philo.matchAll(/'([a-z-]+)'/g)].map((m) => m[1]));
+  if (PHILOSOPHY.size !== 6) throw new Error(`data/subjects.ts: expected philosophy's six courses, read ${[...PHILOSOPHY].join(', ') || 'none'}`);
+  const level = tally.filter((t) => PHILOSOPHY.has(t.branch));
+  const nL = [...new Set(level.map((t) => t.lessons))];
+  const nC = [...new Set(level.map((t) => t.cine))];
+  const show = (key) => level.map((t) => `${t.branch} ${t[key]}`).join(' · ');
   if (nL.length !== 1) errs.push(`branches hold different lesson counts — ${show('lessons')} (§5)`);
   if (nC.length !== 1) errs.push(`branches hold different cinematic counts — ${show('cine')} (§5)`);
 
@@ -557,7 +566,8 @@ if (tally.length) {
   console.log(
     `\ntakeover: ${cine}/${total} cinematic (${Math.round((cine / total) * 100)}%) · ` +
       `${cards} card decks left · solid front ${solid} · ` +
-      `${tally.length} branches at ${tally[0].lessons}/${tally[0].cine}`,
+      `${level.length} philosophy branches at ${level[0].lessons}/${level[0].cine}` +
+      tally.filter((t) => !PHILOSOPHY.has(t.branch)).map((t) => ` · ${t.branch} ${t.lessons}/${t.cine}`).join(''),
   );
   console.log('next to convert, in reading order:');
   for (const t of tally) {

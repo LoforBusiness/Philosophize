@@ -26,7 +26,7 @@ head('§1 · the seven subjects');
 const WANT = ['philosophy', 'psychology', 'personal-growth', 'business', 'economics', 'science', 'history'];
 ok(JSON.stringify(S.SUBJECTS.map((s) => s.slug)) === JSON.stringify(WANT),
   "the subjects are the seven, in the owner's order", S.SUBJECTS.map((s) => s.slug).join(' · '));
-ok(S.SUBJECTS.filter((s) => s.status === 'live').map((s) => s.slug).join() === 'philosophy', 'only philosophy is live');
+ok(S.SUBJECTS.filter((s) => s.status === 'live').map((s) => s.slug).join() === 'philosophy,economics', 'the live subjects are philosophy and economics (a subject goes live on purpose, here)');
 
 head('§2 · every subject is complete');
 for (const s of S.SUBJECTS) {

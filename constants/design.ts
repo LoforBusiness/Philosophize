@@ -292,10 +292,13 @@ export const BRANCH: Record<BranchKey, string> = {
   ethics: '#656E50',                // the owner's olive — conduct
   aesthetics: '#6A5733',            // bronze — taste
   'political-philosophy': '#935D4D',// sienna, the family's warm end — the forum
-  // Economics & Finance's first course, 2026-09-29: petrol blue, the subject's own
-  // family. Searched with check-ui's arithmetic — ΔE 13.2 from the nearest branch
-  // (logic), 10.4 from the Economics subject hue, C* 27.1, L* 48.6, ≥4.5:1 on paper.
-  economics: '#1E7E93',
+  // Economics & Finance's first course, 2026-09-29: a deep navy, the colour of the
+  // subject's own family and of a banknote's ink. Searched (scratchpad/econhue.mjs)
+  // against EVERY floor check-ui holds a branch to: ΔE 11.4 from the nearest branch,
+  // its glow jewel 18.5 and its disc face 13.3 from the nearest of theirs, a progress
+  // track visible on paper; C* 22.3, L* 33.6. Lighter blues passed the rest and
+  // collapsed into logic on the disc.
+  economics: '#335172',
 };
 
 export type TypeKey = 'display' | 'title' | 'body' | 'label' | 'micro';

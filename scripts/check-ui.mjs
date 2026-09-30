@@ -267,7 +267,10 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
 // the hole this section exists to close.
 {
   const branches = Object.entries(D.BRANCH);
-  ok(branches.length === 6, 'six branches, one colour each', `${branches.length} values`);
+  // Philosophy's six, and since 2026-09-29 each other subject's courses too — every
+  // course is a branch in data/branches and carries a hue from this one scale, so
+  // every rule below holds the new ones to the same floors as the six.
+  ok(branches.length >= 6, "philosophy's six branches and every other course, one colour each", `${branches.length} values`);
 
   // THE KEYS ARE THE REAL BRANCH SLUGS, checked against the directories rather
   // than against a second hand-written list. A colour keyed on a slug that does
