@@ -181,7 +181,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 
   // H60 — the only colours are the four in cinematicKit.
   const hexes = [...new Set(src.match(/#[0-9A-Fa-f]{3,8}\b/g) ?? [])];
-  if (hexes.length) errs.push(`declares its own colour(s) ${hexes.join(', ')} — use INK/PAPER/SOFT/RULE (H60)`);
+  if (hexes.length) errs.push(`declares its own colour(s) ${hexes.join(', ')} — use the kit's tones, or NATURAL in objects.ts for a real object's colour (H60, AP11)`);
 
   // H63 — no XP figure typed into a string.
   const xp = src.match(/\+\s?\d+\s?XP/g);

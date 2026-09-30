@@ -57,11 +57,56 @@ export type Role =
  * importing from a .tsx would cost the zero-import rule and with it the plain-Node
  * sheet. TypeScript is structural, so `paint()`'s result is a `Part[]`.
  */
-export type ObjPart =
+export type ObjPart = (
   | { k: 'ell'; role: Role; x: number; y: number; w: number; h: number; rot: number }
   | { k: 'rect'; role: Role; x: number; y: number; w: number; h: number; rot: number; rad: number }
   | { k: 'bar'; role: Role; x1: number; y1: number; x2: number; y2: number; t: number }
-  | { k: 'tri'; role: Role; x: number; y: number; w: number; h: number; dir: 'up' | 'down' | 'left' | 'right'; rot: number };
+  | { k: 'tri'; role: Role; x: number; y: number; w: number; h: number; dir: 'up' | 'down' | 'left' | 'right'; rot: number }
+) & { /** A real-world colour for this part (NATURAL) in place of the branch's tone. */ nat?: NaturalKey };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE COLOURS THINGS ACTUALLY ARE (2026-09-30, LESSON_RULES AP11).
+//
+// The owner, on the first economics lesson: *"if an apple is red, use red. If a loaf
+// of bread is a certain color, use that color … It's okay to use other colors in the
+// lessons."* The branch tones are the stage's GROUND and its diagrams; an object a
+// reader knows by its colour may wear that colour instead. A red apple drawn in the
+// branch's blue-grey is a drawing of an apple-shaped stone.
+//
+// They live HERE, in one table, rather than as hex in a scene, for the reason H60
+// exists: a colour typed into a scene can never be repainted, and one table can.
+// Each entry is a pair so the one-light rule holds — `base` for a lit body, `shade`
+// for its plane in shadow — and names the ink a word needs to be read on it
+// (`label`). `check:objects` re-derives both: shade darker than base, and the label
+// at 4.5:1 on the BASE — a word sits on the lit face, never across the shaded plane,
+// because no mid tone can hold one ink at 4.5:1 on both halves of itself. Add an entry for the object you are drawing, with what it
+// is, rather than bending an existing one.
+// ─────────────────────────────────────────────────────────────────────────────
+export const NATURAL = {
+  apple:      { base: '#B8322A', shade: '#8C2520', label: '#FAFAF7', what: 'a red eating apple' },
+  appleGreen: { base: '#7FA83A', shade: '#5F7F2A', label: '#1A1A1A', what: 'a green apple, a pear' },
+  leaf:       { base: '#4F7A30', shade: '#3B5C24', label: '#FAFAF7', what: 'a leaf, grass, a stalk' },
+  crust:      { base: '#B9783A', shade: '#8E5A28', label: '#1A1A1A', what: 'a baked crust — bread, pie, pastry' },
+  crumb:      { base: '#EFD7A2', shade: '#D9BB7C', label: '#1A1A1A', what: 'the inside of a loaf, cut' },
+  wood:       { base: '#8E5F37', shade: '#6B4829', label: '#FAFAF7', what: 'planks, a crate, a table, a handle' },
+  brass:      { base: '#C9A13B', shade: '#9C7B2A', label: '#1A1A1A', what: 'a gold coin, brass, a trumpet' },
+  copper:     { base: '#A35C31', shade: '#7C4524', label: '#FAFAF7', what: 'a copper coin, a pan' },
+  silver:     { base: '#C4C8CC', shade: '#9CA2A8', label: '#1A1A1A', what: 'a silver coin, steel, a spoon' },
+  cheese:     { base: '#E8C04E', shade: '#C29B32', label: '#1A1A1A', what: 'a hard yellow cheese' },
+  orange:     { base: '#E58A2C', shade: '#B86A1E', label: '#1A1A1A', what: 'an orange, a carrot, a pumpkin' },
+  water:      { base: '#4F8DB8', shade: '#3B6D8F', label: '#1A1A1A', what: 'water, a pond, the sea' },
+  brick:      { base: '#A8553A', shade: '#80402B', label: '#FAFAF7', what: 'brick, terracotta, a clay pot' },
+} as const;
+export type NaturalKey = keyof typeof NATURAL;
+
+/**
+ * An object drawn in a real colour: its BODY parts (mass, face, dark) take the natural
+ * pair, its ink lines and paper highlights stay as they are — so the outline, the rim
+ * and the shine are still this app's, and only the thing itself changes colour.
+ */
+export function tint(parts: readonly ObjPart[], key: NaturalKey): ObjPart[] {
+  return parts.map((p) => (p.role === 'line' || p.role === 'lit' ? p : { ...p, nat: key }));
+}
 
 /** An ellipse centred on (x, y). A CIRCLE SCALED — never a box with a big radius. */
 export const oEll = (role: Role, x: number, y: number, w: number, h: number, rot = 0): ObjPart => ({ k: 'ell', role, x, y, w, h, rot });
@@ -85,7 +130,10 @@ const PAPER = '#FAFAF7';
  */
 export function paint(parts: readonly ObjPart[], tone: ObjTone, ink: string = INK, paper: string = PAPER) {
   return parts.map((p) => {
-    const fill = p.role === 'mass' ? tone.STONE
+    const nat = p.nat ? NATURAL[p.nat] : null;
+    const fill = nat && p.role === 'mass' ? nat.base
+      : nat && (p.role === 'face' || p.role === 'dark') ? nat.shade
+      : p.role === 'mass' ? tone.STONE
       : p.role === 'face' || p.role === 'dark' ? tone.SHADE
         : p.role === 'lit' ? paper
           : ink;

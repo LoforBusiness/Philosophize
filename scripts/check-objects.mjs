@@ -244,6 +244,36 @@ if (plain > PLAIN_BUDGET) {
   note('BARE', `${plain} named objects are one bare rectangle, over the budget of ${PLAIN_BUDGET} (AM7)`);
 }
 
+// ── THE COLOURS THINGS ACTUALLY ARE (AP11, 2026-09-30) ───────────────────────
+// An apple may be red. Every NATURAL pair obeys the lamp (its shade is darker than
+// its base), names an ink that reads on its lit face at 4.5:1, and says what it is
+// for; and a tinted part is painted from the pair while its ink lines and paper
+// highlights stay the app's.
+{
+  const lumOf = (h) => {
+    const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const [x, y] = [lumOf(a), lumOf(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const HEX = /^#[0-9A-Fa-f]{6}$/;
+  for (const [k, c] of Object.entries(O.NATURAL ?? {})) {
+    if (![c.base, c.shade, c.label].every((h) => HEX.test(h))) { note('NATURAL', `${k}: base, shade and label must be #RRGGBB`); continue; }
+    if (!(lumOf(c.shade) < lumOf(c.base))) note('NATURAL', `${k}: its shade is not darker than its base — the lamp is top-left`);
+    const r = ratio(c.label, c.base);
+    if (r < 4.5) note('NATURAL', `${k}: its label reads ${r.toFixed(2)}:1 on its base, under 4.5`);
+    if (!c.what || c.what.length < 4) note('NATURAL', `${k}: says nothing about what it is the colour of`);
+  }
+  if (!O.NATURAL || !O.tint) note('NATURAL', 'objects.ts has no NATURAL table or no tint()');
+  else {
+    const tone = { RULE: '#111111', STONE: '#222222', SHADE: '#333333', EDGE: '#444444' };
+    const parts = O.tint([O.oRect('mass', 0, 0, 10, 10), O.oRect('face', 0, 0, 4, 4), O.oBar('line', 0, 0, 1, 1, 1), O.oEll('lit', 0, 0, 2, 2)], 'apple');
+    const f = O.paint(parts, tone).map((p) => p.fill);
+    if (f[0] !== O.NATURAL.apple.base || f[1] !== O.NATURAL.apple.shade) note('NATURAL', 'a tinted body is not painted from its natural pair');
+    if (f[2] === O.NATURAL.apple.base || f[3] === O.NATURAL.apple.base) note('NATURAL', 'tint() recoloured an ink line or a paper highlight');
+  }
+}
+
 // `OBJECTS_LIST=1` prints the remaining bare rectangles, which is the worklist for the
 // next pass. It is a REPORT, never a verdict: roughly two in five are correctly
 // rectangles (AM8), and the only way to tell which is to read the scene.
@@ -259,6 +289,7 @@ if (!bad.length) {
   console.log('  ok    nothing draws outside the box its scene gave it, at any size');
   console.log('  ok    the lamp is top-left in all of them');
   console.log(`  ok    the corpus is not growing new bare rectangles  ${plain} ≤ ${PLAIN_BUDGET}`);
+  console.log(`  ok    every natural colour obeys the lamp and holds a word on its lit face  ${Object.keys(O.NATURAL).length} colours`);
   console.log('\nthe objects are drawings. whether they are GOOD drawings is `npm run sheet:objects`.');
   process.exit(0);
 }

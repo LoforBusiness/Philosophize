@@ -1043,6 +1043,11 @@ Both are required. Get them from your Supabase project → Settings → API.
 
 > Directory names still say `paths/`, but a "path" **is a unit** — see §5.
 
+> ⚠️ **AND SINCE 2026-09-30 A NEW LESSON IS A DIALOGUE LESSON, IN EVERY SUBJECT**
+> (LESSON_RULES AP12): three voiced stickmen in one real place, no narrator — built the
+> way `economics-foundations-1` is, which the owner holds up as the standard. Objects may
+> wear their real colours from `NATURAL` in `objects.ts` (AP11).
+>
 > ⚠️ **A NEW LESSON IS A CINEMATIC LESSON.** Steps 1–5 below build the data file,
 > which every lesson still needs — the card deck is the fallback the runner uses if
 > the `CINEMATIC` entry is ever removed, which is what makes a scene safe to roll
@@ -8170,6 +8175,19 @@ Technology and History & Politics are announced and empty. Spec:
   - **A poster draws only while its TAB is focused** (`Poster.tsx`, `useTabFocused`),
     and is a box of its hue otherwise, released 420ms after blur so the tab fade never
     shows it empty. Measured in the real navigator: Learn 7 posters held, Profile 0.
+  - **Home's shelf takes ONE card a swipe and builds nothing mid-swipe (2026-09-30).**
+    *"each swipe, no matter which way, will only go one … I want that lag … fixed."* It
+    was a windowed FlatList (JS work on every scroll event) that mounted each card as it
+    came near, and a card's poster was `<SvgXml>` — parsed on the JS thread and built as
+    a native view per path — so the reader's own swipe paid to build the next card. It
+    is a plain ScrollView of all seven, `snapToInterval` + `disableIntervalMomentum`,
+    and its posters are PNGs drawn by `npm run make:posters` (`posterArt.ts`, stamped;
+    `check:subjects` §10 fails a poster edited and not redrawn). The snap can only be
+    felt on a phone — react-native-web ignores it.
+  - **And the cards were 4px off to the right, on Home and Learn.** `Card`'s `pad={0}`
+    meant `SPACE[0]`, which is 4, so a poster sized to the face less its 2px border ran
+    across the right-hand rim. `pad={0}` means no padding now; the two dark cards that
+    wore the 4px as an ink frame (Quick Start, the Philosophy intro) state it themselves.
   - `npm run sheet:subjects` draws every poster at the card, tile and masthead shape;
     `check:subjects` §5 holds that every box keeps every object in view.
 - **Profile and Pass stand on the wallpaper too, and Profile speaks in subjects.**
@@ -8222,6 +8240,9 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   unit-review rule read philosophy's six out of `data/subjects.ts`; the professor's
   intro gates philosophy lessons only (he lectures on philosophy); the Pass says "across
   N courses".
+- **It is the house format now (2026-09-30).** *"This is how I want future lessons to be
+  made for all subjects."* LESSON_RULES AP12 lists what made it work; AP11 lets an object
+  be the colour it is (`NATURAL` + `tint()` in `objects.ts`, held by `check:objects`).
 - **Two traps, both measured.** A re-measure of one lesson DROPS the corpus's
   `wardrobeReach` and `poseReach` records from `mustBoxes.ts.json` — splice the new
   rows into a backup instead of keeping the harness's file. And a stickman's legs are a

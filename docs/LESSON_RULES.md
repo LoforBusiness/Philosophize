@@ -1646,7 +1646,8 @@ from the other side.
 `SOFT #6B6B6B`, `RULE #E4E1D8`. **Not one of the 46 scenes declares a hex value of its
 own**, and that is most of why they read as a single product. Emphasis comes from weight
 and from fill — a card filled INK with PAPER text is the "this one" state everywhere —
-never from a hue.
+never from a hue. *(Amended 2026-09-30 by AP11: an OBJECT may wear its real colour, from
+the `NATURAL` table in `objects.ts` — still never a hex typed into a scene.)*
 
 **H61. A scene-owned answer target looks like the deck's option.** Pressable → inner
 View, 2px INK border, radius 4; once answered the correct one fills INK with PAPER text,
@@ -10918,3 +10919,65 @@ staged, not after.
 
 A stickman's legs are a third of him. At a real waist height a counter hides everything
 of the stall-holder but his cap; at the hip he reads as a man working a stall.
+
+### AP11 · A thing may be the colour it actually is
+
+> *"if it is necessary or makes more sense to use a different color in a lesson, I want
+> you to do so. Like if an apple is red, use red. If a loaf of bread is a certain color,
+> use that color … It's okay to use other colors in the lessons."* (2026-09-30)
+
+The branch tones are the stage's GROUND, its floor, its plates and its diagrams. An
+OBJECT a reader knows by its colour — an apple, a loaf, a coin, a pond, a brick wall —
+may wear that colour instead, because a red apple struck in the branch's blue-grey is an
+apple-shaped stone. This amends H60 for objects; it does not repeal it:
+
+- **The colour comes from `NATURAL` in `objects.ts`, never from a hex typed into a
+  scene.** `tint(parts, 'apple')` paints an object's body from the pair and leaves its
+  ink lines and paper highlights as they were, so the outline and the shine are still
+  this app's. A View-drawn thing in a scene reads `NATURAL.apple.base` the same way. A
+  colour the table lacks is ADDED to it, with what it is for.
+- **Each entry is a pair and obeys the lamp**: `base` for the lit body, `shade` for its
+  plane in shadow, and the shade is darker.
+- **A word sits on the lit face only, in the entry's `label` ink.** No mid tone holds
+  one ink at 4.5:1 on both halves of itself (measured: of thirteen, four could not even
+  hold it on the lit half until they were adjusted), so a caption never crosses onto the
+  shaded plane.
+- **Real colour is for real objects, not for emphasis.** A hue that means "this one" is
+  still weight and fill (H60), and the answer states are still the verdict's.
+
+`check:objects` holds the pair, the lamp and the label, counter-tested by swapping an
+entry's base and shade.
+
+### AP12 · The dialogue lesson is the house format, in every subject
+
+> *"the new economics lesson is absolutely amazing. I love the simplicity of it. I love
+> the voices. I love how the animations work … This is how I want future lessons to be
+> made for all subjects … I really like how it operates compared to the other redesign
+> lessons in philosophy."* (2026-09-30)
+
+**Every new lesson, in every subject, is a dialogue lesson** — AP1 to AP11 — and not a
+narrated one. The 246 narrated philosophy lessons stay as they are until somebody asks
+for one to change. The interactions and objects will be different in every lesson; what
+carries over is how "What Is Economics?" is BUILT, and these are the parts the owner
+named or that the build showed were load-bearing:
+
+1. **One real place, and the whole lesson happens in it.** A Saturday market stall, not
+   a sequence of diagrams. The idea is something the people there DO — pay, run out,
+   change a price — and the words name what the reader is watching.
+2. **Three people, each always the same voice and costume**, the words under the stage
+   with the speaker's face beside them. The Top Hat explains to the reader; the other two
+   live the example.
+3. **Few objects, each one real** — drawn from a fetched reference (AP5), coloured as it
+   is (AP11), and used: handed over, set down, counted. An object nobody touches is
+   decoration.
+4. **Hands meet what they hold, and the counter is at the hip** (AP5, AP10). Contact is
+   staged at a point both arms reach, and a figure is never hidden behind his own stall.
+5. **The scene is paced to the voice** (AP9): lines are rendered first, and each act runs
+   across its line's measured length, so the picture is moving for the whole sentence.
+6. **Two questions, answered by tapping things on the stage** — the costs on the
+   counter, the rows on the price board — never an ordering (AP6), and each one the
+   lesson's own scene rather than a panel of words.
+7. **Simple on purpose** (AP7): at most two figures moving, no bubbles, pen, wander,
+   chair or visitor (AP8). Less that can go wrong, and less to read.
+8. **A first lesson is a foundation** (AP3): what the subject is and why it matters, at
+   most three ideas.
