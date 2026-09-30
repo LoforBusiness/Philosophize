@@ -188,7 +188,9 @@ const styles = StyleSheet.create({
     color: C.inkSoft, textAlign: 'center', marginTop: 18,
   },
   missing: { fontFamily: 'Inter_500Medium', fontSize: 14, color: C.inkSoft, marginTop: 40 },
-  introCard: { overflow: 'hidden' },
+  // padding 4 is the thin ink frame Card's pad={0} used to give by accident (it
+  // meant 4 until 2026-09-30); stated here so the card keeps its look.
+  introCard: { overflow: 'hidden', padding: 4 },
   introBg: { width: '100%', height: INTRO_H, justifyContent: 'flex-end', overflow: 'hidden', borderRadius: 14 },
   introSky: { position: 'absolute', left: 0, right: 0, top: 0 },
   introBody: { paddingHorizontal: 16, paddingBottom: 14 },

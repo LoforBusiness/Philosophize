@@ -24,7 +24,7 @@
 // cross-dissolve, so a tab never fades out with its pictures gone.
 // ─────────────────────────────────────────────────────────────────────────────
 import { memo, useEffect, useMemo, useState } from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { View, Image, type ImageSourcePropType, type StyleProp, type ViewStyle } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from 'expo-router';
 import { posterXml, type PosterKey } from './posters';
@@ -75,21 +75,27 @@ function useTabFocused(): boolean {
 }
 
 function Poster({
-  art, hue, width, height, style,
+  art, hue, width, height, style, image,
 }: {
   art: PosterKey;
   hue: string;
   width: number;
   height: number;
   style?: StyleProp<ViewStyle>;
+  /** The same poster pre-drawn to PNG (posterArt.ts), for a place the reader SWIPES
+   *  through: an image is decoded once, where SvgXml parses its string on the JS
+   *  thread and builds a native view per path every time its card mounts. */
+  image?: ImageSourcePropType;
 }) {
   const w = Math.round(width);
   const h = Math.round(height);
-  const xml = useMemo(() => posterXml(art, hue, w, h), [art, hue, w, h]);
+  const xml = useMemo(() => (image ? '' : posterXml(art, hue, w, h)), [image, art, hue, w, h]);
   const live = useTabFocused();
   return (
     <View pointerEvents="none" style={[{ width: w, height: h, backgroundColor: hue, overflow: 'hidden' }, style]}>
-      {live ? <SvgXml xml={xml} width={w} height={h} /> : null}
+      {!live ? null : image
+        ? <Image source={image} style={{ width: w, height: h }} resizeMode="cover" fadeDuration={0} />
+        : <SvgXml xml={xml} width={w} height={h} />}
     </View>
   );
 }

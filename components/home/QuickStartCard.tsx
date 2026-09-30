@@ -155,6 +155,9 @@ const styles = StyleSheet.create({
     // Card draws the ink face, its 2px edge and the ledge; the picture is
     // clipped to the face's corners.
     overflow: 'hidden',
+    // The thin ink frame round the picture. It used to come from Card's pad={0},
+    // which meant 4 until 2026-09-30; it is stated here now so the card keeps it.
+    padding: 4,
   },
   bg: { width: '100%', height: QS_CARD_H, justifyContent: 'space-between', overflow: 'hidden', borderRadius: 14 },
   sky: { position: 'absolute', left: 0, right: 0, top: 0 },

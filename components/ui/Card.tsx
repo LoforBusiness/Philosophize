@@ -76,7 +76,11 @@ import { C, RADIUS, LIP, SPACE } from '@/constants/design';
 interface Props {
   children: ReactNode;
   onPress?: () => void;
-  /** Index into SPACE. Default 3 → 16. */
+  /** Index into SPACE, except that 0 means NO padding. Default 3 → 16.
+   *  0 used to mean SPACE[0], which is 4 — and every card that passed it did so to
+   *  lay a picture flush against the face's border. The subject cards sized their
+   *  poster to the face less its 2px border, so the hidden 4px pushed every poster
+   *  4px right, across the card's right-hand rim (2026-09-30). */
   pad?: 0 | 1 | 2 | 3 | 4 | 5;
   /** Visual style for the face. */
   style?: StyleProp<ViewStyle>;
@@ -114,7 +118,7 @@ export default function Card({
     <MotiView
       animate={{ translateY: drop }}
       transition={{ type: 'timing', duration: 90, easing: Easing.out(Easing.quad) }}
-      style={[styles.face, { padding: SPACE[pad], backgroundColor: t.face, borderColor: t.edge }, style]}
+      style={[styles.face, { padding: pad === 0 ? 0 : SPACE[pad], backgroundColor: t.face, borderColor: t.edge }, style]}
     >
       {children}
     </MotiView>

@@ -224,5 +224,48 @@ head('§9 · the branch badges count philosophy\'s branches only (2026-09-29 rev
     'progressStats takes its branch figures from branchMastery, not from every branch');
 }
 
+head('§10 · the Home shelf: pre-drawn posters, one card a swipe, flush pictures (2026-09-30)');
+{
+  // "they look like they're a little bit too far to the right, so they go off" and
+  // "each swipe … will only go one … I want that lag … fixed". Three rules, each a
+  // cause that was found rather than guessed.
+  const fs = await import('node:fs');
+  const crypto = await import('node:crypto');
+  const noComments = (p) => fs.readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+
+  // (a) Every Home card's picture is the PNG make:posters drew — and drawn from the
+  // poster as it is NOW. A poster edited in posters.ts and not redrawn would put an
+  // old picture on Home beside the new one on Learn, and nothing else would notice.
+  const table = fs.readFileSync('components/subjects/posterArt.ts', 'utf8');
+  const box = /CARD_POSTER_BOX = \{ w: (\d+), h: (\d+) \}/.exec(table);
+  const stamps = Object.fromEntries([...table.matchAll(/'([a-z-]+)': \{ source: require\('@\/assets\/images\/posters\/card-\1\.png'\), stamp: '([0-9a-f]+)' \}/g)].map((m) => [m[1], m[2]]));
+  ok(!!box, 'posterArt.ts states the box its pictures were drawn for');
+  if (box) {
+    const [W, H] = [Number(box[1]), Number(box[2])];
+    ok(W === L.cardWidth(390) - 4 && H === L.cardArtHeight(L.cardWidth(390)),
+      "the pictures were drawn for today's Home card box", `${W}x${H}`);
+    for (const s of S.SUBJECTS) {
+      const want = crypto.createHash('sha1').update(P.posterXml(s.slug, s.hue, W, H)).digest('hex').slice(0, 12);
+      ok(stamps[s.slug] === want, `${s.slug}'s Home picture is drawn from its poster as it is now`,
+        stamps[s.slug] === want ? '' : stamps[s.slug] ? 'stale — run npm run make:posters' : 'missing — run npm run make:posters');
+      ok(fs.existsSync(`assets/images/posters/card-${s.slug}.png`), `${s.slug}'s Home picture is on disk`);
+    }
+  }
+  const card = noComments('components/subjects/SubjectCard.tsx');
+  ok(/image=\{CARD_POSTER\[subject\.slug\]\?\.source\}/.test(card), 'a Home card paints its pre-drawn picture, not live SVG');
+
+  // (b) One card per swipe, and nothing built while the reader swipes.
+  const shelf = noComments('components/home/SubjectCarousel.tsx');
+  ok(/snapToInterval=/.test(shelf) && /disableIntervalMomentum/.test(shelf),
+    'the shelf stops at the NEXT card however hard it is flicked (snapToInterval + disableIntervalMomentum)');
+  ok(!/FlatList|snapToOffsets|windowSize/.test(shelf),
+    'the shelf is a plain row mounted once, not a windowed list that mounts cards mid-swipe');
+
+  // (c) Card's pad={0} means NO padding. It meant SPACE[0] (4), so a poster sized to
+  // the face less its border ran 4px across the card's right-hand rim.
+  const cardSrc = noComments('components/ui/Card.tsx');
+  ok(/padding: pad === 0 \? 0 : SPACE\[pad\]/.test(cardSrc), "Card's pad={0} lays a picture flush against its border");
+}
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);

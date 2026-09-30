@@ -13,6 +13,7 @@ import { C } from '@/constants/design';
 import { lipOf } from '@/components/shared/tone';
 import type { Subject } from '@/data/subjects';
 import Poster from './Poster';
+import { CARD_POSTER } from './posterArt';
 import { ArtBadge, DoneTag, SoonTag } from './tag';
 import { CARD_PAD, CARD_TITLE, cardArtHeight } from './tileLayout';
 
@@ -33,7 +34,8 @@ export default function SubjectCard({
       accessibilityLabel={`Open ${subject.name}${soon ? ', coming soon' : ''}`}
       containerStyle={{ width }}>
       <View>
-        <Poster art={subject.slug} hue={subject.hue} width={width - 2 * BORDER} height={cardArtHeight(width)} style={styles.poster} />
+        <Poster art={subject.slug} hue={subject.hue} width={width - 2 * BORDER} height={cardArtHeight(width)} style={styles.poster}
+          image={CARD_POSTER[subject.slug]?.source} />
         <ArtBadge label={soon ? 'SOON' : `${subject.courses.length} COURSES`} hue={subject.hue} />
       </View>
       <View style={styles.foot}>
