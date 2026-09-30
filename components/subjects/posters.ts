@@ -99,18 +99,25 @@ const recess = (hue: string) => shade(hue, 0.12);
  * A gear as ONE outline — the rim and its teeth traced as a single path — so it is
  * outlined once. Teeth drawn as separate outlined blocks read as a dashed ring.
  */
-function gear(x: number, y: number, r: number, teeth: number, fill: string, hue: string, rot = 0) {
+function gear(
+  x: number, y: number, r: number, teeth: number, fill: string, hue: string, rot = 0,
+  // A SMALL gear needs fewer, fatter teeth, a lighter line and no inner ring, or the
+  // outline eats the teeth and the fill shows only as spokes between them.
+  opt: { tooth?: number; w?: number; ring?: boolean } = {},
+) {
   const out = r + Math.max(4, r * 0.22);
+  const t = opt.tooth ?? 0.4;
+  const sw = opt.w ?? LINE;
   const step = (Math.PI * 2) / teeth;
   const pts: string[] = [];
   const at = (rad: number, a: number) => `${(x + rad * Math.cos(a)).toFixed(2)} ${(y + rad * Math.sin(a)).toFixed(2)}`;
   for (let i = 0; i < teeth; i++) {
     const a = (rot * Math.PI) / 180 + i * step;
     // root, flank up, tooth top, flank down — the tooth takes 45% of each step
-    pts.push(at(r, a - step * 0.5), at(r, a - step * 0.3), at(out, a - step * 0.2), at(out, a + step * 0.2), at(r, a + step * 0.3));
+    pts.push(at(r, a - step * 0.5), at(r, a - step * (t / 2 + 0.1)), at(out, a - step * (t / 2)), at(out, a + step * (t / 2)), at(r, a + step * (t / 2 + 0.1)));
   }
-  return `<path d="M${pts.join('L')}Z" fill="${fill}" ${S}/>`
-    + `<circle cx="${x}" cy="${y}" r="${r * 0.62}" fill="none" stroke="${mid(hue)}" stroke-width="2"/>`
+  return `<path d="M${pts.join('L')}Z" fill="${fill}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>`
+    + (opt.ring === false ? '' : `<circle cx="${x}" cy="${y}" r="${r * 0.62}" fill="none" stroke="${mid(hue)}" stroke-width="2"/>`)
     + `<circle cx="${x}" cy="${y}" r="${r * 0.3}" fill="${recess(hue)}" ${S} stroke-width="2.4"/>`;
 }
 function coin(x: number, y: number, hue: string, rx = 14) {
@@ -419,24 +426,35 @@ const DRAW: Record<PosterKey, Draw> = {
       <path d="M26 122.5L50 122.5" stroke="${LIT}" stroke-width="2"/>` };
   },
 
-  // REFERENCE: a head in profile (a silhouette study: crown to chin about as tall as
-  // back-of-skull to nose is wide) — the skull opened to show meshed gears; a thought
-  // bubble with its trail.
+  // REFERENCE: the "head with gears" icon (a bald profile bust, the skull a near
+  // circle with the brain window in its upper half) checked against real profile
+  // silhouettes. What makes a profile read as a HEAD rather than a blob: the eye line
+  // sits halfway between crown and chin; the skull bulges BEHIND the neck (occiput);
+  // the face is a stack of small, distinct events — brow, nose, lips, chin — under a
+  // forehead that leans back; and the neck is set behind the jaw. Crown to chin is
+  // about the same as occiput to nose tip, and the shoulders give the bust a base so
+  // it does not stand up like a column.
   psychology: (hue) => {
     const M = mid(hue);
-    const head = 'M68 118L70 98Q58 90 56 72Q53 42 74 29Q94 18 112 30Q121 38 120 50L127 63L119 66Q121 70 119 73Q121 77 118 80L119 87Q116 94 104 95L102 118Z';
+    const head = 'M48 118C50 108 60 103 71 100C75 98 77 94 76 89'
+      + 'C63 82 56 69 57 55C58 33 74 20 93 20C110 20 121 30 122 43'
+      + 'C122 48 121 51 123 55C123 57 121 58 121 60L129 70'
+      + 'C129 72 126 73 123 73C124 75 125 76 124 78C123 79 122 79 122 80'
+      + 'C124 81 124 83 122 84C121 85 120 85 120 86C122 88 122 91 119 93'
+      + 'C115 95 108 95 104 94C103 97 103 100 105 103C113 106 128 108 132 118Z';
     return { back: inkblotRoom(hue), body: `
-      ${pill(86, 120, 60, hue)}
+      ${pill(90, 120, 88, hue)}
       <path d="${head}" fill="${LIT}"/>
-      <path d="M68 118L70 98Q66 95 64 92Q76 100 88 100L86 118Z" fill="${M}"/>
+      <path d="M76 89C86 93 96 94 104 94C103 97 103 100 105 103C95 103 84 99 76 92Z" fill="${M}"/>
       <path d="${head}" fill="none" ${S}/>
-      <path d="M64 52Q64 32 86 31Q106 32 108 50Q108 66 88 68Q66 69 64 52Z" fill="${recess(hue)}" ${S}/>
-      ${gear(78, 48, 9, 8, M, hue)}${gear(97, 57, 6.5, 8, EMBER, hue, 20)}
-      <circle cx="152" cy="42" r="16" fill="${LIT}" ${S}/>
-      <circle cx="134" cy="62" r="4.5" fill="${LIT}" ${S} stroke-width="2.4"/>
-      <path d="M147 37Q147 31 153 31Q159 31 159 37Q159 41 153 43L153 47" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>
-      <circle cx="153" cy="53" r="2.2" fill="${INK}"/>` };
+      <path d="M65 49C63 36 76 29 89 29C104 29 114 37 113 49C113 61 102 66 89 66C76 66 66 61 65 49Z" fill="${recess(hue)}" ${S}/>
+      ${gear(81, 47, 9, 8, M, hue)}${gear(99, 52, 8, 6, EMBER, hue, 15, { tooth: 0.5, w: 2.4, ring: false })}
+      <circle cx="156" cy="40" r="16" fill="${LIT}" ${S}/>
+      <circle cx="138" cy="58" r="4.5" fill="${LIT}" ${S} stroke-width="2.4"/>
+      <path d="M151 35Q151 29 157 29Q163 29 163 35Q163 39 157 41L157 45" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>
+      <circle cx="157" cy="51" r="2.2" fill="${INK}"/>` };
   },
+
 
   // REFERENCE: a summit with a snow cap and a flag planted at the top, a second lower
   // peak behind, and a dotted trail climbing the lit face.
