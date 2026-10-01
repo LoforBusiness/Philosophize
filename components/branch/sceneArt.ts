@@ -570,6 +570,375 @@ function ripples(seed: number, y: number, h: number, n: number): string {
   return d;
 }
 
+// ── THE SEVEN SUBJECT ROADS' LANDMARKS (2026-10-01) ─────────────────────────
+//
+// The owner: "give each road its own scenery, matching what the subject is about.
+// Get reference photos." Every shape below was drawn after looking at a photograph
+// (`npm run ref`), and each note says what the photograph settled.
+//
+// All of them are clockwise rectangles, discs and polygons, so a union of them under
+// the nonzero rule never cancels into a hole by accident; and none uses an `A` arc,
+// for `measureTop`'s sake — an arch is two cubics.
+
+const fx = (v: number) => v.toFixed(1);
+/** A clockwise rectangle. */
+function box(x: number, y: number, w: number, h: number): string {
+  return ` M${fx(x)} ${fx(y)} L${fx(x + w)} ${fx(y)} L${fx(x + w)} ${fx(y + h)} L${fx(x)} ${fx(y + h)} Z`;
+}
+/** A thin bar from one point to another — a stay, a strut, a strand. */
+function bar(x1: number, y1: number, x2: number, y2: number, w: number, w2 = w): string {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  const nx = -Math.sin(a), ny = Math.cos(a);
+  return ` M${fx(x1 + nx * w / 2)} ${fx(y1 + ny * w / 2)} L${fx(x1 - nx * w / 2)} ${fx(y1 - ny * w / 2)}`
+    + ` L${fx(x2 - nx * w2 / 2)} ${fx(y2 - ny * w2 / 2)} L${fx(x2 + nx * w2 / 2)} ${fx(y2 + ny * w2 / 2)} Z`;
+}
+/** Over the top of a semicircle, from its RIGHT foot to its LEFT one, as two cubics. */
+function archOver(cx: number, ys: number, r: number): string {
+  const o = r * KAPPA;
+  return ` C${fx(cx + r)} ${fx(ys - o)} ${fx(cx + o)} ${fx(ys - r)} ${fx(cx)} ${fx(ys - r)}`
+    + ` C${fx(cx - o)} ${fx(ys - r)} ${fx(cx - r)} ${fx(ys - o)} ${fx(cx - r)} ${fx(ys)}`;
+}
+
+/**
+ * A CYPRESS — the tree of a Greek or Roman hillside: a narrow flame, never a cone.
+ * Five or six times taller than it is wide, broadest a third of the way up, and a
+ * little lopsided.
+ */
+function cypress(x: number, base: number, h: number, seed: number): string {
+  const w = h * (0.13 + rnd(seed) * 0.04);
+  const lean = (rnd(seed + 3) - 0.5) * w * 0.5;
+  return ` M${fx(x - w * 0.32)} ${fx(base)}`
+    + ` Q${fx(x - w * 1.1)} ${fx(base - h * 0.38)} ${fx(x + lean)} ${fx(base - h)}`
+    + ` Q${fx(x + w * 1.0)} ${fx(base - h * 0.42)} ${fx(x + w * 0.34)} ${fx(base)} Z`;
+}
+
+/**
+ * THE ACROPOLIS. The photographs (from the Philopappos hill) agree: a FLAT-TOPPED
+ * rock with sheer walls — the fortification wall is a straight line along its brow
+ * — and the Parthenon standing on it as a long low colonnade under a SHALLOW
+ * pediment. The rock is returned as `rock`, the temple as `temple`, so the two can
+ * be struck in different tones.
+ */
+function acropolis(x: number, base: number, w: number, h: number): { rock: string; temple: string } {
+  const top = base - h;
+  const rock = ` M${fx(x - w * 0.62)} ${fx(base)}`
+    + ` L${fx(x - w * 0.46)} ${fx(base - h * 0.42)} L${fx(x - w * 0.42)} ${fx(top + 4)}`
+    + ` L${fx(x - w * 0.40)} ${fx(top)} L${fx(x + w * 0.38)} ${fx(top - 2)}`
+    + ` L${fx(x + w * 0.42)} ${fx(top + 6)} L${fx(x + w * 0.47)} ${fx(base - h * 0.48)}`
+    + ` L${fx(x + w * 0.66)} ${fx(base)} Z`;
+  // The Parthenon: steps, eight columns showing at this distance, the beam, the gable.
+  const tw = w * 0.42, tx = x + w * 0.02, tb = top - 1;
+  let temple = box(tx - tw / 2 - 4, tb - 3, tw + 8, 3) + box(tx - tw / 2 - 2, tb - 6, tw + 4, 3);
+  const cols = 8, ch = h * 0.42, cw = tw / (cols * 1.9);
+  for (let i = 0; i < cols; i++) {
+    const cx = tx - tw / 2 + cw / 2 + (i * (tw - cw)) / (cols - 1);
+    temple += box(cx - cw / 2, tb - 6 - ch, cw, ch);
+  }
+  const ent = tb - 6 - ch;
+  temple += box(tx - tw / 2 - 2, ent - 5, tw + 4, 5);
+  temple += ` M${fx(tx - tw / 2 - 3)} ${fx(ent - 5)} L${fx(tx)} ${fx(ent - 5 - h * 0.11)} L${fx(tx + tw / 2 + 3)} ${fx(ent - 5)} Z`;
+  // A second, smaller building further along the brow (the Erechtheion's side).
+  temple += box(x - w * 0.30, tb - 10, w * 0.12, 10) + box(x - w * 0.31, tb - 13, w * 0.14, 3);
+  return { rock, temple };
+}
+
+/** AN OLIVE GROVE — low, round, grey-green crowns on short crooked trunks, in rows. */
+function olives(seed: number, base: number, h: number, n: number, bottom: number): string {
+  let d = box(0, base, TILE_W, bottom - base);
+  const pitch = TILE_W / n;
+  for (let i = 0; i < n; i++) {
+    const r = (m: number) => rnd(seed + i * 4.7 + m);
+    const x = i * pitch + (r(1) - 0.5) * pitch * 0.5;
+    const th = h * (0.6 + r(2) * 0.6);
+    d += bar(x, base, x + (r(3) - 0.5) * 6, base - th * 0.45, th * 0.10, th * 0.06);
+    const cy = base - th * 0.68;
+    for (let k = 0; k < 4; k++) d += disc(x + (k - 1.5) * th * 0.24 + (r(5 + k) - 0.5) * 4, cy + (r(9 + k) - 0.5) * th * 0.2, th * (0.22 + r(13 + k) * 0.12));
+  }
+  return d;
+}
+
+/**
+ * A WEEPING WILLOW. What every photograph shows and a generic tree never has: the
+ * crown is a dome, and from its whole rim the branches HANG in a curtain nearly to
+ * the ground, with gaps between the strands that the sky shows through.
+ */
+function willow(x: number, base: number, h: number, seed: number): string {
+  const lean = (rnd(seed) - 0.5) * h * 0.08;
+  let d = bar(x, base, x + lean, base - h * 0.52, h * 0.07, h * 0.045);
+  d += bar(x + lean, base - h * 0.48, x + lean - h * 0.16, base - h * 0.66, h * 0.03, h * 0.02);
+  d += bar(x + lean, base - h * 0.5, x + lean + h * 0.18, base - h * 0.68, h * 0.03, h * 0.02);
+  const cx = x + lean, cy = base - h * 0.72, cr = h * 0.25;
+  for (let k = 0; k < 5; k++) d += disc(cx + (k - 2) * cr * 0.42, cy - Math.sin((k / 4) * Math.PI) * cr * 0.42, cr * 0.62);
+  const n = 15;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const sx = cx - cr * 1.25 + t * cr * 2.5;
+    const sy = cy - Math.sin(t * Math.PI) * cr * 0.22 + cr * 0.15;
+    const end = base - h * (0.05 + rnd(seed + i * 3) * 0.20) - Math.sin(t * Math.PI) * h * 0.02;
+    const sway = (t - 0.5) * cr * 0.5 + (rnd(seed + i * 7) - 0.5) * 4;
+    d += bar(sx, sy, sx + sway, end, 5.5, 1.4);
+  }
+  return d;
+}
+
+/** A LOMBARDY POPLAR — the tall narrow tree the lake photographs keep beside the willows. */
+function poplar(x: number, base: number, h: number, seed: number): string {
+  const w = h * 0.12;
+  return bar(x, base, x, base - h * 0.2, w * 0.25, w * 0.2)
+    + ` M${fx(x - w * 0.5)} ${fx(base - h * 0.12)} Q${fx(x - w * 1.05)} ${fx(base - h * 0.62)} ${fx(x + (rnd(seed) - 0.5) * w * 0.4)} ${fx(base - h)}`
+    + ` Q${fx(x + w * 1.05)} ${fx(base - h * 0.6)} ${fx(x + w * 0.5)} ${fx(base - h * 0.12)} Z`;
+}
+
+/**
+ * THE CLIMB — one big mountain, its trail cut across the face in switchbacks, and a
+ * flag on the summit. The switchback photographs show the trail as a pale scar
+ * zig-zagging up a slope at a shallow angle, each leg overlapping the one below.
+ * Returned as the mountain, and the lighter marks on it (trail, snow, flag).
+ */
+function climb(x: number, base: number, w: number, h: number, seed: number): { peak: string; marks: string } {
+  const top = base - h;
+  const pts: [number, number][] = [
+    [x - w * 0.62, base], [x - w * 0.40, base - h * 0.38], [x - w * 0.30, base - h * 0.44],
+    [x - w * 0.14, base - h * 0.76], [x - w * 0.06, base - h * 0.80], [x, top],
+    [x + w * 0.08, base - h * 0.88], [x + w * 0.22, base - h * 0.62], [x + w * 0.30, base - h * 0.60],
+    [x + w * 0.62, base],
+  ];
+  let peak = ` M${fx(pts[0][0])} ${fx(pts[0][1])}`;
+  for (const [px, py] of pts.slice(1)) peak += ` L${fx(px)} ${fx(py)}`;
+  peak += ' Z';
+  // Snow on the summit, lit side only.
+  let marks = ` M${fx(x)} ${fx(top)} L${fx(x + w * 0.045)} ${fx(top + h * 0.066)} L${fx(x + w * 0.03)} ${fx(top + h * 0.10)}`
+    + ` L${fx(x + w * 0.012)} ${fx(top + h * 0.075)} L${fx(x - w * 0.004)} ${fx(top + h * 0.12)} L${fx(x - w * 0.02)} ${fx(top + h * 0.085)}`
+    + ` L${fx(x - w * 0.036)} ${fx(top + h * 0.13)} L${fx(x - w * 0.048)} ${fx(top + h * 0.15)} Z`;
+  // The switchbacks. Each turn is placed INSIDE the mountain at its own height —
+  // read off the outline — so a leg can never run out past the slope into the sky.
+  const edgeAt = (y: number, side: 1 | -1) => {
+    const run = side < 0 ? pts.slice(0, 6) : pts.slice(5).reverse();
+    for (let k = 0; k < run.length - 1; k++) {
+      const [ax, ay] = run[k], [bx, by] = run[k + 1];
+      if ((y <= ay && y >= by) || (y >= ay && y <= by)) return ax + ((y - ay) / (by - ay || 1)) * (bx - ax);
+    }
+    return x;
+  };
+  const legs = 6;
+  let py = base - h * 0.05;
+  let px = x + (edgeAt(py, -1) - x) * 0.55;
+  for (let i = 0; i < legs; i++) {
+    const ny = base - h * ((i + 1) / (legs + 1)) * 0.80 - h * 0.05;
+    const side = i % 2 === 0 ? 1 : -1;
+    const nx = x + (edgeAt(ny, side) - x) * 0.62;
+    marks += bar(px, py, nx, ny, 2.2);
+    px = nx; py = ny;
+  }
+  // The flag: a pole and a pennant, just off the summit.
+  marks += bar(x + 3, top + 2, x + 3, top - 18, 1.8) + ` M${fx(x + 4)} ${fx(top - 18)} L${fx(x + 17)} ${fx(top - 14)} L${fx(x + 4)} ${fx(top - 10)} Z`;
+  void seed;
+  return { peak, marks };
+}
+
+/**
+ * MAIN STREET — two- and three-storey shopfronts. From the downtown photographs:
+ * every frontage is its own height and its own roofline (a flat parapet with a
+ * cornice, a stepped false front, a little pediment), each has an AWNING over the
+ * shop window at the same height, and one in a few hangs a sign out sideways.
+ * Returned as the buildings and their windows, struck lighter.
+ */
+function mainStreet(seed: number, base: number, h: number, bottom: number): { fronts: string; windows: string } {
+  let fronts = box(0, base, TILE_W, bottom - base);
+  let windows = '';
+  let x = -20;
+  let i = 0;
+  while (x < TILE_W + 20) {
+    const r = (m: number) => rnd(seed + i * 6.1 + m);
+    const bw = 64 + r(1) * 56;
+    const bh = h * (0.62 + r(2) * 0.55);
+    const top = base - bh;
+    fronts += box(x, top, bw, bh);
+    const kind = Math.floor(r(3) * 3);
+    if (kind === 0) fronts += box(x - 3, top - 5, bw + 6, 5);                                   // a cornice
+    else if (kind === 1) fronts += box(x + bw * 0.2, top - 9, bw * 0.6, 9) + box(x + bw * 0.38, top - 15, bw * 0.24, 6); // stepped
+    else fronts += ` M${fx(x + bw * 0.25)} ${fx(top)} L${fx(x + bw * 0.5)} ${fx(top - 12)} L${fx(x + bw * 0.75)} ${fx(top)} Z`; // pediment
+    // The awning: out past the facade, its front edge scalloped.
+    const ay = base - 26;
+    let aw = ` M${fx(x + 3)} ${fx(ay - 7)} L${fx(x + bw - 3)} ${fx(ay - 7)} L${fx(x + bw + 4)} ${fx(ay + 3)}`;
+    const sc = 5;
+    for (let k = sc; k > 0; k--) {
+      const ax1 = x - 4 + ((bw + 8) * k) / sc, ax0 = x - 4 + ((bw + 8) * (k - 1)) / sc;
+      aw += ` Q${fx((ax0 + ax1) / 2)} ${fx(ay + 9)} ${fx(ax0)} ${fx(ay + 3)}`;
+    }
+    fronts += aw + ' Z';
+    // The shop window under the awning, and the upper floors' tall windows.
+    windows += box(x + bw * 0.12, ay + 6, bw * 0.48, base - ay - 9) + box(x + bw * 0.68, ay + 6, bw * 0.16, base - ay - 6);
+    const floors = bh > h * 0.95 ? 2 : 1;
+    const cols = bw > 90 ? 4 : 3;
+    for (let fl = 0; fl < floors; fl++) {
+      const wy = ay - 22 - fl * 24;
+      if (wy < top + 6) break;
+      for (let c = 0; c < cols; c++) windows += box(x + bw * (0.12 + (c * 0.76) / cols) + 2, wy, bw * 0.76 / cols - 6, 14);
+    }
+    // A sign hung out sideways from one front in three.
+    if (r(7) < 0.34) fronts += box(x + bw - 2, ay - 40, 4, 6) + box(x + bw + 2, ay - 46, 10, 30);
+    x += bw + 2 + r(8) * 6;
+    i++;
+  }
+  return { fronts, windows };
+}
+
+/** A FAR SKYLINE — towers of different heights, a few with a stepped crown or a mast. */
+function skyline(seed: number, base: number, h: number, bottom: number): string {
+  let d = box(0, base, TILE_W, bottom - base);
+  let x = -10, i = 0;
+  while (x < TILE_W + 10) {
+    const r = (m: number) => rnd(seed + i * 3.3 + m);
+    const w = 22 + r(1) * 36;
+    const th = h * (0.25 + r(2) * 0.75);
+    d += box(x, base - th, w, th);
+    if (r(3) < 0.3) d += box(x + w * 0.2, base - th - 10, w * 0.6, 10);
+    if (r(4) < 0.2) d += box(x + w * 0.48, base - th - 26, 2, 26);
+    x += w + r(5) * 14;
+    i++;
+  }
+  return d;
+}
+
+/**
+ * A SHIP-TO-SHORE CRANE, seen side on. The port photographs: two legs and a portal
+ * beam, an A-frame rising above them, and the long BOOM run out horizontally over
+ * the water with stays from the apex to its tip — the shape that says harbour from
+ * a mile off. `out` is which way the boom points (−1 left, over the water).
+ */
+function gantry(x: number, base: number, h: number, out: number): string {
+  const legs = h * 0.22, beam = base - h * 0.52, boomY = base - h * 0.64, apex = base - h;
+  let d = bar(x - legs, base, x - legs, beam, 4) + bar(x + legs, base, x + legs, beam, 4);
+  d += bar(x - legs * 1.05, base, x + legs * 0.1, beam, 2.5) + bar(x + legs * 1.05, base, x - legs * 0.1, beam, 2.5);
+  d += box(x - legs - 4, beam - 6, legs * 2 + 8, 7);
+  d += bar(x - legs * 0.7, beam, x, apex, 3.5) + bar(x + legs * 0.7, beam, x, apex, 3.5);
+  const tip = x + out * h * 1.05, back = x - out * h * 0.38;
+  d += box(Math.min(tip, back), boomY - 3, Math.abs(tip - back), 6);
+  d += bar(x, apex, tip, boomY - 2, 1.6) + bar(x, apex, back, boomY - 2, 1.6) + bar(x, apex, x + out * h * 0.5, boomY - 2, 1.4);
+  d += box(x + out * h * 0.18 - 9, boomY - 14, 18, 11);       // the trolley's cab
+  return d;
+}
+
+/** A CONTAINER SHIP — a long low hull, the bow raised, containers stacked, the bridge aft. */
+function ship(x: number, water: number, len: number): { hull: string; gaps: string } {
+  const hh = len * 0.07;
+  let hull = ` M${fx(x - len / 2)} ${fx(water - hh)} L${fx(x + len / 2 - len * 0.06)} ${fx(water - hh)}`
+    + ` L${fx(x + len / 2)} ${fx(water - hh * 1.5)} L${fx(x + len / 2 - len * 0.04)} ${fx(water + 2)}`
+    + ` L${fx(x - len / 2 + len * 0.03)} ${fx(water + 2)} Z`;
+  // The bridge, aft, and a funnel.
+  hull += box(x - len / 2 + len * 0.04, water - hh - len * 0.13, len * 0.07, len * 0.13);
+  hull += box(x - len / 2 + len * 0.025, water - hh - len * 0.15, len * 0.10, len * 0.03);
+  let gaps = '';
+  const cw = len * 0.055, chh = len * 0.032;
+  for (let c = 0; c < 12; c++) {
+    const cx = x - len / 2 + len * 0.14 + c * (cw + 1.2);
+    const tiers = 2 + ((c * 7) % 3);
+    hull += box(cx, water - hh - chh * tiers, cw, chh * tiers);
+    for (let t = 1; t < tiers; t++) gaps += box(cx, water - hh - chh * t - 0.6, cw, 1.2);
+  }
+  gaps += box(x - len / 2 + len * 0.05, water - hh - len * 0.12, len * 0.05, 3);
+  return { hull, gaps };
+}
+
+/**
+ * AN OBSERVATORY — the dome on a drum, from the mountain-observatory photographs:
+ * a hemisphere a little wider than the drum it sits on, with the SLIT running up
+ * over the top. Returned as the building and the slit (drawn lighter).
+ */
+function observatory(x: number, base: number, r: number): { body: string; slit: string } {
+  const drum = r * 0.9;
+  let body = box(x - r * 0.9, base - drum, r * 1.8, drum) + box(x + r * 0.7, base - drum * 0.6, r * 1.3, drum * 0.6);
+  const o = r * KAPPA, cy = base - drum;
+  body += ` M${fx(x - r)} ${fx(cy)} C${fx(x - r)} ${fx(cy - o)} ${fx(x - o)} ${fx(cy - r)} ${fx(x)} ${fx(cy - r)}`
+    + ` C${fx(x + o)} ${fx(cy - r)} ${fx(x + r)} ${fx(cy - o)} ${fx(x + r)} ${fx(cy)} Z`;
+  const slit = ` M${fx(x - r * 0.08)} ${fx(cy - r * 0.99)} L${fx(x + r * 0.10)} ${fx(cy - r * 0.99)} L${fx(x + r * 0.14)} ${fx(cy - r * 0.2)} L${fx(x - r * 0.12)} ${fx(cy - r * 0.2)} Z`
+    + ` M${fx(x - r * 0.9)} ${fx(cy - r * 0.08)} L${fx(x + r * 0.9)} ${fx(cy - r * 0.08)} L${fx(x + r * 0.9)} ${fx(cy)} L${fx(x - r * 0.9)} ${fx(cy)} Z`;
+  return { body, slit };
+}
+
+/**
+ * A RADIO TELESCOPE — "The Dish": a shallow bowl tipped up toward the sky on an
+ * A-frame of lattice, with a tripod holding the feed out in front of it.
+ */
+function radioDish(x: number, base: number, s: number): { frame: string; face: string } {
+  let d = bar(x - s * 0.55, base, x - s * 0.05, base - s * 0.62, 4) + bar(x + s * 0.55, base, x + s * 0.05, base - s * 0.62, 4);
+  d += bar(x - s * 0.36, base - s * 0.22, x + s * 0.36, base - s * 0.22, 2.5);
+  d += bar(x - s * 0.5, base - s * 0.08, x + s * 0.14, base - s * 0.5, 1.8) + bar(x + s * 0.5, base - s * 0.08, x - s * 0.14, base - s * 0.5, 1.8);
+  // The bowl, tipped back toward the sky. Seen from the side a dish is an ELLIPSE —
+  // its rim — and the near half of the concave face catches the light, which is
+  // the whole difference between a dish and a fin.
+  const cx = x - s * 0.04, cy = base - s * 0.80, R = s * 0.50, a = -0.62;
+  d += ellipseAt(cx, cy, R, R * 0.36, a);
+  const fx0 = cx + Math.sin(-a) * R * 0.62, fy0 = cy - Math.cos(-a) * R * 0.62;
+  d += bar(cx - Math.cos(a) * R * 0.7, cy - Math.sin(a) * R * 0.7, fx0, fy0, 1.4)
+    + bar(cx + Math.cos(a) * R * 0.7, cy + Math.sin(a) * R * 0.7, fx0, fy0, 1.4) + disc(fx0, fy0, 3);
+  return { frame: d, face: ellipseAt(cx + 1.5, cy + 1.5, R * 0.84, R * 0.24, a) };
+}
+
+/** An ellipse turned by `a` radians, as four cubics, clockwise. */
+function ellipseAt(cx: number, cy: number, rx: number, ry: number, a: number): string {
+  const ca = Math.cos(a), sa = Math.sin(a);
+  const P = (u: number, v: number) => `${fx(cx + u * ca - v * sa)} ${fx(cy + u * sa + v * ca)}`;
+  const ox = rx * KAPPA, oy = ry * KAPPA;
+  return ` M${P(-rx, 0)} C${P(-rx, -oy)} ${P(-ox, -ry)} ${P(0, -ry)} C${P(ox, -ry)} ${P(rx, -oy)} ${P(rx, 0)}`
+    + ` C${P(rx, oy)} ${P(ox, ry)} ${P(0, ry)} C${P(-ox, ry)} ${P(-rx, oy)} ${P(-rx, 0)} Z`;
+}
+
+
+/** A WIND TURBINE — a tapering tower, a nacelle, three long thin blades. */
+function turbine(x: number, base: number, h: number, turn: number): string {
+  let d = bar(x, base, x, base - h, h * 0.045, h * 0.022);
+  d += box(x - h * 0.03, base - h - h * 0.025, h * 0.08, h * 0.05);
+  for (let k = 0; k < 3; k++) {
+    const a = turn + (k * Math.PI * 2) / 3;
+    d += bar(x, base - h, x + Math.cos(a) * h * 0.46, base - h + Math.sin(a) * h * 0.46, h * 0.035, h * 0.008);
+  }
+  return d + disc(x, base - h, h * 0.03);
+}
+
+/**
+ * THE AQUEDUCT — the Pont du Gard, which every photograph agrees on: THREE TIERS,
+ * the lower two of big round arches stacked pier on pier, the top one a long row
+ * of small arches carrying the channel. Each tier is one outline whose lower edge
+ * dips down every pier and up over every arch, so the sky shows through them.
+ */
+function aqueduct(x0: number, x1: number, base: number): string {
+  const tier = (y0: number, y1: number, n: number, pier: number) => {
+    const bay = (x1 - x0) / n;
+    let d = ` M${fx(x0)} ${fx(y0)} L${fx(x1)} ${fx(y0)} L${fx(x1)} ${fx(y1)}`;
+    for (let k = n - 1; k >= 0; k--) {
+      const l = x0 + k * bay, r = l + bay;
+      const half = (bay - pier) / 2, cx = (l + r) / 2;
+      const spring = y0 + (y1 - y0) * 0.32 + half;
+      d += ` L${fx(r - pier / 2)} ${fx(y1)} L${fx(cx + half)} ${fx(spring)}` + archOver(cx, spring, half) + ` L${fx(l + pier / 2)} ${fx(y1)}`;
+    }
+    return d + ` L${fx(x0)} ${fx(y1)} Z`;
+  };
+  const span = x1 - x0;
+  const big = Math.max(3, Math.round(span / 70));
+  return tier(base - 54, base, big, 12)
+    + tier(base - 100, base - 54, big, 10)
+    + tier(base - 116, base - 100, big * 3, 4);
+}
+
+/**
+ * A CASTLE RUIN on its hill — from the Castle Roche photograph: a ragged curtain
+ * wall along the crest with a gap broken in it, and one square keep standing taller
+ * with its crenellations half gone.
+ */
+function castleRuin(x: number, base: number, w: number, h: number): string {
+  let d = ` M${fx(x - w)} ${fx(base)} Q${fx(x - w * 0.4)} ${fx(base - h * 0.55)} ${fx(x)} ${fx(base - h * 0.6)} Q${fx(x + w * 0.45)} ${fx(base - h * 0.55)} ${fx(x + w)} ${fx(base)} Z`;
+  const crest = base - h * 0.58;
+  // the curtain wall, broken in the middle
+  d += box(x - w * 0.42, crest - h * 0.22, w * 0.30, h * 0.22) + box(x + w * 0.05, crest - h * 0.16, w * 0.30, h * 0.16);
+  for (let k = 0; k < 5; k++) d += box(x - w * 0.42 + k * w * 0.065, crest - h * 0.28, w * 0.035, h * 0.06);
+  // the keep
+  d += box(x + w * 0.16, crest - h * 0.52, w * 0.16, h * 0.52);
+  for (let k = 0; k < 3; k++) if (k !== 1) d += box(x + w * 0.16 + k * w * 0.06, crest - h * 0.60, w * 0.04, h * 0.08);
+  return d;
+}
+
 // ── PALETTES ─────────────────────────────────────────────────────────────────
 //
 // Per PLACE, not one global ramp. The references are not equally contrasty:
@@ -657,6 +1026,51 @@ const PALETTES: Record<string, Palette> = {
     sky: '#EAE1DC', cloud: '#FDFDFC', cloudShade: '#D7C5BD',
     far: '#CFB8B0', mid: '#B69287', near: '#604138', ink: '#1A1A1A', earth: '#8A5A4B',
   },
+
+  // ── THE SEVEN SUBJECT ROADS (2026-10-01) ─────────────────────────────────
+  //
+  // Each from its road's hue (constants/design.ts BRANCH) by the same walk as the
+  // six above — far 40% into paper, mid 62%, near 42% into ink — every mid clearing
+  // 5:1 against the ink figure. The SKIES are tinted apart on purpose, so seven
+  // roads are not seven pale blues: a blush over Greece, lilac over the lake, a
+  // green morning on the climb, a warm street, harbour blue, mint over the
+  // observatory and a rose-stone afternoon over the aqueduct.
+  //
+  // Philosophy: the Acropolis on its rock, olive groves and cypresses. Slate teal.
+  philosophy: {
+    sky: '#F1E7E0', cloud: '#FDFDFC', cloudShade: '#DCCFC6',
+    far: '#ACB6B9', mid: '#809198', near: '#2A3A41', ink: '#1A1A1A', earth: '#36515D',
+  },
+  // Psychology: a still lake at dusk, willows and poplars along it. Dusk slate.
+  psychology: {
+    sky: '#E5E1EA', cloud: '#FDFDFC', cloudShade: '#CBC6D6',
+    far: '#BABAC7', mid: '#9797AC', near: '#3F3F54', ink: '#1A1A1A', earth: '#5A5A7E',
+  },
+  // Personal growth: a mountain climbed by switchbacks, and trees growing up beside the road. Moss.
+  'personal-growth': {
+    sky: '#E7EADC', cloud: '#FDFDFC', cloudShade: '#CDD1BC',
+    far: '#BEC1AC', mid: '#9CA283', near: '#444A2E', ink: '#1A1A1A', earth: '#636C3C',
+  },
+  // Business: main street, shopfronts with awnings, a skyline behind. Bronze.
+  business: {
+    sky: '#E9E3D8', cloud: '#FDFDFC', cloudShade: '#D3CABB',
+    far: '#C6BAA7', mid: '#A9977C', near: '#513F27', ink: '#1A1A1A', earth: '#785A30',
+  },
+  // Economics: a container port — gantry cranes, a ship, the quay. Navy.
+  economics: {
+    sky: '#DCE3E8', cloud: '#FDFDFC', cloudShade: '#BDC8D2',
+    far: '#AAB6C2', mid: '#7F91A5', near: '#293A4D', ink: '#1A1A1A', earth: '#335172',
+  },
+  // Science: an observatory on its hill, a radio dish, wind turbines. Lab teal.
+  science: {
+    sky: '#E0E9E3', cloud: '#FDFDFC', cloudShade: '#BFD2CC',
+    far: '#A9C2C2', mid: '#7DA4A5', near: '#274B4D', ink: '#1A1A1A', earth: '#306F72',
+  },
+  // History: an aqueduct across the valley, a castle ruin on the hill. Brick.
+  history: {
+    sky: '#EBE3DF', cloud: '#FDFDFC', cloudShade: '#DAC9C3',
+    far: '#D0B9B1', mid: '#B8958B', near: '#5E3D35', ink: '#1A1A1A', earth: '#905748',
+  },
 };
 
 export const PLACES = Object.keys(PALETTES);
@@ -742,6 +1156,16 @@ export function weatherFor(unit: number): Weather {
   };
 }
 
+const SUBJECT_LIGHT: Record<string, { x: number; y: number; r: number } | null> = {
+  philosophy: { x: 0.80, y: 0.30, r: 46 },
+  psychology: { x: 0.70, y: 0.18, r: 22 },
+  'personal-growth': { x: 0.86, y: 0.36, r: 40 },
+  business: null,
+  economics: { x: 0.18, y: 0.16, r: 34 },
+  science: { x: 0.80, y: 0.14, r: 20 },
+  history: { x: 0.74, y: 0.22, r: 50 },
+};
+
 /** The moon or the low sun, if this place has one at all. Behind everything. */
 export function discFor(
   place: string, unit: number
@@ -751,6 +1175,12 @@ export function discFor(
   if (place === 'logic' || place === 'ethics') return null;
   const w = weatherFor(unit);
   const p = paletteFor(place);
+  // THE SEVEN SUBJECT ROADS each have their own light, so seven roads are not one
+  // white sun in one corner: a low sun beside the Acropolis, a small moon over the
+  // lake, the sun behind the climb, the harbour's high hazy one, a moon over the
+  // observatory, an afternoon sun over the aqueduct. Main Street is noon, and has none.
+  const own = SUBJECT_LIGHT[place];
+  if (own !== undefined) return own && { ...own, tone: p.cloud, opacity: 0.92 };
   return { ...w.disc, tone: p.cloud, opacity: place === 'epistemology' ? 0.98 : 0.92 };
 }
 
@@ -946,6 +1376,129 @@ export function sceneLayers(place: string, unit: number): LayerArt[] {
         // head-high on someone 43 units tall.
         { tone: p.mid, k: 0.46, baseY: 302, make: (b) => roofs(s + 37, 302, 40, 9, b) },
         { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 47, 302, b) },
+      ]);
+
+    // -- PHILOSOPHY: the Acropolis on its rock, olive groves, cypresses ---------
+    case 'philosophy': {
+      const a = acropolis(170, 282, 250, 78);
+      return bands([
+        ...(w.birds ? [{ tone: p.far, k: 0.05, baseY: 150, solo: true, make: () => birds(s + 3, 110, 3) }] : []),
+        cloudSpec(s + 5, 276, 118, w, p, 0.05),
+        { tone: p.far, k: 0.08, baseY: 286, make: (b) => downs(s + 7, 286, 30, 4, b) },
+        { tone: p.cloud, k: 0.10, baseY: 282, solo: true, underTone: p.far, under: () => a.rock, make: () => a.temple },
+        { tone: p.mid, k: 0.30, baseY: 294, make: (b) => olives(s + 11, 294, 30, 16, b) },
+        {
+          tone: p.mid, k: 0.46, baseY: 300, solo: true,
+          make: () => cypress(110, 300, 118, s + 13) + cypress(142, 300, 86, s + 17) + cypress(470, 300, 104, s + 19)
+            + cypress(500, 300, 70, s + 21) + cypress(800, 300, 122, s + 25) + cypress(836, 300, 92, s + 27),
+        },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 23, 302, b) },
+      ]);
+    }
+
+    // -- PSYCHOLOGY: a still lake at dusk, willows and poplars on its bank ----
+    case 'psychology':
+      return bands([
+        cloudSpec(s + 3, 266, 104, w, p, 0.05),
+        { tone: p.far, k: 0.12, baseY: 270, make: (b) => downs(s + 5, 270, 26, 3, b) },
+        { tone: p.far, k: 0.16, baseY: 274, make: (b) => treemass(s + 9, 274, 20, 34, b) },
+        {
+          // The lake: still water the whole width, the far bank's line broken across it.
+          tone: p.cloud, k: 0.20, baseY: 296, solo: true,
+          make: () => 'M0 264 L' + TILE_W + ' 264 L' + TILE_W + ' 268 L0 268 Z' + ripples(s + 13, 272, 22, 14),
+          underTone: p.far, under: () => 'M0 264 L' + TILE_W + ' 264 L' + TILE_W + ' 296 L0 296 Z',
+        },
+        ...(w.mist ? [{ tone: p.cloud, k: 0.22, baseY: 280, solo: true, make: () => mist(s + 17, 276, 9, 4) }] : []),
+        {
+          tone: p.mid, k: 0.42, baseY: 300, solo: true,
+          make: () => willow(96, 300, 130, s + 19) + poplar(292, 300, 128, s + 23) + poplar(318, 300, 96, s + 29)
+            + willow(470, 300, 112, s + 31) + willow(800, 300, 124, s + 33) + poplar(660, 300, 110, s + 37),
+        },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 37, 302, b) },
+      ]);
+
+    // -- PERSONAL GROWTH: the climb, and trees growing up beside the road -----
+    case 'personal-growth': {
+      const c = climb(300, 284, 420, 196, s + 3);
+      return bands([
+        ...(w.birds ? [{ tone: p.mid, k: 0.05, baseY: 150, solo: true, make: () => birds(s + 7, 70, 3) }] : []),
+        cloudSpec(s + 9, 274, 90, w, p, 0.04),
+        { tone: p.far, k: 0.06, baseY: 284, make: (b) => crags(s + 11, 284, 70, 6, b) },
+        { tone: p.cloud, k: 0.09, baseY: 284, solo: true, underTone: p.mid, under: () => c.peak, make: () => c.marks },
+        { tone: p.far, k: 0.26, baseY: 294, make: (b) => downs(s + 13, 294, 16, 5, b) },
+        {
+          // Growth, said once along the road: a seedling, a sapling, a young tree, a grown one.
+          tone: p.mid, k: 0.44, baseY: 300, solo: true,
+          make: () => oak(120, 300, 24, s + 17) + oak(330, 300, 52, s + 19) + oak(560, 300, 84, s + 23) + oak(820, 300, 128, s + 29),
+        },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 31, 302, b) },
+      ]);
+    }
+
+    // -- BUSINESS: main street, its shopfronts and awnings, a skyline behind --
+    case 'business': {
+      const m = mainStreet(s + 7, 298, 96, TILE_H);
+      return bands([
+        cloudSpec(s + 3, 262, 110, w, p, 0.05),
+        { tone: p.far, k: 0.12, baseY: 270, make: (b) => skyline(s + 5, 270, 120, b) },
+        { tone: p.far, k: 0.32, baseY: 298, underTone: p.mid, under: () => m.fronts, make: () => m.windows },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 11, 302, b) },
+      ]);
+    }
+
+    // -- ECONOMICS: the container port — cranes over the water, a ship, the quay
+    case 'economics': {
+      const sh = ship(260, 288, 280);
+      return bands([
+        ...(w.birds ? [{ tone: p.mid, k: 0.05, baseY: 150, solo: true, make: () => birds(s + 3, 96, 4) }] : []),
+        cloudSpec(s + 5, 256, 100, w, p, 0.05),
+        { tone: p.far, k: 0.10, baseY: 262, make: (b) => skyline(s + 7, 262, 54, b) },
+        {
+          tone: p.sky, k: 0.18, baseY: 292, solo: true,
+          make: () => 'M0 262 L' + TILE_W + ' 262 L' + TILE_W + ' 292 L0 292 Z',
+          underTone: p.far, under: () => ripples(s + 9, 266, 22, 12),
+        },
+        { tone: p.far, k: 0.22, baseY: 292, solo: true, underTone: p.mid, under: () => sh.hull, make: () => sh.gaps },
+        {
+          tone: p.mid, k: 0.40, baseY: 300, solo: true,
+          make: () => box(0, 292, TILE_W, 8) + gantry(240, 296, 150, -1) + gantry(560, 296, 132, -1) + gantry(880, 296, 144, -1),
+        },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 13, 302, b) },
+      ]);
+    }
+
+    // -- SCIENCE: an observatory on its hill, a radio dish, wind turbines -----
+    case 'science': {
+      const o1 = observatory(78, 268, 30), o2 = observatory(150, 270, 20);
+      const dishA = radioDish(430, 300, 96), dishB = radioDish(760, 300, 80);
+      return bands([
+        ...(w.birds ? [{ tone: p.mid, k: 0.05, baseY: 150, solo: true, make: () => birds(s + 3, 92, 3) }] : []),
+        cloudSpec(s + 5, 264, 100, w, p, 0.05),
+        {
+          tone: p.far, k: 0.10, baseY: 272,
+          make: (b) => downs(s + 7, 272, 34, 3, b) + turbine(60, 254, 92, 0.3) + turbine(420, 258, 74, 1.4) + turbine(520, 252, 86, 2.2) + turbine(860, 256, 80, 0.9),
+        },
+        {
+          // The observatory's hill: one long rise, the domes along its crest.
+          tone: p.cloud, k: 0.12, baseY: 290, solo: true, underTone: p.mid,
+          under: () => ` M0 290 L0 272 Q80 262 160 266 Q260 270 330 290 Z` + o1.body + o2.body,
+          make: () => o1.slit + o2.slit,
+        },
+        { tone: p.far, k: 0.30, baseY: 300, solo: true, underTone: p.mid, under: () => dishA.frame + dishB.frame, make: () => dishA.face + dishB.face },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 11, 302, b) },
+      ]);
+    }
+
+    // -- HISTORY: an aqueduct across the valley, a castle ruin on the hill ----
+    case 'history':
+      return bands([
+        ...(w.birds ? [{ tone: p.mid, k: 0.05, baseY: 150, solo: true, make: () => birds(s + 3, 100, 3) }] : []),
+        cloudSpec(s + 5, 272, 112, w, p, 0.05),
+        { tone: p.far, k: 0.06, baseY: 280, make: (b) => downs(s + 7, 280, 26, 4, b) },
+        { tone: p.far, k: 0.09, baseY: 278, solo: true, make: () => castleRuin(150, 278, 130, 150) },
+        { tone: p.mid, k: 0.26, baseY: 296, solo: true, make: () => aqueduct(40, 960, 296) },
+        { tone: p.mid, k: 0.46, baseY: 300, solo: true, make: () => cypress(60, 300, 112, s + 11) + cypress(92, 300, 80, s + 13) + cypress(560, 300, 120, s + 15) + cypress(900, 300, 96, s + 17) },
+        { tone: p.near, k: 0.56, baseY: 302, make: (b) => scrub(s + 17, 302, b) },
       ]);
 
     // Unreachable: `placeKey` has already mapped anything unknown to

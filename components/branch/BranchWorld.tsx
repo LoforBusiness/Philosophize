@@ -15,6 +15,8 @@ import {
 } from './worldPath';
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
 import { sceneLayers, discFor, skyFor, earthFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
+import RoadSign, { ComingSoonBoard } from './RoadSign';
+import { BRANCH } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A BRANCH IS A PLACE YOU WALK THROUGH.
@@ -57,8 +59,6 @@ import { sceneLayers, discFor, skyFor, earthFor, placeFromUnitId, TILE_W, type L
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INK = '#1A1A1A';
-const SOFT = '#6B6B6B';
-const FAINT = '#C9C5BA';
 const PAPER = '#FAFAF7';
 
 const FIG_K = 0.62;
@@ -69,7 +69,9 @@ const H = 360;
 const WALK_LEAD_IN = 520;
 /** A sign's box: two lines of title, the caption, the post and the foot. The
  *  stack is bottom-aligned inside it, so the foot always meets the ground. */
-const SIGN_H = 106;
+const SIGN_H = 172;
+/** The sign's pressable box: the board plus room for the NEW tab to stand off its corner. */
+const SIGN_BOX_W = 172;
 
 export interface WorldLesson {
   id: string; title: string;
@@ -96,6 +98,8 @@ export interface WorldLesson {
   signpost?: boolean;
   /** A stop with nothing drawn at it — where a coming-soon road's walk starts from. */
   hidden?: boolean;
+  /** Added in the last five days (data/lessonAdded.ts): the sign wears NEW. */
+  isNew?: boolean;
 }
 
 /** What is mounted right now: which ground chunk, which sign, which place. */
@@ -521,6 +525,9 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
         const l = lessons[i];
         if (!l || l.hidden) return null;
         const here = i === at;
+        // The road's own colour, read off the unit id the way the scenery is.
+        const road = l.unitId.slice(0, l.unitId.lastIndexOf('-'));
+        const hue = (BRANCH as Record<string, string>)[road] ?? INK;
         if (l.signpost) {
           const px = mk.x + SIGN_DX;
           const py = groundAt(px);
@@ -530,20 +537,15 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
               pointerEvents="none"
               accessibilityRole="text"
               accessibilityLabel={l.title}
-              style={{ position: 'absolute', left: px - 80, top: py - SIGN_H + 5, width: 160, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end' }}
+              style={{ position: 'absolute', left: px - SIGN_BOX_W / 2, top: py - SIGN_H + 5, width: SIGN_BOX_W, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end' }}
             >
-              <View style={styles.board}>
-                <Text style={styles.boardText}>{l.title}</Text>
-                <Text style={styles.boardSub} numberOfLines={1}>{l.unitTitle}</Text>
-              </View>
-              <View style={styles.posts}>
-                <View style={styles.post} />
-                <View style={styles.post} />
-              </View>
+              <ComingSoonBoard hue={hue} road={l.unitTitle} />
             </View>
           );
         }
-        const tone = !l.accessible ? FAINT : INK;
+        // LESSON 1, LESSON 2 … counted along the road, reviews not counted.
+        let n = 0;
+        for (let k = 0; k <= i; k++) if (!lessons[k].review && !lessons[k].signpost && !lessons[k].hidden) n++;
         // The sign stands to the RIGHT of where the figure stands, on its own
         // patch of ground — so its foot is planted at ITS x, not the figure's.
         const sx = mk.x + SIGN_DX;
@@ -552,6 +554,8 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
           <Pressable
             key={mk.lessonId}
             onPress={() => onTap(i)}
+            accessibilityRole="button"
+            accessibilityLabel={`${l.review ? 'Unit review' : `Lesson ${n}`}: ${l.title}${l.isNew ? ', new' : ''}`}
             // ANCHORED AT ITS FOOT, not at its top. Positioned from the top, a
             // sign's height decided where it stood: a one-line title made a
             // shorter stack, so the post ended in mid-air 48 units above the
@@ -559,23 +563,21 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
             // bottom of a fixed box means the foot lands on the ground line
             // whatever the title does above it.
             style={{
-              position: 'absolute', left: sx - 74, top: sy - SIGN_H + 5,
-              width: 148, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end',
+              position: 'absolute', left: sx - SIGN_BOX_W / 2, top: sy - SIGN_H + 5,
+              width: SIGN_BOX_W, height: SIGN_H, alignItems: 'center', justifyContent: 'flex-end',
             }}
           >
-            <View style={[
-              styles.card,
-              here && styles.cardHere,
-              !l.accessible && styles.cardLocked,
-              l.done && !here && styles.cardDone,
-            ]}>
-              <Text numberOfLines={2} style={[styles.cardText, here && { color: PAPER }, !l.accessible && { color: SOFT }]}>
-                {l.title}
-              </Text>
-              {here && l.accessible ? <Text style={styles.start}>TAP TO START</Text> : null}
-            </View>
-            <View style={{ width: 2.5, height: 30, backgroundColor: tone }} />
-            <View style={[styles.foot, { borderColor: tone }, l.done && { backgroundColor: tone }]} />
+            <RoadSign
+              // A review is named for the unit it reviews: its strip already says UNIT REVIEW.
+              title={l.review ? l.unitTitle : l.title}
+              hue={hue}
+              label={l.review ? 'UNIT REVIEW' : `LESSON ${n}`}
+              icon={l.review ? 'reload' : 'book'}
+              here={here}
+              done={l.done}
+              locked={!l.accessible}
+              isNew={!!l.isNew && !l.review}
+            />
           </Pressable>
         );
       })}
@@ -585,34 +587,4 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
 
 const styles = StyleSheet.create({
   figWrap: { position: 'absolute', left: 0, top: 0 },
-  card: {
-    maxWidth: 148, paddingHorizontal: 10, paddingVertical: 7,
-    borderWidth: 2, borderColor: INK, borderRadius: 6, backgroundColor: PAPER,
-  },
-  cardHere: { backgroundColor: INK, borderColor: INK, paddingBottom: 5 },
-  cardDone: { backgroundColor: PAPER, borderColor: INK },
-  cardLocked: { borderColor: FAINT, backgroundColor: '#F6F4EE' },
-  cardText: {
-    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 12, lineHeight: 15,
-    color: INK, textAlign: 'center', includeFontPadding: false,
-  },
-  start: {
-    fontFamily: 'Inter_700Bold', fontSize: 7.5, letterSpacing: 1.1,
-    color: '#C9C5BA', textAlign: 'center', marginTop: 3, includeFontPadding: false,
-  },
-  foot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2.5, backgroundColor: PAPER, marginTop: -1 },
-  // The coming-soon signpost: a plank on two posts, planted on the ground line.
-  board: {
-    width: 150, paddingVertical: 8, borderWidth: 2.5, borderColor: INK, borderRadius: 5,
-    backgroundColor: PAPER, alignItems: 'center',
-  },
-  boardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 13, letterSpacing: 2, color: INK, includeFontPadding: false,
-  },
-  boardSub: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 11, color: SOFT,
-    marginTop: 2, maxWidth: 136, includeFontPadding: false,
-  },
-  posts: { flexDirection: 'row', justifyContent: 'space-between', width: 110 },
-  post: { width: 5, height: 34, backgroundColor: INK, borderBottomLeftRadius: 1, borderBottomRightRadius: 1 },
 });

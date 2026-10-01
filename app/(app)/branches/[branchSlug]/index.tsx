@@ -21,6 +21,7 @@ import Poster from '@/components/subjects/Poster';
 import type { PosterKey } from '@/components/subjects/posters';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
+import { isNewLesson } from '@/data/lessonAdded';
 import { openReview, backFromBranch } from '@/components/lesson/lessonNav';
 import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
@@ -182,6 +183,8 @@ export default function BranchDetailScreen() {
         done: lm.state === 'done',
         accessible: lm.open,
         needsPass: lm.needsPass,
+        // NEW on the sign for five days from the day it was added (data/lessonAdded.ts).
+        isNew: isNewLesson(lm.lesson.id),
       });
     }
     if (hasReview(u.unit.id)) {

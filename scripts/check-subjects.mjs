@@ -335,5 +335,65 @@ head('§11 · Quick Start never disappears');
   ok(/pick!?\.again/.test(qsCard), 'the card says READ IT AGAIN rather than START on a lesson already read');
 }
 
+// ── 12. EVERY LESSON ON A ROAD HAS THE DAY IT WAS ADDED, AND NEW LASTS FIVE DAYS ──
+//
+// The owner (2026-10-01): NEW on a new lesson's sign, gone five days after it was
+// made. The sign reads data/lessonAdded.ts, so a live lesson missing from it would
+// simply never be new — this is what makes adding the date part of adding a lesson.
+console.log('\n12 · every lesson has the day it was added');
+{
+  const { ALL_BRANCHES } = await import('@/data');
+  const A = await import('@/data/lessonAdded');
+  const today = new Date();
+  for (const b of ALL_BRANCHES) for (const u of b.paths) for (const l of u.lessons) {
+    const d = A.LESSON_ADDED[l.id];
+    const valid = typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) && !Number.isNaN(Date.parse(d));
+    ok(valid && new Date(`${d}T00:00:00`) <= today, `${l.id} has a real date it was added`,
+      valid ? d : 'add it to data/lessonAdded.ts');
+  }
+  const at = (y, m, d) => new Date(y, m - 1, d, 12);
+  A.LESSON_ADDED.__probe = '2026-03-10';
+  const days = [10, 11, 12, 13, 14, 15, 16].map((d) => A.isNewLesson('__probe', at(2026, 3, d)));
+  delete A.LESSON_ADDED.__probe;
+  ok(days.join() === 'true,true,true,true,true,false,false', 'NEW shows on the day it is added and the four after, then goes',
+    days.map((v) => (v ? 'N' : '-')).join(''));
+  ok(!A.isNewLesson('__probe', at(2026, 3, 9)), 'and never for a lesson with no date');
+}
+
+// ── 13. EVERY WORD ON A ROAD SIGN FITS ITS BOARD ─────────────────────────────
+//
+// The owner: "all the words are always visible on the signs … a lot of them get cut
+// out or it's not properly aligned for the box." Every board is one width
+// (components/branch/RoadSign.tsx), so every title the road can show — a lesson's,
+// a review's unit name, the end-of-road board — is wrapped here against Playfair's
+// own .ttf in that width LESS A MARGIN, because Android draws a bold face's ink past
+// its last advance. Three lines at most, and no single word wider than the board.
+console.log('\n13 · every road sign title fits its board');
+{
+  const fs = await import('node:fs');
+  const src = fs.readFileSync('components/branch/RoadSign.tsx', 'utf8');
+  const num = (name) => Number((src.match(new RegExp(`export const ${name} = ([\\d.]+)`)) || [])[1]);
+  const SIGN_W = num('SIGN_W'), PAD = num('SIGN_PAD'), BORDER = num('SIGN_BORDER');
+  const PX = num('TITLE_PX'), LINES = num('TITLE_LINES');
+  const TEXT_W = SIGN_W - 2 * (PAD + BORDER);
+  const SAFE = TEXT_W - 8;
+  ok(SIGN_W > 0 && PX > 0 && LINES > 0, 'the sign states its width, its title size and its line limit', `${SIGN_W} · ${PX}px · ${LINES} lines`);
+  const { ALL_BRANCHES } = await import('@/data');
+  const titles = new Set(['More lessons coming soon']);
+  for (const b of ALL_BRANCHES) for (const u of b.paths) {
+    titles.add(u.name);
+    for (const l of u.lessons) titles.add(l.title);
+  }
+  let worst = 0;
+  for (const t of titles) {
+    const lines = wrap(t, PX, SAFE, PF);
+    const widest = Math.max(...lines.map((ln) => PF.width(ln, PX)));
+    worst = Math.max(worst, widest);
+    ok(lines.length <= LINES && widest <= SAFE, `"${t}" sets in ${lines.length} line(s)`,
+      `${widest.toFixed(1)} of ${SAFE}px${lines.length > LINES ? ' — too many lines: shorten it' : ''}`);
+  }
+  console.log(`  widest line on any sign: ${worst.toFixed(1)}px of ${SAFE}px`);
+}
+
 console.log(`\n${bad === 0 ? 'check:subjects — clean' : `check:subjects — ${bad} failure(s)`}`);
 process.exit(bad === 0 ? 0 : 1);
