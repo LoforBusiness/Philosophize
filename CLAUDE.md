@@ -8354,3 +8354,27 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   down), 3.9–5.0 syllables a second, a breath at every sentence end; the fallback now
   follows the audio position. `scripts/retake-delivery.mjs` re-renders what fails; the
   cast's default rates in `cast.ts` were lowered so a first take lands at ~4.5.
+- **And a line is said the way its words ask (AP17, 2026-09-30).** Every voiced dialogue
+  beat states a `pace` — `slow` for the line that names the idea, `even`, or `brisk` for a
+  quick reaction — one for the line or one per sentence, each with its own speed band.
+  Its pauses come from its PUNCTUATION (no hand `markup`): `scripts/lib/prosody.mjs` asks
+  the voice for a pause at every mark and then SETS each one in the audio — a comma
+  0.2 s, a full stop 0.45, a question 0.5 — because Chirp pauses in the right places at
+  the wrong lengths. A line with two speeds is rendered whole at each and spliced at the
+  sentence end; every request carries a throwaway word after the line that is cut away,
+  which is what finally stopped takes ending inside their last word. `render-narration`
+  retakes toward the band by itself; `check:narration` holds each mark and each pace,
+  `check:dialogue` that every line has a pace and a lesson says something slowly, and
+  `node scripts/countertest-prosody.mjs` stages each fault on a real take. The seven
+  first lessons were re-voiced this way (their LINES followed, restamped on a
+  settled-frame proof), and every second lesson was voiced with it.
+- **Every road has two lessons** (2026-09-30), the second appended to its foundations
+  unit: What Makes an Argument Good? (a café table and a slice of carrot cake), Why
+  Memory Gets Things Wrong (two trolleys and a jar of jam), How Habits Work (a kitchen
+  at three o'clock), Who Is Your Customer? (a bakery at dawn), Supply and Demand (an
+  umbrella seller in the rain), What Makes a Fair Test? (two paper planes on park steps)
+  and How Historians Know (an attic, a letter and a book). Scripts `phil2 … hist2`;
+  scenes built against `docs/superpowers/plans/2026-09-30-second-lessons-scene-brief.md`,
+  each a different place from its road's first lesson. Re-voicing the seven first
+  lessons and voicing these seven cost about 68,000 characters (ledger 430,304 of
+  900,000 for September): the bands make the voice retake itself, so budget for it.

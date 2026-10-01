@@ -83,13 +83,15 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b2 (the pour and putting the can
  * back), b8 (fetching the can across the garden) and b10 (the cupful and the door).
  */
-const LINES = [4.48, 3.7, 6.61, 4.4, 7.13, 0, 7.76, 5.28, 5.98, 0, 5.4, 0, 0];
+const LINES = [4.82, 3.75, 6.61, 6.31, 7.7, 0, 8.03, 4.85, 5.98, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // kneeling beside a thing.
 const TALK = 167;
 const EXPLAIN = 259;
 const LISTEN = 159;
+/** Waiting, alive: a listener on the quote beat, where 159 is nearly still (N21). */
+const WAIT = 161;
 const NOD = 263;
 const KNEEL = 280;
 
@@ -138,7 +140,7 @@ const TH_TURN: Track[] = [
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const BUN_P = [TALK, LISTEN, TALK, LISTEN, NOD, NOD, NOD, TALK, LISTEN, NOD, LISTEN, NOD, LISTEN];
 const PL_P = [LISTEN, TALK, LISTEN, TALK, NOD, NOD, NOD, LISTEN, NOD, NOD, TALK, LISTEN, NOD];
-const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, LISTEN, LISTEN];
+const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, WAIT, LISTEN];
 
 // ── the garden ───────────────────────────────────────────────────────────────
 const TOP_RIM = 481;                                  // the mouth of a pot on the ground

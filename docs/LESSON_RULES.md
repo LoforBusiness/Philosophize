@@ -11153,3 +11153,71 @@ and retries a stubborn take at a nudged rate — a request Google has not seen �
 job of passing takes to install. **And `check:narration` now fails a finding no group
 reports**: the delivery rules first went in with no group and printed nothing, the same
 silence a rule without a checker has (U).
+
+### AP17 · How a line is said is decided by what it says: its speed, and a pause at every mark
+
+> *"I don't want the stick man to speak too slowly. I don't want the stick man to speak
+> too fast. But … depending on what is said, I want you to know when … words should be
+> said slower and when some words should be said faster. And of course, using punctuation
+> correctly. If there's a comma, you should pause. If there's a period, you should pause
+> a little bit longer … A question mark obviously is a question."* (2026-09-30)
+
+AP16 made a take finish and keep to a person's range. This is the other half: the voice
+follows the WRITING. Measured on Chirp 3 HD before a rule was written
+(`scratchpad/prosody-test.mjs`): left to itself the voice ignores most commas (Kore gave
+two pauses for four marks, the longest 0.29 s) and rests at a full stop for over a second;
+asked for a pause tag at every mark it pauses in the right PLACES but at 0.12–0.96 s,
+different every take. So the places come from the request and the LENGTHS are set in the
+audio, where they are exact (`scripts/lib/prosody.mjs`):
+
+1. **EVERY VOICED DIALOGUE BEAT STATES ITS `pace`** — `slow`, `even` or `brisk`, one for
+   the line or one per sentence — chosen from what the words do:
+   - **slow**: the line that names or defines the lesson's idea, gives a number, or
+     carries the argument ("That gap is called scarcity.");
+   - **even**: an ordinary line of conversation;
+   - **brisk**: a quick reaction, an interruption, an aside, excitement, a run of
+     everyday examples ("Oh, it's pouring!").
+
+   Each has a band of syllables a second of speech, pauses taken out: slow 3.65–4.4,
+   even 4.1–4.9, brisk 4.5–5.3. Everything said at one pace in a line must sit in its
+   band together, and any one sentence of eight syllables or more within 0.35 of it —
+   people drift a little sentence to sentence, and a voice that never did is the flat
+   read this exists to prevent. `check:dialogue` holds that every voiced beat has a pace,
+   that a lesson says something slowly, that no more than 60% of it is slow, and that a
+   lesson of six sentences or more uses at least two paces.
+2. **A PACED LINE TAKES ITS PAUSES FROM ITS PUNCTUATION AND NOTHING ELSE.** It carries no
+   `markup`; `markupOf` asks for `[pause short]` after a comma, dash or semicolon and
+   `[pause]` after a colon, full stop, question or exclamation. **A comma before the one
+   word that ends its sentence is a tag** ("No charge, mate." · "Oh, no.") and asks for
+   nothing: Zubenelgenubi ran through "does, mate" on every one of eight requests, and a
+   pause there sounds like the voice losing its place. Punctuation is the author's tool:
+   to change where he rests, change the sentence.
+3. **EVERY PAUSE IS SET TO A PERSON'S LENGTH** (`shapePauses`): a comma 0.2 s, a dash
+   0.26, a colon 0.32, a full stop or exclamation 0.45, a question 0.5 — a question rests a
+   touch longer so it is heard as one. Silence is taken out of the middle of a gap with a
+   cross-fade, or laid into its quietest 10 ms, so neither the decay of a word nor the
+   onset of the next is touched. A pause the text does not ask for is cut to a catch of
+   breath (0.12 s). `check:narration` holds every mark to its band (`NO PAUSE`, `PAUSE`)
+   and fails a stray silence over 0.2 s (`STRAY PAUSE`).
+4. **A LINE WITH TWO SPEEDS IS ASKED FOR WHOLE, AT EACH SPEED.** Chirp's speaking rate is
+   one number a request, and a sentence asked for on its own comes back worse than the
+   same sentence in its line (four requests of "That gap is called scarcity." alone were
+   trimmed into its last word). So the whole line is rendered at each pace it uses and
+   each sentence is taken from its own pace's take, cut inside the silence at a sentence
+   end (`spliceSentences`).
+5. **THE LAST WORD ALWAYS FINISHES.** AP16's `[pause long]` after a line stopped Chirp
+   trimming the last word on long lines and failed one paced take in five: "fix" came back
+   cut in its hiss at −27 dB. A voice never trims a word with more coming after it, so the
+   request carries one throwaway word (`TAIL_WORD`, "Right.") after the long pause, and
+   the audio is cut in the silence before it (`cutTail`). What is installed is the line
+   and nothing else, which the pace and mark checks re-derive. Across the re-voice of the
+   seven first lessons this took `CUT OFF` from ten stubborn lines to none.
+
+`render-narration` does all of it for a paced beat: it asks at the voice's rate scaled
+for the pace (and remembers, per voice and pace, where the last line landed), measures
+each take, and retakes toward the band — with a firmer tag at any mark the voice ran
+through — up to five times, keeping the best. **The rendering is not deterministic**:
+Kore at 0.92 came back at 5.56 syllables a second once and 3.67 the next time at 0.947,
+so the measurement after the render is the rule, never the rate that was asked for.
+`node scripts/countertest-prosody.mjs` stages every fault on a real installed take and
+asserts each is caught, and that the take itself passes.

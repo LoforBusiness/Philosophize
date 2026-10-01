@@ -226,6 +226,13 @@ import { Ethics41Lesson } from '@/components/lesson/cinematic/ethics41Scene';
 import { Aesthetics41Lesson } from '@/components/lesson/cinematic/aesthetics41Scene';
 import { Political41Lesson } from '@/components/lesson/cinematic/political41Scene';
 import { Econ1Lesson } from '@/components/lesson/cinematic/econ1Scene';
+import { Phil2Lesson } from '@/components/lesson/cinematic/phil2Scene';
+import { Psych2Lesson } from '@/components/lesson/cinematic/psych2Scene';
+import { Growth2Lesson } from '@/components/lesson/cinematic/growth2Scene';
+import { Biz2Lesson } from '@/components/lesson/cinematic/biz2Scene';
+import { Econ2Lesson } from '@/components/lesson/cinematic/econ2Scene';
+import { Sci2Lesson } from '@/components/lesson/cinematic/sci2Scene';
+import { Hist2Lesson } from '@/components/lesson/cinematic/hist2Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -539,13 +546,20 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'political-political-41': Political41Lesson,
   // Economics & Finance — the first dialogue lesson (LESSON_RULES group AP).
   'economics-foundations-1': Econ1Lesson,
+  'economics-foundations-2': Econ2Lesson,
   // One road per subject (2026-09-30): each subject's first lesson, a dialogue lesson.
   'philosophy-foundations-1': Phil1Lesson,
+  'philosophy-foundations-2': Phil2Lesson,
   'psychology-foundations-1': Psych1Lesson,
+  'psychology-foundations-2': Psych2Lesson,
   'personal-growth-foundations-1': Growth1Lesson,
+  'personal-growth-foundations-2': Growth2Lesson,
   'business-foundations-1': Biz1Lesson,
+  'business-foundations-2': Biz2Lesson,
   'science-foundations-1': Sci1Lesson,
+  'science-foundations-2': Sci2Lesson,
   'history-foundations-1': Hist1Lesson,
+  'history-foundations-2': Hist2Lesson,
   'metaphysics-being-26': Metaphysics26Lesson,
   'epistemology-knowledge-26': Epistemology26Lesson,
   'logic-arguments-24': Logic24Lesson,

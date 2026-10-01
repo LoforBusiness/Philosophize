@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, business-foundations-1), except b4, whose hand-offs run
  * on about a second after its 4.36s line. 0 for a beat with no voice.
  */
-const LINES = [5.51, 5.92, 4.77, 7.68, 6.66, 0, 5.43, 6.8, 6.81, 0, 5.1, 0, 0];
+const LINES = [5.85, 5.17, 4.62, 8.1, 6.66, 0, 6.19, 5.68, 7.5, 0, 4.74, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.

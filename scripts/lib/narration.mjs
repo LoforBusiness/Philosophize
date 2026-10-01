@@ -27,6 +27,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { readTake, prosodyFaults } from './prosody.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const ASSETS = path.join(ROOT, 'assets', 'narration');
@@ -288,13 +289,20 @@ export const LESSONS = {
   'political-political-41': 'political41Script.ts',
   // Economics & Finance — a DIALOGUE lesson: each line in its speaker's voice (cast.ts).
   'economics-foundations-1': 'econ1Script.ts',
+  'economics-foundations-2': 'econ2Script.ts',
   // One road per subject (2026-09-30): each subject's first lesson, all DIALOGUE lessons.
   'philosophy-foundations-1': 'phil1Script.ts',
+  'philosophy-foundations-2': 'phil2Script.ts',
   'psychology-foundations-1': 'psych1Script.ts',
+  'psychology-foundations-2': 'psych2Script.ts',
   'personal-growth-foundations-1': 'growth1Script.ts',
+  'personal-growth-foundations-2': 'growth2Script.ts',
   'business-foundations-1': 'biz1Script.ts',
+  'business-foundations-2': 'biz2Script.ts',
   'science-foundations-1': 'sci1Script.ts',
+  'science-foundations-2': 'sci2Script.ts',
   'history-foundations-1': 'hist1Script.ts',
+  'history-foundations-2': 'hist2Script.ts',
 };
 
 /** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */
@@ -806,6 +814,16 @@ export function deliveryFaults(d) {
   return out;
 }
 
+/**
+ * How a DIALOGUE take falls short of a person talking. A beat that states its `pace` is
+ * held to AP17 — its speed per sentence and a pause of a person's length at every mark
+ * (scripts/lib/prosody.mjs); one that does not, to AP16's coarser test.
+ */
+export function spokenFaults(pcm, rate, text, pace) {
+  if (pace === undefined) return deliveryFaults(deliveryOf(pcm, rate, text));
+  return prosodyFaults(readTake(pcm, rate, text, pace), text);
+}
+
 // ── WHAT EACH TAKE WAS RENDERED FROM ────────────────────────────────────────
 //
 // assets/narration/renders.json: for every installed WAV, the words it was rendered
@@ -858,7 +876,7 @@ export function writeRenders(records, dir = ASSETS) {
  * there is none). make-narration and check-narration both call this, so the two cannot
  * disagree about a line.
  */
-export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false }) {
+export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false, pace }) {
   const faults = [];
   const w = parseWav(wav);
   for (const say of headerFaults(w)) faults.push({ kind: 'HEADER', say });
@@ -878,7 +896,7 @@ export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false
     m = measureAudio(w.pcm, w.rate);
     faults.push(...audioFaults(m, text));
     // A DIALOGUE line is a person talking, so it is also held to how it is delivered (AP16).
-    if (dialogue) faults.push(...deliveryFaults(deliveryOf(w.pcm, w.rate, text)));
+    if (dialogue) faults.push(...spokenFaults(w.pcm, w.rate, text, pace));
   }
   return { faults, m, w, sha };
 }

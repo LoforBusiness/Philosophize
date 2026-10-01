@@ -618,8 +618,19 @@ export interface BaseBeat {
    * pause markup (`[pause short]`, `[pause]`). The screen always shows `text`.
    */
   markup?: string;
+  /**
+   * How fast a DIALOGUE line is said, chosen from what it says (LESSON_RULES AP17):
+   * `slow` for the line that names or defines the idea, gives a number or carries the
+   * argument; `even` for an ordinary line; `brisk` for a quick reaction, an interruption
+   * or a run of everyday examples. One for the line, or one per sentence. A paced line
+   * takes its pauses from its punctuation, so it carries no `markup`.
+   */
+  pace?: Pace | readonly Pace[];
   dur: number;
 }
+
+/** A dialogue line's speed (AP17); scripts/lib/prosody.mjs holds each one's band. */
+export type Pace = 'slow' | 'even' | 'brisk';
 
 /** Beats that hold the reader until they answer, rather than until they tap. */
 export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact); }

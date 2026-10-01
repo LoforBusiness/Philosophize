@@ -1129,82 +1129,162 @@
   },
   "business-foundations-1/beat-00": {
     "text": "Fresh lemonade, made with lemons, sugar and a bit of love! One pound a cup.",
-    "wav": "4faf5acb967f3cd3389ccdafaf5b08e4f04948f9929b6b4693decf85c782e641",
+    "wav": "f28e26da6fdf11820e32a6831cdc043396bd7f8f547f7cefc9eaf7cbec35d450",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "business-foundations-1/beat-01": {
     "text": "Everyone looked so thirsty, so I’ve been giving it away. Look at our queue!",
-    "wav": "ff1a120577c4ea215266f029718e8940b3e3b8e721f767d769639e722335d5f1",
+    "wav": "2f82c6b1cf4b8a948e295f28953ac131afadf1907448d988d723e50961c78013",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "business-foundations-1/beat-02": {
     "text": "Good on you. I’ll buy more lemons out of my own pocket, I suppose.",
-    "wav": "2b1a72372d1b18c4f82232f381202a6d477d735d66ca21b58e782e4bf19dd3f6",
+    "wav": "d0ddd6900195a5a156a50c09537d804e89e9f7bbc1188966aee84a358bc19dd7",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "business-foundations-1/beat-03": {
     "text": "A long queue, and an empty tin. A business makes something people want and sells it for more than it cost to make.",
-    "wav": "0f94ac766c5c64f39f8cdf6095a0f3db0d9fa1ca308529222c60218ac5f22bef",
+    "wav": "e414a47301d2f321a617a573dd6681f39ed42b1c790b36e77e21b626a67a70e0",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "business-foundations-1/beat-04": {
     "text": "Oh! So I take the pound, and the lemons get paid for out of it?",
-    "wav": "545d356b72e67b3e03e0557bde718a64f9bd9b8079e395831d583e2d7a85fe40",
+    "wav": "ef96d78c71618e429130e73b7ac4672c271706caabbf4e0ecc24ff820d3950a3",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "business-foundations-1/beat-06": {
     "text": "Profit isn’t greed. It’s proof that people valued the lemonade more than it cost to make.",
-    "wav": "19096d0ad881b29466df5ddb84f7ed277a3ce806f55ef8666d64601e2f16af28",
+    "wav": "8a633352765b14959928f91ee35347710410554076bc555e6c0d84784c705517",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "business-foundations-1/beat-07": {
     "text": "Now we’re both squeezing lemons, and nobody’s serving. Was that my job, or yours?",
-    "wav": "636dd996c0d45b536f38f55e0e7ca6c5fb1124007d2f2308c36d5b6ce8622c5b",
+    "wav": "b236a934ea42d8bb14d76b77ac6f11e85ce8a086195745628b2f9b7227dc08e4",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "business-foundations-1/beat-08": {
     "text": "And that’s the other half of it, called leadership. Someone has to make sure every job has one owner.",
-    "wav": "8efe52d24162d1859f8c22a03b03720eb4d3a3f62acbc9c9122b036a7be3c936",
+    "wav": "03b8dc42d1cf742686fdbbd2d50c3e0b85d932a02cc478b9cf01491c4650dcf2",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "business-foundations-1/beat-10": {
     "text": "Right, I’ll squeeze, you serve, and the pound goes in the tin. Beauty.",
-    "wav": "3b268ab265854d95db4d92d1ad2b200431b9acf8964b00938977ef5b11b8ff93",
+    "wav": "77fff46bf7d07ba5d51668bbc22fbf65dad820228a446aebe4e64c3205ae9393",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-2/beat-00": {
+    "text": "Fresh lavender macarons, all in pastel pink! The builders next door are going to love them.",
+    "wav": "e1b9d19f591584d9ffe673946b0ad78aee7e138acb359ec0cb35e676582bb6ed",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-foundations-2/beat-01": {
+    "text": "Lovely and dainty. Got anything a person could eat at seven in the morning?",
+    "wav": "abf0868f672a13327ea0a460c9af394338d16829561a606538e404e3b7823713",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-2/beat-02": {
+    "text": "The baker made what she likes, for a customer she imagined. A business starts with the customer at the counter.",
+    "wav": "434526439a2ebd86198183f2e106cdc56d36462464d8fa576949b4637931c464",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-2/beat-03": {
+    "text": "Your customer is the person whose problem you solve. His problem is a cold morning, and a long shift ahead.",
+    "wav": "819a777e6657fe6bf8255498d995ceb53a443b75a05e342654673f0bb8f5b478",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-2/beat-05": {
+    "text": "Sausage rolls, coming right up! Although I’m sure everyone secretly wants a macaron.",
+    "wav": "7c693584b15263652a6ebe4cccd59d1db5b082300f04aaae9ecd21830d2a8e39",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-foundations-2/beat-06": {
+    "text": "That’s a guess, and a guess can be checked. Watch what sells, and ask the people buying it.",
+    "wav": "6fe02ab845cf12b14714c718793fc6666601a58689f39582128c6d9b8247519b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-2/beat-07": {
+    "text": "Since nobody asked, a bigger cup of tea would be nice. Not that anyone ever asks.",
+    "wav": "f6a024cda3fab19a34b556fd7af6246bdf451de97634570c523f70790f946fb9",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-2/beat-09": {
+    "text": "One sausage roll, and one very large tea. Oh, and I’ve written it all down!",
+    "wav": "cddac8ebb579b9b3df452630fff7da036e40a8d5a0315ba215fa0ecc87ba988d",
+    "voice": "en-US-Chirp3-HD-Kore"
   },
   "economics-foundations-1/beat-00": {
     "text": "One ten-pound note. And I want everything on this table.",
-    "wav": "f73a95ba0f8e5dee2236b2a6496e62146b0c7de56812b5d90efda2a413ed0bf0",
+    "wav": "ca0b7467d621aeef6f395d2cf60be401a07e6b8b6c5303e8d5eac34e94261212",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "economics-foundations-1/beat-01": {
     "text": "Everyone does, mate. The pie is six pounds, and the book is eight.",
-    "wav": "8ffaf1ce429a7b1740ba70696cfecf9887e1f4ed2a4faad3ac6198dff52d6da9",
+    "wav": "53f1831102557145a3c25f8fd38d416a1c4e6ce9a75ec251bd454a7ec9171b95",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "economics-foundations-1/beat-02": {
     "text": "What you’re watching has a name. Economics is the study of how people choose, when they can’t have it all.",
-    "wav": "bc62333f7936831e536dde6c6768d804d91cc10bfa8ef8257f0d135ef9c6ddee",
+    "wav": "cce07882137668f44cebb2255e793ba3efce9ee1f734292e1b26fc581813888e",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "economics-foundations-1/beat-03": {
     "text": "Your wants never run out, but your money, your time and the bread on that stall all do. That gap is called scarcity.",
-    "wav": "b2deb3bc3a567ca93b4edad0a485aaa4e4fc7768a38e0bfb463d123f2b36465c",
+    "wav": "fb4223b20e390755f5af1153d4df9d9a11cf7ae27feb98331ba880c1b7e4330d",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "economics-foundations-1/beat-04": {
     "text": "Then I’ll take the book.",
-    "wav": "92eb5b24419f58545d5440d52caeb519b2b67336a28112a27ebddaadacb37c5c",
+    "wav": "85600d23526d10922fb90c8eb14da59b3bc541137002084e2824409eca69388f",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "economics-foundations-1/beat-06": {
     "text": "Every choice has an opportunity cost. Spend an hour at this market, and you can’t spend that hour anywhere else.",
-    "wav": "799de1e3a1705b064e1386642b50501cd8edc6511be4842e37bbb99d9fad9e40",
+    "wav": "0e78cc1ba14bf1ffebb04cca5a31b917223e13166a3ca98b9af5dbe3e2019d93",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "economics-foundations-1/beat-07": {
     "text": "One loaf left, and two hungry customers. Right, time to think about my price.",
-    "wav": "6f6d9a8b4fce5a94c7f37a0253e5e78b09c968a98657e1d6158ddbe1980689c9",
+    "wav": "7b045b820ca7fed0d0c3da5cd54eadce7eda704dcb7f7f877089dc97f71b4713",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-2/beat-00": {
+    "text": "Umbrellas, five pounds each, anyone? Well, the sunshine is lovely, at least.",
+    "wav": "b1566eca8440b68378daaa9f8c81fca890c335c190cc03a6f5276a060049210b",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-2/beat-01": {
+    "text": "Oh, it’s pouring! I’ll take one, and so will everybody behind me.",
+    "wav": "911ce44b1d47417ba2be80ebe356e5ece5bdc1e7ec62309b1ddc43a28c2f16f7",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-2/beat-02": {
+    "text": "The umbrellas haven’t changed, but how many people want one has. Economists call that demand.",
+    "wav": "64bdac9681ff13222d1f4b56e75b7a78f8f234803e169482343bcdb3d86f67af",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-2/beat-03": {
+    "text": "Demand is how much people want to buy, at each price. When the rain starts, it jumps.",
+    "wav": "104f454530e7c4acc63dcfe442edeb3e06773eb4cf1e37ab019529e55d53e500",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-2/beat-05": {
+    "text": "Three left, and a queue round the corner. I hate to do it, but they’re twelve pounds now.",
+    "wav": "67aff0b2451334ec45410731ae37ade500ca5edad757e28161e0e1c7c00d84d4",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-2/beat-06": {
+    "text": "That’s the other half: supply, how much sellers have to offer. Few umbrellas and many buyers make a high price.",
+    "wav": "ea6c85d2aa879b4b51f16be2b73006f7c47ef6a02a71fc07be609cfbf89bfa2a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-2/beat-07": {
+    "text": "Oh, look, a van full of umbrellas has just pulled up! Isn’t that lucky for him?",
+    "wav": "47bc54c75c498d2709da7d4b8215f62421eaad28f49cf25a47781edebbbd1001",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-2/beat-09": {
+    "text": "Six pounds, then, and everybody stays dry. Fair enough, I say.",
+    "wav": "32cafcb37e4bb44b99c414c5423f08e499d16b4eac49cc92ef9c91d42df1b8f5",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "epistemology-knowledge-1/beat-00": {
@@ -3545,42 +3625,82 @@
   },
   "history-foundations-1/beat-00": {
     "text": "My window! It was whole when I locked up, so it must have been the wind.",
-    "wav": "7e51858bf728206c0167dd33e87d8fb3e6c10f9f619cae263abee22972acf52e",
+    "wav": "ee839b6ab039387f66319a71c614bb18d90044c51047fc7e2e62ef9c8282fb96",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "history-foundations-1/beat-01": {
     "text": "Oh, brilliant, you found my ball! It’s right there, in your window.",
-    "wav": "3437ebeabdc38639193b2e22bfd8db41d6eded00596a7bbdad46664ed01a13d1",
+    "wav": "54725c4a924ae7f46d8f63208d0f893d80eed200f4e497634bffa08ae393297b",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "history-foundations-1/beat-02": {
     "text": "Nobody here saw it break, and the past is gone. All it leaves behind is evidence, and that’s where history starts.",
-    "wav": "ecb4fe27306327dbfc959a8de7e814c968dfec999b262c38cad7fe74e7bda16c",
+    "wav": "5112367ccea2efa0476ddb2f42a6db7cd609709361cb0fdd3e6a4d987ceba941",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "history-foundations-1/beat-03": {
     "text": "It can’t have been me, I only kicked it once. Quite hard, towards the shop.",
-    "wav": "47700e197cb69e4b83cc0419362395bd832d5ffea433c7d22d25776af20872f2",
+    "wav": "793540fa4d0f3545be4672125b96f3bbe3896ce75a34a96af1493a521b6070d3",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "history-foundations-1/beat-05": {
     "text": "Then ask who’s telling each story. Every source has a point of view, so a historian asks who’s speaking, and why.",
-    "wav": "26f998d6c6fde0dce250ce322bbfb7286dff231007e801e4c1fa4954de460b74",
+    "wav": "45640aaef2a7c9e2274ac07b1c614339994916f5491b6bd39b762a3081bcf662",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "history-foundations-1/beat-06": {
     "text": "No harm meant, I’m sure. Still, somebody ought to pay for the glass, and I hate to ask.",
-    "wav": "f7c700a2420f8ed7babf78095365a2cbe4f874934f28627c8b6d52f8ca001831",
+    "wav": "eda0e5fc7797f997f0ea23ccfb3d1a373bb2e707457b58d1af73f4274fe8d777",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "history-foundations-1/beat-07": {
     "text": "Now the question isn’t what happened, but who decides what happens next. That’s politics.",
-    "wav": "2423519a071bb49d4c6e48bd68077f63d255d8e0ef639e0fca8ebdf8233039c3",
+    "wav": "26d2e4154e50affeea044e081d85f78accd41cca1d44062b99529388cb7c80fa",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "history-foundations-1/beat-09": {
     "text": "We could make a rule: whoever kicks the ball pays for the window! Oh, no.",
-    "wav": "852be4b659502271a97433d6b7ed41af71626904d4478244481b76fc8d27e944",
+    "wav": "e49c644a713f31d1664f72045b793ca48690e358df4a4d6ebbd23036295bbf61",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-2/beat-00": {
+    "text": "My great-grandad captured a whole castle by himself! It says so, right here in this book.",
+    "wav": "93d0e1dee733d71685b4419d33e86ac565c767d9e4a3eac72adcb4d67df03135",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-2/beat-01": {
+    "text": "How thrilling. Then why does his own letter say he spent that week peeling potatoes?",
+    "wav": "f1f7991faf2019b8aa19772f0c8ecae3b8301d0bf2d5233d0db2d70607b1455e",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-2/beat-02": {
+    "text": "Two sources, and they disagree. A historian’s first question is when each one was made, and by whom.",
+    "wav": "78c4c74c0d4e65284232dcfd1dda541de85b9a6f30e47585e6af3dc629072c1c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-2/beat-03": {
+    "text": "A source made at the time, by someone who was there, is a primary source. One written later, from other sources, is a secondary source.",
+    "wav": "a1e6314163aad855aabebb182380246cf1131cd3971299f0298facdec38e3537",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-2/beat-05": {
+    "text": "But the book is printed, with pictures and everything. Printed things are true, aren’t they?",
+    "wav": "22cae1887a5a1ff6106082a187cec2ba03c47da90ee2a14efae7f388b42363a5",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-2/beat-06": {
+    "text": "Printed isn’t the same as checked. When two sources disagree, a historian looks for a third from the time, to see which story it backs.",
+    "wav": "aa9397d0ff737cf4873440292d0e7aae8ef3e61880b5eb21a7c609be785c0f9b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-2/beat-08": {
+    "text": "The local paper from that very week is in the box too. No castles, I’m afraid, but a great many potatoes.",
+    "wav": "11492e0f1645a83ff5b00d79dfd2a6baea12f33cf6ca2ee0af7661ed3cbb7f84",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-2/beat-09": {
+    "text": "So he fed the whole regiment! That makes me even prouder.",
+    "wav": "5b60691fc1c6499f728ce4cae1617ac31bc60795e2e8590a0a901620e64130ed",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "logic-arguments-1/beat-00": {
@@ -5877,93 +5997,178 @@
   },
   "personal-growth-foundations-1/beat-00": {
     "text": "New me! I’m growing the tallest sunflower on the street, starting today.",
-    "wav": "3cdd4c26bd3d4af9ffef02f603a899ae3f6ce2ee9e31abf2e8a92bff89bd4911",
+    "wav": "899f5a569ccd8d748b23fedc6f42dc02476cdfc4e7ed3dc43d6347069ec158ef",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "personal-growth-foundations-1/beat-01": {
     "text": "How lovely. And how often will you water it?",
-    "wav": "b1dc453465695c19a71887ed8648349b897ff46234e98a78899e8fd8200293b9",
+    "wav": "0a309418fb1f022db2b885b5e31f27db9fb2a56b48a3d056b4f2fc218329e6ed",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "personal-growth-foundations-1/beat-02": {
     "text": "No need to water it often. Here’s a whole month of water, all in one go!",
-    "wav": "b1402fab1bb3a7508f1a799ef4a389e57ea89687789337abb571a7ca9f7b6259",
+    "wav": "13f896b090b7873d6edf52cf429a1c4fc80938f9c2a7ad607fde0b214e4f05f7",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "personal-growth-foundations-1/beat-03": {
     "text": "No, no, it’s fine, mine only gets a cupful each morning. I’m sure yours knows best.",
-    "wav": "898bd101e1d185dc64c8af110ae0073916bcd58355a18a2cc1d43565675e8d9f",
+    "wav": "07b323bf72bac68342b4f7e2caadc0774720af6d751ca2b1c6a7cb30bc8bff55",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "personal-growth-foundations-1/beat-04": {
     "text": "Two pots, and two ideas of how change works. Personal growth is the study of how people change, on purpose.",
-    "wav": "f56b1f93a2f3deddbbb5ea8b6b7661841d915761f7b61799af0dc74f699a1625",
+    "wav": "f7c2d2b16cd2459c713e783231b17095e3d04fadd6e8548f757087e2bc1f80cc",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "personal-growth-foundations-1/beat-06": {
     "text": "A little every day beats a lot all at once. The size of the step hardly matters, but coming back to it does.",
-    "wav": "4608bd423e2d09bc28ad7bed0fde7964351f10dcd690cb53613d1508dcf32783",
+    "wav": "225440bc477e21edc103040769b374e980730714cb72ef20d155e0f68e9ea776",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "personal-growth-foundations-1/beat-07": {
     "text": "But I always forget! The watering can lives in the shed, behind the bikes.",
-    "wav": "a796af5fb2b25c3ecd2cc90f982a198a4aec78fe4eb4ca6fef60bed90dbcf7b2",
+    "wav": "501dede0dc314587dc37932e3673353bf734d26f23802e75b59d7ca993be30cd",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "personal-growth-foundations-1/beat-08": {
     "text": "Then don’t try harder, make it easier. Put the can where you can’t miss it.",
-    "wav": "0eb98a74caf9c87381f16725c72688695c2c0e132f1573b23c0699f445d5d416",
+    "wav": "8c489907f419be6f0921635af3d46945bddcced4f4b3979e78a69f92b7b9892a",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "personal-growth-foundations-1/beat-10": {
     "text": "A cupful a day. It’s almost as if the boring way works.",
-    "wav": "0b338629562f948345f1bc393988c4a8627aa02c887477fcb144216095eb9656",
+    "wav": "5890b694d9bb003269178ab542fe055bf8888c99f266b28672823891dff00c25",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-2/beat-00": {
+    "text": "Three o’clock already! Time for a cup of tea, and just the one biscuit.",
+    "wav": "0b7c67379d54632830e0eb1f370aba91ba5f9002cb938de337be4a5a00c1b32b",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-2/beat-01": {
+    "text": "Just the one, at three, every day this week. Not that I’ve been counting.",
+    "wav": "e4d5ba1bd833b6dd1cd9897d95282e2ba85f5e9b2787343d37a8dc4fa9934c3b",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-2/beat-02": {
+    "text": "The man with the biscuit isn’t even hungry. He’s caught in a habit, and every habit runs on a loop.",
+    "wav": "0254ef915b33152ffa3729cc4d22b3ea6623b301191f071aef20abe1a394ab07",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-2/beat-03": {
+    "text": "A cue starts it, and the routine is what you do. The reward at the end makes you want to do it again.",
+    "wav": "765cd5976740526633fe2c7e724c62012675cd1a497f00ea5637127185d4527b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-2/beat-05": {
+    "text": "I suppose it’s the break I’m after. Ten quiet minutes, and a sit down.",
+    "wav": "239109b23240988f97eb6d27cb35d5e68194722bdadeadcc851c7fd6700399b2",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-2/beat-06": {
+    "text": "Then keep the cue, and keep the reward. Change only the routine in the middle.",
+    "wav": "8285bec58c2c429927d06bd9d54ba8c773d81faf53ad3f19637ba1ee44680946",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-2/beat-07": {
+    "text": "Or he could stop. Willpower, I believe it’s called.",
+    "wav": "4ff53d77120d119deca81771fdfec69291e9a3683a87e236161766787ef3f76f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-2/beat-08": {
+    "text": "Fighting a cue every single day is hard work. A swap is easier, because the habit still gets what it came for.",
+    "wav": "38fa21155bed96b3290a5618725b2d1c677825111b55a735b5ba0c1a6b60f126",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-2/beat-10": {
+    "text": "An apple and a cup of tea, then. Do you know, it’s the sitting down I like best.",
+    "wav": "c16d92ae249e8c4accbd7f927d25b3336e8587ccf41c11d2a7c0838dc6e3d891",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
-    "wav": "06f84aa3193db3d06591ee4d55db2866dff271038d84a061d014c8661985363e",
+    "wav": "5b867243fbaa029fe661536f7ac2d6b2e962094c54862852138b4c7bdd768179",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "philosophy-foundations-1/beat-01": {
     "text": "Fixed it, and the frame was cracked, so I changed that and the saddle too. No charge, mate.",
-    "wav": "ee6a2d92df6fd896795c8c947de86a7840cfe50bedc7b64fb6301a8750008136",
+    "wav": "3060446410b1880f3276353b81a7b0538c3845f0fd756f31eef0bd301ae464c5",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "philosophy-foundations-1/beat-02": {
     "text": "How generous. So is this still my bicycle, or a stranger’s?",
-    "wav": "ddd3095ef8a443f9553194f0b1e6025eb4deee847c2de062f1ae9348969db114",
+    "wav": "eca658e0c7608e261e3e7dcc6a472b2ce458b5421d062b7a628a829827ab9ece",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "philosophy-foundations-1/beat-03": {
     "text": "Now that’s a philosophy question. You two agree on every fact, and you still can’t agree on the answer.",
-    "wav": "15396510c4e56bf5dbbc390a05f83183b5273d70902340cfd39a47aee37a70ba",
+    "wav": "e34082237671a756c1f3e12a2621c2d22266ecb95a0576853eb1517466648636",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "philosophy-foundations-1/beat-04": {
     "text": "Philosophy asks what we mean and what’s true, when looking harder won’t settle it.",
-    "wav": "5a0a4352d269fe5aec8d9fad10a4f4bc9cf6b86aa88af86bc51329dfa26e3b7e",
+    "wav": "39f7283dc80c8893385388e2d3861688d96a117673597e48bab79df4ef759e82",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "philosophy-foundations-1/beat-06": {
     "text": "I’d call the bicycle yours. Same owner, same stand, and it never left my sight.",
-    "wav": "7a64800cb1fdf93bcc8ed3eedd6759e237b721a1a3c48c6a3f643b1cbffed0d4",
+    "wav": "bd1c07bc06447409f739c740becdf7c37a0aec4e2e1df24381ab0987c332bd3c",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "philosophy-foundations-1/beat-07": {
     "text": "And I’d say mine is in that crate, in pieces. But do go on.",
-    "wav": "fa8fbfc056f32e073b279a0dc6f44ae80c02db94ad7f58cc233ba6f3de6e153d",
+    "wav": "8aa213876fc69b45a9bceebbde7fa8fcc424b82737fcc08310df3533b80cf283",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "philosophy-foundations-1/beat-08": {
     "text": "Nobody shouted, and nobody took a vote. Each of them gave a reason, and a reason can be tested.",
-    "wav": "acd699ac786f178e06314677d615e9924d7d7510fb2d7dcf9803cc076210413f",
+    "wav": "643a84bd09339af4e2dce34369204d264a3e2b0e76d9f318a499d0aaf6c58ff8",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "philosophy-foundations-1/beat-10": {
     "text": "You already live by answers like these: what’s fair, what’s real and what you owe. Philosophy is how you check them.",
-    "wav": "98094abf8c2486e802501185829f33f29e8b036ddaed569d175a83d08f40dbdd",
+    "wav": "e2b0e4050bf3b3094737cf9b8e9c1801ef00f260e062990dc1ee332f3fe6fc88",
     "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-2/beat-00": {
+    "text": "One slice of carrot cake, please! Carrots are good for you, so carrot cake counts as healthy.",
+    "wav": "2a17c7f688285354d79b304c1c36193fab73d36d83717abf5a252be4a18fcbd8",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-2/beat-01": {
+    "text": "And butter, and sugar, and a thick layer of icing. Do enjoy your vegetables.",
+    "wav": "f7917a71eee579d0ff4c28ac15b38e67a6b6f5bf1786e178bad7cfc2a7858d16",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-2/beat-02": {
+    "text": "The customer has just made an argument. An argument is a set of reasons, given to support a conclusion.",
+    "wav": "8f61689e4573540fcb6364a5b465916fc175c8fd7c35de9b2694d2f37144d9b2",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-2/beat-03": {
+    "text": "The customer’s argument goes up on the board. Carrots are healthy, and this cake has carrots, so this cake is healthy.",
+    "wav": "90852068cc0b3b794f3d35888eb66ae4bc0e1f23276e4d43fe7509ee6d46c6cc",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-2/beat-05": {
+    "text": "A good argument needs two things. True reasons, and a conclusion that follows from them.",
+    "wav": "aa31de4e4786fabe75305dd9c638dbb8c93a9796b0b9e1a005f8483c556e9b0f",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-2/beat-06": {
+    "text": "Well, she would say that. She has cake for breakfast.",
+    "wav": "1d1f712a43a590751d10c557204ed9348cf70a67f06a719fd395ae54eb937f11",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-2/beat-07": {
+    "text": "That’s an attack on the person, not on the reasons. What she eats for breakfast doesn’t change a word on that board.",
+    "wav": "50ae7b0a56dfe24c557f81634ec6659a8fc459bc62fa28eeb0f75c29e0c39237",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-2/beat-09": {
+    "text": "Oh! So my reasons were fine, and my conclusion wasn’t. I’m still finishing the cake.",
+    "wav": "2034f896d383436b7a874d53412416f58587f2eaad197ac15e7ad7d935c4910f",
+    "voice": "en-US-Chirp3-HD-Kore"
   },
   "political-political-1/beat-00": {
     "text": "Every state claims authority over you, although you never agreed to its rules. Why, then, should you obey?",
@@ -7083,87 +7288,177 @@
   },
   "psychology-foundations-1/beat-00": {
     "text": "I can always tell cheap coffee from the good stuff. Always.",
-    "wav": "15df6a693ebcee13387fc90f38679246a3565eae72f36ddaf0046d545fc62fbd",
+    "wav": "50dc10fe2fcab0c5b55bd886e43268c4a2fcada907fb201472263a3a6b62d8bf",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "psychology-foundations-1/beat-01": {
     "text": "Perfect, two cups! This one’s from the bargain tin, and this one’s the gold label.",
-    "wav": "2fd78f3cbf02a3c86a5e3ab462f61b5914a1b7c9370ba272b6b6cc538bf2baf9",
+    "wav": "0d1d958d11f3d06d39562c1065f364d018b21bb589524cf674d25f241ff62420",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "psychology-foundations-1/beat-02": {
     "text": "The gold one, of course, so smooth. The other tastes like a wet sock.",
-    "wav": "c1300ee26a4943bece9eb4b7020875a2482701b721fa632ca8e0a573e68b8587",
+    "wav": "bc1c11fd35aca1f5d8335a1ca2b89586665457e7f87d039ddb891e0f85d3437a",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "psychology-foundations-1/beat-03": {
     "text": "Oh, that’s funny, I only made one pot. They’re both the same coffee.",
-    "wav": "7523138a21361d4253e1119aabc23156c58ab1a0ea219c005f4655334006da16",
+    "wav": "dbf32f4184cb6b5f229926ac561eb9899bb774b24fb1f28825f02fa980297bfd",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "psychology-foundations-1/beat-04": {
     "text": "Same coffee, and a different taste. The change happened in his head, and that’s where psychology looks.",
-    "wav": "328e0556037822b0fe7ccab924ebabd67ceacaa19ca1949cc34935b410efbe93",
+    "wav": "5b938231fff956b56dd696d32b64c75a62b4347f2e41a52da1ca5cc979b2c597",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "psychology-foundations-1/beat-06": {
     "text": "Psychology is the study of how people think, feel and act. Its first lesson is that we’re poor witnesses of our own minds.",
-    "wav": "5d1a653d4499a5572d0848bf3072cadbf47bdc3ff4aaaaf5fe705519f2d20e5d",
+    "wav": "8d966be8704d87b525c93568e3c95d703d3f1c11b92aaa540afc91321385b043",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "psychology-foundations-1/beat-07": {
     "text": "I’d have noticed, of course. If anyone had warned me it was a test.",
-    "wav": "e91ecad07d6eb10b7aa36abb03d83d0acd16b955fabdd789a790eeef6a185134",
+    "wav": "13afb15e0cb8a7f49fe1d594a9c3bd46235f9d85023a22915c8edc9f5221f765",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "psychology-foundations-1/beat-08": {
     "text": "The taster is still sure, so a psychologist doesn’t ask him. You swap the labels, pour again and count what he does.",
-    "wav": "a0d11ea95b204fe8d37990c61f25055ddb281a156d9b9f69d17ae866dfaec5b1",
+    "wav": "c6b947693c89ccd9a76a21282843704bca2c7af893e2dbb5d18f5c30b0614684",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "psychology-foundations-1/beat-10": {
     "text": "The taster picked the gold one again, and that’s the bargain tin! Should I tell him?",
-    "wav": "baf58e1b1dd6f5574ae787d1509602127b489b14ca5219bd37c5fd2149bad958",
+    "wav": "79b1dde905d30a548ca1cf32eb53d35feb9d5cffcfa6f9c7f6f98d01fd2a221c",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-2/beat-00": {
+    "text": "Oh, hello! I think our trolleys just met.",
+    "wav": "e6b1ed1d67908f999724a41f237ef5975f20a117966c399b7be28a239789d0fc",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-2/beat-01": {
+    "text": "Sorry, that was my fault. I was barely moving, but there goes your jam.",
+    "wav": "79615e15a5420f5747a657120a58e675ef44e071f32a56f580a77c964fc23901",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-2/beat-02": {
+    "text": "This gentleman came flying round the corner, I promise you. I heard the glass break before I even saw him.",
+    "wav": "caf825f931f4a87f437f58d086359dfe9b838a7f711dfbc53c05701ecb2b4b64",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-2/beat-03": {
+    "text": "Two people, one bump, and two different memories. Neither of them is lying.",
+    "wav": "0b0b6976ef7651c13ed71b9f76d9b83b0aea30547257c8507c6cb3ed543bd8eb",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-2/beat-04": {
+    "text": "A memory isn’t a recording. Each time you remember something, your brain builds it again, and fills the gaps with whatever seems to fit.",
+    "wav": "f7389729c47148c178245203b534c35cdf18b4ffb96433784cdbae925a5423be",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-2/beat-06": {
+    "text": "The words of a question can change the memory itself. So a careful interviewer asks what happened, and lets the person tell it.",
+    "wav": "4427001617d2b0d268c92f6f5276b85adcd13bf9f87245dfc6bdd1f06701d711",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-2/beat-07": {
+    "text": "Well, I’m certain I was barely moving. Though I suppose she’s just as certain.",
+    "wav": "2026da6c00668ce23404f4ec273dc00e9dff3f49b2e7d5a5dcf9fd5845a1e0b5",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-2/beat-08": {
+    "text": "Feeling sure isn’t the same as being right. A story can feel more certain each time it’s told, even as the details drift.",
+    "wav": "190962bd961aad36fc7087f3eee7b0a31fdf16a304d1bc6b9ae0abc7f6c629ab",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-2/beat-10": {
+    "text": "Oh, look, he was barely moving. So who broke my jam?",
+    "wav": "9c87cc926007932b29d13507593a74fc98cafe3963efaf9f93b5727d0eb792db",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
-    "wav": "1661801f9d29b035274723ad2e3d044d97884b87df125ccc263d62517eb252f3",
+    "wav": "c0450557d948814fc781f20676b6b9c0c810889eb9a96806d32a6d921f5b14c6",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "science-foundations-1/beat-01": {
     "text": "Could be, mate. I’m up the ladder anyway, so I’ll drop them both and we’ll see.",
-    "wav": "29787192cf3a742629e635da1190c827da86ae62214ec72dd900acd80e0ef5fb",
+    "wav": "9353b96819d82ee1597ed00e4f348c35bf4ce1449ed40e10126847e931cb9c76",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "science-foundations-1/beat-02": {
     "text": "Before he lets go, make your own guess. Science starts with a guess you’re willing to test.",
-    "wav": "6334becad6bbdcc06c8b5de96368fdf29714f31a3f31aae4ae2f558eebd7618e",
+    "wav": "c8f8d9a15a571bd40e1ff174c08dbae72d49068338575606c145dc44eff0987a",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "science-foundations-1/beat-04": {
     "text": "There you go, both at once. Sorry, mate.",
-    "wav": "5e051ffda5eb538ce21d77734586ffab2a67f3464505172f217a967ae6e999bb",
+    "wav": "5fe28bd62927cc36a06c45baa5e0ef818b09cd660fb4b870dda4321be70ce70a",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "science-foundations-1/beat-05": {
     "text": "No, no, it’s fine. I’m sure heavy things fell faster when I was young.",
-    "wav": "5e991ad0e9447e7513e8eca961f6314e57101728800b7f18910db82d8e9dfe35",
+    "wav": "85f6e71fe087723dce01a280dfbf6819526a437c04b106ab9a5ac88e6ec82292",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "science-foundations-1/beat-06": {
     "text": "Being certain didn’t save him, and one drop settled it. In science, the test beats the argument.",
-    "wav": "96618d1f562ff7ca784e0764edb4a558f87d542e2c291567e6cc4293f0417eba",
+    "wav": "27666d4de7adaa4648379acb384193319aae2f2269e9cd14ca1e5c04a78a49e1",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "science-foundations-1/beat-07": {
     "text": "And a real test is one your guess could fail. That risk is what makes the answer worth trusting.",
-    "wav": "cfa278791534b7812d1437154571d5d0acbf8866c9bd6e6be469358113457bd0",
+    "wav": "b9a3684e194065ce55c089901b6fd1245d2307ad44ce7cb94267724e380ddb04",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "science-foundations-1/beat-09": {
     "text": "Ideas that pass their tests get built on. That’s technology: tested knowledge put to work, like the ladder he’s standing on.",
-    "wav": "e360bda12c94ffaf0154ae5232c7a7becaaac02124803f5e5a9c3c90151b0752",
+    "wav": "e41bb6db071b8fa1ed63ef5fdfddbb7508de44c1873b04127906781702609c93",
     "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-2/beat-00": {
+    "text": "Mine has the pointy nose, so it’ll fly the furthest. Watch this!",
+    "wav": "c0bed0b1e3b60b5bfd20c9a047d5d736c897492951976a73acd4fa4584cd4579",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-2/beat-01": {
+    "text": "Off you go, then. Goodness, it went miles, and mine barely made it past my feet!",
+    "wav": "dc84a21ad479bc79cc0837e7b5b8a4d44dd6f066f0f2cce0bd810f65abc212a1",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-2/beat-02": {
+    "text": "So that’s settled, then. Pointy noses fly further!",
+    "wav": "01d5a1224a22a94dfffc27e16c3a19cb7d458d1daaa7ad72d07c6d7eb8ccc009",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-2/beat-03": {
+    "text": "Not yet, I’m afraid. She threw from the top of the steps, and he threw from the grass.",
+    "wav": "9fff40c93e2d4ab56dc6cf0b32742de6bc3480a053c12d0097dbca77b79b3740",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-2/beat-04": {
+    "text": "A fair test changes one thing, and keeps everything else the same. Then you know what made the difference.",
+    "wav": "f7b8d47bd720bb2481319df750256c8eb5bc37da74a4a207f4be694a70fa23da",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-2/beat-06": {
+    "text": "Shall we both throw from this line, then? Same paper, same arm, nice and gentle.",
+    "wav": "dcf84c9bea8bb14f65a17f22bc424473a45ff718b0e04dbf30e04d0de950fba1",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-2/beat-07": {
+    "text": "Mine won again! Only by a little, but it still won.",
+    "wav": "1b8981fce83d1443c15081a2732ad33d1ff40d2d628b9044b36d698c839786db",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-2/beat-08": {
+    "text": "One throw can be luck, a gust or a wobble. Repeat it many times, and the luck starts to cancel out.",
+    "wav": "9ec1f1c9096cf4eee831822c98fd6a8319430d28dc3d08cfb60ea09554482b61",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-2/beat-10": {
+    "text": "Ten throws each, and we’ll chalk up every one. Lovely day for it!",
+    "wav": "39be5805759310fcadd0daba45d004e1b9bbeabd5cdada7c2dde330b6a81d25c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   }
 }

@@ -25,6 +25,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROOT, dialogueLessons, wiredLessons } from './lib/dialogue.mjs';
+import { paceFault, sentencesOf } from './lib/prosody.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ts = createRequire(path.join(REPO, 'package.json'))('typescript');
@@ -85,6 +86,27 @@ for (const l of lessons) {
     else if (!SPEAKERS.includes(b.speaker)) fail('AP1', l.id, `beat ${i} names "${b.speaker}", who is not in the cast (${SPEAKERS.join(', ')})`);
     else used.add(b.speaker);
   });
+
+  // AP17 — HOW EACH LINE IS SPOKEN IS DECIDED BY WHAT IT SAYS. Every voiced line states
+  // its pace, its pauses come from its punctuation and nothing else, and a lesson says its
+  // idea slowly at least once without dragging everything: a lesson spoken all at one
+  // speed is the flat read the owner rejected.
+  {
+    const paces = [];
+    beats.forEach((b, i) => {
+      if (!spoken(b)) return;
+      const pf = paceFault(b.text, b.pace);
+      if (pf) { fail('AP17', l.id, `beat ${i} ${pf}`); return; }
+      if (b.markup !== undefined) fail('AP17', l.id, `beat ${i} carries a hand-written markup; a paced line takes its pauses from its punctuation (prosody.markupOf)`);
+      const ps = sentencesOf(b.text, b.pace);
+      for (const s of ps) paces.push(s.pace);
+      if (!/[.!?…]["’”)]?$/.test(b.text.trim())) fail('AP17', l.id, `beat ${i} does not end on a full stop, question or exclamation mark, so the voice has no way to end it`);
+    });
+    const slow = paces.filter((p) => p === 'slow').length;
+    if (paces.length && !slow) fail('AP17', l.id, 'says nothing slowly: the line that names or defines the lesson\'s idea is `slow`');
+    if (paces.length && slow / paces.length > 0.6) fail('AP17', l.id, `says ${slow} of its ${paces.length} sentences slowly; slow is for the idea, and a lesson that drags everything drags`);
+    if (paces.length >= 6 && new Set(paces).size < 2) fail('AP17', l.id, 'says every sentence at one pace');
+  }
 
   // AP6 — no ordering question.
   if (/\border\s*:\s*\{/.test(src)) fail('AP6', l.id, 'uses an `order` control; a dialogue lesson asks by tapping the stage');

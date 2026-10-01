@@ -29,13 +29,29 @@
 // words the reader cannot see (AC rules).
 //
 // A RETAKE MUST BE A DIFFERENT REQUEST. Google returns the same bytes for the same
-// request, broken ones included, so `3@0.98` re-renders beat 3 at a nudged rate.
+// request, broken ones included, so `3@0.98` re-renders beat 3 at a nudged rate (for a
+// paced line, `3@0.98` scales the rate its pace starts from).
+//
+// ── A PACED LINE (LESSON_RULES AP17) ─────────────────────────────────────────
+//
+// A dialogue beat that states its `pace` is rendered from its PUNCTUATION, never from a
+// hand-written markup: a pause tag after every mark (prosody.markupOf). The WHOLE line
+// is asked for at each pace it uses, at the voice's rate scaled for that pace; a take
+// whose sentences at that pace are outside its band, cut off, or run through a mark is
+// asked for again at a rate nudged toward the band's aim (up to TRIES times, keeping the
+// best). Each sentence is then taken from its own pace's take, cut inside the silence at
+// a sentence end (prosody.spliceSentences), and every pause is SET to a person's length
+// in the audio (prosody.shapePauses), so what is installed has a fifth of a second at a
+// comma and twice that at a stop, whatever the take did.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail } from './lib/narration.mjs';
+import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
+import { PACES, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
+
+const TRIES = 5;
 
 const [lessonId, outDir, ...picks] = process.argv.slice(2);
 if (!lessonId || !outDir) {
@@ -56,12 +72,19 @@ const lines = [];
 beats.forEach((b, i) => {
   if (!spoken(b)) return;
   if (only.size && !only.has(i)) return;
+  const v = voiceFor(b.speaker);
+  if (b.speaker && b.pace !== undefined) {
+    const pf = paceFault(b.text, b.pace);
+    if (pf) { console.error(`beat ${i} ${pf}`); process.exit(1); }
+    if (b.markup) { console.error(`beat ${i}: a paced line takes its pauses from its punctuation; remove its markup`); process.exit(1); }
+    lines.push({ i, key: keyOf(lessonId, i), text: b.text, pace: b.pace, voice: v, nudge: only.get(i) ?? 1 });
+    return;
+  }
   const markup = b.markup ?? b.text;
   if (plain(markup) !== plain(b.text)) {
     console.error(`beat ${i}: its markup says "${plain(markup)}" but the screen shows "${b.text}"`);
     process.exit(1);
   }
-  const v = voiceFor(b.speaker);
   // A dialogue line is asked for with a long pause after it, so the voice finishes its
   // last word instead of being trimmed into it (AP16).
   lines.push({ i, key: keyOf(lessonId, i), text: b.text, markup: b.speaker ? endingMarkup(markup) : markup, dialogue: !!b.speaker, voice: v, rate: only.get(i) ?? v.rate });
@@ -72,29 +95,127 @@ const GCLOUD = path.join(process.env.LOCALAPPDATA ?? '', 'Google/Cloud SDK/googl
 const token = execFileSync('cmd.exe', ['/d', '/s', '/c', `""${GCLOUD}" auth application-default print-access-token"`],
   { encoding: 'utf8', windowsVerbatimArguments: true }).trim();
 
-const items = [];
 const ledger = openLedger();
+async function synth(markup, voice, rate, label) {
+  const request = {
+    input: { markup },
+    voice: { languageCode: voice.languageCode, name: voice.name },
+    audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: 24000, speakingRate: Number(rate.toFixed(3)) },
+  };
+  const res = await ledger.spend(request, () => fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-goog-user-project': 'app-narration',
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify(request),
+  }), label);
+  if (!res.ok) { console.log(`${label}: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`); return null; }
+  return Buffer.from((await res.json()).audioContent, 'base64');
+}
+
+/**
+ * What is wrong with a take FOR THE SENTENCES SAID AT `p`: their speed, a mark inside
+ * them or at either end of them that the voice ran through, and the ending if the last
+ * sentence is one of them. The other sentences come from another take.
+ */
+function faultsAt(take, text, p) {
+  const sents = take.sentences;
+  const words = String(text).match(/\S+/g) || [];
+  const mine = new Set(sents.map((s, k) => (s.pace === p ? k : -1)).filter((k) => k >= 0));
+  const out = [];
+  const through = new Set();
+  if (mine.has(sents.length - 1) && take.endDb > -END_DROP_DB) out.push('CUT OFF');
+  for (const m of take.marks) {
+    const k = sents.findIndex((s) => m.word >= s.from && m.word <= s.to);
+    const bounds = mine.has(k) || (m.word === sents[k].to && mine.has(k + 1));
+    if (bounds && m.gap < 0) { out.push(`NO PAUSE after "${words[m.word]}"`); through.add(m.word); }
+  }
+  for (const k of mine) {
+    const s = sents[k];
+    if (!s.rate || s.syllables < MIN_SYLLABLES) continue;
+    if (s.rate > PACES[p].max + SENTENCE_SLACK) out.push('ONE TOO FAST');
+    if (s.rate < PACES[p].min - SENTENCE_SLACK) out.push('ONE TOO SLOW');
+  }
+  const together = paceRates(take).get(p);
+  const said = together?.rate ?? null;
+  if (said && said > PACES[p].max) out.push('TOO FAST');
+  if (said && said < PACES[p].min) out.push('TOO SLOW');
+  return { faults: out, rate: said, through };
+}
+
+/**
+ * Where each voice's rate for each pace ended up, as a share of where it started. Pause
+ * tags slow a voice down (it lengthens the word before every pause), and by how much
+ * differs by voice, so the next line starts where the last one landed: fewer retakes,
+ * fewer characters.
+ */
+const learned = new Map();
+
+/**
+ * The whole line asked for at pace `p`, retaken toward p's band; the best take. Each
+ * request carries a throwaway word after the line (prosody.requestOf), and the audio is
+ * cut in the silence before it (prosody.cutTail), so the last word always finishes.
+ */
+async function renderAt(l, p) {
+  const band = PACES[p];
+  const base = l.voice.rate * band.factor * l.nudge;
+  const lk = `${l.voice.name}|${p}`;
+  let rate = base * (learned.get(lk) ?? 1);
+  let best = null;
+  const strong = new Set();
+  for (let t = 0; t < TRIES; t += 1) {
+    const buf = await synth(requestOf(l.text, strong), l.voice, rate, `${l.key} ${p}@${rate.toFixed(3)}`);
+    if (!buf) break;
+    if (process.env.RENDER_DUMP) fs.writeFileSync(path.join(process.env.RENDER_DUMP, `${l.key.replace(/\W+/g, '_')}-${p}-${t}.wav`), buf);
+    const w = parseWav(buf);
+    const pcm = cutTail(w.pcm, w.rate, l.text);
+    if (!pcm) {
+      console.log(`    ${l.key} ${p} try ${t + 1} @${rate.toFixed(3)}: no silence after the last word to cut in`);
+      rate *= t % 2 ? 0.985 : 1.015;
+      continue;
+    }
+    const take = readTake(pcm, w.rate, l.text, l.pace);
+    const { faults, rate: said, through } = faultsAt(take, l.text, p);
+    const score = faults.length + (said ? Math.abs(said - band.aim) / 10 : 0);
+    console.log(`    ${l.key} ${p} try ${t + 1} @${rate.toFixed(3)}: ${said ? said.toFixed(2) : '—'} syl/s (${band.min}–${band.max})${faults.length ? `  ${faults.join(', ')}` : ''}`);
+    if (!best || score < best.score) best = { pcm, rate: w.rate, take, score, faults };
+    if (said && said <= band.max && said >= band.min) learned.set(lk, rate / base);
+    if (!faults.length) break;
+    for (const k of through) strong.add(k);
+    // a different request every time: toward the band's aim if the speed is off, else a nudge
+    const off = said && (said > band.max || said < band.min);
+    rate = off ? rate * Math.min(1.15, Math.max(0.87, band.aim / said)) : rate * (t % 2 ? 0.985 : 1.015);
+  }
+  return best;
+}
+
+const items = [];
 try {
   for (const l of lines) {
-    const request = {
-      input: { markup: l.markup },
-      voice: { languageCode: l.voice.languageCode, name: l.voice.name },
-      audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: 24000, speakingRate: l.rate },
-    };
-    const res = await ledger.spend(request, () => fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-goog-user-project': 'app-narration',
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: JSON.stringify(request),
-    }), `${l.key} ${l.voice.name}@${l.rate}`);
-    if (!res.ok) { console.log(`${l.key}: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`); continue; }
-    const j = await res.json();
     const dest = path.join(outDir, `${l.key}.wav`);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    const audio = Buffer.from(j.audioContent, 'base64');
+    if (l.pace !== undefined) {
+      // A PACED line: the whole line at each pace it uses, each sentence from its own
+      // pace's take, and then every pause set to a person's length.
+      const paces = [...new Set(sentencesOf(l.text, l.pace).map((s) => s.pace))];
+      const takes = {};
+      for (const p of paces) takes[p] = await renderAt(l, p);
+      if (paces.some((p) => !takes[p])) continue;
+      const rate = takes[paces[0]].rate;
+      const joined = paces.length === 1 ? takes[paces[0]].pcm : spliceSentences(takes, l.text, l.pace, rate);
+      if (!joined) { console.log(`${l.key}: a sentence end has no pause to cut in, in one of its takes — render it again`); continue; }
+      // the line starts a tenth of a second before its first sound, like every other take
+      const pcm = trimLead(shapePauses(joined, rate, l.text, l.pace), rate, 0.1);
+      const faults = prosodyFaults(readTake(pcm, rate, l.text, l.pace), l.text);
+      fs.writeFileSync(dest, wavOf(pcm, rate));
+      items.push({ key: l.key, text: l.text, voice: l.voice.name, encodings: ['LINEAR16'] });
+      console.log(`${l.key}  ${l.voice.name}  ${(pcm.length / rate).toFixed(2)}s${faults.length ? `  STILL: ${faults.map((f) => `${f.kind} ${f.say}`).join(' | ')}` : '  ok'}`);
+      continue;
+    }
+    const audio = await synth(l.markup, l.voice, l.rate, `${l.key} ${l.voice.name}@${l.rate}`);
+    if (!audio) continue;
     // …and the silence that pause bought is cut back, so the line does not end in dead air.
     fs.writeFileSync(dest, l.dialogue ? trimTail(audio) : audio);
     items.push({ key: l.key, text: l.text, voice: l.voice.name, encodings: ['LINEAR16'] });

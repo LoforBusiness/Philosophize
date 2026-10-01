@@ -1,5 +1,6 @@
 import type { Path } from '@/data/types';
 import whatIsEconomics from './lessons/what-is-economics';
+import second from './lessons/supply-and-demand';
 
 const units: Path[] = [
   {
@@ -7,7 +8,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "What economics is, and the choice at the heart of it.",
-    lessons: [whatIsEconomics],
+    lessons: [whatIsEconomics, second],
   },
 ];
 

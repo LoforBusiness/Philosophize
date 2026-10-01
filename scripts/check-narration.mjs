@@ -120,7 +120,7 @@ for (const id of table) {
     if (!missing.length && Math.abs(e.at - l.at) > 0.0005) {
       note(key, 'OFFSET', `the manifest starts this line at ${e.at.toFixed(3)}s and it lands at ${l.at.toFixed(3)}s in ${LESSON_CLIP}: run scripts/encode-narration.mjs, then scripts/make-narration.mjs`);
     }
-    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at, dialogue: !!beats[i].speaker });
+    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at, dialogue: !!beats[i].speaker, pace: beats[i].pace });
     for (const f of faults) note(key, f.kind, f.say);
     lines += 1;
     if (!m) continue;
@@ -204,6 +204,8 @@ const GROUPS = [
   ['nothing is left behind', ['ORPHAN'], 'no record or file that no line plays'],
   ['each dialogue line is delivered like a person talking (AP16)', ['CUT OFF', 'TOO FAST', 'TOO SLOW', 'NO BREATH'],
     "every take ends on its own, at a person's pace, with a breath at every sentence end"],
+  ['each paced line rests at every mark, for as long as a person does (AP17)', ['NO PAUSE', 'PAUSE', 'STRAY PAUSE'],
+    'a pause at every comma, a longer one at every stop, and none the text does not ask for'],
 ];
 // A finding no group reports is a rule that fails in silence — which is how the
 // delivery rules first went in, and read clean. Every kind must belong to a group.

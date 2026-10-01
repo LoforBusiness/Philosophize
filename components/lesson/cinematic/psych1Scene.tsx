@@ -78,7 +78,7 @@ const K = K_FIG * 0.76;
  * the handling need it — b1 (5.36s line), b2 (3.84), b7 (4.00), b8 (6.65) and b10
  * (5.08) run a little past their lines.
  */
-const LINES = [4.79, 6, 5.2, 5.2, 7.3, 0, 7.8, 4.86, 9.2, 0, 5.4, 0, 0];
+const LINES = [4.79, 6, 5.2, 5.2, 7.04, 0, 8.27, 4.86, 9.2, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, arms folded, counting the points.
