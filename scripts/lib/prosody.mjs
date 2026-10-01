@@ -92,7 +92,9 @@ export const END_DROP_DB = 33;
 export const MIN_SYLLABLES = 8;
 export const SENTENCE_SLACK = 0.35;
 
-const ABBREV = /^(?:mr|mrs|ms|dr|st|vs|etc|e\.g|i\.e|no)\.$/i;
+// Not "no.": in dialogue it ends a sentence ("Oh, no."), and read as "No. 5" it hid the
+// stop the render cuts its throwaway tail word at, so no take of that line could finish.
+const ABBREV = /^(?:mr|mrs|ms|dr|st|vs|etc|e\.g|i\.e)\.$/i;
 const CLOSERS = /["’”)\]]+$/;
 
 /** A word's syllables, by vowel groups — close enough to measure a line's speed. */

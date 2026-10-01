@@ -121,6 +121,16 @@ for (const l of lessons) {
     const sc = fs.readFileSync(l.sceneFile, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
     const drift = [...new Set(sc.match(/\b(?:emoteAny|emoteAnyLive|emoteHold|emoteLive|postureHold|postureLive|narratorHold|narratorLive|lookPose)\b/g) ?? [])];
     if (drift.length) fail('AP18', l.id, `poses with ${drift.join(', ')}, whose hands drift on the clock: use emoteStill / emoteStillLive / postureStill`);
+    // A hand target the scene moves on the CLOCK is the same drift written one level up
+    // (growth2's resting hand and tapping pencil were, until 2026-10-01). It may stand only
+    // when the motion is the action itself — a spoon stirring — and says so: `AP18: why`.
+    const raw = fs.readFileSync(l.sceneFile, 'utf8').split('\n');
+    raw.forEach((line, k) => {
+      if (!/\b(?:hand|reachHandTo)\(/.test(line)) return;
+      if (!/Math\.(?:sin|cos)\(\s*(?:t|clock\.value)\b|\bdrift\(/.test(line.replace(/\/\/.*$/, ''))) return;
+      if (/AP18:/.test(line) || /AP18:/.test(raw[k - 1] ?? '')) return;
+      fail('AP18', l.id, `line ${k + 1} moves a hand on the clock with no reason given: hold it still, or say what it is doing in an \`// AP18: …\` comment`);
+    });
   }
 
   // AP6 — no ordering question.

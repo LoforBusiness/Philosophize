@@ -72,7 +72,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, economics-foundations-1), except b4, whose line is 1.3s
  * and whose trade needs about five — the hand-offs run on after the line ends.
  */
-const LINES = [3.64, 3.63, 5.67, 6.11, 5, 0, 6.24, 4.41, 0, 0, 0];
+const LINES = [3.61, 3.47, 5.68, 6.02, 5, 0, 6.38, 4.33, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.

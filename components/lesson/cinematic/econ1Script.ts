@@ -47,7 +47,7 @@ export const BEATS: Econ1Beat[] = [
     act: 'enter', sale: 0, board: 0,
     speaker: 'plain',
     text: 'One ten-pound note. And I want everything on this table.',
-    pace: 'even',
+    pace: ['even', 'brisk'],
     dur: 1.8,
   },
   {

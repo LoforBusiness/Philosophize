@@ -78,7 +78,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, philosophy-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [5.26, 4.72, 6.38, 6.38, 0, 4.8, 3.58, 5.69, 0, 4.91, 0, 0];
+const LINES = [5.63, 4.72, 6.22, 6.61, 0, 5.02, 3.31, 5.9, 0, 4.79, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting for an answer.
@@ -386,9 +386,9 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const xMa = carry(cv, 2, n, wm.xp, wm.xn, wm.walking ? wm.walkU : tr);
     const dMa = carry(cv, 5, n, wm.dirV, wm.dirV, trD);
     let sm = wm.s;
-    // b0 and b10: stirring his coffee
+    // b0 and b10: stirring his coffee (AP18: the spoon going round IS the action)
     if (A_ORDER[n]) sm = hand(sm, xMa, dMa, 1, CUP_ON.x + 1.4 * Math.sin(t * 7), 463, 0.9);
-    if (A_REST[n]) sm = hand(sm, xMa, dMa, 1, CUP_ON.x + 1.4 * Math.sin(t * 7), 463, st(0.05, 0.22));
+    if (A_REST[n]) sm = hand(sm, xMa, dMa, 1, CUP_ON.x + 1.4 * Math.sin(t * 7), 463, st(0.05, 0.22)); // AP18: stirring
     // b1: the spoon counts the layers — butter, sugar, icing — then a little salute
     if (A_SCOFF[n]) {
       sm = hand(sm, xMa, dMa, 1, 262, 470, bp(0.02, 0.07, 0.13));

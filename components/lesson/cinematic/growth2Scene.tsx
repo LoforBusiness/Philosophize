@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b6 (the walk to the worktop and
  * the lid), b7 (the walk back) and b10 (to the bowl and back to his chair).
  */
-const LINES = [4.09, 4.22, 6.26, 5.66, 0, 5.6, 6.4, 4.2, 6.3, 0, 6.4, 0, 0];
+const LINES = [3.98, 4, 5.9, 5.69, 0, 5.6, 6.4, 4.2, 6.32, 0, 6.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along.
 const TALK = 167;
@@ -111,7 +111,9 @@ const Q2 = BEATS.map((b) => (b.reach ? 1 : 0));
 /** The cap is sitting, beat by beat (b5 sits him down; b10 stands him up and back). */
 const SITS = BEATS.map((_, n) => (n >= 6 ? 1 : 0));
 /** The beats he takes a sip of tea on: listening, seated, while only one other moves. */
-const SIPS = BEATS.map((b, n) => (n >= 8 && b.act !== 'swap' ? 1 : 0));
+const SIPS = BEATS.map((b, n) => (n >= 7 && b.act !== 'swap' ? 1 : 0));
+/** The housemate nods along on every beat that is not his own line. */
+const PL_NODS = BEATS.map((b) => (b.speaker === 'plain' ? 0 : 1));
 
 // ── where each of them walks, and which way each faces, beat by beat ─────────
 // A leg is [fraction of the line it starts at, x]; it runs at the walk's own speed
@@ -138,7 +140,7 @@ const TH_TURN: Track[] = [
 /** The housemate stays in his chair, facing the cap across the table. */
 const PL_X = 345;
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const CAP_P = [TALK, LISTEN, LISTEN, NOD, LISTEN, TALK, LISTEN, LISTEN, LISTEN, LISTEN, TALK, WAIT, LISTEN];
+const CAP_P = [TALK, LISTEN, LISTEN, NOD, LISTEN, TALK, LISTEN, NOD, LISTEN, LISTEN, TALK, WAIT, LISTEN];
 const TH_P = [LISTEN, LISTEN, EXPLAIN, EXPLAIN, LISTEN, NOD, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, WAIT, LISTEN];
 
 // ── the kitchen ──────────────────────────────────────────────────────────────
@@ -215,11 +217,6 @@ function sitting(t: number, lean: number): Stance {
   'worklet';
   const s = seated(SEAT_H, t, 18);
   return { ...s, tilt: s.tilt + 0.12 * lean, neck: s.neck - 0.06 * lean };
-}
-/** A slow, unhurried life for a hand resting on something: a drift a few units across. */
-function drift(t: number, k: number): number {
-  'worklet';
-  return Math.sin(t * 0.9 + k) * 1.8 + Math.sin(t * 0.37 + k * 2.1) * 1.2;
 }
 /** A sip of tea, every seven seconds: 0 the mug down · 1 at his lips. */
 function sipAt(t: number): number {
@@ -307,7 +304,7 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
   const heldC = useHeld();
   const heldP = useHeld();
   const heldT = useHeld();
-  const cv = useCarry(18);
+  const cv = useCarry(19);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -356,8 +353,8 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
       sc = hand(sc, xC, dC, 1, xC + 9 * dC, 461, 1 - st(0.68, 0.74));
       sc = hand(sc, xC, dC, 1, MUG_TABLE.x - MUG_GRIP, MUG_TABLE.y, bp(0.68, 0.76, 0.86));
     } else if (!A_SWAP[n]) {
-      // resting by the mug, the fingers drifting on the table; a sip now and then
-      const rest = { x: MUG_TABLE.x - MUG_GRIP - 5 + drift(t, 0), y: 472 };
+      // resting by the mug, still (AP18); a sip now and then
+      const rest = { x: MUG_TABLE.x - MUG_GRIP - 5, y: 472 };
       const lip = { x: xC + 9 * dC, y: 446 };
       sc = hand(sc, xC, dC, 1, lerp(rest.x, lip.x, sip), lerp(rest.y, lip.y, sip), 1);
     }
@@ -387,13 +384,15 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     // ── his housemate, at the table with his notepad ────────────────────────
     const dP = -1;
     let sp = sitting(t, A_JAB[n] ? st(0.1, 0.3) : n > 7 ? 1 : 0);
-    // the pencil hand taps the table, unhurried, whenever it is not busy
-    const tapUp = Math.max(0, Math.sin(t * 2.6)) ** 2;
+    // while somebody else talks he nods along (N21); his hands stay put (AP18)
+    const nodP = carry(cv, 18, n, PL_NODS[n], PL_NODS[n], tr) * Math.max(0, Math.sin(t * 1.45));
+    sp = { ...sp, neck: sp.neck + 0.2 * nodP, tilt: sp.tilt + 0.03 * nodP };
+    // the pencil hand rests on the table (AP18: no tapping on a clock)
     const padNow = A_COUNT[n] ? st(0.06, 0.2) * (1 - st(0.66, 0.8)) : 0;
     const padUp = carry(cv, 6, n, padNow, padNow, tr);
     const folded = A_JAB[n] ? st(0.1, 0.28) : 0;
     const fold = carry(cv, 7, n, folded, folded, tr);
-    sp = hand(sp, PL_X, dP, 1, TAP.x + drift(t, 1) * 0.6, TAP.y - 4 * tapUp, 1 - fold);
+    sp = hand(sp, PL_X, dP, 1, TAP.x, TAP.y, 1 - fold);
     sp = hand(sp, PL_X, dP, -1, PAD.x + 3, PAD.y - 2, (1 - padUp) * (1 - fold));
     // b1: the pad lifted to show, the fifth stroke, and the pad laid down again
     if (A_COUNT[n]) {
@@ -402,7 +401,7 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     }
     // b7: he sits back and folds his arms
     if (fold > 0) {
-      sp = hand(sp, PL_X, dP, 1, PL_X - 9, 462 + drift(t, 2) * 0.4, fold);
+      sp = hand(sp, PL_X, dP, 1, PL_X - 9, 462, fold);
       sp = hand(sp, PL_X, dP, -1, PL_X - 11, 459, fold);
     }
     const prevP = carryFrom(heldP, n, sitting(t, n > 8 ? 1 : 0));

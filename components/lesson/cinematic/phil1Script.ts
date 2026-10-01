@@ -121,7 +121,7 @@ export const BEATS: Phil1Beat[] = [
     act: 'live', th: true,
     speaker: 'tophat',
     text: 'You already live by answers like these: what’s fair, what’s real and what you owe. Philosophy is how you check them.',
-    pace: ['even', 'even'],
+    pace: ['brisk', 'even'],
     dur: 2.1,
   },
   {

@@ -41,7 +41,7 @@
 // asked for again at a rate nudged toward the band's aim (up to TRIES times, keeping the
 // best). Each sentence is then taken from its own pace's take, cut inside the silence at
 // a sentence end (prosody.spliceSentences), and every pause is SET to a person's length
-// in the audio (prosody.shapePauses), so what is installed has a fifth of a second at a
+// in the audio (prosody.shapePauses), so what is installed has about a sixth of a second at a
 // comma and twice that at a stop, whatever the take did.
 import fs from 'node:fs';
 import path from 'node:path';

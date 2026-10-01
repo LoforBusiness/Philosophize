@@ -88,7 +88,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, science-foundations-2), except b4 and b6, whose walks,
  * crouches and hand-offs run on a little after the line ends.
  */
-const LINES = [3.94, 4.5, 3.47, 4.87, 7, 0, 7.2, 4.24, 5.79, 0, 3.79, 0, 0];
+const LINES = [4.09, 4.53, 3.3, 4.88, 7, 0, 7.2, 5.31, 5.67, 0, 3.61, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting — alive — while the reader answers or reads the quotation (N21).
@@ -474,7 +474,7 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sc = crouch(sc, sqC);
       sc = hand(sc, xC, GROUND, dC, 1, HIS_NEAR - HOLD_OFF, 502, bp(0.14, 0.2, 0.3));
       sc = hand(sc, xC, GROUND, dC, 1, xC + 8 * dC, 464, st(0.26, 0.32));
-      sc = hand(sc, xC, GROUND, dC, -1, xC - 16 * dC, 452 + 3 * Math.sin(t * 9), bp(0.7, 0.76, 0.86));
+      sc = hand(sc, xC, GROUND, dC, -1, xC - 16 * dC, 452 + 3 * Math.sin(t * 9), bp(0.7, 0.76, 0.86)); // AP18: beckoning her over
     }
     // b7: from his chest, wound back and thrown
     if (A_RETRY[n]) {

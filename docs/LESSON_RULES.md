@@ -11229,29 +11229,20 @@ so the measurement after the render is the rule, never the rate that was asked f
 `node scripts/countertest-prosody.mjs` stages every fault on a real installed take and
 asserts each is caught, and that the take itself passes.
 
-**A TAKE THAT IS TOO SLOW IS SPED UP, NOT RE-RENDERED, AND THE SOUND MUST NOT GET WORSE.**
-When the bands moved up, all 118 dialogue lines were brought to them without a character of
-the voice budget:
-`RETIME_PYTHON=<python with praat-parselmouth> node scripts/retime-narration.mjs <out dir> --from <original takes> <lesson id> …`
-
-1. **STRETCH ONCE, FROM THE ORIGINAL RENDER.** A take already sped up is never sped up
-   again: artifacts stack. Keep a copy of the takes as the voice gave them and pass it as
-   `--from`.
-2. **PSOLA, NOT A PHASE VOCODER.** `scripts/lib/psola.py` uses Praat's pitch-synchronous
-   overlap-add, which drops whole voice periods, so the voice keeps its own waveform.
-   Measured on all 118 lines by harmonics-to-noise ratio, the voice's clarity: the
-   originals 12.67 dB, rubberband (the first pass, shipped for a day) 10.78, PSOLA from the
-   originals 11.95 — faster than the rubberband pass and cleaner. Rubberband is the fallback
-   only.
-3. **ONLY THE SPEECH IS STRETCHED.** Each sentence is cut inside its own pauses; the runs of
-   speech are sped up and every pause is SET to its mark's length from the silence that was
-   there, so no pause is squeezed out of existence and nothing processes air.
-4. **A SHORT EXCLAMATION IS LEFT MOSTLY ALONE** (at most 1.2×, 1.4× when its line needs it):
-   in "Oh, no." the drawn-out vowel is the intonation, not slow talking, and squeezing it
-   cost the most sound for the least pace. A long sentence goes to 1.55× at most.
-
-The takes then go through `install-narration` like any other. Do this before paying for a
-retake whose only fault is speed.
+**A TAKE IS NEVER TIME-STRETCHED. SPEED COMES FROM THE VOICE'S OWN RATE.** Twice on
+2026-10-01 the dialogue lines were sped up after rendering, to save the character budget:
+first with rubberband (a phase vocoder), then with Praat's PSOLA from the original takes.
+The second was faster and measured cleaner by harmonics-to-noise ratio — and the owner
+heard it at once: *"the sound quality is really bad … a fuzz, or two voices … it has to be
+really clear."* Both methods leave their mark on a synthetic voice (a vocoder's phasiness,
+PSOLA's doubled periods where the pitch marks slip), and **no number this project measures
+heard it**: a voice's clarity is judged by ear, and an ear on a phone speaker is the
+instrument. So every line is RENDERED at its speed — the cast's rate scaled for its pace,
+retaken toward the band — and the only edits ever made to a take are in its SILENCES:
+cutting the throwaway tail word, splicing two paces at a sentence end, and setting each
+pause's length. All three cut and join inside silence and never touch the voice. The
+stretch tools were deleted (they are in git history at e79c6056); a take that is too slow
+is a retake, whatever it costs in characters.
 
 ### AP18 · An arm moves only when the scene moves it
 
@@ -11274,5 +11265,11 @@ it as the drawing being loose, not as a person.
    carries something in it, pours, points, takes a slice, or a PLAYED action (300 + act)
    performs once and ends where it ends. Changing pose between beats — a listener who
    starts to speak — blends there as it always has.
-3. `check:dialogue` fails a dialogue scene that calls a drifting pose function, and a
-   stale `ARM_REST` table.
+3. **THE SAME DRIFT CAN BE WRITTEN ONE LEVEL UP, IN THE SCENE.** growth2's resting hand
+   wandered across the table on `drift(t)` and its housemate's pencil tapped on a sine,
+   forever, after every pose was still. A hand target that moves on the clock stands only
+   when the motion IS the action — a spoon going round a cup — and the line says so in an
+   `// AP18: …` comment. A seated listener who loses his fidget gets his life back in his
+   head (a nod along, N21), never in his hands.
+4. `check:dialogue` fails a dialogue scene that calls a drifting pose function, a hand
+   target on the clock with no `AP18:` reason, and a stale `ARM_REST` table.
