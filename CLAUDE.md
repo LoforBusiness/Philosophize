@@ -8212,6 +8212,29 @@ for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
     wore the 4px as an ink frame (Quick Start, the Philosophy intro) state it themselves.
   - `npm run sheet:subjects` draws every poster at the card, tile and masthead shape;
     `check:subjects` §5 holds that every box keeps every object in view.
+- **THE SEVEN PICTURES ARE IN THEIR OWN COLOURS NOW, AND THE CARDS WEAR THEM (2026-09-30).**
+  *"They only follow the color scheme … if there is brick in the background, you can use
+  proper colors for that … the quick start cards look better than the subject cards."*
+  - `components/subjects/subjectScenes.ts` redraws the seven in the Quick Start's
+    editorial style — flat fills, no outlines, two tones lit from the top left, a pill
+    of shadow under what stands — each material its own colour: a Pompeian gallery, a
+    consulting room, a mountain at dawn, a brick loft, a street market, a tiled lab, Giza.
+    Zero imports, and the ONE file in `components/subjects/` allowed hex (§7). The six
+    retired branches keep their hue-struck posters.
+  - **The words sit on the picture's deepest colour, not a white slip** (`foot.ts`,
+    `SCENE_FOOT`), the card's edge is that colour and its ledge that colour toward ink.
+    `check:subjects` holds the name at 7:1 and the blurb at 4.5:1 on every foot. The
+    card's "N COURSES" badge went (one road a subject made it read "1 COURSES"); a kicker
+    reads SUBJECT III · 1 LESSON, the road masthead's own numbering.
+  - **The shelf animates off one scroll value on the UI thread** (`SubjectCarousel`):
+    centred cards with a neighbour peeking on both sides, neighbours sitting back at 0.92,
+    the picture sliding `PARALLAX` against its frame (drawn into the PNG's margin, so no
+    edge ever shows), a dot row that stretches on the card in front, a haptic tick per
+    arrival. `snapToInterval` + `disableIntervalMomentum` stay.
+  - **Learn is four even rows** — the wide Philosophy hero is gone ("this makes
+    philosophy seem more important"), and the eighth cell is a dashed MORE SUBJECTS ON THE
+    WAY tile that stands on no ledge. Tiles paint PNGs too (`TILE_POSTER`), so Learn
+    builds no SVG; `check:subjects` §10 stamps both sets.
 - **Profile and Pass stand on the wallpaper too, and Profile speaks in subjects.**
   "Where your reading goes" is seven SUBJECT rows (`SUBJECT_SHORT`/`SUBJECT_ICON` in
   branchMarks.ts), a subject's lessons summed over its courses, the coming-soon ones

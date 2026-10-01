@@ -2,16 +2,30 @@
 // Do not edit: change the poster and run it again. check:subjects fails a stale stamp.
 import type { ImageSourcePropType } from 'react-native';
 
-/** The box every picture here was drawn for: a 390dp phone's Home card, less its border. */
-export const CARD_POSTER_BOX = { w: 300, h: 195 } as const;
+/** The box the Home pictures were drawn for: a 390dp phone's Home card less its border,
+ *  plus the parallax margin each side (PARALLAX). */
+export const CARD_POSTER_BOX = { w: 344, h: 195 } as const;
+/** The box the Learn pictures were drawn for: a 390dp phone's tile less its border. */
+export const TILE_POSTER_BOX = { w: 165, h: 118 } as const;
 
 /** Each subject's Home-shelf poster, pre-drawn (see scripts/make-poster-art.mjs). */
 export const CARD_POSTER: Record<string, { source: ImageSourcePropType; stamp: string }> = {
-  'philosophy': { source: require('@/assets/images/posters/card-philosophy.png'), stamp: '773b32b7015a' },
-  'psychology': { source: require('@/assets/images/posters/card-psychology.png'), stamp: 'f91ba417ddf3' },
-  'personal-growth': { source: require('@/assets/images/posters/card-personal-growth.png'), stamp: '807d952b2b5c' },
-  'business': { source: require('@/assets/images/posters/card-business.png'), stamp: 'd44e2def6db6' },
-  'economics': { source: require('@/assets/images/posters/card-economics.png'), stamp: '59b749de9112' },
-  'science': { source: require('@/assets/images/posters/card-science.png'), stamp: '2da7d79f56cb' },
-  'history': { source: require('@/assets/images/posters/card-history.png'), stamp: '2eebb212ad1a' },
+  'philosophy': { source: require('@/assets/images/posters/card-philosophy.png'), stamp: '20f9eb268ecf' },
+  'psychology': { source: require('@/assets/images/posters/card-psychology.png'), stamp: '98ab64887df6' },
+  'personal-growth': { source: require('@/assets/images/posters/card-personal-growth.png'), stamp: 'c932b449ddad' },
+  'business': { source: require('@/assets/images/posters/card-business.png'), stamp: 'a39e0c4b4487' },
+  'economics': { source: require('@/assets/images/posters/card-economics.png'), stamp: 'b1c2eb012efc' },
+  'science': { source: require('@/assets/images/posters/card-science.png'), stamp: '824ee8cc4b47' },
+  'history': { source: require('@/assets/images/posters/card-history.png'), stamp: '75644473fb47' },
+};
+
+/** Each subject's Learn-grid poster, pre-drawn. */
+export const TILE_POSTER: Record<string, { source: ImageSourcePropType; stamp: string }> = {
+  'philosophy': { source: require('@/assets/images/posters/tile-philosophy.png'), stamp: '9a59e009746a' },
+  'psychology': { source: require('@/assets/images/posters/tile-psychology.png'), stamp: '4bea930aeedd' },
+  'personal-growth': { source: require('@/assets/images/posters/tile-personal-growth.png'), stamp: '935390f633e0' },
+  'business': { source: require('@/assets/images/posters/tile-business.png'), stamp: '1af8d3ca307b' },
+  'economics': { source: require('@/assets/images/posters/tile-economics.png'), stamp: '03771d4e86b1' },
+  'science': { source: require('@/assets/images/posters/tile-science.png'), stamp: '6fd5af471b1c' },
+  'history': { source: require('@/assets/images/posters/tile-history.png'), stamp: 'f72794c43a2b' },
 };

@@ -19,7 +19,7 @@
 // app ONE ~121MB texture budget (§19) — which is what Profile's overscroll stretch and
 // the streak screen run out of first. So a poster draws its SVG only while the TAB it
 // belongs to is focused (any screen of the Learn stack counts as Learn), and is a
-// plain box of its own hue otherwise: that bitmap is released while the reader is on
+// plain box of its scene's ground colour otherwise: that bitmap is released while the reader is on
 // Profile, Pass or the streak screen. The release waits out the tabs' 340ms
 // cross-dissolve, so a tab never fades out with its pictures gone.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { View, Image, type ImageSourcePropType, type StyleProp, type ViewStyle } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from 'expo-router';
-import { posterXml, type PosterKey } from './posters';
+import { posterXml, posterGround, type PosterKey } from './posters';
 
 /** Longer than the tabs' 340ms cross-dissolve (app/(app)/_layout.tsx). */
 const RELEASE_AFTER_MS = 420;
@@ -92,7 +92,7 @@ function Poster({
   const xml = useMemo(() => (image ? '' : posterXml(art, hue, w, h)), [image, art, hue, w, h]);
   const live = useTabFocused();
   return (
-    <View pointerEvents="none" style={[{ width: w, height: h, backgroundColor: hue, overflow: 'hidden' }, style]}>
+    <View pointerEvents="none" style={[{ width: w, height: h, backgroundColor: posterGround(art, hue), overflow: 'hidden' }, style]}>
       {!live ? null : image
         ? <Image source={image} style={{ width: w, height: h }} resizeMode="cover" fadeDuration={0} />
         : <SvgXml xml={xml} width={w} height={h} />}

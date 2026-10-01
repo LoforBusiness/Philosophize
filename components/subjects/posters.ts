@@ -52,6 +52,7 @@
 // Fetched with `npm run ref` before drawing, as the lesson objects are (group AM).
 // ─────────────────────────────────────────────────────────────────────────────
 import { mix, INK, EMBER, PAPER, PAPER_LIT } from '@/components/shared/tone';
+import { SCENES, SCENE_GROUND } from './subjectScenes';
 
 export type PosterKey =
   | 'philosophy' | 'psychology' | 'personal-growth' | 'business' | 'economics' | 'science' | 'history'
@@ -699,10 +700,20 @@ export function posterViewBox(w: number, h: number): [number, number, number, nu
   return [(FRAME.w - vw) / 2, FRAME.h - vh, vw, vh];
 }
 
-/** The poster as an SVG document for a box of w×h, in the given hue. */
+/**
+ * The poster as an SVG document for a box of w×h. The seven SUBJECTS are drawn in the
+ * colours of the things in them (subjectScenes.ts, 2026-09-30); the six retired
+ * philosophy branches keep their drawings in their hue.
+ */
 export function posterXml(key: PosterKey, hue: string, w: number, h: number): string {
-  const d = DRAW[key](hue);
   const [x, y, vw, vh] = posterViewBox(w, h);
   const r = (n: number) => Math.round(n * 100) / 100;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r(x)} ${r(y)} ${r(vw)} ${r(vh)}" width="${w}" height="${h}">${d.back}${d.body}</svg>`;
+  const scene = (SCENES as Record<string, (() => string) | undefined>)[key];
+  const inner = scene ? scene() : (() => { const d = DRAW[key](hue); return d.back + d.body; })();
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r(x)} ${r(y)} ${r(vw)} ${r(vh)}" width="${w}" height="${h}">${inner}</svg>`;
+}
+
+/** The colour behind a poster before it draws: a subject's scene ground, or the hue. */
+export function posterGround(key: PosterKey, hue: string): string {
+  return (SCENE_GROUND as Record<string, string | undefined>)[key] ?? hue;
 }

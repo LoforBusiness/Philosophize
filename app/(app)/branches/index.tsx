@@ -8,7 +8,8 @@ import { PAGE_PAD, GRID_GAP, tileSize } from '@/components/subjects/tileLayout';
 import { SUBJECTS, roadOf, type Subject } from '@/data/subjects';
 import { branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
-import { C } from '@/constants/design';
+import { C, LIP } from '@/constants/design';
+import Card from '@/components/ui/Card';
 import DoodleGround from '@/components/shared/DoodleGround';
 import { WALL } from '@/components/shared/tone';
 
@@ -19,8 +20,11 @@ import { WALL } from '@/components/shared/tone';
 // subjects. It is Brilliant's course page now: the subjects as tiles, two to a row,
 // and a tap opens that subject's ROAD — one road per subject since 2026-09-30.
 //
-// PHILOSOPHY GETS THE FULL WIDTH because seven tiles lay out as one across the top
-// and six below, and it is the subject the app began with.
+// EVERY SUBJECT THE SAME SIZE (2026-09-30). Philosophy used to take the full width
+// over six below, and the owner: "This makes philosophy seem more important, and I want
+// … each of the subjects have their equal amount of room." Seven do not pair, so the
+// eighth cell says what is true of the list — more subjects are coming — and the grid
+// is four even rows.
 //
 // The route is still `branches`, on purpose. Every lesson link, the road, the unit
 // reviews and the stack's `anchor: 'index'` are written against it, and renaming a
@@ -39,12 +43,24 @@ function pairs<T>(xs: readonly T[]): T[][] {
   return out;
 }
 
+/** The grid's eighth cell: not a subject, so it stands on no ledge and opens nothing. */
+function MoreTile({ size }: { size: number }) {
+  return (
+    <Card pad={0} style={styles.moreFace}
+      containerStyle={{ width: size, alignSelf: 'stretch', marginBottom: LIP.card }}>
+      <View style={styles.moreBody}>
+        <Text style={styles.morePlus}>+</Text>
+        <Text style={styles.moreText}>More subjects{'\n'}on the way</Text>
+      </View>
+    </Card>
+  );
+}
+
 export default function LearnScreen() {
   const { width } = useWindowDimensions();
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const done = useMemo(() => branchCountsFromUnits(lessonsByUnit), [lessonsByUnit]);
   const tile = tileSize(width);
-  const [lead, ...rest] = SUBJECTS;
   // One road per subject (2026-09-30): a tile opens the road itself.
   const open = (s: Subject) => router.push(`/(app)/branches/${roadOf(s)}` as never);
 
@@ -60,21 +76,18 @@ export default function LearnScreen() {
           <Text style={styles.lede}>Pick one to walk its road.</Text>
 
           <View nativeID="learn-grid">
-            <SubjectTile subject={lead} done={doneIn(lead, done)} size={width - 2 * PAGE_PAD} wide onPress={() => open(lead)} />
             {/* ROWS OF TWO, EACH STRETCHED TO ITS TALLER TILE. On a 320dp phone
                 "Personal Growth" takes two lines and "Psychology" one, and a wrapped
                 grid left the pair at two heights. Card relays a stretch to its face,
                 so an explicit row makes a level pair. */}
-            {pairs(rest).map((row) => (
-              <View key={row[0].slug} style={styles.row}>
-                {row.map((s) => (
-                  <SubjectTile key={s.slug} subject={s} done={doneIn(s, done)} size={tile} onPress={() => open(s)} />
-                ))}
+            {pairs<Subject | null>([...SUBJECTS, ...(SUBJECTS.length % 2 ? [null] : [])]).map((row, r) => (
+              <View key={row[0]?.slug ?? 'more'} style={[styles.row, r === 0 && styles.firstRow]}>
+                {row.map((s) => s
+                  ? <SubjectTile key={s.slug} subject={s} done={doneIn(s, done)} size={tile} onPress={() => open(s)} />
+                  : <MoreTile key="more" size={tile} />)}
               </View>
             ))}
           </View>
-
-          <Text style={styles.footer}>More subjects are on the way.</Text>
         </ScrollView>
       </SafeAreaView>
     </ScreenTransition>
@@ -92,8 +105,13 @@ const styles = StyleSheet.create({
     color: C.inkSoft, marginTop: 2, marginBottom: 16,
   },
   row: { flexDirection: 'row', alignItems: 'stretch', gap: GRID_GAP, marginTop: GRID_GAP + 4 },
-  footer: {
-    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, color: C.inkSoft,
-    textAlign: 'center', marginTop: 26,
+  firstRow: { marginTop: 0 },
+  // Dashed: a place kept, not a thing to press (a pressable card stands on a ledge).
+  moreFace: { borderStyle: 'dashed', borderColor: C.inkSoft },
+  moreBody: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 14, minHeight: 120 },
+  morePlus: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 34, lineHeight: 38, color: C.inkSoft },
+  moreText: {
+    fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic', fontSize: 14, lineHeight: 19,
+    color: C.inkSoft, textAlign: 'center', marginTop: 2,
   },
 });

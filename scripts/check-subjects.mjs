@@ -84,8 +84,10 @@ ok(S.subjectOfBranch('ethics') === undefined, 'a retired branch belongs to no su
 ok(S.subjectOfBranch('no-such-branch') === undefined, 'an unknown branch has no subject');
 
 head('§5 · the posters');
-// Every subject and every branch has a poster (posters.ts); each is ONE svg in its own
-// hue carrying the ember spark; and the viewBox grows to any box so every object in
+// Every subject and every branch has a poster (posters.ts); each is ONE svg; a retired
+// BRANCH's is struck in its own hue carrying the ember spark, while a SUBJECT's is drawn
+// in the colours of the things in it (subjectScenes.ts, 2026-09-30: "use whatever color
+// is fitting best with what is pictured"); and the viewBox grows to any box so every object in
 // the 200×150 frame (CORE sideways) is inside it — never cropped, never stretched
 // (a slice crop took the bust's head off in the first mockup).
 const P = await import('@/components/subjects/posters');
@@ -96,8 +98,13 @@ const hueFor = (k) => S.getSubject(k)?.hue ?? D.BRANCH[k];
 for (const k of P.POSTER_KEYS) {
   const xml = P.posterXml(k, hueFor(k), 169, 118);
   ok((xml.match(/<svg/g) ?? []).length === 1 && xml.trim().endsWith('</svg>'), `${k} is one svg document`);
-  ok(xml.includes(`fill="${hueFor(k)}"`), `${k} is struck in its own hue`);
-  ok(xml.includes(TONE.EMBER), `${k} carries the ember spark`);
+  if (!S.getSubject(k)) {
+    ok(xml.includes(`fill="${hueFor(k)}"`), `${k} is struck in its own hue`);
+    ok(xml.includes(TONE.EMBER), `${k} carries the ember spark`);
+  } else {
+    // A subject's scene is ITS OWN drawing, not the hue-tinted one under it.
+    ok(!xml.includes(TONE.EMBER) && (xml.match(/fill="#/g) ?? []).length > 30, `${k} is drawn as its own scene, in natural colours`);
+  }
   ok(!/NaN|undefined/.test(xml), `${k} has no NaN or undefined in it`);
 }
 {
@@ -105,7 +112,7 @@ for (const k of P.POSTER_KEYS) {
   const boxes = [];
   for (const W of [320, 360, 390, 430]) {
     const card = L5.cardWidth(W); const tile = L5.tileSize(W); const page = W - 2 * L5.PAGE_PAD;
-    boxes.push([card - 4, L5.cardArtHeight(card)], [tile - 4, L5.tileArtHeight(tile)], [page - 4, L5.heroArtHeight(page)],
+    boxes.push([card - 4, L5.cardArtHeight(card)], [card - 4 + 2 * L5.PARALLAX, L5.cardArtHeight(card)], [tile - 4, L5.tileArtHeight(tile)],
       [page - 4, L5.MAST_ART_H], [L5.branchArt(W), L5.BRANCH_CARD_H - 4]);
   }
   for (const [w, h] of boxes) {
@@ -135,7 +142,6 @@ for (const W of [320, 360, 390, 430]) {
   // Every card face has a 2px border inside its width (Card), so the words measure from inside it.
   const inner = tile - 4 - 2 * L.TILE_PAD;
   const card = L.cardWidth(W) - 4 - 2 * L.CARD_PAD;
-  const wideText = W - 2 * L.PAGE_PAD - 4 - 2 * (L.TILE_PAD + 2);
   for (const s of S.SUBJECTS) {
     const t = fitsIn(L.tileTitle(s, tile), L.TILE_TITLE.fontSize, inner, 2);
     ok(t.ok, `${W}dp · ${s.slug}'s grid tile name`, t.why);
@@ -153,23 +159,40 @@ for (const W of [320, 360, 390, 430]) {
   // directly. What is left of them is the line under the road's name on its masthead.
   const DATA = await import('@/data');
   for (const b of DATA.ALL_BRANCHES) ok(!!S.COURSE_LINE[b.slug], `the ${b.slug} road has a line for its masthead`);
-  // Only the LEAD subject is drawn full width (the Learn grid: one across, six below).
-  for (const s of [S.SUBJECTS[0]]) {
-    const w = fitsIn(s.name, L.CARD_TITLE.fontSize, wideText, 1);
-    ok(w.ok, `${W}dp · ${s.slug}'s wide tile name`, w.why);
-  }
 }
 
 head('§7 · no colour is typed into a subject component');
 // The welcome screen kept a palette the app had replaced twice because its colours
-// were literals (§19). A subject's colour lives in data/subjects.ts and nowhere else.
+// were literals (§19). A subject's colour lives in data/subjects.ts and nowhere else —
+// except the pictures' own materials, which live in subjectScenes.ts (brick is a fact
+// about brick, not about a subject), the way quickStartScenes.ts holds Quick Start's.
 {
   const fs = await import('node:fs');
   const dir = 'components/subjects';
   for (const f of fs.readdirSync(dir)) {
+    if (f === 'subjectScenes.ts') continue;
     const src = fs.readFileSync(`${dir}/${f}`, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
     const hits = src.match(/['"]#[0-9A-Fa-f]{3,8}['"]/g) ?? [];
     ok(hits.length === 0, `${dir}/${f} types no hex colour`, hits.join(' '));
+  }
+}
+
+{
+  // THE FOOT. A card's words sit on the deepest colour of its picture (foot.ts); the
+  // name must hold 7:1 there and the blurb and kicker 4.5:1, on every subject.
+  const SC = await import('@/components/subjects/subjectScenes');
+  const lum = (hex) => {
+    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  for (const s of S.SUBJECTS) {
+    const foot = SC.SCENE_FOOT[s.slug];
+    ok(!!foot, `${s.slug} has a foot colour taken from its picture`);
+    if (!foot) continue;
+    const t = ratio(SC.FOOT_TEXT, foot);
+    const soft = ratio(SC.FOOT_SOFT, foot);
+    ok(t >= 7 && soft >= 4.5, `${s.slug}'s name and blurb read on its foot`, `name ${t.toFixed(2)}:1, blurb ${soft.toFixed(2)}:1`);
   }
 }
 
@@ -250,8 +273,8 @@ head('§10 · the Home shelf: pre-drawn posters, one card a swipe, flush picture
   ok(!!box, 'posterArt.ts states the box its pictures were drawn for');
   if (box) {
     const [W, H] = [Number(box[1]), Number(box[2])];
-    ok(W === L.cardWidth(390) - 4 && H === L.cardArtHeight(L.cardWidth(390)),
-      "the pictures were drawn for today's Home card box", `${W}x${H}`);
+    ok(W === L.cardWidth(390) - 4 + 2 * L.PARALLAX && H === L.cardArtHeight(L.cardWidth(390)),
+      "the pictures were drawn for today's Home card box, with the parallax margin", `${W}x${H}`);
     for (const s of S.SUBJECTS) {
       const want = crypto.createHash('sha1').update(P.posterXml(s.slug, s.hue, W, H)).digest('hex').slice(0, 12);
       ok(stamps[s.slug] === want, `${s.slug}'s Home picture is drawn from its poster as it is now`,
@@ -261,6 +284,25 @@ head('§10 · the Home shelf: pre-drawn posters, one card a swipe, flush picture
   }
   const card = noComments('components/subjects/SubjectCard.tsx');
   ok(/image=\{CARD_POSTER\[subject\.slug\]\?\.source\}/.test(card), 'a Home card paints its pre-drawn picture, not live SVG');
+
+  // The Learn tiles are pre-drawn too, and every subject takes ONE tile — no subject is
+  // drawn larger than another (2026-09-30).
+  const tbox = /TILE_POSTER_BOX = \{ w: (\d+), h: (\d+) \}/.exec(table);
+  const tstamps = Object.fromEntries([...table.matchAll(/'([a-z-]+)': \{ source: require\('@\/assets\/images\/posters\/tile-\1\.png'\), stamp: '([0-9a-f]+)' \}/g)].map((m) => [m[1], m[2]]));
+  ok(!!tbox, 'posterArt.ts states the box its tile pictures were drawn for');
+  if (tbox) {
+    const [W, H] = [Number(tbox[1]), Number(tbox[2])];
+    ok(W === L.tileSize(390) - 4 && H === L.tileArtHeight(L.tileSize(390)), "the tile pictures were drawn for today's tile box", `${W}x${H}`);
+    for (const s of S.SUBJECTS) {
+      const want = crypto.createHash('sha1').update(P.posterXml(s.slug, s.hue, W, H)).digest('hex').slice(0, 12);
+      ok(tstamps[s.slug] === want, `${s.slug}'s Learn picture is drawn from its poster as it is now`, tstamps[s.slug] === want ? '' : 'stale — run npm run make:posters');
+      ok(fs.existsSync(`assets/images/posters/tile-${s.slug}.png`), `${s.slug}'s Learn picture is on disk`);
+    }
+  }
+  const tileSrc = noComments('components/subjects/SubjectTile.tsx');
+  ok(/image=\{TILE_POSTER\[subject\.slug\]\?\.source\}/.test(tileSrc), 'a Learn tile paints its pre-drawn picture, not live SVG');
+  const learn = noComments('app/(app)/branches/index.tsx');
+  ok(!/\bwide\b/.test(learn) && /SUBJECTS\.length % 2/.test(learn), 'the Learn grid gives every subject one equal tile');
 
   // (b) One card per swipe, and nothing built while the reader swipes.
   const shelf = noComments('components/home/SubjectCarousel.tsx');

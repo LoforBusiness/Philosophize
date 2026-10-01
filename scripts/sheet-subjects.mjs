@@ -34,7 +34,8 @@ function loadWith(rel, deps = {}) {
 }
 const tone = loadWith('components/shared/tone.ts');
 const design = loadWith('constants/design.ts');
-const P = loadWith('components/subjects/posters.ts', { '@/components/shared/tone': tone });
+const scenes = loadWith('components/subjects/subjectScenes.ts');
+const P = loadWith('components/subjects/posters.ts', { '@/components/shared/tone': tone, './subjectScenes': scenes });
 const S = loadWith('data/subjects.ts');
 const L = loadWith('components/subjects/tileLayout.ts');
 const hueOf = (key) => S.getSubject(key)?.hue ?? design.BRANCH[key];

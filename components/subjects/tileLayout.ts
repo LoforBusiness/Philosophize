@@ -14,12 +14,17 @@ export const GRID_GAP = 12;
 export const TILE_PAD = 12;
 /** Inside a carousel card. */
 export const CARD_PAD = 16;
-/** The art square on the wide (Philosophy) tile and on a branch card. */
-export const WIDE_ART = 104;
 /** How much of the screen a carousel card takes — the next one peeks in. */
 export const CARD_FRAC = 0.78;
 /** Between carousel cards. */
 export const CARD_GAP = 14;
+/**
+ * How far a Home card's picture slides against the card as the shelf moves (the
+ * parallax, SubjectCarousel). The picture is drawn this much WIDER on each side than
+ * its window, and the scene simply carries on into that margin (posterViewBox grows a
+ * picture sideways), so no slide ever shows an edge.
+ */
+export const PARALLAX = 22;
 
 export const TILE_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 17, lineHeight: 21 } as const;
 export const CARD_TITLE = { family: 'PlayfairDisplay_700Bold', fontSize: 21, lineHeight: 26 } as const;
@@ -58,10 +63,6 @@ export function cardArtHeight(cardW: number): number {
 /** A Learn grid tile's poster height. */
 export function tileArtHeight(tileW: number): number {
   return Math.round(tileW * 0.7);
-}
-/** The wide (Philosophy) Learn tile's poster height. */
-export function heroArtHeight(w: number): number {
-  return Math.round(w * 0.5);
 }
 /** A subject page's masthead poster height. */
 export const MAST_ART_H = 170;
