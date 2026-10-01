@@ -13,7 +13,7 @@ import { readTake, prosodyFaults } from './lib/prosody.mjs';
 
 const ID = 'economics-foundations-1', BEAT = 3;
 const TEXT = 'Your wants never run out, but your money, your time and the bread on that stall all do. That gap is called scarcity.';
-const PACE = ['even', 'slow'];
+const PACE = ['even', 'even'];
 const w = parseWav(fs.readFileSync(path.join(ASSETS, `${keyOf(ID, BEAT)}.wav`)));
 const R = w.rate;
 const kinds = (pcm) => prosodyFaults(readTake(pcm, R, TEXT, PACE), TEXT).map((f) => f.kind);

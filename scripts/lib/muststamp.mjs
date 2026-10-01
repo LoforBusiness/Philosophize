@@ -157,6 +157,9 @@ function proselessScript(file) {
   return src
     // A holders list is bare names in brackets; take the key and its comma with it.
     .replace(/,?\s*\bholders\s*:\s*\[[^\]]*\]/g, '')
+    // A dialogue line's `pace` is how fast the VOICE says it (AP17), one name or a list
+    // of them; like `markup` it never reaches the stage.
+    .replace(/\n[ \t]*pace\s*:\s*(?:\[[^\]\n]*\]|'[a-z]+'),?[ \t]*(?=\n)/g, '')
     // A cite sits on its own line in every script that has one.
     .replace(/\n[ \t]*cite\s*:\s*(['"])(?:\\.|(?!\1)[^\\\n])*\1,?[ \t]*(?=\n)/g, '')
     .replace(re, (_m, key, sep, q) => `${key}${sep}${q}${q}`)

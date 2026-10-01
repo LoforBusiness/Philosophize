@@ -61,14 +61,14 @@ export const BEATS: Econ1Beat[] = [
     act: 'arrive', th: true, sale: 0, board: 0,
     speaker: 'tophat',
     text: 'What you’re watching has a name. Economics is the study of how people choose, when they can’t have it all.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'scarce', th: true, sale: 0, board: 0,
     speaker: 'tophat',
     text: 'Your wants never run out, but your money, your time and the bread on that stall all do. That gap is called scarcity.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -91,7 +91,7 @@ export const BEATS: Econ1Beat[] = [
     act: 'settle', th: true, sale: 2, board: 0,
     speaker: 'tophat',
     text: 'Every choice has an opportunity cost. Spend an hour at this market, and you can’t spend that hour anywhere else.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

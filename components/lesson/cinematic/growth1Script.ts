@@ -79,7 +79,7 @@ export const BEATS: Growth1Beat[] = [
     act: 'arrive', th: true,
     speaker: 'tophat',
     text: 'Two pots, and two ideas of how change works. Personal growth is the study of how people change, on purpose.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Growth1Beat[] = [
     act: 'grown', th: true, month: true,
     speaker: 'tophat',
     text: 'A little every day beats a lot all at once. The size of the step hardly matters, but coming back to it does.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -109,7 +109,7 @@ export const BEATS: Growth1Beat[] = [
     act: 'easy', th: true, month: true,
     speaker: 'tophat',
     text: 'Then don’t try harder, make it easier. Put the can where you can’t miss it.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

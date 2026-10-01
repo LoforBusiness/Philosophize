@@ -17,7 +17,7 @@ import {
 import { stageTone, stageToneOf } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -72,7 +72,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, economics-foundations-1), except b4, whose line is 1.3s
  * and whose trade needs about five — the hand-offs run on after the line ends.
  */
-const LINES = [4.07, 4.31, 7.03, 7.74, 5, 0, 7.46, 5.7, 0, 0, 0];
+const LINES = [3.93, 4.01, 6.24, 6.72, 5, 0, 6.89, 4.91, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.
@@ -135,11 +135,11 @@ const LOAF_ART = loaf(0, 0, 32, 21);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

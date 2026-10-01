@@ -33,8 +33,8 @@ export interface Voice {
   languageCode: string;
   /**
    * Chirp 3 HD `speakingRate`: 1 is the voice's own pace. Each is set so a FIRST take
-   * lands near a person's 4.5 syllables a second of speech (AP16): measured on the seven
-   * first lessons, all four voices ran at 4.7–5.4 at their old rates, the cap fastest.
+   * lands near the even pace, 4.85 syllables a second of speech (AP17): raised 2026-10-01
+   * by what each voice measured below that on the fourteen voiced dialogue lessons.
    */
   rate: number;
 }
@@ -54,27 +54,27 @@ export interface CastMember {
 export const CAST: Record<Speaker, CastMember> = {
   // The economist. A touch slower than his own default: he is the one explaining.
   tophat: {
-    costume: 'magistrate', label: 'Top hat', voice: { name: 'en-GB-Chirp3-HD-Algieba', languageCode: 'en-GB', rate: 0.9 },
+    costume: 'magistrate', label: 'Top hat', voice: { name: 'en-GB-Chirp3-HD-Algieba', languageCode: 'en-GB', rate: 0.97 },
     trait: 'teaching',
     character: 'The teacher. He explains, as a story rather than a lecture: he names the idea the others have just walked into, and says why it matters. Patient, precise, a little amused.',
   },
   // The stall-holder. Chosen by Claude on 2026-09-29: a newsboy cap reads as a
   // working man at a glance and cannot be mistaken for the top hat.
   cap: {
-    costume: 'stroller', label: 'Cap', voice: { name: 'en-AU-Chirp3-HD-Zubenelgenubi', languageCode: 'en-AU', rate: 0.86 },
+    costume: 'stroller', label: 'Cap', voice: { name: 'en-AU-Chirp3-HD-Zubenelgenubi', languageCode: 'en-AU', rate: 0.91 },
     trait: 'kind',
     character: 'The kind one. He assumes the best of everybody, helps before he is asked, and takes a loss without complaint — which is often exactly what the lesson needs somebody to do.',
   },
   // The mascot, undressed — the reader's stand-in.
   plain: {
-    costume: 'plain', label: 'Plain', voice: { name: 'en-GB-Chirp3-HD-Sadachbia', languageCode: 'en-GB', rate: 0.92 },
+    costume: 'plain', label: 'Plain', voice: { name: 'en-GB-Chirp3-HD-Sadachbia', languageCode: 'en-GB', rate: 0.98 },
     trait: 'passive-aggressive',
     character: 'The passive-aggressive one. Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine". He needles the OTHER CHARACTERS and the situation — never the reader, and never how clever somebody is (§7).',
   },
   // The fourth voice (2026-09-30): an American woman. A low hair bun is all she
   // wears — nothing is drawn on a stickman's body (wardrobe.ts BUN).
   bun: {
-    costume: 'bun', label: 'Bun', voice: { name: 'en-US-Chirp3-HD-Kore', languageCode: 'en-US', rate: 0.92 },
+    costume: 'bun', label: 'Bun', voice: { name: 'en-US-Chirp3-HD-Kore', languageCode: 'en-US', rate: 0.97 },
     trait: 'oblivious',
     character: 'The oblivious one. Cheerful, and one step behind: she misses the point, takes the figure of speech literally, and asks the question the reader was too polite to ask. Never stupid — her wrong turn is the one the lesson is about to correct.',
   },

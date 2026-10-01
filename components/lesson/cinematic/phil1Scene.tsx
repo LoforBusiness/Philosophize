@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -82,7 +82,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, philosophy-foundations-1). 0 for a beat with no voice.
  */
-const LINES = [3.75, 4.95, 4.46, 7.19, 5.94, 0, 5.61, 4.05, 7.33, 0, 8.16, 0, 0];
+const LINES = [3.38, 4.76, 4.29, 6.63, 4.76, 0, 5.14, 3.77, 6.33, 0, 7.03, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.
@@ -187,11 +187,11 @@ const BILL_ART = repairBill(0, BILL_H / 2, BILL_W, BILL_H);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

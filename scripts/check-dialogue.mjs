@@ -16,6 +16,9 @@
 //   AP8  no row in any table the narrated-lesson player layers read
 //   AP13 at least two speakers, and nobody staged who never speaks
 //   AP14 every cast member has a trait and a character, and no two share one
+//   AP17 every line states its pace, even or brisk (there is no slow), and takes its
+//        pauses from its punctuation
+//   AP18 a scene poses its people with still hands (emoteStill, postureStill)
 //
 // Which lessons are dialogue lessons comes from scripts/lib/dialogue.mjs, which reads
 // it out of the scripts. DIALOGUE_ROOT points the whole check at another tree, which is
@@ -23,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROOT, dialogueLessons, wiredLessons } from './lib/dialogue.mjs';
 import { paceFault, sentencesOf } from './lib/prosody.mjs';
@@ -102,10 +106,21 @@ for (const l of lessons) {
       for (const s of ps) paces.push(s.pace);
       if (!/[.!?…]["’”)]?$/.test(b.text.trim())) fail('AP17', l.id, `beat ${i} does not end on a full stop, question or exclamation mark, so the voice has no way to end it`);
     });
-    const slow = paces.filter((p) => p === 'slow').length;
-    if (paces.length && !slow) fail('AP17', l.id, 'says nothing slowly: the line that names or defines the lesson\'s idea is `slow`');
-    if (paces.length && slow / paces.length > 0.6) fail('AP17', l.id, `says ${slow} of its ${paces.length} sentences slowly; slow is for the idea, and a lesson that drags everything drags`);
+    // There is no slow (2026-10-01): a slowed line drags. paceFault refuses the name;
+    // this says why, for anyone who reaches for it.
+    if (paces.includes('slow')) fail('AP17', l.id, 'says a sentence slowly; a dialogue line is `even` (the idea included) or `brisk`');
     if (paces.length >= 6 && new Set(paces).size < 2) fail('AP17', l.id, 'says every sentence at one pace');
+  }
+
+  // AP18 — AN ARM MOVES ONLY WHEN THE SCENE MOVES IT. The living holds swing the hands
+  // on a slow sine, which is the look the owner rejected; a dialogue scene poses its
+  // people with emoteStill / emoteStillLive / postureStill, which hold the hands at the
+  // pose's rest, and moves an arm itself (a reach, a carry, a played action) when the
+  // scene has a reason to.
+  if (l.sceneFile) {
+    const sc = fs.readFileSync(l.sceneFile, 'utf8').replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    const drift = [...new Set(sc.match(/\b(?:emoteAny|emoteAnyLive|emoteHold|emoteLive|postureHold|postureLive|narratorHold|narratorLive|lookPose)\b/g) ?? [])];
+    if (drift.length) fail('AP18', l.id, `poses with ${drift.join(', ')}, whose hands drift on the clock: use emoteStill / emoteStillLive / postureStill`);
   }
 
   // AP6 — no ordering question.
@@ -192,6 +207,12 @@ if (fs.existsSync(rendersFile)) {
       }
     }
   }
+}
+
+// AP18 — the table of where each held pose's hands rest is current.
+{
+  const r = spawnSync(process.execPath, [path.join(REPO, 'scripts', 'make-arm-rest.mjs'), '--check'], { cwd: REPO, encoding: 'utf8' });
+  if (r.status) fail('AP18', 'moves.ts', 'the ARM_REST table is stale: run node scripts/make-arm-rest.mjs');
 }
 
 const wired = wiredLessons().length;

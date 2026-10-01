@@ -8378,7 +8378,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   follows the audio position. `scripts/retake-delivery.mjs` re-renders what fails; the
   cast's default rates in `cast.ts` were lowered so a first take lands at ~4.5.
 - **And a line is said the way its words ask (AP17, 2026-09-30).** Every voiced dialogue
-  beat states a `pace` — `slow` for the line that names the idea, `even`, or `brisk` for a
+  beat states a `pace` — `even` (a medium pace, the idea included) or `brisk` for a
   quick reaction — one for the line or one per sentence, each with its own speed band.
   Its pauses come from its PUNCTUATION (no hand `markup`): `scripts/lib/prosody.mjs` asks
   the voice for a pause at every mark and then SETS each one in the audio — a comma
@@ -8387,10 +8387,20 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   sentence end; every request carries a throwaway word after the line that is cut away,
   which is what finally stopped takes ending inside their last word. `render-narration`
   retakes toward the band by itself; `check:narration` holds each mark and each pace,
-  `check:dialogue` that every line has a pace and a lesson says something slowly, and
+  `check:dialogue` that every line has a pace and none is slow, and
   `node scripts/countertest-prosody.mjs` stages each fault on a real take. The seven
   first lessons were re-voiced this way (their LINES followed, restamped on a
   settled-frame proof), and every second lesson was voiced with it.
+- **No slow speech, and no drifting arms (2026-10-01).** The owner: the slow lines
+  *"sound so bad … I want more medium pace or faster pace"*, and the arms *"slowly moving
+  back and forth … looks AI"*. `slow` is gone (AP17: even 4.5–5.2, brisk 4.9–5.7
+  syllables a second), and all 118 dialogue lines were brought up to it WITHOUT a new
+  render: `scripts/retime-narration.mjs` time-stretches each sentence with ffmpeg's
+  rubberband and re-sets the pauses, so it cost no voice characters. Dialogue scenes pose
+  with `emoteStill`/`emoteStillLive`/`postureStill` (moves.ts), which hold the hands
+  at each pose's rest from the generated `ARM_REST` table; an arm moves only when the
+  scene moves it (AP18, held by `check:dialogue`). The cast's default rates were raised
+  so a first take lands near the new speeds.
 - **Every road has two lessons** (2026-09-30), the second appended to its foundations
   unit: What Makes an Argument Good? (a café table and a slice of carrot cake), Why
   Memory Gets Things Wrong (two trolleys and a jar of jam), How Habits Work (a kitchen

@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, business-foundations-1), except b4, whose hand-offs run
  * on about a second after its 4.36s line. 0 for a beat with no voice.
  */
-const LINES = [5.85, 5.17, 4.62, 8.1, 6.66, 0, 6.19, 5.68, 7.5, 0, 4.74, 0, 0];
+const LINES = [4.88, 4.74, 4.42, 7.33, 6.66, 0, 5.38, 5.16, 6.49, 0, 4.26, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.
@@ -195,11 +195,11 @@ const COIN_ART = tint(coin(0, 0, 8, 8), 'silver');
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

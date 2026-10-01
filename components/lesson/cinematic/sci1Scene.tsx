@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -87,7 +87,7 @@ const K = K_FIG * 0.76;
  * landing and bounces run to 2.6; b9's is 7.67s and the helper steps off the ladder
  * a little after it ends.
  */
-const LINES = [4.14, 5.78, 5.9, 0, 3.04, 4.42, 6.17, 5.84, 0, 8.35, 0, 0];
+const LINES = [3.65, 5.35, 4.81, 0, 2.78, 4.34, 5.41, 5.01, 0, 8.35, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen, arms folded.
@@ -182,11 +182,11 @@ const LIGHT_ART = tennisBall(0, 0, LIGHT_D, LIGHT_D);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

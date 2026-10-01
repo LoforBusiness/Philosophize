@@ -69,7 +69,7 @@ export const BEATS: Biz1Beat[] = [
     act: 'arrive', th: true, tin: 0,
     speaker: 'tophat',
     text: 'A long queue, and an empty tin. A business makes something people want and sells it for more than it cost to make.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -92,7 +92,7 @@ export const BEATS: Biz1Beat[] = [
     act: 'proof', th: true, tin: 1,
     speaker: 'tophat',
     text: 'Profit isn’t greed. It’s proof that people valued the lemonade more than it cost to make.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -106,7 +106,7 @@ export const BEATS: Biz1Beat[] = [
     act: 'lead', th: true, tin: 1,
     speaker: 'tophat',
     text: 'And that’s the other half of it, called leadership. Someone has to make sure every job has one owner.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive, postureHold } from './moves';
+import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -80,7 +80,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, history-foundations-1). 0 for a beat with no voice.
  */
-const LINES = [5.44, 4.89, 8.01, 5.28, 0, 8.39, 6.06, 5.62, 0, 6.18, 0, 0];
+const LINES = [4.92, 4.35, 7.04, 4.58, 0, 6.9, 5.68, 5.32, 0, 5.18, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, arms folded, leaning in; and, for looking at the glass, a posture.
@@ -168,11 +168,11 @@ const CARD_HAND = { x: 114, y: 428 };
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -346,7 +346,7 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // the hat tipped once he has arrived, then down on his heels over the glass
       const after = wh.arrive / L;
       sh = hand(sh, xH, dH, 1, xH + 5 * dH, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.12));
-      sh = mixStance(sh, postureHold(CROUCH, t), st(after + 0.12, after + 0.2));
+      sh = mixStance(sh, postureStill(CROUCH, t), st(after + 0.12, after + 0.2));
     }
     // b5: an open hand to her, then — turned — to him
     if (A_SOURCE[n]) {

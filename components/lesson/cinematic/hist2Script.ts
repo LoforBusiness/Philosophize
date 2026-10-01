@@ -65,14 +65,14 @@ export const BEATS: Hist2Beat[] = [
     act: 'arrive', th: true, note: 1, news: 0,
     speaker: 'tophat',
     text: 'Two sources, and they disagree. A historian’s first question is when each one was made, and by whom.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'kinds', th: true, note: 1, news: 0,
     speaker: 'tophat',
     text: 'A source made at the time, by someone who was there, is a primary source. One written later, from other sources, is a secondary source.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -95,7 +95,7 @@ export const BEATS: Hist2Beat[] = [
     act: 'check', th: true, note: 1, news: 0,
     speaker: 'tophat',
     text: 'Printed isn’t the same as checked. When two sources disagree, a historian looks for a third from the time, to see which story it backs.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

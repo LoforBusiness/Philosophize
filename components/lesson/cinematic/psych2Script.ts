@@ -81,14 +81,14 @@ export const BEATS: Psych2Beat[] = [
     act: 'arrive', th: true, spill: 1, sign: 0, screen: 0,
     speaker: 'tophat',
     text: 'Two people, one bump, and two different memories. Neither of them is lying.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'rebuild', th: true, spill: 1, sign: 0, screen: 0,
     speaker: 'tophat',
     text: 'A memory isn’t a recording. Each time you remember something, your brain builds it again, and fills the gaps with whatever seems to fit.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -104,7 +104,7 @@ export const BEATS: Psych2Beat[] = [
     act: 'word', th: true, spill: 1, sign: 2, screen: 0,
     speaker: 'tophat',
     text: 'The words of a question can change the memory itself. So a careful interviewer asks what happened, and lets the person tell it.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -118,7 +118,7 @@ export const BEATS: Psych2Beat[] = [
     act: 'confident', th: true, spill: 1, sign: 2, screen: 0,
     speaker: 'tophat',
     text: 'Feeling sure isn’t the same as being right. A story can feel more certain each time it’s told, even as the details drift.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

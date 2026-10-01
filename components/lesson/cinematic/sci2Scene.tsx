@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -88,7 +88,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, science-foundations-2), except b4 and b6, whose walks,
  * crouches and hand-offs run on a little after the line ends.
  */
-const LINES = [4.69, 5.5, 4.15, 5.84, 7.0, 0, 7.2, 4.9, 7.3, 0, 4.25, 0, 0];
+const LINES = [4.09, 5.13, 3.37, 5.19, 7, 0, 7.2, 4.45, 6.41, 0, 4.14, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting — alive — while the reader answers or reads the quotation (N21).
@@ -188,16 +188,16 @@ const TH_LEGS: Track[] = BEATS.map((_, n) => (n < 3 ? [[0, 440]] : n === 3 ? [[0
 const TH_TURN: Track[] = BEATS.map((_, n) => (n === 4 ? [[0, -1], [0.31, 1], [0.84, -1]] : [[0, -1]]));
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const BUN_P = [TALK, LISTEN, TALK, LISTEN, NOD, WAIT, LISTEN, TALK, LEAN, WAIT, LISTEN, WAIT, LISTEN];
-const CAP_P = [LISTEN, TALK, NOD, LISTEN, LEAN, WAIT, TALK, NOD, NOD, WAIT, TALK, NOD, LISTEN];
+const CAP_P = [LISTEN, TALK, NOD, NOD, LEAN, WAIT, TALK, NOD, NOD, WAIT, TALK, NOD, LISTEN];
 const TH_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, EXPLAIN, WAIT, LISTEN, NOD, EXPLAIN, WAIT, NOD, WAIT, LISTEN];
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

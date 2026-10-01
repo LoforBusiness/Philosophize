@@ -77,7 +77,7 @@ export const BEATS: Psych1Beat[] = [
     act: 'arrive', th: true,
     speaker: 'tophat',
     text: 'Same coffee, and a different taste. The change happened in his head, and that’s where psychology looks.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -93,7 +93,7 @@ export const BEATS: Psych1Beat[] = [
     act: 'define', th: true,
     speaker: 'tophat',
     text: 'Psychology is the study of how people think, feel and act. Its first lesson is that we’re poor witnesses of our own minds.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -107,7 +107,7 @@ export const BEATS: Psych1Beat[] = [
     act: 'method', th: true, swap: true,
     speaker: 'tophat',
     text: 'The taster is still sure, so a psychologist doesn’t ask him. You swap the labels, pour again and count what he does.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

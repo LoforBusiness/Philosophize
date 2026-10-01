@@ -71,14 +71,14 @@ export const BEATS: Growth2Beat[] = [
     act: 'arrive', th: true, hour: 1, lid: 1, bowl: 0,
     speaker: 'tophat',
     text: 'The man with the biscuit isn’t even hungry. He’s caught in a habit, and every habit runs on a loop.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'loop', th: true, hour: 1, lid: 1, bowl: 0,
     speaker: 'tophat',
     text: 'A cue starts it, and the routine is what you do. The reward at the end makes you want to do it again.',
-    pace: ['slow', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -101,7 +101,7 @@ export const BEATS: Growth2Beat[] = [
     act: 'rule', th: true, hour: 1, lid: 0, bowl: 1,
     speaker: 'tophat',
     text: 'Then keep the cue, and keep the reward. Change only the routine in the middle.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -115,7 +115,7 @@ export const BEATS: Growth2Beat[] = [
     act: 'will', th: true, hour: 1, lid: 0, bowl: 1,
     speaker: 'tophat',
     text: 'Fighting a cue every single day is hard work. A swap is easier, because the habit still gets what it came for.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

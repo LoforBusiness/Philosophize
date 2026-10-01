@@ -64,14 +64,14 @@ export const BEATS: Biz2Beat[] = [
     act: 'arrive', th: true, tray: 0, steam: 0,
     speaker: 'tophat',
     text: 'The baker made what she likes, for a customer she imagined. A business starts with the customer at the counter.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'define', th: true, tray: 1, steam: 0,
     speaker: 'tophat',
     text: 'Your customer is the person whose problem you solve. His problem is a cold morning, and a long shift ahead.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -94,7 +94,7 @@ export const BEATS: Biz2Beat[] = [
     act: 'guess', th: true, tray: 2, steam: 1,
     speaker: 'tophat',
     text: 'That’s a guess, and a guess can be checked. Watch what sells, and ask the people buying it.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

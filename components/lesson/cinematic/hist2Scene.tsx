@@ -18,7 +18,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive, postureHold } from './moves';
+import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -88,7 +88,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, history-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [5.57, 5.67, 7.36, 9.48, 0, 5.78, 8.23, 0, 7.18, 4.8, 0, 0];
+const LINES = [5.37, 4.93, 5.97, 8.57, 0, 5.2, 7.64, 0, 6.97, 4.12, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting for an answer; and, at the hatbox, a crouch.
@@ -197,11 +197,11 @@ const NEWS_HANDS = { front: PL - 24, back: PL + 2, y: 456 };
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -353,7 +353,7 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const plHolds = n > LETTER_N && n < CHECK_N ? 1 : n === CHECK_N ? 1 - st(0.56, 0.62) : 0;
     if (A_LETTER[n]) {
       // down to the hatbox, a letter drawn out of it, up again, turned to her and read
-      sp = mixStance(sp, postureHold(CROUCH, t), st(0.17, 0.26) * (1 - st(0.4, 0.5)));
+      sp = mixStance(sp, postureStill(CROUCH, t), st(0.17, 0.26) * (1 - st(0.4, 0.5)));
       const inBox = st(0.2, 0.28);
       const tx = lerp(lerp(BOX.x - 6, PL_BOX + 8, st(0.3, 0.4)), PL_HOLD.x, st(0.5, 0.62));
       const ty = lerp(lerp(BOX.rim, 462, st(0.3, 0.4)), PL_HOLD.y, st(0.5, 0.62));
@@ -375,7 +375,7 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // the newspaper: down to the hatbox again, drawn out, up, turned, opened in both hands
     const paperHeld = n > PAPER_N ? 1 : 0;
     if (A_PAPER[n]) {
-      sp = mixStance(sp, postureHold(CROUCH, t), st(0.12, 0.2) * (1 - st(0.32, 0.4)));
+      sp = mixStance(sp, postureStill(CROUCH, t), st(0.12, 0.2) * (1 - st(0.32, 0.4)));
       const grip = st(0.46, 0.56);
       const tx = lerp(lerp(BOX.x - 2, PL_BOX + 8, st(0.26, 0.34)), NEWS_HANDS.front, grip);
       const ty = lerp(lerp(BOX.rim, 462, st(0.26, 0.34)), NEWS_HANDS.y, grip);

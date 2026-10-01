@@ -61,7 +61,7 @@ export const BEATS: Hist1Beat[] = [
     act: 'arrive', th: true, board: 0,
     speaker: 'tophat',
     text: 'Nobody here saw it break, and the past is gone. All it leaves behind is evidence, and that’s where history starts.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -84,7 +84,7 @@ export const BEATS: Hist1Beat[] = [
     act: 'source', th: true, board: 0,
     speaker: 'tophat',
     text: 'Then ask who’s telling each story. Every source has a point of view, so a historian asks who’s speaking, and why.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Hist1Beat[] = [
     act: 'turn', th: true, board: 0,
     speaker: 'tophat',
     text: 'Now the question isn’t what happened, but who decides what happens next. That’s politics.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

@@ -11170,21 +11170,26 @@ asked for a pause tag at every mark it pauses in the right PLACES but at 0.12–
 different every take. So the places come from the request and the LENGTHS are set in the
 audio, where they are exact (`scripts/lib/prosody.mjs`):
 
-1. **EVERY VOICED DIALOGUE BEAT STATES ITS `pace`** — `slow`, `even` or `brisk`, one for
-   the line or one per sentence — chosen from what the words do:
-   - **slow**: the line that names or defines the lesson's idea, gives a number, or
-     carries the argument ("That gap is called scarcity.");
-   - **even**: an ordinary line of conversation;
-   - **brisk**: a quick reaction, an interruption, an aside, excitement, a run of
-     everyday examples ("Oh, it's pouring!").
+1. **EVERY VOICED DIALOGUE BEAT STATES ITS `pace`** — `even` or `brisk`, one for the
+   line or one per sentence — chosen from what the words do:
+   - **even**, a medium pace: an ordinary line of conversation, and the line that names
+     or defines the lesson's idea ("That gap is called scarcity.");
+   - **brisk**, faster: a quick reaction, an interruption, an aside, excitement, a run of
+     everyday examples ("Oh, it's pouring!" · "Everybody knows that.").
 
-   Each has a band of syllables a second of speech, pauses taken out: slow 3.65–4.4,
-   even 4.1–4.9, brisk 4.5–5.3. Everything said at one pace in a line must sit in its
-   band together, and any one sentence of eight syllables or more within 0.35 of it —
-   people drift a little sentence to sentence, and a voice that never did is the flat
-   read this exists to prevent. `check:dialogue` holds that every voiced beat has a pace,
-   that a lesson says something slowly, that no more than 60% of it is slow, and that a
-   lesson of six sentences or more uses at least two paces.
+   **THERE IS NO SLOW.** There was, for the idea, at 3.65–4.4 syllables a second, and on
+   2026-10-01 the owner heard it: *"the narration slows down so much where it sounds so
+   bad … I do not want this slow sounding talking … I want more medium pace or faster
+   pace. And of course, I want punctuation to be met still."* A slowed line on a synthetic
+   voice does not sound weighty; it drags. The idea is carried by the pauses at its marks
+   (point 3), which are exact, never by stretching the words.
+
+   Each pace has a band of syllables a second of speech, pauses taken out: even 4.5–5.2,
+   brisk 4.9–5.7. Everything said at one pace in a line must sit in its band together,
+   and any one sentence of eight syllables or more within 0.35 of it — people drift a
+   little sentence to sentence, and a voice that never did is the flat read this exists to
+   prevent. `check:dialogue` holds that every voiced beat has a pace, that none is slow,
+   and that a lesson of six sentences or more uses both.
 2. **A PACED LINE TAKES ITS PAUSES FROM ITS PUNCTUATION AND NOTHING ELSE.** It carries no
    `markup`; `markupOf` asks for `[pause short]` after a comma, dash or semicolon and
    `[pause]` after a colon, full stop, question or exclamation. **A comma before the one
@@ -11221,3 +11226,36 @@ Kore at 0.92 came back at 5.56 syllables a second once and 3.67 the next time at
 so the measurement after the render is the rule, never the rate that was asked for.
 `node scripts/countertest-prosody.mjs` stages every fault on a real installed take and
 asserts each is caught, and that the take itself passes.
+
+**A TAKE THAT IS TOO SLOW IS SPED UP, NOT RE-RENDERED.** When the bands moved up, all 118
+dialogue lines were brought to them without a character of the voice budget:
+`FFMPEG=<ffmpeg with librubberband> node scripts/retime-narration.mjs <out dir> <lesson id> …`
+cuts each line at its sentence ends, time-stretches each sentence under its pace's aim up
+to it with rubberband (pitch held, so it is the same voice, quicker — at most 1.45×), joins
+them, and sets every pause to its mark's length again; a sentence already at pace is left
+alone. The takes then go through `install-narration` like any other. Do this before paying
+for a retake whose only fault is speed.
+
+### AP18 · An arm moves only when the scene moves it
+
+> *"for their arms, when there's nothing being said, I do not want their arms to be
+> moving. Usually they're moving in a really AI looking way where they're slowly moving
+> back and forth and this looks AI … a stickman's arms will only move in ways that make
+> sense in the scene."* (2026-10-01)
+
+Every living hold in `moves.ts` — listening, waiting, nodding, talking with the hands,
+explaining — swings the hands on a slow sine, and `stand()` under all of them drifts them
+too. A loop with no cause on the stage is group AL's finding one limb over: the eye reads
+it as the drawing being loose, not as a person.
+
+1. **A DIALOGUE SCENE POSES ITS PEOPLE WITH STILL HANDS**: `emoteStill`, `emoteStillLive`
+   and `postureStill`, never `emoteAny`, `emoteAnyLive`, `postureHold` or the rest. The
+   body keeps its small life — the weight, the head, a nod — and the hands sit where the
+   pose puts them: the average of its loop, from the generated `ARM_REST` table in
+   `moves.ts` (`node scripts/make-arm-rest.mjs`).
+2. **AN ARM MOVES FOR A REASON THE PICTURE SHOWS**: the scene reaches it to something,
+   carries something in it, pours, points, takes a slice, or a PLAYED action (300 + act)
+   performs once and ends where it ends. Changing pose between beats — a listener who
+   starts to speak — blends there as it always has.
+3. `check:dialogue` fails a dialogue scene that calls a drifting pose function, and a
+   stale `ARM_REST` table.

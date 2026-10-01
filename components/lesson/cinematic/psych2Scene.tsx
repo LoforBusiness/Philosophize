@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive, postureHold } from './moves';
+import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, psychology-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [3.54, 5.2, 6.42, 5.62, 9.17, 0, 9.31, 5.55, 7.72, 0, 4.51, 0, 0];
+const LINES = [3.02, 4.79, 5.81, 5.01, 8.44, 0, 7.98, 5, 6.72, 0, 3.91, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, waiting for the answer, leaning in; and a posture for the crouch.
@@ -229,11 +229,11 @@ const MINI_ART = trolley(0, 0, 18, 14);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -416,12 +416,12 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       const spread = bp(0.4, 0.48, 0.64);
       sc = hand(sc, xC, dC, 1, xC - 13, 466, spread);
       sc = hand(sc, xC, dC, -1, xC + 11, 466, spread);
-      sc = mixStance(sc, postureHold(CROUCH, t), st(0.8, 0.92));
+      sc = mixStance(sc, postureStill(CROUCH, t), st(0.8, 0.92));
       lidT = st(0.76, 0.84);
     }
     if (A_RETELL[n]) {
       // still down by the jam: he picks up the lid, and holds it out to her back
-      sc = mixStance(sc, postureHold(CROUCH, t), 1);
+      sc = mixStance(sc, postureStill(CROUCH, t), 1);
       const out = st(0.26, 0.36);
       sc = hand(sc, xC, dC, 1, lerp(LID_REST.x, xC - 15, out), lerp(LID_REST.y - 1, 470, out), st(0.12, 0.2));
       lidT = 1 + st(0.21, 0.25);

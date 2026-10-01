@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b2 (the pour and putting the can
  * back), b8 (fetching the can across the garden) and b10 (the cupful and the door).
  */
-const LINES = [4.82, 3.75, 6.61, 6.31, 7.7, 0, 8.03, 4.85, 5.98, 0, 5.4, 0, 0];
+const LINES = [4.52, 3.59, 6.61, 5.42, 6.74, 0, 6.99, 4.66, 5.98, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // kneeling beside a thing.
@@ -139,7 +139,7 @@ const TH_TURN: Track[] = [
 ];
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const BUN_P = [TALK, LISTEN, TALK, LISTEN, NOD, NOD, NOD, TALK, LISTEN, NOD, LISTEN, NOD, LISTEN];
-const PL_P = [LISTEN, TALK, LISTEN, TALK, NOD, NOD, NOD, LISTEN, NOD, NOD, TALK, LISTEN, NOD];
+const PL_P = [LISTEN, TALK, LISTEN, TALK, NOD, NOD, NOD, NOD, NOD, NOD, TALK, LISTEN, NOD];
 const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, WAIT, LISTEN];
 
 // ── the garden ───────────────────────────────────────────────────────────────
@@ -198,11 +198,11 @@ const SEED = NATURAL.seedhead.base;
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

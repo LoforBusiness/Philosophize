@@ -75,7 +75,7 @@ export const BEATS: Phil1Beat[] = [
     act: 'name', th: true,
     speaker: 'tophat',
     text: 'Philosophy asks what we mean and what’s true, when looking harder won’t settle it.',
-    pace: 'slow',
+    pace: 'even',
     dur: 2.1,
   },
   {
@@ -105,7 +105,7 @@ export const BEATS: Phil1Beat[] = [
     act: 'weigh', th: true,
     speaker: 'tophat',
     text: 'Nobody shouted, and nobody took a vote. Each of them gave a reason, and a reason can be tested.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -121,7 +121,7 @@ export const BEATS: Phil1Beat[] = [
     act: 'live', th: true,
     speaker: 'tophat',
     text: 'You already live by answers like these: what’s fair, what’s real and what you owe. Philosophy is how you check them.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

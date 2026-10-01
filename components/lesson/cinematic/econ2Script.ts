@@ -68,14 +68,14 @@ export const BEATS: Econ2Beat[] = [
     act: 'arrive', th: true, rain: 1, tag: 0, rack: 3, van: 0,
     speaker: 'tophat',
     text: 'The umbrellas haven’t changed, but how many people want one has. Economists call that demand.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'demand', th: true, rain: 1, tag: 0, rack: 3, van: 0,
     speaker: 'tophat',
     text: 'Demand is how much people want to buy, at each price. When the rain starts, it jumps.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -98,7 +98,7 @@ export const BEATS: Econ2Beat[] = [
     act: 'supply', th: true, rain: 1, tag: 1, rack: 3, van: 0,
     speaker: 'tophat',
     text: 'That’s the other half: supply, how much sellers have to offer. Few umbrellas and many buyers make a high price.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

@@ -82,7 +82,7 @@ export const BEATS: Sci2Beat[] = [
     act: 'fair', th: true, start: 0, tape: 1, marks: 0,
     speaker: 'tophat',
     text: 'A fair test changes one thing, and keeps everything else the same. Then you know what made the difference.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -112,7 +112,7 @@ export const BEATS: Sci2Beat[] = [
     act: 'luck', th: true, start: 1, tape: 1, marks: 0,
     speaker: 'tophat',
     text: 'One throw can be luck, a gust or a wobble. Repeat it many times, and the luck starts to cancel out.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

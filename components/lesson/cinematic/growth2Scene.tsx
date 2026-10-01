@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b6 (the walk to the worktop and
  * the lid), b7 (the walk back) and b10 (to the bowl and back to his chair).
  */
-const LINES = [4.85, 4.8, 8.03, 7.66, 0, 5.6, 6.4, 4.2, 7.5, 0, 6.4, 0, 0];
+const LINES = [4.52, 4.7, 6.86, 6.28, 0, 5.6, 6.4, 4.2, 6.9, 0, 6.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along.
 const TALK = 167;
@@ -200,11 +200,11 @@ const PENCIL_ART = pencil(0, 0, 13, 3);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

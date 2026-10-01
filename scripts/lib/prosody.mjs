@@ -27,12 +27,20 @@
 // twice that, a question a touch longer, because a listener needs the beat to hear that
 // it was one. A pause the text does not ask for is shortened to a catch of breath.
 //
-// SPEED IS CHOSEN BY THE AUTHOR, PER SENTENCE, FROM WHAT IS SAID (`pace` on a beat).
-// A line that defines the lesson's idea, names it, gives a number or carries the
-// argument is said SLOWLY; an ordinary line EVENLY; a quick reaction, an interruption or
-// a run of everyday examples BRISKLY. Each has its own band of syllables a second of
-// speech (pauses taken out): relaxed conversation runs about 4 to 5. The render asks for
-// the speed and then measures each sentence, and retakes one outside its band.
+// SPEED IS CHOSEN BY THE AUTHOR, PER SENTENCE, FROM WHAT IS SAID (`pace` on a beat):
+// EVEN for an ordinary line, the idea included, and BRISK for a quick reaction, an
+// interruption or a run of everyday examples. Each has its own band of syllables a
+// second of speech (pauses taken out). The render asks for the speed and then measures
+// each sentence, and retakes one outside its band.
+//
+// THERE IS NO SLOW (2026-10-01). There was, for the line that names the idea, at about
+// 4.0 syllables a second, and the owner heard it: *"the narration slows down so much
+// where it sounds so bad … I do not want this slow sounding talking … I want more medium
+// pace or faster pace. And of course, I want punctuation to be met still."* A slowed
+// line on a synthetic voice does not sound weighty, it sounds dragged. An idea is
+// carried by the PAUSE at its marks, which shapePauses sets exactly, and never by
+// stretching the words. The bands moved up with it: even is the medium pace, brisk is
+// faster, and nothing is said under about 4.4.
 //
 // ZERO IMPORTS, like rig.ts and tone.ts: plain functions on 16-bit PCM, so the render,
 // the install, the manifest and the check all read a take the same way.
@@ -40,9 +48,8 @@
 
 /** Syllables a second of speech, pauses taken out. `factor` scales the voice's own rate for a first take. */
 export const PACES = {
-  slow: { aim: 4.0, min: 3.65, max: 4.4, factor: 0.9 },
-  even: { aim: 4.5, min: 4.1, max: 4.9, factor: 1 },
-  brisk: { aim: 4.95, min: 4.5, max: 5.3, factor: 1.08 },
+  even: { aim: 4.85, min: 4.5, max: 5.2, factor: 1 },
+  brisk: { aim: 5.3, min: 4.9, max: 5.7, factor: 1.08 },
 };
 export const PACE_NAMES = Object.keys(PACES);
 
@@ -166,7 +173,7 @@ export function sentencesOf(text, pace) {
 
 /** Why a beat's `pace` is not usable, or null. */
 export function paceFault(text, pace) {
-  if (pace === undefined) return 'has no `pace`: say whether the line is slow (it carries the idea), even, or brisk';
+  if (pace === undefined) return 'has no `pace`: say whether the line is even (an ordinary line, the idea included) or brisk (a reaction, an aside, a list)';
   const n = sentencesOf(text, 'even').length;
   if (Array.isArray(pace)) {
     if (pace.length !== n) return `has ${pace.length} paces for ${n} sentence(s): give one a sentence, or one for the line`;

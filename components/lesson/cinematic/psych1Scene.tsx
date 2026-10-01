@@ -17,7 +17,7 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteAny, emoteAnyLive } from './moves';
+import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
@@ -78,7 +78,7 @@ const K = K_FIG * 0.76;
  * the handling need it — b1 (5.36s line), b2 (3.84), b7 (4.00), b8 (6.65) and b10
  * (5.08) run a little past their lines.
  */
-const LINES = [4.79, 6, 5.2, 5.2, 7.04, 0, 8.27, 4.86, 9.2, 0, 5.4, 0, 0];
+const LINES = [4.79, 6, 5.2, 5.2, 6.06, 0, 7.41, 4.86, 9.2, 0, 4.74, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, arms folded, counting the points.
@@ -126,8 +126,8 @@ const LEGS: number[][][] = BEATS.map((_, n) => (
 ));
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const PL_P = [TALK, HIPS, TALK, LISTEN, LISTEN, FOLD, NOD, FOLD, LISTEN, LISTEN, LISTEN, LISTEN, LISTEN];
-const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, COUNT, LISTEN, NOD, LISTEN, LISTEN];
-const CP_P = [LISTEN, TALK, LISTEN, TALK, LISTEN, FOLD, NOD, LISTEN, LISTEN, LISTEN, TALK, LISTEN, LISTEN];
+const TH_P = [LISTEN, LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, EXPLAIN, LISTEN, COUNT, LISTEN, NOD, NOD, LISTEN];
+const CP_P = [LISTEN, TALK, LISTEN, TALK, LISTEN, FOLD, NOD, NOD, LISTEN, LISTEN, TALK, LISTEN, LISTEN];
 
 // ── the counter and what is on it ────────────────────────────────────────────
 const TOP = 477;                                   // the counter's top, at his hip
@@ -164,11 +164,11 @@ const BARGAIN_ART = tint(tentCard(0, 0, TENT_W, TENT_H), 'apple');
 
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteAny(code, t);
+  return emoteStill(code, t);
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteAnyLive(code, t, bt);
+  return emoteStillLive(code, t, bt);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';

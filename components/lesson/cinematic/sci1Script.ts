@@ -47,7 +47,7 @@ export const BEATS: Sci1Beat[] = [
     act: 'claim',
     speaker: 'plain',
     text: 'The heavy ball lands first, of course. Everybody knows that.',
-    pace: 'even',
+    pace: ['even', 'brisk'],
     dur: 1.8,
   },
   {
@@ -61,7 +61,7 @@ export const BEATS: Sci1Beat[] = [
     act: 'arrive', th: true,
     speaker: 'tophat',
     text: 'Before he lets go, make your own guess. Science starts with a guess you’re willing to test.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -91,14 +91,14 @@ export const BEATS: Sci1Beat[] = [
     act: 'settle', th: true, fell: true,
     speaker: 'tophat',
     text: 'Being certain didn’t save him, and one drop settled it. In science, the test beats the argument.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
     act: 'risk', th: true, fell: true,
     speaker: 'tophat',
     text: 'And a real test is one your guess could fail. That risk is what makes the answer worth trusting.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -114,7 +114,7 @@ export const BEATS: Sci1Beat[] = [
     act: 'build', th: true, fell: true,
     speaker: 'tophat',
     text: 'Ideas that pass their tests get built on. That’s technology: tested knowledge put to work, like the ladder he’s standing on.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {

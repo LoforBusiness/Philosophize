@@ -66,7 +66,7 @@ export const BEATS: Phil2Beat[] = [
     act: 'arrive', th: true, board: 0, cake: 1,
     speaker: 'tophat',
     text: 'The customer has just made an argument. An argument is a set of reasons, given to support a conclusion.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -89,7 +89,7 @@ export const BEATS: Phil2Beat[] = [
     act: 'follow', th: true, board: 1, cake: 1,
     speaker: 'tophat',
     text: 'A good argument needs two things. True reasons, and a conclusion that follows from them.',
-    pace: ['even', 'slow'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
@@ -103,7 +103,7 @@ export const BEATS: Phil2Beat[] = [
     act: 'person', th: true, board: 1, cake: 0.5,
     speaker: 'tophat',
     text: 'That’s an attack on the person, not on the reasons. What she eats for breakfast doesn’t change a word on that board.',
-    pace: ['slow', 'even'],
+    pace: ['even', 'even'],
     dur: 2.1,
   },
   {
