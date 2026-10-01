@@ -87,6 +87,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
 import { loadTs } from './lib/loadts.mjs';
+import { loadFont as LOAD_FONT } from './lib/ttfwidth.mjs';
 
 const REPO = process.cwd();
 const CIN = path.join(REPO, 'components', 'lesson', 'cinematic');
@@ -109,6 +110,93 @@ const VISITOR_FACE_BUDGET = Number(process.env.VISITOR_FACE_BUDGET ?? 0);
  *  something; under STILL is breath alone (group AL left nothing else). */
 const TALKING = 12;
 const STILL = 4;
+
+// ── AQ1 · A WORD FITS THE PLATE IT IS ON, AND THE PLATE SITS ON ITS OBJECT ────
+// The owner, 2026-10-01: *"the words in boxes, usually with questions that you tap on,
+// are not properly fixed to where they should be. Like the word apple, the E is below
+// the other letters because there's not enough room. Or it is not properly fixed to an
+// object."* growth2's APPLE plate was 38 wide, which left 29.6 for a word that sets at
+// 30.1 in Inter Bold 8.6 with its tracking — and `check:fits` never saw it, because the
+// plate's width came from a data table (`pw: 38`), not a style it could read. Here the
+// scene is RUN, so every width is the one actually drawn, data tables included, and each
+// label is set against its font's real advance widths on every beat:
+//   · BROKEN — one word wider than the room on its plate, so a letter wraps alone;
+//   · OVERFLOW — more lines than the plate is tall enough for;
+//   · OFF — a plate that reaches past the object (the sized box) it is mounted on.
+// Held to zero for every dialogue lesson; the retired ones are counted, not failed.
+/** Room a word must leave on its plate (see BROKEN below). */
+const LABEL_SPARE = 2;
+const LABEL_FONTS = new Map();
+function labelFace(family) {
+  if (LABEL_FONTS.has(family)) return LABEL_FONTS.get(family);
+  const m = /^([A-Za-z]+)_(\d{3}[A-Za-z]+)$/.exec(family || '');
+  let f = null;
+  if (m) {
+    const dir = m[1].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    const p = path.join(REPO, 'node_modules', '@expo-google-fonts', dir, m[2], `${family}.ttf`);
+    if (fs.existsSync(p)) { try { f = LOAD_FONT(p); } catch { f = null; } }
+  }
+  LABEL_FONTS.set(family, f);
+  return f;
+}
+const padX = (st) => {
+  const p = (k) => +(st[k] ?? st.paddingHorizontal ?? st.padding ?? 0) || 0;
+  const b = (k) => +(st[k] ?? st.borderWidth ?? 0) || 0;
+  return p('paddingLeft') + p('paddingRight') + b('borderLeftWidth') + b('borderRightWidth');
+};
+const padY = (st) => {
+  const p = (k) => +(st[k] ?? st.paddingVertical ?? st.padding ?? 0) || 0;
+  const b = (k) => +(st[k] ?? st.borderWidth ?? 0) || 0;
+  return p('paddingTop') + p('paddingBottom') + b('borderTopWidth') + b('borderBottomWidth');
+};
+const numW = (v) => (typeof v === 'number' && v > 0 ? v : 0);
+function labelsIn(elements, n, into) {
+  for (const ch of elements) {
+    const t = ch[ch.length - 1];
+    if (!t.leafText || !/Text/.test(t.type) || !t.text) continue;
+    if (readElement(ch).vis < 0.3) continue;
+    const ts = styleOf(t);
+    const font = labelFace(ts.fontFamily);
+    const px = +ts.fontSize || 0;
+    if (!font || !px) continue;
+    const ls = +ts.letterSpacing || 0;
+    const wordW = (w) => font.width(w, px) + ls * w.length;
+    // the plate: the nearest ancestor with a width of its own
+    let j = ch.length - 2;
+    let inner = padX(ts);
+    while (j >= 0 && !numW(styleOf(ch[j]).width)) { inner += padX(styleOf(ch[j])); j -= 1; }
+    if (j < 0) continue;
+    const ps = styleOf(ch[j]);
+    const room = numW(ps.width) - padX(ps) - inner;
+    if (room <= 0) continue;
+    const key = `${t.src}|${t.text}`;
+    if (into.has(key)) continue;
+    const words = t.text.split(/\s+/).filter(Boolean);
+    // SPARE: a bold face draws its ink past its last advance on Android, and growth2's APPLE
+    // (29.0 of 29.6) wrapped its E on a phone. A word needs this much air beside it.
+    const wide = words.find((w) => wordW(w) > room - LABEL_SPARE);
+    if (wide) { into.set(key, { n, kind: 'BROKEN', say: `"${wide}" sets at ${wordW(wide).toFixed(1)} on a plate with ${room.toFixed(1)} of room, so a letter wraps on its own (${t.src})` }); continue; }
+    // lines, greedy, as the platform wraps
+    let lines = 1, cur = 0;
+    for (const w of words) {
+      const add = cur ? wordW(` ${w}`) : wordW(w);
+      if (cur && cur + add > room - LABEL_SPARE) { lines += 1; cur = wordW(w); } else cur += add;
+    }
+    const lh = +ts.lineHeight || px * 1.2;
+    const H = numW(ps.height);
+    if (H && lines * lh > H - padY(ps) + 1) { into.set(key, { n, kind: 'OVERFLOW', say: `"${t.text}" needs ${lines} line(s) of ${lh} on a plate ${H} tall (${t.src})` }); continue; }
+    // the plate on its object: the next sized box up
+    let k = j - 1;
+    while (k >= 0 && !numW(styleOf(ch[k]).width)) k -= 1;
+    // only where the plate hangs straight off that box: under an unsized rider its left is
+    // measured from a point the scene moved, not from the object's edge
+    if (k >= 0 && k === j - 1 && typeof ps.left === 'number' && ps.position === 'absolute') {
+      const W = numW(styleOf(ch[k]).width);
+      const right = ps.left + numW(ps.width);
+      if (ps.left < -0.5 || right > W + 0.5) into.set(key, { n, kind: 'OFF', say: `the plate under "${t.text}" runs ${ps.left.toFixed(1)}…${right.toFixed(1)} on an object ${W} wide (${t.src})` });
+    }
+  }
+}
 const STRIP_BUDGET = 0;
 const DETACH_BUDGET = 0;
 // A CUT is a jump where the beat really did change — a prop that appears, vanishes
@@ -462,6 +550,10 @@ function walkTree(root, inst, file) {
       figK: props && typeof props.k === 'number' ? props.k : 1,
       text: textOf(props.children).join(' ').replace(/\s+/g, ' ').trim(),
       childless: !hasChild(props.children),
+      // its own words, as against words of something nested in it (AQ1)
+      leafText: (Array.isArray(props.children) ? props.children : [props.children])
+        .every((c) => c == null || c === false || typeof c === 'string' || typeof c === 'number')
+        && hasChild(props.children),
     };
     const next = [...chainSoFar, link];
     elements.push(next);
@@ -688,6 +780,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
   const snaps = [];
   const strips = new Map();
   const detached = new Map();
+  const labels = new Map();
   // A beat whose action is paced over a voiced line longer than REST (LINES in the
   // scene, AP16) has not settled at REST: it is read at the end of its own line instead,
   // which is where a reader who lets the voice finish sees it.
@@ -769,7 +862,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
       else if (f === steps) {
-        beatSnaps.last = snap(); detachedIn(elements, n, detached);
+        beatSnaps.last = snap(); detachedIn(elements, n, detached); labelsIn(elements, n, labels);
         beatSnaps.figs = figs.map((ch) => {
           const link = ch[ch.length - 1];
           let B = null;
@@ -811,7 +904,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
     beatSnaps.cont = snap();
     snaps.push(beatSnaps);
   }
-  return { snaps, strips: [...strips.values()], detached: [...detached.values()] };
+  return { snaps, strips: [...strips.values()], detached: [...detached.values()], labels: [...labels.values()] };
 }
 
 function checkLesson({ id, file }) {
@@ -824,7 +917,7 @@ function checkLesson({ id, file }) {
   const BEATS = require(scriptFile).BEATS;
   if (!Array.isArray(BEATS) || !BEATS.length) return { bespoke: true };
 
-  const { snaps, strips, detached } = play(Scene, BEATS, sceneFile);
+  const { snaps, strips, detached, labels } = play(Scene, BEATS, sceneFile);
 
   // REPLAY_FACING=<file> records, for every lesson with ONE figure on its stage,
   // which way he faces at rest on each beat (null where he is not drawn) — what
@@ -896,7 +989,7 @@ function checkLesson({ id, file }) {
   const errors = [...TOKENS.values()]
     .filter((s) => s.token.__animatedStyle >= tokenStart && s.error)
     .map((s) => String(s.error.message || s.error));
-  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3), figs: snaps.map((sn) => sn.figs || []), summary: BEATS.map((b) => !!b.summary) };
+  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3), figs: snaps.map((sn) => sn.figs || []), summary: BEATS.map((b) => !!b.summary), labels, dialogue: BEATS.some((b) => !!b.speaker) };
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1060,6 +1153,15 @@ ok('nobody stands frozen while another talks to him (N21)', frozenListeners.leng
 ok('the lead and the visitor face each other (N21)', visitorAway.length <= VISITOR_FACE_BUDGET,
   `${visitorAway.length}, budget ${VISITOR_FACE_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
+
+// AQ1 — every label fits its plate, and every plate sits on its object.
+{
+  const hard = [], soft = [];
+  for (const r of rows) for (const x of r.labels || []) (r.dialogue ? hard : soft).push(`${r.id} beat ${x.n}: ${x.kind} — ${x.say}`);
+  if (hard.length) { console.log('\n  LABELS — a word that does not fit its plate, or a plate off its object (AQ1):'); for (const h of hard) console.log(`    ${h}`); }
+  if (process.env.REPLAY_VERBOSE && soft.length) { console.log('\n  (retired lessons, counted not failed)'); for (const h of soft) console.log(`    ${h}`); }
+  ok('every word fits its plate, and every plate sits on its object (AQ1)', hard.length === 0, `${hard.length} in the dialogue lessons · ${soft.length} in the retired ones, counted`);
+}
 console.log(`\n  not counted: ${pulses.length} authored pulses, ${advisory.length} changes out of a graded beat${VERBOSE ? '' : ' (REPLAY_VERBOSE=1 lists them)'}.`);
 
 console.log(fail ? `\n${fail} rule(s) broken.\n` : '\nnothing moves that did not change, and every plate holds its words.\n');

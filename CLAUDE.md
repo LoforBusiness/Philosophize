@@ -8403,6 +8403,16 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   at each pose's rest from the generated `ARM_REST` table; an arm moves only when the
   scene moves it (AP18, held by `check:dialogue`). The cast's default rates were raised
   so a first take lands near the new speeds.
+- **The speed is personal growth 2's, and a lesson is voiced once (AP17, 2026-10-01).**
+  The owner liked that lesson's speed exactly, so it is `PACE_REFERENCE` in prosody.mjs:
+  even 4.95–5.85 aiming 5.35, brisk 5.4–6.4 aiming 5.85, and `check:narration` re-measures
+  it and fails if a band stops describing it. To spend fewer characters, `render-narration`
+  refuses to start until the lesson's prose checks pass, aims each voice's first take from
+  its measured speed per unit of rate, and tries a line at most three times.
+- **A word sits in its plate (AQ1, 2026-10-01).** growth2's APPLE wrapped its E because
+  its plate's width came from a data table no static check could read. `check:replay`
+  runs every scene and measures every label against its font on every beat: two units of
+  air beside each word, no more lines than the plate holds, and no plate off its object.
 - **Every road has two lessons** (2026-09-30), the second appended to its foundations
   unit: What Makes an Argument Good? (a café table and a slice of carrot cake), Why
   Memory Gets Things Wrong (two trolleys and a jar of jam), How Habits Work (a kitchen

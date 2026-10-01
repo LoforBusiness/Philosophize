@@ -662,15 +662,15 @@ function Pad({ S }: { S: SharedValue<any> }) {
 type Q = { id: string; label: string; pw: number; left: number; top: number; w: number; h: number; correct: boolean };
 /** Q1: the clock, the jar and his chair. The clock striking three is the cue. */
 const CUE_Q: Q[] = [
-  { id: 'clock', label: 'CLOCK', pw: 40, left: CLOCK.x - 22, top: 354, w: 44, h: 48, correct: true },
-  { id: 'jar', label: 'JAR', pw: 26, left: JAR.x - 18, top: 441, w: 32, h: 57, correct: false },
+  { id: 'clock', label: 'CLOCK', pw: 42, left: CLOCK.x - 22, top: 354, w: 44, h: 48, correct: true },
+  { id: 'jar', label: 'JAR', pw: 29, left: JAR.x - 18, top: 441, w: 32, h: 57, correct: false },
   { id: 'chair', label: 'CHAIR', pw: 40, left: CAP_CHAIR - 21, top: 462, w: 42, h: 51, correct: false },
 ];
 /** Q2: the apple, the chocolate bar and the jar. The apple changes only the routine. */
 const REACH_Q: Q[] = [
-  { id: 'apple', label: 'APPLE', pw: 38, left: BOWL.x + APPLE_IN.x - 19, top: 446, w: 38, h: 52, correct: true },
-  { id: 'chocolate', label: 'CHOCOLATE', pw: 62, left: CHOC.x - 31, top: 459, w: 62, h: 39, correct: false },
-  { id: 'jar', label: 'JAR', pw: 26, left: JAR.x - 18, top: 441, w: 32, h: 57, correct: false },
+  { id: 'apple', label: 'APPLE', pw: 40, left: BOWL.x + APPLE_IN.x - 20, top: 446, w: 40, h: 52, correct: true },
+  { id: 'chocolate', label: 'CHOCOLATE', pw: 67, left: CHOC.x - 33.5, top: 459, w: 67, h: 39, correct: false },
+  { id: 'jar', label: 'JAR', pw: 29, left: JAR.x - 18, top: 441, w: 32, h: 57, correct: false },
 ];
 function CueTargets(p: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   return <StageTargets {...p} qs={CUE_Q} k="q1" />;
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     borderColor: INK, paddingHorizontal: 3,
   },
   nameText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
 });
 

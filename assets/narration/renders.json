@@ -1212,6 +1212,51 @@
     "wav": "8aa02d7eab92f7a0b221fd78b705afeeb9cdeb5935ac95488ee80a88fbacd4c2",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "business-foundations-3/beat-00": {
+    "text": "Fifty pence a candle! I’d hate for anyone to go without.",
+    "wav": "52b06d05733efbf079e03a7b73f68f4dc938d5f1059237a12de3c9c073845f0b",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-3/beat-01": {
+    "text": "Fifty pence? I’d happily pay five pounds for a candle that smells like Christmas!",
+    "wav": "6646e616792906a2d4420268369764d963a0d75dc682fd3a2ae286bc7ed1e29c",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-foundations-3/beat-02": {
+    "text": "Every candle costs him wax, a wick, a jar and an hour of work. A price has to cover all of that.",
+    "wav": "fe6bc67f9204c0a2c3721035c1813c09f8878eedd3fbebedebb25f9c6529f99c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-3/beat-03": {
+    "text": "The wax and the jar alone cost two pounds. At fifty pence, every candle he sells makes him poorer.",
+    "wav": "632da34a179a352f60b0909c1a5af5a3e665f8b7fcaac64bb7e198f836a0d9c8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-3/beat-05": {
+    "text": "Oh dear. I’d only ever thought about the people buying them.",
+    "wav": "f9f7c5b6baf67bfc74420198958de3702a60f71d3b3c74fc66f2e5a220f597e2",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-3/beat-06": {
+    "text": "Think about them too. Value is what a candle is worth to the customer, and she just told you.",
+    "wav": "0a5d5d3e9aa42b2b7a0230ced3cf29afa73278f24bbb34a2169ff293a0ec0f5e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-3/beat-07": {
+    "text": "Oh, and six pounds if it comes with a ribbon!",
+    "wav": "a05d384fb0cfcd036632b1eeabdf174c7dd3d7426d93e88eb428a115fba012f7",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-foundations-3/beat-08": {
+    "text": "So the price sits between the two: above what it costs to make, and no higher than people will pay.",
+    "wav": "7bf7ca08bf6d6ca30ba3385442033b7b2bdd5cd21156c3a5645af462481a0174",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-3/beat-10": {
+    "text": "Four pounds, then. And the ribbon’s on the house, for my first customer.",
+    "wav": "2ccf24d3cada13ae76728eb38e234405b4a05dcf8c4e21524e8982a2f6ee75b8",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "economics-foundations-1/beat-00": {
     "text": "One ten-pound note. And I want everything on this table.",
     "wav": "0721e98b99037db105b9710e80be5a2f03c1c114e6bbd7ac1255298d322e785f",
@@ -1286,6 +1331,51 @@
     "text": "Six pounds, then, and everybody stays dry. Fair enough, I say.",
     "wav": "7d1bb607e221779b421aa505515cc68fa5b30d7a6fd4ced497d09ff73b704f33",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-3/beat-00": {
+    "text": "The concert or the football. Both on Saturday afternoon, naturally.",
+    "wav": "61ffef3b95f83883f287a660a19f7ebb2566481b8ef6fa93f64dc8a6b1605977",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-3/beat-01": {
+    "text": "The football’s free this week, mate. You can’t beat free!",
+    "wav": "31a9d4b41f8384b62fa58882c24aef54586a357e8a438b78872e0fc8d70180b8",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-3/beat-02": {
+    "text": "Free costs no money, but it still costs something. Whichever one you choose, you give up the other.",
+    "wav": "d4bc240a93f27533c973ab39af77b6f1974a8cdb2807a799c93d64783a308152",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-3/beat-03": {
+    "text": "Economists call what you give up the opportunity cost. It’s the next best thing you could have done instead.",
+    "wav": "25804dd5d3cdf603f12aa2fba5ca392f0ef379e70f2ad16680e384fc1bb106d9",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-3/beat-05": {
+    "text": "So the free match would cost me a concert. How generous of it.",
+    "wav": "fbb553d16711c206a74d36f2c36435fd4f4af866c1ca067f21e6c2cfca80b42f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-3/beat-06": {
+    "text": "Yes. Your time is scarce too, so even a free afternoon has a price: everything else you could do with it.",
+    "wav": "f33cde9471e4d1e51a27a1ea4fadfd7ce91d7cc900ecec07bf437ac8fe660ab1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-3/beat-07": {
+    "text": "The concert tickets are twenty pounds, if that helps at all.",
+    "wav": "6379816844e622a2b95056b0d877aa2ea17233675f35efd36b9b9de7dc8490c9",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-3/beat-08": {
+    "text": "Then weigh each choice against what it makes you give up. Pick the one that’s worth more to you than its cost.",
+    "wav": "3e7ae6a2a09f75e93363e4ea1f1a8269f90bf20088454776798eb75179a959a5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-3/beat-10": {
+    "text": "One concert ticket, please. I’ll try not to enjoy it too much.",
+    "wav": "3e251f654586dd831f273edd10df4a25b4127caaa31a32832fca1a1eb1f64bbb",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "epistemology-knowledge-1/beat-00": {
     "text": "You claim to know many things. But what separates knowing something from merely believing it?",
@@ -3703,6 +3793,51 @@
     "wav": "0e99878cae977a3e2818f82e70392922caf131ad49ea66a875dbc7a2e056932a",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "history-foundations-3/beat-00": {
+    "text": "I only drove over it, honest. Same as every market day for twenty years!",
+    "wav": "7eae6728f8c041af7591744439c903ab798b4a9353546bd1dc3fc2c481b6b9e3",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-3/beat-01": {
+    "text": "And the bridge picked today to give up. How thoughtful of it.",
+    "wav": "35359eaeac5df48e3da78c551cb2244b3de5d44d3a33477abc9034cfcdaa5551",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-3/beat-02": {
+    "text": "Historians ask why things happened, and the answer is nearly always more than one cause.",
+    "wav": "42936504556c31a45248a66bf5e4bc968e78f8217ded99d766c65df597008642",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-3/beat-03": {
+    "text": "This plank has been rotting for years. That’s a long-term cause, building up before anyone noticed.",
+    "wav": "970c487fba7b431c7cee2fe904787f84e11baf3b2de2262004ec9b4d351f35ef",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-3/beat-05": {
+    "text": "So it wasn’t my cart at all, then? Oh, that’s a relief.",
+    "wav": "54b255eee23bd280f6fff31b5609318c71d43232a44c92ecbbf5762f3bd6a109",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-3/beat-06": {
+    "text": "Your cart was the trigger: the event on the day that set it off. Without the rot, the bridge would have held.",
+    "wav": "fc391c15f6ffdc5fb17e745e5c3fdb1facf29cefb7f57ae9162a9aed436535d5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-3/beat-07": {
+    "text": "And without the cart, it would have rotted for another year. Lovely.",
+    "wav": "2ab5aebd40ae162bf13019c9605444f54dd62f3fec9f633a4176b87a5fb1739c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-3/beat-08": {
+    "text": "That’s why historians weigh their causes. They ask which one mattered most, and which one only set things off.",
+    "wav": "7704ec18f7ce0e0e61ee8c76c28fac2aec51002f7b3dc17dfaf7248abbf2272b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-3/beat-10": {
+    "text": "Then I’ll mend the plank myself, and go round by the ford until it’s done.",
+    "wav": "93425a2de45d2ab8b11b6513c31bd7750a5c64d665505721c3785107640d1ea8",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "logic-arguments-1/beat-00": {
     "text": "Consider two people who disagree and who treat their disagreement as a fight.",
     "wav": "c6567b9debefaf11ddc60c82cc7b7480346cd5f353fa095024b436ac330f2d2c"
@@ -6085,6 +6220,51 @@
     "wav": "bddf37dee1cdcc87b442fde099081df5a33b493ed37fad616b3c30c6f0233067",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "personal-growth-foundations-3/beat-00": {
+    "text": "This year, I’m getting fit! I’ll start properly once the weather’s warmer.",
+    "wav": "a2278af24ae878a9c96d5d9842ad8a92028f7264a2053c33f708ab5ed0e76cd5",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-3/beat-01": {
+    "text": "Same goal as last year, I believe. And the year before that.",
+    "wav": "603fd957dbb0b9b502cc32a4d4d89c8f8a606346f95f77abc970dfef66e88c64",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-3/beat-02": {
+    "text": "Getting fit is a wish, not a goal. A goal is specific, so you can tell when you’ve done it.",
+    "wav": "d49fba2595ac1934959e27aca87db6b2dd0bb56f0707b69cc10ec2f38c875246",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-3/beat-03": {
+    "text": "Run once round this track without stopping. That one you can check, today, with a stopwatch.",
+    "wav": "4b04d8bce958e98e1f90c8b2a705803712e3f1b8487be69cfc2ba44884273119",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-3/beat-05": {
+    "text": "Only one lap? That sounds almost too easy, to be honest.",
+    "wav": "8e841b6c174d77ed8734f3150f1794cd59c0413f3ec925c0527817206a2d86d9",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-3/beat-06": {
+    "text": "Good. Make the first step small enough to start today, then make it a little bigger each week.",
+    "wav": "00d5d8442ecbc83ade6a1f6fa81dec27b1379bfc1f03c2581284f338738acdf4",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-3/beat-07": {
+    "text": "And when is this lap happening, then? I only ask.",
+    "wav": "ebb63f214c07742eccacf461786319e10c1a86f6919fe06057750d0b24511d92",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-3/beat-08": {
+    "text": "That’s the last part. Write down when and where, and put it somewhere you’ll see it every day.",
+    "wav": "1668be8df70d7072b3da161e603abf845b1a75b6f7c62a84343c332633f02205",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-3/beat-10": {
+    "text": "Tuesday, half past seven, one lap. Oh, I’ll even bring the proper trainers!",
+    "wav": "0688bc4be8385ba0cba34283e85009738bed29468ed7b10dc018f5a3d1c3bc84",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
     "wav": "991e165d2f84f300097098d8a4e1f2ffb2b5fe6275bfd91251f7b1f325c6c233",
@@ -6168,6 +6348,51 @@
   "philosophy-foundations-2/beat-09": {
     "text": "Oh! So my reasons were fine, and my conclusion wasn’t. I’m still finishing the cake.",
     "wav": "4e57ac37cc478b9ae4a2559885d6519a6f71224164a55adfbf70560f5bac638f",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-3/beat-00": {
+    "text": "Look what fell out of my library book! Twenty pounds, and no name on it anywhere.",
+    "wav": "d54f76f008fd60d99bb459274cff59e55b43fb000db1d970bb39d81621c57dd4",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-3/beat-01": {
+    "text": "Oh, the poor soul who lost that. I’ll pin a notice up, just in case.",
+    "wav": "46e9a2e9afcbf2c402e9f3bf7cbfc5f0d5a3e20afe8795af343f1481a7f9ae1a",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "philosophy-foundations-3/beat-02": {
+    "text": "Keep it, or hand it in? Philosophers have two main ways of deciding what’s right.",
+    "wav": "ba0b4a37d8e9c2df391d94ac67b5511624c541c046051fa59693d1e449b27f47",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-3/beat-03": {
+    "text": "The first looks at consequences. You ask who your choice will help, and who it will harm.",
+    "wav": "b58207f0f7c324d27d0695c9b9c1d1a9bd2e1207b9bf7e8a6f4d9d84965ca54d",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-3/beat-05": {
+    "text": "But if nobody comes back for it, then everybody’s happy. Especially me!",
+    "wav": "f7978452a966076466a6f2d0271b61f9a8b6b09d01a344c5296acae9dc5768ca",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-3/beat-06": {
+    "text": "The second way looks at rules. Some things are wrong whatever happens next, and taking what isn’t yours is one of them.",
+    "wav": "3455740a69a66ed0ece7693eb39023faf3463274c11edc797c590ff5ba302e2c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-3/beat-07": {
+    "text": "The rule’s on the wall, love. Anything found comes straight to the front desk.",
+    "wav": "f59ffaf6ef0aefab178eea457f9d81126346c8219bcc9471c5326c638e339b9c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "philosophy-foundations-3/beat-08": {
+    "text": "Here, both ways agree. Each one asks you for a reason, and a good reason still holds when you say it out loud.",
+    "wav": "9652533271507381fb390dde975c182198e21a9c1555489c6a8fc017e5146e34",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-3/beat-10": {
+    "text": "Fine, the note goes in the box. Goodbye, twenty pounds, you were lovely!",
+    "wav": "af440233efa86b117981427d62389984efb63e6132afd88ed8d449e4bfb5679b",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "political-political-1/beat-00": {
@@ -7376,6 +7601,51 @@
     "wav": "ae9f1a8e13d5dc3e546f852f36c4904af460a79f2db0092ece39f56bde063849",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "psychology-foundations-3/beat-00": {
+    "text": "Would you look at that. A royal cup, fourteen hundred years old, and every chip so delicate.",
+    "wav": "b437025c019a00c9068d5aed3867388bd1e864cdf8468e59d02fa6fa86f08305",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-3/beat-01": {
+    "text": "Remarkable. That’s my tea mug, left on the plinth ten minutes ago.",
+    "wav": "276be84e1f8042b44dd340a60cdad2fde4fb57424054efcea1f03b1f1203767f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-3/beat-02": {
+    "text": "Your eyes take in the shapes, but your brain decides what the shapes mean. What you expect changes what you see.",
+    "wav": "7ce76e8a0627055587f1983919eb520d68a41c55a32f58ffab3963694d7b4ad8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-3/beat-03": {
+    "text": "A label, a price or a hint sets that expectation before you even look. This label said royal.",
+    "wav": "0e7b911607aff045b72cc4f17b0bdaa0d519d80982d0e558b61dcdedc5cd3fd6",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-3/beat-05": {
+    "text": "Well, now it just looks like a mug with a chip in it. Funny, that.",
+    "wav": "f3c422ac9db6d2e9c4d3e52423a77084bda64d9fb3b5948bebc18e0e41a87902",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-3/beat-06": {
+    "text": "To see what’s there, look again without the hint. Ask what you’d see if nobody had told you anything.",
+    "wav": "5474bbca673c47de669538a0e2a7876392e8bfa94f44bad92a865b6b4c50c911",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-3/beat-07": {
+    "text": "Or read the sticker underneath. It says dishwasher safe.",
+    "wav": "dc2be354d9cd5cf33647989f928b02dffa3b6da4ccc50fe6a38f3e278deddd1a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-3/beat-08": {
+    "text": "That’s the check. Trust the evidence from the thing itself, not what you were told about it.",
+    "wav": "5fa43c26a677946bea618fe1e732a3559501be26f3281da7a9ac635a53bff585",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-3/beat-10": {
+    "text": "A dishwasher-safe treasure, then. I’ll still give it a nice look on my way out.",
+    "wav": "3b25296aa3f84e6a6f5e754a1fcba15d417f4a4e8daa9364c6d54ed568d53a26",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
     "wav": "b5e112d0972cf98c28dbbc68b2777086a746443518bb93655d937c72d6c270a6",
@@ -7460,5 +7730,50 @@
     "text": "Ten throws each, and we’ll chalk up every one. Lovely day for it!",
     "wav": "776e840d5c5e8764ea248e84dfa31bf4e5364cc354bce52b063de9535f06b641",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-3/beat-00": {
+    "text": "Look at the chart! When ice cream sales go up, so does sunburn, so ice cream must burn you!",
+    "wav": "d9037feb205863e7307a131ae5a6f71f2feb964e9fb7507e1222f9da6a9ad266",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-3/beat-01": {
+    "text": "Yes, I’ve always found my cornet terribly hot.",
+    "wav": "72e234070ea8c104fba541bf5eb762565759389424d589843f710500d38d52e4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-foundations-3/beat-02": {
+    "text": "The two lines do rise together. That’s called a correlation, and it doesn’t mean one causes the other.",
+    "wav": "1aa21c3a0d60912f5cac0712cd19710fc7eb384ec0c669ef8e47e387c52986dd",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-3/beat-03": {
+    "text": "Often a hidden cause pushes both of them up. Here, it’s the thing everybody came to the seaside for.",
+    "wav": "7abee714324c6473de4230edcdcb6f456714baea3230a344332a623e4bc60498",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-3/beat-05": {
+    "text": "Oh, sunny days! More people out buying ice cream, and more people out in the sun.",
+    "wav": "fd56c7aa0070dbeda8283cccb7ec2642f9f27e66b93d7648602f6148f621d5bc",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-3/beat-06": {
+    "text": "To show that one thing causes another, change only that thing. Then watch whether the other one follows.",
+    "wav": "f7daebc3d1b44729e1649ccdc8bcb87b4a7baec10bba8561a4eb66f9f209adec",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-3/beat-07": {
+    "text": "So a whole afternoon of ice cream in the shade. I’ll volunteer.",
+    "wav": "381f8caa9a3ec2b70c17a9f726b9fec4b18412579c4238168c9dbb81fc8c5878",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-foundations-3/beat-08": {
+    "text": "Eat ice cream in the shade, and the sunburn won’t come. Sit out in the sun without any, and it will.",
+    "wav": "0041b5c3340a657e2a9068a06b1750786df0267dcff1dc3a45bf424db1c02f05",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-3/beat-10": {
+    "text": "Sun cream, then, and an ice cream anyway. Science is delicious!",
+    "wav": "88e1e659ddd5d980e67038f8cd3f7d68800b94bd92514cd4b4fd2a6c0ce3e76d",
+    "voice": "en-US-Chirp3-HD-Kore"
   }
 }

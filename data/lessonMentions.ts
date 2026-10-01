@@ -18,9 +18,12 @@ export const MENTION_NAMED = 1;
 
 export const LESSON_MENTIONS: Record<string, readonly Mention[]> = {
   'personal-growth-foundations-2': [['william-james', 3]],
+  'personal-growth-foundations-3': [['seneca', 3]],
   'philosophy-foundations-1': [['socrates', 3], ['plato', 1]],
   'philosophy-foundations-2': [['john-stuart-mill', 3]],
+  'philosophy-foundations-3': [['jeremy-bentham', 3]],
   'psychology-foundations-1': [['william-james', 3]],
+  'psychology-foundations-3': [['william-james', 3]],
 };
 
 /** The philosophers a finished lesson should credit. Empty for a lesson naming none. */

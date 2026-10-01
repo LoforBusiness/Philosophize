@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   clear: { flexGrow: 1 },
   yearCell: { flexGrow: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 1 },
   year: {
-    width: 24, height: 12, alignItems: 'center', justifyContent: 'center',
+    width: 26, height: 12, alignItems: 'center', justifyContent: 'center',
     backgroundColor: PLATE_FACE, borderRadius: 2, borderWidth: 1.1, borderColor: INK,
   },
   yearText: {

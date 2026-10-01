@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   tagFace: { position: 'absolute', left: FACE.left, top: FACE.top, width: FACE.w, height: FACE.h },
   price: {
     position: 'absolute', left: 0, right: 0, top: (FACE.h - 13) / 2, textAlign: 'center',
-    fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: PAPER_LIT, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 13, color: PAPER_LIT, includeFontPadding: false,
   },
   clear: { flexGrow: 1 },
   choice: {

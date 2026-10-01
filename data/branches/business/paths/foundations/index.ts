@@ -1,6 +1,7 @@
 import type { Path } from '@/data/types';
 import first from './lessons/what-is-a-business';
 import second from './lessons/who-is-your-customer';
+import third from './lessons/how-do-you-set-a-price';
 
 const units: Path[] = [
   {
@@ -8,7 +9,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "What a business is, what profit is, and what a leader does.",
-    lessons: [first, second],
+    lessons: [first, second, third],
   },
 ];
 

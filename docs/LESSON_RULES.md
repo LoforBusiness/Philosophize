@@ -11184,9 +11184,16 @@ audio, where they are exact (`scripts/lib/prosody.mjs`):
    voice does not sound weighty; it drags. The idea is carried by the pauses at its marks
    (point 3), which are exact, never by stretching the words.
 
-   Each pace has a band of syllables a second of speech, pauses taken out: even 4.95–5.65,
-   brisk 5.4–6.2. (They were 4.5–5.2 and 4.9–5.7 for one day; the owner heard that as still
-   too slow — *"I want it to be faster"* — and the bands rose again.) Everything said at one pace in a line must sit in its band together,
+   **THE SPEED IS PERSONAL GROWTH 2's** (`PACE_REFERENCE`). The owner, 2026-10-01: *"the
+   speed of that entire lesson of all the narration voices all seems really nice … so that it
+   doesn't get too fast, but especially so it doesn't get too slow."* Measured, its ordinary
+   lines run 5.05–5.56 syllables a second (median 5.28) and its quick ones 5.84–6.04. The
+   bands are drawn round it: even 4.95–5.85 aiming 5.35, brisk 5.4–6.4 aiming 5.85. The
+   FLOOR is the one that matters and it never moves down; the ceiling leaves room for the
+   voice's own scatter, which is what lets a line be voiced in one go. `check:narration`
+   re-measures the reference and fails if a band stops describing it. (The bands were
+   4.5–5.2 and then 4.95–5.65 on the way here; both were heard as too slow.)
+   Everything said at one pace in a line must sit in its band together,
    and any one sentence of eight syllables or more within 0.35 of it — people drift a
    little sentence to sentence, and a voice that never did is the flat read this exists to
    prevent. `check:dialogue` holds that every voiced beat has a pace, that none is slow,
@@ -11273,3 +11280,52 @@ it as the drawing being loose, not as a person.
    head (a nod along, N21), never in his hands.
 4. `check:dialogue` fails a dialogue scene that calls a drifting pose function, a hand
    target on the clock with no `AP18:` reason, and a stale `ARM_REST` table.
+
+**VOICE A LESSON ONCE.** The owner: *"I don't want to have to keep going back and back to
+keep reiterating the narration … if creating the narration voices can be done in one go by
+following the rules … that will be very good."* Re-voicing the fourteen dialogue lessons
+cost 64,000 characters, and two things spent most of it: half the first takes missed a
+band narrower than the voice's own scatter, and earlier rounds re-voiced lines whose words
+changed AFTER they were voiced. So `render-narration`:
+1. **Refuses to render until the words are final**: check:dialogue, check:splits,
+   check:words, check:ear, check:voice and check:plainwords must pass first. Fix a word for
+   free before the voice is asked, never after.
+2. **Aims each voice's first take** from what it measured per unit of rate
+   (`SPEED_PER_RATE`), so most lines land on the first request.
+3. **Tries a line at most three times** and keeps the best.
+A line that still misses is a pace question before it is a retake: a list or a quick aside
+is `brisk`, and a line that rushes its last sentence at every rate gives that sentence its
+own pace, so each comes from its own take.
+
+## Group AQ · A word sits in its plate, and its plate on its thing
+
+### AQ1 · A word fits the plate it is on, and the plate sits on its object
+
+> *"the words in boxes, usually with questions that you tap on, are not properly fixed to
+> where they should be. Like the word apple, the E is below the other letters because
+> there's not enough room. Or it is not properly fixed to an object. If words are on an
+> object, then they need to be properly placed on that object … so the fitting always
+> looks nice and the animation when you answer is really good looking and not cheap."*
+> (2026-10-01)
+
+personal-growth-foundations-2's APPLE sat on a plate 38 wide: 29.6 of room after its border
+and padding, for a word that sets at 29.7 in Inter Bold 8.6 with its tracking, and a bold
+face's ink runs past its last advance on Android. So the E wrapped under the word. Nothing
+caught it, because the plate's width came from a data table (`pw: 38`) and `check:fits`
+reads only the widths written in styles.
+
+1. **EVERY WORD LEAVES TWO UNITS OF AIR ON ITS PLATE** (`LABEL_SPARE`), measured against
+   its font's real advance widths with its letter-spacing: a word that cannot fit on one
+   line of its plate is BROKEN.
+2. **A LABEL TAKES NO MORE LINES THAN ITS PLATE IS TALL FOR** (OVERFLOW).
+3. **A PLATE MOUNTED ON AN OBJECT STAYS INSIDE IT** (OFF): a name plate hanging off the
+   edge of the thing it names is not on that thing.
+4. **WIDEN THE PLATE, NOT THE TYPE**: give the plate (and its target, if the plate is its
+   width) the room; loosen tracking a little if that is not enough; shrink the type last,
+   and never under the stage's legibility floor.
+
+`check:replay` holds it, because it RUNS every scene: every width is the one actually drawn,
+data tables included, and every label is measured on every beat. Zero in every dialogue
+lesson; the retired lessons are counted, not failed. The first run found nine: CLOCK, JAR,
+APPLE and CHOCOLATE (growth2), MACARONS (biz2), £12 (econ2), POINTY NOSE (sci2) and the years
+1985 and 2010 (hist2).

@@ -39,7 +39,12 @@ const { CAST, SPEAKERS, NARRATOR_VOICE } = await import(
 
 const TABLES = ['lessonThoughts', 'lessonMarks', 'lessonWander', 'lessonChair', 'lessonVisitor', 'lessonWardrobe'];
 const errs = [];
-const fail = (rule, id, say) => errs.push(`${rule}  ${id}: ${say}`);
+// DIALOGUE_TEXT_ONLY=1 holds only what the WORDS decide. render-narration runs it before
+// voicing a lesson, whose scene is built afterwards (it is paced to the voiced lines), so
+// the rules about figures on the stage (AP2), LINES (AP16) and arms (AP18) wait for it.
+const TEXT_ONLY = !!process.env.DIALOGUE_TEXT_ONLY;
+const SCENE_RULES = new Set(['AP2', 'AP16', 'AP18']);
+const fail = (rule, id, say) => { if (!(TEXT_ONLY && SCENE_RULES.has(rule))) errs.push(`${rule}  ${id}: ${say}`); };
 
 function beatsOf(file) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {

@@ -1,6 +1,7 @@
 import type { Path } from '@/data/types';
 import first from './lessons/how-do-people-change';
 import second from './lessons/how-habits-work';
+import third from './lessons/how-to-set-a-goal-that-works';
 
 const units: Path[] = [
   {
@@ -8,7 +9,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "How people actually change: a little, and often.",
-    lessons: [first, second],
+    lessons: [first, second, third],
   },
 ];
 

@@ -24,12 +24,19 @@ export const LESSON_ADDED: Record<string, string> = {
   'science-foundations-1': '2026-09-30',
   'history-foundations-1': '2026-09-30',
   'philosophy-foundations-2': '2026-09-30',
+  'philosophy-foundations-3': '2026-10-01',
   'psychology-foundations-2': '2026-09-30',
+  'psychology-foundations-3': '2026-10-01',
   'personal-growth-foundations-2': '2026-09-30',
+  'personal-growth-foundations-3': '2026-10-01',
   'business-foundations-2': '2026-09-30',
+  'business-foundations-3': '2026-10-01',
   'economics-foundations-2': '2026-09-30',
+  'economics-foundations-3': '2026-10-01',
   'science-foundations-2': '2026-09-30',
+  'science-foundations-3': '2026-10-01',
   'history-foundations-2': '2026-09-30',
+  'history-foundations-3': '2026-10-01',
 };
 
 /** How long a lesson wears NEW, in days from the day it was added. */

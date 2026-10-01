@@ -819,7 +819,7 @@ const PAPER = { x: SHOW.x - HOLD_OFF + 2, y: SHOW.y - 4 };
 type Tag = { id: string; label: string; left: number; top: number; w: number; h: number; pl: number; pw: number; pt: number; correct: boolean };
 const UNFAIR_Q: Tag[] = [
   { id: 'steps', label: 'THE STEPS', left: RISER_L[2] + 4, top: 446, w: 104, h: 53, pl: 22, pw: 60, pt: RISER[1] + 0.5 - 446, correct: true },
-  { id: 'nose', label: 'POINTY NOSE', left: 250, top: 440, w: 78, h: 17, pl: 3, pw: 64, pt: 2.5, correct: false },
+  { id: 'nose', label: 'POINTY NOSE', left: 250, top: 440, w: 78, h: 17, pl: 3, pw: 70, pt: 2.5, correct: false },
   { id: 'paper', label: 'PINK PAPER', left: 282, top: 404, w: 72, h: 17, pl: 3, pw: 58, pt: 2.5, correct: false },
 ];
 function UnfairTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {

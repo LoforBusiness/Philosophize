@@ -196,6 +196,67 @@ export const NATURAL = {
   potato:     { base: '#C9A266', shade: '#A07D47', label: '#1A1A1A', what: 'potatoes in their skins' },
   roofBoard:  { base: '#5C3F27', shade: '#43301E', label: '#FAFAF7', what: 'an attic\'s roof boards, old and dark' },
   whitewash:  { base: '#E3E2DC', shade: '#C2C0B6', label: '#1A1A1A', what: 'an attic\'s whitewashed board wall' },
+  // phil3 colours:
+  oak:        { base: '#B98B57', shade: '#94693F', label: '#1A1A1A', what: 'a library desk in light oak' },
+  twenty:     { base: '#7B5C9F', shade: '#5D4480', label: '#FAFAF7', what: 'a twenty-pound note\'s purple' },
+  stampGrip:  { base: '#E7DDC5', shade: '#C5B998', label: '#1A1A1A', what: 'a date stamp\'s cream plastic handle' },
+  stampBand:  { base: '#6E9A4C', shade: '#527538', label: '#1A1A1A', what: 'a date stamp\'s green cap and rubber bands' },
+  novel:      { base: '#2E7686', shade: '#225966', label: '#FAFAF7', what: 'a paperback novel\'s teal cover' },
+  // psych3 colours:
+  mugBrown:   { base: '#7E4524', shade: '#5C311A', label: '#FAFAF7', what: 'a brown-glazed stoneware mug, its glaze' },
+  clay:       { base: '#E2C99B', shade: '#C4A976', label: '#1A1A1A', what: 'bare stoneware — the pale body at a chip or a foot ring' },
+  plinthWhite: { base: '#F1F0EB', shade: '#CFCDC4', label: '#1A1A1A', what: 'a museum plinth, a window frame, painted white' },
+  // growth3 colours:
+  tartan:     { base: '#B4553F', shade: '#8C412F', label: '#FAFAF7', what: 'a running track\'s red rubber surface' },
+  calRed:     { base: '#C0392B', shade: '#932C21', label: '#FAFAF7', what: 'a wall calendar\'s red month band' },
+  bottleBlue: { base: '#2A6A9E', shade: '#1F5079', label: '#FAFAF7', what: 'an aluminium sports bottle in blue' },
+  capBlack:   { base: '#2E3134', shade: '#1E2023', label: '#FAFAF7', what: 'a black plastic bottle cap, a pen\'s end cap' },
+  binGreen:   { base: '#2F5E3E', shade: '#22462E', label: '#FAFAF7', what: 'a park litter bin in dark green metal' },
+  penBlue:    { base: '#2F4FA0', shade: '#233C7A', label: '#FAFAF7', what: 'a ballpoint pen\'s blue barrel' },
+  // biz3 colours:
+  gazebo:     { base: '#2F4A6B', shade: '#233852', label: '#FAFAF7', what: 'a craft-fair gazebo\'s navy canvas' },
+  gazeboSage: { base: '#7D9A78', shade: '#5F7A5B', label: '#1A1A1A', what: 'the next stall\'s sage-green gazebo canvas' },
+  linen:      { base: '#EDE4CF', shade: '#CFC3A6', label: '#1A1A1A', what: 'a cream linen tablecloth' },
+  soyWax:     { base: '#F3EBD3', shade: '#D6C9A3', label: '#1A1A1A', what: 'a block of soy candle wax, creamy white' },
+  waxLavender: { base: '#B9A6D6', shade: '#9783B8', label: '#1A1A1A', what: 'lavender candle wax, seen through its jar' },
+  waxRose:    { base: '#E9A3B3', shade: '#C98191', label: '#1A1A1A', what: 'rose-pink candle wax, seen through its jar' },
+  waxSage:    { base: '#AFC59A', shade: '#8DA477', label: '#1A1A1A', what: 'sage-green candle wax, seen through its jar' },
+  waxCranberry: { base: '#A8283A', shade: '#7F1D2B', label: '#FAFAF7', what: 'a Christmas candle\'s cranberry-red wax' },
+  satin:      { base: '#2E6B45', shade: '#214F33', label: '#FAFAF7', what: 'green satin ribbon, on a spool or tied in a bow' },
+  tote:       { base: '#EFE7D4', shade: '#D2C6AA', label: '#1A1A1A', what: 'a natural canvas tote bag' },
+  pennantRed: { base: '#C8453A', shade: '#9C342B', label: '#FAFAF7', what: 'a red cotton bunting pennant' },
+  pennantMustard: { base: '#E1B23A', shade: '#B88E27', label: '#1A1A1A', what: 'a mustard cotton bunting pennant' },
+  pennantTeal: { base: '#2F7570', shade: '#225753', label: '#FAFAF7', what: 'a teal cotton bunting pennant' },
+  // econ3 colours:
+  gigRed:     { base: '#B83A2E', shade: '#8C2B22', label: '#FAFAF7', what: 'a gig poster\'s printed red' },
+  gigNight:   { base: '#2B3550', shade: '#1E2538', label: '#FAFAF7', what: 'a concert poster\'s night-blue stage' },
+  spotBeam:   { base: '#5C6788', shade: '#47506B', label: '#FAFAF7', what: 'a spotlight\'s beam on a night-blue poster' },
+  pitch:      { base: '#2F7A3E', shade: '#235C2E', label: '#FAFAF7', what: 'a football pitch\'s deep green, printed' },
+  pitchLight: { base: '#4C9A55', shade: '#3A7A42', label: '#1A1A1A', what: 'the paler mown stripe of a football pitch' },
+  ticketPink: { base: '#E86F8E', shade: '#C2546F', label: '#1A1A1A', what: 'a concert ticket printed pink' },
+  ticketGreen: { base: '#7CC36A', shade: '#5C9F4D', label: '#1A1A1A', what: 'a football ticket printed green' },
+  note20:     { base: '#A386C6', shade: '#7E62A3', label: '#1A1A1A', what: 'a twenty-pound note\'s lilac purple' },
+  note10:     { base: '#C98A52', shade: '#A36A38', label: '#1A1A1A', what: 'a ten-pound note\'s orange-brown' },
+  note5:      { base: '#5FA3A8', shade: '#447F84', label: '#1A1A1A', what: 'a five-pound note\'s teal' },
+  // sci3 colours:
+  sand:       { base: '#E8D3A2', shade: '#C9B07A', label: '#1A1A1A', what: 'dry beach sand in the sun' },
+  railGreen:  { base: '#5E9E92', shade: '#467A70', label: '#1A1A1A', what: 'seaside promenade railings in pale sea-green paint' },
+  kioskBlue:  { base: '#8EC3DD', shade: '#6DA2BC', label: '#1A1A1A', what: 'a seaside kiosk painted sky blue' },
+  stripeRed:  { base: '#C8373B', shade: '#9A2A2D', label: '#FAFAF7', what: 'the red stripe of a kiosk awning; a sunburn line on a chart' },
+  canvasWhite: { base: '#F6F3EC', shade: '#D9D3C6', label: '#1A1A1A', what: 'white canvas — an awning stripe, a parasol panel' },
+  umbOrange:  { base: '#EE8A2E', shade: '#C46C1C', label: '#1A1A1A', what: 'a beach parasol\'s orange canvas panels' },
+  wafer:      { base: '#D7A75F', shade: '#B0833F', label: '#1A1A1A', what: 'an ice cream cornet\'s baked wafer' },
+  scoopPink:  { base: '#F2A2B5', shade: '#D57F94', label: '#1A1A1A', what: 'a scoop of strawberry ice cream' },
+  vanilla:    { base: '#F5E7BF', shade: '#DCC994', label: '#1A1A1A', what: 'a scoop of vanilla ice cream' },
+  ropeRed:    { base: '#A6282E', shade: '#7E1E23', label: '#FAFAF7', what: 'a queue barrier\'s red rope' },
+  creamTube:  { base: '#F0B53A', shade: '#C99120', label: '#1A1A1A', what: 'a squeezy bottle of sun cream' },
+  cloudWhite: { base: '#FCFDFE', shade: '#D6E2EA', label: '#1A1A1A', what: 'a white fair-weather cloud' },
+  // hist3 colours:
+  hay:        { base: '#D9B45C', shade: '#AF8C3C', label: '#1A1A1A', what: 'dry hay loaded on a cart, straw' },
+  oldWood:    { base: '#9C9384', shade: '#766E62', label: '#1A1A1A', what: 'weathered silver-grey timber — an old footbridge, a fence' },
+  rotWood:    { base: '#4C3828', shade: '#33261B', label: '#FAFAF7', what: 'wood gone dark and soft with rot' },
+  newWood:    { base: '#DEBC88', shade: '#BA9863', label: '#1A1A1A', what: 'a new plank of fresh-sawn pine' },
+  barnBoard:  { base: '#8E3B2B', shade: '#6A2B1F', label: '#FAFAF7', what: 'a barn\'s weatherboards in faded red paint' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 
@@ -3744,6 +3805,1540 @@ export const shelfBooks = (x: number, y: number, w: number, h: number) => fit(SH
 
 // ── hist2: objects for this lesson go ABOVE this line ──
 
+// ─────────────────────────────────────────────────────────────────────────────
+// philosophy-foundations-3 — A LIBRARY RETURNS DESK. The desk in light oak, a tall
+// bookcase, the FOUND PROPERTY sign hung over the desk on two chains, a library date
+// stamp, a stack of returned books, the novel open in a reader's hands and the leaf
+// she turns, a LOST poster with tear-off tabs and its pushpin, two flyers, and the
+// lost property box with its flaps folded open (drawn back and front, so a note can
+// drop in between).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const p3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function p3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE RETURNS DESK ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, library circulation desks): a long counter at a standing
+// person's hip, its TOP overhanging the front by a lip and casting a shadow on it,
+// the front in SUNK PANELS, a dark kick plinth at the floor. Real units, 124 × 24.
+const LIB_DESK: ObjPart[] = p3In(124, 24, [
+  ...p3N('oak',
+    oRect('mass', 62, 14.1, 120, 19.8),                            // the front, under the top
+    oRect('mass', 62, 2.2, 124, 4.4, 0, 1),                        // the top, overhanging it
+    oRect('dark', 62, 5.1, 118, 1.4),                              // the shadow the top casts
+    ...[22, 62, 102].map((x) => oRect('dark', x, 13.2, 32, 10.6, 0, 0.8)), // three sunk panels
+  ),
+  ...[22, 62, 102].map((x) => oBar('lit', x - 15, 18.6, x + 15, 18.6, 0.7)), // each panel's lit lower lip
+  ...p3N('wood', oRect('dark', 62, 22.4, 120, 3.2)),               // the kick plinth
+  oBar('lit', 1.6, 0.9, 122.4, 0.9, 0.8),                          // the lamp along the top's edge
+]);
+export const libDesk = (x: number, y: number, w: number, h: number) => fit(LIB_DESK, x, y, w, h);
+
+// ── THE BOOKCASE ─────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, wooden bookcases full of books): a tall carcass with a
+// cornice, the inside in shadow, shelves across it, and on each shelf a row of
+// SPINES of different heights, widths and cloths, each with bands blocked near its
+// head and foot; a row rarely fills its shelf, and the last book LEANS. Real units,
+// 56 × 140. The books sit 0.7 apart so the dark of the case shows between spines.
+const P3_CLOTHS: NaturalKey[] = ['bookCloth', 'bookBlue', 'trunk', 'khaki', 'brick', 'umbNavy', 'tinPaint', 'novel', 'teapotGlaze', 'mugGlaze'];
+const P3_ROWS: { floor: number; books: [number, number][] }[] = [
+  { floor: 39.5, books: [[4.4, 24], [3.6, 21], [5, 26], [4, 23], [3.4, 20], [4.6, 25], [4, 22], [4.4, 24]] },
+  { floor: 69.5, books: [[5, 25], [4, 22], [3.6, 24], [4.6, 26], [4.2, 21], [3.8, 23], [5, 25]] },
+  { floor: 99.5, books: [[3.8, 22], [4.6, 26], [4.2, 24], [5, 23], [3.6, 21], [4.4, 25], [4, 24], [3.6, 22]] },
+  { floor: 130, books: [[5, 26], [4.4, 24], [3.8, 22], [4.6, 25], [4, 23], [5, 26]] },
+];
+function p3Shelf(): ObjPart[] {
+  const out: ObjPart[] = [];
+  const bands: ObjPart[] = [];
+  let k = 0;
+  for (const row of P3_ROWS) {
+    let x = 6.6;
+    for (const [w, h] of row.books) {
+      const cx = x + w / 2;
+      const top = row.floor - h;
+      out.push(...p3N(P3_CLOTHS[k % P3_CLOTHS.length], oRect('mass', cx, row.floor - h / 2, w, h, 0, 0.4)));
+      bands.push(oBar('lit', cx - w / 2 + 0.9, top + 3, cx + w / 2 - 0.9, top + 3, 0.6));
+      bands.push(oBar('lit', cx - w / 2 + 0.9, row.floor - 3, cx + w / 2 - 0.9, row.floor - 3, 0.6));
+      x += w + 0.7;
+      k += 3;
+    }
+    // the last book leans on its neighbour
+    const lw = 3.8;
+    const lh = 22;
+    out.push(...p3N(P3_CLOTHS[(k + 1) % P3_CLOTHS.length], oRect('mass', x + 3.4, row.floor - 10.8, lw, lh, 14, 0.4)));
+    k += 2;
+  }
+  return [...out, ...bands];
+}
+const BOOKCASE: ObjPart[] = p3In(56, 140, [
+  ...p3N('wood',
+    oRect('mass', 28, 72, 54, 136, 0, 0.6),                        // the sides, top and base
+    oRect('mass', 28, 4, 58, 8, 0, 1),                             // the cornice
+    oRect('face', 28, 71, 44, 118),                                // the inside, in shadow
+    ...[41, 71, 101].map((y) => oRect('mass', 28, y, 44, 3)),      // the shelves
+  ),
+  ...p3Shelf(),
+  ...p3N('wood', oRect('dark', 28, 135.4, 46, 5)),                 // the kick under the last shelf
+  oBar('lit', 0.8, 0.9, 55.2, 0.9, 0.8),                           // the lamp along the cornice
+]);
+export const libBookcase = (x: number, y: number, w: number, h: number) => fit(BOOKCASE, x, y, w, h);
+
+// ── THE FOUND PROPERTY SIGN ──────────────────────────────────────────────────
+//
+// REFERENCE: a library's hanging sign is a framed board on two CHAINS from the
+// ceiling, its words on a pale face inside a coloured frame. A chain is a row of
+// links, not a rod. Real units, 60 × 100: chains 0–70, the board 70–100; the face
+// the scene writes on is FOUND_FACE.
+const FOUND_SIGN: ObjPart[] = p3In(60, 100, [
+  ...p3N('tinPaint', oRect('mass', 30, 85, 60, 30, 0, 2.5)),       // the board, in library green
+  oRect('lit', 30, 85.6, 52, 21.6, 0, 1.2),                        // the pale face the words are on
+  oBar('lit', 3, 70.9, 57, 70.9, 0.8),                             // the lamp along its top
+  ...[12, 48].flatMap((x) => Array.from({ length: 23 }, (_, i) => oEll('line', x, 1.6 + i * 3, 1.5, 2.8))), // the chains
+  oEll('line', 12, 71.6, 3, 3),                                    // the eyes they hang from
+  oEll('line', 48, 71.6, 3, 3),
+]);
+export const foundSign = (x: number, y: number, w: number, h: number) => fit(FOUND_SIGN, x, y, w, h);
+/** The face the words go on, in the sign's own 60 × 100 units. */
+export const FOUND_FACE = { x: 30, y: 85.6, w: 52, h: 21.6 } as const;
+
+// ── THE DATE STAMP ───────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, "Date stamp 2025-04-17", a library band dater): a cream
+// handle with a green CAP on top, a CHROME FRAME below it, and in the frame the
+// rubber date BANDS whose foot prints the date. Real units, 10 × 20, standing on its
+// bands; it is held by the handle (STAMP_GRIP).
+const DATE_STAMP: ObjPart[] = p3In(10, 20, [
+  ...p3N('stampBand', oRect('mass', 5, 1.8, 7.4, 3.6, 0, 1.4)),    // the cap
+  ...p3N('stampGrip', oRect('mass', 5, 6.6, 4.6, 6.6, 0, 0.8)),    // the handle
+  ...p3N('silver', oRect('mass', 5, 13.6, 10, 7.6, 0, 0.8)),       // the chrome frame
+  ...p3N('stampBand', oRect('mass', 5, 18.6, 8.4, 2.8, 0, 0.5)),   // the rubber at its foot
+  ...p3N('stampBand', oRect('dark', 5, 14.4, 6, 5)),               // the date bands, in the frame
+  oBar('line', 3.6, 12.4, 3.6, 16.6, 0.5),                         // between the bands
+  oBar('line', 6.4, 12.4, 6.4, 16.6, 0.5),
+  oBar('lit', 1.3, 10.6, 1.3, 16.4, 0.8),                          // the light on the chrome
+]);
+export const dateStamp = (x: number, y: number, w: number, h: number) => fit(DATE_STAMP, x, y, w, h);
+/** Where the stamp is held, in its own 10 × 20 units. */
+export const STAMP_GRIP = { x: 5, y: 6.6 } as const;
+
+// ── A STACK OF RETURNED BOOKS ────────────────────────────────────────────────
+//
+// REFERENCE: books lying flat show their FORE-EDGES — a pale block of pages between
+// two cover boards — and no two are the same size, so the stack steps. Real units,
+// 30 × 14.
+const BOOK_STACK: ObjPart[] = p3In(30, 14, [
+  ...p3N('bookBlue', oRect('mass', 15, 11.4, 29, 5, 0, 0.8)),
+  ...p3N('khaki', oRect('mass', 13.8, 6.8, 25, 4.4, 0, 0.8)),
+  ...p3N('bookCloth', oRect('mass', 15.6, 2.4, 22, 4.4, 0, 0.8)),
+  oRect('lit', 16.4, 11.4, 23, 2.4),                               // the page edges between the boards
+  oRect('lit', 15, 6.8, 19, 2),
+  oRect('lit', 16.8, 2.4, 16, 2),
+]);
+export const bookStack = (x: number, y: number, w: number, h: number) => fit(BOOK_STACK, x, y, w, h);
+
+// ── THE NOVEL, OPEN, AND THE LEAF SHE TURNS ──────────────────────────────────
+//
+// REFERENCE (BOOK above, and a paperback held open): two pale LEAVES meeting at a
+// shaded gutter, lines of type across both, and the coloured COVER showing round
+// them at the sides and foot. Real units, 26 × 16. The leaf is its own drawing,
+// 12 × 12.4, so the scene can turn it over about the gutter.
+const NOVEL_OPEN: ObjPart[] = p3In(26, 16, [
+  ...p3N('novel', oRect('mass', 13, 9.6, 26, 12.8, 0, 1)),          // the covers, round the pages
+  ...p3N('paper',
+    oRect('mass', 7, 8.2, 11.6, 12.4, 0, 1),                       // the left leaf
+    oRect('mass', 19, 8.2, 11.6, 12.4, 0, 1),                      // the right
+    oRect('dark', 13, 8.4, 1.6, 12.2),                             // the gutter, in shadow
+  ),
+  ...[4.4, 6.6, 8.8, 11].flatMap((y) => [oBar('line', 2.6, y, 11, y, 0.45), oBar('line', 15, y, 23.4, y, 0.45)]),
+]);
+export const novelOpen = (x: number, y: number, w: number, h: number) => fit(NOVEL_OPEN, x, y, w, h);
+const NOVEL_LEAF: ObjPart[] = p3In(12, 12.4, [
+  ...p3N('paper', oRect('mass', 6, 6.2, 11.6, 12.4, 0, 1)),
+  ...p3N('paper', oRect('dark', 1, 6.2, 1.4, 12)),                  // its gutter edge, in shadow
+  ...[2.2, 4.4, 6.6, 8.8].map((y) => oBar('line', 2.4, y, 10.4, y, 0.45)),
+]);
+export const novelLeaf = (x: number, y: number, w: number, h: number) => fit(NOVEL_LEAF, x, y, w, h);
+
+// ── THE LOST POSTER, ITS PIN, AND THE FLYERS ─────────────────────────────────
+//
+// REFERENCE: a lost-property notice on a cork board is a sheet of paper with a
+// heading in big letters and a row of TEAR-OFF TABS cut along its foot, pinned by
+// one coloured pushpin; its corner curls. Real units, 28 × 34; the words are the
+// scene's (y 2–27). A flyer is smaller, with a coloured band for its heading.
+const LOST_POSTER: ObjPart[] = p3In(28, 34, [
+  ...p3N('paper', oRect('mass', 14, 17, 28, 34, 0, 0.6)),
+  ...p3N('paper', oTri('dark', 26, 32, 4, 4, 'left')),             // the corner curling up
+  ...[5.6, 10.2, 14.8, 19.4].map((x) => oBar('line', x, 28.6, x, 33.4, 0.4)), // the tear-off tabs
+  oBar('line', 1.6, 28.4, 26.4, 28.4, 0.4),
+]);
+export const lostPoster = (x: number, y: number, w: number, h: number) => fit(LOST_POSTER, x, y, w, h);
+const PUSHPIN: ObjPart[] = p3In(6, 6, [
+  ...p3N('apple', oEll('mass', 3, 3, 6, 6)),
+  ...p3N('apple', oEll('dark', 3.6, 3.7, 3.4, 3.2)),
+  oEll('lit', 2.1, 2, 1.6, 1.6),
+]);
+export const pushpin = (x: number, y: number, w: number, h: number) => fit(PUSHPIN, x, y, w, h);
+const FLYER: ObjPart[] = p3In(16, 20, [
+  ...p3N('paper', oRect('mass', 8, 10, 16, 20, 0, 0.5)),
+  ...p3N('water', oRect('dark', 8, 4.6, 13, 5)),                   // its coloured heading band
+  ...[10, 12.6, 15.2, 17.6].map((y, i) => oBar('line', 2.4, y, i === 3 ? 9.6 : 13.6, y, 0.55)),
+]);
+export const flyer = (x: number, y: number, w: number, h: number) => fit(FLYER, x, y, w, h);
+
+// ── THE LOST PROPERTY BOX ────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, open cardboard boxes): a brown box whose four FLAPS stand
+// folded out — the back one up behind the mouth, the two side ones splayed outward —
+// the inside dark, a pale crease of light along the front's top edge, and the right
+// SIDE showing in shade. Drawn in two halves, back and front, in one 64 × 38 box, so
+// a thing dropped in falls between them: front 2–56 × 12–38, side 56–62.
+const BOX_BACK: ObjPart[] = p3In(64, 38, [
+  ...p3N('cardboard',
+    oRect('mass', 30, 5.6, 48, 9, 0, 0.5),                         // the back flap, folded up
+    oBar('mass', 5, 13, 1.9, 2.4, 3.4),                            // the left flap, folded out
+    oBar('mass', 57.4, 11.4, 61.2, 2, 3.4),                        // the right
+    oRect('face', 30, 22.5, 52, 31),                               // the inside and back wall, in shadow
+  ),
+]);
+export const boxBack = (x: number, y: number, w: number, h: number) => fit(BOX_BACK, x, y, w, h);
+const BOX_FRONT: ObjPart[] = p3In(64, 38, [
+  ...p3N('cardboard',
+    oRect('mass', 29, 25, 54, 26, 0, 0.5),                         // the front
+    oRect('face', 59, 23.6, 6, 28.8),                              // the right side, in shade
+    oRect('dark', 29, 36.7, 52, 2.2),                              // its foot, in its own shadow
+  ),
+  oBar('lit', 2.6, 12.5, 55.4, 12.5, 0.8),                         // the light along the front's top
+]);
+export const boxFront = (x: number, y: number, w: number, h: number) => fit(BOX_FRONT, x, y, w, h);
+
+// ── phil3: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE GALLERY, for Psychology lesson 3 (2026-10-01). Drawn against pictures fetched
+// with `node scripts/get-reference.mjs` (scratchpad/ref/p3-*): a gallery of portraits
+// in GILT frames on white walls with a bust on a plain WHITE PLINTH and a small label on
+// it (p3-room); a museum showcase of cups behind glass on a long low plinth (p3-case); a
+// brown-glazed stoneware mug with a CHIP out of its rim showing the pale body under the
+// glaze, its handle a squared loop (p3-chipped); and a wooden stool, a thick seat on an
+// apron over four SPLAYED legs (p3-stool).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const ps3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ps3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE PLINTH ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (p3-room, p3-case): a gallery plinth is a plain WHITE box — no mouldings, no
+// cap — with a shadowed toe recess at its foot, and seen a little from the side, its
+// right-hand side plane in shade. Long and low under a showcase. Real units, 100 × 26.
+const GALLERY_PLINTH: ObjPart[] = ps3In(100, 26, [
+  ...ps3N('plinthWhite',
+    oRect('mass', 47, 13, 94, 26),                                // the front face
+    oRect('face', 97, 13.4, 6, 25.2),                             // the side, turned from the lamp
+    oRect('dark', 47, 24.2, 88, 2.6),                             // the toe recess
+  ),
+  oBar('lit', 1.4, 1, 92.6, 1, 0.8),                              // the lit top edge
+]);
+export const galleryPlinth = (x: number, y: number, w: number, h: number) => fit(GALLERY_PLINTH, x, y, w, h);
+
+// ── THE SHOWCASE: ITS GLASS, AND ITS FRAME ───────────────────────────────────
+//
+// REFERENCE (p3-case): a museum showcase is a GLASS BOX on a dark base rail with a
+// slim top rail; what says glass is a pale cool tint, the frame's edges, and long
+// diagonal GLINTS across the front pane. Two drawings so the scene can put the mug
+// between them: the glass body behind it, the frame and the glints in front. Real units,
+// 42 × 28 each, drawn in the same box.
+const CASE_GLASS: ObjPart[] = ps3In(42, 28, [
+  ...ps3N('glass',
+    oRect('mass', 21, 14.4, 40, 25.2),                             // the glass body
+    oRect('dark', 21, 3.4, 38, 2.4),                               // the shadow under the lid
+    oRect('dark', 21, 24.4, 38, 2.2),                              // the case's floor, seen through
+  ),
+]);
+export const caseGlass = (x: number, y: number, w: number, h: number) => fit(CASE_GLASS, x, y, w, h);
+const CASE_FRAME: ObjPart[] = ps3In(42, 28, [
+  ...ps3N('wood',
+    oRect('mass', 21, 26.2, 42, 3.6, 0, 0.5),                      // the base rail
+    oRect('mass', 21, 1.4, 42, 2.8, 0, 0.5),                       // the top rail
+  ),
+  oBar('line', 1.2, 2.4, 1.2, 24.6, 0.9),                          // the corner posts
+  oBar('line', 40.8, 2.4, 40.8, 24.6, 0.9),
+  oBar('lit', 5, 22, 12, 6, 1.4),                                  // glints on the front pane
+  oBar('lit', 8.4, 22.4, 13.6, 11, 0.7),
+  oBar('lit', 31, 21, 36, 9, 1),
+  oBar('lit', 1.6, 3.6, 40.4, 3.6, 0.5),                           // the top rail's lit edge
+]);
+export const caseFrame = (x: number, y: number, w: number, h: number) => fit(CASE_FRAME, x, y, w, h);
+
+// ── THE CHIPPED MUG, FROM THE SIDE ───────────────────────────────────────────
+//
+// REFERENCE (p3-chipped): a stoneware mug glazed treacle brown, a little WIDER at the
+// foot than the rim, its handle a SQUARED loop standing clear of the side, the rim seen
+// from a little above with the pale glaze inside, and a CHIP out of the rim where the
+// bare buff body shows. Real units, 16 × 14.
+const CHIPPED_MUG: ObjPart[] = ps3In(16, 14, [
+  ...ps3N('mugBrown',
+    oBar('mass', 10.6, 4.4, 14.6, 4.4, 1.8),                       // the handle, a squared loop
+    oBar('mass', 14.6, 4.4, 14.6, 10.6, 1.8),
+    oBar('mass', 14.6, 10.6, 10.6, 10.6, 1.8),
+    ...trapezoid('mass', 6, 8.2, 10.4, 11.4, 10.8),                // the body, wider at the foot
+    oEll('mass', 6, 2.8, 10.4, 2.8),                               // the rim, from a little above
+    oRect('dark', 9.6, 8.6, 2.2, 9.4, 0, 0.6),                     // the side turned from the lamp
+  ),
+  ...ps3N('clay',
+    oEll('dark', 6, 3, 8.4, 1.7),                                  // the pale glaze inside
+    oEll('dark', 3, 3.6, 2.6, 2),                                  // and THE CHIP, bare body
+  ),
+  oBar('lit', 2.2, 5.4, 2.4, 11.8, 0.8),                           // the glaze's shine
+]);
+export const chippedMug = (x: number, y: number, w: number, h: number) => fit(CHIPPED_MUG, x, y, w, h);
+/** The handle, where a hand holds it, in the mug's 16 × 14 box (from its top-left). */
+export const MUG3_GRIP = { x: 14.6, y: 7.5 } as const;
+
+// ── THE MUG, TURNED OVER ─────────────────────────────────────────────────────
+//
+// REFERENCE (p3-chipped, a mug's underside): seen from below a mug is its FOOT — a ring
+// of bare unglazed body round a glazed recess — with the handle standing off one side.
+// The STICKER sits in the recess: a white label with two lines of small print. Real
+// units, 18 × 14.
+const MUG3_BASE: ObjPart[] = ps3In(18, 14, [
+  ...ps3N('mugBrown',
+    oBar('mass', 13, 7, 17, 7, 2.6),                               // the handle, end-on
+    oEll('mass', 7, 7, 14, 14),                                    // the glazed outside
+  ),
+  ...ps3N('clay', oEll('dark', 7, 7, 11.4, 11.4)),                  // the bare foot ring
+  ...ps3N('mugBrown', oEll('dark', 7, 7, 8.6, 8.6)),                // the glazed recess
+  oRect('lit', 7, 7, 8.2, 5, 0, 0.6),                              // THE STICKER
+  oBar('line', 4.2, 6, 9.8, 6, 0.45),                              // its small print
+  oBar('line', 4.2, 7.8, 8.6, 7.8, 0.45),
+]);
+export const mugBase = (x: number, y: number, w: number, h: number) => fit(MUG3_BASE, x, y, w, h);
+
+// ── THE LABEL'S STAND ────────────────────────────────────────────────────────
+//
+// REFERENCE (p3-room): a gallery label on a plinth stands on a small brass foot, propped
+// by a strut behind. The plaque itself is lettering, so the scene draws it as a plate;
+// this is the foot and the strut under it. Real units, 46 × 6.
+const LABEL_STAND: ObjPart[] = ps3In(46, 6, [
+  ...ps3N('brass',
+    oBar('face', 38, 0.6, 43, 5, 1.6),                             // the strut behind
+    oRect('mass', 23, 4.6, 42, 2.6, 0, 0.6),                       // the foot
+  ),
+  oBar('lit', 3, 3.6, 43, 3.6, 0.4),
+]);
+export const labelStand = (x: number, y: number, w: number, h: number) => fit(LABEL_STAND, x, y, w, h);
+
+// ── THE BLANK CARD ───────────────────────────────────────────────────────────
+//
+// An index card: white board, its corners just rounded, a hint of thickness along the
+// edge away from the lamp. Real units, 48 × 26.
+const BLANK_CARD: ObjPart[] = ps3In(48, 26, [
+  ...ps3N('paper',
+    oRect('mass', 23.6, 12.6, 47.2, 25.2, 0, 1),
+    oRect('face', 24.4, 25.3, 47.2, 1.4, 0, 0.6),                  // its edge, in shade
+  ),
+  oBar('lit', 2, 1.4, 45, 1.4, 0.8),                               // its lit top edge
+]);
+export const blankCard = (x: number, y: number, w: number, h: number) => fit(BLANK_CARD, x, y, w, h);
+
+// ── THE ATTENDANT'S STOOL ────────────────────────────────────────────────────
+//
+// REFERENCE (p3-stool): a plain wooden stool — a thick SEAT slab, an APRON under it,
+// four legs that SPLAY outward to the floor; the two at the back show between the front
+// pair, in shade. Real units, 26 × 14.
+const GALLERY_STOOL: ObjPart[] = ps3In(26, 14, [
+  ...ps3N('wood',
+    oBar('face', 9, 4, 7.6, 13, 1.8),                              // the back legs
+    oBar('face', 17, 4, 18.4, 13, 1.8),
+    oBar('mass', 5, 4, 2, 13.6, 2.2),                              // the front legs, splayed
+    oBar('mass', 21, 4, 24, 13.6, 2.2),
+    oRect('mass', 13, 5, 19, 2.6),                                 // the apron
+    oRect('mass', 13, 1.8, 26, 3.6, 0, 0.6),                       // the seat
+  ),
+  oBar('lit', 1, 0.5, 25, 0.5, 0.6),
+]);
+export const galleryStool = (x: number, y: number, w: number, h: number) => fit(GALLERY_STOOL, x, y, w, h);
+
+// ── THE GALLERY WINDOW ───────────────────────────────────────────────────────
+//
+// REFERENCE (p3-gallery-2, a gallery's round-headed windows): a tall window with a
+// ROUND HEAD, a white frame, glazing bars dividing the sky into panes, and a deep sill.
+// Real units, 64 × 88.
+const GALLERY_WINDOW: ObjPart[] = ps3In(64, 88, [
+  ...ps3N('plinthWhite',
+    oRect('mass', 32, 50, 58, 64),                                 // the frame,
+    oEll('mass', 32, 22, 58, 40),                                  // round-headed
+  ),
+  ...ps3N('clearSky',
+    oRect('mass', 32, 51, 46, 58),                                 // the sky through it
+    oEll('mass', 32, 24, 46, 32),
+  ),
+  oBar('lit', 14, 76, 22, 60, 1.6),                                // light on the glass
+  oBar('lit', 40, 50, 46, 38, 1.2),
+  oBar('line', 32, 8, 32, 80, 1.6),                                // the glazing bars
+  oBar('line', 9, 44, 55, 44, 1.6),
+  oBar('line', 9, 62, 55, 62, 1.2),
+  ...ps3N('plinthWhite',
+    oRect('mass', 32, 84, 64, 5, 0, 1),                            // the sill, proud of the frame
+    oRect('face', 32, 87.2, 62, 1.6),
+  ),
+]);
+export const galleryWindow = (x: number, y: number, w: number, h: number) => fit(GALLERY_WINDOW, x, y, w, h);
+
+// ── A PAINTING IN A GILT FRAME ───────────────────────────────────────────────
+//
+// REFERENCE (p3-room): a gallery hangs its pictures in broad GILT frames — a bright
+// outer moulding, a shaded inner step, then the canvas. This one is a landscape: hills
+// under a sky. Real units, 64 × 50.
+const GILT_PAINTING: ObjPart[] = ps3In(64, 50, [
+  ...ps3N('brass', oRect('mass', 32, 25, 64, 50, 0, 1)),            // the gilt moulding
+  ...ps3N('brass', oRect('dark', 32, 25, 54, 40)),                  // its inner step, in shade
+  ...ps3N('clearSky', oRect('dark', 32, 25, 48, 34)),               // the canvas: sky
+  ...ps3N('meadow',
+    oTri('dark', 22, 33, 30, 16, 'up'),                            // two hills
+    oTri('dark', 43, 35, 30, 12, 'up'),
+    oRect('dark', 32, 39.5, 48, 5),                                // and the field in front
+  ),
+  ...ps3N('sunshine', oEll('dark', 47, 15, 6, 6)),
+  oBar('lit', 2, 2, 62, 2, 0.8),                                   // the moulding's lit edge
+]);
+export const giltPainting = (x: number, y: number, w: number, h: number) => fit(GILT_PAINTING, x, y, w, h);
+
+// ── psych3: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE PARK RUNNING TRACK, for Personal Growth lesson 3 (2026-10-01). Drawn against
+// pictures fetched with `node scripts/get-reference.mjs` (scratchpad/ref/growth3-*):
+// village notice boards on two posts under a gabled cap (Burstall, Great Finborough),
+// a mechanical stopwatch with its crown and bow (Hanhart), a litter bin standing by the
+// athletics track at Medway Park, an aluminium sports bottle with a black cap.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in one named real colour. */
+const g3 = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function g3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── RUNNING TRACK ────────────────────────────────────────────────────────────
+//
+// REFERENCE. An athletics track is red rubber ruled into LANES by white lines, the
+// lanes running away along the straight; a START LINE crosses a lane at a slant when
+// it is seen from the side. The white lines on red are the field mark — a red floor
+// is a carpet. Real units, 400 × 16: the kerb line at the top, one lane line below.
+const RUNNING_TRACK: ObjPart[] = g3In(400, 16, [
+  ...g3('tartan', oRect('mass', 200, 8, 400, 16)),
+  ...g3('tartan', oRect('face', 200, 14.6, 400, 2.8)),            // the near edge, out of the lamp
+  oBar('lit', 0, 1.2, 400, 1.2, 1.0),                             // the kerb line
+  oBar('lit', 0, 8.4, 400, 8.4, 0.9),                             // a lane line
+  oBar('lit', 318, 1.6, 312, 8.0, 0.9),                           // a start line, across lane one
+  oBar('lit', 330, 8.8, 324, 13.4, 0.9),                          // and staggered across lane two
+]);
+export const runningTrack = (x: number, y: number, w: number, h: number) => fit(RUNNING_TRACK, x, y, w, h);
+
+// ── TRACK VERGE ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. Beside the track the park is mown grass, sunlit, with the odd tuft
+// standing proud of the cut. Real units, 400 × 10.
+const TRACK_VERGE: ObjPart[] = g3In(400, 10, [
+  ...g3('meadow',
+    oRect('mass', 200, 5, 400, 10),
+    oRect('face', 200, 9, 400, 2),
+    ...Array.from({ length: 14 }, (_, k) => oTri('dark', 12 + k * 28 + (k % 3) * 5, 3.4 + (k % 2) * 2, 3, 3.6, 'up')),
+  ),
+]);
+export const trackVerge = (x: number, y: number, w: number, h: number) => fit(TRACK_VERGE, x, y, w, h);
+
+// ── PARK NOTICE BOARD ────────────────────────────────────────────────────────
+//
+// REFERENCE. A park or village notice board is a CORK panel in a wooden FRAME, raised
+// on two POSTS sunk in the grass, under a gabled CAP that throws the rain off — the cap
+// with its set-back gable is what says notice board rather than picture frame. Real
+// units, 116 × 88: the cap 0–17, the frame 16–70, the cork in it 19–67, the posts to the
+// ground. What is pinned to it is the scene's, because it changes.
+const G3_SPECKS = [[16, 26], [30, 40], [52, 23], [70, 34], [88, 25], [100, 44], [20, 58], [44, 54], [64, 62], [84, 57], [98, 63], [38, 30]];
+const PARK_NOTICE_BOARD: ObjPart[] = g3In(116, 88, [
+  ...g3('wood',
+    oRect('mass', 10, 78.5, 6, 19), oRect('mass', 106, 78.5, 6, 19), // the posts
+    oRect('face', 12.2, 79, 1.8, 18), oRect('face', 108.2, 79, 1.8, 18), // their sides, from the lamp
+    oTri('mass', 58, 8, 116, 14, 'up'),                          // the gabled cap
+    oRect('mass', 58, 16, 116, 3.2, 0, 0.6),                     // its eaves board
+    oRect('mass', 58, 43, 108, 54, 0, 1.2),                      // the frame
+    oTri('dark', 58, 10.4, 80, 8, 'up'),                         // the gable, set back
+    oRect('dark', 58, 18.4, 112, 1.2),                           // the eaves' shadow on the frame
+  ),
+  ...g3('cork',
+    oRect('mass', 58, 43, 102, 48, 0, 0.6),                      // the cork
+    oRect('dark', 58, 20.1, 102, 2.2), oRect('dark', 8.1, 43, 2.2, 48), // the frame's shadow on it
+    ...G3_SPECKS.map(([x, y]) => oEll('dark', x, y, 1.6, 1.6)),
+  ),
+  oBar('lit', 3, 14.8, 113, 14.8, 0.8),                            // the lamp along the eaves
+]);
+export const parkNoticeBoard = (x: number, y: number, w: number, h: number) => fit(PARK_NOTICE_BOARD, x, y, w, h);
+
+// ── GOAL CARD ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A card on a notice board is an oblong of stiff paper held by one PUSH
+// PIN at the top, its lower edge lifting a little off the cork. The words are the
+// scene's. Real units, 44 × 16.
+const goalCardParts = (paper: NaturalKey, pin: NaturalKey): ObjPart[] => g3In(44, 16, [
+  ...g3(paper, oRect('mass', 22, 8, 44, 16, 0, 0.6)),
+  ...g3(paper, oRect('dark', 22, 15.1, 43, 1.4)),                  // its lower edge, lifting off the cork
+  ...g3(pin, oEll('mass', 22, 1.7, 3.2, 3.2)),                      // the push pin
+  oEll('lit', 21.4, 1.2, 1.1, 1.1),                                 // its shine
+]);
+export const goalCard = (x: number, y: number, w: number, h: number, paper: NaturalKey = 'paper', pin: NaturalKey = 'enamel') =>
+  fit(goalCardParts(paper, pin), x, y, w, h);
+
+// ── WALL CALENDAR ────────────────────────────────────────────────────────────
+//
+// REFERENCE. A month calendar is a sheet with the MONTH across the top in a coloured
+// band and the days in a GRID of seven columns under it, a number in the corner of
+// each square. The grid of seven is the field mark — ruled lines alone are a notepad.
+// Real units, 42 × 22: the band 0–5.2, four weeks of 4.2 under it, each day six wide.
+const CAL_ROW = 4.2;
+const CAL_COL = 6;
+const WALL_CALENDAR: ObjPart[] = g3In(42, 22, [
+  ...g3('paper', oRect('mass', 21, 11, 42, 22, 0, 0.6)),
+  ...g3('calRed', oRect('mass', 21, 2.6, 42, 5.2, 0, 0.6)),        // the month band
+  ...g3('paper', oRect('dark', 41.1, 13.6, 1.4, 16.6)),             // its right edge, curling from the lamp
+  ...g3('paper', ...[1, 2, 3, 4, 5, 6].map((c) => oBar('dark', c * CAL_COL, 5.4, c * CAL_COL, 21.8, 0.45))),
+  ...g3('paper', ...[1, 2, 3].map((r) => oBar('dark', 0.4, 5.2 + r * CAL_ROW, 41.6, 5.2 + r * CAL_ROW, 0.45))),
+  ...Array.from({ length: 28 }, (_, k) => oEll('line', (k % 7) * CAL_COL + 1.7, 5.2 + Math.floor(k / 7) * CAL_ROW + 1.3, 1.3, 0.9)),
+  ...g3('enamel', oEll('mass', 21, 1.2, 2.4, 2.4)),                 // the pin it hangs from
+]);
+export const wallCalendar = (x: number, y: number, w: number, h: number) => fit(WALL_CALENDAR, x, y, w, h);
+/** A day's square on the calendar, in its own 42 × 22: Tuesday of the second week. */
+export const CAL_TUESDAY = { x: 1.5 * CAL_COL, y: 5.2 + 1.5 * CAL_ROW, w: CAL_COL, h: CAL_ROW, of: { w: 42, h: 22 } } as const;
+
+// ── STOPWATCH ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A mechanical stopwatch is a round steel CASE with a white DIAL ruled in
+// ticks, the CROWN on top as a red push button on a short stem, and a BOW — a ring —
+// over the crown that the cord runs through. Drawn hanging from its cord, so the top
+// of the cord is the point a hand holds it by. The hand on the dial is the scene's,
+// because it runs. Real units, 14 × 26: the dial's centre at (7, 19.6).
+const STOPWATCH: ObjPart[] = g3In(14, 26, [
+  oBar('line', 6.2, 0.6, 6.4, 7.4, 0.7), oBar('line', 7.8, 0.6, 7.6, 7.4, 0.7), // the cord's loop
+  ...g3('silver',
+    oEll('mass', 7, 8.6, 3.8, 3.8),                                 // the bow
+    oRect('mass', 7, 12.8, 1.8, 1.8),                               // the crown's stem
+    oEll('mass', 7, 19.6, 13, 13),                                  // the case
+    oEll('face', 8.1, 20.7, 11, 11),                                // its far side, from the lamp
+  ),
+  ...g3('enamel', oRect('mass', 7, 11.2, 3.2, 2.4, 0, 0.6)),        // the crown, a red button
+  oEll('lit', 7, 19.6, 10, 10),                                     // the dial
+  ...Array.from({ length: 12 }, (_, i) => {
+    const a = (i / 12) * Math.PI * 2;
+    const r0 = i % 3 === 0 ? 3.4 : 4.0;
+    return oBar('line', 7 + Math.sin(a) * r0, 19.6 - Math.cos(a) * r0, 7 + Math.sin(a) * 4.6, 19.6 - Math.cos(a) * 4.6, i % 3 === 0 ? 0.7 : 0.4);
+  }),
+]);
+export const stopwatch = (x: number, y: number, w: number, h: number) => fit(STOPWATCH, x, y, w, h);
+/** The dial's centre and radius, in the stopwatch's own 14 × 26. */
+export const WATCH_DIAL = { x: 7, y: 19.6, r: 5, of: { w: 14, h: 26 } } as const;
+
+// ── SPORTS BOTTLE ────────────────────────────────────────────────────────────
+//
+// REFERENCE. An aluminium sports bottle is a tall straight CYLINDER that narrows at
+// a rounded SHOULDER to a black screw CAP with a pop-up SPOUT, a printed label round
+// its middle and a long sheen down the lit side. The shoulder and the cap are what
+// separate it from a can or a flask. Real units, 9 × 24.
+const SPORTS_BOTTLE: ObjPart[] = g3In(9, 24, [
+  ...g3('capBlack', oRect('mass', 4.5, 2.6, 4.2, 4.6, 0, 0.8), oRect('mass', 4.5, 0.9, 2, 1.8, 0, 0.6)),
+  ...g3('bottleBlue', ...trapezoid('mass', 4.5, 6.6, 4.6, 9, 3.4)),
+  ...g3('bottleBlue', oRect('mass', 4.5, 15.9, 9, 16.2, 0, 1.4)),
+  ...g3('bottleBlue', oRect('face', 7.7, 15.9, 2.4, 15.6, 0, 1)),
+  oRect('lit', 4.3, 15.6, 5.8, 4.6, 0, 0.4),                         // the label
+  oBar('lit', 1.6, 9.4, 1.6, 12.4, 0.7), oBar('lit', 1.6, 18.6, 1.6, 22.4, 0.7), // the sheen
+]);
+export const sportsBottle = (x: number, y: number, w: number, h: number) => fit(SPORTS_BOTTLE, x, y, w, h);
+
+// ── LITTER BIN ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A park litter bin is a metal DRUM under a domed LID, with a posting SLOT
+// cut in the drum just below the lid, standing on a heavy dark BASE ring. The slot
+// under the dome is the field mark — a plain drum is a barrel or a post. Dark green
+// steel. Real units, 20 × 32.
+const LITTER_BIN: ObjPart[] = g3In(20, 32, [
+  ...g3('binGreen',
+    oRect('mass', 10, 17, 18, 22, 0, 1.4),                          // the drum
+    oEll('mass', 10, 4.4, 18.4, 5.6),                               // the domed lid
+    oRect('mass', 10, 6.6, 19, 3, 0, 0.8),                          // its rim
+    oRect('face', 16.4, 17.4, 5.2, 21),                             // the drum's side, from the lamp
+  ),
+  ...g3('gloom', oRect('dark', 7.6, 11.6, 10, 5, 0, 1)),            // the slot, dark inside
+  ...g3('iron', oRect('mass', 10, 29.4, 20, 4.6, 0, 1), oRect('face', 10, 31.2, 20, 1.6)), // the base
+  oBar('lit', 3, 15, 3, 26, 0.9),                                   // the lamp on the drum
+]);
+export const litterBin = (x: number, y: number, w: number, h: number) => fit(LITTER_BIN, x, y, w, h);
+
+// ── NEWSPAPER ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A newspaper held open to read is two tall PAGES either side of a FOLD,
+// each set in narrow COLUMNS of grey text under a few black HEADLINES, a photograph
+// boxed among them. The columns and the fold are what say newspaper rather than a map
+// or a sheet of paper. Real units, 30 × 21.
+const NEWSPAPER: ObjPart[] = g3In(30, 21, [
+  ...g3('newsprint', oRect('mass', 7.6, 10.5, 15, 21, 0, 0.5), oRect('mass', 22.4, 10.5, 15, 21, 0, 0.5)),
+  ...g3('newsprint', oRect('face', 26, 10.5, 8, 21)),               // the far page, turned from the lamp
+  oBar('line', 15, 0.4, 15, 20.6, 0.5),                             // the fold
+  oRect('line', 7.6, 2.4, 11, 2, 0, 0.3), oRect('line', 21, 2.4, 9, 1.4, 0, 0.3), // the headlines
+  ...g3('newsprint', ...[2.6, 7.6, 12.6, 18.4, 23.4].flatMap((x) => [6, 9, 12, 15, 18].map((y) => oBar('dark', x - 1.8, y, x + 1.8, y, 0.6)))),
+  ...g3('newsprint', oRect('dark', 25.6, 7.6, 6.4, 5.2)),           // a photograph
+]);
+export const newspaper = (x: number, y: number, w: number, h: number) => fit(NEWSPAPER, x, y, w, h);
+
+// ── BALLPOINT PEN ────────────────────────────────────────────────────────────
+//
+// REFERENCE. A ballpoint is a slim BARREL with a black end CAP and a CLIP at one end
+// and a steel cone to the TIP at the other. Drawn tip down, about its cap end, where a
+// string on a notice board is tied. Real units, 3 × 14.
+const BALLPOINT: ObjPart[] = g3In(3, 14, [
+  ...g3('penBlue', oRect('mass', 1.5, 6.2, 2.6, 9.6, 0, 1), oRect('face', 2.3, 6.2, 1, 9.2)),
+  ...g3('silver', oTri('mass', 1.5, 12.4, 2.4, 3.2, 'down')),
+  ...g3('capBlack', oRect('mass', 1.5, 1.4, 2.6, 2.8, 0, 0.8)),
+  oBar('line', 2.5, 1.2, 2.5, 5.2, 0.5),                            // the clip
+]);
+export const ballpoint = (x: number, y: number, w: number, h: number) => fit(BALLPOINT, x, y, w, h);
+
+// ── FLOODLIGHT ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A floodlight at a park track is a tall galvanised MAST with a rectangular
+// FRAME of lamps at its head, two rows of them, angled down over the track. The frame of
+// lamps on a bare pole is the field mark — a single lamp on a pole is a street light.
+// Real units, 40 × 182.
+const FLOODLIGHT: ObjPart[] = g3In(40, 182, [
+  ...g3('silver',
+    oRect('mass', 20, 101, 3.6, 162),                               // the mast
+    oRect('face', 21.3, 101, 1.0, 162),
+    oRect('mass', 20, 18.5, 2.6, 6),                                // its neck to the frame
+    oRect('mass', 20, 180, 10, 4, 0, 1),                            // the base plate
+  ),
+  ...g3('iron', oRect('mass', 20, 9, 40, 16, 0, 1), oRect('face', 20, 15.8, 40, 2.4)),
+  ...[0, 1].flatMap((r) => [0, 1, 2, 3].map((c) => oRect('lit', 6.5 + c * 9, 5 + r * 7, 7, 5, 0, 0.8))),
+]);
+export const floodlight = (x: number, y: number, w: number, h: number) => fit(FLOODLIGHT, x, y, w, h);
+
+// ── growth3: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// business-foundations-3 — A CRAFT FAIR STALL. A pop-up gazebo over a trestle table
+// under a linen cloth, handmade candles in glass jars, a chalk tent tag, a block of soy
+// wax and two empty jars, a spool of green satin ribbon, bunting, and the
+// customer's canvas tote. Drawn against Commons photographs (scratchpad/ref/biz3-*):
+// a Jedburgh craft stall under its gazebo with a chalk price slate, three poured
+// candles in squat glass tumblers, and a canvas tote bag with a printed circle.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const b3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function b3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE GAZEBO ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (the Jedburgh craft stall). A fair's pop-up gazebo is four thin METAL LEGS
+// on foot plates, a canvas roof that rises to a small VENT CAP at its peak, and a deep
+// straight VALANCE round the eaves — the band a stall-holder's name is printed on. Seen
+// from the front the roof is a trapezoid narrowing to the cap. Real units, 208 × 182:
+// the roof 4–26, the valance 26–40, the legs down to the ground.
+function gazeboParts(key: NaturalKey): ObjPart[] {
+  return b3In(208, 182, [
+    ...b3N('silver',
+      oBar('mass', 6, 36, 6, 180, 2.4),                          // the legs
+      oBar('mass', 202, 36, 202, 180, 2.4),
+      oRect('mass', 6, 180.8, 8, 2.2, 0, 0.8),                   // their foot plates
+      oRect('mass', 202, 180.8, 8, 2.2, 0, 0.8),
+    ),
+    ...b3N(key,
+      ...trapezoid('mass', 104, 15, 64, 208, 22),                // the roof, rising to the cap
+      oRect('mass', 104, 3.6, 22, 4.4, 0, 1.2),                  // the vent cap at its peak
+      oRect('mass', 104, 33, 208, 14, 0, 0.8),                   // the valance
+      oRect('dark', 104, 26.8, 200, 1.6),                        // the eave's shadow on it
+    ),
+    oBar('lit', 3, 38.4, 205, 38.4, 0.9),                        // the valance's hem, stitched white
+    oBar('line', 104, 5.8, 104, 26, 0.5),                        // the roof's front seam
+  ]);
+}
+export const fairGazebo = (x: number, y: number, w: number, h: number, key: NaturalKey = 'gazebo') =>
+  fit(gazeboParts(key), x, y, w, h);
+/** The valance, in the gazebo's own 100-square: the stall's name is printed here. */
+export const GAZEBO_VALANCE = { y: (33 / 182) * 100, h: (14 / 182) * 100 } as const;
+
+// ── THE TABLE UNDER ITS CLOTH ────────────────────────────────────────────────
+//
+// REFERENCE (the same stall). A craft-fair trestle is never seen: a cloth goes over it
+// and falls to the ground, so what reads is a lit TOP EDGE with a little thickness, the
+// cloth's FRONT hanging in soft vertical FOLDS that catch the light, and a stitched hem.
+// Real units, 196 × 24.
+const FAIR_CLOTH: ObjPart[] = b3In(196, 24, [
+  ...b3N('linen',
+    oRect('mass', 98, 2.2, 196, 4.4, 0, 1),                      // the top, lit, with its edge
+    oRect('face', 98, 13.8, 194, 20.4, 0, 1),                    // the cloth falling, in shade
+  ),
+  ...[20, 58, 98, 138, 176].map((x) => oBar('lit', x, 6.6, x + (x - 98) * 0.02, 21.6, 0.8)),  // its folds
+  oBar('line', 2, 21, 194, 21, 0.5),                             // the hem's stitching
+]);
+export const fairCloth = (x: number, y: number, w: number, h: number) => fit(FAIR_CLOTH, x, y, w, h);
+
+// ── A CANDLE IN A JAR ────────────────────────────────────────────────────────
+//
+// REFERENCE (three poured candles). A container candle is a SQUAT glass tumbler — about
+// as wide as it is tall — with the coloured WAX visible through the glass to a little
+// below the rim, a short WICK standing out of the wax, and a band of empty glass above
+// it. A handmade one wears a small paper LABEL round its middle. Real units, 12 × 13.
+function candleParts(wax: NaturalKey): ObjPart[] {
+  return b3In(12, 13, [
+    ...b3N('glass', oRect('mass', 6, 7, 12, 12, 0, 2.2)),          // the glass tumbler
+    ...b3N(wax,
+      oRect('mass', 6, 8.4, 10, 8.8, 0, 1.6),                    // the wax inside it
+      oRect('dark', 9.6, 8.4, 2.4, 8.8, 0, 0.8),                 // its side turned from the lamp
+    ),
+    oRect('lit', 6, 8.8, 6.4, 3.4, 0, 0.4),                      // the maker's paper label
+    oBar('line', 4.2, 8.8, 7.8, 8.8, 0.45),                      // and its printed line
+    oBar('line', 6, 4.2, 6, 1.8, 0.7),                           // the wick
+    oBar('line', 1.2, 1.4, 10.8, 1.4, 0.6),                      // the jar's rim
+    oBar('lit', 2.1, 4.6, 2.1, 7, 0.9),                          // the glass's shine
+  ]);
+}
+export const candleJar = (x: number, y: number, w: number, h: number, wax: NaturalKey = 'waxCranberry') =>
+  fit(candleParts(wax), x, y, w, h);
+
+// ── AN EMPTY JAR ─────────────────────────────────────────────────────────────
+//
+// The same tumbler before it is poured: clear glass, its FAR WALL seen through the near
+// one, a screw THREAD under the rim and the shine. No colour inside is what says empty.
+const EMPTY_JAR: ObjPart[] = b3In(12, 13, [
+  ...b3N('glass',
+    oRect('mass', 6, 7, 12, 12, 0, 2.2),
+    oRect('dark', 6.6, 8.2, 8.4, 9, 0, 1.6),                     // its far wall, through the glass
+  ),
+  oBar('line', 1.2, 1.4, 10.8, 1.4, 0.6),                        // the rim
+  oBar('line', 1.4, 3.2, 10.6, 3.2, 0.45),                       // the screw thread under it
+  oBar('lit', 2.1, 4.6, 2.1, 10.4, 0.9),                         // the shine
+]);
+export const emptyJar = (x: number, y: number, w: number, h: number) => fit(EMPTY_JAR, x, y, w, h);
+
+// ── A BLOCK OF WAX ───────────────────────────────────────────────────────────
+//
+// Candle-makers buy soy wax as creamy SLABS scored into pieces to be broken off and
+// melted. Seen from the front and a little above: a lit top receding, a front in
+// shade, and the score lines down it. Real units, 16 × 9.
+const WAX_BLOCK: ObjPart[] = b3In(16, 9, [
+  ...b3N('soyWax',
+    ...trapezoid('mass', 8, 2.2, 13, 16, 4.4),                   // the top, receding, lit
+    oRect('face', 8, 6.6, 16, 4.8, 0, 0.6),                      // the front, in shade
+  ),
+  oBar('line', 5.4, 4.8, 5.4, 8.6, 0.4),                         // where it breaks into pieces
+  oBar('line', 10.6, 4.8, 10.6, 8.6, 0.4),
+]);
+export const waxBlock = (x: number, y: number, w: number, h: number) => fit(WAX_BLOCK, x, y, w, h);
+
+// ── A SPOOL OF RIBBON ────────────────────────────────────────────────────────
+//
+// A reel of satin ribbon stood on the table, seen from the side: two wooden FLANGES,
+// top and bottom, with the ribbon WOUND between them, its sheen along the top of the
+// wind, the underside in shade, and a free TAIL hanging over the table's edge — the
+// end a customer pulls. Real units, 12 × 16; the reel is the top 12, the tail falls
+// below it.
+const RIBBON_SPOOL: ObjPart[] = b3In(12, 16, [
+  ...b3N('wood',
+    oRect('mass', 6, 1.2, 12, 2.4, 0, 0.8),                      // the flanges
+    oRect('mass', 6, 10.8, 12, 2.4, 0, 0.8),
+  ),
+  ...b3N('satin',
+    oRect('mass', 6, 6, 10, 7.2, 0, 0.4),                        // the ribbon wound on it
+    oRect('dark', 6, 8.6, 10, 2),                                // its underside, in shade
+    oBar('mass', 10.2, 7, 11.2, 15.2, 1.6),                      // the free end, hanging
+  ),
+  oBar('lit', 2.6, 3.6, 8, 3.6, 0.8),                            // the satin's sheen
+]);
+export const ribbonSpool = (x: number, y: number, w: number, h: number) => fit(RIBBON_SPOOL, x, y, w, h);
+
+// ── A LENGTH OF RIBBON ───────────────────────────────────────────────────────
+//
+// Cut from the spool and held up by one end: a satin strip with a gentle twist in it
+// and its end cut into a V, which is how ribbon is cut so it will not fray.
+// Real units, 5 × 18, hanging from the top, set in the middle of an 18-unit square.
+const RIBBON_LENGTH: ObjPart[] = b3In(18, 18, [
+  ...b3N('satin',
+    oBar('mass', 9, 0.9, 9.7, 8.5, 1.8),
+    oBar('mass', 9.7, 8.5, 8.8, 16.6, 1.8),
+  ),
+  oBar('lit', 9.1, 2.2, 9.5, 6.6, 0.5),                          // the sheen
+  oTri('lit', 8.8, 17.1, 1.2, 1.6, 'up'),                        // the end, cut in a V
+]);
+export const ribbonLength = (x: number, y: number, w: number, h: number) => fit(RIBBON_LENGTH, x, y, w, h);
+
+// ── A RIBBON BOW ─────────────────────────────────────────────────────────────
+//
+// Tied round a jar: two LOOPS either side of a KNOT, two tails falling from it, and
+// the inside of each loop in shadow. Real units, 12 × 8, in the top of a 12-unit square.
+const RIBBON_BOW: ObjPart[] = b3In(12, 12, [
+  ...b3N('satin',
+    oEll('mass', 3.4, 3, 5.2, 4.2, -18),                         // the loops
+    oEll('mass', 8.6, 3, 5.2, 4.2, 18),
+    oBar('mass', 5.4, 4.2, 3.4, 7.2, 1.5),                       // the tails
+    oBar('mass', 6.6, 4.2, 8.6, 7.2, 1.5),
+    oEll('dark', 3.4, 3.2, 2.2, 1.4, -18),                       // inside each loop
+    oEll('dark', 8.6, 3.2, 2.2, 1.4, 18),
+    oEll('dark', 6, 3.8, 2.4, 2.6),                              // the knot
+  ),
+]);
+export const ribbonBow = (x: number, y: number, w: number, h: number) => fit(RIBBON_BOW, x, y, w, h);
+
+// ── A CANVAS TOTE ────────────────────────────────────────────────────────────
+//
+// REFERENCE (a bookshop's canvas tote). A tote is a plain canvas SACK, a little taller
+// than wide, with two long STRAP handles rising in arches from its mouth, a stitched hem
+// along the mouth, and a big printed CIRCLE on its face. Real units, 24 × 32.
+const TOTE_BAG: ObjPart[] = b3In(24, 32, [
+  ...b3N('tote',
+    oBar('mass', 6, 12, 6.8, 4.4, 1.8), oBar('mass', 6.8, 4.4, 10.4, 3.6, 1.8),    // the straps, each a
+    oBar('mass', 10.4, 3.6, 11, 12, 1.8),                                          // soft loop of webbing
+    oBar('mass', 13, 12, 13.6, 3.6, 1.8), oBar('mass', 13.6, 3.6, 17.2, 4.4, 1.8),
+    oBar('mass', 17.2, 4.4, 18, 12, 1.8),
+    ...trapezoid('mass', 12, 21.6, 21, 24, 20.8),                // the sack
+    oRect('face', 21.4, 21.8, 2.2, 19.2),                        // its side, in shade
+  ),
+  ...b3N('pennantMustard', oEll('mass', 11.4, 22.4, 11, 11)),    // the printed circle
+  oBar('line', 1.8, 12.8, 22.2, 12.8, 0.5),                      // the hem round its mouth
+  oBar('lit', 3.4, 15.4, 3.4, 28.6, 0.9),                        // the canvas's light side
+]);
+export const toteBag = (x: number, y: number, w: number, h: number) => fit(TOTE_BAG, x, y, w, h);
+
+// ── A CHALK TENT TAG ─────────────────────────────────────────────────────────
+//
+// REFERENCE (the Jedburgh stall's slate, chalked "£18"). A table-top price sign is a
+// small SLATE in a WOODEN FRAME standing on splayed legs at the back, so it leans like
+// a tent. The price is chalked on the slate by the scene. Real units, 28 × 22.
+const TENT_SLATE: ObjPart[] = b3In(28, 22, [
+  ...b3N('wood',
+    oBar('mass', 5, 15.6, 2.6, 21.2, 1.8),                       // the legs behind, splayed
+    oBar('mass', 23, 15.6, 25.4, 21.2, 1.8),
+    oRect('mass', 14, 9, 28, 17, 0, 1.6),                        // the frame
+  ),
+  ...b3N('slate', oRect('dark', 14, 9, 23, 12.4, 0, 0.8)),       // the slate let into it
+  oBar('lit', 3.4, 1.6, 10, 1.6, 0.6),                           // the frame's lit top edge
+]);
+export const tentSlate = (x: number, y: number, w: number, h: number) => fit(TENT_SLATE, x, y, w, h);
+/** The slate's face, as fractions of the tag's box: the price is chalked here. */
+export const TENT_FACE = { x: 14 / 28, y: 9 / 22, w: 23 / 28, h: 12.4 / 22 } as const;
+
+// ── A BUNTING PENNANT ────────────────────────────────────────────────────────
+//
+// One cotton PENNANT of a string of bunting: a triangle, point down, its top edge
+// folded over the string. The scene hangs a row of them, red, mustard and teal in turn,
+// along a sagging string. Real units, 12 × 12.
+const pennantParts = (key: NaturalKey): ObjPart[] => b3In(12, 12, [
+  ...b3N(key, oTri('mass', 6, 6.6, 11, 10.8, 'down')),
+  ...b3N(key, oRect('dark', 6, 2.2, 10.4, 1.4)),                 // the fold over the string
+  oBar('lit', 3.2, 4.2, 5.4, 9, 0.6),                            // the cotton catching the light
+]);
+export const pennant = (x: number, y: number, w: number, h: number, key: NaturalKey = 'pennantRed') =>
+  fit(pennantParts(key), x, y, w, h);
+
+// ── biz3: objects for this lesson go ABOVE this line ──
+
+// ── econ3: a ticket kiosk, two posters on a brick wall, tickets and money ────
+const e3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+
+// ── POSTER WALL ──────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, a 1970s gig poster on a pub wall in Peckham; fly-posted brick
+// walls): bills are pasted on BRICK in stretcher bond — long courses, each joint over
+// the middle of the brick below — under a stone COPING with a shaded front lip. The
+// staggered joints are what say brick rather than tiles or a grid.
+const POSTER_WALL: ObjPart[] = [
+  ...e3N('brick', oRect('mass', 50, 54.5, 100, 91)),            // the brickwork
+  ...e3N('coping', oRect('mass', 50, 4.5, 101, 9, 0, 0.6)),     // the stone coping
+  ...e3N('coping', oRect('face', 50, 9.6, 101, 2)),             // its lip, in shade
+  ...e3N('brick', oRect('face', 99, 54.5, 2, 91)),              // the wall's end
+  // the courses, and the joints staggered half a brick from row to row
+  ...Array.from({ length: 10 }, (_, i) => e3N('brick', oBar('dark', 1, 19 + i * 8.6, 97.5, 19 + i * 8.6, 0.9))).flat(),
+  ...Array.from({ length: 11 }, (_, r) => {
+    const y0 = 10.6 + r * 8.6;
+    const y1 = Math.min(99.4, y0 + 8.6);
+    return Array.from({ length: 9 }, (_, k) => 3 + (r % 2 ? 6 : 0) + k * 12)
+      .filter((x) => x < 97)
+      .flatMap((x) => e3N('brick', oBar('dark', x, y0 + 0.9, x, y1 - 0.9, 0.9)));
+  }).flat(),
+];
+export const posterWall = (x: number, y: number, w: number, h: number) => fit(POSTER_WALL, x, y, w, h);
+
+// ── GIG POSTER ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (the Dr Feelgood bill at the Ivy House, Peckham): a letterpress gig poster
+// is BANDS — a red band for the headline, a picture, a red band of small print — on
+// cream paper with a cream border all round. This one's picture is a guitar under a
+// spotlight on a night-blue stage: an electric guitar is two bouts (the lower one the
+// bigger), a long neck and a headstock, held on a diagonal. Laid out for a box about
+// 60 × 72; the headline word is the scene's, set on the top band.
+const GIG_POSTER: ObjPart[] = [
+  ...e3N('paper', oRect('mass', 50, 50, 100, 100, 0, 1)),        // the bill
+  ...e3N('gigRed', oRect('mass', 50, 14, 90, 20)),               // the headline band
+  ...e3N('gigNight', oRect('mass', 50, 53.5, 90, 51)),           // the stage
+  ...e3N('spotBeam', oTri('mass', 50, 53.5, 62, 51, 'up')),       // the spotlight's beam
+  ...e3N('gigRed', oRect('mass', 50, 88.5, 90, 13)),             // the small-print band
+  // the guitar, inked round and then filled
+  oEll('line', 41.7, 65.3, 27, 18.5, -40), oEll('line', 50.2, 56.8, 20, 14, -40),
+  oBar('line', 52.5, 54.2, 73.3, 33.3, 6.5), oRect('line', 76.7, 29.9, 9.5, 12.5, 40, 1),
+  ...e3N('orange', oEll('dark', 41.7, 65.3, 23.5, 15.3, -40), oEll('dark', 50.2, 56.8, 16.7, 11.1, -40)),
+  ...e3N('wood', oBar('dark', 52.5, 54.2, 73.3, 33.3, 4), oRect('dark', 76.7, 29.9, 6.7, 9.7, 40, 1)),
+  oEll('line', 43.2, 63.6, 6, 5),                                // the pickup
+  oBar('lit', 39, 68, 72, 35, 0.9),                              // the strings
+  oBar('lit', 18, 86, 82, 86, 2.2), oBar('lit', 28, 91, 72, 91, 2.2),  // the small print
+];
+export const gigPoster = (x: number, y: number, w: number, h: number) => fit(GIG_POSTER, x, y, w, h);
+
+// ── MATCH POSTER ─────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, a 1951 Szeged–Dorog match bill; a 19th-century Scotland v
+// England bill): a football bill is the BALL and the PITCH — a white ball with black
+// patches over mown green stripes and the halfway line — under a band naming the game,
+// with a starburst flash for the offer. Laid out for a box about 60 × 72; the band's
+// word and the flash's word are the scene's.
+const MATCH_POSTER: ObjPart[] = [
+  ...e3N('paper', oRect('mass', 50, 50, 100, 100, 0, 1)),        // the bill
+  ...e3N('pitch', oRect('mass', 50, 14, 90, 20)),                // the headline band
+  ...[0, 1, 2, 3, 4, 5].flatMap((i) =>                           // the pitch, mown in stripes
+    e3N(i % 2 ? 'pitch' : 'pitchLight', oRect('mass', 12.5 + i * 15, 53.5, 15, 51))),
+  ...e3N('pitch', oRect('mass', 50, 88.5, 90, 13)),              // the small-print band
+  oBar('lit', 64, 29.5, 64, 77.5, 1.4),                          // the halfway line
+  oEll('lit', 64, 53.5, 6, 5),                                   // and its spot
+  // the ball: inked round, white, and patched
+  oEll('line', 38, 57, 35, 29), oEll('lit', 38, 57, 31.5, 26),
+  oEll('line', 38, 57, 10, 8.5),
+  oEll('line', 27, 51, 6, 5), oEll('line', 49, 51, 6, 5), oEll('line', 29, 65, 6, 5), oEll('line', 47, 65, 6, 5),
+  ...e3N('lemon', oRect('dark', 75, 71, 42, 16, 0, 2)),          // the flash for the offer
+  oBar('lit', 18, 86, 82, 86, 2.2), oBar('lit', 28, 91, 72, 91, 2.2),  // the small print
+];
+export const matchPoster = (x: number, y: number, w: number, h: number) => fit(MATCH_POSTER, x, y, w, h);
+
+// ── TICKET KIOSK ─────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, a tiny ticket-sale kiosk on Seurasaari, Helsinki; ferry ticket
+// booths at Brixham): a ticket kiosk is a small timber hut with its GABLE to the
+// street — a pitched roof with deep bargeboards, a sign board under the gable — and a
+// wide SERVICE WINDOW at chest height, trimmed in white, with a counter shelf under it
+// and boarded panelling below. The seller stands inside, behind the shelf, seen through
+// the window. Split in two so the seller can stand between: this is everything BEHIND
+// him; `kioskFront` is the shelf and the panelling in front. Laid out for a box about
+// 152 × 184, with the clock and the sign's word the scene's.
+const TICKET_KIOSK: ObjPart[] = [
+  ...e3N('whitewash',
+    oTri('mass', 50, 14.7, 94.7, 22.8, 'up'),                    // the gable
+    oRect('mass', 50, 67.4, 94.7, 65.2),                         // the walls, painted white
+    oRect('face', 95.4, 67.4, 3.9, 65.2),                        // the end wall, turned from the lamp
+  ),
+  ...e3N('signBoard', oRect('mass', 50, 31, 89.5, 8.7, 0, 0.6)), // the sign board
+  ...e3N('felt', oBar('mass', 0, 26.1, 50, 1.1, 4.6), oBar('mass', 50, 1.1, 100, 26.1, 4.6)), // the roof's edge
+  oBar('lit', 2.6, 27.4, 50, 4.6, 1.45), oBar('lit', 50, 4.6, 97.4, 27.4, 1.45), // the bargeboards' white trim
+  oRect('dark', 50, 62, 84.2, 45.7),                             // the window: the booth's inside
+  oBar('lit', 7.9, 39.1, 92.1, 39.1, 1.3),                       // the window's white frame
+  oBar('lit', 7.9, 39.1, 7.9, 84.8, 1.3), oBar('lit', 92.1, 39.1, 92.1, 84.8, 1.3),
+  oBar('line', 9.2, 60.9, 19.7, 60.9, 1.05), oBar('line', 40.8, 60.9, 51.3, 60.9, 1.05), // the ticket-roll rails
+  oBar('line', 69.7, 39.1, 69.7, 45.4, 0.7),                     // a lamp on its flex,
+  oTri('line', 69.7, 47.3, 7.9, 3.8, 'up'), oEll('lit', 69.7, 49.7, 2.6, 1.6), // its shade and bulb
+];
+export const ticketKiosk = (x: number, y: number, w: number, h: number) => fit(TICKET_KIOSK, x, y, w, h);
+const KIOSK_FRONT: ObjPart[] = [
+  ...e3N('wood', oRect('mass', 50, 7.8, 103.9, 15.6, 0, 1)),     // the counter shelf
+  ...e3N('wood', oRect('face', 50, 20.3, 101.3, 9.4)),           // its front edge, in shade
+  ...e3N('whitewash',
+    oRect('mass', 50, 62.5, 94.7, 75),                           // the boarded panelling
+    oRect('face', 95.4, 62.5, 3.9, 75),                          // its end, turned from the lamp
+  ),
+  oBar('line', 2.6, 50, 92.1, 50, 2.5), oBar('line', 2.6, 75, 92.1, 75, 2.5), // the boards
+];
+export const kioskFront = (x: number, y: number, w: number, h: number) => fit(KIOSK_FRONT, x, y, w, h);
+
+// ── TICKET ROLL ──────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, cloakroom and raffle "admit one" rolls): tickets come wound on a
+// card CORE, a roll seen end-on as a disc of paper turns round a pale core on its
+// spindle, with the STRIP hanging off it, perforated between tickets. Laid out for a
+// box about 12 × 26: the roll above, one ticket's length of strip below; the next
+// ticket to tear off is the scene's, hung under the strip.
+const TICKET_ROLL: ObjPart[] = [
+  oEll('mass', 50, 23, 100, 46),                                 // the roll, end-on
+  oRect('mass', 50, 74, 62, 52, 0, 2),                           // the strip hanging off it
+  oEll('dark', 56, 26, 66, 30),                                  // the turns of paper, in shade
+  oEll('lit', 50, 23, 30, 13.8),                                 // the card core
+  oEll('line', 50, 23, 12, 5.5),                                 // the spindle
+  oBar('lit', 22, 74, 78, 74, 3),                                // a perforation across the strip
+];
+export const ticketRoll = (x: number, y: number, w: number, h: number) => fit(tint(TICKET_ROLL, 'ticketPink'), x, y, w, h);
+
+// ── TICKET ───────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, a 1956 general-admission ticket): a ticket is a printed SLIP about
+// two and a half times as long as it is tall, with a STUB at one end beyond a
+// perforated line. The stub is what says ticket rather than label. Pink by default; a
+// scene re-tints it.
+const TICKET: ObjPart[] = [
+  oRect('mass', 50, 50, 100, 100, 0, 6),                         // the slip
+  oRect('face', 87, 50, 26, 100, 0, 3),                          // the stub
+  oBar('lit', 73, 10, 73, 90, 5),                                // the perforation
+  oBar('line', 12, 34, 60, 34, 9), oBar('line', 12, 64, 46, 64, 8), // the print
+];
+export const ticket = (x: number, y: number, w: number, h: number) => fit(tint(TICKET, 'ticketPink'), x, y, w, h);
+
+// ── TWENTY-POUND NOTE ────────────────────────────────────────────────────────
+//
+// REFERENCE (the Bank of England's £20): a lilac note with a pale FIELD, a portrait in
+// an oval, and the large value — a 2 and a 0 — across from it. As `note`, in its own
+// colour and with its own figure.
+const NOTE_20: ObjPart[] = [
+  ...e3N('note20', oRect('mass', 50, 50, 100, 56, 0, 4)),        // the note
+  oRect('lit', 50, 50, 88, 44, 0, 2),                            // its field
+  ...e3N('note20', oEll('dark', 28, 50, 26, 34)),                // the portrait's oval
+  oEll('lit', 28, 45, 9, 11), oEll('lit', 28, 59, 15, 8),       // the head and shoulders in it
+  oBar('line', 55, 40, 63, 40, 3.5), oBar('line', 63, 40, 63, 49, 3.5), // the value: a 2 …
+  oBar('line', 63, 49, 55, 60, 3.5), oBar('line', 55, 60, 64, 60, 3.5),
+  oEll('line', 77, 50, 14, 22), oEll('lit', 77, 50, 6.5, 14),   // … and a 0
+];
+export const note20 = (x: number, y: number, w: number, h: number) => fit(NOTE_20, x, y, w, h);
+
+// ── TAKINGS ──────────────────────────────────────────────────────────────────
+//
+// REFERENCE (any market cash tin): notes stand on their edges in an open tin, their
+// tops showing over the rim in their own colours — a twenty, a ten and a five. Drawn
+// behind `cashTin`, which covers their lower part.
+const TIN_TAKINGS: ObjPart[] = [
+  ...e3N('note20', oRect('mass', 22, 56, 30, 84, 0, 3)),
+  ...e3N('note10', oRect('mass', 50, 52, 30, 90, 0, 3)),
+  ...e3N('note5', oRect('mass', 78, 58, 30, 80, 0, 3)),
+  oBar('lit', 14, 26, 30, 26, 7), oBar('lit', 42, 22, 58, 22, 7), oBar('lit', 70, 30, 86, 30, 7), // their fields
+];
+export const tinTakings = (x: number, y: number, w: number, h: number) => fit(TIN_TAKINGS, x, y, w, h);
+
+// ── econ3: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE SEASIDE, for Science lesson 3 (2026-10-01). Drawn against pictures fetched with
+// `node scripts/get-reference.mjs` (scratchpad/ref/sci3-*): the ice cream kiosk on
+// Brighton beach and the kiosk row at Skegness, beach parasols on Miami Beach and a
+// parasol's canopy from beneath, Brighton's sea-green promenade railings, a flipchart
+// on its tripod, and a cornet icon. Each is authored in REAL STAGE UNITS (the scene
+// places it at that size), so a point named here is a point on the stage.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const sci3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function sci3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── PROMENADE RAILING ────────────────────────────────────────────────────────
+//
+// REFERENCE. A seaside promenade's railing (Brighton's, painted sea-green) is cast
+// POSTS with a ball on top, a heavy TOP RAIL, a lighter middle rail, and close-set
+// BALUSTERS between the two — the run of thin uprights is what makes it a railing and
+// not a fence. Real units, 66 × 32.
+const PROM_RAILING: ObjPart[] = sci3In(66, 32, [
+  ...sci3N('railGreen',
+    ...[2, 33, 64].map((x) => oBar('mass', x, 3, x, 31.5, 2.6)),            // the posts
+    ...[2, 33, 64].map((x) => oEll('mass', x, 2, 4.4, 4.4)),                 // their balls
+    oBar('mass', 0.5, 5, 65.5, 5, 2.4),                                      // the top rail
+    oBar('mass', 0.5, 19, 65.5, 19, 1.6),                                    // the middle rail
+    oBar('mass', 0.5, 29, 65.5, 29, 1.3),                                    // the foot rail
+    ...[6, 10, 14, 18, 22, 26, 29.5, 36.5, 40, 44, 48, 52, 56, 60].map((x) => oBar('mass', x, 5, x, 19, 0.9)), // balusters
+  ),
+  oBar('lit', 1, 4.2, 65, 4.2, 0.6),                                         // the light along the top rail
+]);
+export const promRailing = (x: number, y: number, w: number, h: number) => fit(PROM_RAILING, x, y, w, h);
+
+// ── BEACH PARASOL ────────────────────────────────────────────────────────────
+//
+// REFERENCE. A beach parasol seen from the side (the Miami Beach row) is a WIDE, LOW
+// canopy — a shallow cone well over twice as wide as it is tall — its panels in
+// alternate colours running from a point at the top to the rib tips along a nearly
+// straight hem, on a single POLE driven into the sand by a SPIKE. Furled, the canopy
+// hangs down the pole from the top as a long bunched teardrop with a strap round it.
+// Three pieces, so a scene can carry it furled and open it: the pole, the furled canopy
+// (real 7 × 46, hung from the pole's top) and the open canopy. The pole and the open
+// canopy are authored in SQUARES — the pole down the middle of a 104 square, its top at
+// (52, 0); the canopy across the top of a 76 square, its apex at (38, 1) — so neither
+// thickens nor skews when it is drawn in a box of another shape.
+const PARASOL_POLE: ObjPart[] = sci3In(104, 104, [
+  ...sci3N('wood', oBar('mass', 52, 1.5, 52, 98, 1.8), oEll('mass', 52, 1.4, 3.4, 3)),
+  ...sci3N('silver', oBar('mass', 52, 97, 52, 103.4, 1.2)),                 // the spike
+]);
+export const parasolPole = (x: number, y: number, w: number, h: number) => fit(PARASOL_POLE, x, y, w, h);
+const PARASOL_FURLED: ObjPart[] = sci3In(7, 46, [
+  ...sci3N('umbOrange',
+    oEll('mass', 3.5, 17, 7, 28),                                            // the bunched canopy
+    ...trapezoid('mass', 3.5, 36, 5.2, 1.4, 18),                             // tapering to the rib tips
+  ),
+  ...sci3N('canvasWhite',
+    oRect('mass', 3.5, 9, 5.6, 3.2, 0, 1),                                   // its white panels, rolled
+    oRect('mass', 3.5, 22, 6.6, 3.2, 0, 1),
+    oRect('mass', 3.5, 35, 4.4, 3, 0, 1),
+  ),
+  ...sci3N('wood', oRect('dark', 3.5, 28.5, 5.6, 2, 0, 0.8)),               // the strap round it
+  oBar('lit', 1.6, 6, 1.4, 30, 0.7),                                         // the light down its side
+]);
+export const parasolFurled = (x: number, y: number, w: number, h: number) => fit(PARASOL_FURLED, x, y, w, h);
+/** One panel of a canopy, apex at (ax, ay), running to the hem between two rib tips. */
+function sci3Gore(role: Role, ax: number, ay: number, p1: [number, number], p2: [number, number]): ObjPart {
+  const mx = (p1[0] + p2[0]) / 2;
+  const my = (p1[1] + p2[1]) / 2;
+  const dx = mx - ax;
+  const dy = my - ay;
+  const h = Math.hypot(dx, dy);
+  const w = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+  return oTri(role, (ax + mx) / 2, (ay + my) / 2, w, h, 'up', (Math.atan2(-dx, dy) * 180) / Math.PI);
+}
+const PARASOL_TIPS: [number, number][] = [[1, 21], [16, 23.5], [30.5, 24.5], [45.5, 24.5], [60, 23.5], [75, 21]];
+const PARASOL_CANOPY: ObjPart[] = sci3In(76, 76, [
+  ...sci3N('umbOrange',
+    oTri('mass', 38, 11.5, 76, 20, 'up'),                                    // the canopy's cone
+    oEll('mass', 38, 20.5, 74, 7.5),                                         // swelling down to its hem
+  ),
+  ...sci3N('canvasWhite',
+    sci3Gore('mass', 38, 1.5, [17, 23], [29.5, 24]),                         // the white panels, alternate
+    sci3Gore('mass', 38, 1.5, [46.5, 24], [59, 23]),
+  ),
+  ...PARASOL_TIPS.map(([x, y]) => oBar('line', 38, 1.6, x, y, 0.55)),       // the ribs
+  ...sci3N('umbOrange', ...PARASOL_TIPS.slice(1, 5).map(([x, y]) => oTri('mass', x, y + 0.6, 2.6, 2.4, 'down'))), // the valance points
+  ...sci3N('wood', oEll('mass', 38, 1, 3.6, 3)),                             // the finial
+  oBar('lit', 30, 5.6, 14, 15.5, 0.9),                                       // the lamp on the near slope
+]);
+export const parasolCanopy = (x: number, y: number, w: number, h: number) => fit(PARASOL_CANOPY, x, y, w, h);
+
+// ── ICE CREAM KIOSK ──────────────────────────────────────────────────────────
+//
+// REFERENCE. A beach ice cream kiosk (Brighton's, and the Skegness row) is a small
+// painted BOX with a SIGN BOARD along its front, a striped AWNING jutting over a wide
+// serving HATCH, a COUNTER ledge at the hatch's foot with the freezer's tubs of ice
+// cream showing inside, and a big model CORNET on the roof. The awning and the cornet
+// on the roof are the field marks: without them it is a shed with a window. Real units,
+// 66 × 124; the counter's top is at y 100, the sign board's face at `KIOSK_SIGN`.
+const ICE_KIOSK: ObjPart[] = sci3In(66, 124, [
+  ...sci3N('kioskBlue',
+    oRect('mass', 33, 79, 62, 90),                                           // the walls
+    oRect('face', 61.5, 79, 5, 90),                                          // the side, away from the lamp
+  ),
+  ...sci3N('canvasWhite',
+    oRect('mass', 33, 33, 68, 5, 0, 1.2),                                    // the roof's edge
+    oRect('mass', 33, 44, 54, 12, 0, 1.2),                                   // the sign board
+    oRect('mass', 33, 102, 60, 4, 0, 1),                                     // the counter ledge
+    oRect('mass', 33, 59, 68, 9),                                            // the awning's white stripes
+  ),
+  ...sci3N('stripeRed', ...[3.5, 15.5, 27.5, 39.5, 51.5, 63.5].map((x) => oRect('mass', x, 59, 6, 9))),
+  ...[3.5, 9.5, 15.5, 21.5, 27.5, 33.5, 39.5, 45.5, 51.5, 57.5, 63.5].map((x, k) =>
+    ({ ...oEll('mass', x, 64, 6, 4.4), nat: (k % 2 ? 'canvasWhite' : 'stripeRed') as NaturalKey })), // the scalloped valance
+  ...sci3N('gloom', oRect('dark', 33, 84, 50, 31)),                         // the hatch, dark inside
+  ...sci3N('kioskBlue', oRect('dark', 33, 69.5, 50, 2)),                     // the awning's shadow on the wall
+  ...sci3N('scoopPink', oRect('mass', 17, 97, 8, 4.4, 0, 1)),               // the tubs in the freezer
+  ...sci3N('vanilla', oRect('mass', 27, 97, 8, 4.4, 0, 1)),
+  ...sci3N('coffee', oRect('mass', 37, 97, 8, 4.4, 0, 1)),
+  ...sci3N('appleGreen', oRect('mass', 47, 97, 8, 4.4, 0, 1)),
+  ...sci3N('kioskBlue', oRect('dark', 33, 121, 62, 4)),                      // the plinth
+  // the model cornet on the roof
+  ...sci3N('wafer', oTri('mass', 33, 21, 14, 18, 'down')),
+  oBar('line', 28, 16, 36.5, 24, 0.6), oBar('line', 38, 16, 29.5, 24, 0.6),
+  ...sci3N('scoopPink', oEll('mass', 33, 9, 17, 12), oRect('mass', 33, 13, 16, 3.2, 0, 1.6)),
+  oEll('lit', 29.5, 6.5, 4, 2.6),
+  oBar('lit', 1.6, 36, 1.6, 120, 0.8),                                       // the lamp down the wall's edge
+]);
+export const iceKiosk = (x: number, y: number, w: number, h: number) => fit(ICE_KIOSK, x, y, w, h);
+/** The kiosk's sign board and its counter ledge, in the kiosk's real units. */
+export const KIOSK_SIGN = { x: 33, y: 44, w: 54, h: 12 } as const;
+export const KIOSK_COUNTER = { x0: 3, x1: 63, y: 100 } as const;
+
+// ── QUEUE STAND ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. A kiosk's queue is marked by a chrome STANCHION on a round foot with a
+// red ROPE hooked from its top to the kiosk, sagging between. Real units, 36 × 44: the
+// post at x 2, the rope's far end at (35, 6).
+const QUEUE_STAND: ObjPart[] = sci3In(36, 44, [
+  ...sci3N('silver',
+    oBar('mass', 2, 4, 2, 42, 2),                                            // the post
+    oEll('mass', 2, 42.6, 9, 2.8),                                           // its foot
+    oEll('mass', 2, 3, 3.8, 3.8),                                            // its knob
+  ),
+  ...sci3N('ropeRed', oBar('mass', 2.5, 6, 18, 11.5, 2), oBar('mass', 18, 11.5, 34.5, 6, 2)), // the rope
+  oEll('line', 35, 6, 2.4, 2.4),                                             // its hook
+]);
+export const queueStand = (x: number, y: number, w: number, h: number) => fit(QUEUE_STAND, x, y, w, h);
+
+// ── FLIPCHART ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A flipchart (the workshop one) is a pale BOARD with a dark CLAMP BAR along
+// its top holding a pad of PAPER, a TRAY along its foot for the pens, on a TRIPOD: a
+// short post under the board and three legs splayed to the floor, the third behind.
+// The clamp bar and the tray are the field marks; without them it is a whiteboard.
+// Real units, 80 × 118; the paper's face, where the scene draws the chart, is
+// `FLIP_PAPER`.
+const FLIP_CHART: ObjPart[] = sci3In(80, 118, [
+  ...sci3N('silver',
+    oBar('face', 40, 76, 40, 116, 2),                                        // the back leg
+    oBar('mass', 40, 62, 40, 77, 3),                                         // the post
+    oBar('mass', 40, 76, 9, 117, 2.4),                                       // the front legs
+    oBar('mass', 40, 76, 71, 117, 2.4),
+  ),
+  ...sci3N('casing',
+    oRect('mass', 40, 33, 78, 62, 0, 2),                                     // the board
+    oRect('mass', 40, 65.5, 80, 3.6, 0, 1.2),                                // the pen tray
+  ),
+  ...sci3N('signBoard', oRect('mass', 40, 5, 80, 5, 0, 1.6)),                 // the clamp bar
+  ...sci3N('paper', oRect('mass', 40, 36, 70, 50)),                          // the pad of paper
+  oBar('line', 20, 65.5, 27, 65.5, 1.2),                                     // a pen in the tray
+]);
+export const flipChart = (x: number, y: number, w: number, h: number) => fit(FLIP_CHART, x, y, w, h);
+export const FLIP_PAPER = { x: 40, y: 36, w: 70, h: 50 } as const;
+
+// ── CORNET ───────────────────────────────────────────────────────────────────
+//
+// REFERENCE. An ice cream cornet is a WAFER CONE, its criss-cross pattern pressed into
+// it, under a round SCOOP that sits just proud of the cone's rim with a lip where it
+// meets it. Real units, 9 × 17, the scoop's top at y 0.
+const cornetParts = (scoop: NaturalKey): ObjPart[] => sci3In(9, 17, [
+  ...sci3N('wafer', oTri('mass', 4.5, 11.6, 7.6, 10.8, 'down')),            // the cone
+  ...sci3N('wafer',
+    oBar('dark', 2, 8, 5.6, 14.6, 0.5), oBar('dark', 7, 8, 3.4, 14.6, 0.5), // its pattern
+    oBar('dark', 3.8, 7.4, 6.4, 11.8, 0.5), oBar('dark', 5.2, 7.4, 2.6, 11.8, 0.5),
+  ),
+  ...sci3N(scoop,
+    oEll('mass', 4.5, 4.2, 8.6, 7.6),                                        // the scoop
+    oRect('mass', 4.5, 6.6, 8.4, 2.2, 0, 1.1),                               // its lip on the rim
+  ),
+  oEll('lit', 3, 2.8, 2.4, 1.7),
+]);
+export const iceCornet = (x: number, y: number, w: number, h: number, scoop: NaturalKey = 'scoopPink') =>
+  fit(cornetParts(scoop), x, y, w, h);
+
+// ── SUN CREAM ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A bottle of sun cream is a squat SQUEEZY BOTTLE stood on its white FLIP
+// CAP, with a pale LABEL on its front. Real units, 5 × 11, cap up.
+const SUN_CREAM: ObjPart[] = sci3In(5, 11, [
+  ...sci3N('creamTube', oRect('mass', 2.5, 6.6, 5, 8.8, 0, 1.6)),
+  ...sci3N('canvasWhite', oRect('mass', 2.5, 1.5, 3.4, 3, 0, 0.7)),
+  oRect('lit', 2.5, 7, 3.4, 3.6, 0, 0.6),
+]);
+export const sunCream = (x: number, y: number, w: number, h: number) => fit(SUN_CREAM, x, y, w, h);
+
+// ── FAIR-WEATHER CLOUD ───────────────────────────────────────────────────────
+//
+// REFERENCE. A fair-weather cloud icon is three white DOMES, the middle one tallest,
+// on a FLAT BOTTOM that is faintly shaded underneath. White, not the rain cloud's grey:
+// this one passes in front of the sun on a fine day. Real units, 60 × 22.
+const FAIR_CLOUD: ObjPart[] = sci3In(60, 22, sci3N('cloudWhite',
+  oEll('mass', 16, 13.5, 22, 15),
+  oEll('mass', 31, 9, 26, 18),
+  oEll('mass', 45, 13, 22, 15),
+  oRect('mass', 30.5, 16.5, 54, 10, 0, 5),
+  oRect('face', 31, 20.2, 46, 2.2, 0, 1.1),
+));
+export const fairCloud = (x: number, y: number, w: number, h: number) => fit(FAIR_CLOUD, x, y, w, h);
+
+// ── sci3: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// history-foundations-3 — A VILLAGE FOOTBRIDGE OVER A STREAM. A plank footbridge on
+// timber trestles with a handrail along its far side, the stream under it, a hay cart
+// whose wheel has gone through a rotten plank, the broken plank and the new one that
+// mends it, reeds on the banks, and a timber barn with a weather vane on its ridge.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const h3N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function h3In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE FOOTBRIDGE: DECK, HANDRAIL, STREAM ───────────────────────────────────
+//
+// REFERENCE (Commons: "Plank footbridge, Westwick, Norfolk"; "Wooden footbridge,
+// Suffield"). A village footbridge over a stream is long PLANKS laid lengthwise and
+// butted end to end over cross BEARERS, each bearer on a pair of timber posts driven
+// into the bed, with a stone or earth ABUTMENT at each bank. The handrail is posts with
+// a TOP RAIL and a MIDDLE RAIL, and every piece of it is weathered to a silver grey.
+// Seen from the side, the deck is a line of plank ends at the bank's own level and the
+// water shows in the shade under it.
+//
+// The deck is authored in the 180 × 18 box it is laid in (x 0 at the left abutment, y 0
+// at the deck's top). The planks butt at 46, 86 and 134; the one from 86 to 134 is the
+// rotten one, and it is NOT in this drawing — the scene draws it broken, and later new.
+const FB_JOINTS = [46, 86, 134] as const;
+const FB_PLANKS = [[26, 40], [66, 40], [154, 40]] as const;
+const FOOTBRIDGE_DECK: ObjPart[] = h3In(180, 18, [
+  // the stone abutments at each bank
+  ...h3N('coping',
+    oRect('mass', 6, 10.5, 12, 15, 0, 1),
+    oRect('mass', 174, 10.5, 12, 15, 0, 1),
+    ...[6, 174].flatMap((x) => [
+      oBar('dark', x - 5.4, 8, x + 5.4, 8, 0.7),
+      oBar('dark', x - 5.4, 13.4, x + 5.4, 13.4, 0.7),
+      oBar('dark', x - 1, 8, x - 1, 13.4, 0.7),
+      oBar('dark', x + 2.5, 13.4, x + 2.5, 18, 0.7),
+    ]),
+  ),
+  // the trestle posts under each joint, and the bearers they carry, seen end on
+  ...h3N('oldWood',
+    ...FB_JOINTS.map((x) => oRect('mass', x, 11.4, 4, 13.2)),
+    ...FB_JOINTS.map((x) => oRect('mass', x, 5.4, 8, 2.8, 0, 0.6)),
+    ...FB_JOINTS.map((x) => oRect('dark', x + 1.1, 12, 1.4, 11.4)),
+  ),
+  // the planks, laid lengthwise and butted over the bearers
+  ...h3N('oldWood',
+    ...FB_PLANKS.map(([x, l]) => oRect('mass', x, 2, l, 4, 0, 0.6)),
+    ...FB_PLANKS.map(([x, l]) => oBar('dark', x - l / 2 + 1, 3.4, x + l / 2 - 1, 3.4, 0.9)),
+    oEll('dark', 58, 2, 2.2, 1.2), oEll('dark', 147, 2.2, 2, 1.1), oBar('dark', 12, 1.8, 22, 2.2, 0.35),
+  ),
+  // the two planks either side of the gap end where the rotten one broke off them: in
+  // jagged, dark splinters, which is what says a plank is MISSING rather than unlaid
+  ...h3N('rotWood',
+    oRect('mass', 84.6, 2, 3, 4), oTri('mass', 87.4, 1.3, 3, 2.2, 'right'), oTri('mass', 87, 3.2, 2.4, 1.8, 'right'),
+    oRect('mass', 135.4, 2, 3, 4), oTri('mass', 132.6, 1.4, 2.6, 2.2, 'left'), oTri('mass', 132.8, 3.2, 3, 1.8, 'left'),
+  ),
+  ...FB_PLANKS.map(([x, l]) => oBar('lit', x - l / 2 + 1.4, 0.6, x + l / 2 - 1.4, 0.6, 0.55)),
+]);
+export const footbridgeDeck = (x: number, y: number, w: number, h: number) => fit(FOOTBRIDGE_DECK, x, y, w, h);
+export { FB_JOINTS };
+
+/** The handrail along the far side: five posts, a top rail and a middle rail. 220 × 48. */
+const FB_POSTS = [4, 60, 116, 172, 216] as const;
+const FOOTBRIDGE_RAIL: ObjPart[] = h3In(220, 48, [
+  ...h3N('oldWood',
+    ...FB_POSTS.map((x) => oRect('mass', x, 25.6, 4.2, 44.8)),
+    ...FB_POSTS.map((x) => oRect('mass', x, 2.6, 6, 3, 0, 0.8)),
+    oRect('mass', 110, 5.8, 218, 3.6, 0, 1),
+    oRect('mass', 110, 24.5, 218, 3, 0, 1),
+    ...FB_POSTS.map((x) => oRect('dark', x + 1.1, 27, 1.4, 40)),
+    oBar('dark', 2, 7.2, 218, 7.2, 0.7),
+    oBar('dark', 2, 25.6, 218, 25.6, 0.6),
+  ),
+  oBar('lit', 2, 4.5, 218, 4.5, 0.5),
+]);
+export const footbridgeRail = (x: number, y: number, w: number, h: number) => fit(FOOTBRIDGE_RAIL, x, y, w, h);
+export { FB_POSTS };
+
+/**
+ * The stream under the bridge: water in the shade of the deck, its surface catching the
+ * light, the muddy banks running down into it at both ends. 172 × 18, its top at the
+ * deck's own top, so the shade under the deck is what shows through a gap in it.
+ */
+const STREAM_BED: ObjPart[] = h3In(172, 18, [
+  ...h3N('water', oRect('mass', 86, 9.5, 158, 17)),
+  ...h3N('soil', oEll('mass', 6, 11, 14, 14), oEll('mass', 166, 11, 14, 14)),
+  ...h3N('water', oRect('dark', 86, 3.2, 156, 4.4), oRect('dark', 86, 16.4, 156, 2.8)),
+  oBar('lit', 14, 9.2, 40, 9.2, 0.6), oBar('lit', 60, 11.2, 82, 11.2, 0.6), oBar('lit', 104, 9.6, 132, 9.6, 0.6),
+]);
+export const streamBed = (x: number, y: number, w: number, h: number) => fit(STREAM_BED, x, y, w, h);
+
+// ── THE HAY CART ─────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Mr. Simpson standing in a horse-drawn hay cart, Nova Scotia";
+// "Loading hay onto the wagon, Kingsthorpe"). A two-wheeled farm cart is a flat BED on
+// one axle, a LADDER of staves and rails along each side to hold the load in, and two
+// SHAFTS running forward from the front of the bed. The wheel is TALL — its top stands
+// well above the bed — so seen from the side it covers the bed's middle. The hay is a
+// mound with a rounded, lumpy top, overhanging the ladder a little and shaded low in
+// the bed.
+//
+// Two drawings in one 128 × 60 box, so the scene can lay the ladder OVER the hay and
+// outline each: the axle is at (42, 54), the bed 2–82 × 42–50, the shafts' tips at
+// (126, 59) — the cart stands on its wheel and the tips of its shafts. The wheel is the
+// library's `wheel`, turned by the scene.
+export const CART_AXLE = { x: 42, y: 54, w: 128, h: 60 } as const;
+const CART_HAY: ObjPart[] = h3In(128, 60, [
+  ...h3N('hay',
+    oRect('mass', 42, 30, 80, 24, 0, 3),
+    oEll('mass', 42, 21, 86, 28),
+    oEll('mass', 14, 18, 28, 20),
+    oEll('mass', 30, 12, 30, 20),
+    oEll('mass', 51, 10, 32, 18),
+    oEll('mass', 70, 15, 30, 20),
+    oRect('face', 42, 39.5, 80, 5),
+    oBar('dark', 8, 27, 16, 24, 0.8), oBar('dark', 28, 21, 38, 19, 0.8), oBar('dark', 54, 24, 63, 21, 0.8),
+    oBar('dark', 20, 34, 30, 32, 0.8), oBar('dark', 64, 31, 74, 33, 0.8), oBar('dark', 42, 14, 50, 12, 0.7),
+    oBar('mass', 36, 3, 33, 0.5, 0.9), oBar('mass', 58, 2.5, 62, 0.6, 0.9), oBar('mass', 3, 16, 0.6, 13, 0.9),
+  ),
+]);
+export const cartHay = (x: number, y: number, w: number, h: number) => fit(CART_HAY, x, y, w, h);
+const CART_BODY: ObjPart[] = h3In(128, 60, [
+  ...h3N('wood',
+    oRect('mass', 42, 46, 80, 8, 0, 1),
+    ...[3, 22, 42, 62, 81].map((x) => oBar('mass', x, 43, x, 21, 2.6)),
+    oBar('mass', 1.5, 21.5, 82.5, 21.5, 2.8),
+    oBar('mass', 2, 32, 82, 32, 2),
+    oBar('mass', 78, 46, 125, 58.5, 3.2),
+    oBar('face', 80, 43.6, 123, 55.4, 2.4),
+    oBar('dark', 3, 49, 81, 49, 1.4),
+    oRect('dark', 42, 51.5, 16, 3),
+  ),
+  oBar('lit', 4, 42.8, 80, 42.8, 0.6),
+  oRect('line', 124.6, 58.2, 3.4, 2.6, -15, 0.6),
+]);
+export const cartBody = (x: number, y: number, w: number, h: number) => fit(CART_BODY, x, y, w, h);
+
+// ── THE PLANKS ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: decay in timber, from the USDA's forest-pathology bulletins). Rot
+// in a plank is DARK and SOFT where it has got in: the sound wood stays grey to the
+// break, and the broken end is brown-black, splintered into jagged fibres and pitted.
+// The rotten piece is 28 × 6, its broken end on the right; the new plank is the length
+// of the one that rotted, 48 × 4.5, in pale fresh-sawn pine with its grain.
+const BROKEN_PLANK: ObjPart[] = h3In(28, 6, [
+  ...h3N('oldWood', oRect('mass', 11, 3, 22, 4, 0, 0.6)),
+  ...h3N('rotWood',
+    oRect('mass', 23.4, 3, 5.2, 4),
+    oTri('mass', 26.8, 1.8, 2.8, 1.8, 'right'),
+    oTri('mass', 27, 3.3, 2.6, 1.4, 'right'),
+    oTri('mass', 26.4, 4.6, 2.2, 1.4, 'right'),
+    oEll('dark', 22.4, 2.4, 1.8, 1.2), oEll('dark', 24.8, 4, 1.6, 1.1), oBar('dark', 14, 3.1, 21, 2.5, 0.5),
+    oEll('mass', 18.6, 3.6, 3.4, 2.4),
+  ),
+  ...h3N('oldWood', oBar('dark', 1, 4.4, 17, 4.4, 0.8)),
+  oBar('lit', 1.2, 1.5, 16, 1.5, 0.5),
+]);
+export const brokenPlank = (x: number, y: number, w: number, h: number) => fit(BROKEN_PLANK, x, y, w, h);
+const NEW_PLANK: ObjPart[] = h3In(48, 4.5, [
+  ...h3N('newWood',
+    oRect('mass', 24, 2.25, 48, 4.5, 0, 0.5),
+    oRect('dark', 24, 3.75, 46.4, 0.8),
+    oRect('dark', 14, 2.15, 10, 0.35), oRect('dark', 33, 2.0, 12, 0.35), oEll('dark', 33, 2.6, 1.4, 1),
+  ),
+  oRect('lit', 24, 0.8, 46, 0.5),
+]);
+export const newPlank = (x: number, y: number, w: number, h: number) => fit(NEW_PLANK, x, y, w, h);
+
+// ── REEDS ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE (any stream bank): a clump of long BLADES fanning from one root, and among
+// them a bulrush or two — a brown velvet head on its own stalk. 22 × 28.
+const REEDS: ObjPart[] = h3In(22, 28, [
+  ...h3N('leaf',
+    oBar('mass', 10, 27.5, 3.5, 5, 1.6),
+    oBar('mass', 11, 27.5, 11, 1.5, 1.6),
+    oBar('mass', 12, 27.5, 19, 7, 1.6),
+    oBar('mass', 9.5, 27.5, 1, 14, 1.4),
+    oBar('mass', 12.5, 27.5, 21, 15, 1.4),
+    oBar('dark', 11, 27, 11, 12, 0.6),
+  ),
+  ...h3N('seedhead', oRect('mass', 7, 9, 3, 8, -16, 1.5), oRect('mass', 16, 11, 3, 8, 14, 1.5)),
+]);
+export const reeds = (x: number, y: number, w: number, h: number) => fit(REEDS, x, y, w, h);
+
+// ── THE BARN, AND ITS WEATHER VANE ───────────────────────────────────────────
+//
+// REFERENCE (a village timber barn, gable end on): a tall gable of horizontal
+// WEATHERBOARDS under BARGE BOARDS standing proud of the roof's edge, a hay LOFT door
+// high in the gable, and wide double DOORS braced in a Z. 92 × 140, the apex at (46, 1).
+//
+// REFERENCE (Commons: the Smithsonian's rooster weathervanes). A weather vane is a
+// SPINDLE on the ridge carrying the four ARMS of the compass, and above them a pointer
+// with a broad TAIL that the wind pushes round — here a cockerel standing on an arrow,
+// his tail feathers sweeping up behind him. Cut from black iron, so it reads as a
+// silhouette against the sky. 44 × 46, the spindle's foot at (22, 46).
+const BARN: ObjPart[] = h3In(92, 140, [
+  ...h3N('barnBoard',
+    oRect('mass', 46, 95, 84, 90),
+    oTri('mass', 46, 26, 84, 50, 'up'),
+    ...[58, 66, 74, 82, 90, 98, 106, 114, 122, 130].map((y) => oBar('dark', 6, y, 86, y, 0.8)),
+    ...[18, 26, 34, 42].map((y) => {
+      const half = ((y - 1) / 50) * 42 - 3;
+      return oBar('dark', 46 - half, y, 46 + half, y, 0.8);
+    }),
+    oRect('dark', 46, 138.6, 84, 2.8),
+  ),
+  ...h3N('roofBoard',
+    oBar('mass', -0.5, 53.5, 46, 1.5, 4.4),
+    oBar('mass', 46, 1.5, 92.5, 53.5, 4.4),
+    oRect('dark', 46, 35, 15, 17, 0, 1),
+  ),
+  ...h3N('wood',
+    oRect('dark', 46, 108.5, 46, 63, 0, 1),
+    oBar('dark', 46, 78, 46, 139, 0.9),
+  ),
+  oBar('line', 26, 82, 26, 135, 0.9), oBar('line', 66, 82, 66, 135, 0.9),
+  oBar('line', 26, 84, 43, 134, 0.9), oBar('line', 66, 84, 49, 134, 0.9),
+  oBar('line', 24, 108, 44, 108, 0.9), oBar('line', 48, 108, 68, 108, 0.9),
+  oBar('line', 23, 76.5, 69, 76.5, 1.2),
+]);
+export const barn = (x: number, y: number, w: number, h: number) => fit(BARN, x, y, w, h);
+const WEATHER_VANE: ObjPart[] = h3In(44, 46, [
+  ...h3N('iron',
+    oBar('mass', 22, 45, 22, 15, 1.6),
+    oRect('mass', 22, 44, 5, 3, 0, 0.8),
+    oBar('mass', 3, 34, 41, 34, 1.3),
+    oBar('mass', 15.5, 38, 28.5, 30, 1.1),
+    oEll('mass', 3, 34, 2.8, 2.8), oEll('mass', 41, 34, 2.8, 2.8),
+    oBar('mass', 6, 21, 38, 21, 1.4),
+    oTri('mass', 40, 21, 5, 5, 'right'),
+    oRect('mass', 5, 21, 5, 6, 0, 0.5),
+    oEll('mass', 12, 6.5, 12, 4.4, -55),
+    oEll('mass', 10.5, 10.5, 12, 4.2, -30),
+    oEll('mass', 12.5, 14, 10, 3.6, -8),
+    oEll('mass', 21, 12.5, 14, 8),
+    oEll('mass', 28.5, 7, 6, 7.5),
+    oTri('mass', 33, 6.6, 3, 2, 'right'),
+    oTri('mass', 26.8, 2.6, 2.6, 3, 'up'), oTri('mass', 29.2, 2.4, 2.6, 3, 'up'),
+    oBar('mass', 21, 16, 21, 20.5, 1), oBar('mass', 24, 16, 25, 20.5, 1),
+    oEll('dark', 22, 15, 10, 3),
+  ),
+  oEll('lit', 18, 10.4, 5, 1.6, -10),
+  oEll('lit', 29.6, 6, 1.2, 1.2),
+]);
+export const weatherVane = (x: number, y: number, w: number, h: number) => fit(WEATHER_VANE, x, y, w, h);
+
+// ── hist3: objects for this lesson go ABOVE this line ──
+
 /** Every object, by name — what `sheet-objects` and `check:objects` walk. */
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
@@ -3777,5 +5372,19 @@ export const OBJECTS = {
   // hist2:
   atticRoof, atticGable, atticBeams, atticWindow, atticDoorway, steamerTrunk, hatboxBack, hatboxFront, hatboxLid,
   letterBundle, newsCorner, oldLetter, historyBook, historyBookOpen, museumLeaflet, oldNewspaper, portraitFrame, shelfBooks,
+  // phil3:
+  libDesk, libBookcase, foundSign, dateStamp, bookStack, novelOpen, novelLeaf, lostPoster, pushpin, flyer, boxBack, boxFront,
+  // psych3:
+  galleryPlinth, caseGlass, caseFrame, chippedMug, mugBase, labelStand, blankCard, galleryStool, galleryWindow, giltPainting,
+  // growth3:
+  runningTrack, trackVerge, parkNoticeBoard, goalCard, wallCalendar, stopwatch, sportsBottle, litterBin, newspaper, ballpoint, floodlight,
+  // biz3:
+  fairGazebo, fairCloth, candleJar, emptyJar, waxBlock, ribbonSpool, ribbonLength, ribbonBow, toteBag, tentSlate, pennant,
+  // econ3:
+  posterWall, gigPoster, matchPoster, ticketKiosk, kioskFront, ticketRoll, ticket, note20, tinTakings,
+  // sci3:
+  promRailing, parasolPole, parasolFurled, parasolCanopy, iceKiosk, queueStand, flipChart, iceCornet, sunCream, fairCloud,
+  // hist3:
+  footbridgeDeck, footbridgeRail, streamBed, cartHay, cartBody, brokenPlank, newPlank, reeds, barn, weatherVane,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;

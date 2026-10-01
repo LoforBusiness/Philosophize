@@ -45,13 +45,35 @@
 // comma and twice that at a stop, whatever the take did.
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
 import { PACES, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
 
-const TRIES = 5;
+// ── ONE GO (2026-10-01) ─────────────────────────────────────────────────────
+// The owner: *"I don't want to have to keep going back and back to keep reiterating the
+// narration … if creating the narration voices can be done in one go by following the
+// rules … that will be very good."* Re-voicing all fourteen dialogue lessons cost 64,000
+// characters, and the requests broke down as: half the first takes missed their band
+// (the voice scatters about 8% either way at one rate), and earlier rounds re-voiced
+// lines because a word changed AFTER they were voiced. So: a line gets at most three
+// tries; each voice's first take is AIMED, from what it measured per unit of rate on
+// those 226 requests (SPEED_PER_RATE); and nothing is rendered until the lesson's words
+// pass the prose checks, so a voiced word never has to change.
+const TRIES = 3;
+/**
+ * Syllables a second a voice gives per unit of speaking rate, per pace: the medians of 226
+ * dialogue requests on 2026-10-01 (pause tags and short sentences make brisk lines read
+ * slower per unit, so the two paces are kept apart). A first take is asked for at
+ * aim / this.
+ */
+const SPEED_PER_RATE = {
+  'en-GB-Chirp3-HD-Algieba|even': 4.80, 'en-GB-Chirp3-HD-Algieba|brisk': 4.6,
+  'en-AU-Chirp3-HD-Zubenelgenubi|even': 4.66, 'en-AU-Chirp3-HD-Zubenelgenubi|brisk': 4.30,
+  'en-GB-Chirp3-HD-Sadachbia|even': 4.88, 'en-GB-Chirp3-HD-Sadachbia|brisk': 4.97,
+  'en-US-Chirp3-HD-Kore|even': 5.07, 'en-US-Chirp3-HD-Kore|brisk': 4.35,
+};
 
 const [lessonId, outDir, ...picks] = process.argv.slice(2);
 if (!lessonId || !outDir) {
@@ -90,6 +112,20 @@ beats.forEach((b, i) => {
   lines.push({ i, key: keyOf(lessonId, i), text: b.text, markup: b.speaker ? endingMarkup(markup) : markup, dialogue: !!b.speaker, voice: v, rate: only.get(i) ?? v.rate });
 });
 if (!lines.length) { console.error('no spoken beats to render'); process.exit(1); }
+
+// THE WORDS ARE FINAL BEFORE THE VOICE IS ASKED. A dialogue lesson's prose checks run
+// first; a failure here costs nothing, where the same failure after rendering costs a
+// re-voice. RENDER_FORCE=1 skips it, for a retake of words already checked.
+if (beats.some((b) => b.speaker) && !process.env.RENDER_FORCE) {
+  for (const c of ['check-dialogue', 'check-splits', 'check-words', 'check-ear', 'check-voice', 'check-plainwords']) {
+    const r = spawnSync(process.execPath, ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', path.join('scripts', `${c}.mjs`)], { encoding: 'utf8', env: { ...process.env, DIALOGUE_TEXT_ONLY: '1' } });
+    if (r.status) {
+      const mine = (r.stdout + r.stderr).split('\n').filter((x) => x.includes(lessonId)).slice(0, 8).join('\n');
+      console.error(`${c} fails, so nothing was rendered: fix the words first, then voice them once.\n${mine}`);
+      process.exit(1);
+    }
+  }
+}
 
 const GCLOUD = path.join(process.env.LOCALAPPDATA ?? '', 'Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd');
 const token = execFileSync('cmd.exe', ['/d', '/s', '/c', `""${GCLOUD}" auth application-default print-access-token"`],
@@ -160,7 +196,8 @@ const learned = new Map();
  */
 async function renderAt(l, p) {
   const band = PACES[p];
-  const base = l.voice.rate * band.factor * l.nudge;
+  const spr = SPEED_PER_RATE[`${l.voice.name}|${p}`];
+  const base = (spr ? band.aim / spr : l.voice.rate * band.factor) * l.nudge;
   const lk = `${l.voice.name}|${p}`;
   let rate = base * (learned.get(lk) ?? 1);
   let best = null;

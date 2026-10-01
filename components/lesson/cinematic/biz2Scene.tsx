@@ -663,7 +663,7 @@ const TAG_H = 13;
 const FIT_Q = [
   { id: 'rolls', label: 'ROLLS', left: MOUTH.x - 19, top: MOUTH.y - 16, w: 34, bottom: TAG_LOW, correct: true },
   { id: 'cake', label: 'CAKE', left: CAKE_AT.x - 16, top: CAKE_AT.y - 16, w: 30, bottom: TAG_LOW, correct: false },
-  { id: 'macarons', label: 'MACARONS', left: MAC.x - 27, top: MAC.y - 9, w: 56, bottom: TAG_LOW, correct: false },
+  { id: 'macarons', label: 'MACARONS', left: MAC.x - 29, top: MAC.y - 9, w: 60, bottom: TAG_LOW, correct: false },
 ];
 function FitTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;

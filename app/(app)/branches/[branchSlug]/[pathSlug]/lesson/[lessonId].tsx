@@ -233,6 +233,13 @@ import { Biz2Lesson } from '@/components/lesson/cinematic/biz2Scene';
 import { Econ2Lesson } from '@/components/lesson/cinematic/econ2Scene';
 import { Sci2Lesson } from '@/components/lesson/cinematic/sci2Scene';
 import { Hist2Lesson } from '@/components/lesson/cinematic/hist2Scene';
+import { Phil3Lesson } from '@/components/lesson/cinematic/phil3Scene';
+import { Psych3Lesson } from '@/components/lesson/cinematic/psych3Scene';
+import { Growth3Lesson } from '@/components/lesson/cinematic/growth3Scene';
+import { Biz3Lesson } from '@/components/lesson/cinematic/biz3Scene';
+import { Econ3Lesson } from '@/components/lesson/cinematic/econ3Scene';
+import { Sci3Lesson } from '@/components/lesson/cinematic/sci3Scene';
+import { Hist3Lesson } from '@/components/lesson/cinematic/hist3Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -547,19 +554,26 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   // Economics & Finance — the first dialogue lesson (LESSON_RULES group AP).
   'economics-foundations-1': Econ1Lesson,
   'economics-foundations-2': Econ2Lesson,
+  'economics-foundations-3': Econ3Lesson,
   // One road per subject (2026-09-30): each subject's first lesson, a dialogue lesson.
   'philosophy-foundations-1': Phil1Lesson,
   'philosophy-foundations-2': Phil2Lesson,
+  'philosophy-foundations-3': Phil3Lesson,
   'psychology-foundations-1': Psych1Lesson,
   'psychology-foundations-2': Psych2Lesson,
+  'psychology-foundations-3': Psych3Lesson,
   'personal-growth-foundations-1': Growth1Lesson,
   'personal-growth-foundations-2': Growth2Lesson,
+  'personal-growth-foundations-3': Growth3Lesson,
   'business-foundations-1': Biz1Lesson,
   'business-foundations-2': Biz2Lesson,
+  'business-foundations-3': Biz3Lesson,
   'science-foundations-1': Sci1Lesson,
   'science-foundations-2': Sci2Lesson,
+  'science-foundations-3': Sci3Lesson,
   'history-foundations-1': Hist1Lesson,
   'history-foundations-2': Hist2Lesson,
+  'history-foundations-3': Hist3Lesson,
   'metaphysics-being-26': Metaphysics26Lesson,
   'epistemology-knowledge-26': Epistemology26Lesson,
   'logic-arguments-24': Logic24Lesson,

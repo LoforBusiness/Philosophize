@@ -1,6 +1,7 @@
 import type { Path } from '@/data/types';
 import first from './lessons/what-is-philosophy';
 import second from './lessons/what-makes-an-argument-good';
+import third from './lessons/how-do-we-decide-whats-right';
 
 const units: Path[] = [
   {
@@ -8,7 +9,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "What philosophy is, and the kind of question it asks.",
-    lessons: [first, second],
+    lessons: [first, second, third],
   },
 ];
 

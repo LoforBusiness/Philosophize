@@ -109,12 +109,15 @@ if (gen) {
 // about psychology, business, science and the rest, which name no philosopher on
 // purpose — and philosophy's old library is retired until it is rebuilt. Held to 60%
 // coverage and a 20% ceiling now, a seven-lesson table fails by arithmetic, not by a
-// defect. They switch back on by themselves once 20 lessons are open again.
-const OPEN_LESSONS = lessonIds.size;
+// defect. They switch back on by themselves once 20 PHILOSOPHY lessons are open again.
+// (They counted every open lesson until 2026-10-01, when the third lesson on each road
+// took the total to 21 with three of them philosophy: the switch tripped on a count of
+// psychology, business and science lessons that name no philosopher by design.)
+const OPEN_LESSONS = [...lessonIds].filter((id) => id.startsWith('philosophy-')).length;
 const CHART_READY = OPEN_LESSONS >= 20;
 const covered = Object.keys(LESSON_MENTIONS).length;
 const pct = (100 * covered) / lessonIds.size;
-if (!CHART_READY) ok(`${covered} of ${lessonIds.size} open lessons name a philosopher`, 'the chart rules wait for 20 open lessons');
+if (!CHART_READY) ok(`${covered} of ${lessonIds.size} open lessons name a philosopher`, 'the chart rules wait for 20 open philosophy lessons');
 else if (pct >= 60) ok(`${covered} of ${lessonIds.size} lessons name a philosopher`, `${pct.toFixed(0)}%`);
 else bad(`only ${covered} of ${lessonIds.size} lessons name a philosopher`, 'the signal is too thin to chart');
 

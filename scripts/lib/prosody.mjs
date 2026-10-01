@@ -49,9 +49,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Syllables a second of speech, pauses taken out. `factor` scales the voice's own rate for a first take. */
+/**
+ * THE SPEED IS PERSONAL GROWTH 2's (owner, 2026-10-01): *"the speed of that entire lesson
+ * of all the narration voices all seems really nice. I like that speed … so that it
+ * doesn't get too fast, but especially so it doesn't get too slow."* Measured, its
+ * ordinary lines run 5.05–5.56 syllables a second together (median 5.31) and its quick
+ * ones 5.84–6.04. The bands are drawn around that: the FLOOR is where it was and never
+ * moves down, and the ceiling has room for the voice's own scatter (about 8% at one
+ * rate), which is what lets a line be voiced in one go. `check:narration` re-measures
+ * the reference lesson and fails if a band ever stops describing it.
+ */
+export const PACE_REFERENCE = 'personal-growth-foundations-2';
 export const PACES = {
-  even: { aim: 5.3, min: 4.95, max: 5.65, factor: 1 },
-  brisk: { aim: 5.8, min: 5.4, max: 6.2, factor: 1.08 },
+  even: { aim: 5.35, min: 4.95, max: 5.85, factor: 1 },
+  brisk: { aim: 5.85, min: 5.4, max: 6.4, factor: 1.08 },
 };
 export const PACE_NAMES = Object.keys(PACES);
 
