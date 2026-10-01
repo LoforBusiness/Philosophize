@@ -82,7 +82,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, philosophy-foundations-1). 0 for a beat with no voice.
  */
-const LINES = [3.38, 4.76, 4.29, 6.63, 4.76, 0, 5.14, 3.77, 6.33, 0, 7.03, 0, 0];
+const LINES = [3.18, 4.52, 3.86, 6.08, 4.41, 0, 4.59, 3.41, 5.71, 0, 6.38, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen.
@@ -123,7 +123,7 @@ const PH_D = BEATS.map(() => 1);
 const ME_D = BEATS.map(() => -1);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const OW_P = [TALK, LISTEN, TALK, LISTEN, NOD, LISTEN, LEAN, TALK, LISTEN, NOD, LISTEN, NOD, LISTEN];
-const ME_P = [LISTEN, TALK, LISTEN, NOD, LISTEN, LEAN, TALK, LISTEN, NOD, LEAN, LISTEN, NOD, LISTEN];
+const ME_P = [LISTEN, TALK, LISTEN, NOD, NOD, LEAN, TALK, LISTEN, NOD, LEAN, LISTEN, NOD, LISTEN];
 const PH_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, EXPLAIN, LISTEN, NOD, LEAN, EXPLAIN, LISTEN, EXPLAIN, NOD, LISTEN];
 
 // ── the bicycle on its stand ─────────────────────────────────────────────────

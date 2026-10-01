@@ -8382,7 +8382,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   quick reaction — one for the line or one per sentence, each with its own speed band.
   Its pauses come from its PUNCTUATION (no hand `markup`): `scripts/lib/prosody.mjs` asks
   the voice for a pause at every mark and then SETS each one in the audio — a comma
-  0.2 s, a full stop 0.45, a question 0.5 — because Chirp pauses in the right places at
+  0.16 s, a full stop 0.36, a question 0.42 — because Chirp pauses in the right places at
   the wrong lengths. A line with two speeds is rendered whole at each and spliced at the
   sentence end; every request carries a throwaway word after the line that is cut away,
   which is what finally stopped takes ending inside their last word. `render-narration`
@@ -8393,10 +8393,13 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   settled-frame proof), and every second lesson was voiced with it.
 - **No slow speech, and no drifting arms (2026-10-01).** The owner: the slow lines
   *"sound so bad … I want more medium pace or faster pace"*, and the arms *"slowly moving
-  back and forth … looks AI"*. `slow` is gone (AP17: even 4.5–5.2, brisk 4.9–5.7
-  syllables a second), and all 118 dialogue lines were brought up to it WITHOUT a new
-  render: `scripts/retime-narration.mjs` time-stretches each sentence with ffmpeg's
-  rubberband and re-sets the pauses, so it cost no voice characters. Dialogue scenes pose
+  back and forth … looks AI"*. `slow` is gone, and the same day the owner asked for
+  faster still, so the bands are even 4.95–5.65 and brisk 5.4–6.2 syllables a second, with
+  shorter pauses. All 118 dialogue lines were brought up to it WITHOUT a new render, so it
+  cost no voice characters: `scripts/retime-narration.mjs` stretches only the SPEECH of
+  each sentence, once, from the ORIGINAL takes, with Praat's PSOLA (`scripts/lib/psola.py`)
+  and sets every pause directly. Measured by harmonics-to-noise ratio it is cleaner than the
+  rubberband pass it replaced (0.7 dB under the originals, against 1.9). Dialogue scenes pose
   with `emoteStill`/`emoteStillLive`/`postureStill` (moves.ts), which hold the hands
   at each pose's rest from the generated `ARM_REST` table; an arm moves only when the
   scene moves it (AP18, held by `check:dialogue`). The cast's default rates were raised

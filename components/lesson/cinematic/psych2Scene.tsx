@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, psychology-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [3.02, 4.79, 5.81, 5.01, 8.44, 0, 7.98, 5, 6.72, 0, 3.91, 0, 0];
+const LINES = [2.99, 4.41, 5.31, 4.67, 7.62, 0, 7.26, 4.63, 6.2, 0, 3.68, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, waiting for the answer, leaning in; and a posture for the crouch.
@@ -148,7 +148,7 @@ const C_TURN: Track[] = BEATS.map((_, n) => (n === N_REBUILD ? [[0, -1], [0.46, 
 const H_LEGS: Track[] = BEATS.map((b) => (b.th ? [[0, 52]] : [[0, H_X0]]));
 const H_TURN: Track[] = BEATS.map(() => [[0, 1]]);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const B_P = [TALK, LISTEN, TALK, NOD, LISTEN, WAIT, NOD, HIPS, LISTEN, WAIT, LEAN, NOD, LISTEN];
+const B_P = [TALK, LISTEN, TALK, NOD, NOD, WAIT, NOD, HIPS, LISTEN, WAIT, LEAN, NOD, LISTEN];
 const C_P = [LISTEN, TALK, LISTEN, LISTEN, LISTEN, WAIT, NOD, TALK, NOD, WAIT, LISTEN, WAIT, LISTEN];
 const H_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, EXPLAIN, WAIT, EXPLAIN, NOD, EXPLAIN, WAIT, NOD, LEAN, LISTEN];
 

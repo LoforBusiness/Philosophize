@@ -23,7 +23,7 @@
 //
 // So the voice is asked for a pause at every mark (markupOf), and then each pause is
 // SET to a person's length in the audio itself (shapePauses), where it is exact and does
-// not depend on the take. A comma rests about a fifth of a second, a full stop about
+// not depend on the take. A comma rests about a sixth of a second, a full stop about
 // twice that, a question a touch longer, because a listener needs the beat to hear that
 // it was one. A pause the text does not ask for is shortened to a catch of breath.
 //
@@ -40,7 +40,9 @@
 // line on a synthetic voice does not sound weighty, it sounds dragged. An idea is
 // carried by the PAUSE at its marks, which shapePauses sets exactly, and never by
 // stretching the words. The bands moved up with it: even is the medium pace, brisk is
-// faster, and nothing is said under about 4.4.
+// faster, and nothing is said under about 4.95. The owner asked for faster again the
+// same day, so the bands rose once more and the pauses were shortened (a pause cut from
+// silence costs the voice nothing, so it is the first place a line gets quicker).
 //
 // ZERO IMPORTS, like rig.ts and tone.ts: plain functions on 16-bit PCM, so the render,
 // the install, the manifest and the check all read a take the same way.
@@ -48,25 +50,25 @@
 
 /** Syllables a second of speech, pauses taken out. `factor` scales the voice's own rate for a first take. */
 export const PACES = {
-  even: { aim: 4.85, min: 4.5, max: 5.2, factor: 1 },
-  brisk: { aim: 5.3, min: 4.9, max: 5.7, factor: 1.08 },
+  even: { aim: 5.3, min: 4.95, max: 5.65, factor: 1 },
+  brisk: { aim: 5.8, min: 5.4, max: 6.2, factor: 1.08 },
 };
 export const PACE_NAMES = Object.keys(PACES);
 
 /**
  * How long the voice rests at each mark, in seconds of silence: where the render sets it
- * (`aim`) and the band a take must sit in. A stop is twice a comma; a question rests a
+ * (`aim`) and the band a take must sit in. A stop is about twice a comma; a question rests a
  * little longer so it is heard as one; a dash or a colon sits between.
  */
 export const PAUSES = {
-  comma: { aim: 0.2, min: 0.14, max: 0.3 },
-  dash: { aim: 0.26, min: 0.18, max: 0.36 },
-  semi: { aim: 0.3, min: 0.2, max: 0.4 },
-  colon: { aim: 0.32, min: 0.22, max: 0.44 },
-  stop: { aim: 0.45, min: 0.35, max: 0.6 },
-  exclaim: { aim: 0.45, min: 0.35, max: 0.6 },
-  question: { aim: 0.5, min: 0.38, max: 0.66 },
-  ellipsis: { aim: 0.55, min: 0.4, max: 0.72 },
+  comma: { aim: 0.16, min: 0.11, max: 0.24 },
+  dash: { aim: 0.2, min: 0.14, max: 0.28 },
+  semi: { aim: 0.24, min: 0.16, max: 0.32 },
+  colon: { aim: 0.26, min: 0.18, max: 0.36 },
+  stop: { aim: 0.36, min: 0.28, max: 0.48 },
+  exclaim: { aim: 0.36, min: 0.28, max: 0.48 },
+  question: { aim: 0.42, min: 0.32, max: 0.55 },
+  ellipsis: { aim: 0.45, min: 0.32, max: 0.6 },
 };
 /** The marks that end a sentence: speed is chosen and measured between them. */
 export const SENTENCE_END = new Set(['stop', 'exclaim', 'question', 'ellipsis']);
@@ -75,7 +77,7 @@ const TAG = { comma: '[pause short]', dash: '[pause short]', semi: '[pause short
 
 /** A pause where the text has no mark is a catch of breath at most. */
 export const STRAY_MAX = 0.2;
-export const STRAY_AIM = 0.12;
+export const STRAY_AIM = 0.1;
 /** The shortest silence counted as a pause at all: a stop consonant's closure is shorter. */
 export const MIN_GAP_S = 0.08;
 /** The last 50 ms of a take against its loudest frame: a finished word has fallen this far (AP16). */
@@ -234,7 +236,9 @@ function align(marks, total, gaps) {
   const gPos = gaps.map((g) => g.talkBefore / Math.max(1e-6, talk));
   const B = marks.length, G = gaps.length;
   const SKIP_MARK = 0.14;
-  const skipGap = (g) => 0.01 + Math.max(0, g.len - 0.15) * 2;
+  // A silence as long as a short comma (0.11 s) is a pause somebody meant; skipping one costs
+  // more than leaving a mark unmatched, so a real comma is never dropped for a nearer one.
+  const skipGap = (g) => 0.01 + Math.max(0, g.len - 0.1) * 3;
   const cost = Array.from({ length: B + 1 }, () => new Float64Array(G + 1).fill(Infinity));
   const move = Array.from({ length: B + 1 }, () => new Int8Array(G + 1));
   cost[0][0] = 0;

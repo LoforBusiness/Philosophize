@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b6 (the walk to the worktop and
  * the lid), b7 (the walk back) and b10 (to the bowl and back to his chair).
  */
-const LINES = [4.52, 4.7, 6.86, 6.28, 0, 5.6, 6.4, 4.2, 6.9, 0, 6.4, 0, 0];
+const LINES = [4.09, 4.22, 6.26, 5.66, 0, 5.6, 6.4, 4.2, 6.3, 0, 6.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along.
 const TALK = 167;

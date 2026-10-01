@@ -11184,8 +11184,9 @@ audio, where they are exact (`scripts/lib/prosody.mjs`):
    voice does not sound weighty; it drags. The idea is carried by the pauses at its marks
    (point 3), which are exact, never by stretching the words.
 
-   Each pace has a band of syllables a second of speech, pauses taken out: even 4.5–5.2,
-   brisk 4.9–5.7. Everything said at one pace in a line must sit in its band together,
+   Each pace has a band of syllables a second of speech, pauses taken out: even 4.95–5.65,
+   brisk 5.4–6.2. (They were 4.5–5.2 and 4.9–5.7 for one day; the owner heard that as still
+   too slow — *"I want it to be faster"* — and the bands rose again.) Everything said at one pace in a line must sit in its band together,
    and any one sentence of eight syllables or more within 0.35 of it — people drift a
    little sentence to sentence, and a voice that never did is the flat read this exists to
    prevent. `check:dialogue` holds that every voiced beat has a pace, that none is slow,
@@ -11197,12 +11198,13 @@ audio, where they are exact (`scripts/lib/prosody.mjs`):
    nothing: Zubenelgenubi ran through "does, mate" on every one of eight requests, and a
    pause there sounds like the voice losing its place. Punctuation is the author's tool:
    to change where he rests, change the sentence.
-3. **EVERY PAUSE IS SET TO A PERSON'S LENGTH** (`shapePauses`): a comma 0.2 s, a dash
-   0.26, a colon 0.32, a full stop or exclamation 0.45, a question 0.5 — a question rests a
-   touch longer so it is heard as one. Silence is taken out of the middle of a gap with a
+3. **EVERY PAUSE IS SET TO A PERSON'S LENGTH** (`shapePauses`): a comma 0.16 s, a dash
+   0.2, a colon 0.26, a full stop or exclamation 0.36, a question 0.42 — a question rests a
+   touch longer so it is heard as one. Shorter than they first were (0.2 and 0.45): a pause
+   cut from silence costs the voice nothing, so it is the first place a line gets quicker. Silence is taken out of the middle of a gap with a
    cross-fade, or laid into its quietest 10 ms, so neither the decay of a word nor the
    onset of the next is touched. A pause the text does not ask for is cut to a catch of
-   breath (0.12 s). `check:narration` holds every mark to its band (`NO PAUSE`, `PAUSE`)
+   breath (0.1 s). `check:narration` holds every mark to its band (`NO PAUSE`, `PAUSE`)
    and fails a stray silence over 0.2 s (`STRAY PAUSE`).
 4. **A LINE WITH TWO SPEEDS IS ASKED FOR WHOLE, AT EACH SPEED.** Chirp's speaking rate is
    one number a request, and a sentence asked for on its own comes back worse than the
@@ -11227,14 +11229,29 @@ so the measurement after the render is the rule, never the rate that was asked f
 `node scripts/countertest-prosody.mjs` stages every fault on a real installed take and
 asserts each is caught, and that the take itself passes.
 
-**A TAKE THAT IS TOO SLOW IS SPED UP, NOT RE-RENDERED.** When the bands moved up, all 118
-dialogue lines were brought to them without a character of the voice budget:
-`FFMPEG=<ffmpeg with librubberband> node scripts/retime-narration.mjs <out dir> <lesson id> …`
-cuts each line at its sentence ends, time-stretches each sentence under its pace's aim up
-to it with rubberband (pitch held, so it is the same voice, quicker — at most 1.45×), joins
-them, and sets every pause to its mark's length again; a sentence already at pace is left
-alone. The takes then go through `install-narration` like any other. Do this before paying
-for a retake whose only fault is speed.
+**A TAKE THAT IS TOO SLOW IS SPED UP, NOT RE-RENDERED, AND THE SOUND MUST NOT GET WORSE.**
+When the bands moved up, all 118 dialogue lines were brought to them without a character of
+the voice budget:
+`RETIME_PYTHON=<python with praat-parselmouth> node scripts/retime-narration.mjs <out dir> --from <original takes> <lesson id> …`
+
+1. **STRETCH ONCE, FROM THE ORIGINAL RENDER.** A take already sped up is never sped up
+   again: artifacts stack. Keep a copy of the takes as the voice gave them and pass it as
+   `--from`.
+2. **PSOLA, NOT A PHASE VOCODER.** `scripts/lib/psola.py` uses Praat's pitch-synchronous
+   overlap-add, which drops whole voice periods, so the voice keeps its own waveform.
+   Measured on all 118 lines by harmonics-to-noise ratio, the voice's clarity: the
+   originals 12.67 dB, rubberband (the first pass, shipped for a day) 10.78, PSOLA from the
+   originals 11.95 — faster than the rubberband pass and cleaner. Rubberband is the fallback
+   only.
+3. **ONLY THE SPEECH IS STRETCHED.** Each sentence is cut inside its own pauses; the runs of
+   speech are sped up and every pause is SET to its mark's length from the silence that was
+   there, so no pause is squeezed out of existence and nothing processes air.
+4. **A SHORT EXCLAMATION IS LEFT MOSTLY ALONE** (at most 1.2×, 1.4× when its line needs it):
+   in "Oh, no." the drawn-out vowel is the intonation, not slow talking, and squeezing it
+   cost the most sound for the least pace. A long sentence goes to 1.55× at most.
+
+The takes then go through `install-narration` like any other. Do this before paying for a
+retake whose only fault is speed.
 
 ### AP18 · An arm moves only when the scene moves it
 

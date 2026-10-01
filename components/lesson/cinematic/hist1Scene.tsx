@@ -80,7 +80,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, history-foundations-1). 0 for a beat with no voice.
  */
-const LINES = [4.92, 4.35, 7.04, 4.58, 0, 6.9, 5.68, 5.32, 0, 5.18, 0, 0];
+const LINES = [4.62, 4.02, 6.36, 4.13, 0, 6.27, 5.12, 4.89, 0, 4.82, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // hands on the hips, arms folded, leaning in; and, for looking at the glass, a posture.
@@ -129,9 +129,9 @@ const H_TURN: Track[] = [
   [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1]],
 ];
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const S_P = [TALK, LISTEN, NOD, HIPS, FOLD, NOD, TALK, LISTEN, NOD, NOD, LISTEN, LISTEN];
-const N_P = [LISTEN, TALK, LEAN, TALK, LISTEN, NOD, LISTEN, NOD, HIPS, TALK, LISTEN, LISTEN];
-const H_P = [LISTEN, LISTEN, EXPLAIN, LISTEN, NOD, EXPLAIN, NOD, EXPLAIN, LISTEN, NOD, LISTEN, LISTEN];
+const S_P = [TALK, LISTEN, NOD, HIPS, FOLD, NOD, TALK, LISTEN, NOD, NOD, NOD, LISTEN];
+const N_P = [LISTEN, TALK, LEAN, TALK, LISTEN, NOD, NOD, NOD, HIPS, TALK, LISTEN, LISTEN];
+const H_P = [LISTEN, LISTEN, EXPLAIN, LISTEN, NOD, EXPLAIN, NOD, EXPLAIN, LISTEN, NOD, NOD, LISTEN];
 
 // ── the street front and what is in it ───────────────────────────────────────
 const FRONT_ART = shopFront(200, 409, 400, 182);

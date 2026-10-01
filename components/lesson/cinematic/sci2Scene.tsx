@@ -88,7 +88,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, science-foundations-2), except b4 and b6, whose walks,
  * crouches and hand-offs run on a little after the line ends.
  */
-const LINES = [4.09, 5.13, 3.37, 5.19, 7, 0, 7.2, 4.45, 6.41, 0, 4.14, 0, 0];
+const LINES = [3.94, 4.5, 3.47, 4.87, 7, 0, 7.2, 4.24, 5.79, 0, 3.79, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting — alive — while the reader answers or reads the quotation (N21).
