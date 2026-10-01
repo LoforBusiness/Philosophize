@@ -1,28 +1,21 @@
 import { useCallback } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Animated, {
   cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
 } from 'react-native-reanimated';
-import { backgroundSource } from '@/data/profileBackgrounds';
-import { useUserDataStore } from '@/stores/userDataStore';
-import {
-  HOME_BAND_H, HOME_SCRIM, HOME_SCRIM_STOPS, HOME_DRIFT, HomeCream, HomeSoft, HomeBase,
-} from '@/constants/homeArt';
+import { ProfileArtFill } from '@/components/shared/ProfileArt';
+import { HOME_BAND_H, HOME_HORIZON, HOME_DRIFT, HomeCream, HomeSoft } from '@/constants/homeArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE MASTHEAD, WEARING THE READER'S OWN PICTURE.
+// THE MASTHEAD, STANDING IN THE READER'S OWN PLACE.
 //
-// This replaces five stacked centred lines — kicker, wordmark, rule, tagline,
-// diamonds — that took about 130dp at the top of Home to tell the reader the
-// name of the app they had just opened. It says the same name in a third of the
-// space, over the image they chose in Settings, above a line that is about
-// TODAY rather than about the app.
-//
-// Contrast is fixed, not sampled: see constants/homeArt.ts for why the images'
-// own `tone` flag is the wrong tool here, and scripts/check-profile-contrast.mjs
-// for the arithmetic that proves the cream survives all ten.
+// The reader's picture is a drawn place now (components/shared/profileScenes.ts),
+// and every place stands on a horizon with dark ground below it. So the masthead
+// lays the picture with its horizon a little over halfway down the band, and the
+// wordmark and today's line stand on that ground — no scrim, no wash dimming the
+// picture they chose, and the words read the same on every place because the
+// ground is always dark (check-profile-contrast measures all ten).
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SW = Dimensions.get('window').width;
@@ -30,9 +23,6 @@ const SW = Dimensions.get('window').width;
 // Same trick as the old wordmark: keep ASHMERE on one line at any width. Seven
 // characters, so the divisor is the per-character budget including the
 // letter-spacing — measured against the narrowest phone we support, not guessed.
-// At seven characters the cap still binds on every phone we support rather than the
-// width term, which is the point: the name is set at the same letter height it
-// always was, and the mark is simply a shorter word than PHILOSOPHIZE was.
 const WORDMARK = Math.min(27, Math.floor((SW - 72) / 7.3));
 
 function greeting(hour: number): string {
@@ -43,18 +33,10 @@ function greeting(hour: number): string {
 }
 
 export default function HomeHeader({ streak }: { streak: number }) {
-  const bgId = useUserDataStore((s) => s.profileBackground);
-  const src = backgroundSource(bgId);
-
-  // ONE continuous push, out and back. Slow enough (26s each way) that it is
-  // never caught moving and never finishes while anyone is looking.
-  //
-  // STOPPED WHEN HOME IS NOT THE SCREEN YOU ARE ON. Tab screens stay mounted, so
-  // an unguarded `withRepeat(-1)` keeps a Reanimated timing animation evaluating
-  // on the UI thread for the entire session — through every lesson, on a screen
-  // nobody can see. It is a small cost and it is a permanent one, which is the
-  // worse kind. StickmanStroll has always guarded its frame callback this way;
-  // this one shipped without it.
+  // ONE continuous slide, out and back. Slow enough (26s each way) that it is never
+  // caught moving. It is a TRANSLATE only: a scale would move the horizon under the
+  // words. STOPPED WHEN HOME IS NOT THE SCREEN YOU ARE ON — tab screens stay
+  // mounted, so an unguarded `withRepeat(-1)` would run for the whole session.
   const drift = useSharedValue(0);
   useFocusEffect(
     useCallback(() => {
@@ -67,10 +49,7 @@ export default function HomeHeader({ streak }: { streak: number }) {
     }, []),
   );
   const art = useAnimatedStyle(() => ({
-    transform: [
-      { scale: HOME_DRIFT.from + drift.value * (HOME_DRIFT.to - HOME_DRIFT.from) },
-      { translateX: drift.value * HOME_DRIFT.shiftX },
-    ],
+    transform: [{ translateX: (drift.value - 0.5) * 2 * HOME_DRIFT.shiftX }],
   }));
 
   // The streak is the honest thing to put here. "DAY 1" on a reader who has
@@ -82,22 +61,10 @@ export default function HomeHeader({ streak }: { streak: number }) {
 
   return (
     <View style={styles.band}>
-      <Animated.View style={[StyleSheet.absoluteFill, art]}>
-        {src ? (
-          // absoluteFill gives the image explicit bounds. A bare <Image> or an
-          // <ImageBackground> with no stated width takes the PICTURE's intrinsic
-          // width instead and leaves a bare strip down the side (§19).
-          <Image source={src} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        ) : (
-          <View style={styles.wash} />
-        )}
+      {/* Wider than the band by the drift either side, so the slide never shows an edge. */}
+      <Animated.View style={[styles.slide, art]}>
+        <ProfileArtFill horizonAt={HOME_HORIZON} />
       </Animated.View>
-
-      <LinearGradient
-        colors={HOME_SCRIM}
-        locations={HOME_SCRIM_STOPS}
-        style={StyleSheet.absoluteFill}
-      />
 
       <View style={styles.type}>
         <Text style={[styles.wordmark, { fontSize: WORDMARK }]} numberOfLines={1} adjustsFontSizeToFit>
@@ -111,28 +78,27 @@ export default function HomeHeader({ streak }: { streak: number }) {
 
 const styles = StyleSheet.create({
   // Full-bleed: the page pads 24 and this cancels it, because a masthead inset
-  // from the edges reads as a card rather than as the top of a page.
+  // from the edges reads as a card rather than as the top of a page. Its foot is
+  // rounded, the same plate the Profile header is.
   band: {
     height: HOME_BAND_H,
     marginHorizontal: -24,
     marginTop: -6,
-    marginBottom: 4,
-    backgroundColor: HomeBase,
+    marginBottom: 10,
     overflow: 'hidden',
     justifyContent: 'flex-end',
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
   },
-  // Shown when an id has no registered file — the same arrangement
-  // data/profileBackgrounds.ts makes for every other surface, so the app always
-  // looks finished rather than broken.
-  wash: { flex: 1, backgroundColor: HomeBase },
+  slide: {
+    position: 'absolute', top: 0, bottom: 0, left: -HOME_DRIFT.shiftX, right: -HOME_DRIFT.shiftX,
+  },
 
-  type: { paddingHorizontal: 24, paddingBottom: 14 },
+  type: { paddingHorizontal: 24, paddingBottom: 16 },
   wordmark: {
     fontFamily: 'PlayfairDisplay_700Bold',
     color: HomeCream,
     letterSpacing: 3,
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowRadius: 7,
   },
   line: {
     fontFamily: 'Inter_500Medium',
@@ -140,7 +106,5 @@ const styles = StyleSheet.create({
     color: HomeSoft,
     letterSpacing: 2.4,
     marginTop: 6,
-    textShadowColor: 'rgba(0,0,0,0.45)',
-    textShadowRadius: 5,
   },
 });

@@ -9,6 +9,7 @@ import SettingsScreen from '@/app/(app)/settings';
 import LessonLocked from '@/components/paywall/LessonLocked';
 import PassConferred from '@/components/paywall/PassConferred';
 import ProfileScreen from '@/app/(app)/profile';
+import HomeScreen from '@/app/(app)/index';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
@@ -71,6 +72,7 @@ export default function PreviewPass() {
     useUserDataStore.setState({
       _hasHydrated: true,
       displayName: fresh ? 'Philosopher' : 'Landy',
+      profileBackground: q('bg') ?? 'woodcut-sky',
       totalXP: fresh ? 0 : 1240,
       rankIndex: fresh ? 0 : 6,
       streak: fresh ? 0 : 12,
@@ -158,6 +160,9 @@ export default function PreviewPass() {
     // reason. The section is reached by the screen's own rail rather than by a
     // prop, so the harness clicks it — see sheet-pass.mjs.
     body = <SettingsScreen />;
+  } else if (s === 'home') {
+    // HOME, for its masthead: the reader's drawn place with the wordmark on its ground.
+    body = <HomeScreen />;
   } else if (s === 'profile') {
     // THE PROFILE, after the statistics tab was folded into it (2026-09-15).
     // It is here rather than in a harness of its own because this one already

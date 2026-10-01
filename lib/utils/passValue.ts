@@ -6,7 +6,9 @@ import { BADGES } from '@/data/badges';
 // the app, and a certificate that recounted them on every frame would be doing
 // the most expensive thing on the screen for a figure that cannot change.
 const RANK_COUNT = RANKS.length;
-const BADGE_COUNT = BADGES.length;
+// The badges a reader can still EARN. The roll keeps the retired ones (2026-09-30) so a
+// holder keeps theirs, and counting those would sell a free reader badges nobody can win.
+const BADGE_COUNT = BADGES.filter((b) => !b.retired).length;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHAT THE PASS IS ACTUALLY WORTH, DERIVED RATHER THAN TYPED.

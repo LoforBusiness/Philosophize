@@ -14,9 +14,10 @@ import DoodleGround from '@/components/shared/DoodleGround';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { C, TYPE, SPACE, RADIUS, LIP, type TypeKey } from '@/constants/design';
-import { GHOST, ramp, EMBER_INK, EMBER_LIT, WALL } from '@/components/shared/tone';
+import { GHOST, ramp, EMBER_INK, EMBER_LIT, WALL, PANEL_BASE, PAPER, mix } from '@/components/shared/tone';
 import { ShelfCount, CountStrip, ReadingRow } from '@/components/profile/Struck';
 import RankSeal from '@/components/shared/RankSeal';
+import StatSticker from '@/components/shared/StatSticker';
 import { SUBJECT_SHORT, SUBJECT_ICON } from '@/components/shared/branchMarks';
 import { SUBJECTS } from '@/data/subjects';
 import { ProfileArtFill, ProfileAvatar, useProfileArt } from '@/components/shared/ProfileArt';
@@ -39,8 +40,14 @@ import { dailyXP, activeDays } from '@/lib/utils/xpSeries';
 import { useInView } from '@/lib/utils/useInView';
 
 const SW = Dimensions.get('window').width;
-// The page gutter (SPACE[3], both sides) and three inter-badge gaps (SPACE[1]) across four columns.
-const BADGE_W = (SW - SPACE[3] * 2 - SPACE[1] * 3) / 4;
+// The page gutter (SPACE[3], both sides), the badge card's own padding (SPACE[2]) and
+// 2pt border, and three inter-badge gaps (SPACE[1]) across four columns.
+const BADGE_W = (SW - SPACE[3] * 2 - (SPACE[2] + 2) * 2 - SPACE[1] * 3) / 4;
+
+// THE HEADER'S GEOMETRY: where the picture's horizon lands under the status bar, and
+// the avatar that straddles it. 158 shows the whole of every place down to its ground.
+const HERO_HORIZON = 158;
+const AVATAR = 88;
 
 const TITLE: Record<string, string> = {
   logic: 'LOGICIAN',
@@ -70,6 +77,7 @@ const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 
 function SectionLabel({ children }: { children: string }) {
   return (
     <View style={styles.sectionRow}>
+      <View style={styles.sectionTick} />
       <Text style={styles.sectionLabel}>{children}</Text>
       <View style={styles.sectionLine} />
     </View>
@@ -110,7 +118,7 @@ export default function ProfileScreen() {
   // now — see `selfSeen` in RankClimbChart. Subscribing to it from a screen this
   // large meant the chart finishing its own intro cost a full re-render.
   const nameFont = useUserDataStore((s) => s.nameFont);
-  const { palette } = useProfileArt();
+  const { palette, bg: art } = useProfileArt();
   const earnedBadges = useUserDataStore((s) => s.earnedBadges);
   const bioSeed = useUserDataStore((s) => s.bioSeed);
   const settings = useUserDataStore((s) => s.settings);
@@ -434,17 +442,35 @@ export default function ProfileScreen() {
         {/* header */}
         {useMemo(() => (
           <>
-        <View style={[styles.header, { paddingTop: insets.top + SPACE[3] }]}>
-          <ProfileArtFill />
+        {/* THE READER'S PLACE (2026-10-01). The picture they chose is a drawn place
+            standing on a horizon, and everything about them stands on its ground:
+            the avatar straddles the horizon like a medallion set into the land, and
+            the name, the rank and the three counts sit on the dark earth below it,
+            so no word is ever laid on the art and none needs a scrim. */}
+        <View style={[styles.header, { paddingTop: insets.top + HERO_HORIZON - AVATAR / 2 }]}>
+          <ProfileArtFill horizonAt={insets.top + HERO_HORIZON} />
 
-          <Pressable style={[styles.settingsBtn, { top: insets.top + 6 }]} hitSlop={10} onPress={() => router.push('/(app)/settings')}>
-            <SketchIcon name="settings" size={22} color={palette.text} />
+          <Pressable
+            style={[styles.settingsBtn, { top: insets.top + 8 }]}
+            hitSlop={10}
+            onPress={() => router.push('/(app)/settings')}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+          >
+            {({ pressed }) => (
+              <View style={styles.settingsWrap}>
+                <View style={styles.settingsLedge} />
+                <View style={[styles.settingsFace, pressed && styles.settingsDown]}>
+                  <SketchIcon name="settings" size={20} color={C.ink} />
+                </View>
+              </View>
+            )}
           </Pressable>
 
           <View>
-            <ProfileAvatar size={76} letter={displayName.charAt(0)} />
-            <View style={[styles.avatarBadge, { backgroundColor: palette.text, borderColor: palette.base }]}>
-              <SketchIcon name="hat" size={14} color={palette.base} />
+            <ProfileAvatar size={AVATAR} letter={displayName.charAt(0)} ringColor={C.paper} />
+            <View style={[styles.avatarBadge, { backgroundColor: C.paper, borderColor: art.ground }]}>
+              <SketchIcon name="hat" size={14} color={C.ink} />
             </View>
           </View>
 
@@ -477,12 +503,26 @@ export default function ProfileScreen() {
             )}
           </Pressable>
 
-          {/* The featured quotation under the name went on 2026-09-29, with saved
-              quotes: Ashmere teaches seven subjects, and quotes are not a feature
-              of the app any more (the owner's call). */}
+          {/* THE THREE COUNTS, on the ground under the name: cut-in plaques of the
+              earth itself, each with the tab bar's own sticker. They were the top
+              row of YOUR PROGRESS; up here they are the first thing about the reader
+              rather than the first line of a statistics card. */}
+          <View style={styles.heroStats}>
+            {[
+              { label: 'LESSONS', value: lessonsDone, icon: 'lessons' as const },
+              { label: 'DAY STREAK', value: shownStreak, icon: 'days' as const },
+              { label: 'TOTAL XP', value: totalXP, icon: 'xp' as const },
+            ].map((it) => (
+              <View key={it.label} style={[styles.heroStat, { backgroundColor: mix(art.ground, PANEL_BASE, 0.5), borderTopColor: mix(art.ground, PANEL_BASE, 0.85), borderBottomColor: mix(art.ground, PAPER, 0.1) }]}>
+                <View style={styles.heroSticker}><StatSticker name={it.icon} size={22} /></View>
+                <Text style={styles.heroValue} numberOfLines={1}>{it.value.toLocaleString()}</Text>
+                <Text style={[styles.heroLabel, { color: palette.muted }]} numberOfLines={1}>{it.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
           </>
-        ), [insets.top, palette, displayName, nameFont, descriptor, joinedLabel, cur, openRanksBadges])}
+        ), [insets.top, palette, art, displayName, nameFont, descriptor, joinedLabel, cur, openRanksBadges, lessonsDone, shownStreak, totalXP])}
 
         {/* Body */}
         {/* THE CLIPPING USED TO HAPPEN HERE, and this was the half that could
@@ -545,18 +585,8 @@ export default function ProfileScreen() {
               three were interesting; none of them changed what a reader does
               next, which is the test a profile has to pass. */}
           <Card>
-            <CountStrip
-              items={[
-                // THINKERS and QUOTES went with the Thinkers tab and saved quotes
-                // (2026-09-29); what is left is the reader's own effort.
-                { label: 'LESSONS', value: lessonsDone, icon: 'lessons' },
-                { label: 'DAYS', value: daysActive, icon: 'days' },
-                { label: 'XP', value: totalXP, icon: 'xp' },
-              ]}
-            />
-
-            <View style={styles.statRule} />
-
+            {/* The three counts moved up into the header (2026-10-01); this card
+                is where the reading goes and how often the reader comes back. */}
             <Text style={styles.statLabel}>WHERE YOUR READING GOES</Text>
             <View style={styles.readList}>
               {reading.map((b) => (
@@ -656,6 +686,9 @@ export default function ProfileScreen() {
           {/* THE ONE QUESTION A CASE OF FIFTY RAISES. The grid showed eight
               medals and no total, so "how much of this is mine" — the only thing
               a trophy shelf is for — was the fact not on the page. */}
+          {/* ON A CARD (2026-10-01), like every other section: the medals stood
+              on the wallpaper, and a locked medal on a doodle read as part of it. */}
+          <Card pad={2}>
           <ShelfCount earned={earnedBadges.length} total={caseOf(earnedBadges).length} />
           <Pressable style={styles.badgeGrid} onPress={() => openRanksBadges('badges')}>
             {badges.map((b) => (
@@ -684,6 +717,7 @@ export default function ProfileScreen() {
               </View>
             ))}
           </Pressable>
+          </Card>
             </>
           ), [badges, earnedBadges, openRanksBadges])}
 
@@ -724,26 +758,51 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
 
   header: {
-    // No background colour: ProfileArtFill paints it. `overflow: hidden` keeps
-    // the art inside the header, and it must stay above the art in z-order,
-    // which it is by being rendered after it.
+    // No background colour: ProfileArtFill paints the picture and its ground.
+    // The foot is rounded so the reader's place reads as a struck plate set into
+    // the page, the same radius every card below it uses.
     alignItems: 'center',
     paddingBottom: SPACE[4],
     paddingHorizontal: SPACE[3],
     overflow: 'hidden',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  settingsBtn: { position: 'absolute', right: 16, padding: 8, zIndex: 2 },
+  settingsBtn: { position: 'absolute', right: 14, zIndex: 2 },
+  // A raised paper button on its ledge, so it reads on a pale sky and a night one.
+  settingsWrap: { paddingBottom: LIP.card },
+  settingsLedge: {
+    position: 'absolute', left: 0, right: 0, top: 3, bottom: 0, borderRadius: 14, backgroundColor: C.edge,
+  },
+  settingsFace: {
+    width: 40, height: 40, borderRadius: 14, backgroundColor: C.surface, borderWidth: 2, borderColor: C.edge,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  settingsDown: { transform: [{ translateY: 3 }] },
   avatarBadge: {
     position: 'absolute',
-    right: -4,
-    bottom: -4,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1.5,
+    right: -2,
+    bottom: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  heroStats: { flexDirection: 'row', gap: SPACE[2], marginTop: SPACE[4], alignSelf: 'stretch' },
+  // CUT INTO THE GROUND, not stood on it: a darker well with a lit lower lip, the
+  // depth kit's recess drawn in the earth's own tones rather than in paper.
+  heroStat: {
+    flex: 1, alignItems: 'center', paddingTop: SPACE[2], paddingBottom: SPACE[2], borderRadius: 16,
+    borderTopWidth: 2, borderBottomWidth: 2,
+  },
+  heroSticker: { height: 24, justifyContent: 'center' },
+  heroValue: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, lineHeight: 28, color: C.paper,
+    fontVariant: ['lining-nums'],
+  },
+  heroLabel: { fontFamily: 'Inter_700Bold', fontSize: TYPE.micro.fontSize, letterSpacing: 0.6 },
   name: {
     // family / size / tracking come from the chosen face (profileNameStyle).
     marginTop: SPACE[3],
@@ -775,8 +834,11 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: SPACE[3], paddingTop: SPACE[4] },
 
   sectionRow: { flexDirection: 'row', alignItems: 'center', marginTop: SPACE[4], marginBottom: SPACE[2] },
-  sectionLabel: { ...role('micro'), color: C.inkSoft, letterSpacing: 3, marginRight: SPACE[2] },
-  sectionLine: { flex: 1, height: 1, backgroundColor: C.hairline },
+  // INK AND BOLD, with a short ember tick before it: on the wallpaper the grey
+  // label read as part of the doodles.
+  sectionTick: { width: 14, height: 4, borderRadius: 2, backgroundColor: EMBER_INK, marginRight: SPACE[1] },
+  sectionLabel: { ...role('micro'), fontFamily: 'Inter_700Bold', color: C.ink, letterSpacing: 2.4, marginRight: SPACE[2] },
+  sectionLine: { flex: 1, height: 1.5, backgroundColor: C.edge },
 
   // ── the one statistics card ──
   //

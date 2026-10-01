@@ -220,6 +220,8 @@
     "make:wallpaper": "node scripts/make-wallpaper.mjs",
     "make:quickstart": "node scripts/make-quickstart-art.mjs",
     "make:posters": "node scripts/make-poster-art.mjs",
+    "make:profile-art": "node scripts/make-profile-art.mjs",
+    "check:profile-art": "node scripts/check-profile-contrast.mjs",
     "sheet:subjects": "node scripts/sheet-subjects.mjs",
     "check:dialogue": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-dialogue.mjs"
   },

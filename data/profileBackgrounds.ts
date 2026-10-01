@@ -1,81 +1,59 @@
 import type { ImageSourcePropType } from 'react-native';
+import { PROFILE_SCENE_ART } from '@/components/shared/profileSceneArt';
 
-// The art someone can wear on their profile. ONE choice drives BOTH their
-// picture and their header background, which is why each image has to work
-// twice: as a ~72px circle and as a full-width band behind live text.
+// The picture someone wears. ONE choice drives their avatar, the top of Profile
+// and the masthead on Home, which is why each place has to work three ways: as a
+// ~76px circle, as a full-width band behind their name, and as a short strip
+// behind the wordmark.
 //
 // ─────────────────────────────────────────────────────────────────────────────
-// HOW TO ADD OR REPLACE AN IMAGE
-//   1. Drop the file in  assets/images/profile/  (see DROP-IMAGES-HERE.md).
-//   2. Add its require() to SOURCES below, keyed by id.
-//   3. Add a line to assets/images/profile/CREDITS.txt — source + licence + URL,
-//      the same way assets/story/existence/CREDITS.txt does it.
-//   4. Run  node scripts/check-profile-contrast.mjs  and take the `tone` it
-//      reports. Do NOT eyeball it (see the note on `tone`).
+// SINCE 2026-10-01 THE PICTURES ARE DRAWN, NOT FOUND.
 //
-// An id with no entry in SOURCES renders a procedural ink wash instead, so the
-// app always builds and always looks finished — the same arrangement
-// components/lesson/lessonBackgrounds.ts uses.
+// They were ten engravings and photographs from Commons, the last found pictures in
+// an app whose every other picture is drawn. The owner asked for "created ones that
+// resemble the art style of the app", and they are ten places in the Quick Start's
+// editorial style (components/shared/profileScenes.ts), each built from a reference
+// photograph looked at first.
+//
+// THE IDS DID NOT CHANGE, and that is deliberate: `profileBackground` is stored on
+// every reader and synced, so a new id would reset everybody's choice. Each old id
+// names the new place nearest the picture it replaced — the-tower is a lighthouse,
+// stone-bridge a stone arch, night-spiral a moonlit lake, woodcut-sky (everybody's
+// default) the open sea.
+//
+// TO CHANGE ONE: edit profileScenes.ts, then `npm run make:profile-art`.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Kept for the callers that still ask. Every drawn place stands on a DARK ground and
+ * the words always sit on that ground, so every place is `dark`: paper text, never
+ * ink. It is no longer measured off a picture because nothing is laid on the art.
+ */
 export type Tone = 'light' | 'dark';
 
 export interface ProfileBackground {
   id: string;
   /** Shown under the swatch in the picker. */
   name: string;
-  /**
-   * What the ART is, which decides what colour the text on top becomes: a
-   * `light` image gets ink text over a paper wash, a `dark` one gets paper text
-   * over an ink wash.
-   *
-   * This is MEASURED, not judged. Several of these images read "dark" to the eye
-   * because they are dense with black line-work while being overwhelmingly white
-   * paper by area — and it is the area that decides whether white text survives.
-   * `scripts/check-profile-contrast.mjs` computes the mean luminance of the exact
-   * band the text occupies and prints the tone to use.
-   */
   tone: Tone;
-  /**
-   * Where to centre the avatar crop, in 0–1 of the image. The header shows the
-   * whole width; the avatar shows a circle, so the subject has to be aimed at.
-   */
+  /** The top of the sky, painted above the picture in a box taller than it. */
+  sky: string;
+  /** The ground the words stand on, painted below the picture. */
+  ground: string;
+  /** What the avatar circle is centred on, in the scene's canvas units. */
   focus: { x: number; y: number };
 }
 
-/**
- * Registered image files. Empty entries fall back to the procedural wash.
- * Keys must match an id in PROFILE_BACKGROUNDS.
- */
-const SOURCES: Partial<Record<string, ImageSourcePropType>> = {
-  'night-spiral': require('@/assets/images/profile/01-night-spiral.jpg'),
-  'sunburst': require('@/assets/images/profile/02-sunburst.jpg'),
-  'woodcut-sky': require('@/assets/images/profile/03-woodcut-sky.jpg'),
-  'the-peak': require('@/assets/images/profile/04-the-peak.jpg'),
-  'the-range': require('@/assets/images/profile/05-the-range.jpg'),
-  'rain-field': require('@/assets/images/profile/06-rain-field.jpg'),
-  'small-house': require('@/assets/images/profile/07-small-house.jpg'),
-  'the-tower': require('@/assets/images/profile/08-the-tower.jpg'),
-  'stone-bridge': require('@/assets/images/profile/09-stone-bridge.jpg'),
-  'the-ruins': require('@/assets/images/profile/10-the-ruins.jpg'),
-};
+export const PROFILE_BACKGROUNDS: ProfileBackground[] = Object.entries(PROFILE_SCENE_ART).map(([id, s]) => ({
+  id,
+  name: s.name,
+  tone: 'dark' as const,
+  sky: s.sky,
+  ground: s.ground,
+  focus: s.focus,
+}));
 
-export const PROFILE_BACKGROUNDS: ProfileBackground[] = [
-  { id: 'night-spiral', name: 'The Wanderer', tone: 'dark', focus: { x: 0.5, y: 0.62 } },
-  // Reads as a dark picture and is not one: measured mean luminance 0.27, because
-  // the black cloudbanks sit around a large bright sun. Ink text, not paper.
-  { id: 'sunburst', name: 'Break in the Clouds', tone: 'light', focus: { x: 0.5, y: 0.4 } },
-  { id: 'woodcut-sky', name: 'Woodcut Sky', tone: 'light', focus: { x: 0.5, y: 0.5 } },
-  { id: 'the-peak', name: 'The Peak', tone: 'light', focus: { x: 0.5, y: 0.45 } },
-  { id: 'the-range', name: 'The Range', tone: 'light', focus: { x: 0.5, y: 0.5 } },
-  { id: 'rain-field', name: 'Weather', tone: 'light', focus: { x: 0.5, y: 0.45 } },
-  { id: 'small-house', name: 'The Small House', tone: 'light', focus: { x: 0.42, y: 0.62 } },
-  { id: 'the-tower', name: 'The Tower', tone: 'light', focus: { x: 0.5, y: 0.5 } },
-  { id: 'stone-bridge', name: 'The Crossing', tone: 'light', focus: { x: 0.5, y: 0.5 } },
-  { id: 'the-ruins', name: 'The Ruins', tone: 'light', focus: { x: 0.5, y: 0.5 } },
-];
-
-/** The woodcut cloud engraving — what every new profile starts as. */
+/** The open sea — what every new profile starts as. */
 export const DEFAULT_BACKGROUND_ID = 'woodcut-sky';
 
 export function backgroundById(id: string | null | undefined): ProfileBackground {
@@ -86,13 +64,12 @@ export function backgroundById(id: string | null | undefined): ProfileBackground
   );
 }
 
-/** null when the file has not been registered yet — caller draws the wash. */
+/** The drawn picture's file. */
 export function backgroundSource(id: string | null | undefined): ImageSourcePropType | null {
-  return SOURCES[backgroundById(id).id] ?? null;
+  return PROFILE_SCENE_ART[backgroundById(id).id]?.source ?? null;
 }
 
-/** True once at least one image file is actually registered. */
-export const HAS_PROFILE_ART = Object.keys(SOURCES).length > 0;
+export const HAS_PROFILE_ART = Object.keys(PROFILE_SCENE_ART).length > 0;
 
 // ── the palette a tone implies ───────────────────────────────────────────────
 // Kept here rather than in the screen so the header, the avatar and the picker
@@ -110,28 +87,21 @@ export interface TonePalette {
   line: string;
   /** Fill behind the avatar so a letter always has something to sit on. */
   avatarFill: string;
-  /** The wash laid over the art to guarantee the contrast. */
+  /** A wash for a box that lays words on the art itself. The drawn places never need it. */
   scrim: [string, string];
-  /** Colour shown while the image loads, and behind a transparent PNG. */
+  /** Colour shown while the image loads. */
   base: string;
 }
 
-// The MUTED colours here are set by measurement, not by taste. The subtitle and
-// the quote attribution are small text, so WCAG asks 4.5:1 of them, and the
-// original mid-greys (#5A574E / #C9C6BD) came in at 3.7–4.4 over half of the
-// artwork — readable-ish on a desk, not readable on a phone in daylight.
-// Darkening the light-tone grey and lightening the dark-tone one buys the
-// contrast without touching the scrim, which is the right trade: a heavier scrim
-// buys the same contrast by hiding the picture the user chose.
-// Re-run scripts/check-profile-contrast.mjs after changing any value here.
+// The muted colour is measured: `scripts/check-profile-contrast.mjs` holds the name
+// at 7:1 and this line at 4.5:1 against every place's ground.
 export function tonePalette(tone: Tone): TonePalette {
   return tone === 'dark'
     ? {
         text: Paper,
-        muted: '#DCD9D0',
+        muted: '#D8D5CC',
         line: Paper,
         avatarFill: 'rgba(0,0,0,0.45)',
-        // Lighter at the top so the art still reads, heavier where the quote sits.
         scrim: ['rgba(12,12,12,0.34)', 'rgba(12,12,12,0.78)'],
         base: Ink,
       }

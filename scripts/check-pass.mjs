@@ -309,7 +309,7 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
     free.map((t) => t.id).join(' · '));
   const num = (id) => Number(String(byId(id)?.figure).replace(/,/g, ''));
   ok(num('ranks') === RK.RANKS.length, 'the ranks tile counts the real ladder', `${byId('ranks')?.figure}`);
-  ok(num('badges') === BG.BADGES.length, 'the badges tile counts the real roll', `${byId('badges')?.figure}`);
+  ok(num('badges') === BG.BADGES.filter((b) => !b.retired).length, 'the badges tile counts the badges a reader can still earn', `${byId('badges')?.figure}`);
   ok(!free.some((t) => /lesson/i.test(t.noun)), 'and no free tile is a lesson');
   void INS;
 

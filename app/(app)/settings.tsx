@@ -393,7 +393,7 @@ function ProfileSection() {
         onPress={() => setPicker(true)}
         style={({ pressed }) => [styles.artPreview, pressed && { opacity: 0.9 }]}
       >
-        <ProfileArtFill backgroundId={draftBg} />
+        <ProfileArtFill backgroundId={draftBg} horizon={0.5} />
         <View style={styles.artPreviewInner}>
           <Text
             numberOfLines={1}
@@ -1422,7 +1422,7 @@ const styles = StyleSheet.create({
 
   // The picture-and-background control: a live miniature of the real header.
   artPreview: {
-    height: 112,
+    height: 136,
     borderRadius: RADIUS.card,
     overflow: 'hidden',
     borderWidth: 2,

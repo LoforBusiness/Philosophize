@@ -1,34 +1,15 @@
-Profile picture / header background art.
+The ten profile pictures are DRAWN in house (2026-10-01): components/shared/profileScenes.ts,
+rendered to these PNGs by `npm run make:profile-art`. Each place was drawn after looking
+at reference photographs from Wikimedia Commons (proportion and construction only; nothing
+traced or shipped):
 
-Provenance: supplied by the project owner on 2026-07-30, confirmed at that time as
-their own work or public-domain / CC0-equivalent. Same standard as
-assets/story/existence/CREDITS.txt and assets/backgrounds/README.md — nothing here
-may be third-party art without a licence, because these ship inside the Play build.
+  the-tower      lighthouse on a cliff (Cabo de Sao Vicente; Lighthouse 7382046676)
+  stone-bridge   stone arch bridge (Laerdalen; Sandbrook-Headquarters Road)
+  the-peak       Matterhorn Peak, California
+  the-range      Blue Ridge Mountains layered
+  small-house    cottage with chimney smoke (geograph 642065)
+  woodcut-sky    sailing by Devils Island
+  sunburst       crepuscular rays over the Pacific
+  the-ruins      studies of temple ruins (Cooper Hewitt, 1868-69)
 
-  01-night-spiral.jpg   Figure beneath a spiralling night sky
-  02-sunburst.jpg       Sunburst through heavy cloudbanks
-  03-woodcut-sky.jpg    Woodcut cloud engraving        <- DEFAULT for new profiles
-  04-the-peak.jpg       Pen-and-ink mountain peak
-  05-the-range.jpg      Mountain range under cloud
-  06-rain-field.jpg     Rain falling on open field
-  07-small-house.jpg    Small house beneath towering clouds
-  08-the-tower.jpg      Stone tower with tree
-  09-stone-bridge.jpg   Stone arch bridge over a gorge
-  10-the-ruins.jpg      Overgrown classical ruins
-
-IF ANY OF THESE CAME FROM A THIRD PARTY, replace this block with a per-file line
-giving source + licence + URL, exactly as the existence CREDITS.txt does:
-
-  06-rain-field.jpg  <-  "Title" (CC0)  https://example.org/...
-
-Originals were PNG screenshots totalling 5.87 MB; resized to a 1080px maximum and
-re-encoded as quality-90 JPEG (1.40 MB total) so they do not weigh down every OTA
-update. Re-encoding shifted measured luminance by less than 0.003, so the tone
-assignments in data/profileBackgrounds.ts are unaffected.
-
-After adding or replacing any file here, run:
-
-    node scripts/check-profile-contrast.mjs
-
-It measures each image and fails if the text on it would drop below WCAG AA, or if
-the tone declared in data/profileBackgrounds.ts disagrees with the measurement.
+The ids are the old file ids, kept so every reader keeps their choice.

@@ -165,15 +165,22 @@ const SCREENS = [
   // sections the owner removed are NOT, the streak comes first, and nothing in
   // the new card overflows its box on the narrow phone.
   { key: 'profile', q: 's=profile',
-    want: ['DAILY STREAK', 'YOUR PROGRESS', 'LESSONS', 'THINKERS', 'QUOTES', 'DAYS',
-           'WHERE YOUR READING GOES', 'XP', 'LAST 30 DAYS',
-           'PROGRESS TO NEXT RANK', 'SAVED QUOTES', 'BADGES EARNED'],
+    want: ['DAILY STREAK', 'YOUR PROGRESS', 'LESSONS', 'DAY STREAK', 'TOTAL XP',
+           'WHERE YOUR READING GOES', 'XP', 'LAST 30 DAYS', 'PROGRESS TO NEXT RANK', 'BADGES EARNED'],
     notWant: ['AT A GLANCE', 'FROM YOUR INSIGHTS', 'THINKERS YOU KEEP RETURNING TO',
-              'BRANCH MASTERY', 'LESSONS DONE', 'TOTAL XP'] },
+              'BRANCH MASTERY', 'LESSONS DONE', 'SAVED QUOTES'] },
+  // EVERY DRAWN PLACE behind the header (2026-10-01): the name, rank and counts must
+  // stand on each place's ground, so each gets photographed. ONLY=profile-bg-<id>.
+  ...['night-spiral', 'sunburst', 'the-peak', 'the-range', 'rain-field', 'small-house', 'the-tower', 'stone-bridge', 'the-ruins']
+    .map((bg) => ({ key: `profile-bg-${bg}`, q: `s=profile&bg=${bg}`, want: ['DAY STREAK', 'TOTAL XP'] })),
+  // HOME'S MASTHEAD, standing in the reader's place.
+  { key: 'home', q: 's=home', want: ['ASHMERE'] },
+  { key: 'home-night', q: 's=home&bg=night-spiral', want: ['ASHMERE'] },
+  { key: 'home-tower', q: 's=home&bg=the-tower', want: ['ASHMERE'] },
   { key: 'pass-tab', q: 's=tab',
     want: ['Every lesson, every day', 'with the Scholar’s', 'Benefits', 'Free', 'Pass',
            'lessons', 'Narrated and animated', 'Unit reviews', 'Start any unit',
-           'FREE FOR EVERYONE', 'thinkers', 'quizzes', 'badges', 'DAYS FREE', 'Start your',
+           'FREE FOR EVERYONE', 'ranks', 'badges', 'DAYS FREE', 'Start your',
            'We’ll remind you a day before your free trial ends.',
            'it automatically becomes a Scholar’s Pass', 'Cancel any time before then',
            // THE SECOND DOOR, under the trial: pay today, no free days. Asserted
@@ -218,7 +225,7 @@ const SCREENS = [
     want: ['DAYS LEFT', 'It ends by itself, and nothing is charged.', 'Keep the Scholar’s Pass'],
     notWant: ['Cancel free trial', 'ACTIVE'] },
   { key: 'pass-tab-pro', q: 's=tab&pro=1',
-    want: ['You hold the', 'ACTIVE', 'Benefits'],
+    want: ['You hold the', 'ACTIVE', 'YOUR PASS OPENS', 'Unit reviews', 'Manage the Pass'],
     notWant: ['Get the Scholar’s Pass', 'Start your', 'Cancel free trial'] },
   // THE CEREMONY, for a trial that has just started: its terms say the charge.
   { key: 'conferral-trial', q: 's=conferral&trial=on',
@@ -231,10 +238,10 @@ const SCREENS = [
   // a way to restore — a hard paywall must never trap somebody who reinstalled.
   { key: 'paywall', q: 's=paywall',
     want: ['Unlock every lesson', 'Everything else in Ashmere stays free', 'Benefits',
-           'Unit reviews', 'DAYS FREE', 'Start your',
+           'Unit reviews', 'HOW THE FREE TRIAL WORKS', 'Start your',
            'We’ll remind you a day before your free trial ends.',
            'it automatically becomes a Scholar’s Pass', 'Restore purchase',
-           'FREE FOR EVERYONE', 'quizzes'],
+           'FREE FOR EVERYONE', 'ranks'],
     notWant: ['AT 1 LESSON A DAY', 'Stop waiting', 'FREE AGAINST THE PASS', 'advertisement'] },
   // No trial on offer: the door charges today, and says so.
   { key: 'paywall-used', q: 's=paywall&trial=used',
@@ -263,6 +270,10 @@ const SCREENS = [
   //
   // `click` names a section on the settings rail, because the section is reached
   // by pressing it rather than by a prop.
+  // THE PICTURE PREVIEW AND THE PICKER (2026-10-01): every swatch is a drawn place
+  // with the reader's name on its ground.
+  { key: 'settings-profile', q: 's=settings', want: ['PICTURE', 'OPEN SEA'] },
+  { key: 'settings-picker', q: 's=settings', click: 'CHANGE', want: ['Choose your look', 'RANK · NOVICE'] },
   { key: 'settings-sub', q: 's=settings', click: 'Subscription',
     want: ['You are on the Free plan', 'Benefits', 'Unit reviews', 'Start any unit',
            'DAYS FREE', 'Start the free trial', 'We’ll remind you a day before your free trial ends.',

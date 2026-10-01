@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Button from '@/components/ui/Button';
 import { MetalPlate } from '@/components/profile/Struck';
-import { INK, MID, PATINA } from '@/components/shared/tone';
+import { INK, MID, PATINA, TEAL, EMBER, EMBER_INK, DEEP, PAPER, TINT, TINT_EDGE, mix } from '@/components/shared/tone';
+import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import { C, RADIUS, SPACE } from '@/constants/design';
 import { FALLBACK_PRICE, BILLING_PERIOD_LABEL } from '@/constants/subscription';
-import { trialLengthPhrase } from '@/lib/utils/trial';
+import { trialLengthPhrase, trialDays } from '@/lib/utils/trial';
+import type { TrialPeriod } from '@/lib/purchases/types';
 import {
   conversionTerms, REMINDER_PROMISE, SKIP_TRIAL_HEADING, skipTrialLabel, skipTrialTerms,
   startNotice, startTrialLabel,
@@ -147,11 +149,15 @@ export default function PassDoor({ source, compact = false }: {
   if (canTrial && trial) {
     return (
       <View style={st.door}>
-        <MetalPlate
-          metal={PATINA}
-          label={`${trialLengthPhrase(trial).toUpperCase()} FREE`}
-          style={st.plate}
-        />
+        {compact ? (
+          <MetalPlate
+            metal={PATINA}
+            label={`${trialLengthPhrase(trial).toUpperCase()} FREE`}
+            style={st.plate}
+          />
+        ) : (
+          <TrialTimeline trial={trial} price={price} period={period} />
+        )}
         <Button
           label={busy ? 'One moment…' : startTrialLabel(trial, compact)}
           size="lg"
@@ -200,8 +206,59 @@ export default function PassDoor({ source, compact = false }: {
   );
 }
 
+/**
+ * THE TRIAL AS THREE STOPS (2026-10-01): today, the reminder, the day it becomes
+ * a Pass. The terms under the button say all of this in a sentence; this says it
+ * as a road the reader can take in at a glance, which is how the clearest trial
+ * screens in the category draw it (Blinkist's "how your trial works"). Every stop
+ * is computed from the trial Google offers — its length, and so the reminder a
+ * day before the end — and from the store's price. Nothing is typed.
+ */
+function TrialTimeline({ trial, price, period }: { trial: TrialPeriod; price: string; period: string }) {
+  const days = trialDays(trial);
+  const inDays = (n: number) => (n <= 0 ? 'TODAY' : n === 1 ? 'TOMORROW' : `IN ${n} DAYS`);
+  const stops: { when: string; what: string; icon: SketchIconName; tone: string }[] = [
+    { when: 'TODAY', what: 'Every lesson opens, free', icon: 'book', tone: TEAL },
+    { when: inDays(days - 1), what: 'We remind you the trial is ending', icon: 'bell', tone: EMBER },
+    { when: inDays(days), what: `It becomes a Scholar’s Pass at ${price} a ${period}, unless you cancel`, icon: 'pass', tone: DEEP },
+  ];
+  return (
+    <View style={st.road} nativeID="trial-timeline">
+      <Text style={st.roadHead}>HOW THE FREE TRIAL WORKS</Text>
+      {stops.map((s, i) => (
+        <View key={s.when + i} style={st.stop}>
+          <View style={st.stopRail}>
+            <View style={[st.stopNode, { backgroundColor: s.tone }]}>
+              <SketchIcon name={s.icon} size={15} color={PAPER} />
+            </View>
+            {i < stops.length - 1 ? <View style={[st.stopLine, { backgroundColor: mix(s.tone, PAPER, 0.45) }]} /> : null}
+          </View>
+          <View style={st.stopBody}>
+            <Text style={[st.stopWhen, { color: s.tone === EMBER ? EMBER_INK : s.tone }]}>{s.when}</Text>
+            <Text style={st.stopWhat}>{s.what}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const st = StyleSheet.create({
   door: { gap: SPACE[2] },
+  road: {
+    marginBottom: SPACE[2], padding: SPACE[3], paddingBottom: SPACE[1], borderRadius: RADIUS.card,
+    backgroundColor: TINT, borderWidth: 1.5, borderColor: TINT_EDGE,
+  },
+  roadHead: {
+    fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.6, color: PATINA.base, marginBottom: SPACE[2],
+  },
+  stop: { flexDirection: 'row', gap: SPACE[2] },
+  stopRail: { width: 30, alignItems: 'center' },
+  stopNode: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  stopLine: { width: 3, flex: 1, minHeight: 12, borderRadius: 1.5, marginVertical: 2 },
+  stopBody: { flex: 1, paddingTop: 1, paddingBottom: SPACE[3] },
+  stopWhen: { fontFamily: 'Inter_700Bold', fontSize: 10.5, letterSpacing: 1.4 },
+  stopWhat: { fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 19, color: INK, marginTop: 1 },
   plate: { alignSelf: 'center' },
   // THE PROMISE IS THE LARGER LINE, the conversion terms the smaller one, in the
   // order the reader asked for. Ink rather than grey, so it reads as a statement
