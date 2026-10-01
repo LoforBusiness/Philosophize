@@ -335,9 +335,9 @@ head('§11 · Quick Start never disappears');
   ok(/pick!?\.again/.test(qsCard), 'the card says READ IT AGAIN rather than START on a lesson already read');
 }
 
-// ── 12. EVERY LESSON ON A ROAD HAS THE DAY IT WAS ADDED, AND NEW LASTS FIVE DAYS ──
+// ── 12. EVERY LESSON ON A ROAD HAS THE DAY IT WAS ADDED, AND NEW LASTS TWELVE DAYS ──
 //
-// The owner (2026-10-01): NEW on a new lesson's sign, gone five days after it was
+// The owner (2026-10-01): NEW on a new lesson's sign, gone twelve days after it was
 // made. The sign reads data/lessonAdded.ts, so a live lesson missing from it would
 // simply never be new — this is what makes adding the date part of adding a lesson.
 console.log('\n12 · every lesson has the day it was added');
@@ -353,9 +353,9 @@ console.log('\n12 · every lesson has the day it was added');
   }
   const at = (y, m, d) => new Date(y, m - 1, d, 12);
   A.LESSON_ADDED.__probe = '2026-03-10';
-  const days = [10, 11, 12, 13, 14, 15, 16].map((d) => A.isNewLesson('__probe', at(2026, 3, d)));
+  const days = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((d) => A.isNewLesson('__probe', at(2026, 3, d)));
   delete A.LESSON_ADDED.__probe;
-  ok(days.join() === 'true,true,true,true,true,false,false', 'NEW shows on the day it is added and the four after, then goes',
+  ok(days.join() === 'true,true,true,true,true,true,true,true,true,true,true,true,false,false', 'NEW shows on the day it is added and the eleven after, then goes',
     days.map((v) => (v ? 'N' : '-')).join(''));
   ok(!A.isNewLesson('__probe', at(2026, 3, 9)), 'and never for a lesson with no date');
 }

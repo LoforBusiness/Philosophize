@@ -98,7 +98,7 @@ export interface WorldLesson {
   signpost?: boolean;
   /** A stop with nothing drawn at it — where a coming-soon road's walk starts from. */
   hidden?: boolean;
-  /** Added in the last five days (data/lessonAdded.ts): the sign wears NEW. */
+  /** Added in the last twelve days (data/lessonAdded.ts): the sign wears NEW. */
   isNew?: boolean;
 }
 

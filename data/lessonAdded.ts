@@ -3,7 +3,7 @@
 //
 // The owner (2026-10-01): "when a new lesson is made, I want you to put a NEW on
 // the top right of the sign and to make it very noticeable. And that NEW goes away
-// five days after that lesson is created."
+// five days after that lesson is created." Later the same day: twelve days, not five.
 //
 // A TABLE AND NOT A FIELD ON THE LESSON, for the reason the maxim is one
 // (data/lessonFocus.ts): a lesson file is pinned by the must-box stamp and edited by
@@ -40,12 +40,12 @@ export const LESSON_ADDED: Record<string, string> = {
 };
 
 /** How long a lesson wears NEW, in days from the day it was added. */
-export const NEW_FOR_DAYS = 5;
+export const NEW_FOR_DAYS = 12;
 
 /**
  * Is this lesson still new? Counted in the reader's own calendar days: a lesson
- * added on the 30th is new on the 30th and the four days after it, and not on the
- * 5th. A lesson with no date is never new — the check is what stops that happening.
+ * added on the 1st is new on the 1st and the eleven days after it, and not on the
+ * 13th. A lesson with no date is never new — the check is what stops that happening.
  */
 export function isNewLesson(id: string, now: Date = new Date()): boolean {
   const added = LESSON_ADDED[id];

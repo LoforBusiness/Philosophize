@@ -35,7 +35,7 @@ import {
 // icon and number, the title on the board, two nail heads, a ledge under it like
 // every pressable thing in the app, and a wooden post. The stop you are at is the
 // board painted solid in the road's hue. A finished one wears a tick; a locked one
-// a padlock, flat and cool. And a lesson added in the last five days wears NEW on
+// a padlock, flat and cool. And a lesson added in the last twelve days wears NEW on
 // its top-right corner — an ember tab that tilts, lifts and breathes, the loudest
 // thing on the road on purpose.
 // ─────────────────────────────────────────────────────────────────────────────
