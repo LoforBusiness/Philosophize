@@ -2,7 +2,9 @@
 // EVERY TONED PLATE STANDS ON A SHADED LIP — THE DEPTH RAMP'S THIRD RUNG.
 //
 //   node scripts/lip-stage.mjs            report
-//   node scripts/lip-stage.mjs --write    do it, then node scripts/restamp-lip.mjs --write
+//   node scripts/lip-stage.mjs --write    do it, then renew the touched scenes' must-box
+//                                         stamps (the one-off restamp-lip that proved a lip
+//                                         moves no box went with the narrated library)
 //
 // 237 scenes used STONE, 244 used RULE and FOUR used SHADE. The tonal pass gave the
 // corpus a light mass and stopped, so a plate was a coloured shape rather than an

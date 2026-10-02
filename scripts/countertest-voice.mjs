@@ -13,6 +13,14 @@
 // mutation really changed the file. Two cases must stay SILENT: a literal use of a
 // phrase that is sometimes an idiom, and a word that merely begins like an
 // instruction. Run it when nothing else is editing the scripts.
+//
+// IT STAGES ON phil1 (`philosophy-foundations-1`), A DIALOGUE LESSON, since the narrated
+// lessons it used (political7, logic27) were deleted on 2026-10-02. Two things about a
+// dialogue script shape the cases. V7 does not read a dialogue lesson's SPOKEN lines
+// (AP4: people on a stage talk as themselves), so its two cases first take the
+// speakers off the copy, which makes check:voice read it as narration. And no dialogue
+// lesson asks with a poll, so R17's case writes one into the first question, with one
+// option naming nobody.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -47,6 +55,8 @@ function mutate(file, change, script) {
 }
 
 const firstText = (prefix) => (s) => s.replace(/\n {4}text: '/, `\n    text: '${prefix}`);
+/** The same, with every `speaker:` taken off, so check:voice reads the copy as narration (V7). */
+const narrated = (prefix) => (s) => firstText(prefix)(s.replace(/\n {4}speaker: '[a-z]+',/g, ''));
 
 console.log('\nCOUNTER-TEST · check:voice V3 and V7, check:answers R17\n');
 const baseVoice = run('check-voice.mjs');
@@ -61,32 +71,32 @@ console.log(`  baseline  V3 ${B3} · V7 ${B7} · unheld poll options ${BU}\n`);
 const cases = [
   {
     name: 'V3 names a colloquial phrase in narration',
-    file: 'political7Script.ts', script: 'check-voice.mjs',
+    file: 'phil1Script.ts', script: 'check-voice.mjs',
     change: firstText('Brace yourself. '),
     judge: (out) => v3(out) === B3 + 1 && /brace yourself/i.test(out),
   },
   {
     name: 'V3 reads a summary point too',
-    file: 'political7Script.ts', script: 'check-voice.mjs',
+    file: 'phil1Script.ts', script: 'check-voice.mjs',
     change: (s) => s.replace(/points: \[\n(\s+)'/, (m, sp) => `points: [\n${sp}'Game over for the theory', '`),
     judge: (out) => v3(out) === B3 + 1 && /game over/i.test(out),
   },
   {
     name: 'V3 stays silent on a literal "in the room"',
-    file: 'political7Script.ts', script: 'check-voice.mjs',
+    file: 'phil1Script.ts', script: 'check-voice.mjs',
     change: firstText('The man in the room follows the rules. '),
     judge: (out) => v3(out) === B3,
   },
   {
     name: 'V7 names narration that tells the eye where to look',
-    file: 'political7Script.ts', script: 'check-voice.mjs',
-    change: firstText('Watch the bar. '),
+    file: 'phil1Script.ts', script: 'check-voice.mjs',
+    change: narrated('Watch the bar. '),
     judge: (out) => v7(out) === B7 + 1 && /Watch the bar/.test(out),
   },
   {
     name: 'V7 stays silent on a word that only begins like an instruction',
-    file: 'political7Script.ts', script: 'check-voice.mjs',
-    change: firstText('Watching a sunset is not wanting it. '),
+    file: 'phil1Script.ts', script: 'check-voice.mjs',
+    change: narrated('Watching a sunset is not wanting it. '),
     judge: (out) => v7(out) === B7,
   },
   {
@@ -97,8 +107,13 @@ const cases = [
   },
   {
     name: 'R17 counts a poll option that names nobody',
-    file: 'logic27Script.ts', script: 'check-answers.mjs',
-    change: (s) => s.replace(/,\s*holders:\s*\[[^\]]*\]/, ''),
+    file: 'phil1Script.ts', script: 'check-answers.mjs',
+    change: (s) => s.replace("      prompt: 'Which question can’t be settled by looking?',\n",
+      "      prompt: 'Which question can’t be settled by looking?',\n"
+      + "      poll: {\n        options: [\n"
+      + "          { id: 'same', reads: 'THE SAME BICYCLE', holders: ['Locke'] },\n"
+      + "          { id: 'new', reads: 'A NEW BICYCLE' },\n"
+      + "        ],\n      },\n"),
     judge: (out) => unheld(out) === BU + 1,
   },
 ];

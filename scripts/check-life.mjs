@@ -39,9 +39,6 @@ const bad = (m, d) => { fails++; console.log(`  FAIL  ${m}${d ? `  ${d}` : ''}`)
 
 const lessons = corpus().filter((l) => l.key && reachesCatalogue(l.comp));
 
-/** Which beats are pieces of one sentence, frozen before group AH (make-splitruns). */
-const SPLIT_RUNS = JSON.parse(fs.readFileSync('scripts/lib/splitruns.json', 'utf8'));
-
 // ── the same run detection the codemod uses ──────────────────────────────────
 function runsOf(lesson) {
   const raw = readScript(lesson.file);
@@ -64,19 +61,15 @@ function runsOf(lesson) {
   }
   const PULSE = 2;
   const state = (sig) => sig.filter((kv) => (lit.get(kv.split('=')[0]) || 0) > PULSE).join(' ');
-  // THE FROZEN TABLE WINS where it still describes this lesson (scripts/lib/
-  // splitruns.json, read once from before group AH — see make-splitruns.mjs). The
-  // pulse rule above is the fallback for a lesson re-cut since, and for new ones.
-  const frozen = SPLIT_RUNS[path.basename(lesson.file)];
+  // (A frozen table of the narrated library's split runs, read once from before group
+  // AH, used to win over this rule where it still described a lesson. It described
+  // only the narrated library and went with it on 2026-10-02; the pulse rule is the
+  // rule for every lesson now.)
   const cont = new Set();
-  if (frozen && frozen.beats === chunks.length) {
-    for (const i of frozen.cont) cont.add(i);
-  } else {
-    for (let i = 1; i < chunks.length; i++) {
-      const a = state(sigs[i - 1]);
-      const b = state(sigs[i]);
-      if (a && a === b) cont.add(i);
-    }
+  for (let i = 1; i < chunks.length; i++) {
+    const a = state(sigs[i - 1]);
+    const b = state(sigs[i]);
+    if (a && a === b) cont.add(i);
   }
   // THE HEAD OF A RUN IS IN THE RUN. `cont` holds continuations only, so a rule
   // written against it alone counts the head as a free-standing beat — which put

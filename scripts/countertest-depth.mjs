@@ -46,20 +46,35 @@ const damage = (src, a, b) => {
 console.log('\nCOUNTER-TESTING T7 AND L9\n');
 
 // ── T7 ──────────────────────────────────────────────────────────────────────
-const plate = fs.readFileSync(path.join(CIN, 'political11Scene.tsx'), 'utf8');
+// NO DIALOGUE SCENE DESTRUCTURES A STONE TONE (they take `const TONE = stageTone(…)`
+// and paint real colours, AR1), so T7 has nothing live to stand on and its shape is
+// staged from a minimal synthetic scene: one STONE plate, lipped. It was
+// political11Scene.tsx until that lesson was deleted with the narrated library.
+const plate = [
+  "const { RULE, STONE, SHADE } = stageTone('economics');",
+  'const LIP = `0px 3px 0px ${SHADE}`;',
+  'const styles = StyleSheet.create({',
+  "  plate: { position: 'absolute', left: 40, top: 300, width: 120, height: 40, backgroundColor: STONE, boxShadow: LIP },",
+  '});',
+  '',
+].join('\n');
 stage('a lipped scene stays silent', 'scripts/check-shade.mjs', 'SHADE_EXTRA', plate, 'shaded lip', false);
 stage('a toned plate without its lip goes red', 'scripts/check-shade.mjs', 'SHADE_EXTRA',
   damage(plate, /, boxShadow: LIP/, ''), 'STONE plate(s) without a lip', true);
 
 // ── L9 ──────────────────────────────────────────────────────────────────────
-const one = fs.readFileSync(path.join(CIN, 'politicalScene.tsx'), 'utf8');
-stage('four figures with four held values stay silent', 'scripts/check-smooth.mjs', 'SMOOTH_EXTRA', one, '(L9)', false);
-stage('four figures sharing one held value go red', 'scripts/check-smooth.mjs', 'SMOOTH_EXTRA',
-  damage(damage(one, 'const s = keepHeld(held, mixStance(carryFrom(held, n, live), live, tr));',
-    'const s = keepHeld(held0, mixStance(carryFrom(held0, n, live), live, tr));'),
-  'c0: cit(0, held0),', 'c0: cit(0, held0), cx: keepHeld(held0, carryFrom(held0, n, live0)),'), '(L9)', true);
+// A dialogue scene: econ1 poses three people, each with its own held value blended
+// in by the transition. It was politicalScene.tsx's four brawlers until that lesson
+// was deleted with the narrated library (2026-10-02).
+const one = fs.readFileSync(path.join(CIN, 'econ1Scene.tsx'), 'utf8');
+stage('three figures with three held values stay silent', 'scripts/check-smooth.mjs', 'SMOOTH_EXTRA', one, '(L9)', false);
+stage('two figures sharing one held value go red', 'scripts/check-smooth.mjs', 'SMOOTH_EXTRA',
+  damage(damage(one, 'const prevTh = carryFrom(heldTh, n,', 'const prevTh = carryFrom(heldPl, n,'),
+    'const figTh = keepHeld(heldTh,', 'const figTh = keepHeld(heldPl,'), '(L9)', true);
 stage('a held pose weighted by something else goes red', 'scripts/check-smooth.mjs', 'SMOOTH_EXTRA',
-  damage(one, 'mixStance(carryFrom(held, n, live), live, tr)', 'mixStance(carryFrom(held, n, live), live, auth)'), '(L9)', true);
+  damage(damage(one, 'const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t));\n', ''),
+    'const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));',
+    'const figPl = keepHeld(heldPl, mixStance(carryFrom(heldPl, n, hHold(PL_P[p], t)), sp, auth));'), '(L9)', true);
 
 fs.rmSync(tmp, { force: true });
 console.log(failed ? `\n${failed} stage(s) did not behave.\n` : '\nboth rules go red on their own defect, and a clean scene is silent.\n');

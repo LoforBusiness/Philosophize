@@ -169,7 +169,7 @@ if (withBare.length) {
   if (withBare.length > 14) console.log('      … and ' + (withBare.length - 14) + ' more scene(s)');
   console.log('');
   console.log('  the fix: put the art INSIDE the Target and position it relative to');
-  console.log('  the Target\'s own box, then delete hitBox. See epistemology19Scene.tsx.');
+  console.log('  the Target\'s own box, then delete hitBox.');
 }
 // ── E39b · AND NOTHING OF THE ANSWER MAY BE LEFT STANDING IN ITS BOX ─────────
 //

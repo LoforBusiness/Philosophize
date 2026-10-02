@@ -86,7 +86,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
-import { loadTs } from './lib/loadts.mjs';
 import { loadFont as LOAD_FONT } from './lib/ttfwidth.mjs';
 
 const REPO = process.cwd();
@@ -105,7 +104,8 @@ const C20C_BUDGET = 0;
 // being talked to is not a statue. High-water marks, like every budget here.
 const FACING_BUDGET = Number(process.env.FACING_BUDGET ?? 0);
 const FROZEN_BUDGET = Number(process.env.FROZEN_BUDGET ?? 0);
-const VISITOR_FACE_BUDGET = Number(process.env.VISITOR_FACE_BUDGET ?? 0);
+// (A third N21 rule — the lead and the visiting second figure face each other — went
+// with the visitor and the narrated library on 2026-10-02.)
 /** Head-and-hand travel through a beat, stage units: over TALKING is a figure doing
  *  something; under STILL is breath alone (group AL left nothing else). */
 const TALKING = 12;
@@ -970,17 +970,6 @@ function checkLesson({ id, file }) {
 
   const { snaps, strips, detached, labels } = play(Scene, BEATS, sceneFile);
 
-  // REPLAY_FACING=<file> records, for every lesson with ONE figure on its stage,
-  // which way he faces at rest on each beat (null where he is not drawn) — what
-  // `make:visitor` needs to stand a visitor where the lead can see him (N21).
-  if (process.env.REPLAY_FACING) {
-    const f = process.env.REPLAY_FACING;
-    const cur = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
-    const per = snaps.map((s) => (s.figs || []).filter((fg) => fg.opacity > 0.3));
-    if (per.every((v) => v.length <= 1)) cur[id] = per.map((v) => (v.length ? v[0].dir : null));
-    fs.writeFileSync(f, JSON.stringify(cur));
-  }
-
   // REPLAY_SLIDE=<file> records, per beat and figure, how far a planted foot slid.
   if (process.env.REPLAY_SLIDE) {
     const f = process.env.REPLAY_SLIDE;
@@ -1135,8 +1124,8 @@ if (unread.length) {
 // "if there is more than 1 stickman on screen they must be communicating and
 // operating in some way that looks natural" (owner, 2026-09-25). Read off each
 // real scene's settled frame: every figure on stage faces at least one other
-// figure; nobody stands frozen while another talks; and the lead faces the visitor
-// the player walks in (AA8), who until now could arrive behind his back.
+// figure; and nobody stands frozen while another talks. (A third rule, that the lead
+// faced the visitor the player walked in (AA8), went with the visitor on 2026-10-02.)
 const facingAway = [];
 const frozenListeners = [];
 for (const r of rows) {
@@ -1157,26 +1146,6 @@ for (const r of rows) {
     }
   });
 }
-const visitorAway = [];
-{
-  const { VISITOR } = await loadTs('data/lessonVisitor.ts');
-  for (const r of rows) {
-    const cue = VISITOR[r.id];
-    if (!cue || !r.figs) continue;
-    for (let n = cue.enter + 1; n < r.figs.length; n++) {
-      if (r.summary && r.summary[n]) continue;
-      const vis = (r.figs[n] || []).filter((fg) => fg.opacity > 0.3 && fg.x > -10 && fg.x < 410);
-      if (!vis.length) continue;
-      const lead = vis.reduce((a, fg) => (Math.abs(fg.x - cue.x) < Math.abs(a.x - cue.x) ? fg : a));
-      const toward = Math.sign(cue.x - lead.x);
-      // `turn` is the player turning the lead round to face him once he has arrived.
-      if (lead.dir !== toward && !cue.turn) {
-        visitorAway.push(`${r.id} beat ${n}: the visitor at x ${cue.x} is behind the lead at x ${Math.round(lead.x)}`);
-      }
-      if (cue.dir !== -toward) visitorAway.push(`${r.id} beat ${n}: the visitor faces away from the lead`);
-    }
-  }
-}
 const showN21 = (list, title) => {
   if (!list.length) return;
   console.log(`  ${title}`);
@@ -1186,7 +1155,6 @@ const showN21 = (list, title) => {
 };
 showN21(facingAway, 'FACING — a figure on a shared stage faces nobody (N21):');
 showN21(frozenListeners, 'FROZEN — a figure stands still while another talks (N21):');
-showN21(visitorAway, 'VISITOR — the visitor and the lead are not facing (N21):');
 
 ok('nothing moves on a beat where nothing changed (C20c)', c20c.length <= C20C_BUDGET,
   `${c20c.length} in ${byLesson(c20c)} lessons, budget ${C20C_BUDGET}`);
@@ -1202,8 +1170,6 @@ ok('every figure on a shared stage faces another (N21)', facingAway.length <= FA
   `${facingAway.length}, budget ${FACING_BUDGET}`);
 ok('nobody stands frozen while another talks to him (N21)', frozenListeners.length <= FROZEN_BUDGET,
   `${frozenListeners.length}, budget ${FROZEN_BUDGET}`);
-ok('the lead and the visitor face each other (N21)', visitorAway.length <= VISITOR_FACE_BUDGET,
-  `${visitorAway.length}, budget ${VISITOR_FACE_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
 
 // ── AR · A HAND USES A THING THE WAY A PERSON DOES (2026-10-01) ─────────────

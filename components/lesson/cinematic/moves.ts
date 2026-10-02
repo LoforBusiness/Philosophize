@@ -3993,7 +3993,7 @@ export function actStance(code: number, t: number, u: number): Stance {
  * DROPPED (owner, 2026-09-25: "at the end of the animation … the hand will very
  * quickly move down"; act 80 measured 5.2 units a frame). It is longer now, and
  * `playU` spends the extra time on the ENDING only. `check:moves` §8 holds every
- * ending under a speed ceiling, and asserts `wanderrule.PLAY_SECONDS` agrees.
+ * ending under a speed ceiling.
  */
 export const PLAY_SECONDS = 2.4;
 

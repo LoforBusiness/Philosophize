@@ -4,8 +4,6 @@ import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reani
 import { BONE_SRC, STR, type Bundle } from './rig';
 import { pillStyle } from './stageSkin';
 import type { Piece } from './wardrobe';
-import { useHasProp, useWorn } from './wardrobeContext';
-import ChairArt from './ChairArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Draws one figure from a Bundle of transform arrays, as native RN Views.
@@ -46,12 +44,10 @@ interface Props {
    */
   wear?: Piece[];
   /**
-   * Which figure this is, when the lesson dresses them from context.
-   *
-   * `lead` is the mascot. `second` is the one other figure in a two-figure scene
-   * — the opposing position — and gets a different costume on purpose, because
-   * two identical figures in identical hats read as a bug. `crowd` is the third
-   * figure and beyond, and wears nothing.
+   * Which figure this is — `lead`, `second` or `crowd`. It used to pick a costume
+   * from the lesson's rotation and hand the lead the lawn chair; both went with the
+   * narrated library (2026-10-02), and a figure now wears exactly its `wear`. Kept so
+   * the scenes that state it need no edit.
    */
   role?: 'lead' | 'second' | 'crowd';
 }
@@ -72,15 +68,13 @@ const WORN_SLOTS = 8;
 /** The stage's own ground, so a `paper` piece reads as a gap rather than a mark. */
 const PAPER = '#FAFAF7';
 
-export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear, role = 'lead' }: Props) {
-  // An explicit `wear` wins; otherwise the lesson dresses him. Outside a lesson —
-  // the launch screen, the branch road, the welcome intro — the context is empty
-  // and he is the bare mascot, which is what those surfaces have always drawn.
-  const fromCtx = useWorn(role);
-  const worn = wear ?? fromCtx;
-  // The chair and the mug are the LEAD's (chairPlay.ts) — and only in a lesson that
-  // plays a routine, so every other figure mounts nothing extra.
-  const prop = useHasProp() && role === 'lead';
+/** One empty costume, shared, so a bare figure's `worn` is the same array every render. */
+const NO_WEAR: Piece[] = [];
+
+export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear }: Props) {
+  // What he wears is exactly what the scene hands him; with nothing he is the bare
+  // mascot, which is what the launch screen, the road and the welcome have always drawn.
+  const worn = wear ?? NO_WEAR;
   // Thicknesses are baked per figure. They never animate, so they stay in style.
   const S = useMemo(() => {
     const limb = STR.limb * k;
@@ -285,8 +279,6 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
     >
       {/* The floor he is standing on, before anything that stands on it. */}
       <Animated.View style={[S.pill, a.pill]} />
-      {/* The chair he sits in, behind every limb of his (ChairArt). */}
-      {prop ? <ChairArt D={D} k={k} layer="back" /> : null}
       {/* Far side first, so the near limbs read in front. */}
       <Animated.View style={[S.limbBone, a.thighL]} />
       <Animated.View style={[S.limbBone, a.shinL]} />
@@ -333,8 +325,6 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       {wornStatic.map((st, i) => (
         st ? <Animated.View key={i} testID="worn" style={[st, wornStyles[i]]} /> : null
       ))}
-      {/* The near armrest once he is in the chair, and the mug in his hand. */}
-      {prop ? <ChairArt D={D} k={k} layer="front" /> : null}
     </Animated.View>
   );
 }

@@ -31,7 +31,7 @@
 import { loadRig } from './lib/loadrig.mjs';
 import { CLOCK_ACTS, STILL_TWIN } from './lib/liveliness.mjs';
 
-const { RIG, MOVES, INTERACT, WANDER } = await loadRig();
+const { RIG, MOVES, INTERACT } = await loadRig();
 
 /**
  * Acts that break one of these rules ON PURPOSE, with the reason from their own
@@ -260,16 +260,9 @@ for (let c = 0; c <= 8; c += 1) {
   bobs(`interact.pairPosture ${c} b`, (t) => INTERACT.pairPosture(c, t).b.bob);
 }
 
-// AND THE WANDER LAYER, which is the one that actually runs on 218 lessons. Its
-// LEAN is an ambient weight shift with nothing on the stage behind it, so it is
-// held here; its LOOK, SIT and CROUCH bend the body on purpose and are not swept,
-// because a look down that does not lower the head is not a look down (group AF).
-// The plan format is `[lo, hi, kind, at, dur, target, …]`, and W_LEAN is 6.
-const LEAN_PLAN = [-30, 30, WANDER.W_LEAN, 0.2, 2.4, 1, WANDER.W_LEAN, 3.0, 2.4, 0];
-bobs('wander LEAN', (t) => {
-  const st = WANDER.wanderState(LEAN_PLAN, t % 6, WANDER.wanderRest(), 1);
-  return WANDER.wanderStance(RIG.stand(t), st, t, 1).bob;
-});
+// (THE WANDER LAYER'S LEAN was swept here too, as the one ambient weight shift with
+// nothing on the stage behind it. The layer went with the narrated library on
+// 2026-10-02.)
 
 if (wob.length) {
   bad += 1;
@@ -319,19 +312,16 @@ if (process.argv.includes('--table')) {
 // Everything above is about the vocabulary. This is the number the reader felt:
 // "three tabs in one lesson where there is no animation above the words". A tap is
 // DEAD when no scene channel changed, every posed figure holds the same code and
-// none of them is a living hold, and the player draws nothing of its own on it — no
-// pen mark (data/lessonMarks.ts) and no thought (data/lessonThoughts.ts). A
+// none of them is a living hold. (The player's own pen mark and thought bubble used to
+// count as an event too; both went with the narrated library on 2026-10-02.) A
 // question, a quotation and the summary are events in themselves and never count.
 // It was 289 on 2026-09-15 and 135 a day later; a ratchet, so it only goes down.
 const { LESSONS, beatsOf } = await import('./lib/narration.mjs');
 const { poseTrack, poseTracks } = await import('./lib/posetrack.mjs');
-const { thoughtBeats, PROSE } = await import('./lib/marks.mjs');
-const { loadTs } = await import('./lib/loadts.mjs');
+const { PROSE } = await import('./lib/prose.mjs');
 const { holdsARun } = await import('./lib/liveliness.mjs');
 const fsm = (await import('node:fs')).default;
 const CIN = 'components/lesson/cinematic';
-const { MARKS } = await loadTs('data/lessonMarks.ts');
-const thoughts = thoughtBeats(fsm.readFileSync('data/lessonThoughts.ts', 'utf8'));
 const dead = [];
 for (const [id, file] of Object.entries(LESSONS)) {
   const stem = file.replace(/Script\.ts$/, '');
@@ -343,7 +333,6 @@ for (const [id, file] of Object.entries(LESSONS)) {
   for (let k = 1; k < beats.length; k += 1) {
     const a = beats[k - 1], b = beats[k];
     if (b.interact || b.mc || b.tap || b.quote || b.summary) continue;
-    if (MARKS[id]?.[k] || thoughts[id]?.has(k)) continue;
     const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
     const moved = [...keys].some((key) => !PROSE.has(key) && JSON.stringify(a[key] ?? null) !== JSON.stringify(b[key] ?? null));
     if (moved) continue;

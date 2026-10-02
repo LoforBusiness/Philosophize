@@ -180,7 +180,9 @@ let timing = '';
   const late = pad + slack + lat;
   if (![pad, slack, lat].every(Number.isFinite)) note(who, 'PLAYER', 'END_PAD_S, END_SLACK_MS or LATENCY_MS could not be read out of the player');
   else {
-    if (/else if \(heard\)\s*finish\(\)/.test(src)) note(who, 'PLAYER', 'the status listener pauses as soon as the line nears its end, which clips its last sound');
+    // `{?` — the player now writes its branches as blocks (`{ finish(); return; }`), and
+    // the brace-less pattern alone stopped seeing the defect it was written for.
+    if (/else if \(heard\)\s*\{?\s*finish\(\)/.test(src)) note(who, 'PLAYER', 'the status listener pauses as soon as the line nears its end, which clips its last sound');
     // The fallback must follow the AUDIO, re-armed from the position each status update
     // reports, or a line whose sound starts late is paused before its last words (AP16).
     if (!/clearTimeout\(fallback\);\s*fallback = setTimeout\(finish, Math\.max\(0, end \+ END_PAD_S - t\)/.test(src)) {

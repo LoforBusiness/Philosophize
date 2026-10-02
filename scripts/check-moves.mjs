@@ -479,11 +479,9 @@ if (!process.argv.includes('--probe')) checkWalkUnchanged();
     if (worst > ENDING_CEILING) over.push(`act ${act} (code ${code}) ${worst.toFixed(2)}u/frame at ${at.toFixed(2)}s`);
   }
   if (FAST_BY_DESIGN.size > 4) note('endings', 'fast', 'the fast-by-design list grew — each one needs the owner');
-  // make:wander waits PLAY_SECONDS + 0.4 after a played action, from its own copy.
-  const WR = await import(pathToFileURL(path.join(process.cwd(), 'scripts/lib/wanderrule.mjs')).href);
-  if (WR.PLAY_SECONDS !== M.PLAY_SECONDS) {
-    note('wanderrule', 'sync', `wanderrule.PLAY_SECONDS ${WR.PLAY_SECONDS} ≠ moves.PLAY_SECONDS ${M.PLAY_SECONDS}`);
-  }
+  // (It also held the wander generator's own copy of PLAY_SECONDS to this one. The
+  // wander and its generator went with the narrated library on 2026-10-02, so there is
+  // one copy now and nothing to agree with.)
   if (over.length) {
     console.log(`\n${over.length} played action(s) end faster than ${ENDING_CEILING}u a frame (check 8):`);
     for (const o of over) console.log(`  ${o}`);

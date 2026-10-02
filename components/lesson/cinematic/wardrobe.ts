@@ -388,9 +388,10 @@ const BUN: Piece[] = [
 // it is one prop with hats. Five carry the cane, three the monocle, and three are
 // a hat on its own — so any two costumes still differ by something a reader can
 // name from across a room, which is the only test this list has ever had.
-// `lessonWardrobe.ts` and `wardroberule`'s roll and sober list are all keyed on
-// them, so the four that lost a piece are re-formed rather than renamed: a costume
-// id is a name a reader never sees and a table everything else is joined on.
+// The cast (cast.ts) and every dialogue scene's `BY_ID[…]` are keyed on them (and
+// the per-lesson rotation table was, until it went with the narrated library on
+// 2026-10-02), so the four that lost a piece are re-formed rather than renamed: a
+// costume id is a name a reader never sees and a table everything else is joined on.
 //
 // `smoker` is the eleventh and it is not here for variety — it is the only look in
 // the roll that a figure standing at x = 0 can wear, which is where the scenes put

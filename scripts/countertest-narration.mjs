@@ -19,14 +19,14 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, ASSETS, MANIFEST, LESSON_CLIP, parseWav, sha256hex, readRenders, writeRenders, encodingMark } from './lib/narration.mjs';
 
-const LESSON = 'metaphysics-being-4';
+const LESSON = 'philosophy-foundations-1';   // a dialogue lesson; it was metaphysics-being-4 until the narrated library was deleted
 const tmp = path.join(os.tmpdir(), 'philosophize-narration-ct');
 const stagedAssets = path.join(tmp, 'assets');
 const stagedManifest = path.join(tmp, 'manifest.ts');
 const stagedRoute = path.join(tmp, 'route.tsx');
 
 const manifestSrc = fs.readFileSync(MANIFEST, 'utf8').replace(/\r\n/g, '\n');
-const block = manifestSrc.match(/^ {2}"metaphysics-being-4": \{\n[\s\S]*?^ {2}\},$/m);
+const block = manifestSrc.match(/^ {2}"philosophy-foundations-1": \{\n[\s\S]*?^ {2}\},$/m);
 if (!block) { console.error(`no ${LESSON} block in the manifest`); process.exit(1); }
 const head = `${manifestSrc.slice(0, manifestSrc.indexOf('export const NARRATION'))}export const NARRATION: Record<string, Record<number, NarratedLine>> = {\n`;
 
@@ -197,7 +197,9 @@ damage(1, (pcm) => pcm.slice(0, Math.floor(pcm.length * 0.3)));
 expect('a take that lost most of its words', 'PACE');
 
 fresh();
-damage(1, (pcm) => { const out = new Int16Array(pcm.length * 3); for (let k = 0; k < 3; k += 1) out.set(pcm, k * pcm.length); return out; });
+// Beat 2, not beat 1: a dialogue line is quick (0.14–0.19s a unit), so beat 1 said
+// three times still sits inside PACE_MAX; beat 2 said three times does not.
+damage(2, (pcm) => { const out = new Int16Array(pcm.length * 3); for (let k = 0; k < 3; k += 1) out.set(pcm, k * pcm.length); return out; });
 expect('a take that said its line three times', 'PACE');
 
 fresh();
@@ -256,7 +258,7 @@ function player(edit) {
 
 fresh();
 expect('the player that paused 50ms before every line ended, as shipped', 'PLAYER', {
-  env: player((s) => s.replace('else if (heard && t >= end + END_PAD_S) finish();', 'else if (heard) finish();')),
+  env: player((s) => s.replace('else if (heard && t >= end + END_PAD_S) { finish(); return; }', 'else if (heard) { finish(); return; }')),
 });
 
 fresh();
@@ -323,7 +325,7 @@ fs.writeFileSync(stagedRoute, `const CINEMATIC = {\n  '${LESSON}': StagedScene,\
 expect('a route whose every lesson has its voice', null, { env: { NARRATION_ROUTE: stagedRoute } });
 
 fresh();
-fs.writeFileSync(stagedRoute, `const CINEMATIC = {\n  '${LESSON}': StagedScene,\n  'metaphysics-being-999': StagedScene,\n};\n`);
+fs.writeFileSync(stagedRoute, `const CINEMATIC = {\n  '${LESSON}': StagedScene,\n  'philosophy-foundations-999': StagedScene,\n};\n`);
 expect('a lesson the app can open with no voice', 'UNVOICED', { env: { NARRATION_ROUTE: stagedRoute } });
 
 fresh();

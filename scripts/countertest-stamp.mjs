@@ -27,7 +27,10 @@
 // So this one restores from BYTES, and asserts each mutation actually changed the
 // file before believing what the stamp says about it.
 //
-// NEVER RUN IT WHILE ANYTHING ELSE IS EDITING logic18Script.ts OR logic18Scene.tsx.
+// It stages on phil1 (`philosophy-foundations-1`), a dialogue lesson; it used logic18
+// until that lesson was deleted with the narrated library on 2026-10-02.
+//
+// NEVER RUN IT WHILE ANYTHING ELSE IS EDITING phil1Script.ts OR phil1Scene.tsx.
 // It restores both from the bytes it read at the start, which would silently undo
 // an edit made in between.
 import fs from 'node:fs';
@@ -35,9 +38,9 @@ import path from 'node:path';
 import { mustStamp } from './lib/muststamp.mjs';
 
 const DIR = 'components/lesson/cinematic';
-const COMP = 'Logic18Lesson';
-const SCRIPT = path.join(DIR, 'logic18Script.ts');
-const SCENE = path.join(DIR, 'logic18Scene.tsx');
+const COMP = 'Phil1Lesson';
+const SCRIPT = path.join(DIR, 'phil1Script.ts');
+const SCENE = path.join(DIR, 'phil1Scene.tsx');
 const PROBE = 'countertest-probe';
 
 const script0 = fs.readFileSync(SCRIPT);
@@ -102,7 +105,7 @@ run('a cite line added over a narration', () => {
 
 // AND FIVE THAT MUST NOT BE.
 run('a changed channel value', () => {
-  fs.writeFileSync(SCRIPT, s.replace(/\bx: 200\b/, 'x: 117'));
+  fs.writeFileSync(SCRIPT, s.replace(/act: 'enter'/, "act: 'parts'"));
 }, 'changed');
 
 run('a beat removed', () => {
@@ -119,7 +122,7 @@ run('an edited scene', () => {
 
 // Removing a holders list whole must not take a neighbour with it.
 run('holders added beside a changed channel', () => {
-  fs.writeFileSync(SCRIPT, s.replace(/\n {4}dur: /, "\n    holders: ['Somebody Else'],\n    dur: ").replace(/\bx: 200\b/, 'x: 117'));
+  fs.writeFileSync(SCRIPT, s.replace(/\n {4}dur: /, "\n    holders: ['Somebody Else'],\n    dur: ").replace(/act: 'enter'/, "act: 'parts'"));
 }, 'changed');
 
 restore();

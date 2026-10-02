@@ -18,6 +18,26 @@ const CIN = path.join('components', 'lesson', 'cinematic');
 const sha = (s) => createHash('sha256').update(s).digest('hex');
 const run = () => spawnSync(process.execPath, [path.join('scripts', 'check-answers-shape.mjs')], { encoding: 'utf8' });
 
+/** The first question of phil1, with a four-tile odd one out written into it; `edit` damages the tiles. */
+const PROMPT = "      prompt: 'Which question can’t be settled by looking?',\n";
+const ODD = [
+  '      odd: {',
+  "        axis: 'THREE HAVE A PLACE',",
+  '        items: [',
+  "          { id: 'tree', reads: 'A TREE' },",
+  "          { id: 'cup', reads: 'A CUP' },",
+  "          { id: 'wheel', reads: 'A WHEEL' },",
+  "          { id: 'three', reads: 'THE NUMBER 3', correct: true },",
+  '        ],',
+  '      },',
+  '',
+].join('\n');
+const odd = (edit, clean = false) => {
+  const tiles = edit(ODD);
+  if (!clean && tiles === ODD) throw new Error('a tile staging changed nothing');
+  return { file: 'phil1Script.ts', from: PROMPT, to: PROMPT + tiles, expect: 'every tile set is the shape' };
+};
+
 const CASES = [
   {
     name: 'a scene mount passes its picks through ungated',
@@ -75,49 +95,22 @@ const CASES = [
   // is a set that hands over its own answer, and NOTHING else in the suite can
   // see it: the spoiler sweep reads words, the readable sweep reads type, and
   // both are looking at a tile that is drawn perfectly.
-  {
-    name: 'an odd one out where one tile draws and three do not',
-    file: 'metaphysics18Script.ts',
-    from: "{ id: 'tree', reads: 'A TREE' }",
-    to: "{ id: 'tree', reads: 'A TREE', draw: 'tree' }",
-    expect: 'every tile set is the shape',
-  },
-  {
-    name: 'an odd one out with five tiles',
-    file: 'metaphysics18Script.ts',
-    from: "{ id: 'wheel', reads: 'A WHEEL' },",
-    to: "{ id: 'wheel', reads: 'A WHEEL' },\n          { id: 'spare', reads: 'A SPARE' },",
-    expect: 'every tile set is the shape',
-  },
-  {
-    name: 'an odd one out with two strangers',
-    file: 'metaphysics18Script.ts',
-    from: "{ id: 'tree', reads: 'A TREE' }",
-    to: "{ id: 'tree', reads: 'A TREE', correct: true }",
-    expect: 'every tile set is the shape',
-  },
-  {
-    name: 'an odd one out with no stranger at all',
-    file: 'metaphysics18Script.ts',
-    from: "reads: 'THE NUMBER 3', correct: true",
-    to: "reads: 'THE NUMBER 3'",
-    expect: 'every tile set is the shape',
-  },
-  {
-    name: 'an axis too long for the row it shares with the hint',
-    file: 'metaphysics18Script.ts',
-    from: "axis: 'THREE HAVE A PLACE'",
-    to: "axis: 'THREE OF THESE HAVE A PLACE IN THE WORLD'",
-    expect: 'every tile set is the shape',
-  },
-  {
-    name: 'two tiles sharing an id',
-    file: 'metaphysics18Script.ts',
-    from: "{ id: 'cup', reads: 'A CUP' }",
-    to: "{ id: 'tree', reads: 'A CUP' }",
-    expect: 'every tile set is the shape',
-  },
+  //
+  // NO DIALOGUE LESSON ASKS WITH A TILE CONTROL — every one answers on the stage — so
+  // the set is STAGED: a clean four-tile odd one out is written into the first question
+  // of a real dialogue script (phil1), and each case damages that. The clean staging
+  // must pass on its own first (`a clean staged odd one out`), or every case below
+  // could be red for one shared reason. These used metaphysics18's odd one out until
+  // that lesson was deleted with the narrated library (2026-10-02).
+  { name: 'a clean staged odd one out', silent: true, ...odd((t) => t, true) },
+  { name: 'an odd one out where one tile draws and three do not', ...odd((t) => t.replace("{ id: 'tree', reads: 'A TREE' }", "{ id: 'tree', reads: 'A TREE', draw: 'tree' }")) },
+  { name: 'an odd one out with five tiles', ...odd((t) => t.replace("{ id: 'wheel', reads: 'A WHEEL' },", "{ id: 'wheel', reads: 'A WHEEL' },\n          { id: 'spare', reads: 'A SPARE' },")) },
+  { name: 'an odd one out with two strangers', ...odd((t) => t.replace("{ id: 'tree', reads: 'A TREE' }", "{ id: 'tree', reads: 'A TREE', correct: true }")) },
+  { name: 'an odd one out with no stranger at all', ...odd((t) => t.replace("reads: 'THE NUMBER 3', correct: true", "reads: 'THE NUMBER 3'")) },
+  { name: 'an axis too long for the row it shares with the hint', ...odd((t) => t.replace("axis: 'THREE HAVE A PLACE'", "axis: 'THREE OF THESE HAVE A PLACE IN THE WORLD'")) },
+  { name: 'two tiles sharing an id', ...odd((t) => t.replace("{ id: 'cup', reads: 'A CUP' }", "{ id: 'tree', reads: 'A CUP' }")) },
 ];
+
 
 let bad = 0;
 const say = (ok, msg) => { if (!ok) bad += 1; console.log(`  ${ok ? 'ok  ' : 'FAIL'}  ${msg}`); };
@@ -138,6 +131,7 @@ for (const c of CASES) {
   const restored = sha(readFileSync(file, 'utf8')) === sha(original);
   if (!restored) { say(false, `${c.name} — ${c.file} did not restore byte for byte; stop and check it`); break; }
   const named = (res.stdout || '').split('\n').some((l) => l.includes('FAIL') && l.includes(c.expect));
+  if (c.silent) { say(res.status === 0 && !named, `${c.name}${res.status === 0 ? ' — silent, as it must be' : ' — the check FAILED on a clean staging'}`); continue; }
   say(res.status !== 0 && named, `${c.name}${res.status === 0 ? ' — the check PASSED on it' : named ? '' : ' — it failed, but not on this fault'}`);
 }
 const clean = run();

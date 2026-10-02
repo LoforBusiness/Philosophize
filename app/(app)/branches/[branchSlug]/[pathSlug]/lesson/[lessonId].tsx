@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
 import { subjectOfBranch } from '@/data/subjects';
 import type { Lesson } from '@/data/types';
-import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
 import { useCurtainLift } from '@/components/shared/Curtain';
 import { exitLesson } from '@/components/lesson/exitLesson';
@@ -44,12 +43,12 @@ import { openedLesson, closedLesson } from '@/lib/analytics/lessonClock';
 
 const Page = '#FAFAF7';
 
-// Lessons that play as a continuous animated scene instead of the card pager.
-// A cinematic component takes the same `{ lesson }` prop and renders LessonReward
-// itself when it finishes, so XP, the streak, badges and the daily counter all
-// still run through exactly one path. Everything above this line — hydration and
-// the unlock gate — applies to both kinds of lesson unchanged.
-// Removing an entry here is a complete, safe rollback to the normal card runner.
+// Every lesson the app can open, by id. A cinematic component takes the `{ lesson }`
+// prop and renders LessonReward itself when it finishes, so XP, the streak, badges
+// and the daily counter all run through exactly one path.
+// A lesson id with no entry here opens nothing: the same "Lesson not found." a
+// retired id gets. There used to be a card runner to fall back on; it went with the
+// narrated library on 2026-10-02, so removing an entry is no longer a rollback.
 // EXPORTED so the lesson audit can mount any scene without duplicating the map.
 // A named export in a route file is inert — Expo Router only reads the default.
 export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> = {
@@ -149,7 +148,7 @@ export default function LessonScreen() {
   const markIntroSeen = useUserDataStore((s) => s.markProfessorIntroSeen);
   const [afterIntro, setAfterIntro] = useState(false);
 
-  if (!result) {
+  if (!result || !CINEMATIC[lessonId]) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAF7', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: '#1A1A1A', fontSize: 18 }}>Lesson not found.</Text>
@@ -201,14 +200,13 @@ export default function LessonScreen() {
     );
   }
 
-  const cinematic = CINEMATIC[lessonId];
-  const Runner = cinematic ?? LessonRunner;
+  const Runner = CINEMATIC[lessonId];
 
   return (
     <ScreenTransition bg="#FAFAF7">
       {loading ? (
         <LessonLoader onDone={() => setLoading(false)} />
-      ) : cinematic ? (
+      ) : (
         // THE LESSON GUIDE is mounted HERE, around the lesson, rather than inside a
         // player: the browser harnesses render lesson components directly, so they
         // can never meet it (components/lesson/cinematic/LessonGuide.tsx).
@@ -221,14 +219,6 @@ export default function LessonScreen() {
             format="cinematic"
           />
         </LessonGuideHost>
-      ) : (
-        <StartedRunner
-          Runner={Runner}
-          lesson={result.lesson}
-          branchSlug={result.branch.slug}
-          unitId={result.path.id}
-          format="cards"
-        />
       )}
     </ScreenTransition>
   );

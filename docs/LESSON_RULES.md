@@ -2490,7 +2490,7 @@ to remember them in:
 lerp(X[p], X[n], tr)   →   carry(cv, 0, n, X[p], X[n], tr)
 ```
 
-`useCarry(N)` once per scene declares the slots; `scripts/carry-tracks.mjs` did the 262
+`useCarry(N)` once per scene declares the slots; carry-tracks.mjs did the 262
 existing sites and `check:smooth` fails a scene that grows a bare one back.
 
 **The multiplier goes INSIDE the carry.** The house pattern for "only what changed
@@ -2964,7 +2964,7 @@ thousand lines of `interact.ts` called three times — and it is worth stating a
 general rule it is: **a catalogue is not a vocabulary until something puts it into
 the scripts, and nothing puts it there by existing.**
 
-`node scripts/spread-lessons.mjs` is the pass. For every beat whose pose has a
+node spread-lessons.mjs is the pass. For every beat whose pose has a
 `VARIANTS` row it chooses from `[the authored code, ...its variants]` at an index
 derived from **where the lesson sits in its branch**, so a reader working down a
 branch is never shown the same body for the same meaning twice running. The
@@ -3045,7 +3045,7 @@ that reason. Counter-tested before the pass was written: changing one `p:` in on
 script takes `check:cinematic` from green to *1 lesson(s) changed since their boxes
 were measured*. The run order is
 
-    node scripts/spread-lessons.mjs
+    node spread-lessons.mjs
     node scripts/measure-must.mjs scripts/.spread-ids.json     # the pass writes the list
     npm run make:tours && npm run make:gaze
 
@@ -3710,7 +3710,7 @@ did not already do in lesson 16?
 
 **The sweep is done: 127 lessons had no analogue control and 2 do now**, and both
 of those ask both their questions on the stage, which is the other thing the reader
-asked for. `node scripts/rotation-worklist.mjs --needed` prints whatever is left,
+asked for. node rotation-worklist.mjs --needed prints whatever is left,
 and `--stageless` prints the other list.
 
 **Converting one deck question is a small, self-contained job** — script only, no
@@ -3808,7 +3808,7 @@ real density problem, and no other rule in this group could see it: J1 caps a
 SENTENCE, J2 caps a beat's WORDS, and a beat of three tight sentences passes both
 comfortably while still being three things to take in at once.
 
-`node scripts/split-beats.mjs` cut them. The load-bearing detail is what it copies:
+node split-beats.mjs cut them. The load-bearing detail is what it copies:
 **every channel value goes to each piece verbatim — the same x, the same gesture,
 the same tracks — so the picture holds still and only the words advance.** That is
 the segmenting principle exactly. The scene is not re-cut; the reader is given it in
@@ -4361,18 +4361,21 @@ had no section for.
       him, and `paper: true` is a gap, not a strap (AA9).
 - [ ] **An animal is a part list in `Silhouette.tsx`** (Z9), never an `<Svg>`, and it
       is judged on `npm run sheet:beats <id>` against a reference, not from memory.
-- [ ] **A harness that writes stored boxes switches the bubbles off** (AB14), as
-      `measure-must.mjs` does, or it records the lesson's own thought as stage words.
+- [ ] **A harness that writes stored boxes measures with the harness switch on**
+      (`setWanderOff` in `tourFlag.ts`), as `measure-must.mjs` does, so `useLinger`
+      lets the last beat's things go at once instead of recording them mid-fade.
+      (It also switched the thought bubble off, AB14, until the bubble was removed.)
 - [ ] **Editing `moves.ts` or `wardrobe.ts` moves the stored figure boxes, and no
       stamp will tell you** — `muststamp` hashes the scene, the script without its
       prose, the probe and the shared `Target.tsx` and `Silhouette.tsx`, and neither
-      file is any of those. Run `npm run make:wardrobe`,
-      which grows them for both and records what it applied so a second run is a
-      no-op (N15, H60d).
-- [ ] **Then the chain, once, in order**: `make:visitor` → `make:wardrobe` →
-      `make:tours` → `make:gaze` → `make:thoughts`. It is not idempotent as a
-      chain — `make:wardrobe` grows the boxes `make:visitor` reads — so run it once
-      from a settled tree and check the second run of each is a no-op.
+      file is any of those. Re-measure the lessons that use what you changed with
+      `npm run measure:must` (N15, H60d). The arithmetic regrowth that used to do this
+      without a browser — make:wardrobe and its reach records — went with the costume
+      rotation on 2026-10-02.
+- [ ] **Then the chain, once, in order**: `make:tours` → `make:gaze`, from a
+      settled tree, and check the second run of each is a no-op. (It also ran
+      make:visitor, make:wardrobe and make:thoughts until those layers were removed
+      on 2026-10-02.)
 - [ ] **A value that means "absent" is `undefined`, never a plausible number**
       (G52). `0` is a real coordinate; a SharedValue is always truthy. The caller
       that knows whether the data exists is the one that has to say so.
@@ -4403,12 +4406,11 @@ had no section for.
 **Run the shape check first — it costs a second and needs no browser.**
 
 ```
-npm run check          # tsc + fifty-nine validators, this file's checker included
+npm run check          # tsc + sixty-six validators, this file's checker included
 npm run check:cinematic
 npm run check:tour     # group K, offline, against each lesson's own band
 npm run check:ear      # groups AC and AD — the narration is heard, and must not read as generated
 npm run check:narration  # group AC's clips — each is its beat's words, rendered clean (AC13–AC18)
-npm run check:marks    # group AE — every pen mark is on a named label, off every word and border
 npm run check:idle     # N16–N18 — the living holds read, and the dead taps only go down
 npm run check:rules    # THIS FILE, against the code it describes (U8)
 ```
@@ -5263,7 +5265,7 @@ corpus, **113 of 317 walking beats record his centre 40 or more units from the x
 script walks him to**, and one is 151 units out.
 
 So anything that anchors on the recorded figure is right on a still beat and wrong on
-exactly the beats that matter. `make:thoughts` did, and the player faithfully restores
+exactly the beats that matter. make:thoughts did, and the player faithfully restores
 the offset it recorded — which is how a thought came to REST 154 units to his side on
 `logic-arguments-21`. CLAUDE.md had already noticed the symptom and filed it as noise
 ("90 of 940 placements record a figure centre more than 40 units from their own beat's
@@ -5277,7 +5279,7 @@ where he stands while the reader reads,
 and on a still beat the two agree to within 13 units either way. Use the recorded BOX
 only for what does not move during a beat: his feet, and from those his skull.
 
-`check:thoughts` re-derives it and **prints how many placements it had to skip**,
+check:thoughts re-derives it and **prints how many placements it had to skip**,
 because a check that quietly measured less would read as a check that found less.
 
 ## Group S — a word must fit the box it is in, and nothing may be laid over it
@@ -5755,7 +5757,7 @@ So a deferred-debt note carries two more things:
    reader, or the box growth can be done offline" is.
 2. **What it costs to pay** — the number that made it look expensive, so the next
    person can check whether it still is. It looked like a corpus-wide re-measure and
-   was actually 903 boxes grown arithmetically in one run, because `make:wardrobe`
+   was actually 903 boxes grown arithmetically in one run, because make:wardrobe
    had gained the machinery for costumes in the meantime. **A deferral is priced
    against the tools of the day it was written.**
 
@@ -5782,12 +5784,12 @@ constant its checker enforces. `node scripts/countertest-rules.mjs` puts each de
 back and also stages the two shapes that must stay SILENT — a Part 1 rule restated in
 a later section, and a screen string in capitals that is not a constant.
 
-**AND A WORKLIST IS DATA, SO IT ROTS.** `check:bubble` runs against twelve lessons
+**AND A WORKLIST IS DATA, SO IT ROTS.** check:bubble runs against twelve lessons
 chosen because their figure walks furthest under a thought. Rationing the thoughts to
 two a lesson (AB9) moved most of them off those beats, and the harness went on
 reporting a clean sweep of a rule it was no longer exercising — "no lesson walked far
 enough" was true of what it could reach and false of the corpus. A chosen worklist
-ships with the script that derives it (`node scripts/pick-bubble-work.mjs`), and it is
+ships with the script that derives it (node pick-bubble-work.mjs), and it is
 re-run whenever the table it was chosen from changes.
 
 ---
@@ -6420,7 +6422,7 @@ conditional ground, a self-closing element, and ethics31's actual source.
 **62 captions in 45 scenes**, every one of them left behind by the tonal pass that
 gave those boxes their fill: on paper SOFT is a legitimate 5.1:1 secondary grey, so
 none of it failed when it was written and nothing caught it after. They are INK
-now (`node scripts/tone-soft-to-ink.mjs`).
+now (node tone-soft-to-ink.mjs).
 
 **The hierarchy those captions were reaching for is carried by size and weight,
 which they already differ in.** It was never carried by the grey — at 3.26:1 the
@@ -6450,7 +6452,7 @@ lip — a hard SHADE edge three units below it: `boxShadow: LIP`, where `LIP` is
 is new art in every must-box table and a full browser re-measure. A hard shadow is drawn
 behind the element, changes no layout and no bounding box, and needs no JSX: RN 0.85 has
 only the New Architecture, where `boxShadow` renders on Android and iOS, and
-react-native-web passes it through as CSS. `node scripts/restamp-lip.mjs` re-stamped
+react-native-web passes it through as CSS. node restamp-lip.mjs re-stamped
 231 scenes on a two-part proof (the codemod reproduces the file from HEAD, and the stored
 stamp matched HEAD). This is NOT the `shadow*` sweep §12 defers — nothing that already
 rendered was restyled.
@@ -6845,7 +6847,7 @@ word was clear there. The defect was always at another value:
 - **a word before its thing** — `ethics30` put all three lens names up at 0.53 on the
   beat that draws the first lens;
 - **another bubble** — the second figure's line and the mascot's thought on one beat in
-  three lessons, which `check:thoughts` 7b now holds, and in `logic20` a thought placed
+  three lessons, which check:thoughts 7b now holds, and in `logic20` a thought placed
   against a board the must-box probe had recorded before it tipped.
 
 A second full sweep, once those were fixed, found three more of the same shape:
@@ -6902,7 +6904,7 @@ question's arrival is a transition rather than a step (group L).
   sit under the pans, inside the arm, so they still ride its counter-rotation.
 - **A plate that has to thin keeps its word at full strength** — S12's shape, the recede
   a child under the words and the word on its own opacity (`metaphysics25`).
-- **One figure talks at a time.** `make:thoughts` no longer offers the mascot a thought
+- **One figure talks at a time.** make:thoughts no longer offers the mascot a thought
   on the beat the second figure speaks.
 
 ### And one animation was running backwards
@@ -6947,7 +6949,8 @@ centres and the pixels then cleared them. `check:readable` now reads the convent
 one of its three nearest ancestors, says the line through the words is the point. Both
 checks walk the same four levels, so they cannot disagree about what is declared.
 
-`node scripts/countertest-readable.mjs` puts both back. NOBODY CAME is pulled forty units
+countertest-readable.mjs put both back (it staged them in aesthetics-36 and logic-30
+and was deleted with them on 2026-10-02). NOBODY CAME was pulled forty units
 into its neighbour, and the hammer's pivot moves thirty units left so that the head
 really does lie across TRUE PREMISES. Each case holds three readings: the near miss
 silent, the collision struck (seven beats, and four), the restored scene silent again.
@@ -7037,7 +7040,7 @@ lessons, most of them wrongly.
 
 ### And the codemod that fixed all 55 wrote to the wrong line first
 
-`scripts/turn-facing.mjs` adds the two imports, the `DIR` line and the argument.
+turn-facing.mjs adds the two imports, the `DIR` line and the argument.
 Its `addImport` matched `import\s*\{([\s\S]*?)\}\s*from '\.\/rig'` — non-greedy,
 but **unbounded**, so from the first `import {` in the file it ran through every
 import in between to reach the rig one, and the insertion landed in whichever came
@@ -8036,6 +8039,8 @@ parts matter.
 
 ## Group AA — what the figure wears, and what he does when you answer
 
+> **REMOVED 2026-10-02** with the narrated library; kept as a finding. (The costume rotation and the visitor — AA2, AA3, AA4, AA8, and the AA7/AA10 checks. The pieces' geometry, AA1, and the answer nod, AA5, stay: the cast wears the pieces and `lookPose` still nods.)
+
 **AA rather than a single letter because A–Z are used**, and this is genuinely a
 new area rather than an extension of one: group N is what the figure DOES, group
 Y is his relationship to the world around him, and neither covers what he has ON
@@ -8209,7 +8214,7 @@ EVERY must-see box. So a costume changes what the camera must frame and what the
 band must contain, and **`Stickman.tsx` is deliberately not in `muststamp`** —
 nothing would have gone red.
 
-`npm run make:wardrobe` assigns the costumes AND regrows the boxes in the same
+make:wardrobe assigns the costumes AND regrows the boxes in the same
 run, so the two cannot drift. Three things it has to get right, all learned the
 hard way:
 
@@ -8272,7 +8277,7 @@ to a coincidence rather than to a difference.
 - **THREE OR MORE wear nothing.** Four identical dandies in a multitude is a
   uniform, not variety.
 
-`npm run make:figure-roles` does it; 28 extra figures across 20 scenes.
+make:figure-roles does it; 28 extra figures across 20 scenes.
 
 ## AA5 · He answers you back
 
@@ -8375,7 +8380,7 @@ are two-sided by construction, so the control IS the evidence.
 
 **`split` WAS THE SECOND TRIGGER, AND RETIRING IT (R20) NEARLY TOOK THE VISITOR
 WITH IT.** Sixteen of the twenty-eight lessons that had one would have lost him on
-the next `make:visitor` — a feature removed as collateral damage from a change
+the next make:visitor — a feature removed as collateral damage from a change
 about something else, silently, because the generator would have reported a
 perfectly good number for a smaller corpus. `cards` is the honest replacement
 rather than a patch: the reason a split qualified was never the seam, it was that
@@ -8386,7 +8391,7 @@ and an odd one out has three tiles that agree, so none of the three gives a seco
 figure anything to hold.
 
 **AND WHETHER THERE IS ROOM IS MEASURED.** A figure is ~48 wide standing on the
-ground. `mustBoxes` records every item every beat draws, so `make:visitor` finds
+ground. `mustBoxes` records every item every beat draws, so make:visitor finds
 the widest clear floor that exists on BOTH the entrance beat and the question beat
 — both, because a visitor who has to move out of the way between them is worse
 than no visitor. 18 lessons are refused for having nowhere to put him.
@@ -8395,7 +8400,7 @@ than no visitor. 18 lessons are refused for having nowhere to put him.
 > and the question, and he STAYS: from the beat he arrives to the end of the
 > lesson. So a spot clear on those two beats could be where a later beat hangs a
 > caption, and `aesthetics3` parked him at x 54 under MUSIC ARRIVES BEFORE REASON,
-> which check:readable reported as a word struck by a figure. `make:visitor` now
+> which check:readable reported as a word struck by a figure. make:visitor now
 > intersects the clear floor over every beat he is on stage. Two lessons lost him
 > (`political-political-1`, `-15`) and four moved, which is the rule working: a
 > visitor standing on a word is worse than no visitor, for the same reason as above.
@@ -8410,7 +8415,7 @@ than no visitor. 18 lessons are refused for having nowhere to put him.
 33 edits to files whose every byte is inside `muststamp` — 33 chances to nudge a
 prop and force a re-measure of everything — and it is the kind of list that gets
 half-finished, leaving a corpus where a visitor turns up in some lessons and not
-others for no reason a reader can see. He is one component (`Visitor.tsx`),
+others for no reason a reader can see. He is one component (Visitor.tsx),
 mounted once, driven off a generated cue.
 
 He is parked OFF-STAGE rather than faded in: a figure who materialises is the
@@ -8429,11 +8434,11 @@ settle took four passes. Every one is worth knowing because they all look right:
 - **A SYNTHETIC BOX IS AN OUTPUT, NOT AN INPUT.** The visitor's body is written
   into `words` as a `fig` item tagged `v`. Left in place across runs it is read by
   both the costume fit test and the growth loop, so the box the script wrote last
-  time decides what it writes this time. `make:wardrobe` moved 1007 boxes on one
+  time decides what it writes this time. make:wardrobe moved 1007 boxes on one
   run and 620 on the next with nothing changed between. Tagged items are dropped
   before anything reads the file.
 - **`fits()` MUST READ THE BARE FIGURE**, and so must `fitsAtX`, and so must
-  `make:visitor`'s floor scan. Three separate functions, one mistake: the stored
+  make:visitor's floor scan. Three separate functions, one mistake: the stored
   boxes carry the previous run's costume growth, so reading them raw is a feedback
   loop in which the last answer decides the next one.
 - **A COSTUME THAT FITS THE LEAD MAY NOT FIT THE VISITOR.** `fits` measures
@@ -8447,7 +8452,7 @@ settle took four passes. Every one is worth knowing because they all look right:
   stage facing each other — the twin problem AA4 exists to prevent, arriving
   through the one door AA4 does not watch.
 
-> **RUN ORDER: `make:visitor`, THEN `make:wardrobe`.** The first only reads; the
+> **RUN ORDER: make:visitor, THEN make:wardrobe.** The first only reads; the
 > second reads the visitor table, dresses him, and grows the boxes for both. AA1
 > and AA7 fail with the commands in the message if they are run the other way or
 > not at all.
@@ -8462,6 +8467,8 @@ settle took four passes. Every one is worth knowing because they all look right:
 
 ## Group AB — what he is making of it
 
+> **REMOVED 2026-10-02** with the narrated library; kept as a finding.
+
 A reader worked through the corpus and said the mascot was *"usually just there,
 not really doing anything"*, and named the fix themselves: *"little thought
 bubbles go up in his head during the lesson, like the stickman is thinking or
@@ -8472,9 +8479,9 @@ other student.
 
 ### AB1 · The words are authored, the placement is measured
 
-`data/lessonThoughts.ts` holds both, and the split is the whole design. `say` is
+data/lessonThoughts.ts holds both, and the split is the whole design. `say` is
 written by a person, per beat, about that beat. `at` is generated by
-`npm run make:thoughts` against `mustBoxes` — the art each beat actually draws.
+make:thoughts against `mustBoxes` — the art each beat actually draws.
 
 It is a TABLE and not a field on the beat for the reason §17 gives for the maxim:
 `muststamp` hashes every script, so writing a thought into 186 scripts marks all
@@ -8504,8 +8511,8 @@ fully clear spot and only spends the licence when it must.
   what makes it read as part of him. At four units the smallest disc of
   `aesthetics-aesthetics-7` and `logic-arguments-21` came to rest on his cap, a paper
   ring pressed into ink that reads as the trail running behind his head. The tail
-  sits at least `CLEAR_MIN` (10) units clear of his head or his hat and at most 20,
-  and `check:thoughts` reads the number out of `make:thoughts` rather than repeating it.
+  sits at least CLEAR_MIN (10) units clear of his head or his hat and at most 20,
+  and check:thoughts reads the number out of make:thoughts rather than repeating it.
 
 ### AB4 · The trade is scored, not nested
 
@@ -8534,7 +8541,7 @@ box rides his live x and lands on the measured spot as he arrives.
 
 ### AB6 · Round before you validate, not after
 
-`check:thoughts` found eleven bubbles grazing a word by four tenths of a unit.
+check:thoughts found eleven bubbles grazing a word by four tenths of a unit.
 The generator had cleared the unrounded position and rounded it on the way out.
 **The number that gets written down is the number to test.**
 
@@ -8557,7 +8564,7 @@ have shipped as an empty bubble. Three other files in the repo get this right;
 
 O1 lists what a graded beat may show before a pick, and the mascot's opinion is
 not on it. The generator refuses to place one, the player refuses to draw one and
-`check:thoughts` refuses to let one be WRITTEN — three refusals so the rule
+check:thoughts refuses to let one be WRITTEN — three refusals so the rule
 cannot drift out of one of them. The answer line arrives only AFTER the pick, in
 an ink box rather than a paper one, because he has stopped working the lesson out
 and is talking to the reader.
@@ -8570,7 +8577,7 @@ half of all 2,237 beats in the app.** The reader:
 > *"it appears way too much. I only want it to appear maybe around two times
 > during the lesson. I don't want it every single tab."*
 
-`make:thoughts` picks **two beats a lesson** and leaves the rest of the writing on
+make:thoughts picks **two beats a lesson** and leaves the rest of the writing on
 the shelf. The split is deliberate: `say` still holds every line that was
 authored, because **the writing is the expensive half and the choosing is the
 cheap one** — a line held back today can be shown tomorrow by moving a weight in
@@ -8593,7 +8600,7 @@ Three things go into the choice, and the second is the one that is not obvious:
 
 **The answer line is not rationed and must not be.** It is a reply to something
 the reader just did, it lands only on the two graded beats, and it is the half
-they asked for by name. `check:thoughts` §8 counts thoughts only, for that reason.
+they asked for by name. check:thoughts §8 counts thoughts only, for that reason.
 
 ### AB10 · The bubble hangs off his HEAD, not off his raised hand
 
@@ -8611,7 +8618,7 @@ They were, and the height was measured against the wrong thing **twice over**:
   and otherwise the constant his own `lookPose` or `reactPose` names (84 scenes
   declare a track nobody stands on). The box his x lands in is his, and where it
   lands in none, the nearest box still gives his feet (`crownOf`, in
-  `scripts/lib/scenefig.mjs`).
+  lib/scenefig.mjs).
 - **A BOX TOP IS NOT A SKULL.** The box is the union of his LIMB Views, so a beat
   where he lifts a hand, points, or wears a hat reports a top a **median of
   fourteen units** above his head and as much as ninety. Hung four units above
@@ -8619,7 +8626,7 @@ They were, and the height was measured against the wrong thing **twice over**:
 
 Measured against his real head — `skullRise` poses the beat's own move code in
 plain Node — the shipped table sat a **median 21 units clear of it, p90 48**.
-Anchored on the head, every one of 595 placed bubbles sits between `CLEAR_MIN` (10)
+Anchored on the head, every one of 595 placed bubbles sits between CLEAR_MIN (10)
 and 20 units clear of it, median 10 (AB3).
 
 **A raised arm through the bubble is not a fault.** The bubble is drawn after the
@@ -8634,7 +8641,7 @@ never the widest one on the stage. A 46-unit limit into the box stood in for all
 that until the render showed boxes whose tops run 72–116 units above the skull,
 where the limit left the bubble floating 30 to 70 units over him. Derived, 93
 bubbles land a median 0.6 units from the drawn head and none further than 5.5.
-`check:thoughts` §9 re-derives all of it, and fails a bubble aimed where the beat
+check:thoughts §9 re-derives all of it, and fails a bubble aimed where the beat
 draws no figure rather than quietly measuring less.
 
 ### AB11 · A phase change must not be a remount
@@ -8683,7 +8690,7 @@ to, and the follow rule reported it keeping 13% of his travel.
 leaned the trail back toward his head and clamped that lean to `half - 14`, so past
 about 51 units the trail was hard against its stop and no longer pointed at him. The
 bubble stops being his and becomes a caption that happens to be nearby. The trail is
-a chain now (AB13), and the limit is stated once, as `THINK_DRIFT` (51).
+a chain now (AB13), and the limit is stated once, as THINK_DRIFT (51).
 
 Nine thoughts of 339 sat beyond 40 units and five beyond 51, so **declining them
 costs almost nothing** — which is the licence AB9's rationing keeps buying: with
@@ -8717,13 +8724,13 @@ one expression:
   reach could barely move at all.
 
 A trail is a **chain**: the discs spread along the line from the box to the head,
-the small one nearest him. Each disc now carries its own share — `THINK_FAN`,
+the small one nearest him. Each disc now carries its own share — THINK_FAN,
 a quarter then three fifths then all of it — and the last one may hang up to
-`THINK_REACH` past the box's own edge, because it is the one that has to arrive.
+THINK_REACH past the box's own edge, because it is the one that has to arrive.
 It is still clamped: a disc that chases him without limit is a dotted line across
 the stage rather than a thought.
 
-**`THINK_DRIFT` is now stated rather than inferred.** How far the BOX may sit from
+**THINK_DRIFT is now stated rather than inferred.** How far the BOX may sit from
 his head (AB12) used to be read out of the trail's clamp expression, which failed
 twice: the speech bubble writes the identical clamp with a different constant one
 component up, so an unanchored pattern answered 20 where the truth was 14 — and
@@ -8737,7 +8744,7 @@ stage records a live bubble as words and art. Re-measuring the redrawn animals b
 rows back with *"The fat, relentless ego."* written on them — the lesson's own thought.
 **29 of 246 lessons** had their bubble on file, some with several lines from when a
 thought sat on nearly every beat, and every table built from those boxes steered round
-a ghost: the camera framed it, the gaze looked at it, and `make:thoughts` placed the
+a ghost: the camera framed it, the gaze looked at it, and make:thoughts placed the
 next bubble clear of where the last one had been — a generator reading its own output.
 
 `measure-must.mjs` sets `setThoughtsOff(true)` from `tourFlag.ts` unconditionally, as it
@@ -8750,7 +8757,7 @@ enforcement (U2).
 ### AB15 · A bubble sits inside the shot the camera actually holds
 
 A beat with no tour of its own that is not a question does not move the camera: the
-player keeps the shot it was drawing. So `make:thoughts` places a bubble against the
+player keeps the shot it was drawing. So make:thoughts places a bubble against the
 frame the last moving beat LEFT, not against the beat's own resting frame.
 `epistemology-knowledge-7` hung beat 1's thought for a wide shot while the camera sat
 pushed in from beat 0, 136 pixels off the picture. On a toured beat the player holds
@@ -8768,20 +8775,20 @@ The must-box probe records figures, words of two or more characters and painted 
 is read from the scene or the component instead:
 
 - **A one-character mark** — a "?", a row's "3", an arrow. `glyphBoxesOf` reads them out
-  of the scene, and every word is padded by `GLYPH_SLOT` either side.
+  of the scene, and every word is padded by GLYPH_SLOT either side.
 - **A seal**, the ✓ or ✕ an answer strikes on a corner. `sealsOf` finds its corner on
   every small labelled plate AND on every live `Target`, whose box comes back exactly
   from the halo and pip the probe records on the beat being asked. The first rule
   looked at small plates only, and `aesthetics-aesthetics-18`'s answers are 130×92
   panels: nine answer lines in seven lessons sat on a seal it could not see.
-- **An answer that moves the figure.** `ANSWER_LIFT` holds the one scene that raises
+- **An answer that moves the figure.** ANSWER_LIFT holds the one scene that raises
   its lead as the answer lands.
 - **The face.** A bubble is measured in the font its style names, so a style set in a
   face the root layout never loads is measured in one font and drawn in another. The
-  answer line did exactly that. `check:thoughts` fails a face `app/_layout.tsx` does
+  answer line did exactly that. check:thoughts fails a face `app/_layout.tsx` does
   not load.
 
-`npm run check:thoughts` re-derives all four offline.
+check:thoughts re-derives all four offline.
 
 ### N15 · The first living shelf gets its arms — and the boxes get the bill
 
@@ -8811,13 +8818,13 @@ All nine are out at 13–17 now. Two were not a simple move:
 **AND THE BILL IS PAID ARITHMETICALLY, NOT WITH A BROWSER.** `muststamp` hashes the
 scene, the script, the probe and two shared components; `moves.ts` is none of them, so a wider act
 leaves every stored box holding it silently too small and nothing goes red.
-`make:wardrobe` now grows those boxes the same way it grows them for a costume,
+make:wardrobe now grows those boxes the same way it grows them for a costume,
 recording what it applied so a second run is a no-op — 903 boxes in 145 lessons,
 of which `mustBox`'s own 4-unit pad was already absorbing four units.
 
 Re-measuring would have been the other option and it is the one that breaks the
 bookkeeping: `measure:must` renders through the player, which DRESSES the figure,
-while `make:wardrobe` separately claims that costume growth is still owed. Fresh
+while make:wardrobe separately claims that costume growth is still owed. Fresh
 boxes plus a stale `wardrobeReach` means the next run subtracts something that is
 not there.
 
@@ -8825,7 +8832,7 @@ not there.
 already account for, and a measured box accounts for whatever the figure was doing
 when the probe read it. Treating that as nothing is not a conservative guess, it
 is a wrong one — the first draft did exactly that and grew **7,589** boxes on a
-corpus where nine acts had moved. `scripts/seed-pose-reach.mjs` writes the
+corpus where nine acts had moved. seed-pose-reach.mjs writes the
 baseline once, from the `moves.ts` at git HEAD, and applies nothing.
 
 ### N16 · A beat where nothing else moves needs a hold that READS
@@ -8881,9 +8888,9 @@ rule entirely**. Those beats need the SCENE to change instead, and they are the
 
 **Changing an act's amplitude bills the boxes.** `moves.ts` is in nobody's hash, so
 a wider swing leaves every box holding it quietly too small with nothing going red.
-Run `node scripts/regrow-pose.mjs --write`, which grows them arithmetically the way
-`make:wardrobe` does and re-stamps only what it can prove; then `make:visitor` and
-`make:thoughts`, in that order and once, because a wider lead narrows the clear
+Run node regrow-pose.mjs --write, which grows them arithmetically the way
+make:wardrobe does and re-stamps only what it can prove; then make:visitor and
+make:thoughts, in that order and once, because a wider lead narrows the clear
 floor and a head that sways further closes the gap under a bubble.
 
 ### N17 · A pose at a prop has a WORKING twin, and the hand stays on the prop
@@ -8957,7 +8964,7 @@ whether it jumped between frames — and a fast, continuous fall is not a jump.
   are fast by design and exempt by name — the jump's landing (3), the double take
   (97), the overshooting third point (114) and the heel click (117) — and the list
   may not grow without the owner. It also asserts `wanderrule.PLAY_SECONDS` equals
-  the one in `moves.ts`, because `make:wander` waits for a played action to finish
+  the one in `moves.ts`, because make:wander waits for a played action to finish
   before it moves him.
 - **A new act that fails §8** widens its own return window. Never raise the ceiling.
 - `node scripts/sheet-moves.mjs` with `PLAYED=1 ACTS=80,81` draws acts against the
@@ -8985,10 +8992,10 @@ zig-zag, and on the thighs they vanished into the legs.
 propping arm inside the trunk, which read as half lying down. Knees-up and
 hands-on-thighs seats were drawn in a grid and both melt into one lump under a head
 this size. Back straight up, legs flat along the floor, hands propped behind (`sitOut`
-in `wander.ts`) cannot be read as anything else, and a look up from it reads as
+in wander.ts) cannot be read as anything else, and a look up from it reads as
 sitting and gazing up.
 
-**`check:wander` holds the look**: standing, seated and crouched, a full look up must
+**check:wander holds the look**: standing, seated and crouched, a full look up must
 move the head back 12 and leave it 8 behind the chest, a full look down must move it
 forward 12, lower it 4 and leave it 8 past the chest, and the chest may never travel
 against the head. Counter-tested by putting the old look down back in a copy
@@ -9017,17 +9024,17 @@ beat (in the figure's own units, so a half-size child waving counts as waving):
   no life of its own since group AL. The listener takes a LISTENING hold (263 nodding
   along, 260 waiting for the answer, 257 thinking it over — measured to move 4+ units in
   any five-second window; 159 and 177 measured 0.9 and 1.4 and are not listeners at
-  all). `node scripts/liven-pairs.mjs <replay-log>` sets them from the check's own
+  all). node liven-pairs.mjs <replay-log> sets them from the check's own
   list, rotated, and changes nothing on a second run. A figure the scene poses itself
   (the slumped friend, the child in the pond, the crowd) is given its motion in the
   scene, and the motion is the one its situation has: grief stirs, a child waves.
 - **The lead faces the visitor.** Placed by room alone, 19 of 32 visitors walked in
-  behind the lead. `make:visitor` stands him on the side the lead faces on every beat he
-  is there, from `leadFacing.json` (`REPLAY_FACING=… npm run check:replay`); where the only
+  behind the lead. make:visitor stands him on the side the lead faces on every beat he
+  is there, from leadFacing.json (`REPLAY_FACING=… npm run check:replay`); where the only
   room is behind a lead who never walks again, the cue carries `turn` and the player turns
   the lead round (`VISIT`, `visitTurn` in cinematicKit, rate-limited so no tap flips him);
   a lead who walks on is never turned, because a turn laid over a walk is C18's moonwalk,
-  and that lesson has no visitor. Once a visitor is in, `make:wander` gives the lead only
+  and that lesson has no visitor. Once a visitor is in, make:wander gives the lead only
   in-place moves — no stroll, no sit, no turn to look behind him.
 
 All three are budgets of zero in `check:replay`, counter-tested by the numbers they
@@ -9118,7 +9125,7 @@ Each spoken beat becomes its own clip, and a clip ends on a sentence's final fal
 So `Not "what do I do?` on one tap and `but "who am I becoming?` on the next is
 heard as two sentences, the second starting with "but".
 
-**The splitter did it.** `scripts/split-beats.mjs` cut sentences on
+**The splitter did it.** split-beats.mjs cut sentences on
 `(?<=[.!?])["')\]]?\s+`, which puts the optional closing quote INSIDE the
 separator: every cut after `?"` deleted the quote mark, and a quoted question the
 sentence carried on past was cut in two. `scripts/check-words.mjs` counted with the
@@ -9502,13 +9509,15 @@ counts. AC12 records why sentence-length variety is not a target.
 
 ## Group AE — the pen marks what the voice is naming
 
+> **REMOVED 2026-10-02** with the narrated library; kept as a finding.
+
 On a tap where the scene's art does not change, the PLAYER draws one hand-drawn mark
-(`StageMark.tsx`) round the stage label the narration names — a ring, an underline, a
+(StageMark.tsx) round the stage label the narration names — a ring, an underline, a
 pair of brackets, a box or an arrow — at the moment the voice reaches the word. It is
 the teacher's pen at a board, and it is Mayer's signalling principle rather than
-decoration. The table is `data/lessonMarks.ts`, written by `npm run make:marks` and
-re-derived by `npm run check:marks`, both reading one set of rules in
-`scripts/lib/marks.mjs`.
+decoration. The table is data/lessonMarks.ts, written by make:marks and
+re-derived by check:marks, both reading one set of rules in
+lib/marks.mjs.
 
 ### AE1 · Only on a still tap, and never on another event
 
@@ -9532,11 +9541,11 @@ explanation words — less what its prompt already says — is refused.
 ### AE4 · The PEN, not the box, stays off every word and every border
 
 The rule is tested on the drawn path, seeded exactly as StageMark seeds it, a unit apart,
-within `PEN_REACH` (half the stroke plus the halo): off its own word, off every other
+within PEN_REACH (half the stroke plus the halo): off its own word, off every other
 word, and off every painted edge the page draws — a plate's border, a tick box, a rule,
 the round top of a door. The must-box probe records leaves only, so the plates were
 invisible offline, and the first render showed an underline laid along a plate's border
-and a ring through a tick box. `node scripts/audit-marks.mjs` walks each candidate beat
+and a ring through a tick box. node audit-marks.mjs walks each candidate beat
 in a browser and records every painted box near the label with its border width and its
 corner radii, stamped with the lesson's must-box stamp; a re-measured lesson's marks go
 red until it is audited again. **A label printed on a plate is marked round the plate**
@@ -9553,7 +9562,7 @@ that window (`cameraWindow`, the same model make:thoughts uses — AB15).
 ### AE6 · A paper halo under the pen, and the spark only ever small
 
 The pen is EMBER_INK, 2.3 units, drawn over a 2.2-unit PAPER halo so it reads on an INK
-plate as well as on paper and the hued STONE; `check:marks` measures the contrast and
+plate as well as on paper and the hued STONE; check:marks measures the contrast and
 requires the halo. One mark at a time, never the same style twice running in a lesson,
 drawn with a dash reveal and round caps, and turned off by the harness switch that turns
 off the bubbles (`tourFlag.thoughtsOff`), because a mark recorded as art would teach the
@@ -9565,15 +9574,17 @@ The must-box probe records a word at any opacity, so a label still waiting to fa
 in the table as if it were drawn — and `metaphysics-being-10` shipped an underline and an
 arrow ringing empty paper on two beats where REDNESS was at opacity 0. `audit-marks`
 reads the label's own opacity, ancestors included, at the spot the table records it, and
-a label that is not there reads 0. `make:marks` refuses a mark below 0.5 and
-`check:marks` fails one.
+a label that is not there reads 0. make:marks refuses a mark below 0.5 and
+check:marks fails one.
 
-`node scripts/countertest-marks.mjs` stages every rule above going red, and the shipped
+node countertest-marks.mjs stages every rule above going red, and the shipped
 table silent.
 
 ---
 
 ## Group AF · The figure moves himself
+
+> **REMOVED 2026-10-02** with the narrated library; kept as a finding.
 
 A reader, after the living holds, the working shelf and the answer nod had all
 shipped: *"the stickman does not move a lot. I do not mean with its hands moving …
@@ -9583,9 +9594,9 @@ on the ground for a little bit … right now the stickman is too stationary."*
 
 Every idle in the library moves a LIMB. This group is the man.
 
-`components/lesson/cinematic/wander.ts` is the maths, `data/lessonWander.ts` the
-choreography (`npm run make:wander`), `npm run check:wander` the ratchet,
-`node scripts/sheet-wander.mjs` the filmstrip and `node scripts/shot-wander.mjs`
+components/lesson/cinematic/wander.ts is the maths, data/lessonWander.ts the
+choreography (make:wander), check:wander the ratchet,
+node sheet-wander.mjs the filmstrip and node shot-wander.mjs
 the live probe.
 
 ### AF1 · The plan is a table, and the player installs it
@@ -9621,14 +9632,14 @@ moment, not the lead's.
 
 ### AF3 · The room is measured, and the camera is not touched
 
-`make:wander` reads `mustBoxes` for the clear floor on his own beat AND the next
+make:wander reads `mustBoxes` for the clear floor on his own beat AND the next
 one, because a tap can arrive at any moment and a plan that ends where the next
 beat's art stands would walk him out of it. The visitor's box blocks him, the pen
 mark's box blocks him, and a box only blocks at all if it comes down to the height
 he occupies.
 
 His box must then sit inside every frame the camera shows on that beat, read out of
-`tours.ts` the way `make:thoughts` reads it (AB15). **No station is ever changed to
+`tours.ts` the way make:thoughts reads it (AB15). **No station is ever changed to
 make room**: a step that would leave the picture is not offered.
 
 `roomFor` returning null means he is standing against the thing the lesson is about,
@@ -9651,7 +9662,7 @@ own speed — rather than stopping dead.
 
 `stand()` travels 2.6 units on its own, so a plan that travels no further is not
 adding a movement, it is adding a name for one (`check:idle`'s calibration, one
-system over). `check:wander` fails a plan under 1.4× it.
+system over). check:wander fails a plan under 1.4× it.
 
 A LOOK is the case that proves the rule and it took three attempts: the head centre
 is driven by `tilt` and by `tilt + neck`, and `sin(π + e) ≈ −e`, so a lean back to
@@ -9663,7 +9674,7 @@ upright is the highest his head ever gets, and "up" has to be said with the body
 
 ### AF7 · A step is continuous at both ends and through a tap
 
-Three numbers, all measured, all budgets in `check:wander`:
+Three numbers, all measured, all budgets in check:wander:
 
 - **out of a stand**, `strideStance` starts its cycle with the feet a stride apart,
   which was a 16-unit foot jump on the frame the step began. `rig.strideStance` takes
@@ -9689,14 +9700,14 @@ whichever step he happened to be taking — and the room the layer is allowed to
 him through is derived from those very boxes. `check:alive` (the figure is excluded
 by his box at rest), `check:nod` and `check:moved` pass it for their own reasons.
 
-`node scripts/shot-wander.mjs <lesson-id> [beat]` is the only instrument that can say
+node shot-wander.mjs <lesson-id> [beat] is the only instrument that can say
 the layer is WIRED: it records his ankle and his fist every frame in the real app. It
 found the layer switched off a frame after it was switched on — `wanderReset` in a
 mount effect, which runs after the render that installs the first plan — and its own
 first draft measured the figure's ROOT, which `Stickman` states is a zero-size box,
 and reported the same dead figure for a different reason.
 
-`node scripts/countertest-wander.mjs` stages all seventeen defects going red, the
+node countertest-wander.mjs stages all seventeen defects going red, the
 shipped table silent, and a single beat with no plan silent.
 
 ### AF9 · Every leg travels the way he is facing — the planned ones and the invented one
@@ -9723,7 +9734,7 @@ backwards.
   the way the scene staged him.** The multiplier that faces stage-direction `d` is
   `d * facing`, both being ±1. Restoring at the end is what lets a beat hand on the
   facing it was given.
-- **`check:wander` §3f re-derives it from the table**, walking each plan's step and
+- **check:wander §3f re-derives it from the table**, walking each plan's step and
   turn moves in order against the scene's own per-beat facing (`facingOf`, now shared
   by the generator and the checker rather than copied into both).
 - **AND THE LEG THE LAYER INVENTS IS HELD TO IT TOO.** The walk back into a beat's
@@ -9786,12 +9797,12 @@ to hold him that way for the rest of the lesson.
   which is the same 0.32s of turning, so a reader who taps exactly mid-turn — carrying
   a `face` of 0, a figure with no width at all — un-flattens as part of a turn rather
   than after one.
-- `check:wander` holds that he ALWAYS comes back (0 of 77,580 taps fail) and how long
+- check:wander holds that he ALWAYS comes back (0 of 77,580 taps fail) and how long
   a carried turn lasts before he is upright again (2.65s of a 3.0s budget).
 
 ### AF13 · The checker must replay what the app runs, and tap where the reader lands
 
-Both halves of `check:wander` were exact about the wrong thing, and every number
+Both halves of check:wander were exact about the wrong thing, and every number
 above was green while the app had all four defects.
 
 - **It replayed `wanderStance` alone.** The app never calls it: `lookPose` runs the
@@ -9816,7 +9827,7 @@ other than the lessons looks more gamified … we will select the gamified look 
 is in the app as well … that gamified, that really clean, gamified depth look."*
 
 `components/lesson/cinematic/stageSkin.ts` is the kit, `scripts/skin-stage.mjs`
-applies it, `npm run check:skin` holds it, and `scripts/restamp-skin.mjs` renews the
+applies it, `npm run check:skin` holds it, and restamp-skin.mjs renews the
 must-box stamps by proof.
 
 ### AG1 · Four decorations, and none of them moves a box
@@ -9941,7 +9952,7 @@ it was.** The figure moved (group AF walks, sits and looks on almost every beat)
 a pen mark or a thought could appear, but the drawing itself held — so a reader who
 had just tapped saw the words advance and nothing else.
 
-`node scripts/still-worklist.mjs [<lesson-id>|<branch>]` is the worklist. Per still
+node still-worklist.mjs [<lesson-id>|<branch>] is the worklist. Per still
 beat it prints the sentence that beat says, what the stage already draws, and the
 channels the script declares with the value that beat holds.
 
@@ -10102,7 +10113,7 @@ leaving the window from the bird's height, captioned TO A PERSON.
 Group AE puts the teacher's pen on a tap where the picture holds still, and after
 this pass there is no such tap: **0 of 2,461**, held by `check:still`. So the pen
 marks retire wherever the beat they sat on now carries its own event — AH2's one
-event per tap — and `make:marks` withdraws them when the tables are regenerated.
+event per tap — and make:marks withdraws them when the tables are regenerated.
 That is not a loss of the pen; the pen was the answer to a still tap, and each of
 those taps now has an event written for its own sentence.
 
@@ -10114,7 +10125,7 @@ beats declaring identical channels, which stopped being true the moment each pie
 got its own event, and 62 repeats that are REQUIRED read as defects. Counting a
 one- or two-beat channel as a pulse recovered most; the rest were events that
 arrive on the second piece and stay, which no count can tell from a new beat. So
-the run structure is read once from before the pass (`scripts/make-splitruns.mjs`,
+the run structure is read once from before the pass (make-splitruns.mjs,
 `scripts/lib/splitruns.json`) and used wherever a lesson's beat count still
 matches; the pulse rule is the fallback for a lesson re-cut since.
 
@@ -10414,7 +10425,7 @@ and a rule that flagged them would ban crouching. So `bob: s.bob - 2.2 - |d| * 2
 becomes `bob: s.bob - 2.2`, and `bob: -14 + breath * 2.0` becomes `bob: -14`. The
 figure's resting height moves by at most 2.6 units anywhere in the corpus, which is
 inside `mustrule`'s own 4-unit pad — which is why this cost no re-measure, and why
-`scripts/restamp-flat.mjs` can renew the two scene stamps on a proof instead.
+restamp-flat.mjs can renew the two scene stamps on a proof instead.
 
 ### AL3 · Sweep the DEFAULT, and sweep it by EVALUATION
 
@@ -10642,7 +10653,7 @@ weight is judged — the default 56 is what hid this.
 > unacceptable."*
 
 AA7 asks whether the second figure fits WHERE HE STANDS. It says nothing about how he
-got there, and `make:visitor`'s first rule was *"he comes on from whichever edge he is
+got there, and make:visitor's first rule was *"he comes on from whichever edge he is
 nearer, so the walk is short"* — which sends him straight through the lead whenever he
 lands on the far side of him. In ethics37 he entered at −60 and walked to 166 with the
 mascot standing at 54; measured live at the arrival beat, **their two heads were nine
@@ -10799,6 +10810,8 @@ short of the junction. Ask what a growing box will meet before growing it.
 
 ## Group AO · A set piece that spans several taps
 
+> **REMOVED 2026-10-02** with the narrated library; kept as a finding.
+
 > *"a couple of things I want the stickman to do is like grab a chair out of noware,
 > like a lawn chair, set it up, and then sit down, mabye fidget his hand and arms just
 > a little, maybe pull out some coffee or tea, crossing his legs sometimes … All off
@@ -10810,9 +10823,9 @@ thing he does ACROSS beats: he reaches behind his back, brings a folded lawn cha
 round, flicks it open, sets it down and sits (one beat); crosses his legs, brings a mug
 out and sips, drums the armrest, looks up and down (the beats after); then stands, folds
 it and tucks it away (the last). 25 lessons do it and 45 more have a mug standing up.
-`lawnChair.ts` is the drawing, `chairRoutine.ts` the choreography as a pure function of
-time, `chairPlay.ts` the playhead, `ChairArt.tsx` the Views, `data/lessonChair.ts` where
-(written by `npm run make:chair`), and `npm run check:chair` holds it.
+lawnChair.ts is the drawing, chairRoutine.ts the choreography as a pure function of
+time, chairPlay.ts the playhead, ChairArt.tsx the Views, data/lessonChair.ts where
+(written by make:chair), and check:chair holds it.
 
 ### AO1 · A set piece is one timeline, and a tap moves the playhead, never the picture
 
@@ -10822,7 +10835,7 @@ note asked for nothing fast) until it catches up; tap back and it runs BACKWARDS
 end of that beat's stretch, so he sits back down rather than being teleported into an
 earlier picture. A beat before the stretch is the timeline's start and a beat after it
 the end, so leaving early finishes the putaway and coming back in from after it leaves
-him standing with nothing to redo. `check:chair` §5 replays every stretch patiently,
+him standing with nothing to redo. check:chair §5 replays every stretch patiently,
 tapping every 0.3 to 3.0 seconds in tenths, and tapping back, and holds the worst
 one-frame move of the man and the chair to a ceiling.
 
@@ -10839,7 +10852,7 @@ a change of part (group L).
 Two-bone IK folds the arm flat when the hand passes near the shoulder and throws the
 elbow over the top in a handful of frames: the first replay measured the elbow moving
 25 units in 0.2s while he carried the chair round, and a mug going back behind him did
-the same. `roundShoulder` holds the hand on a ring about the shoulder and `ARM_DIP`
+the same. `roundShoulder` holds the hand on a ring about the shoulder and ARM_DIP
 carries it low as it crosses him, which is also how a person carries a chair. The chair
 follows the undipped path, so it does not sag with the elbow.
 
@@ -10847,7 +10860,7 @@ follows the undipped path, so it does not sag with the elbow.
 
 Open, the chair is 16 units taller than the folded package below his grip, so he LIFTS
 it as it opens, and a package reached for behind his back rides along the ground rather
-than hanging below it. `check:chair` §4 re-derives how far any part ever reaches —
+than hanging below it. check:chair §4 re-derives how far any part ever reaches —
 back, front, seated, up — and fails if the generator's room test assumes less, or if
 anything goes below the ground line.
 
@@ -10859,15 +10872,15 @@ each other, and no mug straight after another set piece. Every beat of a stretch
 measured for clear floor at the CHAIR's height — a plate at his chest is no obstacle
 to a chair at his knees — and inside every frame the camera shows; the camera is never
 touched. A QUESTION beat may fall inside a stretch, and there he only sits
-(`SEAT_REST`): a man sipping beside a question is competing with it.
+(SEAT_REST): a man sipping beside a question is competing with it.
 
 ### AO6 · The layers after it make room, in order
 
-`make:chair` runs first. `make:thoughts` puts no bubble on a chair beat (a bubble is
-placed against his standing head), and `make:wander` gives no plan to a chair beat or to
+make:chair runs first. make:thoughts puts no bubble on a chair beat (a bubble is
+placed against his standing head), and make:wander gives no plan to a chair beat or to
 the beat after one (an early tap hurries the putaway into it). Run order:
-`make:chair`, then `make:thoughts`, `make:wander`, `make:marks`. `check:chair` §3 fails
-when the committed table is not what `make:chair` writes today.
+make:chair, then make:thoughts, make:wander, make:marks. check:chair §3 fails
+when the committed table is not what make:chair writes today.
 
 ## Group AP · A dialogue lesson: the people on the stage are the ones talking
 
@@ -10880,7 +10893,7 @@ A DIALOGUE lesson has no narrator. Stickmen speak — to each other, and the tea
 them to the reader — inside a real-life scenario, handling real, reference-drawn objects.
 The first is `economics-foundations-1`, "What Is Economics?", at a market stall. The cast
 of FOUR is `components/lesson/cinematic/cast.ts` (a lesson uses as many as it needs,
-AP13); `npm run check:dialogue` holds AP1, AP2, AP6, AP8, AP13 and AP14, counter-tested
+AP13); `npm run check:dialogue` holds AP1, AP2, AP6, AP13 and AP14, counter-tested
 by `node scripts/countertest-dialogue.mjs`.
 
 ### AP1 · Every spoken line has exactly one speaker, from the cast
@@ -10945,6 +10958,10 @@ No thought bubbles, pen marks, wander, lawn chair, visitor or wardrobe row: with
 people talking they are clutter, and a bubble over a speaking man contradicts him. The
 generators skip dialogue lessons (`scripts/lib/dialogue.mjs`, read from the scripts), and
 `check:dialogue` fails a row in any of their tables.
+
+> **Since 2026-10-02 this holds by construction**: the layers, their tables and their
+> generators were removed with the narrated library, so there is no row to write and
+> `check:dialogue` no longer looks for one.
 
 ### AP9 · Written for the ear, paced by the voice
 

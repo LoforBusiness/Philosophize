@@ -10,12 +10,8 @@ import QuotePlate from '@/components/shared/QuotePlate';
 import { eraGroupOfDate } from '@/data/philosophers';
 import { XP_PER_CORRECT_ANSWER } from '@/constants/xp';
 import { C, RADIUS, LIP } from '@/constants/design';
-import { ease01, mixStance, pose, seg, type Bundle, type Stance } from './rig';
-import { CHAIR, chairStep, frameAt } from './chairPlay';
+import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
-import {
-  gazeKeep, wanderDir, wanderRest, wanderStance, wanderState, type WanderState,
-} from './wander';
 import { EMBER_INK } from '@/components/shared/tone';
 import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 import type { ObjectName } from './objects';
@@ -169,7 +165,7 @@ export const BAND_B = STAGE_H;
 // contact with a prop needs its x (or the prop) nudged to meet again.
 export const K_FIG = 1.0;                  // stage units per rig unit
 export const XFADE = 420;                  // beat-to-beat deck fade (ms)
-export const COMPLETION_XP = 5;            // matches LessonRunner
+export const COMPLETION_XP = 5;            // matched the retired card runner
 
 // What the reader is TOLD a right answer is worth. Derived, never typed: this line
 // read "+5 XP" for a while after the model went to 10 per correct answer, so every
@@ -949,6 +945,10 @@ export const REACT = makeMutable(0);
  * was placed for, and rides him while it does (`Thought`'s `live`). `on` stays 0
  * in a scene that never poses its lead through `lookPose`, and those keep the old
  * behaviour. The player zeroes it when a lesson mounts.
+ *
+ * REMOVED 2026-10-02 with the narrated library: the thought bubble that read this.
+ * The head is still published, so anything that needs to hang off the lead's head
+ * again has it, but nothing reads it today.
  */
 export const LEAD_HEAD = makeMutable<readonly number[]>([0, 0, 0]);
 
@@ -969,166 +969,6 @@ export function hideLeadWhile(b: Bundle, hidden: boolean): Bundle {
     LEAD_HEAD.value = [L[0], L[1], -1];
   }
   return b;
-}
-
-// ── AND WHETHER HE IS MOVING AROUND (wander.ts, group AF) ────────────────────
-//
-// The same seam as `REACT`, for the same reason, and it is the whole reason the
-// movement layer was affordable: a reader asked for the figure to *"look up and
-// down a lot, move back and forth, maybe sit on the ground for a little bit"*
-// instead of only moving his hands, and every scene in the app ends its figure
-// with one `lookPose` call — 244 of 244, exactly once each. A per-scene prop
-// would have been 244 edits to files whose every byte is inside `muststamp`,
-// which is a corpus-wide re-measure for a change that moves no prop.
-//
-// `plan` is the beat's plan from `data/lessonWander.ts`, `bt` the BEAT clock and
-// `now` the scene clock — both mirrored by the player's frame callback — and
-// `gen` a counter the player bumps on every beat change.
-//
-// THE PLAN IS READ AGAINST THE BEAT CLOCK, NOT THE SCENE CLOCK, and that is not a
-// convenience. `bt` is reset to 0 during the player's render, in the same
-// statement that swaps the plan, so the first frame of a new beat reads its plan
-// at zero. Timing it off the scene clock instead needs the start time recorded,
-// which can only be read across threads a frame late — and a plan read one frame
-// at the PREVIOUS beat's elapsed time is a plan jumped to its end state and back,
-// which is the one-frame cut group L exists to forbid. `bt` is also what freezes
-// while the camera travels (K1), so he waits for the shot rather than walking
-// through it.
-//
-// THE SIXTEEN AFTER IT ARE A MEMORY, and they are `carry`'s trick rather than a
-// new one: `d*` is what the last frame drew and `s*` is what this plan is being
-// read from. Separate mutables rather than one array because this is written every
-// frame on the UI thread, and an array would allocate on each of them.
-export const WANDER = {
-  plan: makeMutable<readonly number[]>([]),
-  bt: makeMutable(0),
-  gen: makeMutable(0),
-  now: makeMutable(0),
-  seen: makeMutable(-1),
-  ddx: makeMutable(0),
-  dlook: makeMutable(0),
-  dsit: makeMutable(0),
-  dcrouch: makeMutable(0),
-  dface: makeMutable(1),
-  dlean: makeMutable(0),
-  dlegFrom: makeMutable(0),
-  dlegTo: makeMutable(0),
-  dlegU: makeMutable(-1),
-  sdx: makeMutable(0),
-  slook: makeMutable(0),
-  ssit: makeMutable(0),
-  scrouch: makeMutable(0),
-  sface: makeMutable(1),
-  slean: makeMutable(0),
-  slegFrom: makeMutable(0),
-  slegTo: makeMutable(0),
-  slegU: makeMutable(-1),
-};
-
-/**
- * THE LEAD TURNS TO THE VISITOR (N21).
- *
- * Placed by room alone, most visitors walked in behind the lead and argued with the
- * back of his head. `make:visitor` now stands him where the lead faces, and where
- * the only room is behind a lead who never walks again the cue carries `turn` — the
- * side to face. The player writes the cue here when a beat is installed, and
- * `visitTurn` eases the lead round from the moment the visitor has arrived, rate-
- * limited on the frame clock so a tap either way can never flip him.
- */
-export const VISIT = {
-  side: makeMutable(0),
-  enter: makeMutable(-1),
-  walk: makeMutable(0),
-  beat: makeMutable(-1),
-  u: makeMutable(0),
-  last: makeMutable(-1),
-};
-
-/** How far round the lead has turned to the visitor, 0…1, eased. */
-function visitTurn(): number {
-  'worklet';
-  if (!VISIT.side.value) return 0;
-  const arrived = VISIT.beat.value > VISIT.enter.value
-    || (VISIT.beat.value === VISIT.enter.value && WANDER.bt.value >= VISIT.walk.value);
-  const target = arrived ? 1 : 0;
-  const now = WANDER.now.value;
-  const dt = VISIT.last.value < 0 ? 0 : Math.max(0, Math.min(0.1, now - VISIT.last.value));
-  VISIT.last.value = now;
-  const step = dt / 0.36;
-  const u = VISIT.u.value;
-  const nu = target > u ? Math.min(target, u + step) : Math.max(target, u - step);
-  VISIT.u.value = nu;
-  return nu * nu * (3 - 2 * nu);
-}
-
-/** Put the layer back where a lesson starts. The player calls it on its way out. */
-export function wanderReset() {
-  VISIT.side.value = 0; VISIT.enter.value = -1; VISIT.walk.value = 0;
-  VISIT.beat.value = -1; VISIT.u.value = 0; VISIT.last.value = -1;
-  WANDER.plan.value = [];
-  WANDER.bt.value = 0;
-  WANDER.now.value = 0;
-  WANDER.gen.value = 0;
-  WANDER.seen.value = -1;
-  const rest = wanderRest();
-  WANDER.ddx.value = rest.dx; WANDER.sdx.value = rest.dx;
-  WANDER.dlook.value = rest.look; WANDER.slook.value = rest.look;
-  WANDER.dsit.value = rest.sit; WANDER.ssit.value = rest.sit;
-  WANDER.dcrouch.value = rest.crouch; WANDER.scrouch.value = rest.crouch;
-  WANDER.dface.value = rest.face; WANDER.sface.value = rest.face;
-  WANDER.dlean.value = rest.lean; WANDER.slean.value = rest.lean;
-  WANDER.dlegFrom.value = rest.legFrom; WANDER.slegFrom.value = rest.legFrom;
-  WANDER.dlegTo.value = rest.legTo; WANDER.slegTo.value = rest.legTo;
-  WANDER.dlegU.value = rest.legU; WANDER.slegU.value = rest.legU;
-}
-
-/**
- * THE LAYER, THIS FRAME — and the snapshot that makes a tap continuous.
- *
- * On the first frame of a new plan the values the last frame DREW become the
- * values the new plan is read from, which is `carryFrom` one system out: the
- * frame before the tap and the frame after it are then the same picture whatever
- * the reader's tap rate, rather than the new plan starting from a rest the figure
- * was nowhere near (group L).
- */
-function wanderNow(dir: number): WanderState {
-  'worklet';
-  if (WANDER.seen.value !== WANDER.gen.value) {
-    WANDER.seen.value = WANDER.gen.value;
-    WANDER.sdx.value = WANDER.ddx.value;
-    WANDER.slook.value = WANDER.dlook.value;
-    WANDER.ssit.value = WANDER.dsit.value;
-    WANDER.scrouch.value = WANDER.dcrouch.value;
-    WANDER.sface.value = WANDER.dface.value;
-    WANDER.slean.value = WANDER.dlean.value;
-    WANDER.slegFrom.value = WANDER.dlegFrom.value;
-    WANDER.slegTo.value = WANDER.dlegTo.value;
-    WANDER.slegU.value = WANDER.dlegU.value;
-  }
-  const st = wanderState(WANDER.plan.value, WANDER.bt.value, {
-    dx: WANDER.sdx.value,
-    look: WANDER.slook.value,
-    sit: WANDER.ssit.value,
-    crouch: WANDER.scrouch.value,
-    face: WANDER.sface.value,
-    lean: WANDER.slean.value,
-    legFrom: WANDER.slegFrom.value,
-    legTo: WANDER.slegTo.value,
-    legU: WANDER.slegU.value,
-    legPrior: 0,
-    homeDir: 0,
-    turnU: 0,
-  }, dir);
-  WANDER.ddx.value = st.dx;
-  WANDER.dlook.value = st.look;
-  WANDER.dsit.value = st.sit;
-  WANDER.dcrouch.value = st.crouch;
-  WANDER.dface.value = st.face;
-  WANDER.dlean.value = st.lean;
-  WANDER.dlegFrom.value = st.legFrom;
-  WANDER.dlegTo.value = st.legTo;
-  WANDER.dlegU.value = st.legU;
-  return st;
 }
 
 /**
@@ -1171,47 +1011,6 @@ export function lookPose(
 ): Bundle {
   'worklet';
   const r = REACT.value;
-  // ── THE MOVEMENT LAYER GOES FIRST, BECAUSE IT DECIDES WHERE HE IS ─────────
-  //
-  // It moves him along the ground, sits him down and turns him round, so the
-  // gaze, the answer reaction and `pose` all have to be given the figure the
-  // layer produced rather than the one the scene handed in. It is inert — dx 0,
-  // face +1, no leg — for any beat with no plan, which is what the offline
-  // replays in `check:smooth` and `check:replay` continue to measure.
-  const wst = wanderNow(dir);
-  const ws = wanderStance(s, wst, WANDER.now.value, k);
-  const wx = x + wst.dx;
-  // Turned to the visitor (N21): the facing eases round to his side, and the gaze
-  // hands the neck back as it does — level, he is looking straight at a man his own
-  // height, where the generated gaze would have kept him staring at the art behind.
-  const vu = visitTurn();
-  const wdir0 = wanderDir(dir, wst);
-  const wdir = vu > 0 ? wdir0 + (VISIT.side.value - wdir0) * vu : wdir0;
-  // A DELIBERATE LOOK AND THE GENERATED GAZE ARE TWO OPINIONS ON ONE NECK, and
-  // the loser is whichever is applied first. `gazeKeep` hands the neck over while
-  // the layer is using it, on the layer's own eased values, so neither cuts.
-  //
-  // ── AND THE CHAIR, WHICH TAKES THE WHOLE MAN WHILE IT PLAYS (chairPlay.ts) ─
-  //
-  // The routine is a full stance — he reaches behind his back, sits, crosses his
-  // legs — so it is blended over the stance the scene and the layer produced, and
-  // the generated gaze hands the neck back as it arrives, for the same reason the
-  // wander's own look does: two opinions on one neck. The chair and the mug ride
-  // out on the bundle for `Stickman` to draw.
-  const cu = chairStep(WANDER.now.value, WANDER.bt.value);
-  const cf = cu > 0 ? frameAt(CHAIR.plan.value, CHAIR.p.value, WANDER.now.value) : null;
-  const cs = cf ? mixStance(ws, cf.s, cu) : ws;
-  const gw = w * gazeKeep(wst) * (1 - vu) * (1 - cu);
-  const withProp = (b: Bundle): Bundle => {
-    'worklet';
-    if (!cf) return b;
-    const d = wdir < 0 ? -1 : 1;
-    return {
-      ...b,
-      prop: [cf.chair.on, cf.chair.open, wx + d * k * cf.chair.x, groundY + k * cf.chair.y,
-        cf.chair.front, cf.mug.on, cf.mug.steam, WANDER.now.value],
-    };
-  };
   const publish = (b: Bundle): Bundle => {
     'worklet';
     const hx = b.head[0].translateX;
@@ -1219,8 +1018,8 @@ export function lookPose(
     LEAD_HEAD.value = [hx, hy - 20 * k, 1];
     return b;
   };
-  if (gw <= 0) return publish(withProp(pose(reacted(cs, r), wx, groundY, k, wdir, opacity)));
-  const g = gazeAt(cs, wx, groundY, k, wdir, gx, gy, gw);
+  if (w <= 0) return publish(pose(reacted(s, r), x, groundY, k, dir, opacity));
+  const g = gazeAt(s, x, groundY, k, dir, gx, gy, w);
   // ── AND THE LEAN, BECAUSE A HEAD MOVE IS NOT A MOVE (N12) ─────────────────
   //
   // The rule book already records this against the four "looking" actions in
@@ -1235,8 +1034,8 @@ export function lookPose(
   // actually turned keeps the two locked together and costs no second solve: the
   // total comes to about 0.6 of the gaze angle, so a figure craning up at a
   // machine above him moves his head some sixteen units rather than five.
-  const lean = (g.neck - cs.neck) * 0.5;
-  return publish(withProp(pose(reacted({ ...g, tilt: g.tilt + lean }, r), wx, groundY, k, wdir, opacity)));
+  const lean = (g.neck - s.neck) * 0.5;
+  return publish(pose(reacted({ ...g, tilt: g.tilt + lean }, r), x, groundY, k, dir, opacity));
 }
 
 /**
@@ -1430,393 +1229,6 @@ export function Bubble({
           <View style={styles.leader} />
         </Animated.View>
       </Animated.View>
-    </Animated.View>
-  );
-}
-
-// ── THE THOUGHT BUBBLE: WHAT HE IS MAKING OF ALL THIS ────────────────────────
-//
-// A reader worked through the lessons and said the mascot is *"usually just
-// there, not really doing anything"*, and asked for the fix in their own words:
-// *"little thought bubbles go up in his head during the lesson, like the stickman
-// is thinking or discovering something"*, and a line back when they answer — teasing
-// on a wrong one, *"passive aggressive that is somewhat encouraging"* on a right one.
-//
-// **THE POINT IS THAT HE IS LEARNING TOO.** He is not a presenter standing beside
-// the material; he is the other student. So the bubbles are what HE is working
-// out, arriving a beat behind the narration the way a real thought does.
-//
-// ── WHY THIS IS NOT A FLAG ON `Bubble` ──────────────────────────────────────
-//
-// The speech bubble above solved the hard geometry — a View scales about its
-// CENTRE, so a corner-anchored box inflating from 0.86 walks diagonally into
-// place, and pinning the tail is what stops it swimming. This reuses that maths
-// exactly. What it does NOT share is the tail (a triangle and a leader against a
-// descending trail of discs), the entrance ORDER (a thought forms from the discs
-// UP; speech pops from the mouth) or the word budget. Three structural
-// differences behind one boolean is how a component ends up unreadable.
-//
-// ── THE WORD BUDGET IS THE DESIGN ───────────────────────────────────────────
-//
-// *"I don't want them to be huge. Nothing like big paragraphs … pretty short in
-// the words."* The box is 130 wide against the speech bubble's 216, which is not
-// a preference but the enforcement: at Inter 12 that is about twenty characters a
-// line and two lines is the most it will take before `check:thoughts` fails the
-// build. A thought that needs three lines is a narration beat wearing a cloud.
-/**
- * WHERE THE BOX SITS THIS FRAME, in stage x.
- *
- * DECLARED ABOVE EVERY WORKLET THAT CALLS IT. `'worklet'` functions are rewritten
- * into `const`s and their closures are built at module scope, so one declared
- * further down the file is in its temporal dead zone and throws AT IMPORT, taking
- * the whole route tree with it (§17, rule 2).
- *
- * `figX + (x − refX)·settle`, and both ends of that are exact: at `settle` 1 with
- * the walk finished it is the measured spot to the unit, and at 0 it is his own
- * live position, which is always on stage because he is. In between, the lateral
- * offset the generator searched out is restored as he arrives.
- *
- * IT DOES NOT READ `headX` FOR POSITION, AND THAT IS THE POINT. The obvious
- * version anchors on the stored head — and the stored head is not always where he
- * ends up. Counted across the corpus, 90 of 940 placements record a figure centre
- * more than 40 units from their own beat's x: 15 of the 50 lessons involved stage
- * a SECOND figure, where the midpoint between the two is what the generator meant,
- * and the rest are single-figure beats whose recorded centre is simply not where
- * the beat leaves him — `metaphysics-being-35` beat 3 walks 322 → 120 and records
- * 237. Anchoring there asked for x 425 on a 400-wide stage, so the clamp pinned
- * the box to the edge and it kept a quarter of his 186px. His live position cannot
- * be poisoned that way, and at rest this still returns the measured spot exactly.
- */
-function where(x: number, figX: SharedValue<number> | undefined, refX: number, settle: SharedValue<number> | undefined) {
-  'worklet';
-  if (!figX) return x;
-  const st = settle ? settle.value : 1;
-  return figX.value + (x - refX) * st;
-}
-
-/**
- * THE TRAIL POINTS AT HIM, AND IT USED TO ONLY LEAN.
- *
- * A reader: *"the thinking boxes don't quite point enough towards the stickman
- * doing the thinking."* The three discs were a vertical column translated
- * sideways as one rigid group, and clamped to `half - 14` — so on a narrow box
- * (the clamp is a function of the TEXT's width) they could barely move at all,
- * and even at full lean they stayed a straight column standing off to one side.
- * A column is not a trail. What says "this came out of that head" is a CHAIN:
- * the discs spread along the line from the box to the head, smallest and nearest
- * him at the bottom.
- *
- * So each disc carries its own share — a quarter, then three fifths, then all of
- * it — and the last one may hang past the box's own edge, because it is the one
- * that has to arrive at his head. Clamped all the same: a disc that chases him
- * without limit is a dotted line across the stage rather than a thought.
- */
-/**
- * HOW MUCH OF A LIVE THOUGHT SHOWS, from where his head is against where it was
- * placed. Full within 12 units sideways, gone by 26; and gone if his crown has
- * dropped more than a head below the trail's foot (he has sat, or crouched), since
- * a bubble floating a body-length over a seated man is the fault it exists to stop.
- */
-const NEAR = 26;
-const NEAR_FADE = 14;
-const DROP = 30;
-function headGate(L: readonly number[], headX: number, anchorY: number) {
-  'worklet';
-  const dx = Math.abs(L[0] - headX);
-  const side = Math.max(0, Math.min(1, (NEAR - dx) / NEAR_FADE));
-  const gap = L[1] - anchorY;
-  const down = Math.max(0, Math.min(1, (DROP + 14 - gap) / 14));
-  return side * down;
-}
-
-const THINK_FAN = [0.25, 0.58, 1];
-const THINK_REACH = 18;
-/**
- * HOW FAR THE BOX ITSELF MAY SIT FROM HIS HEAD (AB12), read by `make:thoughts`
- * and re-derived by `check:thoughts`.
- *
- * It used to be inferred from the trail's own clamp expression, which stopped
- * being a single number the moment the discs started fanning — and inferring it
- * had already gone wrong once: the speech bubble writes the identical clamp with
- * a different constant one component up, so an unanchored read answered 20 where
- * the truth was 14. Stated once here instead.
- */
-export const THINK_DRIFT = 51;
-
-/**
- * HOW FAR ALONG THE LINE TO HIS HEAD THIS DISC SITS.
- *
- * `frac` is the disc's place in the chain — 0.25 for the one under the box, 1 for
- * the small one nearest him — so the three together draw a trail that arrives at
- * his head rather than a column standing beside it.
- *
- * DECLARED ABOVE ITS CALLERS, and that is not style: the babel plugin rewrites a
- * `'worklet'` function into a `const` and builds every worklet's closure at module
- * scope, so calling one declared further down hits its temporal dead zone and
- * throws AT IMPORT, taking the whole route tree with it (§17 rule 2). It also has
- * to sit below `where`, which it calls, for the same reason.
- */
-function leanTo(
-  frac: number, w: number, x: number, headX: number,
-  figX: SharedValue<number> | undefined, refX: number, settle: SharedValue<number> | undefined,
-) {
-  'worklet';
-  const half = w / 2;
-  // Before layout there is no box to measure a lean against, and half of nothing
-  // turns the clamp inside out.
-  if (half <= 0) return 0;
-  const Lh = LEAD_HEAD.value;
-  const cx = Math.max(half + 10, Math.min(STAGE_W - half - 10, Lh[2] !== 0 ? x + (Lh[0] - headX) : where(x, figX, refX, settle)));
-  // POINTING AT HIM, LIVE. `headX` is the head the placement was measured against
-  // and is the right answer when there is no walk track to do better with; where
-  // there is one, his own position is the head this came out of.
-  const L = LEAD_HEAD.value;
-  const head = L[2] !== 0 ? L[0] : figX ? figX.value : headX;
-  const cap = half + THINK_REACH;
-  return Math.max(-cap, Math.min(cap, head - cx)) * frac;
-}
-
-const THINK_W = 130;
-const THINK_TAIL_UP = 30;
-/**
- * IN AND OUT, AND THE EXIT IS THE ENTRANCE READ BACKWARDS.
- *
- * One LINEAR driver, with every stage a slice of it, is ThinkerPeek's finding and
- * the reason the windows below are honest: a stage occupying the first 42% of a
- * linear value occupies 42% of the time, which is not true of an eased one — M3's
- * emphasized-decelerate drew a 15-unit leader in 10ms. Run the same value from 1
- * back to 0 and the stages play in reverse for free: the box empties first, then
- * the trail retracts downward toward his head, which reads as the thought being
- * reabsorbed rather than as a panel switching off.
- *
- * The exit is shorter than the entrance (M3), and it is the whole exit — nothing
- * unmounts until it has finished.
- */
-const THINK_IN = 520;
-// 340 RATHER THAN 240, AND THE RENDER PICKED THE NUMBER. The box occupies the
-// last 30% of the driver, so an exit of 240ms fades the box itself in 72ms — four
-// frames, measured at 0.37 of its opacity in one — which is a switch rather than a
-// fade and is the other half of *"it needs to disappear … really smoothly"*. At
-// 340 the same slice is 102ms and the worst frame is 0.26. Still two thirds of the
-// entrance, which is the rule it has to keep (M3: exits are shorter).
-const THINK_OUT = 340;
-
-export function Thought({
-  text, x, headX, anchorY, discs, show, figX, refX = 0, settle, kind = 'think', probeId = 'thought', live = false,
-}: {
-  /**
-   * THE LEAD'S THOUGHT: follow his LIVE head (`LEAD_HEAD`) rather than trust the
-   * table alone. It shows only while his head is within `NEAR` of the `headX` it
-   * was placed against and no more than `DROP` below the crown it was placed over,
-   * fading in as he arrives and out if he leaves; while it shows, the box and the
-   * trail ride his head. False for the second figure, who is delivered standing.
-   */
-  live?: boolean;
-  text: string;
-  /**
-   * Stage x the box centres on, and the stage x of HIS OWN centre.
-   *
-   * Both come from `make:thoughts`, which measured them out of `mustBoxes` — and
-   * they are two numbers rather than one because the box slides sideways when the
-   * space directly overhead is taken, while the trail still has to lean back
-   * toward the head it came out of.
-   *
-   * A PLAIN NUMBER RATHER THAN THE FIGURE'S LIVE x, and that is the fix for a real
-   * defect: the player derives the live x from the script's `walk` track, a scene
-   * need not pass one, and where it was missing the bubble fell back to the middle
-   * of the stage — landing across a plate the generator had carefully avoided. A
-   * measurement is spent in the space it was taken in.
-   */
-  x: number;
-  headX: number;
-  /**
-   * How many discs run from the box down to his head: 3, 2 or 1.
-   *
-   * The trail is a FREE PARAMETER and treating it as fixed cost thirteen lessons.
-   * These stages are built to fill the frame — `logic-arguments-3` leaves a
-   * forty-eight unit gap between its VALID MEANS block and his crown, where a box
-   * and a full trail need sixty-two — so `make:thoughts` shortens the trail before
-   * it gives up on the beat. One disc still reads as a thought; no bubble does not.
-   */
-  discs: number;
-  /**
-   * Stage y where the SMALLEST disc sits — just above his crown.
-   *
-   * Anchored from the BOTTOM, not the top, and that is the whole reason this
-   * prop is shaped like this: the box grows upward off the trail, so a one-line
-   * thought and a two-line thought both keep their tail the same distance from
-   * his head. Anchored from the top instead, a short thought pulls its own trail
-   * fifteen units away from the figure and reads as a caption that has come
-   * loose. Same argument as §7's reward cloud, which is anchored at its bottom so
-   * that a third row grows UP rather than pushing the mascot down.
-   */
-  anchorY: number;
-  /**
-   * WHETHER THIS THOUGHT IS STILL HIS — and the component owns the rest.
-   *
-   * It used to take a driver from the player, and the player used to move a
-   * bubble between a live slot and an outgoing one. Both are the same mistake:
-   * a component whose lifecycle is held outside it gets REMOUNTED to change
-   * phase, and a remount resets `w` and `h` to zero — so the exit began by
-   * snapping its trail fourteen units sideways and its box by five, on the exact
-   * frame the reader was watching it leave. Worse, the player zeroed the shared
-   * driver in the same effect: a shared value reaches the UI thread on the next
-   * frame while a React state change waits for the JS thread, so for at least one
-   * frame the outgoing bubble was still mounted and reading zero. Full, gone,
-   * full, fade — which is what the reader saw.
-   *
-   * Owning it here means one element per thought for its whole life, the layout
-   * measured once, and one value carrying it both ways.
-   */
-  show: boolean;
-  /**
-   * THE FIGURE'S LIVE x, SO THE BUBBLE TRAVELS WITH HIM.
-   *
-   * The placement above is a still: `make:thoughts` measured it against the art of
-   * one beat, with him standing where that beat leaves him. On a beat he WALKS,
-   * that description is true only once he has arrived — and measured across the
-   * corpus, all 79 bubbles that land on a walking beat were still mid-walk at the
-   * moment they were told to appear. Every one of them popped up over a spot he
-   * had not reached, trailed at nothing, and held still while he walked into it.
-   *
-   * So the box rides `figX − refX`, which is exactly zero once the walk is done —
-   * the measured spot is where it comes to rest, and nothing about the resting
-   * frame the generator verified has changed. Omit the pair and the offset is
-   * zero always, which is what the second figure's line wants: he is delivered
-   * standing still.
-   */
-  figX?: SharedValue<number>;
-  /** Where he stood when `x` and `headX` were measured — the beat's own walk x. */
-  refX?: number;
-  /**
-   * HOW FAR THROUGH THE WALK HE IS, 0…1 — and 1 on a beat where he does not walk.
-   *
-   * Offsetting the measured spot by the whole of his journey is right until it
-   * is not: `metaphysics-being-35` measures its box at x 273 while he walks in
-   * from 322, so early in that walk the box wants to be at 475 — a hundred and
-   * fifty units off the stage — and the clamp pins it to the right edge for two
-   * and a half seconds while he walks out from under it. Measured, it kept only
-   * a third of his 185px.
-   *
-   * So while he is walking the box rides HIS HEAD, and the lateral offset the
-   * generator searched out is restored as he arrives. Both ends are exact: at
-   * `settle` 1 this is the measured spot to the unit, and at 0 it is directly
-   * over him, which is always on stage because he is.
-   */
-  settle?: SharedValue<number>;
-  /** `say` is the answer line — a bolder box, because he is addressing the reader. */
-  kind?: 'think' | 'say';
-  /**
-   * A DOM id, so `check:bubble` can measure this thing at all.
-   *
-   * The same reason every analogue control carries a `nativeID`: a harness that
-   * can only guess at which box is which measures the wrong one and reports a
-   * clean sweep. Two of these can be on stage at once — his and the second
-   * figure's — and they behave differently on purpose.
-   */
-  probeId?: string;
-}) {
-  const w = useSharedValue(0);
-  const h = useSharedValue(0);
-  const onLayout = useCallback((e: LayoutChangeEvent) => {
-    w.value = e.nativeEvent.layout.width;
-    h.value = e.nativeEvent.layout.height;
-  }, []);
-
-  // THE ONE DRIVER, OWNED HERE. It runs to 1 on mount and back to 0 when the beat
-  // moves on, and the caller keeps the component mounted until it has arrived —
-  // so nothing ever changes its words, its position or its size mid-flight.
-  const drive = useSharedValue(0);
-  useEffect(() => {
-    drive.value = withTiming(show ? 1 : 0, {
-      duration: show ? THINK_IN : THINK_OUT,
-      easing: Easing.linear,
-    });
-  }, [show, drive]);
-
-  // Over his head, clamped so a long line never walks off the stage — the same
-  // rule the speech bubble follows, and for the same reason: a box pinned to the
-  // margin says nothing about whose thought it is.
-  //
-  // NOTHING IS CLAMPED BEFORE THE BOX HAS BEEN MEASURED. `w` is 0 until layout,
-  // and half of nothing turns the clamp inside out — `max(14, min(-14, …))` is a
-  // constant 14, so the trail used to start its life fourteen units to the right
-  // of the head it points at. It is invisible at `drive` 0 and it must also be
-  // correct there, because a mount and a first frame are not the same instant.
-  const wrap = useAnimatedStyle(() => {
-    const half = w.value / 2;
-    const L = LEAD_HEAD.value;
-    const follow = live && L[2] !== 0;
-    const want = follow ? x + (L[0] - headX) : where(x, figX, refX, settle);
-    const cx = half > 0 ? Math.max(half + 10, Math.min(STAGE_W - half - 10, want)) : want;
-    const gate = !follow ? 1 : L[2] < 0 ? 0 : headGate(L, headX, anchorY);
-    return { opacity: gate, transform: [{ translateX: cx - STAGE_W / 2 }] };
-  });
-
-  // The trail leans back toward him when the box has been clamped, so it still
-  // points at whose head this came out of — and it follows the SAME `dx`, so a
-  // bubble travelling with him keeps pointing at the head it came out of rather
-  // than at the place he set off from.
-
-
-  // ONE LINEAR DRIVER, AND THE EXIT IS THE ENTRANCE READ BACKWARDS — ThinkerPeek's
-  // finding, and the reason the stage windows below are honest: a stage occupying
-  // the first 40% of a LINEAR value occupies 40% of the time, which is not true of
-  // an eased one. M3's emphasized-decelerate drew a 15-unit leader in 10ms.
-  const box = useAnimatedStyle(() => {
-    const d = drive.value;
-    const e = ease01(seg(d, 0.42, 1));
-    const sc = 0.84 + 0.16 * e + Math.sin(Math.PI * e) * 0.03;
-    return {
-      opacity: ease01(seg(d, 0.42, 0.72)),
-      transform: [{ translateY: (h.value / 2 - THINK_TAIL_UP) * (1 - sc) }, { scale: sc }],
-    };
-  });
-  // The discs arrive FIRST and from the bottom up, which is the whole difference
-  // between a thought forming and a panel appearing.
-  //
-  // WRITTEN OUT THREE TIMES RATHER THAN FROM A HELPER. `const disc = (a, b) =>
-  // useAnimatedStyle(...)` reads better and is a hook called from a nested
-  // function — it happens to work while the call order is fixed, and it is the
-  // rule this repo has already broken once (§19: the memoised Profile sections
-  // nested their hooks, `tsc` was perfectly happy and React threw at runtime).
-  const d1 = useAnimatedStyle(() => {
-    const d = drive.value;
-    const e = ease01(seg(d, 0.00, 0.22));
-    return {
-      opacity: e,
-      transform: [{ translateX: leanTo(THINK_FAN[2], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
-    };
-  });
-  const d2 = useAnimatedStyle(() => {
-    const d = drive.value;
-    const e = ease01(seg(d, 0.12, 0.36));
-    return {
-      opacity: e,
-      transform: [{ translateX: leanTo(THINK_FAN[1], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
-    };
-  });
-  const d3 = useAnimatedStyle(() => {
-    const d = drive.value;
-    const e = ease01(seg(d, 0.26, 0.50));
-    return {
-      opacity: e,
-      transform: [{ translateX: leanTo(THINK_FAN[0], w.value, x, headX, figX, refX, settle) }, { scale: 0.4 + 0.6 * e }],
-    };
-  });
-
-  return (
-    <Animated.View nativeID={probeId} style={[styles.thoughtWrap, { bottom: STAGE_H - anchorY }, wrap]} pointerEvents="none">
-      <Animated.View nativeID={`${probeId}-box`} onLayout={onLayout} style={[styles.thought, box]}>
-        <View style={[styles.thoughtBox, kind === 'say' && styles.sayBox]}>
-          <Text style={[styles.thoughtText, kind === 'say' && styles.sayText]}>{text}</Text>
-        </View>
-      </Animated.View>
-      <View style={styles.trail}>
-        {discs >= 3 ? <Animated.View style={[styles.puff, styles.puff1, d3]} /> : null}
-        {discs >= 2 ? <Animated.View style={[styles.puff, styles.puff2, d2]} /> : null}
-        <Animated.View style={[styles.puff, styles.puff3, d1]} />
-      </View>
     </Animated.View>
   );
 }
@@ -2224,32 +1636,6 @@ export const styles = StyleSheet.create({
   tailShout: { backgroundColor: INK },
   leader: { width: 2, height: LEADER_H, backgroundColor: INK, marginTop: -2, opacity: 0.55 },
 
-  // THE THOUGHT BUBBLE. Rounder than the speech box on purpose — a thought has no
-  // edges — and narrower, which is what keeps the words short (see Thought).
-  thoughtWrap: { position: 'absolute', left: 0, width: STAGE_W, alignItems: 'center' },
-  thought: { maxWidth: THINK_W, alignItems: 'center' },
-  thoughtBox: {
-    borderWidth: 1.5, borderColor: INK, borderRadius: 14,
-    backgroundColor: PAPER, paddingHorizontal: 11, paddingVertical: 7,
-  },
-  thoughtText: {
-    fontFamily: 'Inter_500Medium', fontSize: 12, color: INK, lineHeight: 15.5,
-    textAlign: 'center',
-  },
-  // The answer line is HIM TALKING TO THE READER rather than thinking, so it is
-  // struck the other way up — ink ground, paper type — the same inversion the
-  // shout bubble uses, and the reason the two never read as the same event.
-  sayBox: { backgroundColor: INK, borderColor: INK },
-  // 700, NOT 600: the root layout loads Inter 400, 500 and 700 and nothing else, so
-  // the 600 this named fell back to the platform's own face on every answer line —
-  // a serif in the browser — while make:thoughts sized the box for Inter. check:thoughts
-  // now reads this name against the loader.
-  sayText: { fontFamily: 'Inter_700Bold', color: PAPER },
-  trail: { alignItems: 'center', marginTop: 3 },
-  puff: { backgroundColor: PAPER, borderColor: INK, borderWidth: 1.5 },
-  puff1: { width: 9, height: 9, borderRadius: 4.5, marginBottom: 2.5 },
-  puff2: { width: 6.5, height: 6.5, borderRadius: 3.25, marginBottom: 2.5 },
-  puff3: { width: 4, height: 4, borderRadius: 2 },
 
   /**
    * The lower half — answer control (if any) and deck, as ONE box (L6).

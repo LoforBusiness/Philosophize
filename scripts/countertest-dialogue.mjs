@@ -3,7 +3,7 @@
 //   node scripts/countertest-dialogue.mjs
 //
 // It builds a small fixture tree in a temp folder — a lesson route, one dialogue
-// lesson's script and scene, the generated tables and a renders.json — points the
+// lesson's script and scene, the cast and a renders.json — points the
 // checker at it with DIALOGUE_ROOT, and stages one defect at a time. The working tree
 // is never edited (group AL's rule for counter-tests). Each defect must be caught by
 // ITS OWN rule, and the clean fixture must pass: a counter-test in which every case
@@ -27,18 +27,21 @@ export const BEATS: FixBeat[] = [
   {
     speaker: 'plain',
     text: 'One note, and I want everything here.',
+    pace: 'even',
     act: 0,
     dur: 3,
   },
   {
     speaker: 'cap',
     text: 'Everyone does, mate.',
+    pace: 'even',
     act: 1,
     dur: 3,
   },
   {
     speaker: 'tophat',
     text: 'That gap is called scarcity.',
+    pace: 'even',
     act: 2,
     dur: 3,
   },
@@ -80,9 +83,6 @@ const OLD_SCRIPT = `export const BEATS = [
 ];
 `;
 
-const TABLES = ['lessonThoughts', 'lessonMarks', 'lessonWander', 'lessonChair', 'lessonVisitor', 'lessonWardrobe'];
-const table = (name, rows = '') => `export const T_${name} = {\n  'old-fixture-1': {},\n${rows}};\n`;
-
 const RENDERS = {
   'econ-fixture-1/beat-00': { text: 'One note, and I want everything here.', wav: 'x', voice: 'en-GB-Chirp3-HD-Sadachbia' },
   'econ-fixture-1/beat-01': { text: 'Everyone does, mate.', wav: 'x', voice: 'en-AU-Chirp3-HD-Zubenelgenubi' },
@@ -105,7 +105,6 @@ function build(mut = {}) {
   if (mut.cast && staged === cast) throw new Error('a cast mutation changed nothing — the counter-test would prove nothing');
   w(path.join(CIN, 'cast.ts'), staged);
   fs.copyFileSync(path.join(REPO, CIN, 'wardrobe.ts'), path.join(root, CIN, 'wardrobe.ts'));
-  for (const t of TABLES) w(path.join('data', `${t}.ts`), table(t, (mut.tables ?? {})[t] ?? ''));
   w(path.join('assets', 'narration', 'renders.json'), JSON.stringify(mut.renders ?? RENDERS, null, 2));
   return root;
 }
@@ -120,17 +119,15 @@ const CASES = [
   { name: 'a spoken beat with no speaker', rule: 'AP1', mut: { script: SCRIPT.replace("    speaker: 'cap',\n", '') } },
   { name: 'a speaker outside the cast', rule: 'AP1', mut: { script: SCRIPT.replace("speaker: 'cap'", "speaker: 'narrator'") } },
   { name: 'the top hat in the wrong costume', rule: 'AP2', mut: { scene: SCENE.replace('BY_ID.magistrate.pieces', 'BY_ID.dandy.pieces') } },
-  { name: 'a figure left to the wardrobe table', rule: 'AP2', mut: { scene: SCENE.replace(' wear={BY_ID.stroller.pieces}', '') } },
+  { name: 'a figure the scene does not dress', rule: 'AP2', mut: { scene: SCENE.replace(' wear={BY_ID.stroller.pieces}', '') } },
   { name: 'a figure with no cast marker', rule: 'AP2', mut: { scene: SCENE.replace('{/* cast: plain */}', '') } },
   { name: 'an order control', rule: 'AP6', mut: { script: SCRIPT.replace('    act: 2,\n', "    act: 2,\n    interact: { prompt: 'p', explain: 'e', xp: 5, order: { items: ['a', 'b', 'c'] } },\n") } },
-  { name: 'a thought bubble row', rule: 'AP8', mut: { tables: { lessonThoughts: "  'econ-fixture-1': { at: [] },\n" } } },
-  { name: 'a wardrobe row', rule: 'AP8', mut: { tables: { lessonWardrobe: "  'econ-fixture-1': ['dandy', 'plain'],\n" } } },
   { name: 'a line in the wrong voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'econ-fixture-1/beat-01': { ...RENDERS['econ-fixture-1/beat-01'], voice: 'en-GB-Chirp3-HD-Algieba' } } } },
   { name: 'a dialogue line with no recorded voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'econ-fixture-1/beat-02': { text: 'That gap is called scarcity.', wav: 'x' } } } },
   { name: 'a narrated line in a dialogue voice', rule: 'AP2', mut: { renders: { ...RENDERS, 'old-fixture-1/beat-00': { ...RENDERS['old-fixture-1/beat-00'], voice: 'en-AU-Chirp3-HD-Zubenelgenubi' } } } },
   { name: 'a figure staged who never speaks', rule: 'AP13', mut: { script: SCRIPT.replace("speaker: 'tophat'", "speaker: 'cap'") } },
-  { name: 'two cast members with one trait', rule: 'AP14', mut: { cast: (c) => c.replace("trait: 'oblivious'", "trait: 'kind'") } },
-  { name: 'a cast member with no character', rule: 'AP14', mut: { cast: (c) => c.replace(/character: 'The kind one.*/, "character: 'Kind.',") } },
+  { name: 'two cast members with one trait', rule: 'AP14', mut: { cast: (c) => c.replace("trait: 'oblivious'", "trait: 'kind-helpful'") } },
+  { name: 'a cast member with no character', rule: 'AP14', mut: { cast: (c) => c.replace(/character: 'The kind and helpful one.*/, "character: 'Kind.',") } },
   { name: 'two cast members in one voice', rule: 'AP2', mut: { cast: (c) => c.replace('en-US-Chirp3-HD-Kore', 'en-GB-Chirp3-HD-Algieba').replace("languageCode: 'en-US'", "languageCode: 'en-GB'") } },
   { name: 'a cast costume the wardrobe does not have', rule: 'AP2', mut: { cast: (c) => c.replace("costume: 'bun', label", "costume: 'bonnet' as never, label") } },
 ];

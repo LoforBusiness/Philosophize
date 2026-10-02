@@ -39,7 +39,9 @@ const WEB = +(process.env.WEB_PORT || 8853);
 const MOUNT_TRIES = +(process.env.MOUNT_TRIES || 240);
 const ROUTE = 'app/previewflow.tsx';
 const SRC = fs.readFileSync(path.join(process.cwd(), 'scripts/lib/previewflow.txt'), 'utf8');
-const LESSON = 'logic-arguments-1';
+// A philosophy lesson, because the intro gates philosophy alone. It was
+// logic-arguments-1 until the narrated library was deleted on 2026-10-02.
+const LESSON = 'philosophy-foundations-1';
 
 const put = (p) => new Promise((res, rej) => {
   const r = http.request({ host: '127.0.0.1', port: CDP, path: p, method: 'PUT' }, (x) => {

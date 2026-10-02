@@ -118,18 +118,17 @@ sweepLive('emote', R.emoteLive, emoteCodes);
 sweepLive('narrator', R.narratorLive, narratorCodes);
 sweepLive('master', R.masterLive, masterCodes);
 
-// THE FOUR SCENES THAT POSE THEIR OWN HANDS.
+// THE SCENES THAT POSE THEIR OWN HANDS.
 //
-// 98 of the 100 scenes settle through the shared libraries above, so fixing those
-// covers them. These four set fist targets literally, which puts them outside the
-// libraries and therefore outside every check — so they are pinned here by value.
-// If one of these lines changes in its scene, change it here too.
-const SCENE_POSES = [
-  ['aestheticsScene', { tilt: -0.06, neck: 0.10, fistR: { x: 25, y: -2 }, fistL: { x: -4, y: -4 } }],
-  ['epistemologyScene', { tilt: -0.06, neck: 0.04, fistR: { x: 33, y: -8 }, fistL: { x: -4, y: -4 } }],
-  ['ethicsScene', { tilt: -0.11, neck: 0.10, fistR: { x: 30, y: 9 }, fistL: { x: -4, y: -3 } }],
-  ['politicalScene', { tilt: -0.02, neck: 0, fistR: { x: 16, y: -42 }, fistL: { x: -9, y: -4 } }],
-];
+// Most scenes settle through the shared libraries above, so fixing those covers
+// them. A scene that sets fist targets literally is outside the libraries and
+// therefore outside every check — so its pose is pinned here by value. If one of
+// these lines changes in its scene, change it here too.
+//
+// Empty since 2026-10-02: the four that were here (aestheticsScene,
+// epistemologyScene, ethicsScene, politicalScene) were narrated lessons, deleted
+// with that library.
+const SCENE_POSES = [];
 for (const [name, p] of SCENE_POSES) {
   for (const t of TS) {
     const base = R.stand(t);

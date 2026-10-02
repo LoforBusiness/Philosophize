@@ -13,7 +13,8 @@
 //        and marked `{/* cast: <speaker> */}`; every rendered line was recorded in
 //        its speaker's voice, and no narrated line in a dialogue voice
 //   AP6  no `order` control
-//   AP8  no row in any table the narrated-lesson player layers read
+//   AP8  (no longer checked: it kept dialogue lessons out of the tables the narrated-
+//        lesson player layers read, and those layers and tables went on 2026-10-02)
 //   AP13 at least two speakers, and nobody staged who never speaks
 //   AP14 every cast member has a trait and a character, and no two share one
 //   AS6  every cast member's trait is named in a group AS heading of LESSON_RULES
@@ -38,7 +39,6 @@ const { CAST, SPEAKERS, NARRATOR_VOICE } = await import(
   pathToFileURL(path.join(ROOT, 'components', 'lesson', 'cinematic', 'cast.ts')).href
 );
 
-const TABLES = ['lessonThoughts', 'lessonMarks', 'lessonWander', 'lessonChair', 'lessonVisitor', 'lessonWardrobe'];
 const errs = [];
 // DIALOGUE_TEXT_ONLY=1 holds only what the WORDS decide. render-narration runs it before
 // voicing a lesson, whose scene is built afterwards (it is paced to the voiced lines), so
@@ -184,16 +184,6 @@ for (const l of lessons) {
   // is four people's worth of movement for three people's worth of lesson.
   if (used.size < 2) fail('AP13', l.id, `has ${used.size} speaker(s); a dialogue needs at least two`);
   for (const who of onStage) if (!used.has(who)) fail('AP13', l.id, `${who} is on the stage and never speaks; cast only who the lesson needs`);
-
-  // AP8 — none of the narrated-lesson layers has a row for it.
-  for (const t of TABLES) {
-    const file = path.join(ROOT, 'data', `${t}.ts`);
-    if (!fs.existsSync(file)) continue;
-    const esc = l.id.replace(/[-]/g, '\\-');
-    if (new RegExp(`['"]${esc}['"]\\s*:`).test(fs.readFileSync(file, 'utf8'))) {
-      fail('AP8', l.id, `has a row in data/${t}.ts; the generator that wrote it must skip dialogue lessons`);
-    }
-  }
 }
 
 // AP2 — the voice each installed take was rendered in.
@@ -253,4 +243,4 @@ if (errs.length) {
   console.log('');
   process.exit(1);
 }
-console.log(`check:dialogue — ${lessons.length} dialogue lesson(s) of ${wired} wired: every line spoken by one cast member in his own voice and costume, no order control, no narrated-lesson layers`);
+console.log(`check:dialogue — ${lessons.length} dialogue lesson(s) of ${wired} wired: every line spoken by one cast member in his own voice and costume, no order control`);

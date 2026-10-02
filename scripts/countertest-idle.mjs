@@ -9,7 +9,7 @@
 // SILENT, because a checker that cannot tell the design from the defect is the
 // boxiness metric again (§13).
 //
-// NOTHING IS EVER WRITTEN INTO THE WORKING TREE. The four files the rig is made of
+// NOTHING IS EVER WRITTEN INTO THE WORKING TREE. The three files the rig is made of
 // are copied into the scratch, the defect is staged in the copy, and `RIG_SRC`
 // points the checker at it. `countertest-life` mutates and reverts in a `finally`,
 // which is correct as far as it goes and still leaves a window in which another
@@ -22,7 +22,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const SRC = 'components/lesson/cinematic';
-const FILES = ['rig.ts', 'moves.ts', 'wander.ts', 'interact.ts'];
+const FILES = ['rig.ts', 'moves.ts', 'interact.ts'];
 const STAGE = fs.mkdtempSync(path.join(os.tmpdir(), 'al1-stage-'));
 
 /** Run check-idle against a staged copy and return the lines it printed. */
@@ -111,11 +111,8 @@ t('act 30 flows up and down again', 'moves.ts',
   'neck: s.neck - b * 0.06, bob: s.bob - Math.abs(a) * 1.2,',
   ['(AL1):', 'actStance 30']);
 
-// 7 · THE WANDER's weight shift, ambient on 218 lessons.
-t('the weight shift sinks again', 'wander.ts',
-  '    tilt: s.tilt + 0.09 * p,\n    footL: { x: s.footL.x - 4 * p, y: s.footL.y },',
-  '    tilt: s.tilt + 0.09 * p,\n    bob: s.bob - 2.2 * p,\n    footL: { x: s.footL.x - 4 * p, y: s.footL.y },',
-  ['(AL1)']);
+// (7 · THE WANDER's weight shift was staged here too. The wander layer went with the
+//     narrated library on 2026-10-02, and check-idle no longer sweeps it.)
 
 // ── AND THE TWO DIRECTIONS THAT MUST STAY SILENT ────────────────────────────
 

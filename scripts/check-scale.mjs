@@ -37,9 +37,9 @@ const ANIMAL_STEM = /(bird|hen|animal|cow|cattle|dog|cat|horse|sheep|fish|zebra|
  * the parts `head` and `body` outright, so only the file can say what they are.
  * Each was read before being listed, the way check:names records its OVERRIDE.
  */
-const ANIMAL_SCENE = new Set([
-  'political31Scene.tsx',   // "four animals ... cattle on a common are eating it"
-]);
+// Empty since 2026-10-02: its one entry, political31Scene.tsx ("four animals ...
+// cattle on a common are eating it"), was deleted with the narrated library.
+const ANIMAL_SCENE = new Set([]);
 
 const files = readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 

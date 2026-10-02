@@ -8,6 +8,17 @@
 // and runs check:replay on that one lesson through REPLAY_SOURCE — so nothing in the
 // working tree is touched, and a mutation that silently matched nothing cannot score
 // as "the check stayed quiet".
+//
+// THE SCENE IS A DIALOGUE LESSON NOW, econ1 (`economics-foundations-1`). Until
+// 2026-10-02 the stagings lived in the narrated lessons where each defect was first
+// found — logic9's straw tag, epistemology10's needle, aesthetics35's train — and those
+// lessons were deleted. The C20c three are staged on econ1's own tracks — the A-board
+// (`board`) and the book changing hands (`bookT`) — and the S12 pair on a staged tag
+// dropped into its stage. The
+// narrated library's two design-shaped silences that have no analogue in a dialogue
+// scene — a stamp re-struck on a RESTAMP beat, and a wheel spinning through every tap
+// — went with it; the fill that wipes in and the orb that carries its own letter are
+// staged here instead.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -16,11 +27,15 @@ import { spawnSync } from 'node:child_process';
 const REPO = process.cwd();
 const CIN = 'components/lesson/cinematic';
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'replay-ct-'));
+const ID = 'economics-foundations-1';
+const SCENE = 'econ1Scene';
 
-/** Run check:replay on one lesson, optionally with one scene's source swapped. */
+/** Run check:replay on one lesson (all of them when `id` is null), optionally with one scene's source swapped. */
 function run(id, scene, text) {
-  const env = { ...process.env, REPLAY_ONLY: id };
+  const env = { ...process.env };
   delete env.REPLAY_SOURCE;
+  delete env.REPLAY_ONLY;
+  if (id) env.REPLAY_ONLY = id;
   if (scene) {
     const file = path.join(TMP, `${scene}-${Math.random().toString(36).slice(2)}.tsx`);
     fs.writeFileSync(file, text);
@@ -37,10 +52,11 @@ function run(id, scene, text) {
   };
   return {
     out,
+    code: r.status,
     c20c: count('(C20c)'),
     strip: count('no painted box is only as tall'),
     detach: count('no words are left behind'),
-    unread: count('every scene could be run') ,
+    unread: count('every scene could be run'),
   };
 }
 
@@ -62,83 +78,95 @@ const expect = (name, pass, detail) => {
   if (!pass) fail++;
 };
 
+const BOARD = 'board: carry(cv, 8, n, BOARD_V[p], BOARD_V[n], tr),';
+const BOOK = 'bookT: carry(cv, 5, n, bookNow, bookNow, tr),';
+
+/**
+ * A tag dropped onto econ1's stage: a painted PLATE and, as its sibling at the same
+ * left and top, a LAYER that carries the words. `plate` is the plate's animated style
+ * and `layerPaints` whether the words layer paints itself.
+ */
+function tag(plate, { layerPaints = false } = {}) {
+  return staged(SCENE, [
+    ['  const DP = useDerivedValue<Bundle>(() => SCENE.value.pl);',
+      `  const ctPlate = useAnimatedStyle(() => (${plate}));\n  const DP = useDerivedValue<Bundle>(() => SCENE.value.pl);`],
+    ['      <Board S={SCENE} />',
+      `      <Board S={SCENE} />\n      <Animated.View style={[styles.ctPlate, ctPlate]} />\n      <View style={${layerPaints ? '[styles.ctLayer, styles.ctPlate]' : 'styles.ctLayer'}}><Text>THE NEW PRICE</Text></View>`],
+    ['  ground: { position: \'absolute\', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },',
+      "  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },\n"
+      + "  ctPlate: { position: 'absolute', left: 230, top: 330, width: 90, height: 24, backgroundColor: RULE },\n"
+      + "  ctLayer: { position: 'absolute', left: 230, top: 330, width: 90, height: 24 },"],
+  ]);
+}
+
 console.log('\ncheck:replay counter-test\n');
 
 // ── THE DEFECTS, PUT BACK ─────────────────────────────────────────────────────
 
 {
-  // The straw copy's fall, keyed to bt alone: it stands up and falls again every beat.
-  const r = run('logic-arguments-9', 'logic9Scene', staged('logic9Scene', [[
-    'tip: carry(cv, 4, n, DOWN[p], DOWN[n], FALLS[n] ? ease01(clamp01((bt.value - 1.15) / 0.7)) : arrive),',
-    'tip: STRAW[n] === 2 ? ease01(clamp01((bt.value - 1.15) / 0.7)) : 0,',
-  ]]));
-  expect('a fall keyed to bt alone replays on the beats that hold it (C20c)', r.c20c > 0, `${r.c20c} found`);
+  // The new price keyed to the transition alone: it is chalked up again on the beat
+  // that only holds it.
+  const r = run(ID, SCENE, staged(SCENE, [[BOARD,
+    'board: BOARD_V[n] === 2 ? 1 + ease01(clamp01(tr)) : BOARD_V[n],']]));
+  expect('a change keyed to the transition alone replays on the beat that holds it (C20c)', r.c20c > 0, `${r.c20c} found`);
 }
 
 {
-  // The straw copy as two siblings: an empty tag, and a transparent layer of words.
-  const r = run('logic-arguments-9', 'logic9Scene', staged('logic9Scene', [
-    [
-      '<Animated.View style={[styles.tag, styles.strawTag, strawStyle]} pointerEvents="none">\n        <Animated.View style={[styles.tagPlate, plateStyle]} />',
-      '<Animated.View style={[styles.tagOld, styles.strawTag, strawStyle]} pointerEvents="none" />\n      <Animated.View style={[styles.tagOld, styles.strawTag, styles.tagBare, strawTextStyle]} pointerEvents="none">',
-    ],
-    [
-      '  const plateStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.dim * 0.45 }));',
-      '  const plateStyle = useAnimatedStyle(() => ({ opacity: 1 - SCENE.value.dim * 0.45 }));\n  const strawTextStyle = useAnimatedStyle(() => ({ opacity: SCENE.value.straw }));',
-    ],
-    [
-      '  smear: { left: SMEAR_L, top: SMEAR_T, width: SMEAR_W },',
-      "  tagOld: { position: 'absolute', borderWidth: 1.5, borderColor: SOFT, borderRadius: 3, backgroundColor: STONE, paddingVertical: 5, paddingHorizontal: 6, alignItems: 'center' },\n  tagBare: { borderColor: 'transparent', backgroundColor: 'transparent' },\n  smear: { left: SMEAR_L, top: SMEAR_T, width: SMEAR_W },",
-    ],
+  // A scale factor passed as carry's multiplier compounds on every beat. The book's
+  // track (0 on the counter · 1 the stall-holder's hand · 2 the shopper's) holds 2 from
+  // the trade on, and past 1 it extrapolates, so a doubled start is a book thrown along
+  // the line of his arms. The board saturates at 2 and could not show it.
+  const r = run(ID, SCENE, staged(SCENE, [[BOOK,
+    'bookT: carry(cv, 5, n, bookNow / 2, bookNow / 2, tr, 2),']]));
+  expect('a factor passed as the carry multiplier compounds every beat (C20c)', r.c20c > 0, `${r.c20c} found`);
+}
+
+{
+  // An arrival that bypasses the carry, so the beat after it starts from a stale slot:
+  // the trade hands the book over outside the carry, and the next beat snaps it back.
+  const r = run(ID, SCENE, staged(SCENE, [[BOOK,
+    'bookT: A_BUY[n] ? bookNow : carry(cv, 5, n, bookNow, bookNow, tr),']]));
+  expect('an arrival that bypasses the carry replays on the next beat (C20c)', r.c20c > 0, `${r.c20c} found`);
+}
+
+{
+  // A painted tag with nothing giving it a height: only its padding.
+  const r = run(ID, SCENE, staged(SCENE, [
+    ['      <Board S={SCENE} />', '      <Board S={SCENE} />\n      <View style={styles.ctStrip} />'],
+    ['  ground: { position: \'absolute\', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },',
+      "  ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },\n"
+      + "  ctStrip: { position: 'absolute', left: 230, top: 330, width: 90, paddingVertical: 5, backgroundColor: RULE },"],
   ]));
   expect('an empty tag with no height is a strip (S12)', r.strip > 0, `${r.strip} found`);
+}
+
+{
+  // The plate tips with the board while the words ride in their own still layer.
+  const r = run(ID, SCENE, tag('{ transform: [{ rotate: `${S.value.board * 20}deg` }] }'.replace('S.value', 'SCENE.value')));
   expect('words in their own layer stay put while the tag tips (S12)', r.detach > 0, `${r.detach} found`);
-}
-
-{
-  // A scale factor passed as carry's multiplier compounds on every beat.
-  const r = run('epistemology-knowledge-10', 'epistemology10Scene', staged('epistemology10Scene', [[
-    'SC_L + SC_W * carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4)))',
-    'SC_L + carry(cv, 2, n, NEEDLE[p], reacting ? dragPos.value : NEEDLE[n], ease01(clamp01(bt.value / 1.4)), SC_W)',
-  ]]));
-  expect('a width passed as the carry multiplier compounds every beat (C20c)', r.c20c > 0, `${r.c20c} found`);
-}
-
-{
-  // An arrival that bypasses the carry, so the beat after runs the train again.
-  const r = run('aesthetics-aesthetics-35', 'aesthetics35Scene', staged('aesthetics35Scene', [[
-    'carry(cv, 0, n, RUN[p], RUN[n], RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : tr)',
-    'RUN[n] > 0 && RUN[p] === 0 ? ease01((bt.value - 0.2) / 1.3) : carry(cv, 0, n, RUN[p], RUN[n], tr)',
-  ]]));
-  expect('an arrival that bypasses the carry replays on the next beat (C20c)', r.c20c > 0, `${r.c20c} found`);
 }
 
 // ── THE SHAPES THAT MUST STAY SILENT ─────────────────────────────────────────
 
 {
-  const r = run('logic-arguments-9');
-  expect('the fixed lesson is clean', r.c20c === 0 && r.strip === 0 && r.detach === 0,
+  const r = run(ID);
+  expect('the lesson as it is, is clean', r.c20c === 0 && r.strip === 0 && r.detach === 0,
     `C20c ${r.c20c}, strip ${r.strip}, detach ${r.detach}`);
 }
 {
-  // epistemology-knowledge-1's stamp strikes again on beats whose script says RESTAMP.
-  const r = run('epistemology-knowledge-1');
-  expect('an authored strike keyed to a channel that changed is not a replay', r.c20c === 0, `C20c ${r.c20c}`);
+  const r = run(null);
+  expect('every dialogue lesson is clean', r.code === 0 && r.c20c === 0 && r.strip === 0 && r.detach === 0,
+    `C20c ${r.c20c}, strip ${r.strip}, detach ${r.detach}`);
 }
 {
-  // ethics-ethics-7 spins a wheel several degrees a frame straight through every tap.
-  const r = run('ethics-ethics-7');
-  expect('a wheel turning at speed through a beat change is not a jump', r.c20c === 0, `C20c ${r.c20c}`);
-}
-{
-  // political-political-4's cards wipe an ink fill in under their words.
-  const r = run('political-political-4');
+  // A fill that WIPES in under its words — a scaleX from the edge — is a stamped card.
+  const r = run(ID, SCENE, tag('{ transform: [{ scaleX: SCENE.value.board / 2 }] }'));
   expect('a fill that wipes in under its words is not detached', r.detach === 0, `detach ${r.detach}`);
 }
 {
-  // metaphysics-being-32 draws an orb carrying its own letter beside a second orb.
-  const r = run('metaphysics-being-32');
-  expect('an orb carrying its own letter is not detached', r.detach === 0, `detach ${r.detach}`);
+  // A layer that paints itself carries its own words: one object, however it moves.
+  const r = run(ID, SCENE, tag('{ transform: [{ rotate: `${SCENE.value.board * 20}deg` }] }', { layerPaints: true }));
+  expect('a plate carrying its own words is not detached', r.detach === 0, `detach ${r.detach}`);
 }
 
 fs.rmSync(TMP, { recursive: true, force: true });

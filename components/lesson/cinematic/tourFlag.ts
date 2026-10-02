@@ -32,40 +32,19 @@ export function toursOff(): boolean {
   return off;
 }
 
-// AND A SECOND SWITCH, FOR THE BUBBLES, FOR THE SAME HARNESS.
+// AND A SECOND SWITCH: "A HARNESS IS MEASURING", FOR THE SAME HARNESSES.
 //
-// The player draws the thought bubble and the answer reply inside the stage, and the
-// probe records every worded leaf there — so a lesson re-measured with bubbles live
-// records its own bubble as stage text, with the box and the trail as art. Its boxes
-// then protect the bubble, the camera frames it, and make:thoughts places the next
-// bubble clear of where the last one was: a table that feeds on its own output.
-// Five of twelve lessons re-measured on 2026-09-11 came back that way.
+// A must-box is a MOMENT, not a place — the probe reads one instant of a beat — so
+// anything that only exists to soften a moment has to stand aside while it reads.
+// `useLinger` (useLinger.ts) keeps the last beat's things mounted while they fade, and
+// under a harness it lets them go at once, because a must-box records what the BEAT
+// stages and the probe's first read lands inside the fade.
 //
-// It turns off the PEN MARKS too (StageMark.tsx), for the identical reason: a mark is a
-// player-drawn stroke inside the stage, and recorded as art it would teach make:marks to
-// place the next mark clear of where the last one was.
-let quiet = false;
-
-export function setThoughtsOff(v: boolean) {
-  quiet = v;
-}
-
-export function thoughtsOff(): boolean {
-  return quiet;
-}
-
-// AND A THIRD SWITCH, FOR THE MOVEMENT LAYER (wander.ts), FOR THE SAME HARNESS.
-//
-// A must-box is a MOMENT, not a place — the probe reads one instant of a beat, and
-// CLAUDE.md records what that already cost once: on a walking beat it caught the
-// figure mid-stride, so 113 of 317 beats recorded him 40 units from where the beat
-// leaves him, and every bubble anchored on that offset came to rest beside him.
-//
-// The movement layer walks him about on purpose, so measuring with it live would
-// record whichever step he happened to be taking — and the room it is allowed to
-// walk him through is derived from those very boxes. That is the bubbles' own
-// feedback loop with a longer lever: a box recorded 40 units left narrows the clear
-// floor, which moves the next run's plan, which moves the box again.
+// The name is historical. It began as the switch for the movement layer (wander.ts,
+// group AF), which walked the lead about on purpose; that layer, the thought bubble,
+// the pen marks and the visitor — each of which had a switch of its own here — went
+// with the narrated library on 2026-10-02. This one stayed because useLinger reads
+// it, and every dialogue scene uses useLinger.
 let rooted = false;
 
 export function setWanderOff(v: boolean) {
@@ -74,22 +53,4 @@ export function setWanderOff(v: boolean) {
 
 export function wanderOff(): boolean {
   return rooted;
-}
-
-// AND A FOURTH, FOR THE VISITOR (Visitor.tsx), FOR THE SAME HARNESS AND THE SAME LOOP.
-//
-// The player draws him inside the stage, so a live visitor is recorded as a plain
-// figure — and make:visitor, which skips only the synthetic boxes make:wardrobe writes
-// for him (`v`), then reads his own measured body as an obstacle standing on his own
-// spot and refuses him. The next re-measure no longer draws him, so the run after that
-// gives him back: the count wandered 36 → 30 → 25 across one day's re-measures
-// (2026-09-24). The camera still frames him, through make:wardrobe's synthetic box.
-let alone = false;
-
-export function setVisitorOff(v: boolean) {
-  alone = v;
-}
-
-export function visitorOff(): boolean {
-  return alone;
 }

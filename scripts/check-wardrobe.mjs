@@ -1,53 +1,36 @@
-// GROUP AA — WHAT THE FIGURE WEARS, AND THE CAMERA THAT HAS TO FRAME IT.
+// GROUP AA — WHAT THE FIGURE WEARS: EVERY COSTUME PIECE SITS ON HIM PROPERLY.
 //
-// AA rather than a single letter because A–Z are used. This is genuinely a new
-// area rather than an extension of one: group N is what the figure DOES, group Y
-// is his relationship to the world around him, and neither covers what he has ON.
+// AA rather than a single letter because A–Z are used. Group N is what the figure
+// DOES, group Y is his relationship to the world around him, and neither covers what
+// he has ON.
 //
 //   node scripts/check-wardrobe.mjs
 //
-// The figure is inside EVERY must-see box (`mustrule`: "the whole man, arms
-// included, and every figure on stage"), so what he is WEARING changes what the
-// camera has to frame and what the band has to contain. A hat is not decoration
-// as far as the geometry is concerned; it is part of the man.
+// THE COSTUME ROTATION IS GONE (2026-10-02). This file used to hold it too — AA1
+// (the stored must-boxes grown by the costume's reach), AA2 (no costume past the
+// band), AA3 (neighbours never dress alike), AA4 (a grave lesson dressed soberly),
+// AA7 and AA10 (the visiting second figure) — all of them about the per-lesson
+// costume table and the visitor that the narrated library carried. Both went with
+// it. A dialogue lesson dresses each speaker in its own scene from the cast
+// (`wear={BY_ID.….pieces}`), and check:dialogue (AP2) holds that.
 //
-// `wardrobe.ts` was put into `muststamp` for an afternoon to catch this and taken
-// back out, because a hash can only say that something changed and the honest
-// response to that message is a multi-hour re-measure. This says WHAT is wrong,
-// offline, in milliseconds.
+// WHAT STAYS IS THE GEOMETRY OF THE PIECES, because the cast wears them:
 //
-// FOUR RULES:
-//
-//   AA1  every lesson's stored figure boxes were grown by the reach of the
-//        costume it is actually wearing. Edit `wardrobe.ts` or the assignment
-//        without re-running `make:wardrobe` and this is what goes red.
-//   AA2  no costume pokes out of its lesson's declared BAND. `mustBox` CLAMPS
-//        to the band, so a hat above it is not merely unframed — it is an H59
-//        fault, and the camera cannot rescue it.
-//   AA3  neighbours in reading order never dress the same. Group Q, applied to
-//        the figure instead of to the script.
-//   AA4  a GRAVE lesson wears nothing louder than a mortarboard. N11 one medium
-//        over: a top hat and monocle on a lesson about slavery is the same
-//        insult as a pratfall on one.
 //   AA6  NO HAT FLOATS. Every costume with headwear must have a piece that
 //        genuinely overlaps the head disc. A reader reported the first version's
 //        top hat as "above his head, so it looks like it's floating", and they
 //        were describing exact geometry: a brim whose bottom edge sits at y −20
 //        is TANGENT to a circle of radius 20 — one point of contact, and a wedge
-//        of blank paper either side of it.
+//        of blank paper either side of it. (AA6b–d: a crown seats at its own
+//        width, a paper seam severs nothing, a ring touches nothing.)
+//   AA11 every costume fits the slots the figure draws, ink before paper.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { grave } from './lib/liveliness.mjs';
-import { STAGE_W } from './lib/mustrule.mjs';
-import { SOBER as RULE_SOBER } from './lib/wardroberule.mjs';
-import { isDialogue } from './lib/dialogue.mjs';
-
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname).replace(/^\//, ''), '..');
 const DIR = 'components/lesson/cinematic';
-const K_FIG = 1.0;
 
 const { transform } = await import(
   pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
@@ -61,62 +44,8 @@ const emit = (rel, name) => {
   return pathToFileURL(path.join(TMP, name)).href;
 };
 const W = await import(emit('components/lesson/cinematic/wardrobe.ts', 'wardrobe.mjs'));
-const TABLE = await import(emit('data/lessonWardrobe.ts', 'lessonWardrobe.mjs'));
 
-const side = JSON.parse(fs.readFileSync(path.join(REPO, DIR, 'mustBoxes.ts.json'), 'utf8'));
-const route = fs.readFileSync(
-  path.join(REPO, 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'), 'utf8',
-);
-
-const lessons = [];
-for (const m of route.matchAll(/'([a-z-]+-[a-z]+-(\d+))':\s*([A-Za-z0-9]+)/g)) {
-  // A DIALOGUE lesson forces each figure's costume in its scene, and check:dialogue
-  // (AP2) holds it; it has no row in the wardrobe table on purpose (AP8).
-  if (isDialogue(m[1])) continue;
-  const comp = m[3].replace(/Lesson$/, '');
-  lessons.push({
-    id: m[1], n: +m[2], branch: m[1].split('-')[0],
-    stem: `${comp[0].toLowerCase()}${comp.slice(1)}`,
-  });
-}
-
-function bandOf(stem) {
-  for (const f of [`${stem}Scene.tsx`, `${stem[0].toUpperCase()}${stem.slice(1)}Lesson.tsx`]) {
-    const p = path.join(REPO, DIR, f);
-    if (!fs.existsSync(p)) continue;
-    const m = fs.readFileSync(p, 'utf8').match(/band=\{\[(\d+),\s*(\d+)\]\}/);
-    if (m) return [+m[1], +m[2]];
-  }
-  return null;
-}
-function textOf(stem) {
-  const p = path.join(REPO, DIR, `${stem}Script.ts`);
-  if (!fs.existsSync(p)) return '';
-  return [...fs.readFileSync(p, 'utf8')
-    .matchAll(/\b(?:text|explain|prompt|cite|reads):\s*(['"])((?:\\.|(?!\1)[^\\])*)\1/g)]
-    .map((m) => m[2]).join(' ');
-}
-
-const SOBER = new Set(RULE_SOBER);
-const applied = side.wardrobeReach || {};
-const bad = { stale: [], band: [], twins: [], heavy: [], unknown: [], floats: [], visitor: [], cross: [], slots: [] };
-
-/**
- * The visitor cues, if any. AA7 checks HIM where he stands, which `fits` cannot:
- * that test measures against the LEAD's recorded boxes, and a visitor stands
- * somewhere else entirely — often near a stage edge, where a wide satchel that
- * cleared the lead's position pokes straight out of the stage.
- */
-const VIS = {};
-{
-  const f = path.join(REPO, 'data/lessonVisitor.ts');
-  if (fs.existsSync(f)) {
-    for (const m of fs.readFileSync(f, 'utf8').matchAll(/'([a-z-]+-[a-z]+-\d+)':\s*\{ enter: (\d+), x: (-?\d+), from: (-?\d+)/g)) {
-      VIS[m[1]] = { enter: +m[2], x: +m[3], from: +m[4] };
-    }
-  }
-}
-const preExisting = [];
+const bad = { floats: [], slots: [] };
 
 // AA6 — checked once per COSTUME rather than per lesson: it is a property of the
 // geometry, not of who is wearing it.
@@ -220,93 +149,8 @@ for (const c of W.COSTUMES) {
   }
 }
 
-const byBranch = {};
-for (const L of lessons) (byBranch[L.branch] = byBranch[L.branch] || []).push(L);
-
-for (const b of Object.keys(byBranch).sort()) {
-  const run = byBranch[b].sort((a, c) => a.n - c.n);
-  let prev = null;
-  for (const L of run) {
-    const [id, secId] = TABLE.WARDROBE[L.id] || [];
-    const cos = W.BY_ID[id];
-    const sec = W.BY_ID[secId];
-    if (!cos || !sec) { bad.unknown.push(`${L.id} → ["${id}", "${secId}"]`); continue; }
-
-    // AA1 — the stored boxes hold the costume they claim to.
-    // THE WIDEST COSTUME ON THAT STAGE. `mustBoxes` records one `fig` item per
-    // figure and does not say which is which, so the box has to hold the largest.
-    const rl = W.reachOf(cos);
-    const rs = W.reachOf(sec);
-    const want = { up: Math.max(rl.up, rs.up), side: Math.max(rl.side, rs.side) };
-    const got = applied[L.id] || { up: 0, side: 0 };
-    if (Math.abs(want.up - got.up) > 0.01 || Math.abs(want.side - got.side) > 0.01) {
-      bad.stale.push(`${L.id} wears ${id}: boxes grown by up ${got.up.toFixed(0)}/side ${got.side.toFixed(0)}, geometry now wants up ${want.up.toFixed(0)}/side ${want.side.toFixed(0)}`);
-    }
-
-    // AA2 — nothing pokes out of the band. Measured against the BARE figure, by
-    // taking back off whatever the boxes were already grown by.
-    const band = bandOf(L.stem);
-    if (band) {
-      // ONLY WHAT THE COSTUME ADDS. Two lessons draw the BARE figure outside their
-      // own band already — `metaphysics-being-11` by 24 units — and that is an H59
-      // fault belonging to the scene, not to the wardrobe. Blaming a hat for it
-      // would be a checker that cannot tell the defect it owns from the one next
-      // to it, which is how a real finding gets buried under a wrong one. The
-      // overflow is REPORTED, and only an overflow the costume causes FAILS.
-      for (const items of side.words[L.id] || []) {
-        let bare = 0;
-        let over = 0;
-        for (const it of items || []) {
-          if (it.k !== 'fig') continue;
-          // A SYNTHETIC VISITOR BOX IS AN OUTPUT, NOT A MEASUREMENT. It was built
-          // from the visitor's own costume at his own x; un-growing it by the
-          // LEAD's reach and re-growing it here compares two different things and
-          // reports the difference as a fault. AA7 checks him properly.
-          if (it.v) continue;
-          const y = it.b[1] + got.up * K_FIG;
-          const x = it.b[0] + got.side * K_FIG;
-          const w = it.b[2] - 2 * got.side * K_FIG;
-          bare = Math.max(bare, band[0] - y, -x, x + w - STAGE_W);
-          over = Math.max(
-            over,
-            band[0] - (y - want.up * K_FIG),
-            want.side * K_FIG - x,
-            x + w + want.side * K_FIG - STAGE_W,
-          );
-        }
-        if (bare > 0.5) { preExisting.push(`${L.id} draws the BARE figure ${bare.toFixed(0)} units outside its band (H59, not the wardrobe)`); break; }
-        if (over > 0.5) { bad.band.push(`${L.id} (${id}) reaches ${over.toFixed(0)} units outside its band`); break; }
-      }
-    }
-
-    // AA7 — the visitor, at his own x, with his own costume.
-    const cue = VIS[L.id];
-    if (cue && band) {
-      const rs2 = W.reachOf(sec);
-      for (let b = cue.enter; b < (side.words[L.id] || []).length; b += 1) {
-        const lead = (side.words[L.id][b] || []).find((it) => it.k === 'fig' && !it.v);
-        if (!lead) continue;
-        const w = lead.b[2] - 2 * got.side * K_FIG;
-        const top = lead.b[1] + got.up * K_FIG;
-        const over = Math.max(
-          rs2.side * K_FIG - (cue.x - w / 2),
-          cue.x + w / 2 + rs2.side * K_FIG - STAGE_W,
-          band[0] - (top - rs2.up * K_FIG),
-        );
-        if (over > 0.5) { bad.visitor.push(`${L.id}: the visitor at x ${cue.x} in ${secId} reaches ${over.toFixed(0)} units past the stage or band`); break; }
-      }
-    }
-
-    // AA3 / AA4
-    if (prev && prev === id && id !== 'plain') bad.twins.push(`${L.id} dresses as the lesson before it (${id})`);
-    if (!SOBER.has(id) && grave(textOf(L.stem))) bad.heavy.push(`${L.id} is a grave lesson wearing ${id}`);
-    prev = id;
-  }
-}
-
-console.log('check:wardrobe — the costume and the camera\n');
-const worn = lessons.filter((L) => (TABLE.WARDROBE[L.id] || ['plain'])[0] !== 'plain').length;
-console.log(`  ${lessons.length} lessons · ${worn} dressed · ${lessons.length - worn} the bare mascot`);
+console.log('check:wardrobe — every costume piece sits on him properly\n');
+console.log(`  ${W.COSTUMES.length} costumes`);
 
 let fails = 0;
 const report = (key, rule, note) => {
@@ -318,76 +162,7 @@ const report = (key, rule, note) => {
   if (rows.length > 8) console.log(`          … and ${rows.length - 8} more`);
   if (note) console.log(`        ${note}`);
 };
-report('unknown', 'AA  every lesson wears a costume that exists');
-report('stale', 'AA1 the stored figure boxes hold the costume', 'run: npm run make:wardrobe');
-report('band', 'AA2 no costume reaches outside its lesson band (H59)');
-report('twins', 'AA3 neighbours never dress the same (Q)');
-report('heavy', 'AA4 a grave lesson wears nothing loud (N11)');
 report('floats', 'AA6 no hat floats — headwear overlaps the skull', 'see seatY() in wardrobe.ts');
 report('slots', 'AA11 every costume fits the slots the figure draws, ink before paper');
-report('visitor', 'AA7 the visitor fits where he actually stands', 'run: npm run make:visitor && npm run make:wardrobe');
-// ── AA10 · HE MAY NOT WALK THROUGH THE LEAD ─────────────────────────────────
-//
-// AA7 asks whether he fits WHERE HE STANDS and says nothing about how he got there.
-// The generator's first rule was "come on from whichever edge he is nearer, so the
-// walk is short", which sends him straight through the lead whenever he lands on the
-// far side of him. Measured live in ethics37 at the arrival beat, the two heads were
-// NINE pixels apart and a head is thirty-nine.
-//
-// The lead stands where the SCRIPT puts him on the beat the visitor walks in — not
-// where a must-box caught him, which is a moment rather than a place (AB10) — and a
-// script with no x at all takes the scene's own resting constant, which is the common
-// case rather than an edge one.
-{
-  const restOf = (stem) => {
-    const p = path.join(REPO, DIR, `${stem}Scene.tsx`);
-    if (!fs.existsSync(p)) return null;
-    const m = /\bconst (?:FIG_X|FIGX|MAN_X|LEAD_X|HE_X|X0)\s*=\s*(-?\d+(?:\.\d+)?)/.exec(fs.readFileSync(p, 'utf8'));
-    return m ? +m[1] : null;
-  };
-  const trackOf = (stem) => {
-    const p = path.join(REPO, DIR, `${stem}Script.ts`);
-    if (!fs.existsSync(p)) return null;
-    const src = fs.readFileSync(p, 'utf8');
-    const body = src.slice(src.indexOf('export const BEATS'));
-    const blocks = [];
-    let depth = 0; let start = -1;
-    const open = body.indexOf('= [') + 2;
-    for (let i = open; i < body.length; i += 1) {
-      const c = body[i];
-      if (c === '{') { if (!depth) start = i; depth += 1; }
-      else if (c === '}') { depth -= 1; if (!depth && start >= 0) { blocks.push(body.slice(start, i + 1)); start = -1; } }
-      else if (c === ']' && !depth) break;
-    }
-    let last = null;
-    const track = blocks.map((b) => {
-      const hit = /(?:^|[^A-Za-z])x:\s*(-?\d+(?:\.\d+)?)/.exec(b);
-      if (hit) last = +hit[1];
-      return last;
-    });
-    return track.some((v) => v !== null) ? track : null;
-  };
-  for (const L of lessons) {
-    const cue = VIS[L.id];
-    if (!cue || cue.from === undefined) continue;
-    const track = trackOf(L.stem);
-    const him = (track && track[Math.min(cue.enter, track.length - 1)]) ?? restOf(L.stem);
-    if (him === null || him === undefined) continue;
-    const lo = Math.min(cue.from, cue.x);
-    const hi = Math.max(cue.from, cue.x);
-    if (him > lo + 20 && him < hi - 20) {
-      bad.cross.push(`${L.id}: the visitor walks ${cue.from} → ${cue.x}, through the lead at ${him}`);
-    }
-  }
-}
-report('cross', 'AA10 the visitor never walks through the lead', 'run: npm run make:visitor');
-
-
-if (preExisting.length) {
-  console.log(`\n  ~ ${preExisting.length} lesson(s) already draw the BARE figure outside their own band.`);
-  console.log('    That is H59 and belongs to the scene, not to the wardrobe — reported so it is');
-  console.log('    not lost, and not failed here so it cannot bury a real costume defect:');
-  for (const r of preExisting) console.log(`      ${r}`);
-}
 console.log(fails ? `\n✗ ${fails} rule(s) broken` : '\nall clear');
 process.exit(fails ? 1 : 0);

@@ -51,68 +51,15 @@ export async function loadRig() {
   };
   const RIG = await import(emit(`${SRC}/rig.ts`, 'rig.mjs'));
   const MOVES = await import(emit(`${SRC}/moves.ts`, 'moves.mjs'));
-  // `wander.ts` keeps the same rule — it imports `rig` and `moves` and nothing else
-  // — so the movement layer replays here too, which is what lets `check:wander`
-  // measure a foot skate and a tap without Metro or a browser.
-  const WANDER = await import(emit(`${SRC}/wander.ts`, 'wander.mjs'));
   // And `interact.ts` — the figure's relationship to what is outside it — imports
   // only those two as well, so the whole pose vocabulary of the app is loadable
   // here. `check:idle` sweeps it for AL1, because a clock-driven `bob` in a
   // carry or a haul would be the same wobble arriving through a different door.
   const INTERACT = await import(emit(`${SRC}/interact.ts`, 'interact.mjs'));
-  loaded = { RIG, MOVES, WANDER, INTERACT };
+  loaded = { RIG, MOVES, INTERACT };
   return loaded;
 }
 
-/**
- * THE TOP OF HIS SKULL FOR ONE POSE CODE, in rig units above the ground.
- *
- * `mustBoxes` records the union of a figure's limb Views, which is not his head:
- * measured across the corpus, a beat's box top sits a median FOURTEEN units above
- * his skull and as much as ninety, because a raised hand is in the union and a
- * pointing arm reaches higher than anything else he owns. Anything that wants to
- * sit "just above his head" and reads the box instead ends up above his fingers.
- *
- * Sampled across the loop, because acts 59–78 and 157–168 read the monotonic clock
- * and never stop moving: the answer has to clear his highest skull, not his first.
- */
-export function skullRise(RIG, MOVES, code, ground = 500) {
-  let top = Infinity;
-  for (const t of [0, 0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2]) {
-    const B = RIG.pose(MOVES.emoteAny(code ?? 0, t), 0, ground, 1, 1, 1);
-    // `head` is a transform array — [{translateX}, {translateY}] — not a point.
-    top = Math.min(top, B.head[1].translateY - RIG.STR.headR);
-  }
-  return ground - top;
-}
-
-let hats = null;
-
-/**
- * HOW FAR ABOVE HIS SKULL EACH FIGURE'S OWN HAT RISES, per lesson, in rig units.
- *
- * `wardrobeReach` in `mustBoxes.ts.json` is the widest costume ON THE STAGE — the
- * right number for growing every figure's must-box, and the wrong one for hanging a
- * bubble off one man's head: a bare lead standing beside a second figure in a fez
- * was treated as wearing the fez, and his bubbles hung ten units loose. This reads
- * the lesson's [LEAD, SECOND] looks and each look's own reach instead.
- *
- * Resolves to `(id) => ({ lead, second })`. `wardrobe.ts` has no imports, so it
- * transpiles on its own beside the rig.
- */
-export async function loadHats() {
-  if (hats) return hats;
-  const { transform } = await import(
-    pathToFileURL(path.join(REPO, 'node_modules/sucrase/dist/index.js')).href
-  );
-  const tmp = path.join(os.tmpdir(), TMP_NAME);
-  fs.mkdirSync(tmp, { recursive: true });
-  const file = path.join(tmp, 'wardrobe.mjs');
-  fs.writeFileSync(file, transform(fs.readFileSync(path.join(REPO, `${SRC}/wardrobe.ts`), 'utf8'), { transforms: ['typescript'] }).code);
-  const W = await import(pathToFileURL(file).href);
-  const { loadTs } = await import('./loadts.mjs');
-  const { WARDROBE } = await loadTs(path.join(REPO, 'data/lessonWardrobe.ts'));
-  const up = (look) => W.reachOf(W.BY_ID[look] || { pieces: [] }).up;
-  hats = (id) => ({ lead: up(WARDROBE[id]?.[0] ?? 'plain'), second: up(WARDROBE[id]?.[1] ?? 'plain') });
-  return hats;
-}
+// (`skullRise` and `loadHats` — where the lead's head and his hat were, for hanging a
+// thought bubble off them — lived here until the bubble went with the narrated library
+// on 2026-10-02.)

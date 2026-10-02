@@ -2,7 +2,7 @@
 //
 //   npx expo start --web --port 8861 --clear
 //   chrome --headless=new --remote-debugging-port=9391 --user-data-dir=<tmp>
-//   node scripts/sheet-beats.mjs epistemology-knowledge-23
+//   node scripts/sheet-beats.mjs economics-foundations-1
 //
 // `sheet-lessons` renders MANY lessons at ONE beat, which is the right shape for
 // comparing scenes against each other. This is the other axis: ONE lesson at

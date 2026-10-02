@@ -19,7 +19,15 @@ const CDP = Number(process.env.CDP_PORT || 9382);
 const WEB = Number(process.env.WEB_PORT || 8853);
 const SLUG = 'previewpeek';
 const ROUTE = `app/${SLUG}.tsx`;
-const id = process.argv[2] || 'aesthetics-aesthetics-3';
+// NO DEFAULT SINCE 2026-10-02. It was aesthetics-aesthetics-3, a narrated lesson that
+// named Schopenhauer, and it went with the narrated library. A peek opens only on a
+// name, and data/lessonNames.ts names nobody in any dialogue lesson yet (phase 2), so
+// there is no lesson to point this at until one does.
+const id = process.argv[2];
+if (!id) {
+  console.error('sheet:peek needs a lesson id whose narration names a philosopher (data/lessonNames.ts) — none does today.');
+  process.exit(2);
+}
 
 const ROUTE_SRC = `// WRITTEN BY scripts/sheet-peek.mjs — deleted again when it finishes.
 import { useEffect, useState } from 'react';

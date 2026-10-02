@@ -10,8 +10,9 @@
 // at zero reads as a finding.
 //
 // That had already happened here twice over, and neither was visible from either
-// end. `question_answered` fires only in `LessonRunner` — the CARD runner — so
-// 84% of the corpus answers its questions without telling anyone. And nothing at
+// end. `question_answered` fired only in the CARD runner, so 84% of the corpus
+// answered its questions without telling anyone (the card runner and the event are
+// both gone since 2026-10-02 — see the note where it was declared). And nothing at
 // all fires when a free reader hits the daily limit, which is the single loudest
 // signal of paywall pressure the app has.
 //
@@ -116,17 +117,12 @@ export const EVENTS = {
     props: ['lesson_id', 'branch_slug', 'unit_id', 'format', 'seconds'],
     where: 'app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx',
   },
-  question_answered: {
-    note: 'One graded answer. `control` is HOW it was answered — see group R of the rule book.',
-    props: ['lesson_id', 'branch_slug', 'format', 'card_type', 'control', 'correct'],
-    // THE ONE HOLE LEFT, and it is the biggest single gap in this taxonomy: only
-    // the CARD runner fires this, and cards are 36 of 222 lessons. The 186
-    // cinematic lessons answer their questions without telling anyone, so every
-    // per-question chart covers 16% of the corpus and says nothing about it.
-    // CinematicPlayer.tsx is where it goes — one call beside the `cue('right')`
-    // / `cue('rethink')` pair, carrying the beat's own control name.
-    where: 'components/lesson/LessonRunner.tsx — CARDS ONLY, see the note above',
-  },
+  // `question_answered` WAS HERE, and only the CARD runner ever sent it. The card
+  // runner went with the narrated library on 2026-10-02, so nothing fires it and it
+  // is undeclared rather than left as a chart that reads zero forever. The name is
+  // kept out of use (rule 1): if graded answers are instrumented again, in
+  // CinematicPlayer.tsx beside the `cue('right')` / `cue('rethink')` pair, declare
+  // it again under the same name so PostHog's history lines up.
 
   // ── progression ───────────────────────────────────────────────────────────
   rank_up: {

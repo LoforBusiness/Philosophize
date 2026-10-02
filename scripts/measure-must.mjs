@@ -148,7 +148,7 @@ import { getLessonById } from '@/data/index';
 import { CINEMATIC } from './(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId]';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
-import { setThoughtsOff, setToursOff, setVisitorOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
+import { setToursOff, setWanderOff } from '@/components/lesson/cinematic/tourFlag';
 
 export default function PreviewFrame() {
   const [go, setGo] = useState(false);
@@ -162,19 +162,11 @@ export default function PreviewFrame() {
   // the recording through a gated clock would measure a timeline the tours had
   // already moved — and every regeneration would shift it further. See tourFlag.ts.
   setToursOff(q?.get('notour') === '1');
-  // AND NEVER WITH A BUBBLE UP. The player draws the thought and the answer reply
-  // inside the stage, so a live one is recorded as stage text and its box and trail as
-  // art — and every table derived from these boxes then protects the bubble. 29 stored
-  // rows carried one when this went in. Unconditional: no reading here wants it.
-  setThoughtsOff(true);
-  // AND NEVER WITH HIM WALKING ABOUT. The movement layer (wander.ts) is derived from
-  // these very boxes, so measuring with it live is the table feeding on its own
-  // output — a box recorded mid-step narrows the clear floor, which moves the next
-  // run's plan, which moves the box again. See tourFlag.ts.
+  // AND WITH THE HARNESS SWITCH ON, so useLinger lets the last beat's things go at
+  // once rather than being recorded mid-fade (tourFlag.ts). It also used to keep the
+  // thought bubble, the wander and the visitor off the stage while it measured; those
+  // layers went with the narrated library on 2026-10-02.
   setWanderOff(true);
-  // AND NEVER WITH THE VISITOR ON STAGE. His measured body is an obstacle to placing
-  // him; make:wardrobe gives the camera a synthetic box for him instead. tourFlag.ts.
-  setVisitorOff(true);
   const id = q?.get('id') ?? '';
   const found = getLessonById(id);
   const Comp = (CINEMATIC as Record<string, any>)[id];

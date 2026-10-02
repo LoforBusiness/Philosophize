@@ -1084,9 +1084,11 @@ function allIds() {
   //
   // Named rather than budgeted, so it explains itself and so a NEW faint word in
   // the same lesson still shows.
-  const FADES_ON_PURPOSE = {
-    'ethics-ethics-12': ['PROMISE'],
-  };
+  //
+  // EMPTY SINCE 2026-10-02: its one entry, ethics-ethics-12's PROMISE, was a narrated
+  // lesson and was deleted with that library. The rule stays for the next lesson whose
+  // argument is a word going pale.
+  const FADES_ON_PURPOSE = {};
 
   // AND TWO SCENES CROSS A WORD ON PURPOSE.
   //
@@ -1100,34 +1102,14 @@ function allIds() {
   //
   // Named rather than budgeted, for the reason the fades above are: a NEW word
   // crossed in the same lesson still shows.
-  const STRUCK_ON_PURPOSE = {
-    // Each claim is struck out as the thing that does it better arrives.
-    'aesthetics-aesthetics-20': ['*'],
-    // The charter TEARS: one sheet drawn in two clipped windows, so every word
-    // across the seam sits under its own twin. §21 records this as the shape that
-    // made the pixel confirmation necessary in the first place.
-    'political-political-7': ['*'],
-    // The scene's own header: "the headline WAR OF ALL AGAINST ALL, struck through
-    // as authority arrives". The war ENDING is the lesson.
-    'political-political-1': ['WAR OF ALL AGAINST ALL'],
-    // Its own header: "the boast NOTHING IS KNOWN cracks, and the question that
-    // breaks it is printed inside the same box". The three crackA/B/C rules are
-    // drawn ACROSS the boast on purpose — a claim that refutes itself, breaking.
-    'epistemology-knowledge-6': ['NOTHING IS KNOWN', '…INCLUDING THAT?'],
-    // REJECT_LABELS in the scene: "the two reasons Mill refuses, before the real
-    // argument exists". Each card carries its own `rejectStrike` rule drawn across
-    // the words — the lesson is those two justifications being crossed out, and a
-    // reader looking at them saw them crossed out, which is the point. Found as two
-    // STRIKEs in the 2026-09-23 sweep and judged by eye.
-    'political-political-13': ['YOUR OWN GOOD', 'OTHERS DISLIKE IT'],
-
-    // The collapse: the premises are stones stacked on the conclusion, and at the
-    // camera's push three stones 114 wide cannot sit in the frame without one
-    // lying on another's edge (CLAUDE.md §17, the port of this lesson). The stone
-    // above rests on the conclusion's rim, not its words — judged by eye on the
-    // crop check:readable itself took on the struck beat (READ_SHOTS, 2026-09-24).
-    'logic-arguments-2': ['Socrates is mortal'],
-  };
+  //
+  // EMPTY SINCE 2026-10-02. Its six entries — aesthetics-aesthetics-20, political-
+  // political-7, -1 and -13, epistemology-knowledge-6 and logic-arguments-2, each a
+  // claim struck out, a charter torn or a boast cracked on purpose — were narrated
+  // lessons and were deleted with that library. A dialogue lesson that crosses a word
+  // on purpose (econ1's old price struck through on its A-board, say) is named here
+  // once somebody has judged it by eye, as each of those six was.
+  const STRUCK_ON_PURPOSE = {};
 
   const nBeatsOf = (() => {
     const src = fs.readFileSync('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx', 'utf8');

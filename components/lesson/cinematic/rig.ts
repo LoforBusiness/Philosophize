@@ -1820,12 +1820,6 @@ export interface Bundle {
    * moment it matters.
    */
   dir: number;
-  /**
-   * The chair and the mug, when the routine is on screen (chairPlay.ts): `[on, open,
-   * x, y, front, mugOn, steam, life]` with x, y the chair's origin in STAGE units.
-   * Absent everywhere else, which is every figure but a solo lead mid-routine.
-   */
-  prop?: readonly number[];
 }
 
 /** Off-stage and invisible — used for figures not in the current shot. */

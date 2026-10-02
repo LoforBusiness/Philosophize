@@ -10,15 +10,15 @@
 //
 // A tap is STILL when no channel the script declares changes between the beat and
 // the one before it — prose, the figure's own pose track, and the beats that carry
-// their own event (a question, a quote, the summary) are set aside, exactly as
-// `still-worklist.mjs` sets them aside. That script is where to look when this
-// fails: it prints, per still beat, the sentence and what the stage draws.
+// their own event (a question, a quote, the summary) are set aside. (A worklist
+// script that printed each still beat's sentence beside what the stage drew served
+// the pass over the narrated library and went with it on 2026-10-02.)
 //
 // Offline and fast: it reads the scripts, never the stored must-boxes.
 import fs from 'node:fs';
 import { LESSONS, beatsOf } from './lib/narration.mjs';
 import { poseTrack, poseTracks } from './lib/posetrack.mjs';
-import { PROSE } from './lib/marks.mjs';
+import { PROSE } from './lib/prose.mjs';
 
 const DIR = 'components/lesson/cinematic';
 
@@ -52,6 +52,6 @@ if (found.length <= STILL_BUDGET) {
 }
 console.log(`  FAIL  ${found.length} tap(s) leave the scene's own art as it was  budget ${STILL_BUDGET}`);
 for (const f of found.slice(0, 12)) console.log(`        ${f}`);
-console.log('\n  node scripts/still-worklist.mjs <lesson-id> prints each beat\'s sentence and what the stage');
-console.log('  draws; the rules for writing its event are group AH of docs/LESSON_RULES.md.\n');
+console.log('\n  give each of those taps its own event in the scene; the rules for writing it are');
+console.log('  group AH of docs/LESSON_RULES.md.\n');
 process.exit(1);
