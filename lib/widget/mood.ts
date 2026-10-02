@@ -1,4 +1,4 @@
-// WHAT THE WIDGET SAYS, AND HOW HE FEELS ABOUT IT.
+// WHAT THE WIDGET SAYS: THE STREAK, THE WEEK, HIS LINE AND A FACT.
 //
 // ZERO IMPORTS — plain Node runs this for `npm run check:widget` and the contact
 // sheet, so every state can be drawn and checked without a phone.
@@ -8,10 +8,12 @@
 // and its mood gets steadily worse the closer it gets to midnight without one.
 // That is the whole mechanism here, in this app's voice — the mascot is pointed
 // about ATTENDANCE and never about ABILITY (§7; `check:widget` holds the lines to
-// it). Being done is a small reward of its own: he relaxes.
+// it). He is not drawn any more (the owner, 2026-10-02: "I do not need a stick man
+// in the widgets"); his line is the voice, and the status says where the day stands.
 //
-// Everything is a pure function of the clock and the three stored numbers the
-// headless task can read (streak, last lesson day, rest days held). The widget
+// Everything is a pure function of the clock and what the headless task can read
+// from the store: the streak, the last lesson day, rest days held, and the days
+// studied and rested (for the week row). The widget
 // refreshes every three hours by itself and whenever the app is used, so the line
 // and the fact change on that same three-hour slot — stable between refreshes,
 // different at each one.
@@ -26,7 +28,15 @@ export interface WidgetInput {
   lastLessonDate: string | null;
   /** Rest days held right now (they bridge missed days; see lib/utils/streak.ts). */
   restHeld: number;
+  /** Days a lesson was finished, and days a rest day covered, as YYYY-MM-DD. */
+  activeDays?: readonly string[];
+  restDays?: readonly string[];
 }
+
+/** One day in the week row, Monday first (lib/utils/week.ts's convention). */
+export type WeekDay = 'done' | 'rest' | 'missed' | 'today' | 'todayDone' | 'future';
+/** What the status row says, and which mark it wears. */
+export type StatusTone = 'calm' | 'risk' | 'done' | 'rest' | 'lapsed';
 
 export interface WidgetMood {
   state: WidgetState;
@@ -38,13 +48,11 @@ export interface WidgetMood {
   /** True when the streak ends tonight unless a lesson is done. */
   atRisk: boolean;
   line: string;
-  pose: string;
-  /** He has his mug. */
-  mug: boolean;
-  /** He sits on a crate (the sip pose needs one under him). */
-  crate: boolean;
-  /** Grey sky and rain: he has been left. */
-  rain: boolean;
+  /** The status row: a few words on where today stands. */
+  status: string;
+  statusTone: StatusTone;
+  /** This week, Monday to Sunday. */
+  week: WeekDay[];
   subject: string;
   fact: string;
   /** The three-hour slot everything was picked from. */
@@ -91,7 +99,7 @@ export const LINES = {
     'Afternoon. Still here. Still waiting.',
     'Lunch is over. I checked.',
     'I’ve been holding your place all day.',
-    'Day {n} is waiting whenever you are.',
+    'Day {n} is waiting for you.',
   ],
   evening: [
     'Getting dark. Still no you.',
@@ -103,15 +111,15 @@ export const LINES = {
     'Your {n}-day streak ends at midnight.',
     'Midnight is coming for your {n} days.',
     'Still time. Barely. But still time.',
-    'I’m not panicking. You’re panicking.',
+    'Not panicking. You’re panicking.',
   ],
   nightFresh: [
     'It’s late. Tomorrow is also a day.',
     'Late again. I’ll be here in the morning.',
   ],
   late: [
-    'It’s very late. Sleep. Then come back.',
-    'Go to bed. Your streak is safe till tonight.',
+    'It’s late. Your streak is safe till tonight.',
+    'Go to bed. Then come back.',
   ],
   done: [
     'Done for today. Look at you, turning up.',
@@ -130,7 +138,7 @@ export const LINES = {
   ],
   lapsedFew: [
     '{d} days. I’ve been sitting here.',
-    '{d} days. The hills and I have talked.',
+    '{d} days. I’ve been talking to the wall.',
     'Back from wherever you were? Good.',
   ],
   lapsedLong: [
@@ -139,26 +147,44 @@ export const LINES = {
   ],
 } as const;
 
-/** Which poses each state may wear. Index picked by slot, like the line. */
-const POSES: Record<string, readonly string[]> = {
-  new: ['whoMe', 'idea'],
-  morning: ['yawn', 'gazeUp'],
-  afternoon: ['hipsWait', 'impatient'],
-  evening: ['checkTime', 'cringe'],
-  night: ['handsHead', 'cower'],
-  nightFresh: ['noddingOff'],
-  late: ['noddingOff'],
-  done: ['recline', 'sip', 'crossLeg', 'celebrate'],
-  rested: ['folded'],
-  lapsedOne: ['deflate', 'facepalm'],
-  lapsedFew: ['hugKnees'],
-  lapsedLong: ['sprawl', 'hugKnees'],
+/** The status row for each line pool: a few words, and the mark it wears. */
+const STATUS: Record<string, [string, StatusTone]> = {
+  new: ['Your first lesson', 'calm'],
+  nightFresh: ['Start a streak', 'calm'],
+  morning: ['Lesson waiting', 'calm'],
+  afternoon: ['Lesson waiting', 'calm'],
+  evening: ['Lesson waiting', 'calm'],
+  night: ['Ends at midnight', 'risk'],
+  late: ['Lesson waiting', 'calm'],
+  done: ['Done today', 'done'],
+  rested: ['Rest day holding', 'rest'],
+  lapsedOne: ['Start again today', 'lapsed'],
+  lapsedFew: ['Start again today', 'lapsed'],
+  lapsedLong: ['Start again today', 'lapsed'],
 };
+export const STATUS_TEXTS = [...new Set(Object.values(STATUS).map(([t]) => t))];
+
+/** This week, Monday first: which days were studied, rested, missed, still to come. */
+export function weekOf(now: Date, active: readonly string[], rest: readonly string[], lastLessonDate: string | null): WeekDay[] {
+  const did = new Set(active);
+  if (lastLessonDate) did.add(lastLessonDate);
+  const rested = new Set(rest);
+  const dow = (now.getDay() + 6) % 7; // Monday = 0
+  const out: WeekDay[] = [];
+  for (let d = 0; d < 7; d++) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow + d);
+    const k = key(day);
+    if (d > dow) out.push('future');
+    else if (d === dow) out.push(did.has(k) ? 'todayDone' : 'today');
+    else out.push(did.has(k) ? 'done' : rested.has(k) ? 'rest' : 'missed');
+  }
+  return out;
+}
 
 const pick = <T,>(list: readonly T[], i: number): T => list[((i % list.length) + list.length) % list.length];
 const fill = (s: string, n: number, d: number) => s.replace('{n}', String(n)).replace('{d}', String(d));
 
-export function widgetMood({ now, streak, lastLessonDate, restHeld }: WidgetInput, facts: Record<string, readonly string[]>): WidgetMood {
+export function widgetMood({ now, streak, lastLessonDate, restHeld, activeDays = [], restDays = [] }: WidgetInput, facts: Record<string, readonly string[]>): WidgetMood {
   const tod = timeOfDay(now.getHours());
   const today = dayNumber(key(now))!;
   const last = lastLessonDate ? dayNumber(lastLessonDate) : null;
@@ -181,7 +207,7 @@ export function widgetMood({ now, streak, lastLessonDate, restHeld }: WidgetInpu
   // A line that names the streak is only offered when there is a streak to name.
   const lines = (LINES[pool] as readonly string[]).filter((l) => !l.includes('{n}') || shown > 0);
   const line = fill(pick(lines, slot), shown, daysAway);
-  const pose = pick(POSES[pool], slot >> 1);
+  const [status, statusTone] = STATUS[pool] ?? STATUS.morning;
 
   const subject = pick(FACT_ORDER, slot);
   const list = facts[subject] ?? [];
@@ -190,10 +216,8 @@ export function widgetMood({ now, streak, lastLessonDate, restHeld }: WidgetInpu
   return {
     state, tod, streak: shown, daysAway,
     atRisk: state === 'waiting' && tod === 'night' && streak > 0,
-    line, pose,
-    mug: pose === 'sip' || pose === 'yawn' || pose === 'recline',
-    crate: pose === 'sip',
-    rain: state === 'lapsed',
+    line, status, statusTone,
+    week: weekOf(now, activeDays, restDays, lastLessonDate),
     subject, fact, slot,
   };
 }

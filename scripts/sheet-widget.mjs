@@ -8,16 +8,11 @@
 //                                          (app.json), so run it before a BUILD.
 //
 // The widget renders to RemoteViews on the phone, which no browser can show. So
-// this is a MIRROR: the same zero-import modules the widget is built from —
-// lib/widget/mood.ts (what he says and how he feels), widgetScenes.ts (the
-// picture, the very SVG string the phone draws), widgetLayout.ts (every size
-// decision) and data/widgetFacts.ts — laid out with the same paddings as
-// StudyWidget.tsx. The SVG goes in an <img> with object-fit: contain, which is
-// what Android's fit-center does, so a scene drawn to the wrong size would show
-// its bars here exactly as it would on the phone.
-//
-// The type is Inter, which runs a little WIDER than the phone's Roboto, so a line
-// that fits here fits there.
+// this is a MIRROR built from the same zero-import modules the widget is —
+// lib/widget/mood.ts, widgetLayout.ts, widgetTheme.ts, widgetIcons.ts and
+// data/widgetFacts.ts — with StudyWidget.tsx's paddings and sizes. The type is
+// Inter, which runs a little WIDER than the phone's Roboto, so a line that fits
+// here fits there.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -34,9 +29,9 @@ const { transform } = await import(pathToFileURL(path.join(ROOT, 'node_modules/s
 const TMP = path.join(os.tmpdir(), 'ph-widget-sheet');
 fs.mkdirSync(TMP, { recursive: true });
 const FILES = {
-  'components/widget/widgetPoses.ts': 'widgetPoses.mjs',
-  'components/widget/widgetScenes.ts': 'widgetScenes.mjs',
   'components/widget/widgetLayout.ts': 'widgetLayout.mjs',
+  'components/widget/widgetTheme.ts': 'widgetTheme.mjs',
+  'components/widget/widgetIcons.ts': 'widgetIcons.mjs',
   'lib/widget/mood.ts': 'mood.mjs',
   'data/widgetFacts.ts': 'widgetFacts.mjs',
   'data/subjects.ts': 'subjects.mjs',
@@ -48,22 +43,23 @@ for (const [rel, out] of Object.entries(FILES)) {
 }
 const load = (f) => import(pathToFileURL(path.join(TMP, f)).href);
 export const W = {
-  scenes: await load('widgetScenes.mjs'),
   layout: await load('widgetLayout.mjs'),
+  theme: await load('widgetTheme.mjs'),
+  icons: await load('widgetIcons.mjs'),
   mood: await load('mood.mjs'),
   facts: (await load('widgetFacts.mjs')).WIDGET_FACTS,
   subjects: (await load('subjects.mjs')).SUBJECTS,
-  poses: (await load('widgetPoses.mjs')).WIDGET_POSES,
 };
-const { sceneSvg, paletteFor, inkFor, SEAL_EMBER, SEAL_CORE } = W.scenes;
-const { layoutWidget, PAD, KICKER, FOOT, RADIUS, FACT_LH } = W.layout;
-
-const PAPER = '#FBFAF6', INK = '#1A1A1A', LINE_CALM = '#5C574F', LINE_URGENT = '#A8401F';
+const { layoutWidget, PAD, RADIUS, T, WEEK, FACT, GAP } = W.layout;
+const { W: C, markFor, mix, STATUS_COLOR, STATUS_ICON } = W.theme;
+const { ICONS, ICON_VIEWBOX } = W.icons;
 
 // ── the states worth looking at, as real inputs to widgetMood ───────────────
-const at = (h, m = 0, day = 15) => new Date(2026, 9, day, h, m);
+const at = (h, m = 0, day = 15) => new Date(2026, 9, day, h, m); // Thu 15 Oct 2026
 const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-const ago = (now, n) => key(new Date(now.getFullYear(), now.getMonth(), now.getDate() - n));
+const back = (now, n) => key(new Date(now.getFullYear(), now.getMonth(), now.getDate() - n));
+/** The days studied for a streak that ended `last` days ago and ran `run` days. */
+const ran = (now, last, run) => Array.from({ length: run }, (_, i) => back(now, last + i));
 export const STATES = [
   ['new · 10 AM', at(10), { streak: 0, last: null }],
   ['morning, not yet', at(8, 10), { streak: 12, last: 1 }],
@@ -72,58 +68,74 @@ export const STATES = [
   ['night, streak at risk', at(22, 40), { streak: 12, last: 1 }],
   ['after midnight', at(1, 30), { streak: 12, last: 1 }],
   ['lesson done', at(18, 5), { streak: 13, last: 0 }],
-  ['done, at night', at(23, 0, 16), { streak: 13, last: 0 }],
   ['rest day holding', at(12, 0), { streak: 20, last: 2, rest: 1 }],
-  ['missed yesterday', at(9, 0), { streak: 0, last: 2 }],
-  ['gone 4 days', at(16, 0), { streak: 0, last: 4 }],
-  ['gone 2 weeks', at(11, 0), { streak: 0, last: 14 }],
+  ['missed yesterday', at(9, 0), { streak: 0, last: 2, run: 6 }],
+  ['gone 4 days', at(16, 0), { streak: 0, last: 4, run: 6 }],
 ];
 export function moodFor([, now, s]) {
-  return W.mood.widgetMood({ now, streak: s.streak, lastLessonDate: s.last == null ? null : ago(now, s.last), restHeld: s.rest ?? 0 }, W.facts);
+  const run = s.run ?? s.streak;
+  const activeDays = s.last == null ? [] : ran(now, s.last, Math.max(1, run));
+  const restDays = s.rest ? [back(now, 1)] : [];
+  return W.mood.widgetMood({ now, streak: s.streak, lastLessonDate: s.last == null ? null : back(now, s.last), restHeld: s.rest ?? 0, activeDays, restDays }, W.facts);
 }
 
 const font = (p) => `url(data:font/ttf;base64,${fs.readFileSync(path.join(ROOT, 'node_modules/@expo-google-fonts/inter', p)).toString('base64')}) format('truetype')`;
-const uri = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-
-function seal(n, P) {
-  return `<div class="seal" style="background:${P.pillBg};color:${P.pillFg}"><svg viewBox="0 0 12 12" width="12" height="12"><circle cx="6" cy="6" r="5.4" fill="${SEAL_EMBER}"/><circle cx="6" cy="6" r="2.5" fill="${SEAL_CORE}"/></svg>${n}</div>`;
+const icon = (n, color, size, mr = 0) => `<svg viewBox="${ICON_VIEWBOX}" width="${size}" height="${size}" style="flex:none;margin-right:${mr}px"><path fill="${color}" d="${ICONS[n]}"/></svg>`;
+const DAY = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+function dayLook(d) {
+  switch (d) {
+    case 'done': return { bg: C.ember, fg: '#FFFFFF', ring: false };
+    case 'todayDone': return { bg: C.ember, fg: '#FFFFFF', ring: true };
+    case 'rest': return { bg: C.rest, fg: C.bg, ring: false };
+    case 'today': return { bg: null, fg: C.on, ring: true };
+    case 'missed': return { bg: mix(C.pill, C.on, 0.14), fg: C.soft, ring: false };
+    default: return { bg: null, fg: C.faint, ring: false };
+  }
 }
+const week = (wk, disc, letters = true) => `<div class="row" style="justify-content:space-between;width:100%">${wk.map((d, i) => {
+  const L = dayLook(d);
+  const bg = L.bg ?? (letters ? null : C.faint);
+  return `<div style="width:${disc}px;height:${disc}px;border-radius:${disc / 2}px;${bg ? `background:${bg};` : ''}${L.ring ? `border:2px solid ${C.on};` : ''}display:flex;align-items:center;justify-content:center;font-size:${Math.round(disc * 0.48)}px;font-weight:800;color:${L.fg}">${letters ? DAY[i] : ''}</div>`;
+}).join('')}</div>`;
 
 /** One widget, w × h dp, as HTML — the mirror of StudyWidget.tsx. */
 export function widgetHtml(m, w, h) {
   const subj = W.subjects.find((s) => s.slug === m.subject);
-  const P = paletteFor(m.tod, m.rain);
-  const L = layoutWidget(w, h, m.fact, m.line);
-  const spec = { tod: m.tod, rain: m.rain, pose: m.pose, mug: m.mug, crate: m.crate };
-  if (L.mode === 'day') {
-    return `<div class="w" style="width:${w}px;height:${h}px">
-      <img class="art" src="${uri(sceneSvg(spec, w, h, [RADIUS, RADIUS, RADIUS, RADIUS], 0.8))}" style="width:${w}px;height:${h}px">
-      <div class="ov" style="padding:${PAD.t}px ${PAD.r}px 0 ${PAD.l}px">${seal(m.streak, P)}
-        <div class="day" style="width:${Math.floor(L.textW)}px;margin-top:8px;font-size:${L.lineSize}px;color:${P.text};-webkit-line-clamp:${L.lineLines}">${esc(m.line)}</div></div></div>`;
+  const L = layoutWidget(w, h, m.streak, m.line, m.fact);
+  const sc = STATUS_COLOR[m.statusTone], si = STATUS_ICON[m.statusTone];
+  const flame = m.streak > 0 ? C.ember : C.out;
+  if (L.mode === 'strip') {
+    return `<div class="w row" style="width:${w}px;height:${h}px;background:${C.bg};border-radius:${RADIUS}px;padding:0 ${PAD}px">
+      ${icon('flame', flame, 22, 2)}<div style="font-size:30px;font-weight:600;color:${C.on};margin-right:14px">${m.streak}</div>
+      <div class="col" style="flex:1;min-width:0"><div class="one" style="font-size:14px;font-weight:700;color:${sc}">${esc(m.status)}</div>${L.line ? `<div class="one" style="font-size:${T.line.size}px;color:${C.soft};margin-top:2px">${esc(m.line)}</div>` : ''}</div></div>`;
   }
-  const urgent = m.state === 'waiting' && (m.atRisk || m.tod === 'evening');
-  return `<div class="w" style="width:${w}px;height:${h}px">
-    <img class="art" src="${uri(sceneSvg(spec, L.leftW, h, [RADIUS, 0, 0, RADIUS], 0.56))}" style="width:${L.leftW}px;height:${h}px">
-    <div class="ov" style="width:${L.leftW}px;padding:10px">${seal(m.streak, P)}</div>
-    <div class="panel" style="left:${L.leftW}px;width:${L.rightW}px;border-radius:0 ${RADIUS}px ${RADIUS}px 0;padding:${PAD.t}px ${PAD.r}px ${PAD.b}px ${PAD.l}px;background:${PAPER}">
-      <div class="kick" style="height:${KICKER.h}px;margin-bottom:${KICKER.gap}px;color:${inkFor(subj.hue, PAPER)};font-size:${KICKER.size}px"><span class="dot" style="background:${inkFor(subj.hue, PAPER)}"></span>${esc(subj.short.toUpperCase())}</div>
-      <div class="factbox"><div class="fact" style="font-size:${L.factSize}px;line-height:${L.factSize * FACT_LH}px;-webkit-line-clamp:${L.factLines}">${esc(m.fact)}</div></div>
-      ${L.footLines ? `<div class="line" style="margin-top:${FOOT.gap}px;font-size:${FOOT.size}px;line-height:${FOOT.lh}px;color:${urgent ? LINE_URGENT : LINE_CALM};-webkit-line-clamp:${L.footLines}">${esc(m.line)}</div>` : ''}
-    </div></div>`;
+  if (L.mode === 'glance') {
+    return `<div class="w col" style="width:${w}px;height:${h}px;background:${C.bg};border-radius:${Math.round(Math.min(w, h) * 0.32)}px;padding:${PAD}px;align-items:center;justify-content:center">
+      <div class="row">${icon('flame', flame, 30, 4)}<div style="font-size:${T.glanceHero.size}px;line-height:${T.glanceHero.lh}px;font-weight:600;color:${C.on}">${m.streak}</div></div>
+      <div style="font-size:12px;font-weight:600;color:${C.soft};margin-top:2px">day streak</div>
+      <div class="one" style="font-size:12.5px;font-weight:700;color:${sc};margin-top:6px">${esc(m.status)}</div>
+      ${L.week ? `<div style="width:100%;margin-top:10px;padding:0 6px">${week(m.week, 11, false)}</div>` : ''}</div>`;
+  }
+  return `<div class="w col" style="width:${w}px;height:${h}px;background:${C.bg};border-radius:${RADIUS}px;padding:${PAD}px">
+    <div class="row" style="align-items:flex-start">
+      <div class="col" style="width:${Math.floor(L.leftW)}px">
+        <div class="row">${icon(si, sc, 18, 6)}<div class="one" style="font-size:${T.status.size}px;line-height:${T.status.lh}px;font-weight:700;color:${sc}">${esc(m.status)}</div></div>
+        ${L.lineLines ? `<div class="clamp" style="font-size:${T.line.size}px;line-height:${T.line.lh}px;color:${C.soft};margin-top:3px;-webkit-line-clamp:${L.lineLines}">${esc(m.line)}</div>` : ''}
+      </div>
+      <div class="row" style="flex:1;justify-content:flex-end">${icon('flame', flame, T.heroFlame, 2)}<div style="font-size:${T.hero.size}px;line-height:${T.hero.lh}px;font-weight:600;color:${C.on}">${m.streak}</div></div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="background:${C.pill};border-radius:18px;padding:${WEEK.padY}px ${WEEK.padX}px">${week(m.week, WEEK.disc)}</div>
+    ${L.factLines ? `<div class="row" style="margin-top:${GAP}px;background:${C.pill};border-radius:16px;padding:${FACT.padY}px ${FACT.padX}px">${icon(m.subject, markFor(subj.hue), FACT.icon, FACT.gap)}<div class="clamp" style="width:${Math.floor(L.factW)}px;font-size:${T.fact.size}px;line-height:${T.fact.lh}px;color:${C.on};-webkit-line-clamp:${L.factLines}">${esc(m.fact)}</div></div>` : ''}
+  </div>`;
 }
 
-export const CSS = `@font-face{font-family:I;font-weight:600;src:${font('600SemiBold/Inter_600SemiBold.ttf')}}@font-face{font-family:I;font-weight:800;src:${font('800ExtraBold/Inter_800ExtraBold.ttf')}}
+export const CSS = `@font-face{font-family:I;font-weight:400;src:${font('400Regular/Inter_400Regular.ttf')}}@font-face{font-family:I;font-weight:600;src:${font('600SemiBold/Inter_600SemiBold.ttf')}}@font-face{font-family:I;font-weight:700;src:${font('700Bold/Inter_700Bold.ttf')}}@font-face{font-family:I;font-weight:800;src:${font('800ExtraBold/Inter_800ExtraBold.ttf')}}
 *{box-sizing:border-box}body{margin:0;font-family:I}
-.w{position:relative;overflow:hidden;border-radius:${RADIUS}px}
-.art{position:absolute;left:0;top:0;object-fit:contain}
-.ov{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start}
-.panel{position:absolute;top:0;bottom:0;display:flex;flex-direction:column}
-.seal{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:14px;padding:3px 8px 3px 5px;border-radius:11px}
-.kick{white-space:nowrap;display:flex;align-items:center;gap:5px;font-weight:800;letter-spacing:1.4px}.dot{width:7px;height:7px;border-radius:4px}
-.factbox{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
-.fact,.line,.day{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-.fact{font-weight:600;color:${INK}}.line,.day{font-weight:800}.day{line-height:1.2}`;
+.row{display:flex;flex-direction:row;align-items:center}.col{display:flex;flex-direction:column}
+.w{overflow:hidden}.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clamp{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}`;
 
 const CHROME = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'].find((p) => fs.existsSync(p));
 export function shoot(html, out, w, h, scale = 1) {
@@ -134,12 +146,11 @@ export function shoot(html, out, w, h, scale = 1) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const W4 = 330, H4 = 190;
   if (OFFER || PREVIEW) {
-    // The offer's three pictures: how the day goes, in three frames.
     const dir = path.join(ROOT, 'assets/images/widget-offer');
     fs.mkdirSync(dir, { recursive: true });
     const pick = { morning: STATES[1], night: STATES[4], done: STATES[6] };
-    const W4 = 320, H4 = 150;
     if (OFFER) {
       for (const [name, st] of Object.entries(pick)) {
         shoot(`<div style="width:${W4}px;height:${H4}px">${widgetHtml(moodFor(st), W4, H4)}</div>`, path.join(dir, `${name}.png`), W4, H4, 3);
@@ -151,17 +162,17 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       console.log('wrote assets/images/widget-preview.png — compiled into the APK; ships with the next BUILD, not an update');
     }
   } else {
-    const SIZES = [[180, 110, '180×110 (min, his day)'], [250, 110, '250×110 (4×2 short)'], [320, 150, '320×150 (4×2 typical)'], [160, 160, '2×2']];
-    let html = `<div style="background:#22262B;color:#cfd3da;padding:20px;width:1460px;font-family:I">`;
+    const SIZES = [[330, 190, '330×190 (4×2 typical)'], [320, 150, '320×150 (4×2 short)'], [172, 172, '2×2'], [320, 100, '4×1']];
+    let html = `<div style="background:linear-gradient(160deg,#7E9A9C,#3E4E58);color:#eef3f4;padding:20px;width:1260px;font-family:I">`;
     for (const st of STATES) {
       const m = moodFor(st);
-      html += `<div style="font-weight:800;font-size:13px;margin:16px 0 6px">${esc(st[0])} — ${m.state} · ${m.tod} · pose ${m.pose} · ${m.subject}</div><div style="display:flex;gap:16px;align-items:flex-start">`;
-      for (const [w, h, lab] of SIZES) html += `<div><div style="font-size:11px;color:#8a919c;margin-bottom:4px">${lab}</div>${widgetHtml(m, w, h)}</div>`;
+      html += `<div style="font-weight:800;font-size:13px;margin:16px 0 6px">${esc(st[0])} — ${m.state} · ${m.tod} · ${m.subject}</div><div class="row" style="gap:14px;align-items:flex-start">`;
+      for (const [w, h, lab] of SIZES) html += `<div><div style="font-size:11px;opacity:.8;margin-bottom:4px">${lab}</div>${widgetHtml(m, w, h)}</div>`;
       html += '</div>';
     }
     html += '</div>';
     const out = args.find((a) => !a.startsWith('--')) ?? path.join(ROOT, 'widget-states.png');
-    shoot(html, out, 1500, 40 + STATES.length * 212, 1);
+    shoot(html, out, 1300, 60 + STATES.length * 236, 1);
     console.log(`wrote ${out}`);
   }
 }

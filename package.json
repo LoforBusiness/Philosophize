@@ -144,7 +144,6 @@
     "sheet:deck": "node scripts/sheet-deck.mjs",
     "countertest:shape": "node scripts/countertest-shape.mjs",
     "check:widget": "node scripts/check-widget.mjs",
-    "make:widget-poses": "node scripts/make-widget-poses.mjs",
     "sheet:widget": "node scripts/sheet-widget.mjs",
     "check:quickstart": "node scripts/check-quickstart-contrast.mjs",
     "check:frame": "node scripts/check-frame.mjs",

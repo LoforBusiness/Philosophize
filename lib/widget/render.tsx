@@ -13,8 +13,9 @@ const USERDATA_KEY = 'philosophize-userdata';
 // Must match the widget "name" in app.json, useWidgetPlaced and pinWidget.
 export const WIDGET_NAME = 'QuoteOfTheDay';
 
-/** The three numbers the widget's mood is worked out from, read straight from the
- *  persisted store, so the headless task needs no app running. */
+/** What the widget is worked out from — the streak, the last lesson day, rest days
+ *  held and the days studied — read straight from the persisted store, so the
+ *  headless task needs no app running. */
 async function readInput(now: Date): Promise<WidgetInput> {
   try {
     const raw = await AsyncStorage.getItem(USERDATA_KEY);
@@ -25,6 +26,8 @@ async function readInput(now: Date): Promise<WidgetInput> {
       streak: n(s.streak),
       lastLessonDate: typeof s.lastLessonDate === 'string' ? s.lastLessonDate : null,
       restHeld: Math.max(0, n(s.restDaysEarned) - n(s.restDaysUsed)),
+      activeDays: Array.isArray(s.activeDays) ? s.activeDays.filter((d: unknown) => typeof d === 'string') : [],
+      restDays: Array.isArray(s.restDays) ? s.restDays.filter((d: unknown) => typeof d === 'string') : [],
     };
   } catch {
     return { now, streak: 0, lastLessonDate: null, restHeld: 0 };

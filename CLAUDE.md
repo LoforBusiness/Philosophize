@@ -83,7 +83,7 @@ replacing the letterpress D.
 | Ads | react-native-google-mobile-ads | 16.x | **Unused since the hard paywall (2026-09-25)** — no ad is shown or initialised; the module stays for a commit of its own |
 | Analytics | posthog-react-native | 4.x | Manual `$screen` events; consent-gated |
 | Reminders | expo-notifications | ~56 | **LOCAL only** — no server, no push token. Live since build 19 (§22) |
-| Widget | react-native-android-widget | 0.20 | Android home-screen "Quote of the Day" |
+| Widget | react-native-android-widget | 0.20 | Android home-screen streak widget (§24); still registered as "QuoteOfTheDay" |
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
 | Haptics | expo-haptics | ~56 | Live in the runners via `lib/feedback.ts` |
@@ -181,7 +181,7 @@ Philosophize/
 │   │                            #   posterArt, foot (the words on the picture),
 │   │                            #   Poster + posters (the retired six) (§23)
 │   ├── gamification/            # StreakPanel, StreakCalendar, SocietyCard, StreakMascot, RewardLoafer, RankUpScreen
-│   ├── widget/                  # Android home-screen widget surface
+│   ├── widget/                  # the home-screen widget (StudyWidget, widgetLayout/Theme/Icons, WidgetOffer)
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
 │                                #   PaywallSheet, RankSeal, Curtain (a journey from Home fades through paper),
 │                                #   BadgeMedal, insigniaArt (every rank pin and
@@ -8713,25 +8713,38 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 > … look at Duolingo's widget … It's funny too … change the widget depending on what
 > kind of day it is, or if the user has not come back for a day."*
 
-**Split, picked from three rendered directions.** On the left is his day. The sky
-follows the clock (`components/widget/widgetScenes.ts`), and he gets more desperate as
-midnight comes without a lesson, which is Duolingo's own mechanism. A grey, rainy sky
-means the reader has stayed away. On the right is a fact from one of the seven
-subjects (`data/widgetFacts.ts`, 12 a subject). It moves to a different subject at
-every three-hour slot, and his line sits underneath. Below 260×120dp the widget is just
-his day. The registered name stays `QuoteOfTheDay`, because a widget already on a home
-screen is bound to it.
+**THE THIRD DESIGN HAS NO STICKMAN, and it was the owner's pick from three mocks
+drawn after Google's own widgets.** *"They look really generated … I do not need a
+stick man in the widgets … look at the Google Calendar design … really nice widgets
+… design using their ideas and their looks."* The first two designs put him in a
+drawn scene: v1 froze lesson gestures halfway, and v2 gave him a prop for every hour
+(coffee, a book, a lantern, an umbrella). Both read as illustration pasted into a
+card. Of three directions (a Calendar-style day, a Pixel Weather-style streak, a
+Keep-style subject card) the owner chose **Pixel Weather's Material 3 Expressive
+layout**: one deep container; the streak as the hero number where Weather puts the
+temperature; a status and his line top-left; then rounded pills inside, with the week
+Monday-first like the hourly row, and a fact from the day's subject beside its
+Material Symbol. At 2×2 it is the streak alone with a dots-only week; on a short 4×1
+strip it is one row. The registered name stays `QuoteOfTheDay`, because a widget
+already on a home screen is bound to it.
 
 - **Everything is arithmetic, because nothing can be measured in RemoteViews.**
-  - `lib/widget/mood.ts` holds the state, pose, line and fact as pure functions of the
-    clock and three stored numbers: streak, last lesson day and rest days held.
-  - `widgetLayout.ts` chooses the type size from Inter's real advance widths, which
-    run wider than the phone's Roboto.
-  - `npm run check:widget` (in `npm run check`) runs every fact and line through that
-    arithmetic and holds the contrast. It also holds the voice: he needles attendance,
-    never ability.
-- **The figure is the real rig.** `npm run make:widget-poses` poses `rig.ts` and
-  `moves.ts` into `widgetPoses.ts` as SVG paths.
+  - `lib/widget/mood.ts` holds the state, status, line, week and fact as pure
+    functions of the clock and what the store holds: streak, last lesson day, rest
+    days held, and the active and rest day lists (for the week row). He still talks
+    (`LINES`), in words alone.
+  - `components/widget/widgetLayout.ts` decides which shape is drawn and what fits,
+    from Inter's real advance widths at 400, 600 and 800, which run wider than the
+    phone's Roboto. **A fact is shown whole or not at all**, never ellipsised.
+  - `widgetTheme.ts` derives every colour from the app's DEEP `#2A4343`: the container
+    is DEEP toward black, the type DEEP toward white, and the ember is the one spark (a
+    studied day, the flame). `widgetIcons.ts` holds Material Symbols Rounded paths
+    (Apache 2.0): one per subject, plus a flame, a check, a play and a bed.
+  - `npm run check:widget` (in `npm run check`) runs all 84 facts beside all 38 lines
+    at a typical 4×2 (330×190), every status at every shape, every pool, status and
+    subject through a fortnight of clock, and the week row against a known Thursday. It
+    holds every word to 4.5:1 and every mark to 3:1. It also holds the voice: he needles
+    attendance, never ability.
 - **`npm run sheet:widget`** draws every state at four sizes, through the same modules.
   - `-- --offer` writes `assets/images/widget-offer/*.png`, the in-app offer's pictures.
   - `-- --preview` rewrites `widget-preview.png`, the picker's thumbnail. That file is

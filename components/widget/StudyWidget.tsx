@@ -1,41 +1,35 @@
-import { FlexWidget, OverlapWidget, SvgWidget, TextWidget } from 'react-native-android-widget';
+import { FlexWidget, SvgWidget, TextWidget } from 'react-native-android-widget';
 
-import type { WidgetMood } from '@/lib/widget/mood';
-import { layoutWidget, FOOT, KICKER, PAD, RADIUS } from './widgetLayout';
-import { inkFor, paletteFor, sceneSvg, SEAL_CORE, SEAL_EMBER } from './widgetScenes';
+import type { WeekDay, WidgetMood } from '@/lib/widget/mood';
+import { ICONS, ICON_VIEWBOX, type IconName } from './widgetIcons';
+import { FACT, GAP, layoutWidget, PAD, RADIUS, T, WEEK } from './widgetLayout';
+import { markFor, mix, STATUS_COLOR, STATUS_ICON, W } from './widgetTheme';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// THE HOME-SCREEN WIDGET (redesigned 2026-10-02).
+// THE HOME-SCREEN WIDGET (third design, 2026-10-02).
 //
-//   "redesign the widget completely to say different things from different
-//    subjects … look at Duolingo's widget … I really like theirs. It's funny too
-//    … really nice colors … change the widget depending on what kind of day it
-//    is, or if the user has not come back for a day."
+//   "completely redesign them … I do not need a stick man in the widgets … look
+//    at the Google Calendar design … really nice widgets … design using their
+//    ideas and their looks."
 //
-// The owner picked the SPLIT from three rendered directions: on the left his day —
-// the sky follows the clock and he gets more desperate as midnight comes without a
-// lesson, Duolingo's own mechanism — with the streak on it; on the right a fact
-// from one of the seven subjects, a different subject every three hours, and his
-// line underneath. Below SPLIT_MIN_W (a 2×2) there is no room for the fact and the
-// widget is just his day.
+// From three mocks drawn after Google's own widgets, the owner picked the one
+// after Pixel Weather's Material 3 Expressive widgets: one deep container; the
+// streak as the hero number where Weather puts the temperature; the status and his
+// line beside it; then rounded pills inside — the week, Monday first, like the
+// hourly forecast row, and a fact from the day's subject with its Material Symbol.
+// No illustration. At 2×2 it is the streak alone; on a short 4×1 strip, one row.
 //
-// NOT a React Native tree: this renders to Android RemoteViews in a headless task,
-// so only the library's primitives exist and nothing can be measured. Every size
-// decision is therefore ARITHMETIC in widgetLayout.ts, and `npm run check:widget`
-// runs the same arithmetic over every fact and every line. The picture is one SVG
-// drawn to the exact box it fills (widgetScenes.ts says why that matters).
-//
-// The registered name is still `QuoteOfTheDay` (app.json, render.tsx): a widget
-// already on somebody's home screen is bound to that name, and renaming it would
-// strand every one of them. Only the picker's label and preview are compiled.
+// NOT a React Native tree: RemoteViews, in a headless task, so only the library's
+// primitives exist and nothing can be measured. Every size decision is arithmetic
+// in widgetLayout.ts, and `npm run check:widget` runs that arithmetic over every
+// fact and line. The registered name is still `QuoteOfTheDay` (app.json): a widget
+// already on a home screen is bound to it.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PAPER = '#FBFAF6';
-const INK = '#1A1A1A';
-/** His line, calm. */
-const LINE_CALM = '#5C574F';
-/** His line when the streak is in danger — the ember, deepened to read on paper. */
-const LINE_URGENT = '#A8401F';
+type Hex = `#${string}`;
+const hex = (c: string) => c as Hex;
+const svg = (name: IconName, color: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${ICON_VIEWBOX}"><path fill="${color}" d="${ICONS[name]}"/></svg>`;
 
 export interface StudyWidgetProps {
   mood: WidgetMood;
@@ -45,93 +39,114 @@ export interface StudyWidgetProps {
   height: number;
 }
 
-function Seal({ n, bg, fg }: { n: number; bg: string; fg: string }) {
-  const seal = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.4" fill="${SEAL_EMBER}"/><circle cx="6" cy="6" r="2.5" fill="${SEAL_CORE}"/></svg>`;
+const DAY = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+/** A day disc's look: fill, letter colour, and whether it wears a ring. */
+export function dayLook(d: WeekDay): { bg: string | null; fg: string; ring: boolean } {
+  switch (d) {
+    case 'done': return { bg: W.ember, fg: '#FFFFFF', ring: false };
+    case 'todayDone': return { bg: W.ember, fg: '#FFFFFF', ring: true };
+    case 'rest': return { bg: W.rest, fg: W.bg, ring: false };
+    case 'today': return { bg: null, fg: W.on, ring: true };
+    case 'missed': return { bg: mix(W.pill, W.on, 0.14), fg: W.soft, ring: false };
+    default: return { bg: null, fg: W.faint, ring: false };
+  }
+}
+
+/** The week row. At 2×2 the discs are too small to carry a letter, so they are dots. */
+function Week({ week, disc, letters = true }: { week: WeekDay[]; disc: number; letters?: boolean }) {
   return (
-    <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: bg as `#${string}`, borderRadius: 11, paddingLeft: 5, paddingRight: 8, paddingVertical: 3 }}>
-      <SvgWidget svg={seal} style={{ width: 12, height: 12, marginRight: 4 }} />
-      <TextWidget text={String(n)} style={{ fontSize: 14, fontWeight: '800', color: fg as `#${string}` }} />
+    <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', width: 'match_parent' }}>
+      {week.map((d, i) => {
+        const L = dayLook(d);
+        return (
+          <FlexWidget
+            key={i}
+            style={{
+              width: disc, height: disc, borderRadius: disc / 2,
+              backgroundColor: L.bg ? hex(L.bg) : letters ? undefined : hex(W.faint),
+              borderWidth: L.ring ? 2 : 0, borderColor: L.ring ? hex(W.on) : undefined,
+              justifyContent: 'center', alignItems: 'center',
+            }}
+          >
+            {letters ? <TextWidget text={DAY[i]} style={{ fontSize: Math.round(disc * 0.48), fontWeight: '800', color: hex(L.fg) }} /> : null}
+          </FlexWidget>
+        );
+      })}
     </FlexWidget>
   );
 }
 
 export function StudyWidget({ mood, subjectName, subjectHue, width, height }: StudyWidgetProps) {
   const w = Math.max(110, Math.round(width));
-  const h = Math.max(80, Math.round(height));
-  const P = paletteFor(mood.tod, mood.rain);
-  const L = layoutWidget(w, h, mood.fact, mood.line);
-  const spec = { tod: mood.tod, rain: mood.rain, pose: mood.pose, mug: mood.mug, crate: mood.crate };
-  const label = `${mood.streak} day streak. ${mood.line}${L.mode === 'split' ? ` ${subjectName}: ${mood.fact}` : ''}`;
-  const kicker = inkFor(subjectHue, PAPER);
+  const h = Math.max(60, Math.round(height));
+  const L = layoutWidget(w, h, mood.streak, mood.line, mood.fact);
+  const statusColor = STATUS_COLOR[mood.statusTone] ?? W.on;
+  const statusIcon = STATUS_ICON[mood.statusTone] ?? 'play';
+  const flameColor = mood.streak > 0 ? W.ember : W.out;
+  const label = `${mood.streak} day streak. ${mood.status}. ${mood.line}${L.mode === 'full' && L.factLines ? ` ${subjectName}: ${mood.fact}` : ''}`;
   const open = { clickAction: 'OPEN_URI' as const, clickActionData: { uri: 'philosophize://' } };
 
-  if (L.mode === 'day') {
+  if (L.mode === 'strip') {
     return (
-      <OverlapWidget {...open} accessibilityLabel={label} style={{ width: 'match_parent', height: 'match_parent' }}>
-        <SvgWidget svg={sceneSvg(spec, w, h, [RADIUS, RADIUS, RADIUS, RADIUS], 0.8)} style={{ width: w, height: h }} />
-        <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', paddingLeft: PAD.l, paddingTop: PAD.t, paddingRight: PAD.r }}>
-          <Seal n={mood.streak} bg={P.pillBg} fg={P.pillFg} />
-          <TextWidget
-            text={mood.line}
-            maxLines={L.lineLines}
-            truncate="END"
-            style={{ width: Math.floor(L.textW), marginTop: 8, fontSize: L.lineSize, fontWeight: '800', color: P.text as `#${string}` }}
-          />
+      <FlexWidget {...open} accessibilityLabel={label} style={{ width: 'match_parent', height: 'match_parent', backgroundColor: hex(W.bg), borderRadius: RADIUS, flexDirection: 'row', alignItems: 'center', paddingHorizontal: PAD }}>
+        <SvgWidget svg={svg('flame', flameColor)} style={{ width: 22, height: 22, marginRight: 2 }} />
+        <TextWidget text={String(mood.streak)} style={{ fontSize: 30, fontWeight: '600', color: hex(W.on), marginRight: 14 }} />
+        <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
+          <TextWidget text={mood.status} maxLines={1} style={{ fontSize: 14, fontWeight: '700', color: hex(statusColor) }} />
+          {L.line ? <TextWidget text={mood.line} maxLines={1} style={{ fontSize: T.line.size, color: hex(W.soft), marginTop: 2 }} /> : null}
         </FlexWidget>
-      </OverlapWidget>
+      </FlexWidget>
+    );
+  }
+
+  if (L.mode === 'glance') {
+    return (
+      <FlexWidget {...open} accessibilityLabel={label} style={{ width: 'match_parent', height: 'match_parent', backgroundColor: hex(W.bg), borderRadius: Math.round(Math.min(w, h) * 0.32), flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: PAD }}>
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <SvgWidget svg={svg('flame', flameColor)} style={{ width: 30, height: 30, marginRight: 4 }} />
+          <TextWidget text={String(mood.streak)} style={{ fontSize: T.glanceHero.size, fontWeight: '600', color: hex(W.on) }} />
+        </FlexWidget>
+        <TextWidget text="day streak" style={{ fontSize: 12, fontWeight: '600', color: hex(W.soft), marginTop: 2 }} />
+        <TextWidget text={mood.status} maxLines={1} style={{ fontSize: 12.5, fontWeight: '700', color: hex(statusColor), marginTop: 6 }} />
+        {L.week ? (
+          <FlexWidget style={{ width: 'match_parent', marginTop: 10, paddingHorizontal: 6 }}>
+            <Week week={mood.week} disc={11} letters={false} />
+          </FlexWidget>
+        ) : null}
+      </FlexWidget>
     );
   }
 
   return (
-    <OverlapWidget {...open} accessibilityLabel={label} style={{ width: 'match_parent', height: 'match_parent' }}>
-      <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'row' }}>
-        <SvgWidget svg={sceneSvg(spec, L.leftW, h, [RADIUS, 0, 0, RADIUS], 0.56)} style={{ width: L.leftW, height: h }} />
-        <FlexWidget
-          style={{
-            width: L.rightW,
-            height: 'match_parent',
-            backgroundColor: PAPER,
-            borderTopRightRadius: RADIUS,
-            borderBottomRightRadius: RADIUS,
-            flexDirection: 'column',
-            paddingLeft: PAD.l,
-            paddingRight: PAD.r,
-            paddingTop: PAD.t,
-            paddingBottom: PAD.b,
-          }}
-        >
-          {/* Which subject, in its own colour. */}
-          <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', height: KICKER.h, marginBottom: KICKER.gap }}>
-            <FlexWidget style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: kicker as `#${string}`, marginRight: 5 }} />
-            <TextWidget
-              text={subjectName.toUpperCase()}
-              maxLines={1}
-              style={{ fontSize: KICKER.size, fontWeight: '800', letterSpacing: 1.4, color: kicker as `#${string}` }}
-            />
+    <FlexWidget {...open} accessibilityLabel={label} style={{ width: 'match_parent', height: 'match_parent', backgroundColor: hex(W.bg), borderRadius: RADIUS, flexDirection: 'column', padding: PAD }}>
+      {/* The status and his line, and the streak, big, where Weather puts the temperature. */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'flex-start' }}>
+        <FlexWidget style={{ width: Math.floor(L.leftW), flexDirection: 'column' }}>
+          <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <SvgWidget svg={svg(statusIcon, statusColor)} style={{ width: 18, height: 18, marginRight: 6 }} />
+            <TextWidget text={mood.status} maxLines={1} style={{ fontSize: T.status.size, fontWeight: '700', color: hex(statusColor) }} />
           </FlexWidget>
-          {/* The fact takes every dp the panel can spare. */}
-          <FlexWidget style={{ flex: 1, width: 'match_parent', justifyContent: 'center' }}>
-            <TextWidget
-              text={mood.fact}
-              maxLines={L.factLines}
-              truncate="END"
-              style={{ fontSize: L.factSize, fontWeight: '600', color: INK, width: L.rightW - PAD.l - PAD.r }}
-            />
-          </FlexWidget>
-          {L.footLines > 0 ? (
-            <TextWidget
-              text={mood.line}
-              maxLines={L.footLines}
-              truncate="END"
-              style={{ marginTop: FOOT.gap, fontSize: FOOT.size, fontWeight: '800', color: mood.state === 'waiting' && (mood.atRisk || mood.tod === 'evening') ? LINE_URGENT : LINE_CALM }}
-            />
+          {L.lineLines ? (
+            <TextWidget text={mood.line} maxLines={L.lineLines} style={{ fontSize: T.line.size, color: hex(W.soft), marginTop: 3 }} />
           ) : null}
         </FlexWidget>
+        <FlexWidget style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <SvgWidget svg={svg('flame', flameColor)} style={{ width: T.heroFlame, height: T.heroFlame, marginRight: 2 }} />
+          <TextWidget text={String(mood.streak)} style={{ fontSize: T.hero.size, fontWeight: '600', color: hex(W.on) }} />
+        </FlexWidget>
       </FlexWidget>
-      {/* The streak sits on his sky, top left. */}
-      <FlexWidget style={{ width: L.leftW, height: 'match_parent', paddingLeft: 10, paddingTop: 10 }}>
-        <Seal n={mood.streak} bg={P.pillBg} fg={P.pillFg} />
+      <FlexWidget style={{ flex: 1 }} />
+      {/* The week, Monday first, like Weather's hourly row. */}
+      <FlexWidget style={{ width: 'match_parent', backgroundColor: hex(W.pill), borderRadius: 18, paddingVertical: WEEK.padY, paddingHorizontal: WEEK.padX }}>
+        <Week week={mood.week} disc={WEEK.disc} />
       </FlexWidget>
-    </OverlapWidget>
+      {/* The day's subject and its fact, whole or not at all. */}
+      {L.factLines ? (
+        <FlexWidget style={{ width: 'match_parent', marginTop: GAP, backgroundColor: hex(W.pill), borderRadius: 16, paddingVertical: FACT.padY, paddingHorizontal: FACT.padX, flexDirection: 'row', alignItems: 'center' }}>
+          <SvgWidget svg={svg(mood.subject as IconName, markFor(subjectHue))} style={{ width: FACT.icon, height: FACT.icon, marginRight: FACT.gap }} />
+          <TextWidget text={mood.fact} maxLines={L.factLines} style={{ width: Math.floor(L.factW), fontSize: T.fact.size, color: hex(W.on) }} />
+        </FlexWidget>
+      ) : null}
+    </FlexWidget>
   );
 }
