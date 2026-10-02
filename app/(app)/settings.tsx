@@ -23,14 +23,9 @@ import UICard from '@/components/ui/Card';
 import { C, TYPE, SPACE, RADIUS, type TypeKey } from '@/constants/design';
 import { ProfileArtFill, ProfileAvatar } from '@/components/shared/ProfileArt';
 import ProfileArtSheet from '@/components/shared/ProfileArtSheet';
-import { SvgXml } from 'react-native-svg';
 import { backgroundById } from '@/data/profileBackgrounds';
-import { WIDGET_BACKGROUNDS } from '@/components/widget/backgrounds';
-
-/** The swatch's own size, so the scene is drawn to the shape it is shown at.
- *  Must match `sceneThumb` below — a scene is a function of its box now. */
-const WIDGET_SWATCH_W = 66;
-const WIDGET_SWATCH_H = 29;
+import AddWidgetSheet from '@/components/shared/AddWidgetSheet';
+import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { PROFILE_FONTS, profileNameStyle, profileNameText } from '@/data/profileFonts';
 import { signOut, deleteAccountCloud } from '@/lib/supabase/auth';
 import { signOutSocial } from '@/lib/auth/social';
@@ -680,62 +675,41 @@ function NotificationsSection() {
 /* ---------------- Display ---------------- */
 
 /**
- * The home-screen widget's backdrop, chosen from thumbnails rather than a list of
- * names — these are pictures, and "Colonnade" tells you nothing about what you are
- * about to put on your home screen.
+ * THE HOME-SCREEN WIDGET'S ONLY CONTROL NOW IS "ADD IT" (2026-10-02).
  *
- * Each thumbnail is the real scene SVG at the widget's own proportions, so what is
- * previewed is exactly what Android will draw. Picking one re-renders any PLACED
- * widget immediately; without that the change would not show until the next
- * three-hour refresh and would read as broken. The require is dynamic and wrapped
- * because it reaches react-native-android-widget, which does not exist on web or
- * in Expo Go.
+ * It used to offer six scenes to print the quote on. The redesigned widget draws
+ * his day instead, and the sky follows the clock, so a chosen backdrop would have
+ * no reader (§22) and the setting went. What stays is a way back to the widget for
+ * anyone who said "Not now" to the offer that appears twenty seconds into a
+ * session every three days (components/widget/WidgetOffer.tsx) — the button that used to sit at the
+ * foot of Home was removed by the owner the same day. The sheet it opens pins the
+ * widget in one tap where the launcher allows, and lists the manual steps where it
+ * does not.
  */
-function WidgetSceneRow() {
-  const chosen = useUserDataStore((s) => s.settings.widgetBackground);
-  const setSetting = useUserDataStore((s) => s.setSetting);
-  const pick = (id: string) => {
-    setSetting('widgetBackground', id);
-    try {
-      require('@/lib/widget/render').refreshQuoteWidget();
-    } catch {}
-  };
-  return (
-    <View style={styles.sceneRow}>
-      {WIDGET_BACKGROUNDS.map((b) => {
-        const on = b.id === chosen;
-        return (
-          <Pressable key={b.id} onPress={() => pick(b.id)} style={styles.sceneItem} hitSlop={4}>
-            <View style={[styles.sceneThumb, on && styles.sceneThumbOn]}>
-              <SvgXml xml={b.svg(WIDGET_SWATCH_W, WIDGET_SWATCH_H)} width="100%" height="100%" />
-            </View>
-            <Text style={[styles.sceneName, on && styles.sceneNameOn]} numberOfLines={1}>
-              {b.name}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 function DisplaySection() {
-  const settings = useUserDataStore((s) => s.settings);
-  const setSetting = useUserDataStore((s) => s.setSetting);
+  const placed = useWidgetPlaced();
+  const [open, setOpen] = useState(false);
+  const android = Platform.OS === 'android';
   return (
     <Card>
       <Header title="Display" sub="What the app shows you, and where." />
       <View style={styles.hr} />
-      {/* The in-app Daily Quote Card and its placement went on 2026-09-29 with
-          saved quotes (§22: a setting earns its place by having a reader, and the
-          card no longer has a screen). The phone's own widget stays. */}
-      <Row title="Home-Screen Widget" sub="The scene the quote is printed on" last stack>
-        <WidgetSceneRow />
+      <Row
+        title="Home-Screen Widget"
+        sub={android
+          ? 'A fact from a different subject every few hours, and how he feels about your streak.'
+          : 'The home-screen widget is on Android only.'}
+        last
+      >
+        {android ? (
+          placed ? (
+            <Text style={styles.rowSub}>On your home screen</Text>
+          ) : (
+            <Button label="Add" size="md" onPress={() => setOpen(true)} />
+          )
+        ) : null}
       </Row>
-      <Text style={styles.footNote}>
-        The card inside the app and the Android home-screen widget keep their own quotes. The scene above is
-        the home-screen one; changing it redraws the widget straight away.
-      </Text>
+      <AddWidgetSheet visible={open} onClose={() => setOpen(false)} />
     </Card>
   );
 }
@@ -1483,32 +1457,6 @@ const styles = StyleSheet.create({
   miniLabel: { ...role('label'), color: C.inkSoft, marginTop: SPACE[0] },
 
   footNote: { ...role('label'), fontFamily: PLAYFAIR_CAPTION, fontStyle: 'italic', color: C.inkSoft, marginTop: SPACE[3] },
-
-  // Widget scene picker. The thumbnails keep the widget's own 2.27:1 so the
-  // preview is the shape of the thing being chosen, not a crop of it.
-  sceneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACE[1], marginTop: SPACE[0] },
-  sceneItem: { width: 66 },
-  sceneThumb: {
-    width: 66,
-    height: 29,
-    // The one radius on this screen that is not a token, and it is deliberate:
-    // RADIUS.card at 12 on a box only 29 tall eats the picture's corners. This
-    // is the shape of the thing being previewed, not the app's own edge.
-    borderRadius: 7,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: C.hairline,
-    backgroundColor: C.surface,
-  },
-  sceneThumbOn: { borderWidth: 2, borderColor: C.ink },
-  sceneName: {
-    ...role('micro'),
-    letterSpacing: 0,
-    color: C.inkSoft,
-    marginTop: SPACE[0],
-    textAlign: 'center',
-  },
-  sceneNameOn: { fontFamily: 'Inter_700Bold', color: C.ink },
 
   // Subscription. THIRTEEN STYLES WENT WITH THE TWO PRICING CARDS — planRow,
   // planCol, currentTag, proKicker, planName, planPrice, perMo, planNote,

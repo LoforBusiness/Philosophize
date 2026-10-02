@@ -87,15 +87,15 @@ export default function AddWidgetSheet({ visible, onClose }: { visible: boolean;
             >
               <Text style={styles.kicker}>HOME-SCREEN WIDGET</Text>
               <Text style={styles.title}>
-                Keep a quote <Text style={styles.titleItalic}>close</Text>
+                Keep him <Text style={styles.titleItalic}>close</Text>
               </Text>
               <Text style={styles.sub}>
-                A fresh philosophy quote on your home screen, changing through the day.
+                A fact from a different subject every few hours, and a word from him when you haven’t been in.
               </Text>
 
               <View style={styles.previewFrame}>
                 <Image
-                  source={require('../../assets/images/widget-preview.png')}
+                  source={require('../../assets/images/widget-offer/night.png')}
                   style={styles.preview}
                   resizeMode="contain"
                 />

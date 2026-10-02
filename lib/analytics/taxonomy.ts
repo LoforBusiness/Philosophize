@@ -201,6 +201,16 @@ export const EVENTS = {
     props: ['stars', 'went_to_store', 'ask_number'],
     where: 'components/shared/RatePrompt.tsx',
   },
+  widget_offer_shown: {
+    note: 'The home-screen widget offer slid up, twenty seconds of foreground into a session, at most every three days per device, on Android, only while no widget is placed. `can_pin` is whether the launcher supports the one-tap pin dialog; without it, "Add" opens the manual steps.',
+    props: ['can_pin'],
+    where: 'components/widget/WidgetOffer.tsx',
+  },
+  widget_offer_answered: {
+    note: 'What they did with the widget offer: `added` true for Add, false for Not now (or tapping away). Whether the widget then actually landed on the home screen is only knowable from the launcher, so judge the offer by `added` against later `getWidgetInfo` counts, not by this alone.',
+    props: ['added', 'can_pin'],
+    where: 'components/widget/WidgetOffer.tsx',
+  },
   rate_prompt_already_rated: {
     note: 'They said they had already rated, which settles the ask for ever exactly as submitting stars does. It exists because NO app can see a Play rating -- Google\'s In-App Review API never reports one and this sheet only links to the listing -- so somebody who rated from the Play Store itself had no way to stop being asked. A high count against `ask_number` 1 or 2 means the sheet is reaching people who rated long ago; a high count at a large `ask_number` means it took them that many days to find the way out.',
     props: ['ask_number'],

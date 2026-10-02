@@ -40,6 +40,11 @@ interface UIStore {
   // hard paywall (2026-09-25) it draws `HardPaywall`; `paywallSource` is why it
   // was raised, and rides `paywall_viewed`.
   paywallOpen: boolean;
+  // Which of the two unasked-for sheets is up, so they can never stack: the daily
+  // rating ask (RatePrompt, on Home) and the home-screen widget's offer
+  // (WidgetOffer, twenty seconds into a session). Each waits while the other shows.
+  promptUp: 'rate' | 'widget' | null;
+  setPromptUp: (v: 'rate' | 'widget' | null) => void;
   paywallSource: 'locked_lesson' | 'locked_review';
 
   // ── THE LESSON TESTER (dev only) ───────────────────────────────────────────
@@ -159,6 +164,8 @@ export const useUIStore = create<UIStore>((set) => ({
   openRanksBadges: (tab) => set({ ranksBadgesTab: tab }),
   closeRanksBadges: () => set({ ranksBadgesTab: null }),
   paywallOpen: false,
+  promptUp: null,
+  setPromptUp: (v) => set({ promptUp: v }),
   paywallSource: 'locked_lesson',
   devUnlocked: __DEV__,
   unlockDev: () => set({ devUnlocked: true }),

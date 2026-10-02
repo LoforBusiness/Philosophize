@@ -22,7 +22,6 @@ import { restDaysToSpend, todayKey } from '@/lib/utils/streak';
 import { subjectsInWeek } from '@/lib/utils/subjectBreadth';
 import { subjectOfBranch } from '@/data/subjects';
 import { track } from '@/lib/posthog';
-import { writePinnedQuote } from '@/lib/widget/pin';
 import { branchMastery } from '@/lib/utils/branchMastery';
 
 // A quote the user has bookmarked. Self-contained so the profile/stats
@@ -79,11 +78,9 @@ export interface AppSettings {
   // which screen showed it. The card went with saved quotes on 2026-09-29, so nothing
   // reads them; removed rather than defaulted, so sanitizeSettings() prunes them from
   // AsyncStorage and the cloud snapshot.
-  // Which scene the HOME-SCREEN widget is drawn on. Read outside Settings by
-  // lib/widget/background.ts, which the headless widget task calls — so this key
-  // meets the rule above. Values are ids from components/widget/backgrounds.ts;
-  // an unknown one falls back to the first scene rather than rendering nothing.
-  widgetBackground: string;
+  // `widgetBackground` was here: which scene the home-screen widget's quote was
+  // printed on. The widget was redesigned on 2026-10-02 and its sky follows the
+  // clock, so nothing reads a chosen scene; removed so sanitizeSettings() prunes it.
   // Sound + haptics: taps, the stickman's footfalls, the reward chime. Read by
   // lib/feedback.ts, which is the single gate both channels pass through — so
   // this key has a reader outside Settings, which is the rule above.
@@ -117,7 +114,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   reminderTime: '08:00 AM',
   streakAlerts: true,
   quoteOfDay: true,
-  widgetBackground: 'grove',
   // `autoAdvance` was here and defaulted to TRUE, which is why finishing a lesson
   // threw the reader into the next one. Its behaviour is replaced by the advance
   // animation on the branch screen; the key is removed rather than defaulted off,
@@ -919,14 +915,12 @@ export const useUserDataStore = create<UserDataState>()(
 
       isQuoteSaved: (id) => get().savedQuotes.some((x) => x.id === id),
 
-      // Pin (or clear) the home-screen widget quote. Mirrors the chosen quote to
-      // the widget's own storage key and triggers an immediate refresh on Android.
+      // Pin (or clear) a saved quote. It used to be mirrored to the home-screen
+      // widget; the widget was redesigned on 2026-10-02 to show subject facts and
+      // nothing on screen pins a quote any more, so only the id is kept (it is in
+      // the synced snapshot, and dropping a field there is a migration of its own).
       setPinnedQuote: (id) => {
         set({ pinnedQuoteId: id });
-        const q = id ? get().savedQuotes.find((x) => x.id === id) ?? null : null;
-        writePinnedQuote(
-          q ? { text: q.text, author: q.author, philosopherId: q.philosopherId } : null
-        );
       },
 
       // Feature (or clear, when passed null) the single quote shown on the
@@ -1189,7 +1183,6 @@ export const useUserDataStore = create<UserDataState>()(
       }),
 
       deleteAccount: () => {
-        if (get().pinnedQuoteId) writePinnedQuote(null);
         set({
           savedQuotes: [],
           pinnedQuoteId: null,
@@ -1252,7 +1245,6 @@ export const useUserDataStore = create<UserDataState>()(
       // reset but is purely local; clears _syncOwnerId so the next sign-in adopts
       // that account's own cloud snapshot rather than merging leftover data.
       resetForSignOut: () => {
-        if (get().pinnedQuoteId) writePinnedQuote(null);
         set({
           savedQuotes: [],
           pinnedQuoteId: null,

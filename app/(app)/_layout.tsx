@@ -6,6 +6,7 @@ import TabIcon, { type TabIconName } from '@/components/shared/TabIcon';
 import { touch } from '@/lib/feedback';
 import { useUIStore } from '@/stores/uiStore';
 import Curtain, { useInstantTabs } from '@/components/shared/Curtain';
+import WidgetOffer from '@/components/widget/WidgetOffer';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WARMING THE TABS, AND WHY IT IS NOT DONE UNDER THE LAUNCH ANIMATION
@@ -354,6 +355,9 @@ export default function AppLayout() {
           a route can always be reached by URL, so the tab config is not the lock. */}
       <Tabs.Screen name="devlessons" options={{ href: null }} />
     </Tabs>
+    {/* Twenty seconds into a session, every three days: the home-screen widget's
+        offer (it replaced the button at the foot of Home, 2026-10-02). */}
+    <WidgetOffer />
     <Curtain />
     </View>
   );

@@ -256,6 +256,10 @@ export function RatePromptHost() {
   const launchDone = useUIStore((s) => s.launchDone);
   const reward = useUIStore((s) => s.reward);
   const paywallOpen = useUIStore((s) => s.paywallOpen);
+  // The widget's offer and this sheet never stack: whichever came first holds the
+  // glass, and the other waits (uiStore.promptUp).
+  const promptUp = useUIStore((s) => s.promptUp);
+  const setPromptUp = useUIStore((s) => s.setPromptUp);
 
   // HOME STAYS MOUNTED BEHIND EVERY OTHER TAB -- all five are built at startup
   // and none of them unmounts for the session -- and a Modal raised from a
@@ -280,7 +284,7 @@ export function RatePromptHost() {
   const due = hydrated
     && mayAsk({ settled: rateSettled, askedAt: rateAskedAt }, Date.now(), onboardingVersion > 0);
 
-  const clear = due && launchDone && onHome && !reward && !paywallOpen;
+  const clear = due && launchDone && onHome && !reward && !paywallOpen && promptUp !== 'widget';
 
   // NOT ON MOUNT. The home screen is still settling out of the tab transition on
   // the frame it appears, and a sheet rising through that reads as a glitch --
@@ -298,6 +302,12 @@ export function RatePromptHost() {
     const t = setTimeout(() => { noteRateAsk(); setOpen(true); }, 900);
     return () => clearTimeout(t);
   }, [clear, open, noteRateAsk]);
+
+  useEffect(() => {
+    if (!open) return;
+    setPromptUp('rate');
+    return () => setPromptUp(null);
+  }, [open, setPromptUp]);
 
   // Android only: the copy names Google Play, and there is no iOS build.
   if (Platform.OS === 'ios') return null;

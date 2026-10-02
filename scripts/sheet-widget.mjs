@@ -1,124 +1,167 @@
-// Contact sheet for the widget backdrops: every scene, at several real widget
-// sizes, with the REAL text on top.
+// THE HOME-SCREEN WIDGET, DRAWN IN EVERY STATE, IN PLAIN NODE + HEADLESS CHROME.
 //
-//   node scripts/sheet-widget.mjs
+//   npm run sheet:widget                 → widget-states.png (repo root, untracked)
+//   npm run sheet:widget -- --offer      → assets/images/widget-offer/*.png, the
+//                                          pictures the in-app offer cycles through
+//   npm run sheet:widget -- --preview    → assets/images/widget-preview.png, the
+//                                          picker's thumbnail. COMPILED into the APK
+//                                          (app.json), so run it before a BUILD.
 //
-// A backdrop cannot be judged empty. The whole difficulty is that the card is
-// dense — header, rule, four lines of quote, attribution, streak — so a scene
-// that looks handsome on its own can still be a mess behind type, and the only
-// way to see that is to draw the type. check-widget-contrast.mjs answers the
-// other half ("can it be READ") in numbers.
+// The widget renders to RemoteViews on the phone, which no browser can show. So
+// this is a MIRROR: the same zero-import modules the widget is built from —
+// lib/widget/mood.ts (what he says and how he feels), widgetScenes.ts (the
+// picture, the very SVG string the phone draws), widgetLayout.ts (every size
+// decision) and data/widgetFacts.ts — laid out with the same paddings as
+// StudyWidget.tsx. The SVG goes in an <img> with object-fit: contain, which is
+// what Android's fit-center does, so a scene drawn to the wrong size would show
+// its bars here exactly as it would on the phone.
 //
-// ── AND IT DRAWS THE SVG THE WAY ANDROID DOES ───────────────────────────────
-//
-// This sheet used to inline the SVG into the page, where a browser honours
-// `preserveAspectRatio="slice"` and covers the card. Android does not: androidsvg
-// renders the picture at the document's own size and hands it to an ImageView,
-// which fit-centers it. So the sheet showed a full-bleed scene while the phone
-// showed a letterboxed one, and it showed that happily for as long as the bug
-// existed — a harness agreeing with the intention instead of with the device.
-//
-// So the scene goes in an <img> with `object-fit: contain`, which IS fit-center.
-// If a scene's aspect does not match its card, this sheet now shows the bars.
+// The type is Inter, which runs a little WIDER than the phone's Roboto, so a line
+// that fits here fits there.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = process.argv[2] ?? path.join(ROOT, 'widget-scenes.png');
+const args = process.argv.slice(2);
+const OFFER = args.includes('--offer');
+const PREVIEW = args.includes('--preview');
 
-/** Real sizes the widget can be, in dp — min, the 4×2 target, and resized tall. */
-const SIZES = [
-  { w: 180, h: 110, label: '180×110 min' },
-  { w: 250, h: 110, label: '250×110 target' },
-  { w: 300, h: 220, label: '300×220 resized' },
-];
-const S = 2.4;   // sheet pixels per dp, so 9sp type is legible here
-
-const ts = (await import(pathToFileURL(path.join(ROOT, 'node_modules/typescript/lib/typescript.js')).href)).default;
-const tmp = path.join(ROOT, 'node_modules/.cache/widget-sheet');
-fs.mkdirSync(tmp, { recursive: true });
-fs.writeFileSync(
-  path.join(tmp, 'bg.mjs'),
-  ts.transpileModule(fs.readFileSync(path.join(ROOT, 'components/widget/backgrounds.ts'), 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
-  }).outputText
-);
-const { WIDGET_BACKGROUNDS } = await import(pathToFileURL(path.join(tmp, 'bg.mjs')).href);
-
-const font = (p) =>
-  `url(data:font/ttf;base64,${fs.readFileSync(path.join(ROOT, 'node_modules/@expo-google-fonts/inter', p)).toString('base64')}) format('truetype')`;
-
-const QUOTE = '\u201cThe unexamined life is not worth living.\u201d';
-const MARK = (ink) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 2 C6 7 3 12 3 16 a9 9 0 0 0 18 0 c0-4-3-9-9-14 Z" fill="${ink}"/>
-<path d="M12 7 C9 11 7.5 13.5 7.5 16 a4.5 4.5 0 0 0 9 0 c0-2.5-1.5-5-4.5-9 Z" fill="${ink}" opacity="0.28"/></svg>`;
-
-const dataUri = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-
-const card = (b, size) => {
-  const W = size.w * S, H = size.h * S;
-  const px = (n) => `${n * S}px`;
-  return `
-<figure>
-  <div class="card" style="width:${W}px;height:${H}px;border-width:${px(2)};border-radius:${px(16)}">
-    <img class="art" src="${dataUri(b.svg(size.w, size.h))}" style="background:${b.paper}">
-    <div class="body" style="color:${b.ink};padding:${px(11)} ${px(13)}">
-      <div class="head">
-        <div style="font-size:${px(9)};font-weight:700;letter-spacing:${px(2)}">DAILY QUOTE</div>
-        <div style="font-size:${px(9)};font-weight:500;letter-spacing:${px(1)};color:${b.inkSoft}">JUL 6</div>
-      </div>
-      <div class="rule" style="background:${b.hairline};height:${px(1)};margin:${px(5)} 0"></div>
-      <div class="quote" style="font-size:${px(14)}">${QUOTE}</div>
-      <div class="foot" style="margin-top:${px(3)}">
-        <div style="flex:1;font-size:${px(9)};font-weight:700;letter-spacing:${px(1)};color:${b.inkSoft}">&mdash; SOCRATES</div>
-        <div class="mark" style="width:${px(11)};height:${px(11)};margin-right:${px(4)}">${MARK(b.inkSoft)}</div>
-        <div style="font-size:${px(9)};font-weight:700;letter-spacing:${px(1)};color:${b.inkSoft}">3 DAYS</div>
-      </div>
-    </div>
-  </div>
-  <figcaption>${b.name}${b.dark ? ' \u00b7 dark' : ''} &nbsp;&nbsp; ${size.label}</figcaption>
-</figure>`;
+// ── load the real modules ───────────────────────────────────────────────────
+const { transform } = await import(pathToFileURL(path.join(ROOT, 'node_modules/sucrase/dist/index.js')).href);
+const TMP = path.join(os.tmpdir(), 'ph-widget-sheet');
+fs.mkdirSync(TMP, { recursive: true });
+const FILES = {
+  'components/widget/widgetPoses.ts': 'widgetPoses.mjs',
+  'components/widget/widgetScenes.ts': 'widgetScenes.mjs',
+  'components/widget/widgetLayout.ts': 'widgetLayout.mjs',
+  'lib/widget/mood.ts': 'mood.mjs',
+  'data/widgetFacts.ts': 'widgetFacts.mjs',
+  'data/subjects.ts': 'subjects.mjs',
 };
+for (const [rel, out] of Object.entries(FILES)) {
+  const src = transform(fs.readFileSync(path.join(ROOT, rel), 'utf8'), { transforms: ['typescript'] }).code
+    .replace(/(from\s+['"])\.\/([A-Za-z0-9_-]+)(['"])/g, '$1./$2.mjs$3');
+  fs.writeFileSync(path.join(TMP, out), src);
+}
+const load = (f) => import(pathToFileURL(path.join(TMP, f)).href);
+export const W = {
+  scenes: await load('widgetScenes.mjs'),
+  layout: await load('widgetLayout.mjs'),
+  mood: await load('mood.mjs'),
+  facts: (await load('widgetFacts.mjs')).WIDGET_FACTS,
+  subjects: (await load('subjects.mjs')).SUBJECTS,
+  poses: (await load('widgetPoses.mjs')).WIDGET_POSES,
+};
+const { sceneSvg, paletteFor, inkFor, SEAL_EMBER, SEAL_CORE } = W.scenes;
+const { layoutWidget, PAD, KICKER, FOOT, RADIUS, FACT_LH } = W.layout;
 
-const rowsHtml = WIDGET_BACKGROUNDS
-  .map((b) => `<div class="row">${SIZES.map((s) => card(b, s)).join('')}</div>`)
-  .join('');
+const PAPER = '#FBFAF6', INK = '#1A1A1A', LINE_CALM = '#5C574F', LINE_URGENT = '#A8401F';
 
-const html = `<!doctype html><meta charset="utf-8"><style>
-@font-face{font-family:I;font-weight:400;src:${font('400Regular/Inter_400Regular.ttf')}}
-@font-face{font-family:I;font-weight:500;src:${font('500Medium/Inter_500Medium.ttf')}}
-@font-face{font-family:I;font-weight:700;src:${font('700Bold/Inter_700Bold.ttf')}}
-@font-face{font-family:I;font-weight:400;font-style:italic;src:${font('400Regular_Italic/Inter_400Regular_Italic.ttf')}}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#9a9a96;padding:22px;font-family:I}
-.row{display:flex;align-items:flex-start;gap:26px;margin-bottom:26px}
-figure{margin:0}
-figcaption{font-size:13px;color:#fff;letter-spacing:1px;margin-top:7px;text-transform:uppercase;font-weight:700}
-.card{position:relative;overflow:hidden;border-style:solid;border-color:#1A1A1A}
-/* object-fit:contain IS Android's FIT_CENTER. If a scene is the wrong shape for
-   its card, the bars show here exactly as they do on the phone. */
-.art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
-.body{position:absolute;inset:0;display:flex;flex-direction:column}
-.head{display:flex;justify-content:space-between;align-items:baseline}
-.quote{flex:1;display:flex;align-items:center;font-style:italic;line-height:1.34}
-.foot{display:flex;align-items:center}
-.mark svg{width:100%;height:100%;display:block}
-</style>${rowsHtml}`;
+// ── the states worth looking at, as real inputs to widgetMood ───────────────
+const at = (h, m = 0, day = 15) => new Date(2026, 9, day, h, m);
+const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const ago = (now, n) => key(new Date(now.getFullYear(), now.getMonth(), now.getDate() - n));
+export const STATES = [
+  ['new · 10 AM', at(10), { streak: 0, last: null }],
+  ['morning, not yet', at(8, 10), { streak: 12, last: 1 }],
+  ['afternoon, not yet', at(14, 30), { streak: 12, last: 1 }],
+  ['evening, not yet', at(19, 40), { streak: 12, last: 1 }],
+  ['night, streak at risk', at(22, 40), { streak: 12, last: 1 }],
+  ['after midnight', at(1, 30), { streak: 12, last: 1 }],
+  ['lesson done', at(18, 5), { streak: 13, last: 0 }],
+  ['done, at night', at(23, 0, 16), { streak: 13, last: 0 }],
+  ['rest day holding', at(12, 0), { streak: 20, last: 2, rest: 1 }],
+  ['missed yesterday', at(9, 0), { streak: 0, last: 2 }],
+  ['gone 4 days', at(16, 0), { streak: 0, last: 4 }],
+  ['gone 2 weeks', at(11, 0), { streak: 0, last: 14 }],
+];
+export function moodFor([, now, s]) {
+  return W.mood.widgetMood({ now, streak: s.streak, lastLessonDate: s.last == null ? null : ago(now, s.last), restHeld: s.rest ?? 0 }, W.facts);
+}
 
-const page = path.join(tmp, 'sheet.html');
-fs.writeFileSync(page, html);
+const font = (p) => `url(data:font/ttf;base64,${fs.readFileSync(path.join(ROOT, 'node_modules/@expo-google-fonts/inter', p)).toString('base64')}) format('truetype')`;
+const uri = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+function seal(n, P) {
+  return `<div class="seal" style="background:${P.pillBg};color:${P.pillFg}"><svg viewBox="0 0 12 12" width="12" height="12"><circle cx="6" cy="6" r="5.4" fill="${SEAL_EMBER}"/><circle cx="6" cy="6" r="2.5" fill="${SEAL_CORE}"/></svg>${n}</div>`;
+}
+
+/** One widget, w × h dp, as HTML — the mirror of StudyWidget.tsx. */
+export function widgetHtml(m, w, h) {
+  const subj = W.subjects.find((s) => s.slug === m.subject);
+  const P = paletteFor(m.tod, m.rain);
+  const L = layoutWidget(w, h, m.fact, m.line);
+  const spec = { tod: m.tod, rain: m.rain, pose: m.pose, mug: m.mug, crate: m.crate };
+  if (L.mode === 'day') {
+    return `<div class="w" style="width:${w}px;height:${h}px">
+      <img class="art" src="${uri(sceneSvg(spec, w, h, [RADIUS, RADIUS, RADIUS, RADIUS], 0.8))}" style="width:${w}px;height:${h}px">
+      <div class="ov" style="padding:${PAD.t}px ${PAD.r}px 0 ${PAD.l}px">${seal(m.streak, P)}
+        <div class="day" style="width:${Math.floor(L.textW)}px;margin-top:8px;font-size:${L.lineSize}px;color:${P.text};-webkit-line-clamp:${L.lineLines}">${esc(m.line)}</div></div></div>`;
+  }
+  const urgent = m.state === 'waiting' && (m.atRisk || m.tod === 'evening');
+  return `<div class="w" style="width:${w}px;height:${h}px">
+    <img class="art" src="${uri(sceneSvg(spec, L.leftW, h, [RADIUS, 0, 0, RADIUS], 0.56))}" style="width:${L.leftW}px;height:${h}px">
+    <div class="ov" style="width:${L.leftW}px;padding:10px">${seal(m.streak, P)}</div>
+    <div class="panel" style="left:${L.leftW}px;width:${L.rightW}px;border-radius:0 ${RADIUS}px ${RADIUS}px 0;padding:${PAD.t}px ${PAD.r}px ${PAD.b}px ${PAD.l}px;background:${PAPER}">
+      <div class="kick" style="height:${KICKER.h}px;margin-bottom:${KICKER.gap}px;color:${inkFor(subj.hue, PAPER)};font-size:${KICKER.size}px"><span class="dot" style="background:${inkFor(subj.hue, PAPER)}"></span>${esc(subj.short.toUpperCase())}</div>
+      <div class="factbox"><div class="fact" style="font-size:${L.factSize}px;line-height:${L.factSize * FACT_LH}px;-webkit-line-clamp:${L.factLines}">${esc(m.fact)}</div></div>
+      ${L.footLines ? `<div class="line" style="margin-top:${FOOT.gap}px;font-size:${FOOT.size}px;line-height:${FOOT.lh}px;color:${urgent ? LINE_URGENT : LINE_CALM};-webkit-line-clamp:${L.footLines}">${esc(m.line)}</div>` : ''}
+    </div></div>`;
+}
+
+export const CSS = `@font-face{font-family:I;font-weight:600;src:${font('600SemiBold/Inter_600SemiBold.ttf')}}@font-face{font-family:I;font-weight:800;src:${font('800ExtraBold/Inter_800ExtraBold.ttf')}}
+*{box-sizing:border-box}body{margin:0;font-family:I}
+.w{position:relative;overflow:hidden;border-radius:${RADIUS}px}
+.art{position:absolute;left:0;top:0;object-fit:contain}
+.ov{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start}
+.panel{position:absolute;top:0;bottom:0;display:flex;flex-direction:column}
+.seal{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:14px;padding:3px 8px 3px 5px;border-radius:11px}
+.kick{white-space:nowrap;display:flex;align-items:center;gap:5px;font-weight:800;letter-spacing:1.4px}.dot{width:7px;height:7px;border-radius:4px}
+.factbox{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.fact,.line,.day{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.fact{font-weight:600;color:${INK}}.line,.day{font-weight:800}.day{line-height:1.2}`;
 
 const CHROME = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'].find((p) => fs.existsSync(p));
-if (!CHROME) throw new Error('Chrome not found');
+export function shoot(html, out, w, h, scale = 1) {
+  const file = path.join(TMP, `page-${path.basename(out)}.html`);
+  fs.writeFileSync(file, `<!doctype html><meta charset="utf-8"><style>${CSS}</style>${html}`);
+  execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--force-device-scale-factor=${scale}`,
+    `--window-size=${w},${h}`, `--screenshot=${out}`, '--default-background-color=00000000', pathToFileURL(file).href], { stdio: 'ignore' });
+}
 
-const wide = SIZES.reduce((n, s) => n + s.w * S + 26, 0) + 44;
-const tall = WIDGET_BACKGROUNDS.length * (Math.max(...SIZES.map((s) => s.h)) * S + 60) + 44;
-fs.rmSync(OUT, { force: true });
-execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars',
-  `--screenshot=${OUT.replace(/\\/g, '/')}`,
-  `--window-size=${Math.ceil(wide)},${Math.ceil(tall)}`,
-  '--force-device-scale-factor=1', pathToFileURL(page).href], { stdio: 'pipe' });
-if (!fs.existsSync(OUT)) throw new Error('Chrome exited without writing the sheet');
-console.log(`${WIDGET_BACKGROUNDS.length} scenes × ${SIZES.length} sizes -> ${OUT}  (${(fs.statSync(OUT).size / 1024).toFixed(0)} KB)`);
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (OFFER || PREVIEW) {
+    // The offer's three pictures: how the day goes, in three frames.
+    const dir = path.join(ROOT, 'assets/images/widget-offer');
+    fs.mkdirSync(dir, { recursive: true });
+    const pick = { morning: STATES[1], night: STATES[4], done: STATES[6] };
+    const W4 = 320, H4 = 150;
+    if (OFFER) {
+      for (const [name, st] of Object.entries(pick)) {
+        shoot(`<div style="width:${W4}px;height:${H4}px">${widgetHtml(moodFor(st), W4, H4)}</div>`, path.join(dir, `${name}.png`), W4, H4, 3);
+        console.log(`wrote assets/images/widget-offer/${name}.png`);
+      }
+    }
+    if (PREVIEW) {
+      shoot(`<div style="width:${W4}px;height:${H4}px">${widgetHtml(moodFor(STATES[3]), W4, H4)}</div>`, path.join(ROOT, 'assets/images/widget-preview.png'), W4, H4, 2);
+      console.log('wrote assets/images/widget-preview.png — compiled into the APK; ships with the next BUILD, not an update');
+    }
+  } else {
+    const SIZES = [[180, 110, '180×110 (min, his day)'], [250, 110, '250×110 (4×2 short)'], [320, 150, '320×150 (4×2 typical)'], [160, 160, '2×2']];
+    let html = `<div style="background:#22262B;color:#cfd3da;padding:20px;width:1460px;font-family:I">`;
+    for (const st of STATES) {
+      const m = moodFor(st);
+      html += `<div style="font-weight:800;font-size:13px;margin:16px 0 6px">${esc(st[0])} — ${m.state} · ${m.tod} · pose ${m.pose} · ${m.subject}</div><div style="display:flex;gap:16px;align-items:flex-start">`;
+      for (const [w, h, lab] of SIZES) html += `<div><div style="font-size:11px;color:#8a919c;margin-bottom:4px">${lab}</div>${widgetHtml(m, w, h)}</div>`;
+      html += '</div>';
+    }
+    html += '</div>';
+    const out = args.find((a) => !a.startsWith('--')) ?? path.join(ROOT, 'widget-states.png');
+    shoot(html, out, 1500, 40 + STATES.length * 212, 1);
+    console.log(`wrote ${out}`);
+  }
+}

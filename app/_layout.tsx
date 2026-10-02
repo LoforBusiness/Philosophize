@@ -351,8 +351,8 @@ export default function RootLayout() {
   useEffect(() => {
     const refresh = () => {
       try {
-        const { refreshQuoteWidget } = require('@/lib/widget/render');
-        refreshQuoteWidget();
+        const { refreshHomeWidget } = require('@/lib/widget/render');
+        refreshHomeWidget();
       } catch {}
     };
     refresh();

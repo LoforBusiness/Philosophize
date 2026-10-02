@@ -28,7 +28,7 @@ import { LINE } from '@/components/shared/drawn';
 import { track } from '@/lib/posthog';
 import { cue } from '@/lib/feedback';
 import { lessonHasSound } from '@/components/lesson/cinematic/lessonSound';
-import { refreshQuoteWidget } from '@/lib/widget/render';
+import { refreshHomeWidget } from '@/lib/widget/render';
 
 interface Props {
   xp: number;
@@ -312,7 +312,7 @@ export default function LessonReward({ xp, correct, total, branchSlug, lessonId,
       rest_days_spent: dayInfo.restSpent,
     });
     // The home-screen widget shows the day streak — keep it current (best-effort).
-    refreshQuoteWidget();
+    refreshHomeWidget();
   };
 
   // LAND THEM ON THE BRANCH, AND HAND THE MOMENT OVER TO IT.

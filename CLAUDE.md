@@ -1159,14 +1159,14 @@ To add a new subject (AP15: one road each): an entry in `data/subjects.ts` whose
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-six** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-seven** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
 `check-routes` · `check-nav` · `validate-worklets` · `validate-lessons` · `validate-cinematic` · `check-echo` · `check-prompts` ·
 `validate-badges` · `validate-sound` · `check-walk` · `check-props` · `check-scale` · `check-wardrobe` ·
 `check-camera` · `check-tour` · `check-space` · `check-controls` · `check-shade` · `check-lift` · `check-fits` ·
-`check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` ·
+`check-plainwords` · `check-voice` · `check-ear` · `check-narration` · `check-streak` · `check-quips` · `check-widget` ·
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
@@ -8704,3 +8704,44 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   AF, AO and AA's rotation and visitor are marked removed and kept as findings. Proof
   that no dialogue lesson changed: `check:replay`'s settled-frame dump of all 21 is
   byte-identical before and after.
+
+---
+
+## 24. The Home-Screen Widget (2026-10-02)
+
+> *"redesign the widget completely to say different things from different subjects
+> … look at Duolingo's widget … It's funny too … change the widget depending on what
+> kind of day it is, or if the user has not come back for a day."*
+
+**Split, picked from three rendered directions.** On the left is his day. The sky
+follows the clock (`components/widget/widgetScenes.ts`), and he gets more desperate as
+midnight comes without a lesson, which is Duolingo's own mechanism. A grey, rainy sky
+means the reader has stayed away. On the right is a fact from one of the seven
+subjects (`data/widgetFacts.ts`, 12 a subject). It moves to a different subject at
+every three-hour slot, and his line sits underneath. Below 260×120dp the widget is just
+his day. The registered name stays `QuoteOfTheDay`, because a widget already on a home
+screen is bound to it.
+
+- **Everything is arithmetic, because nothing can be measured in RemoteViews.**
+  - `lib/widget/mood.ts` holds the state, pose, line and fact as pure functions of the
+    clock and three stored numbers: streak, last lesson day and rest days held.
+  - `widgetLayout.ts` chooses the type size from Inter's real advance widths, which
+    run wider than the phone's Roboto.
+  - `npm run check:widget` (in `npm run check`) runs every fact and line through that
+    arithmetic and holds the contrast. It also holds the voice: he needles attendance,
+    never ability.
+- **The figure is the real rig.** `npm run make:widget-poses` poses `rig.ts` and
+  `moves.ts` into `widgetPoses.ts` as SVG paths.
+- **`npm run sheet:widget`** draws every state at four sizes, through the same modules.
+  - `-- --offer` writes `assets/images/widget-offer/*.png`, the in-app offer's pictures.
+  - `-- --preview` rewrites `widget-preview.png`, the picker's thumbnail. That file is
+    COMPILED, so run it before a build, not before an update. The picker's label
+    ("Quote of the Day") and description in `app.json` are also stale until a build
+    changes them, and `AddWidgetSheet`'s steps quote that label.
+- **The Home button is gone.** It is replaced by `components/widget/WidgetOffer.tsx`,
+  mounted in the tab layout. It appears every three days (`OFFER_EVERY_MS`, per device),
+  on Android, after 20 seconds in the foreground, only on a tab screen and only while
+  no widget is placed, so a reader who has added it is never asked again. It never
+  stacks with the rating sheet (`uiStore.promptUp`). Settings › Display keeps an Add
+  button for anyone who chose "Not now". The scene picker and `settings.widgetBackground`
+  went.

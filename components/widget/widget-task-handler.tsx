@@ -1,8 +1,8 @@
 import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
-import { buildQuoteWidget } from '@/lib/widget/render';
+import { buildHomeWidget } from '@/lib/widget/render';
 
 // Headless task that Android invokes for widget lifecycle events. It runs WITHOUT
-// the app's UI, so it must be self-contained: buildQuoteWidget reads the pinned
+// the app's UI, so it must be self-contained: buildHomeWidget reads the pinned
 // quote (or the 3-hour rotation) and the live streak from storage, then renders.
 // Registered in index.js via registerWidgetTaskHandler so it's available to the
 // headless JS bundle.
@@ -15,7 +15,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       // For WIDGET_CLICK the OPEN_URI action already opens the deep link; we just
       // refresh so a tap also advances the quote if a rotation window rolled over.
       // props.widgetInfo carries the real dp size; the scene is drawn to it.
-      props.renderWidget(await buildQuoteWidget(props.widgetInfo));
+      props.renderWidget(await buildHomeWidget(props.widgetInfo));
       break;
     case 'WIDGET_DELETED':
     default:
