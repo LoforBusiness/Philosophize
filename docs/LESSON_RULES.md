@@ -11052,6 +11052,9 @@ apple-shaped stone. This amends H60 for objects; it does not repeal it:
 `check:objects` holds the pair, the lamp and the label, counter-tested by swapping an
 entry's base and shade.
 
+*(Since 2026-10-01 a dialogue lesson MUST draw every object in its own colours, not may:
+see AR1.)*
+
 ### AP12 · The dialogue lesson is the house format, in every subject
 
 > *"the new economics lesson is absolutely amazing. I love the simplicity of it. I love
@@ -11276,7 +11279,8 @@ it as the drawing being loose, not as a person.
    wandered across the table on `drift(t)` and its housemate's pencil tapped on a sine,
    forever, after every pose was still. A hand target that moves on the clock stands only
    when the motion IS the action — a spoon going round a cup — and the line says so in an
-   `// AP18: …` comment. A seated listener who loses his fidget gets his life back in his
+   `// AP18: …` comment — and since 2026-10-01 that action still ENDS after a stroke or two
+   (AR5). A seated listener who loses his fidget gets his life back in his
    head (a nod along, N21), never in his hands.
 4. `check:dialogue` fails a dialogue scene that calls a drifting pose function, a hand
    target on the clock with no `AP18:` reason, and a stale `ARM_REST` table.
@@ -11329,3 +11333,130 @@ data tables included, and every label is measured on every beat. Zero in every d
 lesson; the retired lessons are counted, not failed. The first run found nine: CLOCK, JAR,
 APPLE and CHOCOLATE (growth2), MACARONS (biz2), £12 (econ2), POINTY NOSE (sci2) and the years
 1985 and 2010 (hist2).
+
+## Group AR · A hand uses a thing the way a person does, and the thing is what it is
+
+> *"I think they're created only with the color palette and not given free reign to use
+> any colors. So I want these lessons to be made so that they all have different colors
+> that are right for the objects. Like for the first economics one, the pie or the
+> different objects don't actually look like the object."* — and — *"when stickmen
+> interact with objects, they interact with them only in a natural way. Like when they
+> grab umbrellas, they actually grab them in a human-like way. Or if they take a coffee …
+> it looks like they're just grabbing the cup. If there's a saucer, then they grab the
+> saucer and the cup, but then when they drink it, it looks like they actually drink it.
+> Off the saucer … the woman stickman that has a cup moves her arm in a back way … no
+> movement of the arm that looks awkward, like too far backwards, or continuous, the same
+> movement over and over again. Only natural, real-looking movements."* (2026-10-01)
+
+Measured before a line changed, over the 21 dialogue lessons: economics-foundations-1 drew
+**none** of its objects in a real colour (the pie and the loaf were grey-green discs in the
+branch's olive), and five more drew under 60% of their object area in one; **106**
+figure-beats threw a raised hand behind the body (business-foundations-1's partner held her
+cup up behind her own head to show it to a queue she had her back to); and **30** repeated
+one stroke more than twice in a row (a spoon stirring for a whole line, a hand sawing the
+air while chalking). Every one of them passed every check the suite had: AP11 said an object
+MAY wear its colour, and AP18 let a clock-driven hand stand if a comment named the action.
+
+### AR1 · Every object is drawn in the colours it is
+
+AP11 said a thing MAY wear its real colour. In a dialogue lesson it MUST: a pie is a baked
+crust, a counter is wood, a café's tiles are tiles, a canopy is striped canvas, a coin is
+brass or silver. The branch's stage tones are for what is not a thing — the floor and the
+ground line, the plates a word sits on, the answer plates, a diagram — and nothing else.
+
+- **Every colour comes from `NATURAL` in `objects.ts`** (AP11's table and its rules: a pair
+  that obeys the lamp, a word only on the lit face). A colour the table lacks is ADDED to
+  it, with what it is. An `<ObjectArt>` takes `tint(parts, key)`, or the drawing's parts
+  carry `nat` already; a thing a scene draws in Views reads `NATURAL.x.base` the same way.
+- **A thing that has several colours has several entries**: a pie's crust and its glaze, a
+  stall's posts and its canvas stripes, a book's cover and its pages. One colour over a whole
+  object is a silhouette in a colour, not the object.
+- **It must also LOOK like the object** (group AM, AP5): a reference fetched and looked at,
+  its parts in its proportions — a pie has a rim and a lid with vents, a loaf a scored top
+  and a rounded crust, an umbrella a canopy, a shaft and a crook.
+
+`check:replay` holds it: it reads every object drawing a dialogue scene mounts, and fails one
+whose body is more than `AR_TONED` (half) the branch's stage tone. It cannot see a thing a
+scene draws from Views; the beat sheet can, so look at it.
+
+### AR2 · A thing is held where a person holds it
+
+A hand closes on the part of a thing made for a hand, and the thing hangs from that grip:
+
+| thing | where the hand is | how it hangs |
+|---|---|---|
+| a cup or a mug | its handle (or round its body, if it has none) | upright |
+| a cup with a saucer | the saucer, flat on the palm under the cup | both level |
+| a jug, a kettle, a watering can | its handle | upright; tipped only to pour |
+| an umbrella, a walking stick | the crook or the handle | hanging straight down from it, tip to the ground, or tucked under the arm |
+| a spoon, a fork, a pen, chalk | the end of its handle, the point to the work | the point down or forward |
+| a book, a board, a sign | its bottom edge or its spine, in front of the chest | upright, facing whom it is shown to |
+| a coin, a note, a ticket | between the fingers, at the tip of the hand | flat |
+| a bag, a basket, a bucket | its handle | hanging below the hand |
+
+- **The object is drawn about its grip point**, and its rider puts that point on the wrist —
+  never the object's centre on the wrist, which floats a mug beside a fist.
+- **It keeps its orientation.** A held cup is upright and a held umbrella hangs; a thing
+  tilts only while it is being poured, drunk from or shown.
+- **A thing taken from a surface is reached FOR at its grip, and put back where it came
+  from**, its grip point first.
+
+Held by eye on the beat sheet: no checker can tell a handle from a body.
+
+### AR3 · A drink is drunk
+
+- **The cup goes to the lips.** `lipsAt`, `sipHandAt`, `sipTilt` and `sipHead` in
+  `interact.ts` are the one construction: the hand goes to `sipHandAt` (past the lips and a
+  touch below, 26 units clear of the head so the forearm is not swallowed), the cup is drawn
+  with its rim at `lipsAt` and its handle in the hand, it tips toward the face by `sipTilt`
+  while it is there, and the head dips to meet it (`sipHead`). It stays at the lips for
+  about half a second and comes back down.
+- **A cup on a saucer is drunk off the saucer.** The saucer is lifted with the cup and held
+  flat at the chest in the OTHER hand (`saucerHandAt`); the cup alone goes up to the mouth
+  and comes back down onto the saucer. A cup is never drunk with its saucer stuck to it.
+- **A sip is an event, at most twice in a line** (AR5), timed to a pause in the talk, never
+  on a clock that repeats while someone speaks.
+
+### AR4 · An arm is never thrown behind the body
+
+A person shows, holds, offers and reaches for things IN FRONT of himself. To hand something
+to a person behind him, or to point at a thing behind him, he TURNS first — the scene
+changes his facing for the beat, or for the part of it the act needs (`facing()`), and the
+hand goes out in front.
+
+- **A raised hand** (above the waist) is never more than `AR_RAISED` (8) units behind the
+  spine — the back of the torso is 6.
+- **A hanging hand** is never more than `AR_HANG` (18) behind it: the resting listening
+  poses hang the far hand about 12 back, which is how a side-on figure's arm reads; 20 is an
+  arm swung back.
+- **Nothing held is held behind**: a cup, a coin, a book is held in front of the chest or at
+  the hip on the side he faces.
+
+`check:replay` measures both, every frame, in the figure's own units, and fails any in a
+dialogue lesson. A walk's arm swing is not counted.
+
+### AR5 · A stroke plays at most twice, and then the hand rests
+
+Stirring, wiping, chalking, sawing, waving, tapping, beckoning: a person does it a couple of
+times and stops. A hand that goes round and round, or back and forth, for the whole of a line
+is AP18's drift written as an action. So:
+
+- **No more than two back-and-forths**, then the hand stops where the stroke ended and rests
+  there or goes back to the pose. A long action that needs more — writing a word on a slate —
+  is a PATH that travels (the chalk moving along the line), not a loop on the clock.
+- **AP18's `// AP18:` reason no longer licenses a loop that runs on**: the motion may be the
+  action, and the action still ends. Window it to one or two cycles.
+
+`check:replay` counts how many times each hand turns back on itself within 0.8s of the last
+turn, while the figure stands, and fails more than `AR_RUN` (4) in a row.
+
+### AR6 · A held thing is held still, and close
+
+- **While he listens, a thing in his hand rests**: a cup at the chest or the hip, a book
+  against him, an umbrella hanging — in front of him, below the shoulder, within about 20
+  units of his body. Not held out at arm's length, not up by the head, and not swinging.
+- **An arm carrying a thing does not swing as he walks** (`carryMode`): it is a full hand.
+- **A thing goes where the hand goes**, every frame, from the moment it is picked up to the
+  moment it is put down; it never floats a frame behind.
+
+Held by eye on the beat sheet, and by AR4 for the far end of it.

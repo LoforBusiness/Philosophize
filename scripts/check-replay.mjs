@@ -535,9 +535,9 @@ function walkTree(root, inst, file) {
       visit(out, chainSoFar, `${key}>`, kid);
       return;
     }
-    if (process.env.REPLAY_OBJECTS && props && Array.isArray(props.parts) && props.parts.length && props.parts[0] && typeof props.parts[0].role === 'string') {
+    if (props && Array.isArray(props.parts) && props.parts.length && props.parts[0] && typeof props.parts[0].role === 'string') {
       const where = node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}:${key}` : key;
-      if (!OBJECTS_SEEN.has(where)) OBJECTS_SEEN.set(where, { file: path.basename(file), parts: props.parts, line: props.line });
+      if (!OBJECTS_SEEN.has(where)) OBJECTS_SEEN.set(where, { file: path.basename(file), parts: props.parts, line: props.line, src: node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}` : key });
     }
     const { statics, tokens } = styleParts(props.style);
     const src = node.source ? `${path.basename(node.source.fileName || file)}:${node.source.lineNumber}` : '';
@@ -855,9 +855,56 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       }
       m.prev = cur;
     });
+    // AR4 · AR5 — HOW A HAND MOVES (2026-10-01). Measured every frame from the pose
+    // bundle, in the figure's own units: how far either hand gets BEHIND the spine (an
+    // arm thrown back past the body, which no person does to show or hold a thing),
+    // and how many times a hand turns back on itself while the figure stands — the
+    // same stroke over and over. A walk swings the arms by design, so a frame where the
+    // pelvis travels is not counted, and the count of that hand starts again after it.
+    const HYST = 1.5;
+    const RUN_GAP = 0.8;
+    const handM = figs.map(() => ({ behind: 0, behindAt: 0, high: 0, highAt: 0, rev: [0, 0], ax: [null, null], prevPel: null }));
+    const handSample = () => figs.forEach((ch, i) => {
+      let B = null;
+      try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
+      if (!B || !B.wrR || !B.wrL || !B.shB || !B.pel) return;
+      if ((B.opacity ?? 1) < 0.3) return;
+      const kk = B.scale > 0.05 ? B.scale : 1;
+      const d = B.dir < 0 ? -1 : 1;
+      const px = +B.pel[0].translateX, py = +B.pel[1].translateY;
+      const sx = +B.shB[0].translateX;
+      const m = handM[i];
+      const walking = m.prevPel != null && Math.abs(px - m.prevPel) > 0.02;
+      m.prevPel = px;
+      ['wrR', 'wrL'].forEach((w, a) => {
+        const wx = +B[w][0].translateX, wy = +B[w][1].translateY;
+        const back = -(wx - sx) * d / kk;
+        if (walking) { m.ax[a] = null; return; }
+        if (back > m.behind) { m.behind = back; m.behindAt = api.bt.value; }
+        // RAISED and behind: above the waist (20 units under the shoulders), where a
+        // hand is showing, holding or reaching — not hanging at the figure's side.
+        if (wy - +B.shB[1].translateY < 20 * kk && back > m.high) { m.high = back; m.highAt = api.bt.value; }
+        const v = [(wx - px) / kk, (wy - py) / kk];
+        if (!m.ax[a]) { m.ax[a] = v.map((x) => ({ ref: x, trend: 0, rev: 0, last: -9, run: 0 })); return; }
+        // A STROKE REPEATED is a run of turns that come quickly one after another:
+        // a spoon going round, a hand sawing the air. A trade has as many turns, each
+        // a separate reach with a pause between, and is a sequence, not a loop.
+        const turn = (s2) => { const now = api.bt.value; s2.run = now - s2.last <= RUN_GAP ? s2.run + 1 : 1; s2.last = now; s2.rev++; m.run = Math.max(m.run || 0, s2.run); };
+        m.ax[a].forEach((s, j) => {
+          const x = v[j];
+          if (s.trend === 0) {
+            if (x > s.ref + HYST) { s.trend = 1; s.ref = x; } else if (x < s.ref - HYST) { s.trend = -1; s.ref = x; }
+          } else if (s.trend === 1) {
+            if (x > s.ref) s.ref = x; else if (x < s.ref - HYST) { s.trend = -1; s.ref = x; turn(s); }
+          } else if (x < s.ref) s.ref = x; else if (x > s.ref + HYST) { s.trend = 1; s.ref = x; turn(s); }
+          m.rev[a] = Math.max(m.rev[a], s.rev);
+        });
+      });
+    });
     const steps = stepsOf(n);
     for (let f = 0; f <= steps; f++) {
       FRAME++;
+      handSample();
       if (process.env.REPLAY_SLIDE) slideSample();
       if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
@@ -874,6 +921,10 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
             x: +B.pel[0].translateX || 0, y: +B.pel[1].translateY || 0,
             hx: +B.head[0].translateX || 0, hy: +B.head[1].translateY || 0,
             opacity: B.opacity ?? 1,
+            hands: (() => {
+              const m = handM[figs.indexOf(ch)];
+              return m ? { behind: +m.behind.toFixed(1), at: +m.behindAt.toFixed(2), high: +m.high.toFixed(1), highAt: +m.highAt.toFixed(2), rev: Math.max(...m.rev), run: m.run || 0 } : null;
+            })(),
             slide: (() => {
               const m = slide[figs.indexOf(ch)];
               return m ? { slide: +m.slide.toFixed(2), worst: +m.worst.toFixed(2), travel: +m.travel.toFixed(1), steps: m.steps } : null;
@@ -989,7 +1040,8 @@ function checkLesson({ id, file }) {
   const errors = [...TOKENS.values()]
     .filter((s) => s.token.__animatedStyle >= tokenStart && s.error)
     .map((s) => String(s.error.message || s.error));
-  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3), figs: snaps.map((sn) => sn.figs || []), summary: BEATS.map((b) => !!b.summary), labels, dialogue: BEATS.some((b) => !!b.speaker) };
+  return { findings, strips, detached, errors: [...new Set(errors)].slice(0, 3), figs: snaps.map((sn) => sn.figs || []), summary: BEATS.map((b) => !!b.summary), labels, dialogue: BEATS.some((b) => !!b.speaker),
+    objects: [...OBJECTS_SEEN.values()].filter((o) => o.file === path.basename(sceneFile)).map((o) => ({ src: o.src, parts: o.parts })) };
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1153,6 +1205,57 @@ ok('nobody stands frozen while another talks to him (N21)', frozenListeners.leng
 ok('the lead and the visitor face each other (N21)', visitorAway.length <= VISITOR_FACE_BUDGET,
   `${visitorAway.length}, budget ${VISITOR_FACE_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
+
+// ── AR · A HAND USES A THING THE WAY A PERSON DOES (2026-10-01) ─────────────
+//
+// "when stickmen interact with objects, they interact with them only in a natural
+// way … I do not want stickmen to move their arms in that far back position … no
+// movement of the arm that looks awkward, like too far backwards, or continuous, the
+// same movement over and over again" — and the first lessons' objects "don't actually
+// look like the object": a pie struck in the branch's blue-grey is a grey disc.
+// Zero in every dialogue lesson; the retired narrated lessons are not measured.
+//
+//   AR1  an object is drawn in the colours it is: no drawing whose body is mostly
+//        the branch's stage tone (the floor, the plates and the diagrams keep it).
+//   AR4  a raised hand stays in front of the body: above the waist, no hand gets
+//        more than AR_RAISED units behind the spine; hanging, no more than AR_HANG.
+//   AR5  a stroke plays at most twice: no more than AR_RUN quick turns in a row.
+const AR_RAISED = 8;
+const AR_HANG = 18;
+const AR_RUN = 4;
+const AR_TONED = 0.5;
+const arBehind = [];
+const arLoop = [];
+const arToned = [];
+{
+  const area = (p) => (p.k === 'bar' ? Math.hypot(p.x2 - p.x1, p.y2 - p.y1) * p.t : (p.k === 'tri' ? 0.5 : 1) * p.w * p.h);
+  for (const r of rows) {
+    if (!r.dialogue) continue;
+    (r.figs || []).forEach((beat, n) => {
+      if (r.summary && r.summary[n]) return;
+      for (const fg of beat) {
+        const h = fg.hands;
+        if (!h || fg.opacity < 0.3) continue;
+        if (h.high > AR_RAISED) arBehind.push(`${r.id} beat ${n}: ${fg.src} — a raised hand ${h.high} units behind his back, ${h.highAt}s in (AR4)`);
+        else if (h.behind > AR_HANG) arBehind.push(`${r.id} beat ${n}: ${fg.src} — a hand hangs ${h.behind} units behind him, ${h.at}s in (AR4)`);
+        if (h.run > AR_RUN) arLoop.push(`${r.id} beat ${n}: ${fg.src} — the same stroke ${h.run} turns in a row (AR5)`);
+      }
+    });
+    for (const o of r.objects || []) {
+      const body = o.parts.filter((p) => p.role === 'mass' || p.role === 'face');
+      const all = body.reduce((a, p) => a + area(p), 0);
+      if (all <= 0) continue;
+      const toned = body.filter((p) => !p.nat).reduce((a, p) => a + area(p), 0) / all;
+      if (toned > AR_TONED) arToned.push(`${r.id}: ${o.src} — ${Math.round(toned * 100)}% of the drawing is the branch's stage tone, not its own colour (AR1)`);
+    }
+  }
+}
+showN21(arToned, 'TONED — an object is drawn in the stage tone instead of its own colours (AR1):');
+showN21(arBehind, 'BEHIND — a hand is thrown back behind the body (AR4):');
+showN21(arLoop, 'LOOP — a hand repeats one stroke over and over (AR5):');
+ok('every object in a dialogue lesson wears its own colours (AR1)', arToned.length === 0, `${arToned.length}`);
+ok('no hand is thrown back behind the body (AR4)', arBehind.length === 0, `${arBehind.length}`);
+ok('no hand repeats one stroke over and over (AR5)', arLoop.length === 0, `${arLoop.length}`);
 
 // AQ1 — every label fits its plate, and every plate sits on its object.
 {

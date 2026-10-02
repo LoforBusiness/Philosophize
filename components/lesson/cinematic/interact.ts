@@ -148,6 +148,59 @@ export function headStage(s: Stance, p: Placed): P2 {
   return j.head;
 }
 
+// ── drinking, and holding a cup on its saucer (LESSON_RULES AR3) ────────────
+//
+// The owner, 2026-10-01: *"if they take a coffee, it is, looks like they're just
+// grabbing the cup. If there's a saucer, then they grab the saucer and the cup, but
+// then when they drink it, it looks like they actually drink it. Off the saucer."*
+//
+// A drink has three places, all measured off the head the rig actually drew (so a
+// nod or a lean carries them): the LIPS, in front of the face at mouth height; the
+// CUP HAND, out past the lips and a little below, where the hand holds the handle and
+// stays 26 units clear of the head centre (constraint 2 above — any nearer and the
+// forearm disappears into the head); and the SAUCER HAND, the other hand flat at the
+// chest under the cup's path, so the cup comes back down onto it. A scene draws the
+// cup BETWEEN the cup hand and the lips — handle in the hand, rim at the mouth — and
+// tilts it toward the face by `sipTilt` while it is there. Constraint 1 holds: the cup
+// hand is about 26 units from its shoulder, the saucer hand about 24.
+
+/** The lips, in front of the face at mouth height: head centre + (16, 8) local. */
+export function lipsAt(s: Stance, p: Placed): P2 {
+  'worklet';
+  const h = headStage(s, p);
+  return { x: h.x + p.dir * 16 * p.k, y: h.y + 8 * p.k };
+}
+/** Where the hand holding a cup goes for a sip: past the lips and a touch below. */
+export function sipHandAt(s: Stance, p: Placed): P2 {
+  'worklet';
+  const h = headStage(s, p);
+  return { x: h.x + p.dir * 26 * p.k, y: h.y + 11 * p.k };
+}
+/** The other hand, flat at the chest under the cup's path, holding the saucer. */
+export function saucerHandAt(s: Stance, p: Placed): P2 {
+  'worklet';
+  const h = headStage(s, p);
+  return { x: h.x + p.dir * 18 * p.k, y: h.y + 33 * p.k };
+}
+/**
+ * How far a cup tips toward the face, in degrees for a View's `rotate`, as it reaches
+ * the lips: `u` 0 (upright, on its way) → 1 (at the mouth, drinking). Facing right
+ * the cup's top tips LEFT, toward the face — counter-clockwise, so negative.
+ */
+export function sipTilt(u: number, dir: number): number {
+  'worklet';
+  return -(dir < 0 ? -1 : 1) * 30 * clamp01(u);
+}
+/**
+ * The head meeting the cup: a small forward dip of the neck as the cup arrives. On a
+ * faceless disc the arm and the cup do most of the telling; the dip says he drinks
+ * rather than holds the cup up to look at it.
+ */
+export function sipHead(s: Stance, u: number): Stance {
+  'worklet';
+  return { ...s, neck: s.neck - 0.12 * clamp01(u) };
+}
+
 /** A stage point in a figure's pelvis-local frame. */
 function local(tx: number, ty: number, p: Placed, bob: number): P2 {
   'worklet';
