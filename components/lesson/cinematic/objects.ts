@@ -14,7 +14,7 @@
 //
 // ── ZERO IMPORTS, LIKE rig.ts AND critters.ts ───────────────────────────────
 //
-// So `node scripts/sheet-objects.mjs ship` draws it in plain Node and "does that
+// So `node scripts/sheet-lesson-objects.mjs ship` draws it in plain Node and "does that
 // look like a ship?" is answered in seconds. That loop is the whole reason this is
 // affordable: the first hull here was built from the reference's own words — *"the
 // bottom is a smooth U"* — and came out a BOWL. Two iterations at thirty seconds
@@ -5339,7 +5339,7 @@ export const weatherVane = (x: number, y: number, w: number, h: number) => fit(W
 
 // ── hist3: objects for this lesson go ABOVE this line ──
 
-/** Every object, by name — what `sheet-objects` and `check:objects` walk. */
+/** Every object, by name — what `sheet-lesson-objects` and `check:objects` walk. */
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
   door, shelf, flag, bridge, window, wheel, coin, leaf, plinth, column, cave,

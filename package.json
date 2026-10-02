@@ -208,6 +208,7 @@
     "countertest:idle": "node scripts/countertest-idle.mjs",
     "ref": "node scripts/get-reference.mjs",
     "sheet:objects": "node scripts/sheet-objects.mjs",
+    "sheet:lesson-objects": "node scripts/sheet-lesson-objects.mjs",
     "check:objects": "node scripts/check-objects.mjs",
     "countertest:objects": "node scripts/countertest-objects.mjs",
     "check:named": "node scripts/check-named.mjs",

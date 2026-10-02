@@ -10477,7 +10477,7 @@ second rounded box. The tree was a 4×30 stick under a 24-unit circle. The table
 92×7 bar on two legs — a capital Π.
 
 `components/lesson/cinematic/objects.ts` is the library, `ObjectArt.tsx` puts one on a
-stage, `npm run sheet:objects` draws any of them in plain Node, and
+stage, `npm run sheet:lesson-objects` draws any of them in plain Node, and
 `npm run check:objects` holds what a number can hold. `node
 scripts/countertest-objects.mjs` stages every defect below on a copy.
 
@@ -10633,7 +10633,7 @@ anything changed (`scripts/lib/objectink.mjs` rasterises a drawing the way
 `check:objects` §7 holds all of it: the renderer draws a grown triangle from its
 corners, both components strike `outlineFor`, and no library object at 20, 56 or 140
 units has ink further from its fill than the outline reaches. `SIZE=22 npm run
-sheet:objects` draws an object at the size a scene places it, which is where a line
+sheet:lesson-objects` draws an object at the size a scene places it, which is where a line
 weight is judged — the default 56 is what hid this.
 
 ### AA10 · The visitor may not walk THROUGH the lead
@@ -10923,7 +10923,7 @@ prompts and summary are still the lesson's own voice and still read.
 
 ### AP5 · Every object is drawn from a fetched reference
 
-Group AM, unchanged: `npm run ref`, then `objects.ts`, then `npm run sheet:objects`.
+Group AM, unchanged: `npm run ref`, then `objects.ts`, then `npm run sheet:lesson-objects`.
 Hands meet what they hold: an object passes from hand to hand at a point both arms reach
 (the rig's safe reach is about 23 stage units from the shoulder at K 0.76), which is why
 the stall-holder walks to the shopper's end of the counter to trade.
