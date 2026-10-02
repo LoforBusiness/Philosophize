@@ -13,9 +13,9 @@
 
 ## 1. Project Overview
 
-**Ashmere** is a mobile learning app for iOS and Android — philosophy first, and since 2026-09-29 a home for SEVEN subjects (§23). It makes philosophy interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
+**Ashmere** is a mobile learning app for iOS and Android — SEVEN subjects since 2026-09-29, each ONE road of voiced dialogue lessons since 2026-09-30 (§23); it began as philosophy alone. It makes learning interactive, visual, and gamified — using micro-lesson cards, XP systems, streaks, and curiosity-driven progression instead of walls of text.
 
-**Target audience:** Ages 16–35, curious beginners with no prior philosophy background.
+**Target audience:** Ages 16–35, curious beginners with no prior background in the subject.
 
 **Core principle:** Every screen should make the user feel smarter, not more confused.
 
@@ -75,7 +75,7 @@ replacing the letterpress D.
 | Auth storage | expo-secure-store | ~56 | Session in the Keychain/Keystore, **not** plaintext AsyncStorage |
 | Local storage | AsyncStorage | 2.2 | Persists `userDataStore` (key `philosophize-userdata`) |
 | Icons | react-native-svg | 15.15 | Hand-drawn B&W `SketchIcon` + `Glyph` sets (not Ionicons) |
-| Fonts | @expo-google-fonts | latest | Playfair Display (headings), Inter (body), Caveat, IM Fell English, Cormorant + EB Garamond |
+| Fonts | @expo-google-fonts | latest | Playfair Display (headings), Inter (body), Caveat, IM Fell English, Cormorant + EB Garamond, plus Cinzel, Special Elite, UnifrakturMaguntia and Abril Fatface (the profile name faces, `data/profileFonts.ts`; Cinzel also sets the Pass certificate, Special Elite the streak stamp) |
 | Gradients | expo-linear-gradient | ~56 | Scrims over photographic backgrounds (§19) |
 | Build version | expo-application | ~56 | Real APK versionCode — powers the forced-update gate (§20) |
 | OTA | expo-updates | ~56 | EAS Update; **runtime-versioned** — read §18 before publishing |
@@ -110,52 +110,59 @@ Philosophize/
 │   ├── index.tsx                # Landing / onboarding
 │   ├── sign-in.tsx              # Modal presentation
 │   ├── thinker/[id].tsx         # Deep-link target (philosophize://thinker/<id>)
-│   └── (app)/                   # Authenticated tab shell (5 tabs)
+│   └── (app)/                   # Authenticated tab shell (4 tabs)
 │       ├── _layout.tsx          # Tabs: Home · Learn · Pass · Profile (FOUR since
 │       │                        #   2026-09-29 — Thinkers went with the move to
 │       │                        #   seven subjects, §23)
 │       │                        #   animation:'fade' cross-dissolve, 340ms (§19)
 │       │                        #   INSIGHTS WAS THE SIXTH and went on 2026-09-15
-│       ├── index.tsx            # Home: reflection → QuickStart → actions → streak
-│       ├── branches/            # _layout (fade_from_bottom push) → index (Learn)
-│       │                        #   → [branchSlug] (units accordion)
-│       │                        #   → [pathSlug]/lesson/[lessonId]
+│       ├── index.tsx            # Home: header + streak → Quick Start → the subject shelf
+│       ├── branches/            # _layout (fade_from_bottom push) → index (Learn: the seven subjects)
+│       │                        #   → [branchSlug] (a subject's ROAD + units drawer)
+│       │                        #   → [pathSlug]/lesson/[lessonId] · [pathSlug]/review
 │       ├── profile/             # Streak · YOUR PROGRESS (the condensed stats) ·
-│       │                        #   rank ladder · bio · saved quotes · badges
-│       ├── settings.tsx         # Hidden route. 9 sections down a LABELLED rail:
-│       │                        #   Profile · Account · Notifications · Learning ·
+│       │                        #   bio · rank ladder · badges (no saved quotes, §23)
+│       ├── settings.tsx         # Hidden route. 10 sections down a LABELLED rail:
+│       │                        #   Profile · Account · Notifications · Sound · Lessons ·
 │       │                        #   Display · Privacy · Feedback · Subscription ·
 │       │                        #   Danger Zone. Notifications only when §22 says
 │       │                        #   the binary can schedule one
-│       ├── pass.tsx             # THE PASS TAB — a Free-against-Pass chart, the
-│       │                        #   way Brilliant draws it (§14). The only permanent
+│       ├── pass.tsx             # THE PASS TAB — the Pass as a member's card in a
+│       │                        #   drawn reading room, then a Free-against-Pass
+│       │                        #   chart the way Brilliant draws it (§14). The only permanent
 │       │                        #   address the offer has; the rest of the family
 │       │                        #   are interruptions
 │       ├── paywall.tsx          # Hidden route — the one paywall, HardPaywall
+│       ├── streak.tsx           # Hidden route — THE STREAK SCREEN: the mascot,
+│       │                        #   the reader's society (SocietyCard), the month (§7)
+│       ├── devlessons.tsx       # Hidden route — the lesson tester, open only after
+│       │                        #   seven taps on Settings' version line; records nothing
 │       └── intro.tsx            # Hidden route — THE PROFESSOR'S INTRO, then the
-│                                #   paywall for a free reader (§14)
+│                                #   paywall for a free reader — OFF since 2026-09-30, `PROFESSOR_INTRO_ON` (§14)
 ├── components/
 │   ├── lesson/                  # LessonRunner, CardShell, LessonReward, LessonLoader
 │   │   ├── cards/               # 8 card components (incl. DilemmaCard, QuoteCard)
 │   │   ├── interactions/        # MultipleChoice, TrueFalse, SortItems (3 live)
-│   │   ├── cinematic/           # THE BIG ONE — 132 wired cinematic lessons, the
+│   │   ├── cinematic/           # THE BIG ONE — 267 wired cinematic lessons (246 retired + 21 live), the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   NarrationText + ThinkerPeek (the marked deck),
 │   │   │                        #   interact.ts (the figure and what is outside it),
 │   │   │                        #   GENERATED: mustBoxes · tours · gazeTargets,
 │   │   │                        #   per-lesson *Scene.tsx + *Script.ts (§17)
+│   │   │                        #   cast.ts + SpeakerTag (the dialogue cast, §23),
+│   │   │                        #   review/ (UnitReview, ReviewScene, UnitStamp)
 │   │   ├── feedback/            # CorrectFeedback, IncorrectFeedback (built, unwired)
 │   │   ├── scenes/ inkScenes    # per-branch illustration art
 │   │   └── story/               # SnowWalkStory, ExistenceStory, PaintScene (unwired)
 │   ├── branch/                  # THE ROAD — BranchWorld (the walked strip on a
 │   │                            #   branch screen) + worldPath (layout, speed,
-│   │                            #   obstacles, jump) + walkFigure + sceneArt.
+│   │                            #   obstacles, jump) + walkFigure + sceneArt (a landmark per road) + RoadSign (each lesson's board, NEW for 12 days off data/lessonAdded.ts).
 │   │                            #   worldPath/sceneArt have ZERO imports (§17)
 │   ├── launch/                  # LaunchScreen + launchArt + launchScenes +
 │   │                            #   LaunchFigure + launchMotion (§19)
 │   ├── home/                    # QuickStartCard + quickStartScenes (21 drawn
 │   │                            #   pictures, zero imports) + GENERATED quickStartArt,
-│   │                            #   StickmanStroll
+│   │                            #   HomeHeader, SubjectCarousel (the subject shelf)
 │   ├── paywall/                 # THE PASS FAMILY — HardPaywall (the one paywall),
 │   │                            #   PassChart (the Free-against-Pass chart + the
 │   │                            #   free tiles, on the tab, the paywall and
@@ -169,21 +176,28 @@ Philosophize/
 │   │                            #   chalk + hershey (single-stroke letters),
 │   │                            #   professorScript (the words), GENERATED
 │   │                            #   professorVoice, lectureVoice (§14)
-│   ├── gamification/            # StreakBook, StreakWeek, RankUpScreen
+│   ├── subjects/                # THE SEVEN — SubjectCard/SubjectTile, subjectScenes
+│   │                            #   (the seven in their own colours) + GENERATED
+│   │                            #   posterArt, foot (the words on the picture),
+│   │                            #   Poster + posters (the retired six) (§23)
+│   ├── gamification/            # StreakPanel, StreakCalendar, SocietyCard, StreakMascot, RewardLoafer, RankUpScreen
 │   ├── widget/                  # Android home-screen widget surface
 │   └── shared/                  # SketchIcon, Glyph, PhilosopherSheet, RanksBadgesSheet,
-│                                #   SavedQuotesSheet, PaywallSheet, RankSeal,
+│                                #   PaywallSheet, RankSeal, Curtain (a journey from Home fades through paper),
 │                                #   BadgeMedal, insigniaArt (every rank pin and
-│                                #   badge, zero imports) + InsigniaParts,
-│                                #   UpdateGate, DailyQuoteWidget, QuotePlate,
+│                                #   badge, zero imports) + InsigniaParts + insigniaObjects/objects/ (the drawn objects),
+│                                #   UpdateGate, DoodleGround (the wallpaper), QuotePlate,
 │                                #   Sketch{Bar,Line}Chart (both ORPHANED — nothing
 │                                #   imports them; ship or delete),
 │                                #   Portrait, ScreenTransition, PressableScale
 ├── data/                        # Curriculum + reference content (version-controlled)
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
-│   ├── index.ts                 # ALL_BRANCHES + getLessonById, lessonAccessibility,
+│   ├── index.ts                 # ALL_BRANCHES (7 roads) + LEGACY_BRANCHES (the retired 6), getLessonById, lessonAccess + tasteFor (the free lesson), lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 6 branches · 28 units · 246 lessons (§5)
+│   ├── branches/                # 7 ROADS, one a subject, each 1 unit · 3 dialogue lessons (21), + philosophy's 6 RETIRED branches (28 units · 246 lessons, §5, §23)
+│   ├── subjects.ts              # the seven subjects, one list; roadOf() (§23)
+│   ├── lessonAdded.ts           # when each lesson landed — NEW on its sign for 12 days
+│   ├── unitReviews.ts           # every unit review's four questions (§17, AK)
 │   ├── philosophers.ts          # BASE + composes ALL_PHILOSOPHERS (341)
 │   ├── extra-philosophers/      # ancient/eastern/medieval/modern/contemporary/
 │   │                            #   expansion, expansion2a/2b/3/4 (+ *-facts)
@@ -192,7 +206,7 @@ Philosophize/
 │   │                            #   narration are philosophers (make:names)
 │   ├── lessonFocus.ts           # AUTHORED — one maxim per lesson, struck in
 │   │                            #   the deck (make:focus proposes, a person picks)
-│   ├── ranks.ts                 # 40 ranks in 8 orders of 5; rankForXP(),
+│   ├── ranks.ts                 # 48 ranks in 8 orders of 6; rankForXP(),
 │   │                            #   awardedRank(), rankOrder(), rankDegree()
 │   ├── rankLore.ts              # the 8 Circles + a one-line epithet per rank
 │   └── badges.ts                # 74 on the roll (37 live, 37 retired), 5 tiers
@@ -205,15 +219,20 @@ Philosophize/
 │   ├── sound/                   # same four-file pattern; `cue()` in lib/feedback.ts
 │   │                            #   is the ONE call site for haptics + sound together
 │   ├── notifications/           # same pattern + useReminders (§22)
+│   ├── narration/               # same pattern + GENERATED manifest, reveal.ts (§13)
+│   ├── updates/                 # firstRun.ts (§19)
+│   ├── analytics/               # taxonomy.ts — the declared event set (§12)
 │   ├── widget/                  # render.tsx, pin.ts, pinWidget.ts
 │   └── utils/                   # streak, week, progress, xp, quickStart,
-│                                #   useTodayKey, userBio
-├── constants/                   # Colors, xp, subscription, branchArt, achievements (legacy)
+│                                #   useTodayKey, userBio, streakMood, subjectBreadth
+├── constants/                   # design (the tokens), streak, insignia, xp, subscription, branchArt; Colors + achievements are legacy, imported by nothing
 ├── assets/images/branches/      # 6 branch photographs (§19)
 ├── assets/images/quickstart/    # 21 Quick Start pictures, 3 a subject (§19),
 │                                #   GENERATED by make:quickstart
-├── assets/images/welcome/       # sky.jpg — the welcome END CARD only (§19)
-└── supabase/migrations/         # 0001_user_state, 0002_security_hardening,
+├── assets/images/posters/       # subject card + tile PNGs, GENERATED by make:posters (§23)
+├── assets/images/wallpaper/     # the doodle tile behind Home, Learn, Profile, Pass
+├── assets/images/welcome/       # sky.jpg — the old welcome's END CARD (WelcomeAnimation; the live first screen is SeatedWelcome)
+└── supabase/migrations/         # 0001_user_state, 0002_security_hardening, 0003_trial_reminders,
                                  #   001_initial_schema (the dormant relational one, §6)
 └── global.css                   # Tailwind base/components/utilities import
 ```
@@ -232,10 +251,10 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 
 **State & persistence (current reality):**
 - `lessonStore` (Zustand): card index, answers, session XP — ephemeral, reset on lesson end
-- `uiStore` (Zustand): philosopher sheet + ranks/badges sheet visibility
-- `userDataStore` (Zustand + AsyncStorage, key `philosophize-userdata`): **the live source of truth** for all progress — streak, totalXP, lessonsByBranch, earnedBadges, savedQuotes, philosopherViews, profile, settings
+- `uiStore` (Zustand): philosopher sheet + ranks/badges sheet visibility, the paywall, the reward and conferral screens, `launchDone`, the dev lesson tester (`devUnlocked`/`testLessonId`)
+- `userDataStore` (Zustand + AsyncStorage, key `philosophize-userdata`): **the live source of truth** for all progress — streak, totalXP, lessonsByUnit (canonical; lessonsByBranch is its mirror, §5), rankIndex, earnedBadges, freeLesson, subjectDays, savedQuotes and philosopherViews (kept, no longer shown, §23), profile, settings
 - **Supabase cloud sync is LIVE (local-first).** `userDataStore` is still the on-device source of truth, but its persisted slice is mirrored to Supabase and merged back on sign-in via `lib/supabase/sync.ts` + `lib/supabase/useCloudSync.ts` (table `public.user_state`, one JSON snapshot row per user). Sync is best-effort — failures never block offline play. `useCloudSync` tags the store with `_syncOwnerId` so a shared/guest device adopts the account's own snapshot instead of fusing in the previous user's data, and `resetForSignOut()` wipes local data on sign-out.
-  - The older relational sketch (`lib/supabase/progress.ts`, and the `profiles`/`user_xp`/… tables in `001_initial_schema.sql`) is **still dormant** — the app syncs the JSON `user_state` snapshot, not those per-metric tables. §6 documents that dormant relational schema; the live path is the single `user_state` row.
+  - The older relational sketch (`lib/supabase/progress.ts` — deleted 2026-06-11, when sync went live — and the `profiles`/`user_xp`/… tables in `001_initial_schema.sql`) is **still dormant** — the app syncs the JSON `user_state` snapshot, not those per-metric tables. §6 documents that dormant relational schema; the live path is the single `user_state` row.
   - Auth session is stored in the OS Keychain/Keystore (`expo-secure-store`), not plaintext AsyncStorage. RLS is enabled + forced on `user_state` (`auth.uid() = user_id`); see `supabase/migrations/0001_user_state.sql` + `0002_security_hardening.sql`.
 
 **Card components are static imports, not dynamic:**
@@ -244,6 +263,12 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 ---
 
 ## 5. Curriculum Data Model
+
+> **SINCE 2026-09-30 THE LIVE LIBRARY IS SEVEN ROADS OF THREE DIALOGUE LESSONS —
+> 21 in all (§23).** Everything below about 41 a branch, the takeover and the 246
+> describes philosophy's six RETIRED branches (`LEGACY_BRANCHES`), hidden from every
+> screen. It is kept as a finding. `check:cinematic` still levels the retired six and
+> counts all 267 lessons, so `SOLID_FLOOR` is 267.
 
 ### Shape today
 
@@ -280,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 246**, which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 267** (246 when the takeover finished; the seven roads count too), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. `LessonRunner`, `cards/`
@@ -296,7 +321,7 @@ whenever somebody wants the lines back.
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 246, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 267, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -379,7 +404,7 @@ type InteractionData = MultipleChoiceInteraction | TrueFalseInteraction | SortIt
 
 **Two added card types beyond the original six:**
 - `dilemma` — "Choose Your Belief": a `scenario` + `choices`, then 2–4 philosophers' `views` (stance + why) revealed after the user picks. Gates the forward swipe like `question`.
-- `quote` — a saveable quotation with `author`, `era`, optional `work`, and optional `philosopherId` (links the Thinkers tab).
+- `quote` — a saveable quotation with `author`, `era`, optional `work`, and optional `philosopherId` (opens the thinker card, `PhilosopherSheet`; the Thinkers tab went 2026-09-29).
 
 ### Card Sequence Contract
 Every lesson MUST:
@@ -390,8 +415,8 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 246/246 clean. Cinematic lessons have their own
-> shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus ten
+> (`scripts/validate-lessons.mjs`) — 267/267 clean. Cinematic lessons have their own
+> shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus seventy
 > validators — see §11.
 
 ### Content Limits
@@ -412,7 +437,7 @@ Every lesson MUST:
 
 ## 6. Dormant Relational Schema (not the live sync path)
 
-> **Status: dormant — NOT how sync works today.** The live cloud sync (see §4) mirrors the whole `userDataStore` slice into a single JSON `public.user_state` row (`lib/supabase/sync.ts`), **not** the per-metric relational tables below. This section documents the older relational sketch (`lib/supabase/progress.ts` + `supabase/migrations/001_initial_schema.sql`), which is written and RLS-protected but **never called** by the app. Keep it as a reference for a possible future migration to normalized tables; it is not current behavior.
+> **Status: dormant — NOT how sync works today.** The live cloud sync (see §4) mirrors the whole `userDataStore` slice into a single JSON `public.user_state` row (`lib/supabase/sync.ts`), **not** the per-metric relational tables below. This section documents the older relational sketch (`supabase/migrations/001_initial_schema.sql`; its client, `lib/supabase/progress.ts`, was deleted 2026-06-11), which is written and RLS-protected but **never used** by the app. Keep it as a reference for a possible future migration to normalized tables; it is not current behavior.
 
 ### profiles
 | Column | Type | Notes |
@@ -508,9 +533,9 @@ make a beginner leave, and `check:quips` makes it unsayable in all three pools.
 
 | where | file | pool |
 |---|---|---|
-| the streak tab | `lib/utils/streakMood.ts` | 92 lines across six moods |
+| the streak screen | `lib/utils/streakMood.ts` | 92 lines across six moods |
 | the reward screen | `components/gamification/RewardLoafer.tsx` | 217 thoughts in the cloud |
-| Profile's "who you're becoming" | `lib/utils/userBio.ts` | 84 openers + assembled receipts |
+| Profile's "who you're becoming" | `lib/utils/userBio.ts` | 86 subject openers (+ six branch pools of 14) + assembled receipts |
 
 **Which line shows is derived, never random**, and the three do it differently for
 three reasons. The mascot picks from the DAY, so a reader who opens the app twice
@@ -521,8 +546,9 @@ characters every seed on a given day shares, and two lessons back to back repeat
 ~527 refreshes to repeat.
 
 **THE POOL SIZE THAT MATTERS IS THE ONE A READER ACTUALLY DRAWS FROM.** The bio's
-openers looked like a pool of 50; they are six pools of 14, because a reader whose
-top interest is ethics never sees another branch's. The mascot's 92 are six pools,
+openers looked like a pool of 50; they were six pools of 14, because a reader whose
+top interest is ethics never sees another branch's — and since 2026-10-01 they are
+seven pools of 12–13, one a subject. The mascot's 92 are six pools,
 and a reader stuck in `urgent` for a week only ever meets `urgent`. Count per
 bucket, not per file.
 
@@ -559,6 +585,13 @@ costs milliseconds rather than a Metro and a browser. What it holds:
 > detector is blind.
 
 **Streak:** Maintained by completing at least one lesson per calendar day. Alive if the last activity is today or yesterday (`lib/utils/streak.ts`). Stored in `userDataStore`.
+
+**A long streak makes you a member (2026-09-29).** Ten scholar's-club SOCIETIES,
+The Newcomers at 3 days to The Keepers at 365 (`STREAK_TIERS` in
+`constants/streak.ts`). Their thresholds ARE `STREAK_MILESTONES`, one ladder and not
+two, so the reward screen and the streak screen celebrate the same days.
+`SocietyCard` strikes the reader's society on a teal plate on the streak screen, and
+the month calendar draws a run as one flat capsule (`StreakCalendar`).
 
 > **THREE HUES NOW, AND THE THIRD ONE WAS RESEARCHED RATHER THAN FELT.**
 > `constants/streak.ts` licenses a single colour for the whole app on the grounds
@@ -844,7 +877,7 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   The ids
   are FROZEN and `check:badges` holds the roll — the roll is a literal list in
   `validate-badges.mjs`, so **adding one is a deliberate two-file act**, which is
-  what the last two (32,000 and 50,000 XP) were.
+  what the 32,000 and 50,000 XP badges were, and then the four SUBJECTS badges (2026-09-30, §23).
 - **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
   orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
   **TWO AXES, and a pin is the pair.** `order` picks the MATERIAL and the
@@ -987,6 +1020,16 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   only shrinks once, when the crest moves into its frame. That discipline is the
   whole reason it survives being drawn at 44px.
 
+  > **AND EVERY PIN AND BADGE CARRIES A DRAWN OBJECT NOW (2026-10-01).** Forty-eight
+  > plates and thirty-seven medals with one white glyph each read as one thing in eight
+  > colours. Each now holds a full-colour object in a lit WINDOW cut into the plate
+  > (`insigniaObjects.ts` + `components/shared/objects/`), keyed by rank glyph and
+  > badge id; a retired badge borrows the rank object of its glyph. The Ranks sheet is
+  > eight circle chips and one 3×2 card that opens on the reader's own circle, so a
+  > rank-up never means scrolling a 48-rung ladder; the climb chart sits below it.
+  > `npm run sheet:objects` draws these objects (the lessons' are
+  > `sheet:lesson-objects`).
+
   **`npm run sheet:ranks` renders all forty-eight** and is how they are judged —
   `PIN=50` draws them at the size the ladder actually uses, and
   `sheet:ranks jade` draws one order large. It is the only instrument this
@@ -996,7 +1039,7 @@ costs milliseconds rather than a Metro and a browser. What it holds:
   alone would earn, while `awardedRank(rankIndex, totalXP)` is what has actually
   been *conferred*. `userDataStore.rankIndex` advances at most one tier per
   finished lesson, so a rank-up always lands on the reward screen
-  (`RankUpScreen`) instead of appearing silently in the Thinkers tab.
+  (`RankUpScreen`) instead of appearing silently on Profile.
 - `constants/achievements.ts` holds a legacy ~20-achievement list (`xpBonus`/`category`); badges are the system actually surfaced in the UI.
 
 ---
@@ -1033,10 +1076,9 @@ Both are required. Get them from your Supabase project → Settings → API.
 ## 10. Component Conventions
 
 - **Naming:** PascalCase files and components. One component per file.
-- **Styling:** In practice most components use `StyleSheet.create` with shared ink/paper theme tokens (`components/lesson/theme.ts`, `constants/Colors.ts`); NativeWind is configured and available via `className` but used sparingly.
-- **Server vs Client:** Everything is a React Native component (no server/client distinction). Supabase calls happen in TanStack Query hooks or in Zustand actions.
-- **Loading states:** Each data-fetching screen renders a skeleton UI when `isLoading` is true.
-- **Error states:** Show an `EmptyState` component with a retry button.
+- **Styling:** In practice most components use `StyleSheet.create` with the tokens in `constants/design.ts` (`C`, `TYPE`, `SPACE`, `RADIUS`, `LIP`) and `components/shared/tone.ts`. `constants/Colors.ts` is imported by nothing, and `components/lesson/theme.ts` only by the dead card runner; NativeWind is configured and available via `className` but used sparingly.
+- **Server vs Client:** Everything is a React Native component (no server/client distinction). Supabase calls happen in `lib/supabase/` and Zustand actions; TanStack Query's provider is mounted and no screen calls `useQuery`.
+- **Loading and error states:** no screen fetches its content (it is in `data/`), so there is no skeleton UI and no `EmptyState` component; a lesson and a unit review open on `LessonLoader`.
 
 ---
 
@@ -1045,9 +1087,17 @@ Both are required. Get them from your Supabase project → Settings → API.
 > Directory names still say `paths/`, but a "path" **is a unit** — see §5.
 
 > ⚠️ **AND SINCE 2026-09-30 A NEW LESSON IS A DIALOGUE LESSON, IN EVERY SUBJECT**
-> (LESSON_RULES AP12): three voiced stickmen in one real place, no narrator — built the
+> (LESSON_RULES AP12): two to four voiced stickmen from the cast of four (`cast.ts`, AP13, group AS) in one real place, no narrator — built the
 > way `economics-foundations-1` is, which the owner holds up as the standard. Objects may
-> wear their real colours from `NATURAL` in `objects.ts` (AP11).
+> wear their real colours from `NATURAL` in `objects.ts` (AP11) — and since AR1 they MUST.
+>
+> The rules are groups **AP** (dialogue), **AQ** (a word fits its plate, its plate sits on its
+> object), **AR** (objects in their own colours, hands used as people use them, built the AR7
+> way) and **AS** (who each of the four is). AP12 ends with the checklist the 21 were built in:
+> lines written FROM the characters and prose-checked BEFORE voicing, `render-narration` once,
+> `check:replay` green on AR1/AR4/AR5/AQ1, and every beat looked at on a quiet Metro. A new
+> lesson is appended to its subject's one road (AP15) — `data/branches/<subject>/paths/foundations/`,
+> id `<subject>-foundations-N` — with a `data/lessonAdded.ts` date for its NEW sign.
 >
 > ⚠️ **A NEW LESSON IS A CINEMATIC LESSON.** Steps 1–5 below build the data file,
 > which every lesson still needs — the card deck is the fallback the runner uses if
@@ -1071,7 +1121,7 @@ Both are required. Get them from your Supabase project → Settings → API.
    `npm run check`
 9. Give it its voice (LESSON_RULES AC17): add it to `LESSONS` in
    `scripts/lib/narration.mjs`, render its spoken beats through the character
-   ledger, `node scripts/install-narration.mjs <job> <dir>`, then
+   ledger with `node scripts/render-narration.mjs <lesson-id> <dir>` (each line in its speaker's `cast.ts` voice at its AP17 `pace`, never time-stretched; render only once the prose checks pass, because a lesson is voiced once), `node scripts/install-narration.mjs <job> <dir>`, then
    `FFMPEG=<path> node scripts/encode-narration.mjs` and
    `node scripts/make-narration.mjs`. Every lesson in the app speaks, and
    `check:narration` fails **UNVOICED** until this one does.
@@ -1086,13 +1136,13 @@ A unit's `index.ts` exports an array of `Path` objects (the units); each needs a
 stable `id` — `lessonsByUnit` is keyed on it, so **renaming an id silently resets
 that unit's progress for every existing user.**
 
-**Keep every branch at 41, and at 41 cinematic (§5).** The counts were 27–30 and
+**Philosophy's six RETIRED branches stay at 41, and at 41 cinematic (§5); a live subject road grows on its own, one lesson at a time (AP15, `scripts/lib/legacy.mjs`).** The counts were 27–30 and
 it showed on the Learn cards, so they were levelled deliberately; adding one lesson
 to one branch puts them back out. Add six, one per branch — and give each of the six
 a scene, or `CARD_BUDGET` goes up and the build fails, which is the point of it.
 
 **Grep for the free id; do not assume it is the next number.** Every branch runs
-1…32 unbroken today, but that is recent: the ids used to carry *gaps* where lessons
+1…41 unbroken today (a live road's ids are `<subject>-foundations-1…3`), but that is recent: the ids used to carry *gaps* where lessons
 had been removed — ethics had no 9, aesthetics no 11 or 16, epistemology no 2, 13 or
 21 — and those six gaps were exactly the six lessons missing when the branches were
 levelled. So grep the branch's `id:` values, take a vacant number, and **append the
@@ -1100,11 +1150,11 @@ lesson to the end of whichever unit suits it** rather than slotting it where its
 number would sort. The id is cosmetic; the position is load-bearing (F45b, and the
 `lessonsByUnit` warning above).
 
-To add a new branch: create an `index.ts` in the branch directory, export a
+To add a new subject (AP15: one road each): an entry in `data/subjects.ts` whose `courses` is one new `BranchKey` with its hue in `constants/design.ts` `BRANCH`, then create an `index.ts` in the road's directory, export a
 `Branch` object, add to `ALL_BRANCHES` in `data/index.ts`.
 
 **Card-type notes:**
-- A `quote` card needs a stable unique `id` (e.g. `lq-ethics-3-1`) so it can be saved; include `author`, `era`, optional `work`, and a `philosopherId` to link the Thinkers tab.
+- A `quote` card needs a stable unique `id` (e.g. `lq-ethics-3-1`) kept unique by `check:quotes` (nothing can be saved since 2026-09-29, §23); include `author`, `era`, optional `work`, and a `philosopherId`, which colours its plate by the thinker's era.
 - A `dilemma` card has a `scenario`, `prompt`, 2–4 `choices`, and 2–4 `views` (each a thinker's `stance` + `why`) revealed after the user chooses. Like `question`, it gates the forward swipe.
 - One clear idea per card; follow the Lesson Design Principles (§13).
 
@@ -1130,15 +1180,21 @@ followed:
 > knocked over again on every tap. It loads each real scene in plain Node with React,
 > React Native and Reanimated stood in (a hook store, a once-per-frame derived value,
 > styles it can call; `rig`, `moves`, `camera`, `cinematicKit` and the scripts are the
-> real modules), plays all 244 lessons in about 25 seconds, and fails on anything that
+> real modules), plays all 267 lessons in about 25 seconds, and fails on anything that
 > jumps at a beat change and would still jump if that beat had changed nothing (C20c),
 > on a painted box only as tall as its padding, and on words that stay put while their
 > plate tips (S12). Its first run found 13 more lessons repeating something; all are
 > fixed. One-frame CUTS where a beat really does change are a separate class, held at
-> 302 in 41 lessons by `CUT_BUDGET`, and `node scripts/countertest-replay.mjs` puts
+> 299 by `CUT_BUDGET` (302 in 41 lessons when this was written), and `node scripts/countertest-replay.mjs` puts
 > each defect back.
+>
+> **AND SINCE 2026-10-01 IT HOLDS THE DIALOGUE LESSONS' HANDS AND WORDS.** Reading every
+> figure's pose bundle and every label each frame, it fails AR1 (an object in a stage
+> tone), AR4 (an arm thrown behind the body), AR5 (a stroke played more than twice) and
+> AQ1 (a word that does not fit its plate, or a plate off its object) — at zero in the 21
+> dialogue lessons. The retired narrated ones are counted, not failed.
 
-> **`check-rules` is the newest and it is not about a lesson at all — it is about
+> **`check-rules` was the newest when it landed (2026-09-08), and it is not about a lesson at all — it is about
 > the file lessons are written FROM.** `docs/LESSON_RULES.md` is what an author
 > reads before writing anything, so a stale line there does not cause one defect,
 > it causes the next twenty: **a wrong rule is worse than a missing one, because it
@@ -1160,7 +1216,7 @@ followed:
 > reminder. It exits 0 today. `check-clear` and `check-plain` — which this file
 recorded as the two permanent failures, "measuring lesson prose that is being
 rewritten in another session's working tree" — are now green and sitting EXACTLY
-on their budgets, 72 and 18. That is the dangerous state to inherit, not a
+on their budgets, 72 and 18 (1 and 0 since the lecture rewrite of 13 Sep). That is the dangerous state to inherit, not a
 comfortable one: **a check at its budget fails on the next single sentence
 anybody writes**, and the writing pass in §13 did precisely that, twice, in one
 commit. Both were mine and both were real — `check-plain` caught a sentence I had
@@ -1179,8 +1235,8 @@ carry high-water budgets rather than zeroes — `check-scale` allows 18 oversize
 figures and 3 hand-built PEOPLE — it was 6 until four of the seven it reported
 turned out to be a bird, a hen, a zebra and a cow, which the rule was never about
 (Z6) — and `check-moves` 6 head-clearance defects plus
-5 acts that barely move across their own `u`, all of them cold. A budget
-line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 246 lessons; `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+3 acts that barely move across their own `u`, all of them cold. A budget
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 267 lesson files (21 live, 246 retired); `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
 > time it did not.** It existed, this section quoted its budget, and
@@ -1237,21 +1293,27 @@ they belong to, so the rule book has them and this file did not:
   nothing in this app handles the Android back button, so the list has to be
   there from the push.
 
-**Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done.
+**Cinematic lessons have their own rule book:** [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md) — figure scale and proportion, reach and joint rules, motion and end-poses, band/deck/box/wrap clipping, and the text-must-match-the-picture rule. Read it before authoring a cinematic lesson and run its Part 3 checks before calling one done. A dialogue lesson — every new one — is built to groups AP, AQ, AR and AS and the checklist at the end of AP12.
 
 ---
 
 ## 12. Current Status
 
-**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 21, as Ashmere.
+**Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 22, as Ashmere — the gate is at 22 too, so there is one reachable runtime (§18, §20).
 
-- **Content (since 2026-09-30): seven roads, one per subject, each with its first
-  dialogue lesson (§23).** Philosophy's old library — 6 branches · **28 units** · **246
+- **Content (since 2026-09-30): seven roads, one per subject, each with three
+  dialogue lessons, 21 in all (§23).** Philosophy's old library — 6 branches · **28 units** · **246
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
-  three "Did you know?" facts, with nothing missing.
-- **Lessons:** 8 card types; 3 interactions; swipe pager with question/dilemma
-  gating; **247 cinematic lessons — every lesson in the app** (animated stickman
+  three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
+- **Lessons (live): 21 DIALOGUE lessons, three on each road** (§23, LESSON_RULES
+  groups AP–AS): three of the four-strong cast in one real place, every line voiced
+  in its speaker's own Chirp 3 HD voice with their face beside the words, objects
+  in their own colours, and both graded questions answered by tapping the stage.
+  The narrated-lesson layers stay off in them (AP8), and so do maxims and tappable
+  names (Phase 2, §23).
+- **The retired narrated library (246 lessons, §23), as it stood:** 8 card types; 3 interactions; swipe pager with question/dilemma
+  gating; **246 cinematic lessons** (animated stickman
   scenes, §17), answered six
   ways — scene targets, two cards, and the analogue family of `sort` · `poll` ·
   `plot` · `order` · `odd` (§17, group R). **The analogue family is the
@@ -1317,30 +1379,32 @@ they belong to, so the rule book has them and this file did not:
   > from that rule now: two undressed lessons running do not read as a repeated
   > costume, they read as the mascot, and the fallback had been emitting them all
   > along whenever nothing fitted.
-- **Gamification:** 37 live badges in 5 tiers (74 on the roll), **48 ranks in 8 coloured orders, each
-  order struck in a better material and six worked shapes cycling inside every
-  one of them** (§7), a conferred-rank ceremony that shows
-  the pin they held handing over to the pin they just earned, a three-badge
-  profile cabinet, XP + level curve, daily streak. Top rank at 50,000 XP.
-- **Screens:** Home (with Quick Start, §19), Learn → branch → unit accordion →
-  lesson, **Pass**, Profile, Settings, paywall, widget. **FOUR tabs since
+- **Gamification:** 37 live badges in 5 tiers (74 on the roll: 37 retired on 2026-09-30, a SUBJECTS family added, §23), **48 ranks in 8 coloured orders, each
+  order struck in a better material and its own shape, built up rung by rung**,
+  every pin and badge carrying its own drawn object in a lit window (`insigniaObjects.ts`), and the Ranks sheet opening on the reader's circle (§7), a conferred-rank ceremony that shows
+  the pin they held handing over to the pin they just earned, an eight-badge
+  shelf on Profile, XP + level curve, and a daily streak with ten societies (`constants/streak.ts`, 3 to 365 days). Top rank at 50,000 XP.
+- **Screens:** Home (Quick Start and a shelf of the seven subjects, §19, §23), Learn (a grid of
+  subjects) → the subject's road (a signboard per stop, NEW for 12 days from `data/lessonAdded.ts`,
+  a landmark per road) → lesson, **Pass**, Profile, Settings, the streak screen, paywall, widget.
+  A journey from Home goes behind one sheet of paper (`components/shared/Curtain.tsx`). **FOUR tabs since
   2026-09-29** — the Thinkers tab and saved quotes went with the move to seven
   subjects (§23).
-  **FIVE tabs since 2026-09-15**, when the owner asked for the app to be
+  It had gone to **FIVE tabs on 2026-09-15**, when the owner asked for the app to be
   simpler — "there's too much information, there's too many statistics … I want
   the user to be focused on the lessons." Insights was the sixth and its readings
   are one card inside Profile now (§19).
 - **Money:** RevenueCat `scholars_pass` entitlement, and a **HARD PAYWALL since
   2026-09-25**: every lesson and unit review needs the Pass or its three-day
-  trial, and everything else in the app is free. No ad, no free daily lesson.
+  trial, and everything else in the app is free — except **one free lesson of the reader's choosing** (since 2026-10-01: `freeLesson` in the store, `tasteFor` in `data/index.ts`), which stays open to replay. No ad.
   There is one paywall (`HardPaywall`), built from the Pass tab's own chart and
-  door, and before it a reader meets **the professor's intro** — a forty-second
-  self-playing lecture opened from Home's Quick Start or the Learn tab (§14).
+  door. **The professor's intro** that used to come before it has been OFF since
+  2026-09-30 (`PROFESSOR_INTRO_ON = false`): its recording lectures on philosophy's six branches (§14).
   Every claim is derived from the gate that enforces it and re-checked by
   `check:pass`.
 - **Infra:** Supabase auth + cloud sync; EAS Build + EAS Update; forced-update
   gate (§20). **PostHog, and its events are a declared set** —
-  `lib/analytics/taxonomy.ts` holds all 29 with their properties and `npm run
+  `lib/analytics/taxonomy.ts` holds all 39 with their properties and `npm run
   check:events` fails the build if the app sends one that is not declared, or
   declares one nothing sends, or declares a property the PII scrubber deletes in
   flight. That last case is the dangerous one: the event still arrives, the
@@ -1349,12 +1413,15 @@ they belong to, so the rule book has them and this file did not:
   channels — `$screen` is sent by hand because PostHog does not understand Expo
   Router, and turning navigation autocapture on would double-count every screen.
 - **Identity:** hand-drawn black-and-white "paper-and-ink" editorial aesthetic,
-  light theme only — with photographic backgrounds behind branch cards, branch
-  mastheads, the launch screen and Quick Start (§19).
+  light theme only — with drawn colour scenes behind the subject cards, road
+  mastheads and Quick Start, a doodle wallpaper behind Home, Learn, Pass and Profile,
+  and a pen drawing on a white launch screen (§19, §23).
 
 **Known gaps / tech debt:**
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 246, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 246. What is left of the old format is the DATA — every lesson
+> Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
+> are about philosophy's RETIRED narrated library (§23): kept, still checked, out of the app.
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 267, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 267 (the 21 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -1397,7 +1464,8 @@ they belong to, so the rule book has them and this file did not:
   were fixed on sight. Fixing these is a small MIGRATION rather than an edit: a
   reader who has already saved one keeps their copy under the old id and could
   then save the identical text again under the new one. Do it when the saved
-  collection is next opened up, not before.
+  collection is next opened up, not before. Since 2026-09-29 nothing can be saved at
+  all (§23), so this waits on Phase 2.
 - **`fill-blank` and `match` are closed as won't-do.** They were the oldest open
   item in this file. Finishing an interaction for the format being retired is work
   pointed the wrong way, so the stubs stay stubs.
@@ -1407,14 +1475,19 @@ they belong to, so the rule book has them and this file did not:
   mutate the store, record it again — and it lives in a scratchpad rather than in
   `npm run check`, because it needs Metro and a browser. Rebuild it before
   touching that file.
-- **Built but not wired:** `story/` scenes, `KineticNarration` voice, `feedback/`
-  panels. Decide to ship or delete them.
+- **Built but not wired:** `story/` scenes and `feedback/`
+  panels (`KineticNarration` was deleted on 2026-08-04). Decide to ship or delete them.
 - **Daily Review / spaced repetition does not exist.** It is the headline
   Scholar's Pass promise in §14 and the P0 in §15, and nothing has been built.
 - **`lib/utils/progress.ts` is legacy** — `isLessonUnlocked` / `isPathUnlocked`
   encode the *old* per-branch model. The live gate is
   `lessonAccessibility()` in `data/index.ts`. Don't call the old ones.
-- Aesthetics has 3 units where the others have 5.
+- **A live road has no unit review, no maxims and no tappable names yet.**
+  `data/unitReviews.ts` covers only the 28 retired units. The rest of the Phase 2
+  list (in-lesson quotes and names, quote and thinker badges, the widget's
+  content) is in §23. And the professor's intro needs re-recording about seven
+  subjects before `PROFESSOR_INTRO_ON` goes back on.
+- Aesthetics has 3 units where the others have 5 (a retired branch now, §23).
 - **Quick Start truncates a long lesson title, on the most prominent card in the
   app.** "Is Morality Universal or Relative?" renders as "Is Morality Universal
   or …" at 390dp — a `numberOfLines` clamp that runs out by 43pt, which is §14's
@@ -1422,10 +1495,12 @@ they belong to, so the rule book has them and this file did not:
   one is a word the reader does not get. Found on 2026-09-15 the first time a
   harness ever loaded Home, and NOT fixed: the card has a fixed height and a
   photographic ground, so giving the title a third line is a composition decision
-  rather than an edit. Either shorten the titles or re-lay the card.
-- **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~1,400
-  `pointerEvents=` props, 60 `shadow*` declarations across 13 files, and
-  `textShadow*` in 10. All three are deprecated, and the decision is to leave them
+  rather than an edit. Either shorten the titles or re-lay the card. (That lesson is
+  retired and the card is a drawn scene now; the longest live title, "How Do We Decide
+  What’s Right?", has not been measured.)
+- **Deprecated RN style APIs — a KNOWN and deliberately un-swept debt.** ~3,000
+  `pointerEvents=` props, ~50 `shadow*` declarations across 12 files, and
+  `textShadow*` in 7. All three are deprecated, and the decision is to leave them
   until someone can do it with a device attached. The reasoning, because it is
   the sort of thing that gets "tidied" by the next reader:
   - **Both warnings come from `react-native-web`, not React Native.**
@@ -1454,7 +1529,7 @@ they belong to, so the rule book has them and this file did not:
 ## 13. Lesson Design Principles (north star)
 
 > ⚠️ **Before writing or changing any cinematic lesson, read [`docs/LESSON_RULES.md`](docs/LESSON_RULES.md).**
-> That is the binding rule book — its numbered rules in groups A–AA (truth of the
+> That is the binding rule book — its numbered rules in groups A–AS (truth of the
 > picture · the figure · motion · nothing hidden · questions · writing · engine · the
 > house shape · being followable · the words · the tour · teleporting · the narrator ·
 > the vocabulary · answer-before-reveal · held objects · not repeating yourself ·
@@ -1462,7 +1537,7 @@ they belong to, so the rule book has them and this file did not:
 > needs mass · the rule book is part of the product · **the narrator is not in the
 > room** · the two marked words in the
 > paragraph · **a ratchet can reach zero without the screens changing** · **the figure
-> and the world it is standing in** · **the drawing has to be the thing it names** · **what the figure WEARS, and what he does when you answer**), an
+> and the world it is standing in** · **the drawing has to be the thing it names** · **what the figure WEARS, and what he does when you answer** · what he makes of it · the paragraph is heard · it must not read as generated · the pen · the figure moves himself · the app's depth · every tap changes the picture · a unit review · both directions · nothing on a clock · an object is a drawing · a choice has a name · a set piece across taps · **a dialogue lesson** · a word in its plate · a hand uses a thing as a person does · **the cast**), an
 > authoring checklist, and the exact verification checks. Groups A–G each exist because
 > a real lesson broke that rule and it was caught on a real phone; group **H** is the
 > reverse — the conventions the built lessons already share, counted out of the source,
@@ -1476,15 +1551,23 @@ they belong to, so the rule book has them and this file did not:
 > than current through it. Y is about the figure's relationship to everything outside
 > it, which had a thousand-line library and three call sites. Z is about whether a
 > drawing IS the thing it names, which no checker can answer and which therefore
-> needs a shortlist and a person. **AL is the newest and it is the only group that
+> needs a shortlist and a person. **AL is the only group that
 > takes something AWAY**: the figure's pelvis may not move on a clock, because a
 > vertical wobble is the one motion with no cause on the stage to explain it. This
 > section is the *why*; that file is the *how*, with the numbers.
 >
+> **AP–AS are the newest, and they are the house format (§23).** A DIALOGUE lesson
+> has no narrator: two to four voiced stickmen from `cast.ts` talk in one real place
+> (AP). Every word fits its plate and every plate sits on its object, and `check:replay`
+> measures both (AQ). Objects wear their own colours and hands use them as people do
+> (AR). Who each of the four IS lives in AS alone, held by `check:dialogue`. Much of
+> this section (the lecture voice, the narration pipeline, "all 246") describes
+> philosophy's retired narrated library and is kept for its findings.
+>
 > Three rules were added the day a reader said the lessons were unreadable, and
 > all three are arithmetic rather than taste: **D34** no word on the stage may
 > land under 8pt (a tall band shrinks every label, and `logic8`'s captions were
-> reaching the reader at 5.1pt); **J10** reading ease at least 55 and at most
+> reaching the reader at 5.1pt); **J10** reading ease at least 55 (60 since) and at most
 > 12% of the words pointing rather than naming; **R9** the rotation — the deck
 > is not the default, neighbours differ, and one question stays on the stage.
 >
@@ -2044,7 +2127,7 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     fill, and the unit review starts its sound `REWARD_HIT_MS` early so the chord
     lands with the stamp. The kit is `scripts/lib/chime.mjs`, zero imports, 44.1
     kHz, and the three written clips are byte-identical to what was approved.
-  - **And every lesson speaks, all 246.** `ethics-ethics-9` ("When Both Choices Are
+  - **And every lesson speaks, all 246 then and every dialogue lesson since.** `ethics-ethics-9` ("When Both Choices Are
     Wrong") came first, then the first two lessons of every branch in reading
     order, then the rest of every branch's first unit, then every branch's second
     unit, and then the other 161 lessons at once. Each reads its teaching
@@ -2056,8 +2139,8 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     timings. `NarrationText` reveals the line on that estimate, the player plays a
     line when its paragraph swaps in and cuts it on a tap, and a speaker button in a
     narrated lesson's header writes `settings.narration` (on by default). The two
-    lessons older than the shared player, `logic-arguments-1` and `-2`, carry their
-    own copy of those three effects and that button. `check:narration` fails
+    lessons older than the shared player, `logic-arguments-1` and `-2`, carried their
+    own copy of those three effects and that button until they were ported onto it on 2026-09-21 (§17). `check:narration` fails
     **UNVOICED** on any lesson the app can open that is missing from its table
     (LESSON_RULES AC17), so a new lesson ships with its voice. The web stays silent.
   - **A lesson ships ONE audio file, because EAS Update takes at most 1,000 assets in
@@ -2071,8 +2154,8 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     64 kbps mono `lesson.mp3` whose ID3 comment lists every line's WAV hash and
     offset. The manifest gives each line an `at`, and `lib/narration/real.ts` seeks
     there and pauses at the line's end, so a pause that lands late lands in the
-    silence. 246 files come to 87.1 MB since the lecture rewrite (69.0 MB before, when the
-    lines were shorter), and a real Android export bundles 364 assets.
+    silence. 246 files came to 87.1 MB after the lecture rewrite (69.0 MB before, when the
+    lines were shorter), and a real Android export bundled 364 assets; with the 21 dialogue lessons it is 267 files and 99.5 MB (2026-10-02).
     Decoded, every line sits exactly on its start, and the 710 lines already heard kept
     their word times to the hundredth. ffmpeg is not a dependency; point `FFMPEG` at
     any build with libmp3lame.
@@ -2162,9 +2245,9 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
 - **Ground it in a real thinker.** Pair the concept with a primary-source `quote` card. Authenticity ("here is the sentence Descartes actually wrote") is what makes it feel valuable, not gamified trivia.
 - **Give it an arc.** Hook (provocation) → build → struggle → a "what you now know" payoff on the summary.
 - **Retention over completion.** Finishing a lesson is worthless if it's forgotten by Friday. Concepts must come back (see Daily Review, §15).
-- **Make it feel crafted.** Hand-drawn B&W ink identity, micro-animations, haptics + subtle sound, calm pacing, swipe = page-turn.
-- **Rotate the interaction.** Don't let two lessons in a row feel identical — vary the card mix and interaction type.
-- **Reward curiosity & give a sense of mastery.** Saveable quotes, tappable philosophers, and path-mastery checks that feel like a small credential.
+- **Make it feel crafted.** Hand-drawn B&W ink identity, micro-animations, haptics + subtle sound, calm pacing, tap = page-turn (the left third goes back, group AI).
+- **Rotate the interaction.** Don't let two lessons in a row feel identical — vary the control (R9) and the place.
+- **Reward curiosity & give a sense of mastery.** Path-mastery checks, ranks and badges that feel like a small credential (saveable quotes and tappable names left the live lessons on 2026-09-29 and are phase 2, §23).
 
 ---
 
@@ -2183,11 +2266,11 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
 
 The owner's research found a hard paywall converts better than freemium. **Every
 lesson needs the Scholar's Pass or its three-day trial; everything else is free.**
-Four rows, each a cross on Free and a tick on the Pass, and all four enforced:
+Four rows, each a tick on the Pass and a cross on Free (but for the one free lesson, below), and all four enforced:
 
 | | Free | Scholar's Pass | Enforced by |
 |---|---|---|---|
-| All the lessons | no | every one | `lessonAccess` — `if (!isPro)` shuts all of them |
+| All the lessons | 1, their choice | every one | `lessonAccess` — `if (!isPro)` shuts all but the reader's own `taste` |
 | Narrated and animated | no | every one | `check:pass` counts the narration manifest and the `CINEMATIC` map |
 | Unit reviews | no | all of them | the review route draws `HardPaywall` without the Pass |
 | Start any unit | no | any, any time | `lessonAccess` with `unitStartable` ignored on the Pass |
@@ -2204,16 +2287,16 @@ leak a free lesson. The chart's Free cell on the lessons row reads **1**, the
 paywall tells a reader who has used it why it is asking, and `check:pass` §1 holds
 all of it.
 
-**Free for everyone**, and said just as loudly (the tiles under the chart): all the
-thinkers, their quotations to save, their quizzes, the ranks, the badges, XP and
-the streak, Quote of the Day, the widget, Profile and Settings. A hard paywall that
+**Free for everyone**, and said just as loudly (the tiles under the chart): the
+ranks, the badges, XP and the streak (the thinkers, their quotations and quizzes
+too, until they left with the Thinkers tab on 2026-09-29), Quote of the Day, the widget, Profile and Settings. A hard paywall that
 does not say what is still free reads as an app that has locked everything.
 
 **What went:** `FREE_DAILY_LESSON_LIMIT`, the daily-limit screen, the frozen gate in
 the lesson route, the ad after a lesson (and AdMob's initialisation — asking for
 consent to adverts that never show is a form about nothing), `TrialOffer` after a
 lesson, and `PaywallContent`. `check:pass` §12 fails the build if any of those
-names comes back. **What stayed:** `dailyLessonCount` (Home's goal dots read it) and
+names comes back. **What stayed:** `dailyLessonCount` (still counted in the store, though Home's goal dots went on 2026-08-02 and nothing outside the store reads it) and
 rest days, which differ by tier still. The lesson route's one-way latch stayed too,
 for a new reason: a trial that ENDS mid-lesson must not eject the reader
 (`check:access` walks it).
@@ -2253,7 +2336,7 @@ the three free days; for a free reader the paywall follows (`source: intro`).
   his head — the first "pointing up" gesture put a hand at his cheek and read as
   scratching it), and no hex in `components/professor/`. `npm run sheet:professor`
   photographs the real film at fourteen instants; `npm run check:paywall-flow` walks
-  the doors, the intro, Skip and the paywall through seven cases in a browser.
+  the doors, the intro, Skip and the paywall through seven cases in a browser (parked while the intro is off, §23).
 
 **(Before the hard paywall)** replay and jumping ahead were missing from the paywall for its whole life, so
 the two biggest things the Pass buys were being given away for nothing. That is
@@ -2265,7 +2348,7 @@ for — everyone guards against over-promising, and nothing guards against silen
 Every other member of this family is an INTERRUPTION — the daily limit, the
 locked lesson, the sheet after a lesson. All three arrive when a reader has just
 been stopped, which is the worst moment to ask somebody to read a price. So the
-offer also has a permanent address between Insights and Profile, which is the
+offer also has a permanent address between Learn and Profile, which is the
 shape Duolingo and Brilliant both use and the reason is not imitation: a reader
 can walk in, read the terms at their own pace, and walk out again.
 
@@ -2289,11 +2372,11 @@ rows that differ, and what both share merged rather than repeated.
   launch screen; its callback depends on nothing, because `available` flips when
   RevenueCat answers and a callback listing it would replay the arrival under a
   reader who had not moved (§19's Insights fault).
-- **A limit is said in words where it is not zero**: "1", "In order", "2 held". A
+- **A limit is said in words where it is not zero**: "1" — the free lesson (before the hard paywall also "In order" and "2 held"). A
   cross appears only where the free tier has none of the thing, because a cross
-  beside "Start any unit" would say a free reader cannot start a unit at all.
+  beside "Start any unit" would say a free reader cannot start a unit at all. Since the hard paywall that is true, and the cross is drawn.
 - **`lib/utils/passCompare.ts` re-says `PASS_LINES` as cells**, and
-  `includedTiles()` turns the six shared things into figures on tiles, printed
+  `freeTiles()` (from `passValue.freeThings()`) turns the three free things into figures on tiles, printed
   once. That short form is a second place a claim could drift, so `check:pass` §7
   re-derives every cell from the constant its gate reads, not from the long form.
   It also measures the cross: GHOST alone is about 2:1 on paper, under the 3:1 a
@@ -2308,17 +2391,25 @@ rows that differ, and what both share merged rather than repeated.
   pass `check:quips` and nothing draws them. His lines talk about "the
   certificate", which this screen no longer shows, so moving him somewhere else
   means reading the pool first.
+- **The tab opens on the Pass itself, as a member's card (2026-10-01).** *"The
+  information is good on it, but it's visually not very good."* A chart of ticks
+  describes a membership; `components/paywall/PassCard.tsx` is one. It is a deep teal
+  band with the seal, the holder's name on a white face and a strip of ember foil.
+  Its stamp is read from the store: the free days Google would give, the days a
+  trial has left, ACTIVE, or NOT YET ISSUED. It lies on the floor of a drawn reading
+  room (`READING_ROOM_ART`, in the Profile places' style), is built from Views only,
+  and rises in on the tab's own arrival driver.
 
 **And it is one chart in three places, with the trial as the door.** The same
 reader asked for the post-lesson offer and Settings › Subscription to wear the
 tab's look, for the tab's arrival on the post-lesson offer but not in Settings,
 and for the three-day trial to be what a free reader is offered first in all
 three. `components/paywall/PassChart.tsx` is the chart and the tiles: the tab
-replays its arrival on focus, `TrialOffer` (retired 2026-09-25) played it once the modal had slid up,
+replays its arrival on focus, `HardPaywall` plays it as it opens (as `TrialOffer`, retired 2026-09-25, once did after a lesson),
 and Settings draws it `size="compact"` and still, picking smaller columns from
 the card's measured width, because that card sits beside a rail and is about
 225pt wide at 390dp and 160pt at 320dp. `components/paywall/PassDoor.tsx` is the
-action under it on the tab and in Settings: while `canStartTrial()`, the trial is
+action under it on the tab, on the paywall and in Settings: while `canStartTrial()`, the trial is
 the button, with **a smaller box under it that charges today**; during the trial
 it shows the days left and offers to keep the Pass; after it, the price and the
 button. `startTrial(source)` records where the trial was taken.
@@ -2424,9 +2515,9 @@ and these three decisions in it stand:
   which is the type least able to hold its own against texture.
 
 **AND EVERY FIGURE ON THE PASS SCREENS IS COUNTED, INCLUDING THE ONES THAT ARE
-NOT GATES.** `PASS_LINES` already held the five differences; `includedLines()`
-now counts the library, the thinkers, the saveable quotes, the ranks and the
-badges out of the tree, and `check:pass` re-derives every one of them by counting
+NOT GATES.** `PASS_LINES` holds the four differences, with the library counted out of the
+tree by `libraryShape()`, and `freeThings()` counts the ranks and the badges still
+earnable (the thinkers and saveable quotes too, until 2026-09-29), and `check:pass` re-derives every one of them by counting
 again independently. This is not fussiness — the curriculum has gone 60 → 192 →
 234 lessons, and CLAUDE.md was still saying 132 saveable quotes when the real
 figure was **228**. A number typed onto a certificate is a number nobody
@@ -2451,7 +2542,7 @@ and fails on any digit left in literal text.
 > screen that ships to every currency Play sells in. Nothing could fail: a stale
 > claim still typechecks and still renders.
 >
-> It is the same certificate now, issued small — `Certificate` with `compact`,
+> It was the same certificate then, issued small — `Certificate` with `compact` (today it is the chart, `PassChart size="compact"`, above),
 > the same `PASS_LINES`, the same struck rows. **A claim cannot be true on one
 > screen and stale on the other, because there is only one claim**, and
 > `check:pass` §7 now reads the settings section for all three rules the tab is
@@ -2481,7 +2572,7 @@ and fails on any digit left in literal text.
 > already draws as SPILL (§21). It measures `scrollHeight` against the clamp now,
 > and `DEVICE_W=320` renders the width that has broken this object twice.
 
-> **The sixth tab, and the note that argued against one.** `_layout.tsx` rejected
+> **The sixth tab, and the note that argued against one** (there were six then; there are four since 2026-09-29, §23). `_layout.tsx` rejected
 > a streak tab because "at 390pt that is ~62pt a tab and the labels clip". Sound,
 > and it does not apply: `tabBarShowLabel` is false, so there is nothing to clip.
 > Measured in the real navigator at 320dp — six icons, 30pt each, centres 53pt
@@ -2491,14 +2582,14 @@ and fails on any digit left in literal text.
 
 **Free tier** — (since 2026-09-29 the Pass chart's free tiles are ranks, badges and
 streaks only; thinkers, quotations and quizzes left with the Thinkers tab, §23.)
-Since 2026-09-25, everything but the lessons: all 341 thinkers and
-their quotations and quizzes, the full streak, XP, rank and badge systems, Quote of
-the Day and the widget. The lessons need the Pass or its trial.
+Since 2026-09-25, everything but the lessons: the full streak, XP, rank and badge
+systems, Quote of the Day and the widget. The lessons need the Pass or its trial,
+except the one free lesson of the reader's choosing (2026-10-01, above).
 
 **Why someone pays (the thesis — the aspiration, not the current feature list):**
 1. They actually **retain** what they learn (spaced review), not just tap through it.
 2. The **cinematic, narrated** lessons feel like nothing else in the category.
-3. **Breadth** — 6 branches, 246 lessons, 341 thinkers — is a genuine library.
+3. **Breadth** — seven subjects under one roof, each road growing a lesson at a time (§23).
 4. **Credential & mastery** — ranks + path-mastery give visible proof of progress.
 5. The **daily habit** (streak + review) makes the subscription part of a routine.
 
@@ -2515,14 +2606,16 @@ and `interactions/` are unreachable now and can go in their own commit. Every le
 added from here is cinematic (§5).
 
 
-**P1 — Finish the orphaned premium machinery.** Wire the cinematic **story scenes** (`SnowWalkStory`, `ExistenceStory`) in as a path's hook or capstone; ship a **"Read to me"** narration toggle (`KineticNarration`); and decide to either **show** the `feedback/` panels in the runner or delete them.
+**P1 — Finish the orphaned premium machinery.** Wire the cinematic **story scenes** (`SnowWalkStory`, `ExistenceStory`) in as a path's hook or capstone; ~~ship a "Read to me" narration toggle~~ (done: every lesson is voiced, with a speaker button writing `settings.narration`; `KineticNarration` exists nowhere in the tree); and decide to either **show** the `feedback/` panels in the runner or delete them.
 
-**P2 — Growth loops.** Add **unit-mastery quizzes** (`XP_PER_PATH_MASTERY` is
-defined and unused). Add **shareable B&W quote/streak cards**. Aesthetics has 3
-units where every other branch has 5 — level it up.
+**P2 — Growth loops.** ~~Add unit-mastery quizzes~~ — done as the unit reviews (group AK), which pay
+`XP_PER_PATH_MASTERY`; but `data/unitReviews.ts` covers only philosophy's 28 retired
+units, so none of the seven live roads has one yet. Add **shareable B&W
+quote/streak cards**. (Levelling Aesthetics no longer applies: it was retired with the
+other philosophy branches, §23.)
 
 **P3 — Foundations.** Delete the legacy `lib/utils/progress.ts` and
-`constants/achievements.ts` once nothing imports them. (The **lesson-contract
+`constants/achievements.ts` — nothing imports either of them now (checked 2026-10-02), so this is ready to do. (The **lesson-contract
 validation script** that used to head this item is done — `npm run check`, see §11.)
 
 **Done since this list was written** — kept so nobody re-plans them: sensory
@@ -2534,6 +2627,11 @@ cinematic lessons shipped; the app launched on Google Play with ads,
 subscriptions and a widget; the XP model was reconciled behind `lessonXP()`;
 ranks gained a conferred-rank ceremony; and the branch screen became a
 one-unit-at-a-time accordion.
+
+**And since 2026-09-25:** the hard paywall replaced the ads and the free daily
+lesson (§14), with one free lesson of the reader's choosing from 2026-10-01. Every
+lesson is voiced, with its toggle. Unit reviews pay the mastery XP (group AK). The
+app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ---
 
@@ -2559,7 +2657,7 @@ one-unit-at-a-time accordion.
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 253 of the 253 lessons are here now (the 246 retired ones included),
+**This is the format the app converged ON** — 267 of the 267 lessons are here now (the 246 retired ones and the 21 live dialogue lessons),
 and the card runner they replaced is unreachable (§5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -2568,7 +2666,18 @@ normal `LessonRunner`. **Removing an entry is a complete, safe rollback** for on
 lesson.
 
 A cinematic lesson = a **script** (beats) + a **scene** component, played by
-`CinematicPlayer`. **Every one of the 246 is, since 2026-09-21.**
+`CinematicPlayer`. **Every one of the 267 is** — the last two of the 246 since 2026-09-21.
+
+> **SINCE 2026-09-30 EVERY LESSON A READER CAN OPEN IS A DIALOGUE LESSON** — 21 of
+> them, three on each of the seven roads (§23; LESSON_RULES AP, AQ, AR, AS). They
+> run on this same player: a `*Script.ts` whose beats carry a `speaker`, a
+> `*Scene.tsx` and a `CINEMATIC` entry. Most of what follows was learned on
+> philosophy's 246 narrated lessons, which are retired from the app
+> (`LEGACY_BRANCHES`) but still checked, and it stays as findings. Several layers do
+> not reach a dialogue lesson. The generators skip any script with a `speaker`
+> (`scripts/lib/dialogue.mjs`), so there are no thoughts, pen marks, costumes, chair,
+> wander or visitor. There are no maxims or tappable names, and no analogue
+> controls: all 21 ask both questions on the stage.
 
 > **TWO LESSONS USED TO CARRY THEIR OWN COPY OF THE PLAYER, AND THAT IS WHY THEY
 > LOOKED WRONG.** A reader opened the first lesson in Logic — *"the arguments are
@@ -2635,9 +2744,9 @@ A cinematic lesson = a **script** (beats) + a **scene** component, played by
 > `crowd`.
 
 Two lessons still have **authored `shots` tables** rather than generated camera
-verbs — `logic-arguments-1` and `logic-arguments-2`, which is what their own
-cameras were — and `ethics8Scene` is the third. `check:camera` holds one shot per
-beat for all three.
+verbs — `logic-arguments-1`, which is what its own camera was, and `ethics8Scene`.
+`logic-arguments-2` had one too until its redraw moved it onto camera verbs
+(f1fd8e2e). `check:camera` holds one shot per beat for both.
 
 > **AND EVERY ONE OF THOSE SHOTS WAS INERT. THE CAMERA HELD BEAT 0'S FRAMING FOR
 > THE WHOLE LESSON.** A reader, the day after the port shipped: *"I cannot see the
@@ -2705,9 +2814,9 @@ beat for all three.
 ### Six ways to answer, and five of them can move the picture
 
 A graded beat carries `interact`, and that block now has six shapes. **Scene
-targets** (210 questions): the scene draws its own tap targets and calls
+targets** (268 questions): the scene draws its own tap targets and calls
 `onPick`. **`cards`**: two short `ChoiceCards` under the art, which replaced the
-A/B/C/D deck and is still the right answer for a genuine either/or, at 8% of all
+A/B/C/D deck and is still the right answer for a genuine either/or, at 5% of all
 questions. And then the **analogue family** — `sort`, `poll`, `plot`, `order` and
 `odd` — where the answer is a category, a position, a shape, a sequence or the
 one that does not belong, rather than a pick.
@@ -2971,14 +3080,14 @@ Three things make the whole family teach rather than merely slide:
   while every life in it shrinks. One gesture, on the UI thread, with no React
   render in between.
 
-**240 graded beats are on the analogue family now** — 93 `sort`, 45 `plot`, 38
-`order`, 33 `poll` and 31 `odd`, counted by `check:rotation` — against 38 left in
-the two-card deck, which is 8% of all questions and is meant to stay a minority
+**235 graded beats are on the analogue family now** — 89 `sort`, 45 `plot`, 38
+`order`, 33 `poll` and 30 `odd`, counted by `check:rotation` — against 29 left in
+the two-card deck, which is 5% of all questions and is meant to stay a minority
 rather than reach zero
 (*"I still want a couple every now and then for the old way"*). It got there by
 conversion rather than by writing new lessons: **127 lessons had no analogue
-control at all and 2 do now**, and both of those ask both their questions on the
-stage instead. A conversion is a SCRIPT-ONLY edit — the player renders whichever
+control at all, and 11 of the retired 246 still have none**; the 21 dialogue
+lessons have none either and ask both their questions on the stage. A conversion is a SCRIPT-ONLY edit — the player renders whichever
 control the beat declares — so it costs a control block, a rewritten `prompt` and
 a rewritten `explain` (an explanation that says "the other card" names nothing
 once the cards are gone, which is J9). `node scripts/rotation-worklist.mjs`
@@ -3012,7 +3121,7 @@ prints what is left, with each claim, in reading order.
 
 **THE SCENE FOLLOWING THE CONTROL IS NO LONGER OPTIONAL (R7c).** It used to be:
 30 scenes of 186 moved and the other 150 held still while the reader dragged a
-knob under them. **224 of the 240 lessons with a control do now**, because the reader said what the
+knob under them. **220 of the 235 lessons with a control do now**, because the reader said what the
 difference was — *"I want something to change within the animation above the
 stickman, like it reacts during the user moving something"* — and it is the
 difference between moving a widget and moving the picture. The wiring is a
@@ -3033,7 +3142,7 @@ moves toward *done in the open*; `metaphysics11`'s MEMORIES plate rides across t
 whoever woke up with the recollections as the seam gives memory more of the person.
 **"It looks hard" is a description of the reader's attention, not of the scene.**
 
-The 16 left are four shapes, and naming which one a lesson is comes
+The 15 left are four shapes, and naming which one a lesson is comes
 before calling it a gap — each scene says which, in a comment that begins
 `// R7c — LEFT STILL ON PURPOSE:`. **A reaction that would give the answer away**
 (R7d): a `sort` moves `pickPos` while the chip is being dragged, so a table that
@@ -3365,7 +3474,7 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 > inside `styles.lower` with the deck, never as a sibling of the stage — that is
 > L6, and a control outside it does not merely move the picture, it **rescales**
 > it by about 12% on the frame a question mounts. And every control carries a
-> `nativeID` (`drag-strip`, `sort-bins`, `poll-ballot`, `split-bar`, `trend-pick`)
+> `nativeID` (`order-tiles`, `odd-one-out`, `trend-pick`, `sort-bins`, `poll-ballot`, and the retired `drag-strip` and `split-bar` the harnesses still know)
 > because a beat with no button on it is invisible to a harness that only knows
 > how to click: the first sweep of the twelve drag lessons measured 6 or 7 beats
 > of 9 and reported them as measured. All four harnesses drive them through one
@@ -3376,9 +3485,9 @@ declared as a channel, so it cannot fall out of step with the control and it cos
 what a reader's thumb is asked to do lesson after lesson is R9, and only the
 second one is felt by somebody working through a branch. `npm run check:rotation`
 holds three high-water marks plus a flat zero: the two-card deck is at most 14% of
-all questions (it is 8% now, and the floor came down from 55% as the analogue
+all questions (it is 5% now, and the floor came down from 55% as the analogue
 family took over), neighbouring lessons do not both use the same control (133
-pairs did, now 23), **36 lessons ask both of their questions BELOW the
+pairs did, now 22 against a budget of 23), **at most 36 lessons — 27 now — ask both of their questions BELOW the
 figure** — every one an early lesson, which is exactly where the picture most
 needs to be the thing being answered — and **no lesson uses a retired control
 (R20)**, which is a zero rather than a mark because it is a decision rather than
@@ -3394,11 +3503,11 @@ converting one is a self-contained job.
 > converting BOTH ends of such a run puts two neighbours on the same new control
 > and they are a pair again.
 
-**They all have the same shape, and `npm run check:cinematic` enforces it**: 7–11
-beats (8 is the mode), **exactly two graded questions**, one saveable quote on a rest
+**They all have the same shape, and `npm run check:cinematic` enforces it**: 7–19
+beats (10 is the mode), **exactly two graded questions**, one quote (no longer saveable, since 2026-09-29) on a rest
 beat, one summary and it is last, a declared band whose bottom sits on the ground line,
 no scene-declared colours, no XP figure typed into a string. That is group **H** of the
-rule book — the conventions the 48 already share, as opposed to groups A–G, which are
+rule book — the conventions the lessons already share, as opposed to groups A–G, which are
 defects they already made. Read H before laying out a new lesson's beats.
 
 **The figure.** `components/lesson/cinematic/rig.ts` is pure maths with **zero
@@ -3710,7 +3819,7 @@ the same weight, including the two kinds that carry more than the rest.
   it opens `ThinkerPeek`: name, dates and the `oneLiner` the roster already keeps
   for all 341. **Nothing new had to be written for any thinker**, which is the
   whole reason this was cheap.
-- **A MAXIM.** One phrase per lesson, struck on a band. 204 of 246 lessons carry
+- **A MAXIM.** One phrase per lesson, struck on a band. 204 of the 246 narrated lessons carry
   one and **42 deliberately carry none** — the floor in `make-focus` exists
   because a highlighter on a merely-acceptable sentence tells the reader that a
   prop in the story is the thing to carry away, which is worse than no mark.
@@ -3880,7 +3989,7 @@ minute.
    > arguing about it). The transformed bundle says so out loud:
    > `__closure={rad,w,lift,out,TILT,dimmed}`.
    >
-   > An uncaught throw in a style worklet is fatal in release, the Insights tab is
+   > An uncaught throw in a style worklet is fatal in release, the Insights tab was
    > one of the five WARMED at startup (§19), and so the app died a few seconds
    > after every launch without the reader going anywhere near the chart.
    >
@@ -4064,7 +4173,7 @@ across — and **this figure has no face**, so a turned head on a plain disc is
 invisible from the side. Measured on the real rig (`scripts/sheet-gaze.mjs`, plain
 Node, no browser): the neck alone moves the head **3.4–7.4** units; carried by the
 SPINE as N12 says attention must be, **7.3–16.0**. `lookPose` takes the lean from
-how far the neck actually turned, so the two cannot drift apart, and 164 scenes
+how far the neck actually turned, so the two cannot drift apart, and 237 scenes (164 when this was written)
 use it in place of `pose` — one substitution, because `gazeAt` needs the same `x`
 and `dir` that every scene writes inline inside its own `pose(...)` call.
 
@@ -4105,7 +4214,17 @@ it beside `make:tours`.
 > core stickman to be the main mascot"* — and — *"the stickman's purpose is to
 > learn with the user."*
 
-Both halves are group **AA** of the rule book, and both are shipped: 78 of 246
+> **SINCE 2026-09-30 NONE OF THE LAYERS BELOW REACHES A LESSON A READER CAN OPEN.**
+> The costume rotation, the visitor and the nod (AA), the thoughts (AB), the pen (AE),
+> the wander (AF) and the lawn chair (AO) serve philosophy's 246 retired narrated
+> lessons (§23). The 21 live lessons are dialogue lessons (group AP). Every generator
+> skips a script that gives a beat a `speaker` (`scripts/lib/dialogue.mjs`, AP8). Each
+> speaker always wears one costume from `cast.ts` (the pieces and AA6's seating still
+> apply). Their scenes pose with `emoteStill`/`postureStill` (AP18) and never call
+> `lookPose`, so nothing in them nods, thinks, wanders or sits down. The findings stand,
+> and the counts below are the retired library's.
+
+Both halves are group **AA** of the rule book, and both are shipped: 137 of 246
 lessons dress the figure — see the note in §12 for why that number was 24 until a
 brimless hat was added, and why the constraint was never the band — and he nods or
 draws back on every answer in the scenes that route through `lookPose`.
@@ -4266,12 +4385,12 @@ the head mostly in X and judging it on `y` alone under-reads it by half.
 > right.
 
 That is group **AB** of the rule book, and the point of it is that **he is
-learning too** — not presenting the material, but the other student. 1,113
-authored thoughts, 272 of them shown, plus a line back on an answer wherever one
-can sit near his head without touching it or a word (314 of them).
+learning too** — not presenting the material, but the other student. 1,194
+authored thoughts, 250 of them shown, plus a line back on an answer wherever one
+can sit near his head without touching it or a word (292 of them).
 
 **THE THIRTY LESSONS THAT FINISHED THE TAKEOVER CARRY NO THOUGHT LINES**, which is
-part of why 94 lessons show none. `say` is AUTHORED and the
+part of why 106 of the 246 show none. `say` is AUTHORED and the
 generator only chooses among what has been written, so a new lesson gets a bubble
 only once somebody writes it one — the split this section already argues for,
 seen from the other side.
@@ -4306,7 +4425,7 @@ from three discs to one, and minimising the gap to his crown (median **4 units**
   preferred a clear spot 84 units above his crown to one 4 units above that grazed
   a diagram. The trade is scored now.
 
-**AND THE SECOND FIGURE SPEAKS.** The 24 lessons where a visitor walks in (AA8)
+**AND THE SECOND FIGURE SPEAKS.** The lessons where a visitor walks in (AA8, 26 today, 12 of them with room for his line)
 had two stickmen facing each other in silence; he now says one line as he arrives,
 timed to his walk. His line is POOLED where the mascot's thoughts could not be,
 and that is structural: a `poll` or a `cards` fixes his meaning — he holds the
@@ -4314,7 +4433,7 @@ other position — whatever the lesson is about.
 
 `npm run check:thoughts` holds all of it offline against the real `.ttf`: every
 line fits two rows, no wrong-answer line is aimed at the reader (§7), no thought
-sits on a beat still being answered (group O), and none of 595 placed bubbles
+sits on a beat still being answered (group O), and none of 542 placed bubbles
 covers a word.
 
 > **AND THEN THE BUBBLES DID NOT FOLLOW HIM, WHICH WAS THREE DEFECTS AND NOT ONE.**
@@ -4724,8 +4843,8 @@ On a tap where the scene's art holds, the PLAYER draws one hand-drawn mark — a
 an underline, brackets, a box or an arrow — round the stage label the narration names,
 as the voice reaches the word (`StageMark.tsx`, `data/lessonMarks.ts`). It is the
 teacher's pen at a board: Mayer's signalling, which is what transfers from Imprint's
-"every card earns one event" without seven illustrators. **3 marks in
-3 lessons** since group AH gave every still tap its own event; 69 before it. `make:marks` writes the table and `check:marks` re-derives it
+"every card earns one event" without seven illustrators. **2 marks in
+2 lessons** since group AH gave every still tap its own event; 69 before it. `make:marks` writes the table and `check:marks` re-derives it
 from one set of rules in `scripts/lib/marks.mjs`; `countertest-marks` stages each.
 
 - **Only a still tap, only a label the voice names, never the coming answer.** The
@@ -4806,7 +4925,7 @@ talking to the lead's back (19 of 32 visitors). All three are zero-budget rules 
 take measured listening holds (`scripts/liven-pairs.mjs` from the check's own list);
 `make:visitor` places the visitor where the lead faces, from `leadFacing.json`
 (`REPLAY_FACING`), or turns a still lead round (`VisitorCue.turn`, `VISIT` in
-cinematicKit). 30 visitors, 8 of them turned to.
+cinematicKit). 26 visitors, 7 of them turned to.
 
 ### And the picture has the app's own depth now (group AG)
 
@@ -4913,7 +5032,7 @@ against `stand()`'s own breath — so a lesson where the picture holds was a fig
 rooted to one x for eight beats doing something slightly different with his arms.
 
 **`components/lesson/cinematic/wander.ts` is the maths and `data/lessonWander.ts` is
-the choreography: 880 beats across 218 lessons**, out of 895 where his pose leaves
+the choreography: 880 beats across 218 lessons** when it shipped (700 across 204 today), out of 895 where his pose leaves
 him free. Six moves — a step (with a turn if it is behind him), a look up or down,
 sitting on the ground, a crouch, a glance over his shoulder, a weight shift — timed
 to the PAUSES in the line being spoken, which the narration manifest already
@@ -4921,7 +5040,7 @@ measures. That is Duolingo's own construction for their characters: idle behavio
 triggered against the audio rather than looped on its own clock.
 
 **It reaches every lesson without editing a scene**, through `lookPose` — the one
-call all 244 scenes make for the lead figure — exactly as `REACT` does. A per-scene
+call 237 of the 246 narrated scenes make for the lead figure (no dialogue scene makes it) — exactly as `REACT` does. A per-scene
 prop would have been 244 edits inside `muststamp`, which is a corpus-wide re-measure
 for a change that moves no prop.
 
@@ -4952,7 +5071,7 @@ in-place moves only, because the bubble is placed against his resting head.
   the other fell 7.3 between two frames. That one is in `rig.settleStep` and every
   walk in the app had it; the lift is shared by gap now.
 
-**`npm run check:wander` replays all 880 plans through the real rig at 60fps**,
+**`npm run check:wander` replays every plan (700 today) through the real rig at 60fps**,
 including a tap at every tenth of a second: the worst one-frame move inside a plan is
 4.05 units, at a tap it is **0.00**, and the planted-foot slide is 3.06 — the shipped
 settle's own residue. `node scripts/sheet-wander.mjs` draws every pattern as a
@@ -5125,7 +5244,7 @@ Counts held: 268 thoughts across 246 lessons, 862 wander plans.
 > mabye fidget his hand and arms just a little, maybe pull out some coffee or tea,
 > crossing his legs sometimes."* (2026-09-25)
 
-**25 lessons sit him in a lawn chair and 45 more hand him a mug standing up.** The chair
+**25 lessons sit him in a lawn chair and 42 more hand him a mug standing up.** The chair
 comes out from behind his back, is flicked open, set down and sat in on one beat; the
 beats after it cross his legs, bring the mug out, sip, drum the armrest and look up or
 down; the last one folds it away. It is the first thing he does ACROSS beats, so it is a
@@ -5189,7 +5308,7 @@ neural-network figure and *"column"* a bacterial flagellum. Search for the objec
 its own world.
 
 **`objects.ts` HAS ZERO IMPORTS, like `rig.ts` and `critters.ts`**, so
-`npm run sheet:objects` draws any of the 21 in plain Node in about two seconds. That
+`npm run sheet:lesson-objects` draws any of them (21 then, 241 now) in plain Node in about two seconds — it was `sheet:objects` until 2026-10-01, which now draws the insignia's objects. That
 loop is the whole reason this was affordable, and it is the only instrument that has
 ever caught one: a hull came back a SOUP BOWL (twice — the reference says "the bottom
 is a smooth U" and taking that literally draws a bathtub), a lamp a ROAD SIGN, a coin a
@@ -5202,6 +5321,13 @@ by eye: `face` is a body plane in shade and is OUTLINED with the body, where `da
 a recess painted on top of one. Drawn as a recess, the crate's front face had no
 outline along its own bottom and sides.
 
+> **AND SINCE 2026-09-30 A PART MAY CARRY ITS REAL COLOUR (AP11, AR1).** `NATURAL` in
+> `objects.ts` holds the colours a real thing is (an apple, a leaf, wood, brick, paper,
+> silver…). `tint()`, or a part's `nat`, strikes a part in one of them in place of the
+> branch tone. Every dialogue lesson's objects wear their own colours (ffc6d5c3), and
+> `check:objects` holds each natural colour to the lamp and to carrying a word on its
+> lit face (171 colours). The roles above still decide the shading.
+
 **FIVE OF THE TWELVE LESSONS PICKED FOR THE FIRST BATCH WERE FALSE POSITIVES** — the
 shortlist was built from style NAMES, and names lie. `ethics5`'s "flute" is a COLUMN's
 flute, correctly a 1.5-unit rule; `logic23`'s "lamp" is a truth-table indicator light;
@@ -5211,7 +5337,7 @@ that three rows of type sit on, and it was wired, rendered, and only then obviou
 wrong — an open book with page lines showing under three plates. **Redrawing a thing
 that was already right is a regression every check in the suite will pass.**
 
-**ELEVEN SCENES ARE WIRED**, and each object's box is DERIVED from the constants the
+**ELEVEN SCENES WERE WIRED FIRST** (64 draw from the library today), and each object's box is DERIVED from the constants the
 scene already states rather than chosen: `metaphysics23` says its masthead is at 244
 and its hull foot at 356, and `objects.ship` draws those at 8% and 90% of its own box.
 Landed that way the new hull's left edge measures 41.6 against the old one's 40. What
@@ -5238,7 +5364,7 @@ tree is never edited (group AL's rule).
 > was 2.2 on everything, so on a 22-unit cup the outline was 48% of the ink. A grown
 > triangle is now itself plus a capsule along each edge, and the weight is
 > `outlineFor()` — 4.5% of √(w·h), 0.7…2.2 — struck by `ObjectArt` and `SetArt`.
-> `sheet:objects` drew everything at 56 units, which is what hid it: `SIZE=22` draws
+> `sheet:objects` (now `sheet:lesson-objects`) drew everything at 56 units, which is what hid it: `SIZE=22` draws
 > the size a scene uses. `REPLAY_OBJECTS=<file> npm run check:replay` dumps every
 > object drawing as the scenes place it. The 59 stale must-box stamps were renewed by
 > `scripts/restamp-outline.mjs`, because a thinner outline can only make a box looser.
@@ -5394,6 +5520,13 @@ Lessons to bring it back (NN/g: help must be easy to dismiss and easy to bring b
 > things a lesson has into this review. And at the end … a certificate or a
 > celebration … some kind of animation that makes user happy."*
 
+> **THE 28 ARE PHILOSOPHY'S RETIRED UNITS (2026-09-30).** Each live road is one unit
+> of three lessons, and none has a review yet. `hasReview` is false for every
+> `<subject>-foundations` unit, so no road draws a review stop today. `check:review`
+> reports "28 of 35 units" and holds the every-unit rule for the retired six only
+> (`scripts/lib/legacy.mjs`). The machinery is ready for the first live unit that is
+> given one.
+
 **ALL 28 UNITS HAVE ONE: 112 new questions, four each.** `data/unitReviews.ts` is the
 content and `components/lesson/cinematic/review/` the machinery. Two decisions were
 the owner's and they pull opposite ways on cost — the QUESTIONS are written per unit
@@ -5407,7 +5540,7 @@ builds a synthetic `Lesson` and hands it to `CinematicPlayer`, so the deck, the 
 the six controls, the verdict seal, the XP coin, the rising letters, the back-and-
 forward navigation and its guide are the same code paths rather than lookalikes — the
 only way to be sure of "all the animations, all the things a lesson has". The player
-gained ONE optional prop, `finish`; without it all 246 lessons end as they always have.
+gained ONE optional prop, `finish`; without it every lesson ends as it always has.
 A review is in no branch, so it never moves `lessonsByUnit`, never touches the
 free-tier gate and appears in no generated table, and `check:cinematic`'s house shape
 does not apply to it.
@@ -5445,7 +5578,7 @@ the review the stickman walks to the unit's review, then afterwards the stickman
 the next unit to the next lesson."* It is a `WorldLesson` on `BranchWorld` now, inserted
 after its unit's last lesson, so finishing that lesson walks the figure to the review and
 finishing the review walks it on into the next unit. The drawer keeps its row and only
-inside an OPEN unit. It is never locked, only not-yet-reached — nothing there consults the
+inside an OPEN unit. It is never locked, only not-yet-reached. Since the hard paywall (2026-09-25), a tap on it without the Pass opens the paywall (`locked_review`), as a lesson's does. Nothing else there consults the
 Pass.
 
 **EVERY INDEX INTO THE ROAD IS SEARCHED NOW, NEVER COUNTED (AK8), and that is what made
@@ -5498,7 +5631,7 @@ and all three ways to lose the loader among them.
 
 Imprint's pipeline does not transfer and saying so is half the answer: seven
 illustrators and eight animators hand-key After Effects and export **Lottie JSON**
-per card, which is a full-screen canvas — §17 rule 7, and this app draws all 246
+per card, which is a full-screen canvas — §17 rule 7, and this app draws all 267
 scenes procedurally from Views for that exact reason. What transfers is the
 principle, that every card earns one visual event and the visual IS the
 explanation.
@@ -5508,6 +5641,11 @@ BELOW the words in the lesson's own branch hue since the controls were gamified;
 the picture ABOVE them was still ink, paper and two greys, so a reader met a
 coloured question under a grey diagram. `stageTones.ts` carries the same
 `BRANCH` hue up over the words — one colour a lesson, ground line to answer button.
+
+> **A DIALOGUE LESSON KEEPS THE HUE FOR ITS GROUND, NOT FOR ITS OBJECTS (2026-09-30).**
+> Its floor and ledges are still `stageTone(<road>)`, but every object it draws wears
+> its real colours (AP11, AR1; see group AM above). The luminance contract below was
+> measured on the retired library's grey-matched masses.
 
 **LUMINANCE IS THE CONTRACT.** Every caption in 244 scenes was measured against the
 grey it sits on (`check:shade` pairs a fill with its word three ways, and STONE is
@@ -5555,13 +5693,28 @@ candy; mid plus saturated is rich.
 
 `components/branch/` puts the rig on a **branch screen**: a 360-tall strip the
 reader's figure walks along, one marker per lesson, seven seconds to the next.
-Four files, and two of them (`worldPath.ts`, `sceneArt.ts`) hold the zero-import
+Five files (`RoadSign.tsx`, the signboard, came on 2026-10-01), and two of them (`worldPath.ts`, `sceneArt.ts`) hold the zero-import
 rule for the same reason `rig.ts` does — the whole world can be laid out,
 measured and *drawn* in plain Node.
 
 `npm run check:walk` runs the exact motion code frame by frame; `node
-scripts/sheet-scene.mjs` renders all six places × five weathers to a PNG. Between
+scripts/sheet-scene.mjs` renders every place × five weathers to a PNG — thirteen since 2026-10-01, the seven subject roads and the six retired branches. Between
 them almost nothing here needs a phone.
+
+**SINCE 2026-09-30 IT IS ONE ROAD A SUBJECT, AND ON 2026-10-01 THE ROAD CHANGED IN
+THREE WAYS.**
+- **Every stop is a `RoadSign`.** It is one painted board of fixed width (`SIGN_W`
+  148) in the road's hue, with no clamp. `check:subjects` wraps every live title
+  against Playfair's `.ttf` (three lines at most), so none can be cut.
+- **A lesson added in the last `NEW_FOR_DAYS` (12) days wears an ember NEW tab**,
+  from `data/lessonAdded.ts`, which must date every live lesson.
+- **Each road has its own landmark scenery** in `sceneArt.ts`, drawn from reference
+  photographs: the Acropolis, a lake with willows, a switchback climb, a main
+  street, a container port, an observatory, an aqueduct.
+
+A sign blends into TAP TO START as the figure arrives, and the road ends at a
+`ComingSoonBoard` (`Branch.more`). A journey from Home arrives behind the paper
+curtain (§19), and the road builds its world only once it has arrived (`ARRIVE_MS`).
 
 What a viewer complained about, and what the answers cost:
 
@@ -5583,6 +5736,10 @@ What a viewer complained about, and what the answers cost:
   road distance. It is a separate shelf because **53 scenes walk figures with
   `WALK`** through `travelStance`; retuning the shared table would have restrided
   every one of them.
+- **And since 2026-10-01 the road deals only two gaits.** About two spans in three
+  are a walk and the rest a run (`gaitForSpan`): the owner found the skip, the
+  trudge and the slow stroll strange. `spanSeconds` keeps its table, the other gaits
+  stay in `moves.ts`, and `check:walk` still measures them. Nothing deals them.
 - **The ground is FLAT, on purpose.** It was a continuous curve, and the figure
   spent a whole branch trudging over knolls that also tilted him. What stops a
   level road being a progress bar is what grows on it and lies across it.
@@ -5827,6 +5984,11 @@ the allowance a build queues or is refused, never billed.
 
 ### Before ANY publish
 
+0. **Nothing is built or published unless the owner says so in that message.**
+   Finishing a fix is not permission to ship it: say it is ready and stop.
+   Several sessions usually share this tree, and an OTA bundles whatever all of
+   them have on disk at that moment.
+
 1. `npx tsc --noEmit` must exit 0.
 2. `git status` — a build or OTA bundles the **working tree**, including someone
    else's half-finished edits. This has caught a total blocker more than once.
@@ -5856,13 +6018,20 @@ the allowance a build queues or is refused, never billed.
    note, `expo/fyi` eas-update-asset-limits), and nothing in this repo warned before
    it mattered: narration shipped a clip a line until 85 lessons had put 710 clips into
    an update of 809 assets. It ships one file a lesson now (LESSON_RULES AC15), and a
-   real Android export bundles 364. `eas update` prints the count as `Assets (N)`,
+   real Android export bundled 364 at build 22, and more since: 267 `lesson.mp3` alone today, because the 246 retired lessons still ship their voices (`lib/narration/manifest.ts`), plus the drawn Quick Start, poster and profile PNGs. `eas update` prints the count as `Assets (N)`,
    listing each asset twice. Anything that adds a file per something numerous is
    counted against this before it is built.
 
 ---
 
 ## 19. Photographic Backgrounds and the Scrim Rule
+
+> **NO LIVE SCREEN SHOWS A PHOTOGRAPH ANY MORE (2026-10-01); kept as a finding.**
+> The launch screen has been a drawing since 2026-09-09, Quick Start drawn scenes
+> since 2026-09-29 and the profile pictures drawn places since 2026-10-01. A road's
+> masthead lays `MAST_SCRIM` over its subject's poster. Only the six retired
+> branches still carry their photographs (`BRANCH_ART`), and no screen reaches
+> them. The scrim rule stands for the next photograph.
 
 Photographs sit behind the branch cards, the branch mastheads, the launch screen
 and Quick Start. They are the one place the strict B&W identity bends, and they
@@ -5917,7 +6086,7 @@ Hard-won specifics:
 >   box-sized bitmap held while its tab is built, and Home is always built.
 > - The Philosophy page's intro card wears the study scene too, laid the same way
 >   (`qsLayout` against its measured words, 288dp tall so the window shows), and
->   the last of the five photographs went with it.
+>   the last of the five photographs went with it. (That page went with one road per subject on 2026-09-30, §23; the card's own intro mode is the professor's, and `PROFESSOR_INTRO_ON` is false.)
 
 ### And the overscroll at the top — the GPU budget, not the page
 
@@ -6069,7 +6238,7 @@ all now. After both fixes, on the same instrument:
 > boundary on the pristine text first, then splice.
 
 
-**What is still true, and is the next thing to do.** Every mounted tab re-renders
+**What was still true before the split above, which has since been done (Profile is memoised sections, ~86ms a write; the four tabs and the streak screen are what is built).** Every mounted tab re-renders
 on every store write, and all five are built at startup — so an XP write during a
 lesson re-renders Profile's 890 nodes even though Profile is nowhere on screen.
 Measured at **~190ms to the next paint, unthrottled**, per write. It is off the
@@ -6095,18 +6264,18 @@ gradients, no glows, no new colours. The lessons were deliberately not touched �
   on a ledge of the same grey (`Card`, `LIP.card` 3). `check-ui` holds it equal
   to tone's `FLAT_EDGE`. `RADIUS.card` is 16.
 - **`Card` takes `tone`**: `paper`, `ink` (a dark card on a `C.HUE` ledge — Quick
-  Start, Home's streak panel, the Learn cards on their own branch's ledge via
-  `lipOf()`), and `framed`.
+  Start; Home's streak panel and the Learn branch cards wore it until the move
+  to seven subjects, 2026-09-29), and `framed`.
 - **`components/ui/Meter.tsx` is the one progress bar outside the lessons**:
   chunky, flat, a 30% white shine along its top, never narrower than 1.5× its
   height. `StruckBar`, the streak panel, the streak calendar, the branch units
-  and the Thinkers sections all draw it.
-- **`components/ui/Chip.tsx`** is a raised filter chip; chosen, it sinks into the
+  and the rank header all draw it (the Thinkers sections went with their tab, 2026-09-29).
+- **`components/ui/Chip.tsx`** (orphaned since the Thinkers tab went: nothing imports it) is a raised filter chip; chosen, it sinks into the
   teal tint. **`components/shared/StatSticker.tsx`** puts a small sticker over a
   count, drawn like the tab bar (the book and bust ARE `TabGlyph`), with a cream
   outline on a dark panel because an ink outline on ink is no outline.
 - **Locked keeps its shape and loses its colour** (`LOCK_FACE`/`LOCK_EDGE`/
-  `LOCK_MARK`): an unmet thinker's seal is the same raised tile in grey.
+  `LOCK_MARK`): a locked lesson's road sign is the same board in grey (`RoadSign`), as an unmet thinker's seal was.
 - **Pass:** the Free column is a WELL (`FLOOR` with a `FLOOR_CUT` top) against the
   raised Pass column, which carries two faint glare stripes; the plan tiles wear
   the stickers, a real bronze rank crest and a real first-tier badge medal.
@@ -6115,9 +6284,14 @@ gradients, no glows, no new colours. The lessons were deliberately not touched �
 - The rank pins, badge medals and tab icons were not changed. `TabGlyph` only
   gained an optional outline colour, which the tab bar does not pass.
 
+### Drawn places, and a curtain (2026-10-01/02)
+
+- **Profile opens on a drawn PLACE.** The ten profile pictures are scenes in the Quick Start style (`components/shared/profileScenes.ts`, `npm run make:profile-art`), with ids unchanged. Each stands on a dark ground: the avatar straddles the horizon, and the name, the rank chip and LESSONS · DAY STREAK · TOTAL XP sit on the earth, so nothing needs a scrim. Home's masthead dropped its scrim too. `npm run check:profile-art` measures all ten, but it is not in `npm run check`. (The Pass tab's member's card and its reading room are in §14.)
+- **A journey from Home fades through paper** (`components/shared/Curtain.tsx`). `curtainTo` covers in 150ms, the navigation happens underneath with the tab fade off (`useInstantTabs`), and the destination lifts it once drawn (`useCurtainLift`, 260ms). The navigator's own cross-fade never ran: it snapped Home out on its second render. The road arrives light and builds its world after (`ARRIVE_MS`, 380).
+
 ### Struck things are shaded, and that is not a second colour
 
-> **Since 2026-09-16 only the rank pins and badge medals still use `FACE`.** Every
+> **Nothing is struck from `FACE` any more: the rank pins and badge medals went flat with the game crest (§7), and since 2026-10-01 each carries a full-colour object in a lit window (`insigniaObjects.ts`).** Every
 > other surface this section describes is flat, with its depth in its edges and
 > its shadow, because the tan end of `FACE` read as gold (§7).
 
@@ -6162,6 +6336,10 @@ Two findings worth not rediscovering:
   swords are gone for good, with `badgeShapes.ts`.
 
 ### A quote is a struck thing too, and its metal is the era
+
+> **Since 2026-09-29 the saved collection and Home's Quote of the Day are gone
+> (§23).** `QuotePlate` is drawn by the lesson deck and the thinker card
+> (`PhilosopherSheet`). The Saved sheet below is kept as a finding.
 
 Quotes were the flattest surface in the app, and the cause was structural rather
 than a matter of taste: **four screens each drew their own rectangle** — Quote of
@@ -6218,9 +6396,9 @@ Two things that were measured rather than judged, and both had already failed:
 > *"instead of a dedicated statistics tab, I want all the statistics to be in the
 > profile. And I want a much more condensed version of the statistics."*
 >
-> **WHAT REPLACED IT** is one card in Profile — `YOUR PROGRESS`: four counts, six
-> branch reading rows carrying the branch icons, and thirty days of XP as a bar a
-> day. `CountStrip` and `ReadingRow` in `components/profile/Struck.tsx`.
+> **WHAT REPLACED IT** is one card in Profile — `YOUR PROGRESS`: seven subject
+> reading rows and thirty days of XP as a bar a day; its counts moved up onto the
+> header's drawn place on 2026-10-01. `ReadingRow` in `components/profile/Struck.tsx`.
 >
 > **THESE SECTIONS ARE KEPT ANYWAY, and they are kept as FINDINGS rather than as
 > documentation.** Five of them are general and were paid for expensively:
@@ -6679,7 +6857,7 @@ Two things measured rather than judged:
 > the width off the gutter and by removing the headroom, and both went red.
 
 
-> The lesson deck's quote card (`cinematicKit.tsx`) is the one surface not yet
+> **Converted since: `cinematicKit.tsx` draws `QuotePlate`.** The lesson deck's quote card (`cinematicKit.tsx`) was the one surface not yet
 > converted — see §17; it is the highest-traffic file in the repo and was being
 > refactored across ninety scenes at the time. It is a drop-in when that settles.
 
@@ -6693,6 +6871,10 @@ found. Two CDP traps cost an hour: `Page.captureScreenshot` with
 silent no-op — use `scripts/peek.mjs`'s pattern.
 
 ### Two of the six launch poses could not be read, and it is one rule
+
+> **The launch screen has drawn the scribble and the bulb since 2026-09-09 (below).
+> Of these six scenes only one is still on screen: the mascot on his stone in the
+> sign-in panel (`AuthPanel`, `MASCOT_SCENE`). Kept as a finding.**
 
 > *"the one where the stickman is laying down, supposedly reading a book. And
 > then the other one … where it's sitting down and its arm is, like, crossed into
@@ -6860,7 +7042,7 @@ this app is printed on `C.paper`. The splash is a COMPILED resource (§18) and
 cannot be changed over the air, so the first frame is still the splash grey and
 the step up to white is **1.28:1** rather than paper's 1.02:1 — against the
 **10.7:1** flash the near-black scenes opened with. The ground still STARTS on
-the splash colour and settles onto white, so the hand-off has no seam.
+the splash colour and settles onto white, so the hand-off has no seam. (Since build 22 the compiled splash is white as well, so the step is 1:1; see "AND THE SPLASH IS THE PAGE NOW" below.)
 
 **The whole thing is 2,900ms of drawing plus the 1,040ms outro — 3.94s, against
 the 3.74s the title page took.** That is a floor on every cold start, so
@@ -6957,8 +7139,9 @@ native splash, the second because it is a status bar.
   520ms dissolve onto a cream welcome page — white icons on cream, which is to say
   no icons — and snapped back when the component finally left the tree. A clock
   and a battery blinking out and back at the moment of the hand-off is the other
-  half of what a reader means by a glitchy start. It flips at `screenOpacity < 0.5`
-  now, so the icons change on the frame the ground under them does.
+  half of what a reader means by a glitchy start. It flipped at `screenOpacity < 0.5`;
+since the page went white the icons are dark for the screen's whole life
+(`barStyle="dark-content"`), with no crossing to time.
 
 ### And the third thing in those four seconds was the app building itself
 
@@ -6998,7 +7181,8 @@ So the cost is paid AFTERWARDS, one screen at a time, gated on `launchDone` and
 yielding to `InteractionManager` at every step. `lazy` is read per screen on
 every render — `BottomTabView` checks the descriptor each pass, not a mount-time
 snapshot — so turning it off later is what builds that tab, and all five are
-still built without ever being visited.
+still built without ever being visited: the four tabs and the streak screen
+(`WARM` in `app/(app)/_layout.tsx`).
 
 **`SETTLE_MS` and the launch screen's outro are a pair in two files, and
 `check:ui` §10 re-derives both.** `launchDone` fires when the screen begins to
@@ -7008,6 +7192,12 @@ is the same stall on a different animation and would look wrong in neither file.
 The check reads the three durations out of `LaunchScreen.tsx` rather than
 restating them, the same rule `check:launch` applies to `SPLASH_BG`, and it is
 counter-tested from both sides.
+
+**AND THE WARM-UP WAITS FOR THE READER (2026-10-01).** Building a tab is one
+long blocking commit, and the warm-up ran exactly while a new reader taps their
+first cards. A step is now held back `QUIET_MS` (1.5s) after the last touch, and
+is not taken at all while a lesson or the intro is on screen. Every screen is
+still built, just in the gaps.
 
 > **The instrument mattered more than the fix, and its first two numbers were
 > useless.** Total frames lost across a boot swings by seconds between runs on a
@@ -7060,6 +7250,13 @@ means next time. The deadline is a wall clock rather than the timeout's own flag
 because the effect's cleanup clears that timeout and a flag a cleanup can disarm
 is not a deadline.
 
+**AND THE SECOND PASS DOES NOT DRAW AGAIN (2026-09-20).** A restart sets
+`RELOADED_KEY`. The root layout reads it with `consumeReloadedFlag()` and hands
+`LaunchScreen` a TRI-STATE `skipAnimation` (`null` until the read answers), so
+after a restart the screen fades in for 260ms and goes straight to held. It used
+to be read under `[]`, which made it dead: a child's effect runs before its
+parent's, so the drawing had always started before the flag arrived.
+
 **AND THE SPLASH IS THE PAGE NOW.** `splash-blank.png` sat on `#E4E4DF` while the
 drawing's page is pure white — a 1.28:1 step this file recorded as deliberate and
 unfixable from the JS side, because the splash is a COMPILED resource (§18). A
@@ -7090,6 +7287,12 @@ checker reads `FIRSTRUN_SRC` — so the working tree is never edited, plus the
 splash pair and the direction that must stay silent.
 
 ### And then it was clunky, and every word of that was measurable
+
+> **Since 2026-09-24 the first screen is the SEATED host (see the end of §19).**
+> This section and the three after it describe `WelcomeAnimation`, the standing
+> host with his boards and the `sky.jpg` end card. It is kept whole as the
+> one-line way back (`const Intro` in `app/index.tsx`), and `check:host` still
+> holds it. Kept as findings.
 
 > *"it kinda seems a little clunky and not very smooth … especially at the very
 > end when the stick man kinda runs off. hit bronze off in a kinda weird way,
@@ -7372,6 +7575,16 @@ first and erased the drawing, which defeated the point of having it.
 > on the welcome screen is updatable over the air like anything else. It had to be
 > in a binary once; it never has to be again.
 
+### The first screen is a seated host now (2026-09-24)
+
+`app/index.tsx` plays `SeatedWelcome`. The top-hat host walks into a parlour
+(`Parlour.tsx`), sits, crosses his legs and speaks seven voiced lines: Chirp 3 HD
+Algieba, one `welcome.mp3` with a word-timed table (`welcomeVoice.ts`, built by
+`node scripts/make-welcome-voice.mjs`). One clock runs all of it, and `?t=`
+freezes any instant on the web. Its first line was re-recorded on 2026-09-30 for
+seven subjects, and the onboarding questions after it weigh subjects (§23).
+Neither intro bumps `WELCOME_VERSION`.
+
 ---
 
 ## 20. Forced Update Gate
@@ -7541,7 +7754,7 @@ browser at it; the first transform can take longer than a navigation timeout.
   pid has gone is taken over rather than obeyed, and the orphaned route it left
   behind is deleted on the way past. `npm run check:intro` plays the WELCOME
   screen and measures where its lines break, how fast its words arrive and
-  whether any two names on a board touch (8856/9396 — see §19).
+  whether any two names on a board touch (8856/9396 — see §19). It loads `WelcomeAnimation`, and that has not been the first screen since 2026-09-24: `app/index.tsx` shows `SeatedWelcome`, and no browser check of this kind covers it.
   `npm run check:frame` measures every
   element a scene draws against the stage's own crop and reports what the camera
   is cutting in half; `npm run measure:must` records what each beat has on stage
@@ -7910,8 +8123,8 @@ browser at it; the first transform can take longer than a navigation timeout.
   gets it — which is the only version of this rule that survives being forgotten.
 
   **A fifth harness, and it is not about lessons.** `npm run sheet:pass` loads the
-  Scholar's Pass screens (§14) — the tab, the offer, the daily limit and the three
-  locked readings, eight in all — for real and reports whether React actually
+  Scholar's Pass screens (§14) — the Pass tab in ten states, the paywall, the
+  conferral, a locked lesson, Settings › Subscription, Profile and Home, 37 cases in all — for real and reports whether React actually
   mounted, whether anything sticks out past the viewport, and whether any line of
   text is cut off inside its own box — then writes a PNG of each so they can be
   looked at. Its own two lessons, both of which cost a run:
@@ -7951,7 +8164,7 @@ a window by handing back the window ORIGIN at the view's real size** — Android
 thing furthest from the screen produces the most convincingly *on screen* reading
 there is, and three ordinary situations produce it: the first layout pass, a tab
 `react-native-screens` has detached, and `removeClippedSubviews`, which Profile
-turns on for fling performance and which detaches every direct child of the
+turned on for fling performance at the time (it is off now, §19) and which detaches every direct child of the
 scroll content outside the viewport.
 
 The rank climb's intro was gated on exactly that, latched at mount 900 points
@@ -8071,13 +8284,16 @@ right beneath it is the enforcement — it keeps only the keys still in
 the cloud snapshot at once. Plain `{...defaults, ...persisted}` would re-adopt
 `dailyGoalMinutes` on every load and push it straight back up forever.
 
-Where the live ones are read: **daily goal** → the dot row under the streak on
-Home; **auto-advance** → `LessonReward.handleContinue` via `nextLessonInUnit()`;
+Where the live ones are read (eleven keys today): **reminders, streak alerts and
+the quote of the day** → `lib/notifications`; **widget background** →
+`lib/widget/background.ts`; **sound** → `lib/feedback.ts`; **narration** and
+**rising words** → `NarrationText` and the player; **lesson guide** → `LessonGuide`;
 **auto-backup** → `useCloudSync` gates the upload (never the pull-and-merge, so
-signing in on a new phone still restores); **usage analytics** → the root layout;
-**quote card + placement** → Home / Profile / Insights.
+signing in on a new phone still restores); **usage analytics** → the root layout.
+The daily goal and auto-advance went on 2026-08-02 (`307dba7a`, `698a46ce`), and
+the in-app quote card on 2026-09-29 (`68577a5b`).
 
-Two decisions worth not re-litigating:
+Two decisions worth not re-litigating. Both were since settled by deleting the setting itself (above), and they are kept for the reasoning:
 
 - **Auto-advance stops at the unit boundary.** Running on would skip the unit
   list — the one screen that shows a unit was just finished — and on a free
@@ -8140,7 +8356,7 @@ Consequences to remember:
 > a similar design … as how Brilliant does theirs."*
 
 **Ashmere teaches seven subjects now, and since 2026-09-30 each is ONE ROAD** with
-its first lesson on it (see "One road per subject" at the end of this section). Spec
+three dialogue lessons on it, 21 in all (see "One road per subject" at the end of this section). Spec
 for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
 
 > **THE BULLETS BELOW DESCRIBE 2026-09-29, AND FOUR OF THEM ARE HISTORY NOW**: the
@@ -8150,7 +8366,7 @@ for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
 
 - **`data/subjects.ts` is the one list.** Name, short name, blurb, hue, status,
   courses. Home's carousel, the Learn grid and every subject page read it; a new
-  subject is one entry. Philosophy's courses are its six branches.
+  subject is one entry. Philosophy's courses were its six branches (one road since 2026-09-30).
 - **The Learn route is still `branches`.** `/branches` is the subject grid,
   `/branches/subject/[subjectSlug]` a subject page (the static segment outranks
   `[branchSlug]`), and a branch road is where it always was.
@@ -8182,7 +8398,7 @@ for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
     the box's shape (sideways, or upward after trimming the empty sides to `CORE`), so
     nothing is cropped or stretched. `Poster.tsx` paints it with `SvgXml`. **This is
     SVG on purpose** — curves the View primitives cannot draw — so each poster is a
-    box-sized bitmap (§19): the Home shelf is windowed to three cards, and the Learn
+    box-sized bitmap (§19): the Home shelf was windowed to three cards (since then a plain ScrollView of PNGs, below), and the Learn
     grid's tiles are small. Worth a `dumpsys gfxinfo` look on the phone.
   - Every object drawn against a Commons reference (`npm run ref`); economics is a
     supply-and-demand board and coins because ethics owns the balance scale.
@@ -8237,7 +8453,7 @@ for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
     `SCENE_FOOT`), the card's edge is that colour and its ledge that colour toward ink.
     `check:subjects` holds the name at 7:1 and the blurb at 4.5:1 on every foot. The
     card's "N COURSES" badge went (one road a subject made it read "1 COURSES"); a kicker
-    reads SUBJECT III · 1 LESSON, the road masthead's own numbering.
+    reads SUBJECT III · 3 LESSONS, the road masthead's own numbering.
   - **The shelf animates off one scroll value on the UI thread** (`SubjectCarousel`):
     centred cards with a neighbour peeking on both sides, neighbours sitting back at 0.92,
     the picture sliding `PARALLAX` against its frame (drawn into the PNG's margin, so no
@@ -8250,21 +8466,21 @@ for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
 - **Profile and Pass stand on the wallpaper too, and Profile speaks in subjects.**
   "Where your reading goes" is seven SUBJECT rows (`SUBJECT_SHORT`/`SUBJECT_ICON` in
   branchMarks.ts), a subject's lessons summed over its courses, the coming-soon ones
-  quiet at the foot as SOON. "Who you're becoming" (`userBio.ts`) opens from the
+  quiet at the foot as SOON (none since every subject went live, 2026-09-30). "Who you're becoming" (`userBio.ts`) opens from the
   reader's top subject's pool — seven pools, held ≥12 deep by `check:quips` — and a
   philosophy reader draws from their top branch's pool half the time. The title under
   the name follows the subject too. On the Pass tab the chart and its door sit on a
   white panel, because on the wallpaper a doodle ran behind every benefit label.
 - **`npm run check:subjects`** holds the list, the colours (tame, clear of the
   verdict wedge, ΔE ≥ 11.4 apart), every drawing inside its box, no hex in
-  `components/subjects/`, every name/pill/course line measured against the real
+  `components/subjects/`, every name/pill/course line and road-sign title measured against the real
   `.ttf` at 320–430dp, and that saved quotes are gone from Profile, Settings,
   Home, the lesson quote card and the Pass chart. The 320dp render found three
   things the first draft of that check passed — a wrapping pill, unequal row
   heights, a clipped branch name — which is why each is a rule now.
 
 **Phase 2, not done:** quotes and tappable names inside lessons, quote/thinker
-badges and XP, the Quote-of-the-Day widget's content (it is compiled into the
+badges and XP (those badges are retired now, below), the Quote-of-the-Day widget's content (it is compiled into the
 binary; its thinker link now opens the card over Home), per-subject intros, and
 the orphaned `HabitCard.tsx` / `DailyReflection.tsx`, kept only because
 `check-ui` and `check-thinkers` read them. The store still holds
@@ -8276,7 +8492,7 @@ the orphaned `HabitCard.tsx` / `DailyReflection.tsx`, kept only because
 > people talking and learning and describing."*
 
 **Economics & Finance has one course, *Foundations of Economics* (BranchKey
-`economics`, deep navy `#335172`), holding one lesson, `economics-foundations-1`
+`economics`, deep navy `#335172`), holding one lesson then (three now), `economics-foundations-1`
 "What Is Economics?", and its road ends in a MORE COMING SOON sign (`Branch.more`).**
 It is the first DIALOGUE lesson — LESSON_RULES group AP:
 
@@ -8294,14 +8510,14 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   wardrobe rows): the generators skip any lesson whose script has a `speaker`
   (`scripts/lib/dialogue.mjs`), and `check:dialogue` fails a row in their tables.
 - **Philosophy keeps every invariant it had.** The 41-per-branch level rule and the
-  unit-review rule read philosophy's six out of `data/subjects.ts`; the professor's
-  intro gates philosophy lessons only (he lectures on philosophy); the Pass says "across
+  unit-review rule read philosophy's six retired branches out of `scripts/lib/legacy.mjs` (they read `data/subjects.ts` until 2026-09-30); the professor's
+  intro gates philosophy lessons only (he lectures on philosophy; it is switched off, below); the Pass says "across
   N courses".
 - **It is the house format now (2026-09-30).** *"This is how I want future lessons to be
   made for all subjects."* LESSON_RULES AP12 lists what made it work; AP11 lets an object
   be the colour it is (`NATURAL` + `tint()` in `objects.ts`, held by `check:objects`).
 - **THE CAST IS FOUR, AND EACH IS A CHARACTER (2026-09-30).** The owner added a woman's
-  voice — `en-US-Chirp3-HD-Kore` — and a trait for each: the top hat TEACHES (as a
+  voice — `en-US-Chirp3-HD-Kore` — and a trait for each (three rewritten 2026-10-02, next bullet): the top hat TEACHES (as a
   story), the newsboy cap is KIND, the plain mascot is PASSIVE-AGGRESSIVE, and the
   woman (`bun`) is OBLIVIOUS. `cast.ts` carries `trait` and `character` beside each
   voice and a script is written from them (AP14). **A low hair BUN is all she wears**
@@ -8341,7 +8557,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **Every subject is live and is ONE road** (`data/subjects.ts`: `courses` holds one
   branch; `roadOf(subject)`). The roads are `data/branches/<subject slug>/` —
   philosophy, psychology, personal-growth, business, economics, science, history — each
-  one unit (`<slug>-foundations`) with one lesson (`<slug>-foundations-1`) and
+  one unit (`<slug>-foundations`) with, today, three lessons (`<slug>-foundations-1` to `-3`) and
   `more: true`, so the road ends at MORE COMING SOON. `ALL_BRANCHES` is these seven, in
   subject order. LESSON_RULES AP15; `check:subjects` holds it.
 - **A tap on a subject opens its road.** The subject page is deleted. Learn's grid and
@@ -8374,8 +8590,8 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   branch floor, with the pairwise floors held over the LIVE seven; the retired six are
   held among themselves. Tightest live pair psychology/economics, ΔE 11.4.
 - **The professor's intro is OFF** (`PROFESSOR_INTRO_ON = false`, openIntro.ts): its
-  recording says "Philosophy has six branches". Quick Start is a lesson card and a free
-  reader meets the paywall directly. Re-record it about seven subjects to turn it back
+  recording says "Philosophy has six branches". Quick Start is a lesson card, and a free
+  reader opens one lesson of their choosing and then meets the paywall (§14). Re-record it about seven subjects to turn it back
   on; `check:paywall-flow` is parked until then.
 - **The six first lessons** (AP3, AP12; scripts `phil1 psych1 growth1 biz1 sci1 hist1`):
   a bicycle repair stand (What Is Philosophy?), a café taste test (What Is Psychology?),
@@ -8399,7 +8615,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   takes stopped mid-word, the pace ran 3.8–6.4 syllables a second of speech, and the
   player's wall-clock fallback could pause a line that started late before its last
   words. `check:narration` holds every dialogue line to: ends on its own (last 50 ms 33 dB
-  down), 3.9–5.0 syllables a second, a breath at every sentence end; the fallback now
+  down), 3.9–5.0 syllables a second (now only for a beat with no `pace`; every dialogue beat states one, so AP17's bands below govern), a breath at every sentence end; the fallback now
   follows the audio position. `scripts/retake-delivery.mjs` re-renders what fails; the
   cast's default rates in `cast.ts` were lowered so a first take lands at ~4.5.
 - **And a line is said the way its words ask (AP17, 2026-09-30).** Every voiced dialogue
@@ -8419,7 +8635,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **No slow speech, and no drifting arms (2026-10-01).** The owner: the slow lines
   *"sound so bad … I want more medium pace or faster pace"*, and the arms *"slowly moving
   back and forth … looks AI"*. `slow` is gone, and the same day the owner asked for
-  faster still, so the bands are even 4.95–5.65 and brisk 5.4–6.2 syllables a second, with
+  faster still, so the bands became even 4.95–5.65 and brisk 5.4–6.2 syllables a second (widened to growth2's, next bullet), with
   shorter pauses. The lines were first sped up after rendering (rubberband, then PSOLA) to
   save characters, and the owner heard "a fuzz, or two voices" though every measure said the
   sound was clean: **a take is never time-stretched** (AP17). All 118 were RE-RENDERED at
@@ -8452,7 +8668,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   front of him (AR6). `check:replay` measures AR1, AR4 and AR5 on every dialogue lesson
   (found 28, 106 and 30 before the pass); `sheet:lesson-objects` draws a lesson object in
   plain Node again (`sheet:objects` now draws the insignia's).
-- **Every road has two lessons** (2026-09-30), the second appended to its foundations
+- **A second lesson on every road** (2026-09-30), the second appended to its foundations
   unit: What Makes an Argument Good? (a café table and a slice of carrot cake), Why
   Memory Gets Things Wrong (two trolleys and a jar of jam), How Habits Work (a kitchen
   at three o'clock), Who Is Your Customer? (a bakery at dawn), Supply and Demand (an
@@ -8462,3 +8678,12 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   each a different place from its road's first lesson. Re-voicing the seven first
   lessons and voicing these seven cost about 68,000 characters (ledger 430,304 of
   900,000 for September): the bands make the voice retake itself, so budget for it.
+- **And a third on every road (2026-10-01), 21 lessons in all.** How Do We Decide
+  What's Right? (a library desk), Why We See What We Expect (a museum and a mug), How
+  to Set a Goal That Works (a running track), How Do You Set a Price? (craft-fair
+  candles), What Does It Really Cost? (a ticket kiosk), Correlation Isn't Causation
+  (the seaside) and Why Did It Happen? (a village footbridge). Scripts `phil3 … hist3`.
+  63 lines were voiced in one go for about 17,000 characters. All 21 lessons cast three
+  of the four, with the top hat in every one. `SOLID_FLOOR` is 267: the 246 retired and
+  the 21. The road they stand on — a signboard per stop, NEW for 12 days, a landmark per
+  road — is in §17 ("The branch road"); the paper curtain from Home is in §19.
