@@ -697,6 +697,7 @@ export default function ProfileScreen() {
                   family={b.family}
                   tier={b.tier}
                   glyph={b.glyph}
+                  id={b.id}
                   earned={b.earned}
                   size={BADGE_W - 12}
                 />

@@ -21,7 +21,7 @@
 // its shape and loses its material.
 import os from 'node:os';
 import path from 'node:path';
-import { Art, Ins, PAGE_CSS, markSvg, nodesSvg, roll, shoot, svg } from './lib/insigniasheet.mjs';
+import { Art, Ins, PAGE_CSS, markSvg, nodesSvg, objectMarkSvg, ObjIndex, roll, shoot, svg } from './lib/insigniasheet.mjs';
 
 const only = process.argv[2]?.toUpperCase() ?? null;
 if (only && !Ins.ORDERS.includes(only)) throw new Error(`no order ${only}; one of ${Ins.ORDERS.join(' ')}`);
@@ -32,7 +32,8 @@ const { ranks } = roll();
 function pin(oi, d, size, locked) {
   const t = locked ? Art.LOCKED : Art.tonesOf(Ins.ORDER[Ins.ORDERS[oi]]);
   const a = Art.rankArt(oi, d, t);
-  return svg(nodesSvg(a.nodes) + markSvg(a.mark, ranks[oi * 6 + d] ?? 'candle'), size);
+  const g = ranks[oi * 6 + d] ?? 'candle';
+  return svg(nodesSvg(a.nodes) + (objectMarkSvg(a.mark, a.win, ObjIndex.rankObject(g), locked) ?? markSvg(a.mark, g)), size);
 }
 
 let body = `<div class="h">${orders.length} ORDER(S) DOWN × 6 DEGREES ACROSS · LAST COLUMN LOCKED · `

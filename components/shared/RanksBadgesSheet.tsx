@@ -15,7 +15,7 @@ import RankSeal, { type SealState } from './RankSeal';
 import RankClimbChart from './RankClimbChart';
 import RankHeader from '@/components/profile/RankHeader';
 import { RANKS, awardedRank, rankProgress, rankRequirement, type RankDef, rankOrder, rankDegree } from '@/data/ranks';
-import { circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
+import { CIRCLES, circleForRank, RANK_EPITHETS, toRoman } from '@/data/rankLore';
 import {
   BADGES, FAMILY_LABEL, FAMILY_ORDER, badgeCriterion, badgeProgress, badgeProgressLabel,
   caseOf, isStruck, type BadgeDef, type BadgeFamily, type ProgressStats,
@@ -94,6 +94,7 @@ function BadgeCell({
         family={badge.family}
         tier={badge.tier}
         glyph={badge.glyph}
+        id={badge.id}
         earned={earned}
         size={MEDAL}
       />
@@ -132,6 +133,7 @@ function BadgeDetail({
           family={badge.family}
           tier={badge.tier}
           glyph={badge.glyph}
+          id={badge.id}
           earned={earned}
           size={168}
         />
@@ -194,6 +196,8 @@ export default function RanksBadgesSheet() {
   const [tab, setTab] = useState<'ranks' | 'badges'>('ranks');
   const [selected, setSelected] = useState<RankDef | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<BadgeDef | null>(null);
+  // Which circle the ladder shows; null is the reader's own.
+  const [circle, setCircle] = useState<number | null>(null);
 
   useEffect(() => {
     if (tabReq) {
@@ -201,6 +205,7 @@ export default function RanksBadgesSheet() {
       setVisible(true);
       setSelected(null);
       setSelectedBadge(null);
+      setCircle(null);
     }
   }, [tabReq]);
 
@@ -226,6 +231,8 @@ export default function RanksBadgesSheet() {
   if (!visible) return null;
 
   const { current, index } = awardedRank(rankIndex, totalXP);
+  const curTier = Math.floor(index / 6);
+  const shownTier = circle ?? curTier;
   const earnedCount = caseOf(earnedBadges).filter((b) => isStruck(b, stats, earnedBadges)).length;
   const badgeW = (width - 32 - 2 * BADGE_GAP) / 3;
 
@@ -288,6 +295,74 @@ export default function RanksBadgesSheet() {
                       own legend is off because the header has already said it. */}
                   <View style={styles.heroCard}>
                     <RankHeader rankIndex={index} totalXP={totalXP} />
+                  </View>
+
+                  {/* THE EIGHT CIRCLES (2026-10-01). This was all forty-eight ranks in
+                      one column, so after a rank-up the reader scrolled past every
+                      rung below theirs to find themselves. The ladder is grouped the
+                      way it is built — eight circles of six — and the sheet opens on
+                      the circle they are IN. The row picks a circle; the card shows
+                      its six ranks, with the reader's own marked. No scrolling to
+                      find where you are. */}
+                  <Text style={styles.spineHint}>THE EIGHT CIRCLES · TAP ONE</Text>
+                  <View style={styles.circleRow}>
+                    {CIRCLES.map((c, t) => {
+                      const cap = t * 6 + 5;
+                      const st: SealState = t < curTier ? 'earned' : t === curTier ? 'current' : 'locked';
+                      const on = t === shownTier;
+                      return (
+                        <Pressable
+                          key={c.name}
+                          onPress={() => setCircle(t)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${c.name}${t === curTier ? ', your circle' : ''}`}
+                          style={[styles.circleChip, on && styles.circleChipOn]}
+                        >
+                          <RankSeal glyph={RANKS[cap].glyph} state={st} size={34} order={rankOrder(cap)} degree={0} />
+                          {t === curTier ? <View style={styles.circleDot} /> : null}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.circleCard}>
+                    <View style={styles.circleHead}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.circleKicker}>CIRCLE {toRoman(shownTier + 1)} · {CIRCLES[shownTier].subtitle.toUpperCase()}</Text>
+                        <Text style={styles.circleName}>{CIRCLES[shownTier].name}</Text>
+                      </View>
+                      <Text style={styles.circleCount}>
+                        {Math.max(0, Math.min(6, index + 1 - shownTier * 6))}
+                        <Text style={styles.circleOf}> / 6</Text>
+                      </Text>
+                    </View>
+                    <View style={styles.circleGrid}>
+                      {RANKS.slice(shownTier * 6, shownTier * 6 + 6).map((r, k) => {
+                        const i = shownTier * 6 + k;
+                        const st = stateFor(i, index);
+                        const isNext = i === index + 1;
+                        return (
+                          <Pressable
+                            key={r.id}
+                            onPress={() => setSelected(r)}
+                            style={[styles.rankCell, st === 'current' && styles.rankCellHere]}
+                          >
+                            <RankSeal glyph={r.glyph} state={st} size={62} order={rankOrder(i)} degree={rankDegree(i)} />
+                            <Text style={[styles.rankCellName, st === 'locked' && { color: Lock }]} numberOfLines={2}>{r.name}</Text>
+                            <Text style={[styles.rankCellXp, st === 'locked' && { color: Lock }]}>{r.xp.toLocaleString()} XP</Text>
+                            {st === 'current' ? <Text style={styles.tagHere}>YOU ARE HERE</Text> : null}
+                            {st === 'earned' ? <Text style={styles.tagDoneSmall}>✓ ACHIEVED</Text> : null}
+                            {isNext ? <Text style={styles.tagNextSmall}>NEXT</Text> : null}
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  {/* THE CLIMB, after the circles: the circles answer "where am I" and
+                      come first; the chart is how the reader got there. */}
+                  <Text style={styles.spineHint}>YOUR CLIMB</Text>
+                  <View style={[styles.heroCard, { marginTop: 6 }]}>
                     <View style={styles.climbWrap}>
                       <RankClimbChart
                         rankIndex={index}
@@ -300,63 +375,6 @@ export default function RanksBadgesSheet() {
                         legend={false}
                       />
                     </View>
-                  </View>
-
-                  <Text style={styles.spineHint}>THE WHOLE LADDER · TAP A SEAL</Text>
-
-                  {/* THE LADDER — all 25 seals hung off a rail on the left.
-                      The rule used to run down the CENTRE of the gutter, which put
-                      it straight through every seal. Now it runs down the left edge
-                      and turns off to each rank in a short branch, so the path
-                      passes the ranks rather than through them. */}
-                  <View style={styles.spine}>
-                    {RANKS.map((r, i) => {
-                      const st = stateFor(i, index);
-                      const isNext = i === index + 1;
-                      // Inked as far as the rank you hold; faint beyond it, so the
-                      // rail reads as the distance already walked.
-                      const reached = i <= index;
-                      return (
-                        <Pressable key={r.id} onPress={() => setSelected(r)} style={styles.row}>
-                          <View style={styles.gutter}>
-                            {i > 0 && (
-                              <View style={[styles.rail, styles.railTop, { backgroundColor: reached ? Ink : InkFaint }]} />
-                            )}
-                            {i < RANKS.length - 1 && (
-                              <View style={[styles.rail, styles.railBot, { backgroundColor: i < index ? Ink : InkFaint }]} />
-                            )}
-                            {/* the turn-off, and the junction it turns off at */}
-                            <View style={[styles.branch, { backgroundColor: reached ? Ink : InkFaint }]} />
-                            <View style={[styles.junction, { backgroundColor: reached ? Ink : InkFaint }]} />
-                            <View style={styles.sealSlot}>
-                              {/* BOTH ARE PASSED EVEN WHEN LOCKED, and they say
-                                  different things: `degree` is the SHAPE and
-                                  `order` is the MATERIAL. Reading this ladder
-                                  down the page is the one place the whole system
-                                  is visible at once — six shapes running again
-                                  and again while the metal changes under them.
-                                  RankSeal withholds only the material, because
-                                  that is the part that has to be earned. */}
-                              <RankSeal glyph={r.glyph} state={st} size={50}
-                                order={rankOrder(i)} degree={rankDegree(i)} />
-                            </View>
-                          </View>
-
-                          <View style={styles.rowText}>
-                            <Text style={[styles.rowName, st === 'locked' && { color: Lock }]} numberOfLines={1}>
-                              {r.name}
-                            </Text>
-                            <Text style={[styles.rowXp, st === 'locked' && { color: Lock }]}>
-                              {r.xp.toLocaleString()} XP
-                            </Text>
-                          </View>
-
-                          {st === 'current' && <Text style={styles.tagCurrent}>YOU ARE HERE</Text>}
-                          {st === 'earned' && <Text style={styles.tagDone}>✓ ACHIEVED</Text>}
-                          {isNext && <Text style={styles.tagNext}>NEXT</Text>}
-                        </Pressable>
-                      );
-                    })}
                   </View>
                 </ScrollView>
               ) : (
@@ -558,6 +576,36 @@ const styles = StyleSheet.create({
   },
   climbWrap: { marginTop: 16 },
   spineHint: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 2, marginTop: 18, marginBottom: 4 },
+
+  // ── the eight circles (2026-10-01) ─────────────────────────────────────────
+  circleRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  circleChip: {
+    width: 40, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 12,
+    borderWidth: 2, borderColor: 'transparent',
+  },
+  circleChipOn: { backgroundColor: '#FFFFFF', borderColor: InkFaint },
+  circleDot: { position: 'absolute', bottom: 1, width: 6, height: 6, borderRadius: 3, backgroundColor: '#D35E36' },
+  circleCard: {
+    marginTop: 10, padding: 14, borderRadius: 16, backgroundColor: '#FFFFFF', borderWidth: 2, borderColor: InkFaint,
+  },
+  circleHead: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 6 },
+  circleKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, color: InkSoft, letterSpacing: 1.6 },
+  circleName: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 20, color: Ink, marginTop: 2 },
+  circleCount: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: Ink },
+  circleOf: { fontFamily: 'Inter_500Medium', fontSize: 12, color: InkSoft },
+  circleGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 },
+  rankCell: { width: '32%', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 2, borderRadius: 12 },
+  rankCellHere: { backgroundColor: RowTint, borderWidth: 2, borderColor: Ink },
+  rankCellName: {
+    fontFamily: 'PlayfairDisplay_700Bold', fontSize: 13, lineHeight: 17, color: Ink, textAlign: 'center', marginTop: 4,
+  },
+  rankCellXp: { fontFamily: 'Inter_500Medium', fontSize: 10, color: InkSoft, marginTop: 1 },
+  tagHere: {
+    marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: '#FFFFFF',
+    backgroundColor: Ink, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden',
+  },
+  tagDoneSmall: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: '#3E8E5A' },
+  tagNextSmall: { marginTop: 4, fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 1, color: '#D35E36' },
 
   // ── the ladder ──────────────────────────────────────────────────────────
   // THE RAIL RUNS DOWN THE LEFT AND TURNS OFF TO EACH RANK.

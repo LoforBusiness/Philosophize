@@ -17,17 +17,20 @@
 // with the REAL marks, in headless Chrome — scripts/lib/insigniasheet.mjs.
 import os from 'node:os';
 import path from 'node:path';
-import { Art, Ins, PAGE_CSS, markSvg, nodesSvg, roll, shoot, svg } from './lib/insigniasheet.mjs';
+import { Art, Ins, PAGE_CSS, markSvg, nodesSvg, objectMarkSvg, ObjIndex, roll, shoot, svg } from './lib/insigniasheet.mjs';
 
 const BOX = Number(process.env.PIN) || 100;
 const GRID = 52; // the size the badge case draws them at
 const FAMILIES = ['lessons', 'subjects', 'streak', 'thinkers', 'quotes', 'mastery', 'xp'];
 const { badges } = roll();
 
-function medal(family, tier, glyph, size, earned = true) {
+function medal(family, tier, glyph, size, earned = true, id) {
+  // The family×tier grid has no id: show the first live badge of that family and tier.
+  id = id ?? badges.find((b) => b.family === family && b.tier === tier && !b.retired)?.id;
   const t = earned ? Art.tonesOf(Ins.ORDER[Ins.TIER_ORDER[tier - 1]]) : Art.LOCKED;
   const a = Art.badgeArt(family, tier, t);
-  return svg(nodesSvg(a.back) + nodesSvg(a.medal) + nodesSvg(a.front) + markSvg(a.mark, glyph), size);
+  const obj = objectMarkSvg(a.mark, a.win, ObjIndex.badgeObject(id, glyph), !earned, 1.72);
+  return svg(nodesSvg(a.back) + nodesSvg(a.medal) + (obj ?? markSvg(a.mark, glyph)) + nodesSvg(a.front), size);
 }
 
 let body = `<div class="h">${FAMILIES.length} FAMILIES DOWN × 5 TIERS ACROSS (${Ins.TIER_ORDER.join(' · ')}) · LAST COLUMN LOCKED</div>`;
@@ -43,7 +46,7 @@ for (const f of FAMILIES) {
 body += '</div>';
 body += `<div class="h">ALL ${badges.length} ON THE ROLL, AT ${GRID}px</div>`;
 body += `<div class="g" style="grid-template-columns:repeat(12,${GRID + 4}px)">`;
-for (const b of badges) body += medal(b.family, b.tier, b.glyph, GRID);
+for (const b of badges) body += medal(b.family, b.tier, b.glyph, GRID, true, b.id);
 body += '</div>';
 
 const dest = path.join(os.tmpdir(), 'badge-sheet.png');

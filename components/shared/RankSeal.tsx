@@ -3,8 +3,10 @@ import React from 'react';
 import { View } from 'react-native';
 import Svg from 'react-native-svg';
 import { type GlyphName } from './Glyph';
-import { InsigniaNodes, StruckMark } from './InsigniaParts';
-import { LOCKED, PLAIN, rankArt, tonesOf, type RankArt, type Tones } from './insigniaArt';
+import { InsigniaNodes, ObjectMark, StruckMark } from './InsigniaParts';
+import { LOCKED, PLAIN, pathOf, rankArt, tonesOf, type Node, type RankArt, type Tones } from './insigniaArt';
+import { objectNodes } from './insigniaObjects';
+import { rankObject } from './objects';
 import { ORDER, ORDERS, type OrderName } from '@/constants/insignia';
 
 // -----------------------------------------------------------------------------
@@ -73,6 +75,13 @@ interface Props {
 // geometry, the ladder sheet draws forty-eight at a time, and nothing about one
 // ever changes while the app runs.
 const ART = new Map<string, RankArt>();
+// An object's nodes, once per glyph and lock state: they never change.
+const OBJ = new Map<string, Node[] | null>();
+function objFor(glyph: string, locked: boolean): Node[] | null {
+  const k = `${glyph}:${locked ? 1 : 0}`;
+  if (!OBJ.has(k)) { const o = rankObject(glyph); OBJ.set(k, o ? objectNodes(o(), locked) : null); }
+  return OBJ.get(k) ?? null;
+}
 function artFor(oi: number, degree: number, key: string, tones: Tones): RankArt {
   const k = `${oi}:${degree}:${key}`;
   let a = ART.get(k);
@@ -95,13 +104,20 @@ export default memo(function RankSeal({
 
   // useId embeds ':', which is not a legal id; the clip paths are keyed on it.
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const obj = objFor(glyph, locked);
 
   return (
     <View style={{ width: size, height: size }}>
       <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute' }}>
         <InsigniaNodes nodes={art.nodes} id={uid} />
       </Svg>
-      <StruckMark glyph={glyph} mark={art.mark} size={size} />
+      {/* THE RANK'S OBJECT in its window (2026-10-01); the old line glyph only where
+          a rank has no object drawn. */}
+      {obj ? (
+        <ObjectMark nodes={obj} mark={art.mark} win={pathOf(art.win)} size={size} id={uid} />
+      ) : (
+        <StruckMark glyph={glyph} mark={art.mark} size={size} />
+      )}
     </View>
   );
 });

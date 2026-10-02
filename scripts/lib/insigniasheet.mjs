@@ -89,9 +89,14 @@ export const svg = (inner, size) => `<svg width="${size}" height="${size}" viewB
 /** Every rank's and every badge's mark, read out of the data files. */
 export function roll() {
   const ranks = [...fs.readFileSync(path.join(REPO, 'data/ranks.ts'), 'utf8').matchAll(/glyph: '([a-z]+)'/g)].map((m) => m[1]);
-  const badges = [...fs.readFileSync(path.join(REPO, 'data/badges.ts'), 'utf8')
-    .matchAll(/glyph: '([a-z]+)', family: '([a-z]+)', tier: (\d)/g)]
-    .map((m) => ({ glyph: m[1], family: m[2], tier: Number(m[3]) }));
+  // Each entry from its id to the next id, so the id travels with the rest.
+  const src = fs.readFileSync(path.join(REPO, 'data/badges.ts'), 'utf8');
+  const badges = src.split(/\bid: '/).slice(1).map((chunk) => {
+    const m = chunk.match(/glyph: '([a-z]+)', family: '([a-z]+)', tier: (\d)/);
+    if (!m) return null;
+    const own = chunk.split(/\n  \},/)[0];
+    return { id: chunk.slice(0, chunk.indexOf("'")), glyph: m[1], family: m[2], tier: Number(m[3]), retired: /retired: true/.test(own) };
+  }).filter(Boolean);
   return { ranks, badges };
 }
 
@@ -121,3 +126,35 @@ export function shoot(html, out, width, height) {
 export const PAGE_CSS = `body{margin:0;background:#FAFAF7;font:600 11px system-ui,sans-serif;color:#6B6B6B}
 .h{padding:12px 14px 2px;font-size:12px;letter-spacing:.06em;color:#4A4A4A}
 .g{display:grid;gap:2px 6px;padding:8px 14px}.c{display:flex;flex-direction:column;align-items:center}`;
+
+// ── THE DRAWN OBJECTS (2026-10-01) ─────────────────────────────────────────
+// The pins and badges carry a coloured object in a lit window where the glyph was
+// (components/shared/insigniaObjects.ts). Loaded here with a small module loader,
+// because those files import each other.
+const objCache = new Map();
+function loadTs(rel) {
+  const abs = path.join(REPO, rel);
+  if (objCache.has(abs)) return objCache.get(abs);
+  const code = transform(fs.readFileSync(abs, 'utf8'), { transforms: ['typescript', 'imports'] }).code;
+  const mod = { exports: {} };
+  objCache.set(abs, mod.exports);
+  const req = (spec) => {
+    if (!spec.startsWith('.')) throw new Error(`${rel} imports ${spec}`);
+    let r = path.join(path.dirname(rel), spec);
+    if (fs.existsSync(path.join(REPO, r, 'index.ts'))) r = path.join(r, 'index.ts');
+    else if (!r.endsWith('.ts')) r += '.ts';
+    return loadTs(r);
+  };
+  new Function('exports', 'module', 'require', code)(mod.exports, mod, req);
+  return mod.exports;
+}
+export const Obj = loadTs('components/shared/insigniaObjects.ts');
+export const ObjIndex = loadTs('components/shared/objects/index.ts');
+/** The window and the object in it, as ObjectMark draws it; null if there is no object. */
+export function objectMarkSvg(mark, win, make, locked, scale = 1.42) {
+  if (!make) return null;
+  const nodes = Obj.objectNodes(make(), locked);
+  const s = (mark.size * scale) / 100, x = mark.cx - 50 * s, y = mark.cy - 50 * s;
+  const id = `ow${++clipSeq}`;
+  return `<clipPath id="${id}"><path d="${Art.pathOf(win)}"/></clipPath><g clip-path="url(#${id})"><g transform="translate(${x} ${y}) scale(${s})">${nodesSvg(nodes)}</g></g>`;
+}

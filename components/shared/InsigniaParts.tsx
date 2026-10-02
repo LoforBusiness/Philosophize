@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ClipPath, Defs, G, Path } from 'react-native-svg';
+import Svg, { ClipPath, Defs, G, Path } from 'react-native-svg';
 import Glyph, { type GlyphName } from './Glyph';
 import type { Mark, Node } from './insigniaArt';
 
@@ -48,6 +48,42 @@ function paint(n: Node, key: string): React.ReactElement {
     </G>
   );
 }
+
+/**
+ * THE OBJECT IN THE WINDOW (2026-10-01) — what replaced the white line glyph.
+ * `nodes` are an object's parts in its own 100-unit box (insigniaObjects.ts); they
+ * are scaled into the mark's square and clipped to the window, so an object can
+ * never spill over the rim. An <Svg> of its own over the insignia, for the reason
+ * the glyph was two Views: a badge's mark animates in on its own layer.
+ */
+export function ObjectMark({ nodes, mark, win, size, id, scale = OBJECT_SCALE }: {
+  nodes: Node[]; mark: Mark; win: string; size: number; id: string;
+  /** How much larger than the glyph square the object is drawn. A badge's window is
+   *  roomier for its mark than a pin's, so badges pass BADGE_OBJECT_SCALE. */
+  scale?: number;
+}) {
+  // The object's 100-unit box maps onto a square a little larger than the glyph's,
+  // because an object fills about three quarters of its box where a glyph filled
+  // nearly all of its own.
+  const s = (mark.size * scale) / 100;
+  const x = mark.cx - 50 * s, y = mark.cy - 50 * s;
+  const cid = `ow${id}`;
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute', left: 0, top: 0, zIndex: 2 }} pointerEvents="none">
+      <Defs>
+        <ClipPath id={cid}><Path d={win} /></ClipPath>
+      </Defs>
+      <G clipPath={`url(#${cid})`}>
+        <G transform={`translate(${x} ${y}) scale(${s})`}>
+          <InsigniaNodes nodes={nodes} id={`${id}o`} />
+        </G>
+      </G>
+    </Svg>
+  );
+}
+/** How much larger than the glyph's square an object's box is drawn. */
+export const OBJECT_SCALE = 1.42;
+export const BADGE_OBJECT_SCALE = 1.72;
 
 /** The emblem, placed in the insignia's 100-unit box drawn at `size` points. */
 export function StruckMark({ glyph, mark, size }: { glyph: GlyphName; mark: Mark; size: number }) {

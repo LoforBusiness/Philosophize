@@ -65,6 +65,8 @@ export interface Material {
 export interface Tones {
   glow: string; hi: string; lit: string; base: string; shade: string; rim: string;
   line: string; mark: string; markShadow: string;
+  /** The lit window the object is drawn in (2026-10-01), and its shaded top edge. */
+  win: string; winShade: string;
   /** false for a locked insignia: no glare, no sparkle, no shadow. */
   struck: boolean;
 }
@@ -137,6 +139,10 @@ export function tonesOf(m: Material): Tones {
     line: mix(m.rim, '#0B0B0B', 0.45),
     mark: m.on,
     markShadow: m.rim,
+    // The window: the material's own light, nearly to white, so a candle in a clay
+    // pin sits on pale terracotta and one in a lapis pin on pale blue.
+    win: mix(m.lit, '#FFFFFF', 0.8),
+    winShade: mix(m.lit, '#FFFFFF', 0.42),
     struck: true,
   };
 }
@@ -149,7 +155,7 @@ export function tonesOf(m: Material): Tones {
  */
 export const LOCKED: Tones = {
   glow: '#F7F8FA', hi: '#F2F3F5', lit: '#EBEDF0', base: '#E4E7EB', shade: '#D6DAE0', rim: '#C9CED6',
-  line: '#AAB1BC', mark: '#AAB1BC', markShadow: '#E4E7EB', struck: false,
+  line: '#AAB1BC', mark: '#AAB1BC', markShadow: '#E4E7EB', win: '#F4F5F7', winShade: '#E2E5EA', struck: false,
 };
 
 /**
@@ -158,7 +164,7 @@ export const LOCKED: Tones = {
  */
 export const PLAIN: Tones = {
   glow: '#FFFFFF', hi: '#FFFFFF', lit: '#F2EFE8', base: '#FAFAF7', shade: '#E4DFD4', rim: '#C6C0B2',
-  line: '#1A1A1A', mark: '#1A1A1A', markShadow: '#E4DFD4', struck: true,
+  line: '#1A1A1A', mark: '#1A1A1A', markShadow: '#E4DFD4', win: '#FFFFFF', winShade: '#ECE8DF', struck: true,
 };
 
 // ── geometry ──────────────────────────────────────────────────────────────
@@ -436,6 +442,19 @@ export function innerRule(sil: Pt[], t: Tones, at: number): Node {
 }
 
 /**
+ * THE WINDOW the object sits in (2026-10-01): the face cut back to a lit pane, with a
+ * shaded band along its top-left where the rim overhangs it. What used to sit on the
+ * face was a white line glyph; a coloured object needs a pale ground to be read on.
+ */
+export const WINDOW_INSET = 2.2;
+export function windowNodes(win: Pt[], t: Tones): Node[] {
+  return [
+    { k: 'fill', d: pathOf(win), c: t.winShade },
+    { k: 'clip', d: pathOf(win), kids: [{ k: 'fill', d: pathOf(shift(win, 1.6, 3.2)), c: t.win }] },
+  ];
+}
+
+/**
  * A four-point glint, white inside the order's own dark line. The line is not
  * decoration: a glint drawn past the object's edge is sitting on PAPER, and a
  * bare white star on cream is the trap this app has walked into three times
@@ -570,6 +589,8 @@ export interface RankArt {
   body: Pt[];
   /** The frame as drawn, from degree 3; null below it. */
   frame: Pt[] | null;
+  /** The lit window the rank's object is drawn in. */
+  win: Pt[];
 }
 
 /** Where a ray from (cx, cy) at angle `a` last crosses an outline. */
@@ -616,7 +637,7 @@ export function alongOutline(pts: Pt[], n: number, offset = 0.5): Pt[] {
 export const RANK_CY = 48;
 /** How big the crest is drawn on its own, and inside its frame. */
 export const CREST_K = 0.88;
-export const FRAMED_K = 0.62;
+export const FRAMED_K = 0.66;
 /** The frame's size, a little larger at every order. */
 export const frameK = (orderIndex: number) => 0.86 + Math.min(7, Math.max(0, orderIndex)) * 0.01;
 
@@ -652,7 +673,10 @@ export function rankArt(orderIndex: number, degree: number, t: Tones): RankArt {
   }
 
   nodes.push(...crest(body, t, 50, RANK_CY, b.framed ? 6 : RIM, b.framed ? 3.2 : LIP));
-  if (b.rule) { nodes.push(innerRule(body, t, b.framed ? 9 : 11.5)); parts++; }
+  const win = inset(body, (b.framed ? 6 : RIM) + WINDOW_INSET);
+  nodes.push(...windowNodes(win, t));
+  // The rule is the window's bezel now: a light line round the pane.
+  if (b.rule) { nodes.push(innerRule(body, t, (b.framed ? 6 : RIM) + WINDOW_INSET)); parts++; }
 
   // Stones set in the crest's foot: one, then three. Countable at 50px because
   // they sit on the outline, where the contrast is highest.
@@ -699,7 +723,7 @@ export function rankArt(orderIndex: number, degree: number, t: Tones): RankArt {
       // A shield and a crest narrow to a point below, so their marks sit higher
       // and a little smaller than the rest: the room is in their shoulders.
       cy: RANK_CY - (shape.label === 'crest' ? 9 * k : heavyTop ? 7 * k : 0),
-      size: (b.framed ? 30 : 38) * (shape.label === 'star' ? 0.9 : shape.label === 'crest' ? 0.85 : heavyTop ? 0.88 : 1),
+      size: (b.framed ? 33 : 38) * (shape.label === 'star' ? 0.9 : shape.label === 'crest' ? 0.85 : heavyTop ? 0.88 : 1),
       weight: 3.2, color: t.mark, shadow: t.markShadow, dx: 0.9, dy: 1.3,
     },
     reach,
@@ -708,6 +732,7 @@ export function rankArt(orderIndex: number, degree: number, t: Tones): RankArt {
     parts,
     body,
     frame,
+    win,
   };
 }
 
@@ -771,6 +796,8 @@ export interface BadgeArt {
   body: Pt[];
   /** the medal's face as drawn — the room the mark has */
   face: Pt[];
+  /** the lit window the badge's object is drawn in */
+  win: Pt[];
   /** the laurel's leaves, for measuring (empty below tier III) */
   leaves: Leaf[];
   /** how far everything reaches from (50, 50) */
@@ -903,7 +930,9 @@ export function badgeArt(family: Family, tier: number, t: Tones): BadgeArt {
     leaves = laurelLeaves(kind).leaves;
   }
   const medal = crest(body, t, 50, place.cy);
-  if (dressed) medal.push(innerRule(body, t, 11));
+  const win = inset(body, RIM + WINDOW_INSET);
+  medal.push(...windowNodes(win, t));
+  if (dressed) medal.push(innerRule(body, t, RIM + WINDOW_INSET));
   if (furnished && tr >= 2) front.push(...ribbon(t));
   if (furnished && tr >= 4) front.push(...stars(t));
   if (furnished && tr >= 5) { front.push(...sparkle(14, 30, 5.6, t), ...sparkle(87, 21, 4.2, t)); }
@@ -923,7 +952,7 @@ export function badgeArt(family: Family, tier: number, t: Tones): BadgeArt {
       cx: 50, cy: place.cy + fm.dy * place.k,
       size: 100 * fm.size * place.k * (dressed ? DRESSED_MARK : 1), weight: 3.2, color: t.mark, shadow: t.markShadow, dx: 0.8, dy: 1.2,
     },
-    body, face, leaves,
+    body, face, win, leaves,
     reach: Math.max(reachOf(body) + OUTLINE / 2, leafReach, dressed && furnished ? Math.hypot(41, 37.5) : 0),
     top: leafTop,
   };

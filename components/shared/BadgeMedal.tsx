@@ -4,8 +4,10 @@ import { View } from 'react-native';
 import Svg, { G } from 'react-native-svg';
 import Animated, { useAnimatedProps, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { type GlyphName } from './Glyph';
-import { InsigniaNodes, StruckMark } from './InsigniaParts';
-import { LOCKED, badgeArt, tonesOf, type BadgeArt } from './insigniaArt';
+import { BADGE_OBJECT_SCALE, InsigniaNodes, ObjectMark, StruckMark } from './InsigniaParts';
+import { LOCKED, badgeArt, pathOf, tonesOf, type BadgeArt, type Node } from './insigniaArt';
+import { objectNodes } from './insigniaObjects';
+import { badgeObject } from './objects';
 import { TIER_ORDER, ORDER } from '@/constants/insignia';
 import type { BadgeFamily, BadgeTier } from '@/data/badges';
 
@@ -62,6 +64,8 @@ interface Props {
   family: BadgeFamily;
   tier: BadgeTier;
   glyph: GlyphName;
+  /** The badge's id: what picks its drawn object (objects/badgeObjects.ts). */
+  id?: string;
   earned: boolean;
   size?: number;
   /** 0..1 — the medal landing. Omit for a finished medal. */
@@ -73,6 +77,12 @@ interface Props {
 // Pure geometry, built once per variant: sixty-odd medals can be on screen at
 // once and none of them ever changes.
 const ART = new Map<string, BadgeArt>();
+const OBJ = new Map<string, Node[] | null>();
+function objFor(id: string | undefined, glyph: string, earned: boolean): Node[] | null {
+  const k = `${id ?? glyph}:${earned ? 1 : 0}`;
+  if (!OBJ.has(k)) { const o = badgeObject(id, glyph); OBJ.set(k, o ? objectNodes(o(), !earned) : null); }
+  return OBJ.get(k) ?? null;
+}
 function artFor(family: BadgeFamily, tier: BadgeTier, earned: boolean): BadgeArt {
   const k = `${family}:${tier}:${earned ? 1 : 0}`;
   let a = ART.get(k);
@@ -92,9 +102,10 @@ const clamp = (v: number) => {
 // MEMOISED. Every prop below is a primitive (the two shared values are stable
 // refs), so the comparison is exact.
 export default memo(function BadgeMedal({
-  family, tier, glyph, earned, size = 72, draw = null, reveal = null,
+  family, tier, glyph, id, earned, size = 72, draw = null, reveal = null,
 }: Props) {
   const art = artFor(family, tier, earned);
+  const obj = objFor(id, glyph, earned);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
 
   // The strike: in from 1.14× and transparent, down onto the page over the
@@ -123,15 +134,23 @@ export default memo(function BadgeMedal({
           </AG>
         )}
         <InsigniaNodes nodes={art.medal} id={`${uid}m`} />
-        {art.front.length > 0 && (
+      </Svg>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width: size, height: size, zIndex: 1 }, markStyle]} pointerEvents="none">
+        {obj ? (
+          <ObjectMark nodes={obj} mark={art.mark} win={pathOf(art.win)} size={size} id={uid} scale={BADGE_OBJECT_SCALE} />
+        ) : (
+          <StruckMark glyph={glyph} mark={art.mark} size={size} />
+        )}
+      </Animated.View>
+      {/* THE RIBBON AND THE STARS IN FRONT OF THE OBJECT (2026-10-01): the ribbon
+          crosses the medal's foot, so it must cross the object sitting in it too. */}
+      {art.front.length > 0 && (
+        <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: 'absolute', zIndex: 3 }} pointerEvents="none">
           <AG animatedProps={furnish}>
             <InsigniaNodes nodes={art.front} id={`${uid}f`} />
           </AG>
-        )}
-      </Svg>
-      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width: size, height: size, zIndex: 1 }, markStyle]} pointerEvents="none">
-        <StruckMark glyph={glyph} mark={art.mark} size={size} />
-      </Animated.View>
+        </Svg>
+      )}
     </Animated.View>
   );
 });

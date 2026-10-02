@@ -70,6 +70,7 @@ export default function BadgeEarned({ badge, delay }: { badge: BadgeDef; delay: 
         family={badge.family}
         tier={badge.tier}
         glyph={badge.glyph}
+        id={badge.id}
         earned
         size={MEDAL}
         draw={draw}

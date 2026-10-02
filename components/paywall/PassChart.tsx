@@ -127,7 +127,7 @@ function TileIcon({ id }: { id: FreeTile['id'] }) {
     }
     case 'badges':
       return (
-        <BadgeMedal family={TILE_BADGE.family} tier={TILE_BADGE.tier} glyph={TILE_BADGE.glyph} earned size={ICON + 1} />
+        <BadgeMedal family={TILE_BADGE.family} tier={TILE_BADGE.tier} glyph={TILE_BADGE.glyph} id={TILE_BADGE.id} earned size={ICON + 1} />
       );
   }
 }

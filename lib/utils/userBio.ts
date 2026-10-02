@@ -278,6 +278,338 @@ const BLANK_SLATE = [
   'No lessons yet. Just the itch. That is where every expert started.',
 ];
 
+// ── THE REST OF THE SENTENCE FOLLOWS THE SUBJECT TOO (2026-10-01) ─────────────
+// The owner: "update the who you're becoming to say things related to the
+// different subjects that [the user is] learning, instead of just the philosophy
+// ones … I want a bunch of different phrases for this part." So the middle (a
+// receipt in the list), the flourish and the closer each have a pool per subject.
+//
+// THE KEYS ARE UNQUOTED on purpose: the lookup drops the hyphen, so
+// 'personal-growth' is `personalgrowth` here. check:quips reads every quoted
+// string in this file as a phrase and fails on a duplicate, and a quoted key
+// repeated in four tables would be four duplicates of a word nobody reads.
+//
+// None of these carries a count. A receipt says something true of the SUBJECT the
+// reader leads with — it never claims all their lessons were in it, because the
+// lesson total runs across every subject (and the retired philosophy library).
+
+/** The subject as a word in a sentence: "at home in personal growth". */
+const SUBJECT_NOUN: Record<string, string> = {
+  philosophy: 'philosophy',
+  psychology: 'psychology',
+  personalgrowth: 'personal growth',
+  business: 'business',
+  economics: 'economics',
+  science: 'science',
+  history: 'history',
+};
+
+/** The middle: one subject receipt, listed beside the counts. No commas, no "and". */
+const SUBJECT_RECEIPT: Record<string, string[]> = {
+  philosophy: [
+    'several arguments politely dismantled',
+    'a notebook full of objections',
+    'a steadily sharpening “but why?”',
+    'a growing list of things no longer taken for granted',
+    'an argument for every occasion',
+    'a healthy distrust of the obvious',
+    'a few ancient opinions given a new home',
+    'a habit of defining terms first',
+    'opinions held a little more carefully',
+    'a counterexample always to hand',
+    'a running quarrel with common sense',
+    'a thought experiment on the go',
+  ],
+  psychology: [
+    'a growing file on human nature',
+    'a fresh suspicion of their own memory',
+    'a working theory of the group chat',
+    'a field guide to other people’s moods',
+    'a list of biases they keep catching in themselves',
+    'a new respect for the power of a nudge',
+    'several first impressions quietly downgraded',
+    'an eye for the brain’s little shortcuts',
+    'a theory about why they always buy the snacks',
+    'a habit of asking what the brain is up to',
+    'one memory they no longer fully trust',
+    'a running tally of the mind’s tricks',
+  ],
+  personalgrowth: [
+    'a routine with actual structure',
+    'a habit or two under construction',
+    'a to-do list with a strategy',
+    'small wins stacked in a tidy pile',
+    'every habit traced back to its cue',
+    'a sharper eye for their own excuses',
+    'a goal written down where it can be seen',
+    'a calendar that means business',
+    'one old habit firmly on notice',
+    'a growing respect for the boring middle',
+    'a fresh grudge against the snooze button',
+    'the beginnings of a better morning',
+  ],
+  business: [
+    'a sharpened sense of who the customer is',
+    'opinions on every menu’s pricing',
+    'a notebook of business ideas worth a second look',
+    'a fresh eye for a margin',
+    'a working theory of why that café is always full',
+    'a mental spreadsheet that never quite closes',
+    'a pitch half-rehearsed in the shower',
+    'several shop windows quietly critiqued',
+    'a new habit of asking who pays',
+    'a sharper nose for a good deal',
+    'a soft spot for a clever business model',
+    'a list of problems worth charging for',
+  ],
+  economics: [
+    'a fresh grudge against hidden costs',
+    'a working grasp of why umbrellas cost more in the rain',
+    'a habit of asking what else that money could do',
+    'opinions about the price of everything',
+    'an eye for incentives in the wild',
+    'a sudden interest in the price of bread',
+    'a theory about why concert tickets vanish',
+    'a calmer view of a price rise',
+    'a new way of reading the weekly shop',
+    'trade-offs spotted before breakfast',
+    'a keen sense of what is really free',
+    'a quiet suspicion of every “bargain”',
+  ],
+  science: [
+    'a fresh suspicion of any test without a control',
+    'a habit of changing one thing at a time',
+    'several kitchen experiments to their name',
+    'a sharper eye for a fair test',
+    'a hypothesis for most household mysteries',
+    'a new respect for the boring repeat',
+    'an eye for the variable nobody controlled',
+    'a growing respect for measuring twice',
+    'evidence where there used to be hunches',
+    'a notebook of results including the awkward ones',
+    'a polite scepticism toward miracle cures',
+    'a sample size question ready for every headline',
+  ],
+  history: [
+    'a habit of asking who wrote the source',
+    'a fresh suspicion of the tidy version',
+    'several old letters read between the lines',
+    'a longer view of the news',
+    'an eye for what the record leaves out',
+    'a working timeline in their head',
+    'a new respect for a dusty archive',
+    'a habit of checking the date on everything',
+    'a growing pile of turning points',
+    'a sharper ear for the slant in a source',
+    'a soft spot for primary sources',
+    'questions for every museum label',
+  ],
+};
+
+/** The flourish: a whole sentence about what the subject is doing to them. */
+const SUBJECT_FLOURISH: Record<string, string[]> = {
+  philosophy: [
+    'The examined life is going well, thank you.',
+    'Socrates would have asked a follow-up question. They already have.',
+    'Gets more out of a “why” than most people get out of an answer.',
+    'Treats every certainty as a starting point.',
+    'Still hasn’t met an argument they couldn’t poke.',
+    'Comfortable living inside an open question.',
+    'Has started defining their terms at parties.',
+    'Quietly building a worldview, one premise at a time.',
+    'Happiest two steps into a thought experiment.',
+    'The big questions have a regular visitor.',
+    'Knows the difference between a reason and an excuse now.',
+    'Tastes a weak argument the way a chef tastes burnt toast.',
+  ],
+  psychology: [
+    'Has started catching their own brain in the act.',
+    'Now knows exactly why that advert worked on them.',
+    'Remembers things differently now, and knows why.',
+    'The human mind has an attentive new student.',
+    'Asks “why did they do that?” and actually waits for the answer.',
+    'Quietly fascinated by the stories memory tells.',
+    'Spots a cognitive bias at fifty paces.',
+    'Reading people, and occasionally themselves.',
+    'Taking the mind’s small print seriously.',
+    'Knows a habit loop when they see one.',
+    'Slightly unnerved by how much the brain fills in.',
+    'Watching how people think, kindly.',
+  ],
+  personalgrowth: [
+    'Turning up is becoming a habit, which is rather the point.',
+    'A better routine is quietly taking shape.',
+    'Progress, measured in small and stubborn steps.',
+    'Building the kind of habits that build back.',
+    'Getting better at getting better.',
+    'Change is underway, mostly on schedule.',
+    'Has started treating Mondays as an opportunity. Worrying.',
+    'Knows a cue from a craving now.',
+    'Swapping big resolutions for small systems.',
+    'Their future self is going to be very grateful.',
+    'Trimming the habits that were never invited.',
+    'Patience is now officially part of the plan.',
+  ],
+  business: [
+    'Can no longer walk past a shop without pricing it.',
+    'Now thinks about the customer before the product.',
+    'Has a business idea for most of the high street.',
+    'Reading every market stall as a case study.',
+    'Quietly running the numbers on lunch.',
+    'Knows a good margin when they see one.',
+    'A future founder, collecting the right questions.',
+    'Pays attention to who buys what, and why.',
+    'Notices when a shop gets the little things right.',
+    'Spots the business model behind every free app.',
+    'Has opinions on the lemonade stand down the road.',
+    'Strategy is starting to feel like common sense.',
+  ],
+  economics: [
+    'Sees supply and demand in the rain now.',
+    'Can no longer hear “it’s free” without asking who pays.',
+    'Thinks about every choice as a trade-off, cheerfully.',
+    'Reads a price tag like a short story.',
+    'Now explains surge pricing before anyone asks.',
+    'Follows the incentive, then follows it again.',
+    'Knows exactly why the umbrella seller raised the price.',
+    'Has started weighing what they give up, not just what they get.',
+    'The weekly shop has become a seminar.',
+    'Spots the hidden cost in most good deals.',
+    'Prices make a lot more sense than they used to.',
+    'Markets are starting to look like crowds with a plan.',
+  ],
+  science: [
+    'Has started controlling for variables at the breakfast table.',
+    'Wants to see the evidence, and the method behind it.',
+    'Prefers a fair test to a good story.',
+    'Changes one thing at a time, on principle.',
+    'Running the experiment rather than guessing the answer.',
+    'The kitchen is now, technically, a laboratory.',
+    'Asks for a control group in casual conversation.',
+    'A hypothesis is never far away.',
+    'Happy to change their mind when the results say so.',
+    'Repeats the test before believing the result.',
+    'Measuring things nobody asked to be measured.',
+    'Curious first, certain only after the data.',
+  ],
+  history: [
+    'Reads every headline with a long memory.',
+    'Asks who was writing before believing what was written.',
+    'Treats the past as evidence, not decoration.',
+    'Has started checking the date on every story.',
+    'The archives have a regular visitor.',
+    'Connects today’s news to something old, every time.',
+    'Knows the official version is only one version.',
+    'Hunting causes the way others hunt bargains.',
+    'Keeps a very long timeline close to hand.',
+    'Prefers a primary source to a confident guess.',
+    'Hears an echo of the past in most arguments.',
+    'Learning how we know what happened, not just what did.',
+  ],
+};
+
+/** The closer: a short sign-off in the subject's own key. */
+const SUBJECT_CLOSER: Record<string, string[]> = {
+  philosophy: [
+    'Socrates would be proud.',
+    'The agora awaits.',
+    'Plato is taking notes.',
+    'Somewhere, a premise is nervous.',
+    'The cave has a new escapee.',
+    'Kant is cautiously impressed.',
+    'Ask them a simple question. Go on.',
+    'Diogenes would approve, probably.',
+    'Argue at your own risk.',
+    'A Stoic in the making.',
+    'Hume would like a word.',
+    'The owl of Minerva is circling.',
+  ],
+  psychology: [
+    'Freud would have questions.',
+    'Poker faces everywhere are worried.',
+    'The brain has been rumbled.',
+    'Watch what you say around them.',
+    'Every bias is on notice.',
+    'Pavlov would ring a bell.',
+    'Memory, consider yourself checked.',
+    'The group chat is under observation.',
+    'Nobody’s motives are safe.',
+    'Mind the mind.',
+    'The unconscious has company.',
+    'Expect to be understood.',
+  ],
+  personalgrowth: [
+    'Their future self says thanks.',
+    'Momentum is building.',
+    'One small step at a time.',
+    'The snooze button is worried.',
+    'Consistency suits them.',
+    'Tomorrow is already planned.',
+    'Small steps, big plans.',
+    'Watch this habit grow.',
+    'Discipline, but make it friendly.',
+    'Excuses are running low.',
+    'The routine approves.',
+    'Onwards, steadily.',
+  ],
+  business: [
+    'Investors, take note.',
+    'The boardroom awaits.',
+    'Margins everywhere are nervous.',
+    'A pitch deck is surely coming.',
+    'Customers, beware: they understand you now.',
+    'Open for business.',
+    'The market has a new reader.',
+    'Expect a business card soon.',
+    'Somewhere, a startup is waiting.',
+    'The numbers look good.',
+    'Profit, eventually.',
+    'Strategy session at noon.',
+  ],
+  economics: [
+    'Adam Smith nods approvingly.',
+    'There is no such thing as a free lunch.',
+    'The invisible hand waves hello.',
+    'Keynes is checking the long run.',
+    'Demand for them is rising.',
+    'Priced in.',
+    'Supply is limited.',
+    'Trade-offs, accepted.',
+    'The market is watching.',
+    'Worth every opportunity cost.',
+    'Inflation-proof curiosity.',
+    'Equilibrium, nearly.',
+  ],
+  science: [
+    'Results pending.',
+    'Peer review approves.',
+    'Hypothesis: they will be back tomorrow.',
+    'Newton would check the maths.',
+    'The data does not lie.',
+    'Reproducible, too.',
+    'Curie would approve.',
+    'Experiment ongoing.',
+    'Control group: everyone else.',
+    'Statistically significant.',
+    'Safety goggles optional.',
+    'Eureka, any minute now.',
+  ],
+  history: [
+    'History will remember this.',
+    'Herodotus would take notes.',
+    'For the record.',
+    'The archives approve.',
+    'Footnotes to follow.',
+    'Future historians, take note.',
+    'A chapter still being written.',
+    'Mark the date.',
+    'Primary source: themselves.',
+    'Dated and signed.',
+    'The past is in good hands.',
+    'Recorded for posterity.',
+  ],
+};
+
 // Small, fast, well-distributed PRNG so one integer seed drives many independent
 // choices (and consecutive seeds produce very different bios).
 function mulberry32(a: number) {
@@ -341,9 +673,31 @@ export function generateUserBio(input: BioInput, seed = 0): string {
   const archetypes = (branchPool && (!subjectPool || rng() < 0.5) ? branchPool : subjectPool) || ARCHETYPE_GENERIC;
   const opener = pick(archetypes);
 
+  // Every other slot speaks in the subject the reader leads with. A reader with only
+  // the retired philosophy library behind them has no top subject, and is a
+  // philosophy reader for this purpose.
+  const key = topSubject ? topSubject.replace(/-/g, '') : 'philosophy';
+  const noun = SUBJECT_NOUN[key] ?? null;
+  const subjectReceipts = SUBJECT_RECEIPT[key];
+  const subjectFlourishes = SUBJECT_FLOURISH[key];
+  const subjectClosers = SUBJECT_CLOSER[key];
+
   // The receipts — each phrased a few different ways, a varying subset shown.
   const receipts: string[] = [];
   if (lessonsDone > 0) {
+    const many = [
+      `${lessonsDone} lessons deep`,
+      `${lessonsDone} lessons in`,
+      `${lessonsDone} lessons down`,
+      `${lessonsDone} lessons behind them`,
+      `${lessonsDone} lessons to their name`,
+      `${lessonsDone} lessons of evidence`,
+      `${lessonsDone} lessons and no sign of stopping`,
+      `${lessonsDone} lessons read properly`,
+      `${lessonsDone} lessons on the counter`,
+    ];
+    // "Argued through" is a philosophy verb; it stays with the philosophy reader.
+    if (philosophyReader) many.push(`${lessonsDone} lessons already argued through`);
     receipts.push(
       lessonsDone === 1
         ? pick([
@@ -354,20 +708,11 @@ export function generateUserBio(input: BioInput, seed = 0): string {
             'exactly one lesson wiser',
             'off the mark by one lesson',
           ])
-        : pick([
-            `${lessonsDone} lessons deep`,
-            `${lessonsDone} lessons in`,
-            `${lessonsDone} lessons down`,
-            `${lessonsDone} lessons behind them`,
-            `${lessonsDone} lessons to their name`,
-            `${lessonsDone} lessons of evidence`,
-            `${lessonsDone} lessons and no sign of stopping`,
-            `${lessonsDone} lessons read properly`,
-            `${lessonsDone} lessons on the counter`,
-            `${lessonsDone} lessons already argued through`,
-          ])
+        : pick(many)
     );
   }
+  // The middle: one thing the subject has given them, said in its own terms.
+  if (subjectReceipts && lessonsDone > 0 && rng() < 0.75) receipts.push(pick(subjectReceipts));
   if (streak >= 2) {
     receipts.push(
       pick([
@@ -384,7 +729,9 @@ export function generateUserBio(input: BioInput, seed = 0): string {
       ])
     );
   }
-  if (quotesSaved >= 1) {
+  // Saved quotes and thinkers met are the retired philosophy library's — they only
+  // speak for a philosophy reader, or a psychology reader's bio would count Kant.
+  if (quotesSaved >= 1 && philosophyReader) {
     receipts.push(
       quotesSaved === 1
         ? pick([
@@ -407,7 +754,7 @@ export function generateUserBio(input: BioInput, seed = 0): string {
           ])
     );
   }
-  if (distinctViewed >= 2) {
+  if (distinctViewed >= 2 && philosophyReader) {
     receipts.push(
       pick([
         `${distinctViewed} thinkers met`,
@@ -424,78 +771,119 @@ export function generateUserBio(input: BioInput, seed = 0): string {
 
   shuffle(receipts);
   const take = receipts.length <= 1 ? receipts.length : 1 + Math.floor(rng() * Math.min(3, receipts.length));
-  const deedsSentence = receipts.length ? `${capitalize(joinList(receipts.slice(0, take)))}.` : '';
+  // A receipt with its own "and" ("…and no sign of stopping") only stands alone,
+  // or the list reads "a field guide to other people's moods and 9 lessons and no
+  // sign of stopping".
+  const taken = receipts.slice(0, take);
+  const plain = taken.filter((r) => !r.includes(' and '));
+  const listed = taken.length > 1 && plain.length ? plain : taken.slice(0, 1);
+  const deedsSentence = listed.length ? `${capitalize(joinList(listed))}.` : '';
 
-  // The closing flourish about the thinker (or breadth / area) they keep
-  // returning to — always true to their actual top thinker or interest.
+  // The flourish — a whole sentence, always true of what they actually read: their
+  // breadth, their top thinker or branch (philosophy only), or their subject.
+  const at = (a: string): string[] => [
+    `Increasingly at home in ${a}.`,
+    `${capitalize(a)} has its hooks in.`,
+    `Drifting steadily toward ${a}.`,
+    `${capitalize(a)} is winning, for now.`,
+    `Keeps coming back to ${a}.`,
+    `Settling in nicely to ${a}.`,
+    `${capitalize(a)} seems to be the one.`,
+  ];
   let flourish = '';
-  if (subjectsRead >= 2 && rng() < 0.5) {
-    flourish = pick([
-      `Reading across ${subjectsRead} subjects now.`,
-      `Refuses to stick to one subject. ${subjectsRead} and counting.`,
-      `Spreading out: ${subjectsRead} subjects on the go.`,
-      `A generalist in the making, ${subjectsRead} subjects deep.`,
-    ]);
-  } else if (topPhilosopher && philosophyReader) {
-    const P = topPhilosopher;
-    const base = [
-      `Soft spot for ${P}.`,
-      `Keeps circling back to ${P}.`,
-      `Currently orbiting ${P}.`,
-      `Quietly obsessed with ${P}.`,
-      `${P} would approve.`,
-      `Reads a suspicious amount of ${P}.`,
-      `Lately, it’s all ${P}.`,
-      `Cannot seem to get past ${P}.`,
-      `${P} has become a bit of a habit.`,
-      `Keeps ending up back at ${P}.`,
-      `Would defend ${P} at a dinner table.`,
-      `On a first-name basis with ${P} by now.`,
-      `${P} gets the most of their attention.`,
-      `Has clearly taken a side, and it is ${P}.`,
-      `Something about ${P} keeps pulling them back.`,
+  if (subjectsRead >= 2 && rng() < 0.4) {
+    // Across subjects. Every count here is the reader's own; the "others" are
+    // subjectsRead less the one they lead with, so it is never zero in this branch.
+    const n = subjectsRead;
+    const others = n - 1 === 1 ? 'one other subject is' : `${n - 1} other subjects are`;
+    const cross = [
+      `Reading across ${n} subjects now.`,
+      `Refuses to stick to one subject. ${n} and counting.`,
+      `Spreading out: ${n} subjects on the go.`,
+      `A generalist in the making, ${n} subjects deep.`,
+      `Has a passport stamped by ${n} subjects.`,
+      `Cross-training across ${n} subjects.`,
+      `Collecting subjects: ${n} so far.`,
+      `Happily distracted by ${n} different subjects.`,
+      `Won’t be pinned to one shelf. ${n} subjects and climbing.`,
     ];
-    if (quotesSaved >= 4) {
-      base.push(
-        `Has bookmarked more ${P} than is strictly healthy.`,
-        `Suspiciously well-read on ${P}.`,
-        `Owns rather a lot of ${P} in quotation form.`,
-        `Could probably quote ${P} unprompted. Probably will.`,
+    if (noun) {
+      cross.push(
+        `Leads with ${noun}, but ${others} getting a look in.`,
+        `${n} subjects open, with ${noun} out in front.`,
+        `Mostly ${noun}, with detours. ${n} subjects so far.`,
+        `Dipping into ${n} subjects and always coming back to ${noun}.`,
+        `${capitalize(noun)} first, with the rest of the library close behind.`,
+        `${n} subjects in rotation. ${capitalize(noun)} keeps winning.`,
       );
     }
-    flourish = pick(base);
-  } else if (distinctViewed >= 3 && philosophyReader) {
-    flourish = pick([
-      `Already on a first-name basis with ${distinctViewed} thinkers.`,
-      `Making the rounds — ${distinctViewed} thinkers and counting.`,
-      `No favourites yet. ${distinctViewed} thinkers and still browsing.`,
-      `Casting a wide net — ${distinctViewed} minds so far.`,
-      `Sampling broadly. ${distinctViewed} thinkers in, no allegiances.`,
-    ]);
-  } else if ((philosophyReader && topInterestName) || input.topSubjectName) {
-    // A philosophy reader is placed in their branch ("at home in ethics"); anyone
-    // else in their subject ("at home in psychology").
-    const a = (philosophyReader && topInterestName ? topInterestName : input.topSubjectName ?? '').toLowerCase();
-    flourish = pick([
-      `Increasingly at home in ${a}.`,
-      `${capitalize(a)} has its hooks in.`,
-      `Drifting steadily toward ${a}.`,
-      `${capitalize(a)} is winning, for now.`,
-      `Keeps coming back to ${a}.`,
-      `Settling in nicely to ${a}.`,
-      `${capitalize(a)} seems to be the one.`,
-    ]);
+    flourish = pick(cross);
+  } else if (philosophyReader) {
+    // A philosophy reader still gets their thinker or branch some of the time, and
+    // the subject's own sentences the rest.
+    const r = rng();
+    if (topPhilosopher && r < 0.45) {
+      const P = topPhilosopher;
+      const base = [
+        `Soft spot for ${P}.`,
+        `Keeps circling back to ${P}.`,
+        `Currently orbiting ${P}.`,
+        `Quietly obsessed with ${P}.`,
+        `${P} would approve.`,
+        `Reads a suspicious amount of ${P}.`,
+        `Lately, it’s all ${P}.`,
+        `Cannot seem to get past ${P}.`,
+        `${P} has become a bit of a habit.`,
+        `Keeps ending up back at ${P}.`,
+        `Would defend ${P} at a dinner table.`,
+        `On a first-name basis with ${P} by now.`,
+        `${P} gets the most of their attention.`,
+        `Has clearly taken a side, and it is ${P}.`,
+        `Something about ${P} keeps pulling them back.`,
+      ];
+      if (quotesSaved >= 4) {
+        base.push(
+          `Has bookmarked more ${P} than is strictly healthy.`,
+          `Suspiciously well-read on ${P}.`,
+          `Owns rather a lot of ${P} in quotation form.`,
+          `Could probably quote ${P} unprompted. Probably will.`,
+        );
+      }
+      flourish = pick(base);
+    } else if (distinctViewed >= 3 && r < 0.6) {
+      flourish = pick([
+        `Already on a first-name basis with ${distinctViewed} thinkers.`,
+        `Making the rounds — ${distinctViewed} thinkers and counting.`,
+        `No favourites yet. ${distinctViewed} thinkers and still browsing.`,
+        `Casting a wide net — ${distinctViewed} minds so far.`,
+        `Sampling broadly. ${distinctViewed} thinkers in, no allegiances.`,
+      ]);
+    } else if (topInterestName && r < 0.75) {
+      // Placed in their branch: "at home in ethics".
+      flourish = pick(at(topInterestName.toLowerCase()));
+    } else if (lessonsDone > 0 && subjectFlourishes) {
+      flourish = pick(subjectFlourishes);
+    }
+  } else if (subjectFlourishes && rng() < 0.8) {
+    flourish = pick(subjectFlourishes);
+  } else if (noun) {
+    flourish = pick(at(noun));
   }
 
   // Compose: the opener, the receipts and the flourish are each complete
   // sentences, so any ordering reads cleanly. Shuffle for freshness, and
-  // sometimes sign off with a punchy closer.
+  // sometimes sign off with a punchy closer — in the subject's key, mostly.
   const parts = [`${opener}.`];
   if (deedsSentence) parts.push(deedsSentence);
   if (flourish) parts.push(flourish);
   shuffle(parts);
 
   let out = parts.join(' ');
-  if (rng() < 0.4) out += ` ${pick(MICRO)}`;
+  if (rng() < 0.45) {
+    // "Several subjects at once" is only true of a reader who has read several.
+    const micro = subjectsRead >= 2 ? MICRO : MICRO.filter((l) => !l.includes('subjects'));
+    const closers = subjectClosers && lessonsDone > 0 && rng() < 0.65 ? subjectClosers : micro;
+    out += ` ${pick(closers)}`;
+  }
   return out;
 }
