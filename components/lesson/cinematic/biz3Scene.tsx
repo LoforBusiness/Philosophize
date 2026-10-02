@@ -182,6 +182,8 @@ const SHELF_CANDLES = [
   candleJar(219, 471, CANDLE_W, CANDLE_H, 'waxLavender'),
 ];
 const TAG_ART = tentSlate(TAG.x, TAG.y, TAG.w, TAG.h);
+/** How far the price's reveal mask reaches past the slate, above and below. */
+const MASK_PAD = 3;
 const SPOOL_ART = ribbonSpool(SPOOL.x, SPOOL.y, SPOOL.w, SPOOL.h);
 const BAG_ART = toteBag(BAG.x, BAG.y, BAG.w, BAG.h);
 // The things that move are drawn about the point they are held by.
@@ -704,11 +706,15 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   string: { position: 'absolute', width: SAG_LEN, height: 1, borderRadius: 0.5, backgroundColor: INK },
+  // The mask reveals the price ACROSS as it is chalked; it reaches MASK_PAD above and
+  // below the slate so it never clips the handwriting face's tall line box, which cut
+  // "50p" to 77% of its height (check:readable CUT, 2026-10-02). The word stays centred
+  // on the slate.
   slateMask: {
-    position: 'absolute', left: SLATE.left, top: SLATE.top, height: SLATE.h, overflow: 'hidden',
+    position: 'absolute', left: SLATE.left, top: SLATE.top - MASK_PAD, height: SLATE.h + 2 * MASK_PAD, overflow: 'hidden',
   },
   slatePlate: {
-    position: 'absolute', left: 0, top: 0, width: SLATE.w, height: SLATE.h, alignItems: 'center', justifyContent: 'center',
+    position: 'absolute', left: 0, top: MASK_PAD, width: SLATE.w, height: SLATE.h, alignItems: 'center', justifyContent: 'center',
   },
   chalkText: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: PAPER_LIT, includeFontPadding: false,

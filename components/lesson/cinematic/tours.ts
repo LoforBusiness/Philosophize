@@ -30,7 +30,7 @@ export type TourStation =
 export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> = {
   'business-foundations-1': [[[219, 417, 97, 88, 1.2, 9]], null, null, null, null, null, [[180, 406, 140, 99, 1.2, 9]], null, null, null, null, null],
   'business-foundations-2': [null, null, null, null, null, [[40, 406, 256, 99, 1.08, 9]], [[40, 406, 178, 99, 0.67, 9]], null, null, [[38, 406, 219, 99, 1.2, 9]], [[34, 406, 180, 99, 0.55, 9]]],
-  'business-foundations-3': [[[244, 417, 146, 88, 1.2, 9]], [[241, 416, 92, 89, 0.55, 9]], null, null, null, null, [[74, 406, 256, 99, 1.08, 9]], null, null, null, null, null],
+  'business-foundations-3': [null, null, null, null, null, [[67, 406, 267, 99, 1.03, 9]], null, null, [[76, 407, 255, 98, 0.61, 9]], null, [[65, 406, 270, 99, 1.02, 9]], [[72, 406, 258, 99, 0.6, 9]]],
   'economics-foundations-1': [[[67, 416, 259, 89, 1.07, 9]], null, [[15, 405, 304, 100, 0.87, 9]], [[0, 306, 400, 208, 0.88, 9]], [[22, 406, 273, 99, 1.01, 9]], null, [[25, 407, 239, 98, 1.17, 9]], [[0, 306, 400, 208, 1.17, 9]], null, null],
   'history-foundations-1': [null, null, [[0, 306, 400, 208, 1.2, 9]], null, null, null, null, null, null, null, null],
   'history-foundations-2': [null, null, [[0, 405, 284, 100, 0.79, 9]], null, null, null, [[92, 406, 218, 99, 0.55, 9]], null, null, [[93, 406, 193, 99, 0.55, 9]], null],
@@ -50,7 +50,7 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
 export const TOUR_STAMP: Record<string, string> = {
   'business-foundations-1': 'a51a12c36e2c',
   'business-foundations-2': 'beb4ed65cb55',
-  'business-foundations-3': 'b1e9a23a8251',
+  'business-foundations-3': '2f8c3beb87b1',
   'economics-foundations-1': '359d38158e15',
   'history-foundations-1': 'ddc9ee9a2455',
   'history-foundations-2': '1cdb32982f43',

@@ -246,7 +246,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldBn = useHeld();
   const heldTh = useHeld();
   const heldCp = useHeld();
-  const cv = useCarry(26);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -416,6 +416,13 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const p5 = n < RAISE_N ? 1 : n === RAISE_N ? 1 - sAt(3.9, 4.3) : 0;
     const p12 = n < RAISE_N ? 0 : n === RAISE_N ? sAt(4.6, 5.4) : n < SETTLE_N ? 1 : n === SETTLE_N ? 1 - sAt(0.5, 0.9) : 0;
     const p6 = n < SETTLE_N ? 0 : n === SETTLE_N ? sAt(1.2, 2.0) : 1;
+    // THE TAG HANGS ON THE NEAR SIDE OF THE RACK'S ARM. The seller stands beside it, and
+    // drawn under him his body covered its left edge — the £ of every price (check:readable
+    // STRIKE, 2026-10-02). So a front copy of the tag sits over him, and gives way only
+    // while he wipes and chalks it, when his hand has to be in front.
+    const tagFront = A_RAISE[n] ? 1 - sAt(3.25, 3.5) + sAt(5.9, 6.3)
+      : A_SETTLE[n] ? sAt(2.5, 2.9)
+        : 1;
 
     return {
       bn: pose(figBn, xBn, GROUND, K, dBn, 1),
@@ -439,6 +446,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       p5: carry(cv, 19, n, p5, p5, tr),
       p12: carry(cv, 20, n, p12, p12, tr),
       p6: carry(cv, 21, n, p6, p6, tr),
+      tagFront: carry(cv, 26, n, tagFront, tagFront, tr),
       arrows: carry(cv, 22, n, ARROW[p], ARROW[n], tr),
       q1: carry(cv, 23, n, CAUSE[p], CAUSE[n], tr),
       q2: carry(cv, 24, n, ARROW[p], ARROW[n], tr),
@@ -469,6 +477,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
+      <TagFront S={SCENE} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
       <Umbrellas S={SCENE} DB={DB} DC={DC} DT={DT} />
@@ -565,6 +574,17 @@ function Tag({ S }: { S: SharedValue<any> }) {
       <Animated.Text style={[styles.price, c]}>£12</Animated.Text>
       <Animated.Text style={[styles.price, d]}>£6</Animated.Text>
     </View>
+  );
+}
+
+/** The same tag again, drawn over the seller except while he works it (see `tagFront`). */
+function TagFront({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ opacity: S.value.tagFront }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
+      <ObjectArt parts={TAG_ART} tone={TONE} />
+      <Tag S={S} />
+    </Animated.View>
   );
 }
 
