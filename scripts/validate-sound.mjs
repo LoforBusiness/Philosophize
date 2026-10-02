@@ -344,15 +344,14 @@ ok('footfalls.ts agrees with the rig on where the arrival begins',
 // ── 4b. THE FOOTSTEPS LAND ON THE FEET ───────────────────────────────────────
 head('the footsteps land on the feet');
 
-// The lesson under trial, and its x track — read out of the script rather than
-// retyped, so the check follows the lesson if the staging changes.
-const scriptSrc = fs.readFileSync(path.join(ROOT, 'components/lesson/cinematic/ethics7Script.ts'), 'utf8');
-const X = [...scriptSrc.matchAll(/^\s*p:\s*-?\d+,\s*x:\s*(-?\d+)/gm)].map((m) => Number(m[1]));
-// The final summary beat declares no p/x — it holds the previous position.
-while (X.length < (scriptSrc.match(/^\s*\{$/gm) || []).length) X.push(X[X.length - 1]);
-ok('read the x track out of the script', X.length >= 9, `x = ${X.join(' → ')}`);
+// The journey under trial: ethics-ethics-7's x and pose tracks, which this was written
+// against. That lesson was deleted with the rest of philosophy's narrated library on
+// 2026-10-02, so its tracks are kept here as a fixture: the rule is about the rig's
+// walk, and a walk with three legs of different length tests it as well as it did.
+const X = [90, 90, 170, 170, 300, 300, 300, 300, 170, 170, 170, 90, 170, 170, 170, 170];
+ok('the fixture walk has its legs', X.length >= 9, `x = ${X.join(' → ')}`);
 
-const P = [...scriptSrc.matchAll(/^\s*p:\s*(-?\d+)/gm)].map((m) => Number(m[1]));
+const P = [463, 463, 2, 266, 274, 274, 47, 267, 453, 15, 258, 165, 167, 167, 129];
 while (P.length < X.length) P.push(0);
 
 /**
@@ -581,7 +580,8 @@ head('every walker sounds, and nothing else does');
     if (why && claims) lying.push(`${f.replace('Scene.tsx', '')} (${why})`);
     if (claims) sounding++; else silent++;
   }
-  ok('the check found scenes to judge', scenes.length > 80, `${scenes.length} scenes · ${sounding} sound their steps, ${silent} do not`);
+  // 21 since philosophy's 246 narrated scenes were deleted (2026-10-02); it was > 80.
+  ok('the check found scenes to judge', scenes.length >= 21, `${scenes.length} scenes · ${sounding} sound their steps, ${silent} do not`);
   ok('every scene that walks one figure sounds its steps', missing.length === 0,
     missing.length ? `silent but qualifies: ${missing.slice(0, 6).join(', ')}` : `all ${sounding} wired`);
   ok('and no scene claims a walk it does not have', lying.length === 0,

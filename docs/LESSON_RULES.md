@@ -988,7 +988,7 @@ and a word was split anyway, so here is the number and the check instead.
   nothing structural stops the long word breaking — 8% is the whole of the protection,
   and it must be measured against the longest WORD, never the whole string.
 - **When the margin is short, spend tracking before geometry.** Three of the four real
-  cases sat in rows whose PITCH is tuned for tap targets (`TOK_PITCH`, `PLOT_PITCH`),
+  cases sat in rows whose PITCH is tuned for tap targets (TOK_PITCH and PLOT_PITCH, in scenes deleted 2026-10-02),
   where widening the box eats the gutter that makes the answer reliably tappable — you
   would fix D30 by breaking E37b. Tracking is free to give back: it costs nothing
   optically at 8–9px and it is usually the entire overflow.
@@ -7680,8 +7680,8 @@ table is a set of magic numbers nobody can check.
 
 ## X4 · A word with a line through it is not a covered word, and only one check sees it
 
-`epistemology23` printed `THE MOUTH` at `MOUTH_Y − 7` while the mouth's own rail
-runs at `MOUTH_Y`, so a 2-unit ink line crossed the middle of the word on every
+`epistemology23` printed `THE MOUTH` at MOUTH_Y − 7 while the mouth's own rail
+runs at MOUTH_Y (that scene was deleted on 2026-10-02), so a 2-unit ink line crossed the middle of the word on every
 beat of the lesson. Four checks passed it and each was right about what it
 measures:
 
@@ -11121,13 +11121,13 @@ lesson (AP3) in the house format (AP12), and ends at a MORE COMING SOON sign (`m
 
 - **A new lesson goes on its subject's road**, appended to the end of its unit (§11 of
   CLAUDE.md: position is load-bearing). A subject never grows a second road.
-- **Philosophy's six old branches are RETIRED, not deleted** (`data/index.ts`
-  `LEGACY_BRANCHES`). No screen lists them, `getLessonById` does not find them, and a
-  reader's progress in them is kept and counted (badges, totals, the cloud snapshot) but
-  not shown. The rules they were written under still hold them (`scripts/lib/legacy.mjs`
-  scopes the level, review and colour-set rules), because each will be rebuilt as a
-  dialogue lesson on philosophy's road — rebuilt, not revived: a lesson comes back as a
-  new dialogue lesson, with a new id on the new road.
+- **Philosophy's six old branches were RETIRED on 2026-09-30 and their lessons DELETED on
+  2026-10-02** (the owner: *"I will no longer have any use of the old philosophy
+  lessons"*). A reader's progress in them is kept and counted (badges, totals, the cloud
+  snapshot) from `data/retiredBranches.ts` — each branch's slug, name and units — but
+  not shown, and their six colours stay for the thinker cards and the badges earned in
+  them (`scripts/lib/legacy.mjs`). New philosophy lessons are written fresh as dialogue
+  lessons on philosophy's road, with new ids.
 - **The six first lessons are one per subject, one real place each**: a bicycle repair
   stand (philosophy), a café taste test (psychology), two flowerpots (personal growth), a
   lemonade stand (business), a ladder and two balls (science), a broken shop window

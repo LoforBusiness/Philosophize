@@ -69,10 +69,11 @@ for (const s of S.SUBJECTS) for (const c of s.courses) ok(c in D.BRANCH, `${s.sl
   const live = DATA4.ALL_BRANCHES.map((b) => b.slug);
   ok(JSON.stringify(live) === JSON.stringify(S.SUBJECTS.map((x) => x.courses[0])),
     "the roads a reader can walk are the subjects' roads, in the subjects' order", live.join(' · '));
-  ok(DATA4.LEGACY_BRANCHES.length === 6 && DATA4.LEGACY_BRANCHES.every((b) => !live.includes(b.slug)),
-    "philosophy's six old branches are retired: kept, and on no road");
+  // Their lessons were deleted on 2026-10-02; what is left is progress (retiredBranches.ts).
+  ok(DATA4.RETIRED_BRANCHES.length === 6 && DATA4.RETIRED_BRANCHES.every((b) => !live.includes(b.slug)),
+    "philosophy's six old branches are retired: kept as progress, and on no road");
   ok(DATA4.getLessonById('ethics-ethics-1') === null, 'a retired lesson cannot be opened by id');
-  const oneEach = Object.fromEntries(DATA4.LEGACY_BRANCHES.flatMap((b) => b.paths.map((p) => [p.id, 1])));
+  const oneEach = Object.fromEntries(DATA4.RETIRED_BRANCHES.flatMap((b) => b.units.map((u) => [u.id, 1])));
   const kept = Object.values(DATA4.branchCountsFromUnits(oneEach)).reduce((a, b) => a + b, 0);
   ok(kept === 28, 'progress in the retired units is still counted, so nothing a reader finished is dropped',
     `${kept} of 28 units' lessons`);

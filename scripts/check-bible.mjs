@@ -63,12 +63,16 @@ ok(current && +current >= +gate, 'S1 states a live binary at or above the gate',
 ok(!/versionCode 16\*\*/.test(md), 'S1 no longer claims 16');
 
 const cin = execSync('node scripts/validate-cinematic.mjs', { encoding: 'utf8' });
-const m = /(\d+)\/(\d+) cinematic \((\d+)%\) · (\d+) card decks left .* at (\d+)\/(\d+)/.exec(cin);
-ok(md.includes(`**${m[1]} cinematic lessons**`) || md.includes(`${m[1]} of the ${m[2]}`),
-  'S17 cinematic count matches', `${m[1]}/${m[2]}`);
-ok(md.includes(`at ${m[6]} cinematic`), 'S11 per-branch cinematic invariant matches',
-  `check says ${m[5]}/${m[6]} a branch`);
-ok(!md.includes('at 16 cinematic'), 'and the old 16 is gone');
+const m = /(\d+)\/(\d+) cinematic \((\d+)%\) · (\d+) card decks left/.exec(cin);
+ok(!!m && (md.includes(`**${m[1]} cinematic lessons**`) || md.includes(`${m[1]} of the ${m[2]}`)),
+  'S17 cinematic count matches', m ? `${m[1]}/${m[2]}` : 'validate-cinematic printed no takeover line');
+// Every road wholly cinematic. The per-branch "41 a branch" invariant went with
+// philosophy's retired library (deleted 2026-10-02); what still holds is that no road
+// carries a card-only lesson, and that the file no longer claims the 41.
+const roads = [...cin.matchAll(/ · ([a-z-]+) (\d+)\/(\d+)/g)];
+ok(roads.length > 0 && roads.every((r) => r[2] === r[3]), 'S11 every road is wholly cinematic',
+  roads.map((r) => `${r[1]} ${r[2]}/${r[3]}`).join(' · '));
+ok(!md.includes('at 41 cinematic') && !md.includes('at 16 cinematic'), 'and no old per-branch count is claimed');
 
 // ── PHILOSOPHERS, FROM THE COMPOSED ARRAY — AND IT USED TO SAY 322 ──────────
 //

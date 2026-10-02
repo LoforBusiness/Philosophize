@@ -22,6 +22,7 @@ import {
 } from './lib/marks.mjs';
 import { windowOf } from './lib/tourrule.mjs';
 import { loadTs } from './lib/loadts.mjs';
+import { wiredLessons, dialogueLessons } from './lib/dialogue.mjs';
 
 const REPO = process.cwd();
 const DIR = path.join(REPO, 'components/lesson/cinematic');
@@ -161,7 +162,11 @@ rule(unseen, 'every marked label is visible when the pen draws', 'its opacity as
 rule(shot, 'every mark is inside the shot the camera holds', 'none on a beat where the camera travels');
 rule(stroke, 'every pen stroke stays inside its box', '');
 rule(repeat, 'no lesson draws the same style twice running', '');
-if (count < MARKS_FLOOR) bad(`only ${count} marks, under the floor of ${MARKS_FLOOR}`, ['a re-measure or a table rebuilt from nothing: run node scripts/make-marks.mjs --write and read what it refused']);
+// The pen is a narrated-lesson layer (AP8). Since philosophy's 246 were deleted
+// (2026-10-02) no narrated lesson is wired, so the floor has nothing to count.
+const NARRATED = wiredLessons().length - dialogueLessons().length;
+if (!NARRATED) ok('no narrated lesson is wired, so the pen has nowhere to mark', `floor ${MARKS_FLOOR} waits for one`);
+else if (count < MARKS_FLOOR) bad(`only ${count} marks, under the floor of ${MARKS_FLOOR}`, ['a re-measure or a table rebuilt from nothing: run node scripts/make-marks.mjs --write and read what it refused']);
 else ok(`${count} marks across the corpus`, `floor ${MARKS_FLOOR}`);
 
 // 8. The stroke colour reads on every ground a mark can sit on.

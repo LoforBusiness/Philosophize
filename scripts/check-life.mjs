@@ -112,7 +112,13 @@ const top10 = (100 * ranked.slice(0, 10).reduce((a, [, v]) => a + v, 0)) / total
 // anything but itself, and then another run of `spread-lessons` to distribute
 // them.
 const TOP10_BUDGET = 40;
-if (top10 <= TOP10_BUDGET + 0.5) {
+// THE THREE VARIETY RULES ARE ABOUT A CORPUS OF NARRATED SCRIPTS. Philosophy's 246 were
+// deleted on 2026-10-02 and the dialogue lessons pose their cast in the scene (AP18), so
+// with no script posing its figure there is nothing to measure — said once, not failed.
+const NARRATED = lessons.length > 0;
+if (!NARRATED) {
+  ok('no lesson poses its figure from its script', 'the variety rules (top ten, distinct poses, actions reached) wait for one');
+} else if (top10 <= TOP10_BUDGET + 0.5) {
   ok(`the ten commonest poses are ${top10.toFixed(0)}% of every gesture call`,
     `budget ${TOP10_BUDGET}% · was 68% before group N was enforced`);
 } else {
@@ -122,7 +128,9 @@ if (top10 <= TOP10_BUDGET + 0.5) {
 
 // UP ONLY. 63 → 101 (group N) → 136 (the N14 spread).
 const DISTINCT_FLOOR = 136;
-if (use.size >= DISTINCT_FLOOR) {
+if (!NARRATED) {
+  // see above
+} else if (use.size >= DISTINCT_FLOOR) {
   ok(`${use.size} distinct poses in use across ${beats} beats`, `floor ${DISTINCT_FLOOR} · was 63`);
 } else {
   bad(`only ${use.size} distinct poses in use`, `floor is ${DISTINCT_FLOOR}`);
@@ -148,7 +156,9 @@ for (const code of use.keys()) {
   else if (code >= 100 && code < 200) reachedActs.add(code - 99);
 }
 const ACTS_FLOOR = 91;
-if (reachedActs.size >= ACTS_FLOOR) {
+if (!NARRATED) {
+  // see above
+} else if (reachedActs.size >= ACTS_FLOOR) {
   ok(`${reachedActs.size} of ${catalogue.size} actions in the catalogue are reached (N14)`,
     `floor ${ACTS_FLOOR} · was 52 · run spread-lessons after adding any`);
 } else {

@@ -14,7 +14,6 @@
 //
 // Run: node scripts/validate-cinematic.mjs
 import fs from 'node:fs';
-import { LEGACY as RETIRED } from './lib/legacy.mjs';
 import path from 'node:path';
 import { MEASURE } from './lib/mustprobe.mjs';
 import { mustStamp } from './lib/muststamp.mjs';
@@ -410,7 +409,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 267;
+const SOLID_FLOOR = 21; // the 21 dialogue lessons; 267 until the retired 246 were deleted (2026-10-02)
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //
@@ -487,17 +486,9 @@ for (const branch of fs.readdirSync(BRANCHES).sort()) {
 
 if (tally.length) {
   const errs = [];
-  // LEVEL IS A RULE ABOUT PHILOSOPHY'S SIX OLD BRANCHES. They were levelled on purpose
-  // (§5) and stay level while they wait to be rebuilt; a subject's one road
-  // (2026-09-30) grows on its own schedule and opens with a single lesson. The set is
-  // read out of data/index.ts (scripts/lib/legacy.mjs), not retyped.
-  const PHILOSOPHY = RETIRED;
-  const level = tally.filter((t) => PHILOSOPHY.has(t.branch));
-  const nL = [...new Set(level.map((t) => t.lessons))];
-  const nC = [...new Set(level.map((t) => t.cine))];
-  const show = (key) => level.map((t) => `${t.branch} ${t[key]}`).join(' · ');
-  if (nL.length !== 1) errs.push(`branches hold different lesson counts — ${show('lessons')} (§5)`);
-  if (nC.length !== 1) errs.push(`branches hold different cinematic counts — ${show('cine')} (§5)`);
+  // LEVEL WAS A RULE ABOUT PHILOSOPHY'S SIX OLD BRANCHES, levelled on purpose (§5). Their
+  // lessons were deleted on 2026-10-02, and a subject's one road grows on its own
+  // schedule, so there is nothing left to hold level.
 
   // ── the A/B/C/D retirement, counted the same way ──────────────────────────
   {
@@ -563,9 +554,8 @@ if (tally.length) {
   const cine = tally.reduce((a, t) => a + t.cine, 0);
   console.log(
     `\ntakeover: ${cine}/${total} cinematic (${Math.round((cine / total) * 100)}%) · ` +
-      `${cards} card decks left · solid front ${solid} · ` +
-      `${level.length} philosophy branches at ${level[0].lessons}/${level[0].cine}` +
-      tally.filter((t) => !PHILOSOPHY.has(t.branch)).map((t) => ` · ${t.branch} ${t.lessons}/${t.cine}`).join(''),
+      `${cards} card decks left · solid front ${solid}` +
+      tally.map((t) => ` · ${t.branch} ${t.lessons}/${t.cine}`).join(''),
   );
   console.log('next to convert, in reading order:');
   for (const t of tally) {

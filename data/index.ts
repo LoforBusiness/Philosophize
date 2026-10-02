@@ -1,10 +1,5 @@
 import type { Branch } from './types';
-import logicBranch from './branches/logic';
-import ethicsBranch from './branches/ethics';
-import epistemologyBranch from './branches/epistemology';
-import metaphysicsBranch from './branches/metaphysics';
-import aestheticsBranch from './branches/aesthetics';
-import politicalBranch from './branches/political-philosophy';
+import { RETIRED_BRANCHES } from './retiredBranches';
 import economicsBranch from './branches/economics';
 import philosophyBranch from './branches/philosophy';
 import psychologyBranch from './branches/psychology';
@@ -33,28 +28,25 @@ export const ALL_BRANCHES: Branch[] = [
 ];
 
 /**
- * PHILOSOPHY'S SIX RETIRED BRANCHES and their 246 narrated lessons. NOT reachable in
- * the app: no screen lists them and `getLessonById` does not search them, so a stale
- * link or a saved id opens nothing. They are kept — files, scenes, voices — because
- * each will be rebuilt as a dialogue lesson on philosophy's one road, and the checks
- * go on holding them to every rule they were written under. A reader's progress in
- * their units stays in `lessonsByUnit`, untouched and unshown.
+ * PHILOSOPHY'S SIX RETIRED BRANCHES, as progress only. Their 246 narrated lessons were
+ * deleted on 2026-10-02 (the owner: "I will no longer have any use of the old philosophy
+ * lessons"); what is left is each branch's slug, name and units with their lengths
+ * (`retiredBranches.ts`), which is exactly what counting a reader's progress needs. No
+ * screen lists them and `getLessonById` cannot find them.
  */
-export const LEGACY_BRANCHES: Branch[] = [
-  logicBranch,
-  ethicsBranch,
-  epistemologyBranch,
-  metaphysicsBranch,
-  aestheticsBranch,
-  politicalBranch,
-];
+export { RETIRED_BRANCHES };
+export type { RetiredBranch } from './retiredBranches';
 
 /**
- * Every branch a reader may hold PROGRESS in: the live roads and the retired six.
- * The per-unit and per-branch counts are kept over all of them, so nothing a reader
- * finished is dropped from their totals, their badges or their cloud snapshot.
+ * Every branch a reader may hold PROGRESS in, as units and their lengths: the live roads
+ * and the retired six. The per-unit and per-branch counts are kept over all of them, so
+ * nothing a reader finished is dropped from their totals, their badges or their cloud
+ * snapshot.
  */
-const PROGRESS_BRANCHES: Branch[] = [...ALL_BRANCHES, ...LEGACY_BRANCHES];
+const PROGRESS_BRANCHES: readonly { slug: string; units: readonly { id: string; lessons: number }[] }[] = [
+  ...ALL_BRANCHES.map((b) => ({ slug: b.slug, units: b.paths.map((p) => ({ id: p.id, lessons: p.lessons.length })) })),
+  ...RETIRED_BRANCHES,
+];
 
 export function getBranchBySlug(slug: string): Branch | undefined {
   return ALL_BRANCHES.find((b) => b.slug === slug);
@@ -104,8 +96,8 @@ export function branchCountsFromUnits(
   const out: Record<string, number> = {};
   for (const branch of PROGRESS_BRANCHES) {
     let total = 0;
-    for (const path of branch.paths) {
-      total += Math.max(0, Math.min(path.lessons.length, lessonsByUnit[path.id] ?? 0));
+    for (const unit of branch.units) {
+      total += Math.max(0, Math.min(unit.lessons, lessonsByUnit[unit.id] ?? 0));
     }
     out[branch.slug] = total;
   }
@@ -236,9 +228,9 @@ export function unitsFromBranchCounts(
   const out: Record<string, number> = {};
   for (const branch of PROGRESS_BRANCHES) {
     let remaining = Math.max(0, lessonsByBranch[branch.slug] ?? 0);
-    for (const path of branch.paths) {
-      const take = Math.min(path.lessons.length, remaining);
-      if (take > 0) out[path.id] = take;
+    for (const unit of branch.units) {
+      const take = Math.min(unit.lessons, remaining);
+      if (take > 0) out[unit.id] = take;
       remaining -= take;
     }
   }

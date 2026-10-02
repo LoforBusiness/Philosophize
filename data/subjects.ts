@@ -7,7 +7,8 @@
 // ONE ROAD PER SUBJECT (2026-09-30): "I only want one road for each subject, not a
 // bunch of different ones." So `courses` holds exactly one branch for every subject,
 // all seven are live, and a tap on a subject opens that road directly. Philosophy's
-// six old branches are retired (data/index.ts LEGACY_BRANCHES) until they are rebuilt.
+// six old branches are retired, and their lessons were deleted on 2026-10-02; a reader's
+// progress in them is kept as counts (data/retiredBranches.ts).
 //
 // Home's carousel, the Learn grid and every subject page read THIS list, so they
 // cannot disagree about what a subject is called, what colour it is or whether it

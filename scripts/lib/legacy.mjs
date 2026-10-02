@@ -1,32 +1,32 @@
-// PHILOSOPHY'S SIX RETIRED BRANCHES, read out of data/index.ts rather than retyped.
+// PHILOSOPHY'S SIX RETIRED BRANCHES, and the live roads, read out of the data rather
+// than retyped.
 //
-// Since 2026-09-30 every subject is one road, and philosophy's old branches — 246
-// narrated lessons in 28 units — are out of the app until they are rebuilt as dialogue
-// lessons (data/index.ts LEGACY_BRANCHES). The rules written for them still hold them:
-// every branch level at 41, every lesson cinematic, every unit reviewed. Those rules
-// are about THESE six and must not reach the new one-lesson roads, so the checks that
-// carry them read the set from here.
+// Since 2026-09-30 every subject is one road. Philosophy's six old branches were retired
+// then, and on 2026-10-02 their 246 narrated lessons were deleted (the owner: "I will no
+// longer have any use of the old philosophy lessons"). What is left of them is each
+// branch's slug, name and units, kept in data/retiredBranches.ts so a reader's progress
+// keeps counting — and their six colours, which a thinker's card and the badges earned
+// in them still draw. So the checks that hold those colours read the six from here.
 import fs from 'node:fs';
 import path from 'node:path';
 
-const src = fs.readFileSync(path.join(process.cwd(), 'data', 'index.ts'), 'utf8');
+const root = process.cwd();
+const index = fs.readFileSync(path.join(root, 'data', 'index.ts'), 'utf8');
+const retired = fs.readFileSync(path.join(root, 'data', 'retiredBranches.ts'), 'utf8');
 
 /** `import xBranch from './branches/<dir>'` → { xBranch: '<dir>' } */
 const dirOf = Object.fromEntries(
-  [...src.matchAll(/import (\w+) from '\.\/branches\/([a-z-]+)';/g)].map((m) => [m[1], m[2]]),
+  [...index.matchAll(/import (\w+) from '\.\/branches\/([a-z-]+)';/g)].map((m) => [m[1], m[2]]),
 );
-const listOf = (name) => {
-  const body = src.match(new RegExp('export const ' + name + ': Branch\\[\\] = \\[([^\\]]*)\\]'))?.[1] ?? '';
-  return [...body.matchAll(/(\w+),/g)].map((m) => dirOf[m[1]]).filter(Boolean);
-};
+const body = index.match(/export const ALL_BRANCHES: Branch\[\] = \[([^\]]*)\]/)?.[1] ?? '';
 
-/** The six retired philosophy branches, as directory names under data/branches. */
-export const LEGACY = new Set(listOf('LEGACY_BRANCHES'));
+/** The six retired philosophy branches, by slug — progress and colour only, no lessons. */
+export const LEGACY = new Set([...retired.matchAll(/slug: '([a-z-]+)'/g)].map((m) => m[1]));
 /** The roads a reader can walk: one per subject. */
-export const LIVE = new Set(listOf('ALL_BRANCHES'));
+export const LIVE = new Set([...body.matchAll(/(\w+),/g)].map((m) => dirOf[m[1]]).filter(Boolean));
 
 if (LEGACY.size !== 6) {
-  throw new Error(`data/index.ts: expected philosophy's six retired branches in LEGACY_BRANCHES, read ${[...LEGACY].join(', ') || 'none'}`);
+  throw new Error(`data/retiredBranches.ts: expected philosophy's six retired branches, read ${[...LEGACY].join(', ') || 'none'}`);
 }
 if (LIVE.size < 1 || [...LIVE].some((b) => LEGACY.has(b))) {
   throw new Error(`data/index.ts: ALL_BRANCHES must list the live roads and none of the retired six, read ${[...LIVE].join(', ') || 'none'}`);

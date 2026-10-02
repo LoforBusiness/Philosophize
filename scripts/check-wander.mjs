@@ -30,6 +30,7 @@ import { sceneOf, walkOf } from './lib/scenefig.mjs';
 import { windowOf } from './lib/tourrule.mjs';
 import { LESSONS, beatsOf, parseManifest } from './lib/narration.mjs';
 import { markBox } from './lib/marks.mjs';
+import { wiredLessons, dialogueLessons } from './lib/dialogue.mjs';
 import {
   W, KIND_NAME, GROUND_Y, SIT_REACH, poseTier, freeFloor, roomFor, movesOf, endState, facingOf,
 } from './lib/wanderrule.mjs';
@@ -428,7 +429,13 @@ console.log(`  ok  the quietest plan travels ${worst.quiet === Infinity ? 0 : wo
 // be perfectly varied across three patterns, and the complaint this answers was that
 // the figure repeats himself.
 const PATTERN_FLOOR = 8;
-if (kinds.size < PATTERN_FLOOR) {
+// THE FLOORS ARE ABOUT NARRATED LESSONS: the wander and the chair skip every dialogue
+// lesson (AP8), and since philosophy's 246 were deleted (2026-10-02) none is left, so
+// with no narrated lesson wired the two floors have nothing to count.
+const NARRATED = wiredLessons().length - dialogueLessons().length;
+if (!NARRATED) {
+  console.log('  ok  no narrated lesson is wired, so the vocabulary and movement floors wait for one');
+} else if (kinds.size < PATTERN_FLOOR) {
   fail += 1;
   console.log(`  ✗   only ${kinds.size} distinct patterns in the corpus  floor ${PATTERN_FLOOR}`);
 } else console.log(`  ok  ${kinds.size} distinct patterns in the corpus  floor ${PATTERN_FLOOR}`);
@@ -442,7 +449,9 @@ let chairBeats = 0;
 for (const p of Object.values(CHAIR_PLANS)) chairBeats += p[p.length - 4] - p[0] + 1;
 const PLAN_FLOOR = 800;
 const moving = planned + chairBeats;
-if (moving < PLAN_FLOOR) {
+if (!NARRATED) {
+  // see above
+} else if (moving < PLAN_FLOOR) {
   fail += 1;
   console.log(`  ✗   only ${moving} beats move him (${planned} plans + ${chairBeats} with the chair or a mug)  floor ${PLAN_FLOOR}`);
 } else console.log(`  ok  ${moving} beats move him (${planned} plans + ${chairBeats} with the chair or a mug)  floor ${PLAN_FLOOR}`);

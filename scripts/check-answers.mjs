@@ -115,7 +115,14 @@ for (const [id, comp] of comps) {
   }
 }
 
-if (!total) { bad('no two-card questions found — has the format changed?'); }
+// A parser that finds nothing must not read as a clean corpus, so finding no two-card
+// question is a failure only when a script still declares one. Since 2026-10-02 none
+// does: the dialogue lessons ask on the stage, and the narrated library that used the
+// deck was deleted.
+const declared = fs.readdirSync(DIR).filter((f) => /Script\.ts$/.test(f))
+  .filter((f) => /\bcards:\s*\[/.test(fs.readFileSync(path.join(DIR, f), 'utf8')));
+if (!total && declared.length) { bad(`no two-card questions found, yet ${declared.length} script(s) declare one — has the format changed?`); }
+else if (!total) { ok('no lesson asks a two-card question', 'nothing to balance'); }
 else {
   const pct = (100 * shownLeft) / total;
   console.log(`  ${total} two-card questions · authored with the answer first: ${authoredFirst}`);

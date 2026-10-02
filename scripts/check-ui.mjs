@@ -277,8 +277,10 @@ const chroma = (h) => { const [, a, b] = lab(h); return Math.hypot(a, b); };
   // than against a second hand-written list. A colour keyed on a slug that does
   // not exist is a branch that silently renders in no colour at all, and nothing
   // else in the build would say so.
-  const dirs = fs.readdirSync(path.join(REPO, 'data/branches'), { withFileTypes: true })
-    .filter((d) => d.isDirectory()).map((d) => d.name).sort();
+  // The six retired branches have no directory since their lessons were deleted
+  // (2026-10-02); their colours are keyed on data/retiredBranches.ts instead.
+  const dirs = [...fs.readdirSync(path.join(REPO, 'data/branches'), { withFileTypes: true })
+    .filter((d) => d.isDirectory()).map((d) => d.name), ...LEGACY].sort();
   ok(JSON.stringify(Object.keys(D.BRANCH).sort()) === JSON.stringify(dirs),
     'every branch colour is keyed on a real branch', dirs.join(' '));
 

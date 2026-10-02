@@ -9,11 +9,12 @@
 // subject's badges are a decision for when it has a real course, not an accident of
 // sharing the branch list. check:subjects §9 holds it.
 //
-// SINCE 2026-09-30 THOSE SIX ARE RETIRED (data/index.ts LEGACY_BRANCHES): philosophy is
-// one road, and its old lessons are hidden until they are rebuilt. The badges still
+// SINCE 2026-09-30 THOSE SIX ARE RETIRED, and since 2026-10-02 their lessons are deleted:
+// the badges count them from `RETIRED_BRANCHES` (data/retiredBranches.ts), their units and
+// lengths alone. The badges still
 // count the six, so what a reader earned in them stands and a one-lesson road is never
 // "a whole branch". What the badges should count on the new roads is the owner's call.
-import { LEGACY_BRANCHES } from '@/data';
+import { RETIRED_BRANCHES } from '@/data';
 
 export interface BranchMastery {
   /** Percent of each philosophy branch read, 0–100, keyed by branch slug. */
@@ -28,12 +29,12 @@ export function branchMastery(
 ): BranchMastery {
   const mastery: Record<string, number> = {};
   let unitsComplete = 0;
-  for (const b of LEGACY_BRANCHES) {
-    const total = b.paths.reduce((acc, p) => acc + p.lessons.length, 0);
+  for (const b of RETIRED_BRANCHES) {
+    const total = b.units.reduce((acc, u) => acc + u.lessons, 0);
     const done = lessonsByBranch[b.slug] ?? 0;
     mastery[b.slug] = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-    for (const p of b.paths) {
-      if (p.lessons.length > 0 && (lessonsByUnit[p.id] ?? 0) >= p.lessons.length) unitsComplete++;
+    for (const u of b.units) {
+      if (u.lessons > 0 && (lessonsByUnit[u.id] ?? 0) >= u.lessons) unitsComplete++;
     }
   }
   return { mastery, unitsComplete };

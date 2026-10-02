@@ -5,7 +5,7 @@ import { BADGES, isEarned, type BadgeDef, type ProgressStats } from '@/data/badg
 import { eraGroupOfId } from '@/data/philosophers';
 import {
   ALL_BRANCHES,
-  LEGACY_BRANCHES,
+  RETIRED_BRANCHES,
   getLessonUnitInfo,
   branchCountsFromUnits,
   unitsFromBranchCounts,
@@ -683,7 +683,7 @@ export const SHOWCASE_MAX = 3;
 export function subjectKeyOf(branchSlug: string): string | null {
   const live = subjectOfBranch(branchSlug);
   if (live) return live.slug;
-  return LEGACY_BRANCHES.some((b) => b.slug === branchSlug) ? 'philosophy' : null;
+  return RETIRED_BRANCHES.some((b) => b.slug === branchSlug) ? 'philosophy' : null;
 }
 
 /** subjectDays with today's lesson written in — the store's write and the preview's. */

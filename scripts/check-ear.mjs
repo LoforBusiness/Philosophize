@@ -57,13 +57,13 @@ const DIR = process.env.EAR_DIR || 'components/lesson/cinematic';
 // committed are somebody's decisions, and sweeping the file would have quietly
 // overruled every one of them.
 /** AC4 — spelled-out forms left where the "not" or the "is" is the point. May only go DOWN. */
-const EXPANDED_BUDGET = 144;
+const EXPANDED_BUDGET = 0; // the retired 246 carried them; deleted 2026-10-02
 /** AC5 — quoted phrases with no spoken frame. May only go DOWN. */
-const UNFRAMED_BUDGET = 9;
+const UNFRAMED_BUDGET = 0; // the retired 246 carried them; deleted 2026-10-02
 /** AC7 — dashes in narration, each one a real interruption. May only go DOWN. */
 const DASH_BUDGET = 0;
 /** AD6 — intensifiers that survived being asked what they change. May only go DOWN. */
-const ADVERB_BUDGET = 9;
+const ADVERB_BUDGET = 0; // the retired 246 carried them; deleted 2026-10-02
 const BUDGETS = { EXPANDED_BUDGET, UNFRAMED_BUDGET, DASH_BUDGET, ADVERB_BUDGET };
 
 const args = process.argv.slice(2);

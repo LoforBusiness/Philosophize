@@ -48,13 +48,12 @@ const INSTRUMENT_CEILING = 0.50;
 /** Worst adjacent graded-prompt word overlap. Measured; may only go DOWN. */
 const ASK_CEILING = 0.20;
 /** How many lessons declare their picture in one line. May only go UP. */
-const THEME_FLOOR = 58;
+const THEME_FLOOR = 21; // every live lesson; 58 of the retired 246 until they were deleted (2026-10-02)
 
-// The live roads AND philosophy's six retired branches (2026-09-30): the retired ones
-// are out of the app, not out of the rule book — they stay unlike their neighbours
-// until each is rebuilt.
+// The live roads. Philosophy's six retired branches were held here too until their
+// lessons were deleted on 2026-10-02.
 const DATA = await import('@/data');
-const ALL_BRANCHES = [...DATA.LEGACY_BRANCHES, ...DATA.ALL_BRANCHES];
+const ALL_BRANCHES = DATA.ALL_BRANCHES;
 
 let bad = 0;
 const ok = (cond, label, detail = '') => {

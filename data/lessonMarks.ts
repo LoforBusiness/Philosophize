@@ -19,10 +19,4 @@ export interface StageMarkSpot {
 }
 
 export const MARKS: Record<string, Record<number, StageMarkSpot>> = {
-  'ethics-ethics-12': {
-    1: { w: 5, style: 'underline', box: [174, 245.5, 47.7, 8], label: "PROMISE" },
-  },
-  'logic-arguments-38': {
-    5: { w: 4, style: 'arrowL', box: [236, 254, 29, 16], label: "AN ISLAND", on: [270, 250, 116, 24] },
-  },
 };
