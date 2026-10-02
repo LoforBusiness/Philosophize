@@ -18,15 +18,15 @@ import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
-import { reachHandTo } from './interact';
+import { reachHandTo, sipHandAt, sipTilt, sipHead, lipsAt } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  tint, table, window as kitchenWindow, kitchenUnit, splashback, wallClock, kettle, mug, biscuitJar, jarLid, biscuit,
+  NATURAL, tint, table, kitchenWindow, kitchenUnit, splashback, wallClock, kettle, mug, biscuitJar, jarLid, biscuit,
   kitchenChair, fruitBowl, fruitBowlFront, chocolateBar, apple, notepad, pencil, LID_HINGE,
 } from './objects';
 import { BY_ID } from './wardrobe';
-import { EMBER, PAPER_LIT } from '@/components/shared/tone';
+import { PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // personal-growth-foundations-2, "How Habits Work" — A KITCHEN AT THREE O'CLOCK.
@@ -110,10 +110,17 @@ const Q1 = BEATS.map((b) => (b.cue ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.reach ? 1 : 0));
 /** The cap is sitting, beat by beat (b5 sits him down; b10 stands him up and back). */
 const SITS = BEATS.map((_, n) => (n >= 6 ? 1 : 0));
-/** The beats he takes a sip of tea on: listening, seated, while only one other moves. */
-const SIPS = BEATS.map((b, n) => (n >= 7 && b.act !== 'swap' ? 1 : 0));
+/**
+ * When he takes a sip of tea, in seconds into the beat (-1: not on this beat). A sip is
+ * an EVENT, once in a line, at a pause in the talk (AR3, AR5) and never a clock: on b7
+ * just after the housemate's "Willpower, I believe it's called.", and once on the
+ * quotation.
+ */
+const SIP_AT = BEATS.map((b, n) => (n === 7 ? 2.9 : b.act === 'rest' ? 1.0 : -1));
 /** The housemate nods along on every beat that is not his own line. */
 const PL_NODS = BEATS.map((b) => (b.speaker === 'plain' ? 0 : 1));
+/** And so does the cap, once he is in his chair, on every beat that is not his line. */
+const CAP_NODS = BEATS.map((b, n) => (n >= 6 && b.speaker !== 'cap' ? 1 : 0));
 
 // ── where each of them walks, and which way each faces, beat by beat ─────────
 // A leg is [fraction of the line it starts at, x]; it runs at the walk's own speed
@@ -153,6 +160,10 @@ const MUG_H = 12;
 const MUG_GRIP = (0.4 * MUG_W);                       // the handle, right of the mug's middle
 const MUG_TOP = { x: 70, y: TOP - MUG_H / 2 };        // its place on the worktop
 const MUG_TABLE = { x: 260, y: 474 - MUG_H / 2 };     // and on the table, by his chair
+/** Where his hand holds the mug standing: at his chest, in front (pelvis-local units). */
+const MUG_HOLD = { x: 11.8, y: -17.3 };
+/** Where he holds his biscuit between bites: at his chest, below the shoulder (AR6). */
+const BISCUIT_Y = 461;
 /** The jar, and its lid hinged at the back of its neck. */
 const JAR = { x: 108, y: 462, w: 22, h: 26 };
 const LID = { w: 24, h: 9 };
@@ -200,13 +211,34 @@ const GREEN_ART = tint(apple(0, 0, 10, 10), 'appleGreen');
 const PAD_ART = notepad(0, 0, PAD.w, PAD.h);
 const PENCIL_ART = pencil(0, 0, 13, 3);
 
+/**
+ * AR4: the explaining pose (259) rests its FAR hand raised and 13 units behind the
+ * spine, which side-on is an arm thrown back. A person explaining holds both hands in
+ * front of him, so the far one comes forward to sit beside the near one.
+ */
+function inFront(code: number, s: Stance): Stance {
+  'worklet';
+  return code === EXPLAIN ? { ...s, fistL: { x: 8, y: -3 } } : s;
+}
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return inFront(code, emoteStill(code, t));
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return inFront(code, emoteStillLive(code, t, bt));
+}
+/**
+ * A hand holding something against the body, in the figure's own frame (pelvis-local
+ * units, +x forward, -y up): the thing rides WITH him as he walks and sits rather than
+ * hanging at a fixed point on the stage while his body moves under it (AR6).
+ */
+function holdAt(s: Stance, which: 1 | -1, lx: number, ly: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const cur = which > 0 ? s.fistR : s.fistL;
+  const m = { x: lerp(cur.x, lx, w), y: lerp(cur.y, ly, w) };
+  return which > 0 ? { ...s, fistR: m } : { ...s, fistL: m };
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -218,17 +250,20 @@ function sitting(t: number, lean: number): Stance {
   const s = seated(SEAT_H, t, 18);
   return { ...s, tilt: s.tilt + 0.12 * lean, neck: s.neck - 0.06 * lean };
 }
-/** A sip of tea, every seven seconds: 0 the mug down · 1 at his lips. */
-function sipAt(t: number): number {
+/**
+ * One sip, `b` seconds into a beat whose sip starts at `s0`: `g` his hand going to the
+ * mug's handle on the table (and, at the end, off it again), `u` the mug up at his lips:
+ * up in 0.45s, held there about half a second, and back down onto the table (AR3).
+ */
+function sipPhase(b: number, s0: number) {
   'worklet';
-  const u = (t % 7) / 7;
-  const up = clamp01((u - 0.18) / 0.14);
-  const down = clamp01((u - 0.52) / 0.14);
-  const e = (v: number) => {
+  if (s0 < 0) return { g: 0, u: 0 };
+  const k = (a: number, z: number) => {
     'worklet';
+    const v = clamp01((b - s0 - a) / (z - a));
     return v * v * (3 - 2 * v);
   };
-  return e(up) * (1 - e(down));
+  return { g: k(0, 0.35) * (1 - k(1.85, 2.15)), u: k(0.35, 0.8) * (1 - k(1.35, 1.8)) };
 }
 /** The lid's front edge, swung `deg` open about its hinge. */
 function lidEdge(deg: number, r: number) {
@@ -304,7 +339,7 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
   const heldC = useHeld();
   const heldP = useHeld();
   const heldT = useHeld();
-  const cv = useCarry(19);
+  const cv = useCarry(21);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -333,7 +368,9 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const seat = carry(cv, 1, n, seatNow, seatNow, tr);
     const leanNow = A_REWARD[n] ? st(0.86, 0.96) : n > 5 ? 1 : 0;
     const lean = carry(cv, 2, n, leanNow, leanNow, tr);
-    const sip = carry(cv, 3, n, SIPS[n], SIPS[n], tr) * sipAt(t);
+    const sp0 = sipPhase(b, SIP_AT[n]);
+    const sipG = carry(cv, 3, n, sp0.g, sp0.g, tr);
+    const sip = carry(cv, 19, n, sp0.u, sp0.u, tr);
 
     // ── the man in the cap ──────────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 4, n, CAP_LEGS[0][0][1]), CAP_LEGS[n], b, L);
@@ -341,22 +378,34 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const dC = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), CAP_TURN[n], b, L), 1);
     let sc = bodyOf(wc, CAP_P, n, t, b);
     if (seat > 0) sc = mixStance(sc, sitting(t, lean), seat);
+    // seated and listening, his life is his head: a nod along, out of step with his
+    // housemate's (N21); his hands stay put (AP18)
+    const nodC = carry(cv, 20, n, CAP_NODS[n], CAP_NODS[n], tr) * seat * Math.max(0, Math.sin(t * 1.3 + 1.7));
+    sc = { ...sc, neck: sc.neck + 0.22 * nodC, tilt: sc.tilt + 0.04 * nodC };
     // his right hand: the mug. Off the worktop on b0, held through b4, set on the table
     // on b5; seated, it rests by the mug and lifts it for a sip.
     if (A_CHIME[n]) {
       sc = hand(sc, xC, dC, 1, MUG_TOP.x + MUG_GRIP, MUG_TOP.y, st(0.22, 0.3));
-      sc = hand(sc, xC, dC, 1, xC + 9 * dC, 461, st(0.36, 0.46));
+      sc = holdAt(sc, 1, MUG_HOLD.x, MUG_HOLD.y, st(0.36, 0.46));
     } else if (n <= 4) {
+      // held by its handle at his chest, upright (AR2, AR6); lifted once on "reward"
       const raise = A_LOOP[n] ? bp(0.66, 0.74, 0.92) : 0;
-      sc = hand(sc, xC, dC, 1, xC + 9 * dC, 461 - 9 * raise, 1);
+      sc = holdAt(sc, 1, MUG_HOLD.x, MUG_HOLD.y - 11 * raise, 1);
     } else if (A_REWARD[n]) {
-      sc = hand(sc, xC, dC, 1, xC + 9 * dC, 461, 1 - st(0.68, 0.74));
+      // carried to his chair against his chest, and set down on the table once he sits
+      sc = holdAt(sc, 1, MUG_HOLD.x, MUG_HOLD.y, 1 - st(0.68, 0.74));
       sc = hand(sc, xC, dC, 1, MUG_TABLE.x - MUG_GRIP, MUG_TABLE.y, bp(0.68, 0.76, 0.86));
     } else if (!A_SWAP[n]) {
-      // resting by the mug, still (AP18); a sip now and then
+      // resting on the table by the mug, still (AP18). For a sip he takes it by the
+      // handle, lifts it to his lips (interact.ts: sipHandAt) with his head dipping to
+      // meet it, and puts it back where it stood (AR3).
       const rest = { x: MUG_TABLE.x - MUG_GRIP - 5, y: 472 };
-      const lip = { x: xC + 9 * dC, y: 446 };
-      sc = hand(sc, xC, dC, 1, lerp(rest.x, lip.x, sip), lerp(rest.y, lip.y, sip), 1);
+      const grip = { x: MUG_TABLE.x - MUG_GRIP, y: MUG_TABLE.y };
+      const cupHand = sipHandAt(sc, { x: xC, groundY: GROUND, k: K, dir: dC < 0 ? -1 : 1 });
+      const gx = lerp(rest.x, grip.x, sipG);
+      const gy = lerp(rest.y, grip.y, sipG);
+      sc = hand(sc, xC, dC, 1, lerp(gx, cupHand.x, sip), lerp(gy, cupHand.y, sip), 1);
+      sc = sipHead(sc, sip);
     }
     // his left hand: the jar's lid flicked open, a biscuit out, and eaten
     if (A_CHIME[n]) {
@@ -364,20 +413,30 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
       const edge = lidEdge(ang, 21);
       sc = hand(sc, xC, dC, -1, edge.x, edge.y, bp(0.58, 0.64, 0.74));
       sc = hand(sc, xC, dC, -1, JAR.x - 5, JAR.y - 9, bp(0.74, 0.8, 0.88));
-      sc = hand(sc, xC, dC, -1, xC + 11 * dC, 455, st(0.86, 0.96));
+      sc = hand(sc, xC, dC, -1, xC + 11 * dC, BISCUIT_Y, st(0.86, 0.96));
     }
+    // two bites on b1 and the last on b2: the biscuit up to his lips, the head dipping to
+    // it, and back down to his chest (AR5: twice in a line, then it rests)
+    const lips = lipsAt(sc, { x: xC, groundY: GROUND, k: K, dir: dC < 0 ? -1 : 1 });
+    const biteAt = { x: lips.x + 4 * K * (dC < 0 ? -1 : 1), y: lips.y + 1 };
     if (A_COUNT[n]) {
       const bite = bp(0.48, 0.56, 0.64) + bp(0.78, 0.86, 0.94);
-      sc = hand(sc, xC, dC, -1, lerp(xC + 11 * dC, xC + 12 * dC, bite), lerp(455, 444, bite), 1);
+      sc = hand(sc, xC, dC, -1, lerp(xC + 11 * dC, biteAt.x, bite), lerp(BISCUIT_Y, biteAt.y, bite), 1);
+      sc = sipHead(sc, bite * 0.6);
     }
-    if (A_ARRIVE[n]) sc = hand(sc, xC, dC, -1, xC + 12 * dC, 444, bp(0, 0.08, 0.2));
+    if (A_ARRIVE[n]) {
+      const bite = bp(0, 0.08, 0.2);
+      sc = hand(sc, xC, dC, -1, biteAt.x, biteAt.y, bite);
+      sc = sipHead(sc, bite * 0.6);
+    }
     // b10: up, over to the bowl for the apple, and back to his chair with it
     if (A_SWAP[n]) {
       sc = hand(sc, xC, dC, -1, BOWL.x + APPLE_IN.x, BOWL.y + APPLE_IN.y, bp(0.24, 0.3, 0.38));
-      sc = hand(sc, xC, dC, -1, xC + 10 * dC, 460 - 6 * st(0.86, 0.95), st(0.32, 0.4));
+      sc = holdAt(sc, -1, 13, -16, st(0.32, 0.4));
       sc = hand(sc, xC, dC, 1, MUG_TABLE.x - MUG_GRIP - 5, 472, st(0.66, 0.76));
     }
-    if (n > 10) sc = hand(sc, xC, dC, -1, xC + 12 * dC, 462, 1);
+    // the apple held at his chest, close and still, while he listens (AR6)
+    if (n > 10) sc = holdAt(sc, -1, 13, -16, 1);
     const prevC = carryFrom(heldC, n, seat >= 0.99 ? sitting(t, lean) : hHold(CAP_P[p], t));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
@@ -416,7 +475,7 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const bowlNow = A_RULE[n] ? st(0.9, 0.93) : n > 6 ? 1 : 0;
     const bowlDown = carry(cv, 10, n, bowlNow, bowlNow, tr);
     if (n <= 6) {
-      stt = hand(stt, xT, dT, -1, xT + 6 * dT, 462, 1 - bowlDown);
+      stt = holdAt(stt, -1, 8, -16, 1 - bowlDown);
       if (A_RULE[n]) stt = hand(stt, xT, dT, -1, BOWL.x - 10, BOWL.y, bp(0.86, 0.91, 0.98));
     }
     if (A_ARRIVE[n]) {
@@ -442,11 +501,13 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     if (A_JAB[n]) stt = hand(stt, xT, dT, 1, JAR.x, JAR.y - 15, 1 - st(0, 0.1));
     // b8: pushing against something heavy that will not move, and letting it go
     if (A_WILL[n]) {
+      // one shove that gets nowhere (a lean in, and the hands give back), not a tremble
+      // on the clock (AR5)
       const push = st(0.06, 0.16) * (1 - st(0.5, 0.6));
-      const strain = Math.sin(t * 22) * 0.9 * push;
-      stt = { ...stt, tilt: stt.tilt - 0.16 * push };
-      stt = hand(stt, xT, dT, 1, xT + 30 * dT + strain, 452, push);
-      stt = hand(stt, xT, dT, -1, xT + 29 * dT + strain, 457, push);
+      const heave = 2 * bp(0.18, 0.3, 0.44);
+      stt = { ...stt, tilt: stt.tilt - 0.16 * push - 0.04 * heave };
+      stt = hand(stt, xT, dT, 1, xT + (30 + heave) * dT, 452, push);
+      stt = hand(stt, xT, dT, -1, xT + (29 + heave) * dT, 457, push);
     }
     const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
@@ -474,12 +535,14 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const wT = wristOf(th, 'wrL');
     const wPL = wristOf(pl, 'wrL');
     const wPR = wristOf(pl, 'wrR');
-    const mugSx = mugT < 1.5 ? (mugT < 0.5 ? 1 : -dC) : -1;
+    // On the worktop and the table its handle is toward him; at his lips it is turned
+    // body to the face, handle out (AR3), so it turns in his hand as it comes up.
+    const mugSx = mugT < 1.5 ? (mugT < 0.5 ? 1 : -dC) : lerp(-1, 1, sip);
     let mugAt: { x: number; y: number };
     if (mugT <= 1) mugAt = { x: lerp(MUG_TOP.x + MUG_GRIP, wC.x, mugT), y: lerp(MUG_TOP.y, wC.y, mugT) };
     else {
       const tbl = { x: MUG_TABLE.x - MUG_GRIP, y: MUG_TABLE.y };
-      const lift = sip;
+      const lift = clamp01((sipG - 0.85) / 0.15);
       const base = { x: lerp(wC.x, tbl.x, mugT - 1), y: lerp(wC.y, tbl.y, mugT - 1) };
       mugAt = { x: lerp(base.x, wC.x, lift), y: lerp(base.y, wC.y, lift) };
     }
@@ -491,7 +554,7 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
       cap, pl, th, t,
       hour: carry(cv, 14, n, minNow, minNow, tr),
       lid,
-      mug: { x: mugAt.x, y: mugAt.y, o: 1, sx: mugSx },
+      mug: { x: mugAt.x, y: mugAt.y, o: 1, sx: mugSx, r: sipTilt(sip, dC) },
       bis: { x: wCL.x, y: wCL.y, o: bis >= 0.6 && bis < 3.9 ? 1 : 0, s: bis < 1 ? 1 : 1 - 0.28 * (bis - 1) },
       bowl: { x: bowlAt.x, y: bowlAt.y, o: 1 },
       apple: { x: appleAt.x, y: appleAt.y, o: appleT < 0.5 ? 1 : 0 },
@@ -718,7 +781,7 @@ const styles = StyleSheet.create({
   },
   handSecond: {
     position: 'absolute', left: CLOCK.x - 0.4, top: CLOCK.y - 11, width: 0.8, height: 11,
-    backgroundColor: EMBER, transformOrigin: '50% 100%',
+    backgroundColor: NATURAL.clockRed.base, transformOrigin: '50% 100%',
   },
   boss: {
     position: 'absolute', left: CLOCK.x - 1.6, top: CLOCK.y - 1.6, width: 3.2, height: 3.2, borderRadius: 1.6, backgroundColor: INK,

@@ -22,7 +22,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, loaf, shopFront, shopDoor, glassBreak, glassShards, football, twig, noticeBoard, BOARD_CORK,
+  NATURAL, tint, pencil, loaf, shopFront, shopDoor, glassBreak, glassShards, football, twig, noticeBoard, BOARD_CORK,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { EMBER } from '@/components/shared/tone';
@@ -146,6 +146,8 @@ const INNER_GLASS_ART = glassShards(330, 430, 40, 40);
 const STREET_GLASS_ART = glassShards(300, 476, 44, 44);
 const TWIG = { x: 346, y: 493 };
 const TWIG_ART = twig(346, 481, 40, 40);
+/** The pencil she writes the rule with (AR2): lying point-left, held a third from its end. */
+const PENCIL_ART = pencil(0, 0, 13, 3);
 
 // ── the notice board on the pier by the door ────────────────────────────────
 const BOARD = { x: 146, y: 425, w: 92, h: 90 };
@@ -165,6 +167,14 @@ const SLIPS = [
 const CARD = { left: 112, top: 406, w: 66, h: 46 };
 /** Where her hand presses the card to the board and writes on it: its near edge. */
 const CARD_HAND = { x: 114, y: 428 };
+/**
+ * The three lines of the rule, as fractions of her line: WHOEVER, KICKS IT, and — after
+ * a pause to think, longer than a breath — PAYS. Her hand runs R_REACH along each.
+ */
+const R_ROWS = [[0.28, 0.4], [0.44, 0.55], [0.74, 0.8]] as const;
+const R_REACH = 8;
+/** The card's grip: the middle of its near edge, where her fingers hold it. */
+const CARD_GRIP = { x: CARD.left + 2, y: CARD.top + CARD.h / 2 };
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -262,7 +272,7 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldS = useHeld();
   const heldN = useHeld();
   const heldH = useHeld();
-  const cv = useCarry(12);
+  const cv = useCarry(16);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -286,11 +296,11 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const dS = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), S_TURN[n], b, L), 1);
     let ss = bodyOf(ws, S_P, n, t, b);
     if (A_FIND[n]) {
-      // "My window!" — both hands thrown up at it as he stops; then, "it must have been
-      // the wind", a hand out and down at the twig lying on the pavement
+      // "My window!" — both hands thrown up IN FRONT of him, at the window he faces
+      // (AR4); then, "it must have been the wind", a hand out and down at the twig
       const up = bp(0.2, 0.3, 0.6);
       ss = hand(ss, xS, dS, 1, xS + 22 * dS, 432, up);
-      ss = hand(ss, xS, dS, -1, xS - 18 * dS, 432, up);
+      ss = hand(ss, xS, dS, -1, xS + 9 * dS, 428, up);
       ss = hand(ss, xS, dS, 1, TWIG.x, TWIG.y, bp(0.66, 0.78, 0.98));
       ss = lookOf(ss, -0.26, bp(0.18, 0.28, 0.62));
     }
@@ -298,9 +308,10 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // the pocket turned out, empty; hands spread at "somebody ought to pay"; and then
       // he looks up at the hole
       ss = hand(ss, xS, dS, 1, xS + 3 * dS, 472, bp(0.05, 0.13, 0.3));
+      // both palms open in front of him, never one thrown back behind (AR4)
       const spread = bp(0.4, 0.5, 0.68);
-      ss = hand(ss, xS, dS, 1, xS + 16 * dS, 458, spread);
-      ss = hand(ss, xS, dS, -1, xS - 13 * dS, 458, spread);
+      ss = hand(ss, xS, dS, 1, xS + 17 * dS, 458, spread);
+      ss = hand(ss, xS, dS, -1, xS + 5 * dS, 460, spread);
       ss = lookOf(ss, -0.32, st(0.66, 0.78));
     }
     const prevS = carryFrom(heldS, n, hHold(S_P[p], t));
@@ -324,11 +335,21 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // a card out of her pocket, pressed onto the board, the rule written on it — and
       // then she sees who it is about: her own foot, hands to her face
       sn = hand(sn, xN, dN, 1, xN + 3 * dN, 472, bp(0.04, 0.1, 0.16));
-      const write = st(0.3, 0.72);
-      const stroke = Math.sin(write * Math.PI * 7) * 0.5 + 0.5;
-      const row = Math.min(2, Math.floor(write * 3));
-      sn = hand(sn, xN, dN, 1, CARD_HAND.x + 4 * stroke, CARD_HAND.y - 12 + row * 12,
-        st(0.14, 0.22) * (1 - st(0.74, 0.8)));
+      // the rule is WRITTEN, a line at a time (AR5): the hand runs along a line, back to
+      // the start of the next, and after the second line she stops to think before the
+      // last word — so no stroke repeats more than twice in a row
+      const r1 = st(R_ROWS[0][0], R_ROWS[0][1]);
+      const r2 = st(R_ROWS[1][0], R_ROWS[1][1]);
+      const r3 = st(R_ROWS[2][0], R_ROWS[2][1]);
+      const back1 = st(R_ROWS[0][1], R_ROWS[1][0]);
+      const back2 = st(R_ROWS[2][0] - 0.03, R_ROWS[2][0]);
+      // the windows never overlap, so each line's run and each return simply add up
+      const along = r1 * (1 - back1) + r2 * (1 - back2) + r3;
+      const rowY = 12 * (back1 + back2);
+      sn = hand(sn, xN, dN, 1, CARD_HAND.x + R_REACH * along, CARD_HAND.y - 12 + rowY,
+        st(0.14, 0.22) * (1 - st(R_ROWS[2][1] + 0.02, R_ROWS[2][1] + 0.07)));
+      // the pencil back into her pocket before she sees whom the rule is about
+      sn = hand(sn, xN, dN, 1, xN + 3 * dN, 472, bp(0.81, 0.835, 0.86));
       const face = st(0.86, 0.93);
       sn = hand(sn, xN, dN, 1, xN + 9 * dN, 434, face);
       sn = hand(sn, xN, dN, -1, xN + 6 * dN, 440, face);
@@ -360,18 +381,34 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
     // ── the things that change ──────────────────────────────────────────────
     const liningNow = A_PAY[n] ? st(0.12, 0.18) : 0;
-    const cardNow = A_RULE[n] ? st(0.2, 0.26) : n > RULE_N ? 1 : 0;
-    const writeNow = A_RULE[n] ? st(0.3, 0.72) : n > RULE_N ? 1 : 0;
+    // the card: drawn out of her pocket in her hand (AR6 — it goes where the hand goes),
+    // carried up by its near edge and pressed onto the board, where it stays
+    const cardNow = A_RULE[n] ? st(0.08, 0.11) : n > RULE_N ? 1 : 0;
+    const pinNow = A_RULE[n] ? st(0.21, 0.24) : n > RULE_N ? 1 : 0;
+    const nbP = pose(figN, xN, GROUND, K, dN, 1);
+    const wrN = { x: nbP.wrR[0].translateX as number, y: nbP.wrR[1].translateY as number };
+    // only on its own beat: before it comes out it waits on the board, not off the edge
+    // of the stage with her (check:space reads a word at any opacity)
+    const offX = A_RULE[n] ? (1 - pinNow) * (wrN.x - CARD_GRIP.x) : 0;
+    const offY = A_RULE[n] ? (1 - pinNow) * (wrN.y - CARD_GRIP.y) : 0;
+    const writeNow = A_RULE[n]
+      ? (st(R_ROWS[0][0], R_ROWS[0][1]) + st(R_ROWS[1][0], R_ROWS[1][1]) + st(R_ROWS[2][0], R_ROWS[2][1])) / 3
+      : n > RULE_N ? 1 : 0;
 
     return {
       s: pose(figS, xS, GROUND, K, dS, 1),
-      nb: pose(figN, xN, GROUND, K, dN, 1),
+      nb: nbP,
       h: pose(figH, xH, GROUND, K, dH, 1),
       hip: { x: xS + 3 * dS, d: dS },
       lining: carry(cv, 6, n, liningNow, liningNow, tr),
       board: carry(cv, 7, n, BOARD_V[p], BOARD_V[n], tr),
       card: carry(cv, 8, n, cardNow, cardNow, tr),
+      pin: carry(cv, 12, n, pinNow, pinNow, tr),
+      cardX: carry(cv, 13, n, offX, offX, tr),
+      cardY: carry(cv, 14, n, offY, offY, tr),
       write: carry(cv, 9, n, writeNow, writeNow, tr),
+      // the pencil comes out of her pocket with the card and goes back after the rule
+      pencil: carry(cv, 15, n, A_RULE[n] ? st(0.08, 0.11) * (1 - st(0.83, 0.845)) : 0, A_RULE[n] ? st(0.08, 0.11) * (1 - st(0.83, 0.845)) : 0, tr),
       q1: carry(cv, 10, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 11, n, Q2[p], Q2[n], tr),
     };
@@ -405,6 +442,7 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       {/* cast: cap */}
       <Stickman D={DS} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <Lining S={SCENE} />
+      <Pencil S={SCENE} DN={DN} />
       {on(Q1) ? <EvidenceTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <QuestionTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
@@ -421,13 +459,34 @@ function Lining({ S }: { S: SharedValue<any> }) {
   return <Animated.View style={[styles.lining, st]} pointerEvents="none" />;
 }
 
+// ── her pencil: held by its back third, the point forward and down to the card (AR2) ─
+
+function Pencil({ S, DN }: { S: SharedValue<any>; DN: SharedValue<Bundle> }) {
+  const st = useAnimatedStyle(() => {
+    const w = DN.value.wrR;
+    const d = DN.value.dir < 0 ? -1 : 1;
+    return {
+      opacity: S.value.pencil,
+      transform: [
+        { translateX: (w[0].translateX as number) + 3 * d }, { translateY: (w[1].translateY as number) + 1.5 },
+        { scaleX: -d }, { rotate: '-35deg' },
+      ],
+    };
+  });
+  return (
+    <Animated.View style={[styles.pencil, st]} pointerEvents="none">
+      <ObjectArt parts={PENCIL_ART} tone={TONE} line={0.8} />
+    </Animated.View>
+  );
+}
+
 // ── the notice board: the hours, and the rule she pins over them ────────────
 
 function Board({ S }: { S: SharedValue<any> }) {
-  const hours = useAnimatedStyle(() => ({ opacity: clamp01(1 - S.value.board) * (1 - S.value.card) }));
+  const hours = useAnimatedStyle(() => ({ opacity: clamp01(1 - S.value.board) * (1 - S.value.pin) }));
   const card = useAnimatedStyle(() => ({
     opacity: S.value.card,
-    transform: [{ scale: 1 + 0.06 * (1 - S.value.card) }],
+    transform: [{ translateX: S.value.cardX }, { translateY: S.value.cardY }],
   }));
   const l1 = useAnimatedStyle(() => ({ width: `${100 * clamp01(S.value.write * 3)}%` }));
   const l2 = useAnimatedStyle(() => ({ width: `${100 * clamp01(S.value.write * 3 - 1)}%` }));
@@ -527,13 +586,14 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold', fontSize: 13, lineHeight: 15, letterSpacing: 4,
     color: NATURAL.shopPaint.label, includeFontPadding: false,
   },
+  pencil: { position: 'absolute', left: 0, top: 0, width: 0, height: 0, zIndex: 3 },
   lining: {
     position: 'absolute', left: 0, top: 0, width: 6, height: 8, borderRadius: 1.5,
     backgroundColor: PLATE_FACE, borderWidth: 1, borderColor: INK, transformOrigin: '50% 0%',
   },
   scrap: {
     position: 'absolute', width: 16, height: 13, paddingTop: 3, paddingHorizontal: 2.5, gap: 2,
-    backgroundColor: PLATE_FACE, borderWidth: 0.8, borderColor: INK,
+    backgroundColor: NATURAL.paper.base, borderWidth: 0.8, borderColor: INK,
   },
   scrapLine: { height: 1, backgroundColor: INK, opacity: 0.6 },
   scrapShort: { width: '60%' },

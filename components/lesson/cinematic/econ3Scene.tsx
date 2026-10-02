@@ -87,11 +87,12 @@ const K = K_FIG * 0.76;
  * longer than the line and runs on after it — b1 (the ticket laid down), b7 (the note
  * put back) and b10 (the walk, the money and the ticket).
  */
-const LINES = [3.98, 3.2, 5.23, 5.57, 0, 3.86, 6.34, 4, 4.76, 0, 5.4, 0, 0];
+const LINES = [3.98, 3.2, 5.23, 5.57, 0, 3.86, 6.34, 5.6, 4.76, 0, 5.4, 0, 0];
 
-// The held poses (moves.ts act + 99): talking, explaining, nodding along, waiting.
+// The held poses (moves.ts act + 99): talking with the hands, nodding along, waiting.
+// EXPLAINING (259) is not used: its resting far hand sits at the chest a little behind
+// the spine, and as his weight moves it reads as an arm held back (AR4).
 const TALK = 167;
-const EXPLAIN = 259;
 const NOD = 263;
 const WAIT = 161;
 
@@ -131,12 +132,21 @@ const PL_TURN: Track[] = [
 ];
 /** The economist is off the stage, left, until he walks in on b2. */
 const TH_LEGS: Track[] = BEATS.map((b) => (b.th ? [[0, TH_HOME]] : [[0, -40]]));
-const TH_TURN: Track[] = BEATS.map(() => [[0, 1]]);
+/**
+ * He faces the music lover — except on b3, when he turns to the concert bill behind him
+ * to lay a hand on it (what you give up) and turns back: a hand is never thrown back to
+ * a thing behind him (AR4).
+ */
+const TH_TURN: Track[] = BEATS.map((_, n) => (A_GIVEUP[n] ? [[0, 1], [0.44, -1], [0.88, 1]] : [[0, 1]]));
 const CP_LEGS: Track[] = BEATS.map((_, n) => (n < BUY_N ? [[0, CP_HOME]] : n === BUY_N ? [[0.04, CP_TRADE]] : [[0, CP_TRADE]]));
-const CP_TURN: Track[] = BEATS.map(() => [[0, -1]]);
+/**
+ * He faces his window — except on b7, when he turns to the concert roll on his own side
+ * to tear a ticket off it, and turns back to hold it up (AR4).
+ */
+const CP_TURN: Track[] = BEATS.map((_, n) => (A_TWENTY[n] ? [[0, 1], [0.27, -1]] : [[0, -1]]));
 /** What each is doing with his body: talking while he speaks, alive while he listens (N21). */
 const PL_P = [TALK, NOD, NOD, NOD, WAIT, TALK, NOD, NOD, NOD, WAIT, TALK, NOD, WAIT];
-const TH_P = [WAIT, WAIT, EXPLAIN, EXPLAIN, WAIT, NOD, EXPLAIN, NOD, EXPLAIN, WAIT, NOD, NOD, WAIT];
+const TH_P = [WAIT, WAIT, TALK, TALK, WAIT, NOD, TALK, NOD, TALK, WAIT, NOD, NOD, WAIT];
 const CP_P = [NOD, TALK, NOD, NOD, WAIT, NOD, NOD, TALK, NOD, WAIT, NOD, NOD, WAIT];
 
 // ── the wall and its two bills ───────────────────────────────────────────────
@@ -167,11 +177,12 @@ const ROLL_P = 314;
 const TIP_Y = ROLL.y + ROLL.h / 2 + 7;
 /** A ticket, drawn about its middle: 14 × 7. */
 const TK = { w: 14, h: 7 };
-/** The cash tin, open on the shelf, and the takings standing in it. */
-const TIN = { x: 296, y: TOP - 6, w: 20, h: 12 };
-const TIN_MOUTH = { x: 295, y: TOP - 11 };
-/** Where the football ticket is laid down on the shelf. */
-const SHELF_G = { x: 270, y: TOP - 1.6 };
+/** The cash tin, open on the shelf IN FRONT of him (he faces the window, x falling), and
+ *  the takings standing in it: a hand goes into it without reaching behind him (AR4). */
+const TIN = { x: 280, y: TOP - 6, w: 20, h: 12 };
+const TIN_MOUTH = { x: 279, y: TOP - 11 };
+/** Where the football ticket is laid down on the shelf, at the window's near end. */
+const SHELF_G = { x: 261, y: TOP - 1.6 };
 /** Where things pass across the shelf, from one hand to the other. */
 const PASS = { x: 262, y: 461 };
 
@@ -180,7 +191,7 @@ const GIG_ART = gigPoster(GIG.x, GIG.y, GIG.w, GIG.h);
 const MATCH_ART = matchPoster(MATCH.x, MATCH.y, MATCH.w, MATCH.h);
 const KIOSK_ART = ticketKiosk(KIOSK.x, KIOSK.y, KIOSK.w, KIOSK.h);
 const FRONT_ART = kioskFront(FRONT.x, FRONT.y, FRONT.w, FRONT.h);
-const CLOCK_ART = wallClock(CLOCK.x, CLOCK.y, CLOCK.d, CLOCK.d);
+const CLOCK_ART = tint(wallClock(CLOCK.x, CLOCK.y, CLOCK.d, CLOCK.d), 'brass');
 const ROLL_G_ART = tint(ticketRoll(ROLL_G, ROLL.y, ROLL.w, ROLL.h), 'ticketGreen');
 const ROLL_P_ART = ticketRoll(ROLL_P, ROLL.y, ROLL.w, ROLL.h);
 const TAKINGS_ART = tinTakings(TIN.x, TIN.y - 7, 16, 9);
@@ -306,12 +317,13 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b10: a twenty out of his pocket, across the shelf; then the ticket, held up to look at
     const lookNow = A_BUY[n] ? st(0.74, 0.84) : n > BUY_N ? 1 : 0;
+    const lookY = n > BUY_N ? 458 : 451;
     if (A_BUY[n]) {
       sp = hand(sp, xP, dP, 1, xP - 3 * dP, 471, bp(0.19, 0.24, 0.31));
       sp = hand(sp, xP, dP, 1, PASS.x, PASS.y, st(0.29, 0.37) * (1 - st(0.47, 0.53)));
       sp = hand(sp, xP, dP, 1, PASS.x + 2, PASS.y - 2, st(0.58, 0.65) * (1 - st(0.72, 0.78)));
     }
-    if (lookNow > 0) sp = hand(sp, xP, dP, 1, xP + 13 * dP, 451, lookNow);
+    if (lookNow > 0) sp = hand(sp, xP, dP, 1, xP + 13 * dP, lookY, lookNow);
     const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
@@ -326,24 +338,24 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.18));
       stt = hand(stt, xT, dT, 1, xT + 20 * dT, 450, bp(after + 0.22, after + 0.3, 0.97));
     }
-    // b3: a hand on each bill — then the one on the football bill lifted away
+    // b3: a hand on the football bill — the one he picks; then he turns to the concert
+    // bill behind him and lays his hand on it — what he gives up — and turns back
     if (A_GIVEUP[n]) {
-      stt = hand(stt, xT, dT, -1, ON_GIG.x, ON_GIG.y, st(0.04, 0.14) * (1 - st(0.9, 0.98)));
-      stt = hand(stt, xT, dT, 1, ON_MATCH.x, ON_MATCH.y, st(0.08, 0.18) * (1 - st(0.36, 0.44)));
-      stt = hand(stt, xT, dT, 1, ON_MATCH.x - 3, 432, bp(0.36, 0.46, 0.9));
+      stt = hand(stt, xT, dT, 1, ON_MATCH.x, ON_MATCH.y, st(0.06, 0.16) * (1 - st(0.34, 0.42)));
+      stt = hand(stt, xT, dT, 1, ON_GIG.x, ON_GIG.y, st(0.54, 0.62) * (1 - st(0.8, 0.88)));
     }
     // b6: a finger at the kiosk clock while its hand runs on; then a hand to the music lover
     if (A_TIME[n]) {
       stt = hand(stt, xT, dT, 1, CLOCK.x, CLOCK.y, bp(0.03, 0.12, 0.6));
       stt = hand(stt, xT, dT, 1, xT + 20 * dT, 452, bp(0.66, 0.76, 0.97));
     }
-    // b8: his hands out like the pans of a pair of scales, tipped one way, the other,
-    // and level
+    // b8: his hands held out in front of him like the pans of a pair of scales, one
+    // nearer than the other, tipped one way, the other, and level
     if (A_WEIGH[n]) {
       const out = st(0.04, 0.16) * (1 - st(0.9, 0.98));
       const tip = 7 * (bp(0.26, 0.36, 0.46) - bp(0.46, 0.56, 0.66));
       stt = hand(stt, xT, dT, 1, xT + 17 * dT, 458 + tip, out);
-      stt = hand(stt, xT, dT, -1, xT - 17 * dT, 458 - tip, out);
+      stt = hand(stt, xT, dT, -1, xT + 8 * dT, 458 - tip, out);
     }
     const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
@@ -370,19 +382,21 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b7: a concert ticket torn off its roll in one hand, a twenty lifted out of the tin
     // in the other, both held up; the note back in the tin, the ticket kept
+    // Turned to the concert roll on his own side, he tears a ticket off it; turned back,
+    // he holds it up in front of him, lifts a twenty out of the tin in front of him and
+    // holds it up too, puts the note back, and keeps the ticket low at the shelf.
     if (A_TWENTY[n]) {
-      let lx = lerp(ROLL_P, 302, st(0.2, 0.3));
-      let ly = lerp(TIP_Y, 430, st(0.2, 0.3));
-      lx = lerp(lx, xC + 22, st(0.78, 0.88));
-      ly = lerp(ly, 463, st(0.78, 0.88));
-      sc = hand(sc, xC, dC, -1, lx, ly, st(0.04, 0.12));
-      const rx = lerp(TIN_MOUTH.x, 276, st(0.24, 0.34) * (1 - st(0.72, 0.8)));
-      const ry = lerp(TIN_MOUTH.y, 430, st(0.24, 0.34) * (1 - st(0.72, 0.8)));
-      sc = hand(sc, xC, dC, 1, rx, ry, st(0.12, 0.2) * (1 - st(0.86, 0.95)));
+      let lx = lerp(ROLL_P, xC + 12 * dC, st(0.22, 0.36));
+      let ly = lerp(TIP_Y, 432, st(0.22, 0.36));
+      lx = lerp(lx, xC + 12 * dC, st(0.643, 0.75));
+      ly = lerp(ly, 463, st(0.643, 0.75));
+      sc = hand(sc, xC, dC, -1, lx, ly, st(0.05, 0.125));
+      const up = st(0.464, 0.536) * (1 - st(0.643, 0.714));
+      sc = hand(sc, xC, dC, 1, lerp(TIN_MOUTH.x, xC + 22 * dC, up), lerp(TIN_MOUTH.y, 428, up), st(0.357, 0.43) * (1 - st(0.75, 0.84)));
     }
-    // b8–b10: the ticket held still at the shelf, until it is handed over
+    // b8–b10: the ticket held still in front of him at the shelf, until it is handed over
     const keepNow = n > TWENTY_N && n < BUY_N ? 1 : A_BUY[n] ? 1 - st(0.7, 0.78) : 0;
-    if (keepNow > 0) sc = hand(sc, xC, dC, -1, xC + 22, 463, keepNow);
+    if (keepNow > 0) sc = hand(sc, xC, dC, -1, xC + 12 * dC, 463, keepNow);
     // b10: his note taken across the shelf and dropped in the tin; the ticket handed over
     if (A_BUY[n]) {
       sc = hand(sc, xC, dC, 1, PASS.x, PASS.y, st(0.36, 0.43) * (1 - st(0.5, 0.56)));
@@ -403,8 +417,8 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // noteS  the seller's twenty: 0 in the tin · 1 held up
     // noteL  the music lover's twenty: 0 his pocket · 1 his hand · 2 the seller's · 3 the tin
     const greenNow = A_FREE[n] ? st(0.1, 0.13) + st(0.8, 0.84) : n > FREE_N ? 2 : 0;
-    const pinkNow = A_TWENTY[n] ? st(0.11, 0.14) : A_BUY[n] ? 1 + st(0.64, 0.68) : n > TWENTY_N ? (n > BUY_N ? 2 : 1) : 0;
-    const noteSNow = A_TWENTY[n] ? st(0.18, 0.22) * (1 - st(0.79, 0.83)) : 0;
+    const pinkNow = A_TWENTY[n] ? st(0.143, 0.17) : A_BUY[n] ? 1 + st(0.64, 0.68) : n > TWENTY_N ? (n > BUY_N ? 2 : 1) : 0;
+    const noteSNow = A_TWENTY[n] ? st(0.43, 0.464) * (1 - st(0.705, 0.74)) : 0;
     const noteLNow = A_BUY[n] ? st(0.22, 0.26) + st(0.43, 0.47) + st(0.54, 0.6) : n > BUY_N ? 3 : 0;
     const gT = carry(cv, 8, n, greenNow, greenNow, tr);
     const pT = carry(cv, 9, n, pinkNow, pinkNow, tr);

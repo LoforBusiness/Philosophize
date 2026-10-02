@@ -26,7 +26,7 @@ import {
   lemonCrateBack, lemonCrateFront, queueSign, cupBin, STAND_SLATE,
 } from './objects';
 import { BY_ID } from './wardrobe';
-import { DEEP, PAPER_LIT } from '@/components/shared/tone';
+import { PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // business-foundations-1, "What Is a Business?" — A PAVEMENT LEMONADE STAND.
@@ -39,38 +39,42 @@ import { DEEP, PAPER_LIT } from '@/components/shared/tone';
 //
 //   b0   the maker squeezes his last lemon over the jug with the wooden reamer, drops
 //        the rind behind the counter, sets the reamer down and calls his price.
-//   b1   the partner lifts a full cup and holds it out over the counter to the queue,
-//        beaming, then points off down the pavement at it.
-//   b2   she sets the cup down; the maker tips the empty lemon crate up to show it and
-//        pats his pocket, palm out.
+//   b1   the partner turns to the queue, lifts a full cup by its body and holds it out
+//        over the counter to it, beaming, sets it back, points off down the pavement at
+//        the queue, and turns back to him.
+//   b2   the maker turns to his lemon crate and tips it up to show it empty, turns back
+//        to her, pats his pocket, palm out.
 //   b3   the adviser walks in from the left, tips his hat, and lifts the lid of the
 //        cash tin: empty.
 //   b4   he hands over a pound (two fifty-pence pieces) and takes the full cup; she
-//        drops one coin in the tin and slides the other along to the maker, who drops
-//        it in the lemon crate.
+//        drops one coin in the tin, turns, and slides the other along to the maker, who
+//        turns to his crate and drops it in. (Every turn is eased through a profile: a
+//        hand offers, reaches and gives IN FRONT of the body — LESSON_RULES AR4.)
 //   b5   Q1: three tags hang from the counter, PAID IN · LEMONS & SUGAR · LEFT OVER,
 //        each with its coins on it — tap one.
 //   b6   the adviser takes the coin out of the tin and holds it up, then puts it back;
 //        the maker restocks the crate with lemons from behind the counter.
 //   b7   the partner comes along to the squeezer and both of them grab it at once and
 //        tug; the cups stand unserved; "my job, or yours?"
-//   b8   the reamer goes back down; the adviser points to the squeezer, then to the
-//        front of the stand where the cups are.
+//   b8   the reamer goes back down; the adviser points to the squeezer, then along to
+//        the front of the stand where the cups are, and she walks back there.
 //   b9   Q2: the stand's chalk sign is wiped to three rows — tap one.
-//   b10  the maker squeezes a fresh lemon; she goes back to the front and pours from the
-//        jug into the adviser's held-out cup; he drops a pound in the tin. The sign
-//        chalks ONE SQUEEZES, ONE SERVES under the price.
+//   b10  she turns to the jug, lifts it by its handle, turns to the adviser and pours
+//        into his held-out cup, then sets it back; meanwhile the maker turns to his crate
+//        for a fresh lemon, and once the jug is back squeezes it over its mouth; the
+//        adviser drops a pound in the tin. The sign chalks ONE SQUEEZES, ONE SERVES.
 //   b11  at ease under the quotation; the adviser raises his cup.
 //
 // COMPOSITION, in stage units. The stand's two uprights stand at 190 and 362 and carry
 // its name board, 190–362 × 316–382, with the chalk slate let into it at 196–356 ×
 // 323–379. The counter, 192–360 × 476–500, is at the HIP of the two people behind it
 // (AP10): the partner at 246 and the maker at 298. On its top: the cash tin 212–236,
-// a full cup at 242, the nested cups at 254, the jug 267–285 (handle to the maker),
-// the reamer resting 278–300, and the lemon crate 313–347. The adviser comes in to
-// 200, at the counter's left end, which puts the tin, the pass-point over it (224,
-// 450) and the refill point all inside his arm's reach (~23 units from the shoulder
-// at this scale) and inside the partner's. On the pavement to the left, a hand-lettered
+// a full cup at 242, the nested cups at 254, the jug 267–285 (its handle toward her,
+// its lip toward him), the reamer resting 278–300, and the lemon crate 313–347. The
+// adviser comes in to 204, at the counter's left end, which puts the tin, the
+// pass-point over it (226, 455) and the refill point all inside his arm's reach (~23
+// units from the shoulder at this scale) and inside the partner's. His cup rides in
+// his right hand, so his coins are in his left. On the pavement to the left, a hand-lettered
 // QUEUE HERE card on its stake at 48–108 and a bin full of used cups at 119–149 say
 // where the queue is without putting a silent figure on the stage (AP13).
 // Band [306, 514].
@@ -123,16 +127,45 @@ const PROOF_N = A_PROOF.indexOf(1);
 const SPLIT_N = A_SPLIT.indexOf(1);
 
 /** Where each of them stands, beat by beat. The adviser is off the stage until b3. */
-const PT_X = [246, 246, 246, 246, 246, 246, 246, 258, 258, 258, 246, 246, 246];
-const AD_X = BEATS.map((b) => (b.th ? 200 : -30));
+const PT_X = [246, 246, 246, 246, 246, 246, 246, 258, 246, 246, 246, 246, 246];
+/** b8: she walks back to the front of the stand at this share of the line, once he has pointed there. */
+const PT_WALK = BEATS.map((_, n) => (n === 8 ? 0.62 : 0));
+const AD_X = BEATS.map((b) => (b.th ? 204 : -30));
 const MK_X = BEATS.map(() => 298);
-/** Which way each faces: the partner turns between the maker and the pavement. */
-const PT_D = [1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1];
-const AD_D = BEATS.map(() => 1);
-const MK_D = BEATS.map(() => -1);
+/**
+ * Which way each faces, and when he turns: per beat, [share of the line, facing]. A
+ * person TURNS to whom he offers or reaches (AR4) — the partner to the queue with the
+ * cup and to the jug, the maker to his lemon crate — and turns back after.
+ */
+type Track = readonly (readonly number[])[];
+const PT_TURN: Track[] = [
+  [[0, 1]],                                                // b0 she watches him squeeze
+  [[0, 1], [0.1, -1], [0.88, 1]],                          // b1 to the queue, with the cup, and back
+  [[0, 1]],                                                // b2 she listens to him
+  [[0, -1]],                                               // b3 the adviser arrives
+  [[0, -1], [0.68, 1], [0.9, -1]],                         // b4 his coin slid along to the maker
+  [[0, -1]], [[0, -1]],
+  [[0, 1]],                                                // b7 along to the squeezer
+  [[0, 1], [0.12, -1]],                                    // b8 lets go, turns to the adviser
+  [[0, -1]],
+  [[0, -1], [0.04, 1], [0.26, -1], [0.68, 1], [0.92, -1]], // b10 to the jug, to his cup, the jug back
+  [[0, -1]], [[0, -1]],
+];
+const AD_TURN: Track[] = BEATS.map(() => [[0, 1]]);
+const MK_TURN: Track[] = [
+  [[0, -1]], [[0, -1]],
+  [[0, -1], [0.02, 1], [0.56, -1]],                        // b2 to the crate to tip it, then back
+  [[0, -1]],
+  [[0, -1], [0.87, 1], [0.985, -1]],                       // b4 the coin to the crate, and back
+  [[0, -1]],
+  [[0, -1], [0.12, 1], [0.72, -1]],                        // b6 lemons into the crate
+  [[0, -1]], [[0, -1]], [[0, -1]],
+  [[0, -1], [0.02, 1], [0.16, -1]],                        // b10 a lemon out of the crate
+  [[0, -1]], [[0, -1]],
+];
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const PT_P = [LISTEN, TALK, NOD, LISTEN, TALK, LISTEN, NOD, TALK, LISTEN, NOD, NOD, WAIT, LISTEN];
-const MK_P = [TALK, NOD, TALK, LISTEN, LISTEN, LEAN, NOD, LISTEN, NOD, LISTEN, TALK, NOD, LISTEN];
+const MK_P = [TALK, NOD, TALK, LISTEN, LISTEN, LEAN, NOD, LISTEN, NOD, NOD, TALK, NOD, LISTEN];
 const AD_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, LISTEN, NOD, EXPLAIN, LISTEN, EXPLAIN, LISTEN, NOD, LISTEN, LISTEN];
 
 // ── the stand and what is on its counter ─────────────────────────────────────
@@ -146,8 +179,6 @@ const SLATE = {
 const TOP = 477;                                        // the counter's top, at their hip
 const FULL_AT = { x: 242, y: TOP - 6.5 };
 const JUG_REST = { x: 276, y: TOP - 11.5 };
-/** The jug is held by the left side of its glass, 9 units from its middle. */
-const JUG_GRAB = { x: JUG_REST.x - 9, y: JUG_REST.y - 1 };
 /** The reamer is held by the end of its handle; at rest it lies tip-left on the counter. */
 const SQZ_REST = { x: 300, y: TOP - 4 };
 /** Squeezing: the lemon held over the jug's mouth, the reamer's point in it. */
@@ -160,21 +191,32 @@ const CRATE = { left: 313, top: 440, w: 34, h: 37 };    // the crate's box, lemo
 const CRATE_MOUTH = { x: 322, y: 459 };
 /** Lemons in the crate, in the crate box's own coordinates. */
 const CRATE_LEMONS = [{ x: 9, y: 17 }, { x: 18, y: 15 }, { x: 27, y: 17 }];
-/** Where things cross the counter between the adviser's hand and the partner's. */
-const PASS = { x: 224, y: 450 };
-const CUP_HOLD = { x: 210, y: 448 };
-const CUP_UP = { x: 212, y: 438 };
-const REFILL = { x: 214, y: 456 };
-const POUR_HAND = { x: 226, y: 446 };
-const HOLD_OUT = { x: 226, y: 444 };
-const HOLD_UP = { x: 218, y: 436 };
+/** Where things cross the counter between the adviser's hand and the partner's: inside both arms. */
+const PASS = { x: 226, y: 455 };
+/** The adviser's cup, in his front hand: at rest by his hip, raised for the toast, held out to be filled. */
+const CUP_HOLD = { x: 214, y: 463 };
+const CUP_UP = { x: 218, y: 447 };
+const REFILL = { x: 216, y: 462 };
+/** Her cup held out over the counter to the queue, and in to her chest after. */
+const HOLD_OUT = { x: 227, y: 456 };
+const HOLD_IN = { x: 237, y: 461 };
+const HOLD_UP = { x: 218, y: 440 };
 const SLIDE_A = { x: 244, y: TOP - 3 };
 const SLIDE_B = { x: 290, y: TOP - 3 };
 const SLIDE_PUSH = { x: 262, y: TOP - 3 };
 const QUEUE_PT = { x: 120, y: 428 };
-/** The pour: how far the jug tips (degrees), and where its lip is from the hand, before tipping. */
-const TIP_DEG = -70;
-const LIP_OFF = { x: 1.6, y: -5.6 };
+/**
+ * The jug is held by its HANDLE (AR2), so it is drawn about the handle. At rest it stands
+ * with the handle toward her and the lip toward him; in her hand the lip points the way
+ * she faces, so it is mirrored as she turns. JUG_GRAB is the handle on the counter.
+ */
+const JUG_GRAB = { x: JUG_REST.x - 7.9, y: JUG_REST.y + 0.5 };
+/** Her jug hand, in front of her body: [how far in front, how high], as she lifts, pours and sets it down. */
+const JUG_LX = { grab: 22, held: 16 };
+const JUG_Y = { grab: JUG_GRAB.y, held: 458, pour: 440 };
+/** The pour: how far the jug tips (degrees), and where its lip is from the handle, upright and unmirrored. */
+const TIP_DEG = -55;
+const LIP_OFF = { x: -14.8, y: -7.4 };
 
 const STAND_ART = lemonStand(STAND.x, STAND.y, STAND.w, STAND.h);
 const COUNTER_ART = standCounter(276, 488, 168, 24);
@@ -187,7 +229,8 @@ const CRATE_BACK_ART = lemonCrateBack(17, 26, 34, 22);
 const CRATE_FRONT_ART = lemonCrateFront(17, 26, 34, 22);
 const LID_ART = tinLid(13, 8, 26, 16);
 // The things that move are drawn about the point a hand holds them by.
-const JUG_ART = lemonadeJug(9, 1, 18, 23);
+// The jug about its handle: the handle is 7.9 right of its middle and 0.5 below it.
+const JUG_ART = lemonadeJug(-7.9, -0.5, 18, 23);
 const REAMER_ART = reamer(9, 0, 22, 8);
 const LEMON_ART = lemon(0, 0, 11, 8);
 const CUP_ART = paperCup(0, 0, 10, 13);
@@ -228,28 +271,60 @@ function rimAt(tip: number) {
   };
 }
 /**
+ * A BACK hand brought up in front of him: it comes forward at the hip first and only
+ * then rises, so on its way up it never passes behind his back (AR4).
+ */
+function lift(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const s1 = hand(s, x, dir, which, x + (dir < 0 ? -10 : 10), GROUND - 26, clamp01(w * 2.5));
+  return hand(s1, x, dir, which, tx, ty, clamp01((w - 0.4) / 0.6));
+}
+/** Which way a figure faces at time `b`, turning through a profile from its facing on screen. */
+function faceOf(src: number, turns: Track, b: number, L: number) {
+  'worklet';
+  let from = src;
+  let d = src;
+  for (let k = 0; k < turns.length; k += 1) {
+    const at = turns[k][0] * L;
+    if (b < at) break;
+    d = facing(from, turns[k][1], b - at);
+    from = turns[k][1];
+  }
+  return d;
+}
+/**
  * One figure's walk and facing for a beat. He walks from WHERE HE IS ON SCREEN — `src`,
  * read out of the carry — not from where the script says the last beat left him, so a
- * tap mid-walk never puts him anywhere in one frame (group L). He faces the way he
- * goes (C18), then turns to whom the beat has him face.
+ * tap mid-walk never puts him anywhere in one frame (group L); and he turns from the
+ * facing on screen (`dsrc`), the same way. He faces the way he goes (C18), then turns
+ * as the beat's track has him. `start` holds the walk back that many seconds.
  */
-function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number) {
+function walkOf(
+  src: number, dsrc: number, xs: readonly number[], turns: readonly Track[], codes: readonly number[],
+  n: number, t: number, b: number, L: number, start: number,
+) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
   const xp = src;
   const xn = xs[n];
   const walking = Math.abs(xn - xp) > 1;
-  const walkDur = walking ? moveTr(xp, xn, TR) : 0;
-  const walkU = walking ? ease01(clamp01(b / walkDur)) : 1;
-  const dp = n > 0 ? ds[p] : ds[n];
-  const way = xn > xp ? 1 : -1;
-  const dirV = walking
-    ? lerp(facing(dp, way, b), ds[n], clamp01((b - walkDur) / 0.3))
-    : facing(dp, ds[n], b);
-  const s = walking
-    ? travelStance(xp, xn, hHold(codes[p], t), hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
+  const wd = walking ? moveTr(xp, xn, TR) : 0;
+  const bw = b - start;
+  const walkU = walking ? ease01(clamp01(bw / wd)) : 1;
+  const tk = turns[n];
+  let dirV = faceOf(dsrc, tk, b, L);
+  if (walking && bw > 0 && bw < wd + 0.3) {
+    const way = xn > xp ? 1 : -1;
+    const d0 = faceOf(dsrc, tk, start, L);
+    dirV = lerp(facing(d0, way, bw), faceOf(dsrc, tk, start + wd + 0.3, L), clamp01((bw - wd) / 0.3));
+  }
+  // A walk held back starts from the pose he is IN, not the one the last beat left.
+  const from = start > 0 ? hLive(codes[n], t, b) : hHold(codes[p], t);
+  const s = walking && (bw > 0 || start === 0)
+    ? travelStance(xp, xn, from, hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
     : hLive(codes[n], t, b);
-  return { xp, xn, walking, walkU, walkDur, dirV, s };
+  return { xp, xn, walking, walkU, walkDur: wd + start, dirV, s };
 }
 
 const CAM = followMoves(PT_X, BEATS.map(kindOf), seedOf('business'));
@@ -258,7 +333,7 @@ export default function Biz1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldPt = useHeld();
   const heldAd = useHeld();
   const heldMk = useHeld();
-  const cv = useCarry(24);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -277,181 +352,204 @@ export default function Biz1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     };
 
     // ── the squeezing, the tug and the tipping, which hands follow ──────────
-    const squeeze = A_CRY[n] ? st(0.06, 0.12) * (1 - st(0.56, 0.62))
-      : A_SPLIT[n] ? st(0.22, 0.25) * (1 - st(0.33, 0.36)) : 0;
-    const twistNow = Math.sin(b * 10) * 14 * squeeze;
-    const tugNow = Math.sin(b * 7) * 3 * (A_MUDDLE[n] ? bp(0.5, 0.6, 0.74) : 0);
-    const tipNow = A_LEMONS[n] ? bp(0.14, 0.32, 0.56) : 0;
+    // AR5: the reamer is twisted once there and back, and then rests where the stroke
+    // ended; the tug is the same, one pull each way.
+    const sqA = A_CRY[n] ? 0.08 : 0.75;
+    const sqB = A_CRY[n] ? 0.56 : 0.89;
+    const squeeze = A_CRY[n] ? st(0.06, 0.1) * (1 - st(0.56, 0.6))
+      : A_SPLIT[n] ? st(0.73, 0.76) * (1 - st(0.89, 0.92)) : 0;
+    const sqU = clamp01((b / L - sqA) / (sqB - sqA));
+    const twistNow = Math.sin(sqU * Math.PI * 2) * 14 * squeeze;
+    const tugU = clamp01((b / L - 0.52) / 0.2);
+    const tugNow = Math.sin(tugU * Math.PI * 2) * 3 * (A_MUDDLE[n] ? bp(0.5, 0.6, 0.74) : 0);
+    const tipNow = A_LEMONS[n] ? bp(0.16, 0.32, 0.5) : 0;
     const tugHold = A_MUDDLE[n] ? st(0.42, 0.5) : A_LEAD[n] ? 1 - st(0.02, 0.14) : 0;
 
     // ── the partner, behind the counter ─────────────────────────────────────
-    // where she stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where she stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src0 = carrySource(cv, 0, n, PT_X[0]);
-    const wp = walkOf(src0, PT_X, PT_D, PT_P, n, t, b);
+    const dsrc0 = carrySource(cv, 24, n, PT_TURN[0][0][1]);
+    const wp = walkOf(src0, dsrc0, PT_X, PT_TURN, PT_P, n, t, b, L, PT_WALK[n] * L);
     const xPt = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
+    const dPt = carry(cv, 24, n, 0, wp.dirV, 1);
     let sp = wp.s;
-    // b1: a full cup lifted and held out to the queue, then a hand out down the pavement at it
+    // b1: turned to the queue, the full cup lifted by its body and held out over the
+    // counter to it, and set back down where it stood; then her hand out down the
+    // pavement at the queue, and she turns back to him
     if (A_FREE[n]) {
-      const c = via([FULL_AT, HOLD_OUT, QUEUE_PT, HOLD_OUT], [st(0.2, 0.4), st(0.62, 0.72), st(0.86, 0.96)]);
-      sp = hand(sp, xPt, wp.dirV, -1, c.x, c.y, st(0.04, 0.16));
+      const c = via([FULL_AT, HOLD_OUT, FULL_AT], [st(0.28, 0.4), st(0.5, 0.6)]);
+      sp = hand(sp, xPt, dPt, -1, c.x, c.y, st(0.16, 0.26) * (1 - st(0.62, 0.7)));
+      sp = hand(sp, xPt, dPt, 1, QUEUE_PT.x, QUEUE_PT.y, bp(0.64, 0.74, 0.88));
     }
-    // b2: and set back down on the counter
-    if (A_LEMONS[n]) {
-      const down = st(0.02, 0.2);
-      sp = hand(sp, xPt, wp.dirV, -1, lerp(HOLD_OUT.x, FULL_AT.x, down), lerp(HOLD_OUT.y, FULL_AT.y, down), 1 - st(0.26, 0.4));
-    }
-    // b4: the cup to the pass-point; the coins taken, one into the tin, one slid along
+    // b4: the cup to the pass-point; the pound taken, one coin into the tin; then turned
+    // to the maker, the other coin slid along the counter to him
     if (A_SALE[n]) {
       const c = via([FULL_AT, PASS], [st(0.34, 0.46)]);
-      sp = hand(sp, xPt, wp.dirV, -1, c.x, c.y, st(0.04, 0.14) * (1 - st(0.52, 0.62)));
-      const k = via([PASS, TIN_MOUTH, SLIDE_A, SLIDE_PUSH], [st(0.58, 0.66), st(0.7, 0.75), st(0.76, 0.8)]);
-      sp = hand(sp, xPt, wp.dirV, 1, k.x, k.y, st(0.18, 0.28) * (1 - st(0.82, 0.92)));
+      sp = hand(sp, xPt, dPt, -1, c.x, c.y, st(0.04, 0.14) * (1 - st(0.52, 0.62)));
+      const k = via([PASS, TIN_MOUTH, SLIDE_A, SLIDE_PUSH], [st(0.58, 0.66), st(0.68, 0.74), st(0.76, 0.8)]);
+      sp = hand(sp, xPt, dPt, 1, k.x, k.y, st(0.18, 0.28) * (1 - st(0.82, 0.89)));
     }
     // b7: along to the squeezer, and a hand on its point; then "my job, or yours?"
     if (A_MUDDLE[n]) {
-      sp = hand(sp, xPt, wp.dirV, 1, lerp(SQZ_REST.x - 19, 280, tugHold) + tugNow, lerp(SQZ_REST.y, 458, tugHold), st(0.3, 0.4));
-      sp = hand(sp, xPt, wp.dirV, -1, xPt + 3, GROUND - 50, bp(0.76, 0.82, 0.88));
-      sp = hand(sp, xPt, wp.dirV, -1, xPt + 22, GROUND - 48, bp(0.86, 0.92, 0.99));
+      sp = hand(sp, xPt, dPt, 1, lerp(SQZ_REST.x - 19, 280, tugHold) + tugNow, lerp(SQZ_REST.y, 458, tugHold), st(0.3, 0.4));
+      sp = hand(sp, xPt, dPt, -1, xPt + 3, GROUND - 50, bp(0.76, 0.82, 0.88));
+      sp = hand(sp, xPt, dPt, -1, xPt + 22, GROUND - 48, bp(0.86, 0.92, 0.99));
     }
-    // b8: and lets go of it
-    if (A_LEAD[n]) sp = hand(sp, xPt, wp.dirV, 1, lerp(SQZ_REST.x - 19, 280, tugHold), lerp(SQZ_REST.y, 458, tugHold), 1 - st(0.02, 0.1));
-    // b10: back at the front, the jug lifted by its side and poured into the held-out cup
+    // b8: and lets go of it before she turns to the adviser
+    if (A_LEAD[n]) sp = hand(sp, xPt, dPt, 1, lerp(SQZ_REST.x - 19, 280, tugHold), lerp(SQZ_REST.y, 458, tugHold), 1 - st(0.01, 0.08));
+    // b10: turned to the jug, lifted by its handle; turned to the adviser and poured into
+    // his held-out cup; turned back and set down where it stood, so the maker can squeeze
+    // into it. Her hand is held IN FRONT of her body (xPt + dPt·lx) while she turns, so
+    // the jug turns with her.
     if (A_SPLIT[n]) {
-      const j = via([JUG_GRAB, POUR_HAND, JUG_GRAB], [st(0.48, 0.56), st(0.72, 0.8)]);
-      sp = hand(sp, xPt, wp.dirV, 1, j.x, j.y, st(0.38, 0.46) * (1 - st(0.84, 0.92)));
+      const lx = lerp(lerp(JUG_LX.grab, JUG_LX.held, st(0.17, 0.24)), JUG_LX.grab, st(0.62, 0.7));
+      const up = st(0.3, 0.36) * (1 - st(0.5, 0.55));
+      const jy = lerp(lerp(lerp(JUG_Y.grab, JUG_Y.held, st(0.17, 0.24)), JUG_Y.grab, st(0.62, 0.7)), JUG_Y.pour, up);
+      sp = hand(sp, xPt, dPt, 1, xPt + dPt * lx, jy, st(0.08, 0.15) * (1 - st(0.72, 0.8)));
     }
     const prevPt = carryFrom(heldPt, n, hHold(PT_P[p], t));
     const figPt = keepHeld(heldPt, wp.walking ? mixKeepLegs(prevPt, sp, tr) : mixStance(prevPt, sp, tr));
 
     // ── the adviser ─────────────────────────────────────────────────────────
-    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src1 = carrySource(cv, 1, n, -30);
-    const wa = walkOf(src1, AD_X, AD_D, AD_P, n, t, b);
+    const dsrc1 = carrySource(cv, 25, n, 1);
+    const wa = walkOf(src1, dsrc1, AD_X, AD_TURN, AD_P, n, t, b, L, 0);
     const xAd = carry(cv, 1, n, wa.xp, wa.xn, wa.walking ? wa.walkU : tr);
+    const dAd = carry(cv, 25, n, 0, wa.dirV, 1);
     const pocket = { x: xAd + 3, y: GROUND - 30 };
     let sa = wa.s;
     // b3: he tips his hat once he has arrived, then lifts the lid of the tin
     if (A_ARRIVE[n]) {
       const after = wa.walkDur / L;
-      sa = hand(sa, xAd, wa.dirV, 1, xAd + 5, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.14));
-      sa = hand(sa, xAd, wa.dirV, 1, TIN_MOUTH.x, lerp(TIN_MOUTH.y, 446, st(after + 0.18, after + 0.26)),
+      sa = hand(sa, xAd, dAd, 1, xAd + 5, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.14));
+      sa = hand(sa, xAd, dAd, 1, TIN_MOUTH.x, lerp(TIN_MOUTH.y, 446, st(after + 0.18, after + 0.26)),
         st(after + 0.13, after + 0.19) * (1 - st(after + 0.28, after + 0.34)));
     }
-    // b4: a pound from his pocket across the tin, and the cup taken in his other hand
+    // b4: a pound from his pocket across the tin, and the cup taken in the same hand
     if (A_SALE[n]) {
-      const c = via([pocket, PASS], [st(0.1, 0.24)]);
-      sa = hand(sa, xAd, wa.dirV, 1, c.x, c.y, st(0, 0.08) * (1 - st(0.36, 0.46)));
-      const h = via([PASS, CUP_HOLD], [st(0.52, 0.62)]);
-      sa = hand(sa, xAd, wa.dirV, -1, h.x, h.y, st(0.4, 0.48));
+      const c = via([pocket, PASS, CUP_HOLD], [st(0.1, 0.24), st(0.52, 0.62)]);
+      sa = hand(sa, xAd, dAd, 1, c.x, c.y, st(0, 0.08));
     }
-    // after the sale he holds his cup in front of him
+    // after the sale he holds his cup in front of him, by his hip; raised once, for the toast
     if (n > SALE_N && !A_SPLIT[n]) {
-      const up = A_REST[n] ? st(0.1, 0.3) : n > SPLIT_N + 1 ? 1 : 0;
-      sa = hand(sa, xAd, wa.dirV, -1, lerp(CUP_HOLD.x, CUP_UP.x, up), lerp(CUP_HOLD.y, CUP_UP.y, up), 1);
+      const up = A_REST[n] ? bp(0.08, 0.25, 0.7) : 0;
+      sa = hand(sa, xAd, dAd, 1, lerp(CUP_HOLD.x, CUP_UP.x, up), lerp(CUP_HOLD.y, CUP_UP.y, up), 1);
     }
-    // b6: the coin out of the tin and held up, then put back
+    // b6: the coin out of the tin in his other hand and held up, then put back
     if (A_PROOF[n]) {
       const k = via([TIN_MOUTH, HOLD_UP, TIN_MOUTH], [st(0.22, 0.34), st(0.76, 0.84)]);
-      sa = hand(sa, xAd, wa.dirV, 1, k.x, k.y, st(0.08, 0.18) * (1 - st(0.86, 0.94)));
+      sa = lift(sa, xAd, dAd, -1, k.x, k.y, st(0.06, 0.18) * (1 - st(0.86, 0.96)));
     }
-    // b8: a hand to the squeezer — one owner — then to the front, where the cups are served
+    // b8: his free hand to the squeezer — one owner — then along to the front, where the
+    // cups are served: one point that travels, not two
     if (A_LEAD[n]) {
-      sa = hand(sa, xAd, wa.dirV, 1, 300, 446, bp(0.14, 0.24, 0.46));
-      sa = hand(sa, xAd, wa.dirV, 1, 238, 470, st(0.52, 0.62) * (1 - st(0.9, 0.98)));
+      const k = via([{ x: 300, y: 446 }, { x: 238, y: 470 }], [st(0.46, 0.58)]);
+      sa = lift(sa, xAd, dAd, -1, k.x, k.y, st(0.12, 0.24) * (1 - st(0.9, 0.98)));
     }
     // b10: his cup held out to be filled, then a pound from his pocket into the tin
     if (A_SPLIT[n]) {
-      const h = via([CUP_HOLD, REFILL, CUP_HOLD], [st(0.46, 0.54), st(0.72, 0.8)]);
-      sa = hand(sa, xAd, wa.dirV, -1, h.x, h.y, 1);
+      const h = via([CUP_HOLD, REFILL, CUP_HOLD], [st(0.24, 0.32), st(0.54, 0.62)]);
+      sa = hand(sa, xAd, dAd, 1, h.x, h.y, 1);
       const c = via([pocket, TIN_MOUTH], [st(0.8, 0.88)]);
-      sa = hand(sa, xAd, wa.dirV, 1, c.x, c.y, st(0.7, 0.76) * (1 - st(0.9, 0.97)));
+      sa = lift(sa, xAd, dAd, -1, c.x, c.y, st(0.68, 0.76) * (1 - st(0.9, 0.97)));
     }
     const prevAd = carryFrom(heldAd, n, hHold(AD_P[p], t));
     const figAd = keepHeld(heldAd, wa.walking ? mixKeepLegs(prevAd, sa, tr) : mixStance(prevAd, sa, tr));
 
     // ── the maker, behind the counter ───────────────────────────────────────
-    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src2 = carrySource(cv, 2, n, MK_X[0]);
-    const wm = walkOf(src2, MK_X, MK_D, MK_P, n, t, b);
+    const dsrc2 = carrySource(cv, 26, n, -1);
+    const wm = walkOf(src2, dsrc2, MK_X, MK_TURN, MK_P, n, t, b, L, 0);
     const xMk = carry(cv, 2, n, wm.xp, wm.xn, wm.walking ? wm.walkU : tr);
+    const dMk = carry(cv, 26, n, 0, wm.dirV, 1);
     let sm = wm.s;
-    const jig = Math.sin(b * 10) * 2 * squeeze;
+    // The twist is in the wrist: the reamer turns in the lemon, the hand holds its place.
     // b0: the last lemon squeezed over the jug, the rind behind the counter, the reamer
     // down, and a hand to his mouth to call the price
     if (A_CRY[n]) {
       const l = via([SQ_LEMON, BEHIND], [st(0.62, 0.7)]);
-      sm = hand(sm, xMk, wm.dirV, 1, l.x, l.y, 1 - st(0.7, 0.76));
+      sm = hand(sm, xMk, dMk, 1, l.x, l.y, 1 - st(0.7, 0.76));
       const r = via([SQ_GRIP, SQZ_REST], [st(0.6, 0.7)]);
-      sm = hand(sm, xMk, wm.dirV, -1, r.x + jig, r.y - jig * 0.5, 1 - st(0.74, 0.82));
-      sm = hand(sm, xMk, wm.dirV, 1, xMk - 7, GROUND - 67, bp(0.78, 0.86, 0.99));
+      sm = hand(sm, xMk, dMk, -1, r.x, r.y, 1 - st(0.74, 0.82));
+      sm = hand(sm, xMk, dMk, 1, xMk - 7, GROUND - 67, bp(0.78, 0.86, 0.99));
     }
-    // b2: the empty crate tipped up to show it, then his pocket, and a palm out
+    // b2: turned to the crate, it is tipped up to show it empty; then turned back to her,
+    // a hand to his pocket, and a palm out
     if (A_LEMONS[n]) {
       const rim = rimAt(tipNow);
-      sm = hand(sm, xMk, wm.dirV, -1, rim.x, rim.y, bp(0.06, 0.16, 0.64));
-      sm = hand(sm, xMk, wm.dirV, 1, xMk + 2, GROUND - 30, bp(0.62, 0.72, 0.84));
-      sm = hand(sm, xMk, wm.dirV, 1, xMk - 16, GROUND - 46, st(0.84, 0.94));
+      sm = hand(sm, xMk, dMk, -1, rim.x, rim.y, bp(0.1, 0.2, 0.52));
+      sm = hand(sm, xMk, dMk, 1, xMk - 2, GROUND - 30, bp(0.66, 0.74, 0.84));
+      sm = hand(sm, xMk, dMk, 1, xMk - 16, GROUND - 46, st(0.84, 0.94));
     }
-    // b4: the coin slid to him, dropped in the lemon crate
+    // b4: the coin slid to him is picked up; turned to the crate, he drops it in. The
+    // hand is held in front of his body (xMk + dMk·lx) while he turns.
     if (A_SALE[n]) {
-      const k = via([SLIDE_B, CRATE_MOUTH], [st(0.89, 0.95)]);
-      sm = hand(sm, xMk, wm.dirV, -1, k.x, k.y, st(0.82, 0.87) * (1 - st(0.95, 1)));
+      const m = st(0.93, 0.97);
+      sm = hand(sm, xMk, dMk, 1, xMk + dMk * lerp(xMk - SLIDE_B.x, CRATE_MOUTH.x - xMk, m), lerp(SLIDE_B.y, CRATE_MOUTH.y, m),
+        st(0.82, 0.87) * (1 - st(0.97, 1)));
     }
-    // b6: lemons up from behind the counter into the crate
+    // b6: turned to the crate, lemons lifted up from behind the counter into it
     if (A_PROOF[n]) {
-      const k = via([{ x: 312, y: 488 }, CRATE_MOUTH], [st(0.34, 0.46)]);
-      sm = hand(sm, xMk, wm.dirV, -1, k.x, k.y, st(0.2, 0.3) * (1 - st(0.6, 0.7)));
+      const k = via([{ x: 312, y: 488 }, CRATE_MOUTH], [st(0.3, 0.42)]);
+      sm = hand(sm, xMk, dMk, -1, k.x, k.y, st(0.2, 0.28) * (1 - st(0.6, 0.7)));
     }
     // b7: his hand on the squeezer's handle, and the tug
-    if (A_MUDDLE[n]) sm = hand(sm, xMk, wm.dirV, 1, lerp(SQZ_REST.x, 298, tugHold) + tugNow, lerp(SQZ_REST.y, 458, tugHold), st(0.28, 0.38));
+    if (A_MUDDLE[n]) sm = hand(sm, xMk, dMk, 1, lerp(SQZ_REST.x, 298, tugHold) + tugNow, lerp(SQZ_REST.y, 458, tugHold), st(0.28, 0.38));
     // b8: he puts it back down and lets go
-    if (A_LEAD[n]) sm = hand(sm, xMk, wm.dirV, 1, lerp(SQZ_REST.x, 298, tugHold), lerp(SQZ_REST.y, 458, tugHold), 1 - st(0.14, 0.24));
-    // b10: a fresh lemon from the crate, the reamer, one squeeze, the rind away
+    if (A_LEAD[n]) sm = hand(sm, xMk, dMk, 1, lerp(SQZ_REST.x, 298, tugHold), lerp(SQZ_REST.y, 458, tugHold), 1 - st(0.14, 0.24));
+    // b10: turned to the crate, a fresh lemon out of it, and turned back holding it in
+    // front of him while she pours; once the jug is back, the lemon over its mouth, the
+    // reamer, one squeeze, the rind away, the reamer down. While he turns the lemon is
+    // held in front of his body (xMk + dMk·lx).
     if (A_SPLIT[n]) {
-      const slot = { x: CRATE.left + CRATE_LEMONS[0].x, y: CRATE.top + CRATE_LEMONS[0].y };
-      const k = via([slot, SQ_LEMON, SQZ_REST, SQ_GRIP, SQZ_REST], [st(0.05, 0.11), st(0.14, 0.18), st(0.18, 0.22), st(0.36, 0.4)]);
-      sm = hand(sm, xMk, wm.dirV, -1, k.x + jig, k.y - jig * 0.5, st(0, 0.04) * (1 - st(0.4, 0.46)));
-      const l = via([SQ_LEMON, BEHIND], [st(0.37, 0.43)]);
-      sm = hand(sm, xMk, wm.dirV, 1, l.x, l.y, st(0.07, 0.11) * (1 - st(0.43, 0.5)));
+      const lx = lerp(lerp(CRATE.left + CRATE_LEMONS[0].x - xMk, 14, st(0.14, 0.26)), xMk - SQ_LEMON.x, st(0.66, 0.72));
+      const ly = lerp(lerp(CRATE.top + CRATE_LEMONS[0].y, 458, st(0.14, 0.26)), SQ_LEMON.y, st(0.66, 0.72));
+      const l = via([{ x: xMk + dMk * lx, y: ly }, BEHIND], [st(0.9, 0.96)]);
+      sm = hand(sm, xMk, dMk, 1, l.x, l.y, st(0.04, 0.1) * (1 - st(0.96, 1.02)));
+      const r = via([SQZ_REST, SQ_GRIP, SQZ_REST], [st(0.7, 0.74), st(0.9, 0.95)]);
+      sm = hand(sm, xMk, dMk, -1, r.x, r.y, st(0.64, 0.7) * (1 - st(0.95, 1)));
     }
     const prevMk = carryFrom(heldMk, n, hHold(MK_P[p], t));
     const figMk = keepHeld(heldMk, wm.walking ? mixKeepLegs(prevMk, sm, tr) : mixStance(prevMk, sm, tr));
 
     // ── the things that change hands ────────────────────────────────────────
     // cup     0 on the counter · 1 the partner's hand · 2 the adviser's
-    const cupNow = A_FREE[n] ? st(0.12, 0.17)
-      : A_LEMONS[n] ? 1 - st(0.18, 0.24)
+    const cupNow = A_FREE[n] ? st(0.24, 0.28) * (1 - st(0.58, 0.62))
         : A_SALE[n] ? st(0.12, 0.16) + st(0.48, 0.52)
           : n > SALE_N ? 2 : 0;
     // ca, cb  the pound's two coins: 0 in his pocket · 1 his hand · 2 hers; then
     //         ca 3 into the tin, and cb 3 laid down · 4 slid along · 5 the maker's hand · 6 the crate
     const early = A_SALE[n] ? st(0.02, 0.08) + st(0.3, 0.34) : n > SALE_N ? 2 : 0;
     const caNow = A_SALE[n] ? early + st(0.62, 0.68) : n > SALE_N ? 3 : 0;
-    const cbNow = A_SALE[n] ? early + st(0.72, 0.76) + st(0.77, 0.84) + st(0.86, 0.88) + st(0.89, 0.95) : n > SALE_N ? 6 : 0;
+    const cbNow = A_SALE[n] ? early + st(0.7, 0.74) + st(0.76, 0.84) + st(0.86, 0.88) + st(0.93, 0.97) : n > SALE_N ? 6 : 0;
     // cc      the second pound: 0 not yet · 1 his hand · 2 into the tin
-    const ccNow = A_SPLIT[n] ? st(0.72, 0.76) + st(0.8, 0.88) : n > SPLIT_N ? 2 : 0;
+    const ccNow = A_SPLIT[n] ? st(0.74, 0.77) + st(0.8, 0.88) : n > SPLIT_N ? 2 : 0;
     // the coins seen inside the open tin, and the one held up out of it
     const tinNow = A_SALE[n] ? st(0.67, 0.7) : A_SPLIT[n] ? 1 + st(0.87, 0.89) : TIN[n];
     const proofNow = A_PROOF[n] ? st(0.18, 0.22) * (1 - st(0.84, 0.86)) : 0;
     // lemon0  the last lemon: 0 in his hand · 1 behind the counter
     const lemon0Now = A_CRY[n] ? st(0.62, 0.7) : 1;
-    // lemon1  the fresh one: 0 in the crate · 1 his back hand · 2 his front hand · 3 behind the counter
-    const lemon1Now = A_SPLIT[n] ? st(0.03, 0.07) + st(0.1, 0.13) + st(0.37, 0.43) : n > SPLIT_N ? 3 : 0;
+    // lemon1  the fresh one: 0 in the crate · 2 his front hand · 3 behind the counter
+    const lemon1Now = A_SPLIT[n] ? 2 * st(0.09, 0.12) + st(0.9, 0.96) : n > SPLIT_N ? 3 : 0;
     // the reamer: in his hand, and held between the two of them
-    const sqzNow = A_CRY[n] ? 1 - st(0.7, 0.74) : A_SPLIT[n] ? st(0.18, 0.21) * (1 - st(0.38, 0.4)) : 0;
-    // the jug: lifted by her, and tipped
-    const jugNow = A_SPLIT[n] ? st(0.44, 0.48) * (1 - st(0.8, 0.84)) : 0;
-    const tiltNow = A_SPLIT[n] ? st(0.54, 0.6) * (1 - st(0.66, 0.72)) : 0;
-    const pourNow = A_SPLIT[n] ? bp(0.57, 0.61, 0.68) : 0;
+    const sqzNow = A_CRY[n] ? 1 - st(0.7, 0.74) : A_SPLIT[n] ? st(0.69, 0.71) * (1 - st(0.94, 0.96)) : 0;
+    // the jug: lifted by her by its handle, tipped to pour, and set back down
+    const jugNow = A_SPLIT[n] ? st(0.14, 0.17) * (1 - st(0.69, 0.72)) : 0;
+    const tiltNow = A_SPLIT[n] ? st(0.36, 0.4) * (1 - st(0.48, 0.52)) : 0;
+    const pourNow = A_SPLIT[n] ? bp(0.39, 0.43, 0.49) : 0;
     // the tin's lid, lifted when the adviser arrives and left open
     const lidNow = A_ARRIVE[n] ? st(wa.walkDur / L + 0.18, wa.walkDur / L + 0.26) : n > A_ARRIVE.indexOf(1) ? 1 : 0;
     // the crate restocked with lemons as the maker lifts them in
     const lemonsNow = A_PROOF[n] ? st(0.42, 0.5) : n > PROOF_N ? 1 : 0;
 
     return {
-      pt: pose(figPt, xPt, GROUND, K, wp.dirV, 1),
-      ad: pose(figAd, xAd, GROUND, K, wa.dirV, 1),
-      mk: pose(figMk, xMk, GROUND, K, wm.dirV, 1),
+      pt: pose(figPt, xPt, GROUND, K, dPt, 1),
+      ad: pose(figAd, xAd, GROUND, K, dAd, 1),
+      mk: pose(figMk, xMk, GROUND, K, dMk, 1),
+      // the jug turns with her: the handle toward her, the lip the way she faces
+      jugSx: -dPt,
       cupT: carry(cv, 3, n, cupNow, cupNow, tr),
       ca: carry(cv, 4, n, caNow, caNow, tr),
       cb: carry(cv, 5, n, cbNow, cbNow, tr),
@@ -557,12 +655,14 @@ function Crate({ S }: { S: SharedValue<any> }) {
 // ── the things on the counter, and the ones in people's hands ────────────────
 
 function Rider({ at, art, line, lift }: {
-  at: { readonly value: { x: number; y: number; o: number; r?: number } }; art: ReturnType<typeof coin>;
+  at: { readonly value: { x: number; y: number; o: number; r?: number; sx?: number } }; art: ReturnType<typeof coin>;
   line?: number; lift?: boolean;
 }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
-    transform: [{ translateX: at.value.x }, { translateY: at.value.y }, { rotate: `${at.value.r ?? 0}deg` }],
+    transform: [
+      { translateX: at.value.x }, { translateY: at.value.y }, { rotate: `${at.value.r ?? 0}deg` }, { scaleX: at.value.sx ?? 1 },
+    ],
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
@@ -579,10 +679,12 @@ function Goods({ S, DP, DA, DM }: {
     const v = w.value[k];
     return { x: v[0].translateX as number, y: v[1].translateY as number };
   };
+  // The paper cup has no handle, so a hand holds it round its body, upright (AR2): hers
+  // in her left hand, his in his right.
   const cupP = useDerivedValue(() => {
     const u = S.value.cupT;
     const pt = at(DP, 'wrL');
-    const ad = at(DA, 'wrL');
+    const ad = at(DA, 'wrR');
     if (u <= 1) return { x: lerp(FULL_AT.x, pt.x, u), y: lerp(FULL_AT.y, pt.y, u), o: 1 };
     return { x: lerp(pt.x, ad.x, u - 1), y: lerp(pt.y, ad.y, u - 1), o: 1 };
   });
@@ -608,22 +710,23 @@ function Goods({ S, DP, DA, DM }: {
       return { x: q.x + 1.5, y: q.y - 1.5, o: q.o };
     }
     const pt = at(DP, 'wrR');
-    const mk = at(DM, 'wrL');
+    const mk = at(DM, 'wrR');
     if (u <= 3) return { x: lerp(pt.x, SLIDE_A.x, u - 2), y: lerp(pt.y, SLIDE_A.y, u - 2), o: 1 };
     if (u <= 4) return { x: lerp(SLIDE_A.x, SLIDE_B.x, u - 3), y: SLIDE_A.y, o: 1 };
     if (u <= 5) return { x: lerp(SLIDE_B.x, mk.x, u - 4), y: lerp(SLIDE_B.y, mk.y, u - 4), o: 1 };
     const v = u - 5;
     return { x: lerp(mk.x, CRATE_MOUTH.x, v), y: lerp(mk.y, CRATE_MOUTH.y + 4, v), o: 1 - clamp01((v - 0.6) / 0.4) };
   });
+  // His cup is in his right hand, so the second pound and the coin held up are in his left.
   const ccP = useDerivedValue(() => {
     const u = S.value.cc;
-    const ad = at(DA, 'wrR');
+    const ad = at(DA, 'wrL');
     if (u <= 1) return { x: ad.x, y: ad.y, o: clamp01(u) };
     const v = u - 1;
     return { x: lerp(ad.x, TIN_MOUTH.x + 3, v), y: lerp(ad.y, TIN_MOUTH.y + 4, v), o: 1 - clamp01((v - 0.6) / 0.4) };
   });
   const proofP = useDerivedValue(() => {
-    const ad = at(DA, 'wrR');
+    const ad = at(DA, 'wrL');
     return { x: ad.x, y: ad.y, o: clamp01(S.value.proof * 3) };
   });
   const lemon0P = useDerivedValue(() => {
@@ -634,10 +737,11 @@ function Goods({ S, DP, DA, DM }: {
   const lemon1P = useDerivedValue(() => {
     const u = S.value.lemon1;
     const slot = { x: CRATE.left + CRATE_LEMONS[0].x, y: CRATE.top + CRATE_LEMONS[0].y };
-    const back = at(DM, 'wrL');
     const front = at(DM, 'wrR');
-    if (u <= 1) return { x: lerp(slot.x, back.x, u), y: lerp(slot.y, back.y, u), o: clamp01(u * 20) };
-    if (u <= 2) return { x: lerp(back.x, front.x, u - 1), y: lerp(back.y, front.y, u - 1), o: 1 };
+    if (u <= 2) {
+      const k = clamp01(u);
+      return { x: lerp(slot.x, front.x, k), y: lerp(slot.y, front.y, k), o: clamp01(u * 20) };
+    }
     return { x: lerp(front.x, BEHIND.x, u - 2), y: lerp(front.y, BEHIND.y, u - 2), o: 1 - (u - 2) };
   });
   // The reamer: resting tip-left on the counter, in the maker's back hand, or held
@@ -653,19 +757,22 @@ function Goods({ S, DP, DA, DM }: {
     y = lerp(y, front.y, g);
     return { x, y, o: 1, r: 180 + S.value.twist - 14 * g };
   });
-  // The jug is held by the left side of its glass, and tips about the hand.
+  // The jug is held by its handle, and tips about the hand. Standing on the counter its
+  // handle is toward her (mirrored); in her hand the lip points the way she faces.
   const jugP = useDerivedValue(() => {
     const u = S.value.jug;
     const h = at(DP, 'wrR');
     return {
       x: lerp(JUG_GRAB.x, h.x, u), y: lerp(JUG_GRAB.y, h.y, u), o: 1, r: TIP_DEG * S.value.tilt,
+      sx: lerp(-1, S.value.jugSx, clamp01(u)),
     };
   });
   const pourSt = useAnimatedStyle(() => {
     const j = jugP.value;
     const a = ((j.r ?? 0) * Math.PI) / 180;
-    const lx = j.x + LIP_OFF.x * Math.cos(a) - LIP_OFF.y * Math.sin(a);
-    const ly = j.y + LIP_OFF.x * Math.sin(a) + LIP_OFF.y * Math.cos(a);
+    const ox = LIP_OFF.x * (j.sx ?? 1);
+    const lx = j.x + ox * Math.cos(a) - LIP_OFF.y * Math.sin(a);
+    const ly = j.y + ox * Math.sin(a) + LIP_OFF.y * Math.cos(a);
     const c = cupP.value;
     const bottom = c.y - 4;
     return { opacity: S.value.pour, left: lx - 1, top: ly, height: Math.max(0, bottom - ly) };
@@ -797,7 +904,7 @@ const styles = StyleSheet.create({
   pour: { position: 'absolute', width: 2, borderRadius: 1, backgroundColor: NATURAL.lemonade.shade },
   slate: {
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
-    backgroundColor: DEEP, overflow: 'hidden',
+    backgroundColor: NATURAL.slate.base, overflow: 'hidden',
   },
   chalkBlock: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   overlay: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },

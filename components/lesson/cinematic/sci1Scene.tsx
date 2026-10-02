@@ -37,8 +37,9 @@ import { PAPER_LIT } from '@/components/shared/tone';
 //
 //   b0   the helper stands one tread down the ladder, the two balls held at his chest;
 //        the sceptic points up at the heavy one.
-//   b1   the helper steps up to the top tread and holds the balls out level, the iron
-//        ball in his back hand and the tennis ball in his front one.
+//   b1   the helper steps up to the top tread and holds the balls out level IN FRONT of
+//        him, toward the sceptic he is talking to: the iron ball in his near hand and the
+//        tennis ball in his far one (AR4 — no hand is thrown back behind him to show it).
 //   b2   the scientist walks in from the left, tips his hat and raises a finger: wait.
 //   b3   Q1: the heavy ball, the light ball, and the chalk line between the two marked
 //        landing spots on the paving (BOTH TOGETHER) — tap one. Nothing has fallen.
@@ -49,26 +50,32 @@ import { PAPER_LIT } from '@/components/shared/tone';
 //        little way toward the ladder.
 //   b6   the scientist steps closer and opens a hand to the two balls on the ground,
 //        then raises a finger as he names the rule; the sceptic folds his arms.
-//   b7   the scientist crouches, picks the iron ball up, stands and weighs it in his
-//        hand.
+//   b7   the scientist crosses in front of the ladder to the far side of the balls, turns
+//        back to them, crouches, picks the iron ball up in his front hand, stands and
+//        weighs it in his palm — from there, clear of the man on the ladder.
 //   b8   Q2: the slate leaning on the wall is wiped to three chalk rows — tap one.
-//   b9   the scientist steps up and lays a hand on the ladder; after "tested knowledge put
-//        to work" he steps back and the helper starts down it, and he is on the bottom tread for "the
-//        ladder he's standing on", then steps off onto the paving.
+//   b9   the scientist lays his free hand on the ladder; after "tested knowledge put to
+//        work" he steps back and the helper starts down it, and he is on the bottom tread
+//        for "the ladder he's standing on", then steps off onto the paving. The iron ball
+//        stays in his hand, in front of him, whichever way he walks.
 //   b10  at ease under the quotation.
 //
 // COMPOSITION, in stage units. A brick yard wall runs the width of the stage, 0–400 ×
 // 396–500: coping at 404–413, a pier 330–374 standing proud under its cap. Grey paving
 // 0–400 × 500–516 in front of it. The wooden stepladder stands at 229–271 × 424–500,
 // its top cap at 424 (the helper's HIP when he stands on the top tread) and its treads
-// at 448, 466 and 484. The helper (250) stands on the 448 tread facing right, his hands
-// held out level at 225 and 275 — within the rig's safe reach (~23 units from the
-// shoulder at this scale) — so the balls fall just clear of the stiles, onto two chalk
-// crosses on the paving at 225 and 275. The sceptic stands at 332 facing left, in front
-// of the pier, and steps to 292 to prod the tennis ball. A slate 4–132 × 420–500 leans
-// on the wall at the left, its face 12–120 × 427–493. The scientist walks in to 150,
-// steps to 190 and 206 (in reach of the iron ball at 225), to 214 to lay his hand on the
-// ladder's left stile under the top tread, and back to 196 as the helper comes down.
+// at 448, 466 and 484. The helper (255) stands on the 448 tread facing right, both hands
+// held out level IN FRONT of him at 262 and 279 — within the rig's safe reach (~23 units
+// from the shoulder at this scale) — so the iron ball falls past the front of the
+// ladder's right stile and the tennis ball just clear of it, onto two chalk crosses on
+// the paving at 262 and 279. The sceptic stands at 332 facing left, in front of the
+// pier, and steps to 294 to prod the tennis ball, which rolls up against the iron one.
+// A slate 4–132 × 420–500 leans on the wall at the left, its face 12–120 × 427–493. The
+// scientist walks in to 150 and steps to 214; on b7 he crosses to 284 and faces back
+// left (his front hand in reach of the iron ball at 262 once he is down on his heels,
+// and his head clear of the helper's legs on the top tread); on b9 he lays his free hand
+// on the ladder's right stile under the top tread, and steps back to 304 as the helper
+// comes down. The sceptic, having prodded the ball, steps back to 340 by the pier.
 // Band [312, 520].
 //
 // SIMPLE ON PURPOSE (AP7): at most two figures move at once, everyone faces whom he
@@ -117,19 +124,23 @@ const EXCUSE_N = A_EXCUSE.indexOf(1);
 const BUILD_N = A_BUILD.indexOf(1);
 
 /** Where each of them stands, beat by beat. The scientist is off the stage until b2. */
-const SK_X = BEATS.map((_, n) => (n >= EXCUSE_N ? 292 : 332));
-const SC_X = [-40, -40, 150, 150, 150, 150, 190, 206, 206, 214, 196, 196];
+/** The sceptic prods the tennis ball from 294, then steps back to the pier and folds his arms. */
+const SK_X = BEATS.map((_, n) => (n > EXCUSE_N ? 340 : n === EXCUSE_N ? 294 : 332));
+const SC_X = [-40, -40, 150, 150, 150, 150, 214, 284, 284, 284, 304, 304];
 /**
  * The scientist's walk WITHIN a beat, after any walk at its start: [from, to, start s,
- * end s, facing after]. On b9 he lets go of the ladder and steps back out of the
- * helper's way as the helper comes down it.
+ * end s, facing after]. On b7 he steps back clear of the ladder once he has the ball;
+ * on b9 he lets go of the ladder and steps back out of the helper's way as the helper
+ * comes down it.
  */
 const NO_LEGS: number[][] = [];
-const SC_LEGS: number[][][] = BEATS.map((_, n) => (n === BUILD_N ? [[214, 196, 5.95, 6.8, 1]] : NO_LEGS));
-const HX = 250;
+const SC_LEGS: number[][][] = BEATS.map((_, n) => (n === BUILD_N ? [[284, 304, 5.95, 6.8, -1]] : NO_LEGS));
+const HX = 255;
 /** Which way each faces: the sceptic and the helper talk to each other across the ladder. */
 const SK_D = BEATS.map(() => -1);
-const SC_D = BEATS.map(() => 1);
+/** The scientist faces right until he crosses past the ladder for the iron ball (b7); from
+ * there he faces back left, to the ladder, the helper on it and the ball in his hand. */
+const SC_D = BEATS.map((_, n) => (n >= RISK_N ? -1 : 1));
 const HP_D = BEATS.map(() => 1);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const SK_P = [TALK, LISTEN, NOD, LEAN, LISTEN, TALK, FOLD, LISTEN, FOLD, NOD, NOD, LISTEN];
@@ -141,22 +152,22 @@ const LAD = { x: 250, y: 462, w: 42, h: 76 };
 /** The tops of the three treads, and the paving: 448, 466, 484, 500. */
 const TREAD = LADDER_TREADS.map((t) => LAD.y - LAD.h / 2 + (t * LAD.h) / 100);
 const TOP_TREAD = TREAD[0];
-/** The ladder's left stile, just under the top tread, where a hand steadies it. */
-const STILE = { x: 238, y: 452 };
+/** The ladder's right stile, just under the top tread, where a hand steadies it. */
+const STILE = { x: 261, y: 452 };
 
 // ── the two balls ────────────────────────────────────────────────────────────
 const HEAVY_D = 15;
 const LIGHT_D = 10;
-/** Held out level, at shoulder height of a man on the top tread. */
-const HELD_Y = 408;
-const HEAVY_X = 225;
-const LIGHT_X = 275;
+/** Held out level in front of him, a little under the shoulders of a man on the top tread. */
+const HELD_Y = 410;
+const HEAVY_X = 262;
+const LIGHT_X = 279;
 /** Where each rests on the paving: its foot on the chalk cross at y 504. */
 const LAND_Y = 504;
 const HEAVY_REST = LAND_Y - HEAVY_D / 2;
 const LIGHT_REST = LAND_Y - LIGHT_D / 2;
-/** Where the tennis ball stops after the prod. */
-const ROLLED_X = 270;
+/** Where the tennis ball stops after the prod: up against the iron ball. */
+const ROLLED_X = HEAVY_X + HEAVY_D / 2 + LIGHT_D / 2;
 /** A held ball sits a little under the fist that holds it. */
 const HOLD_OFF = 1.5;
 /** The drop: let go at REL seconds, and both fall 88 units in FALL seconds, as a stone does. */
@@ -191,6 +202,23 @@ function hLive(code: number, t: number, bt: number): Stance {
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
   return w <= 0 ? s : reachHandTo(s, { x, groundY: g, k: K, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
+/**
+ * A hand to a stage point, measured from where the shoulder REALLY is. `reachHandTo`
+ * clamps from an upright shoulder, which is right standing and short by a hand's width
+ * when he leans in over the ball: the rig itself clamps the fist to the arm's length
+ * from the leaning shoulder, so the hand meets the ball rather than stopping above it.
+ * `dir` may be mid-turn: a target written as `x + d * dir` is then still in front.
+ */
+function handFree(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const d = Math.abs(dir) < 0.05 ? (dir < 0 ? -0.05 : 0.05) : dir;
+  const pelY = g - (34 + s.bob) * K;
+  const tgt = { x: (tx - x) / (K * d), y: (ty - pelY) / K };
+  const cur = which > 0 ? s.fistR : s.fistL;
+  const f = { x: lerp(cur.x, tgt.x, w), y: lerp(cur.y, tgt.y, w) };
+  return which > 0 ? { ...s, fistR: f } : { ...s, fistL: f };
 }
 /** Eased 0 → 1 over [a, z] SECONDS of the beat — for handling timed by the clock. */
 function sm(b: number, a: number, z: number): number {
@@ -372,30 +400,37 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sc = hand(sc, xSc, GROUND, dSc, 1, xSc + 22, GROUND - 32, bp(0.16, 0.26, 0.58));
       sc = hand(sc, xSc, GROUND, dSc, 1, xSc + 12, GROUND - 64, bp(0.62, 0.7, 0.97));
     }
-    // b7: down on his heels to the iron ball, up with it, and weighing it in his palm
+    // b7: down on his heels to the iron ball — leaning in over it, his FRONT hand closing
+    // on it — up with it held at his chest, and one heft of it in his palm
     let holdSc = n > RISK_N ? 1 : 0;
     if (A_RISK[n]) {
       const a = wt.walkDur + 0.1;
       const sq = sm(b, a, a + 0.55) * (1 - sm(b, a + 1.0, a + 1.6));
       sc = {
         ...sc,
-        bob: sc.bob - 22 * sq,
-        tilt: sc.tilt - 0.3 * sq,
-        neck: sc.neck + 0.22 * sq,
+        bob: sc.bob - 24 * sq,
+        tilt: sc.tilt - 0.5 * sq,
+        neck: sc.neck + 0.3 * sq,
         footL: { x: lerp(sc.footL.x, -7, sq), y: sc.footL.y * (1 - sq) },
         footR: { x: lerp(sc.footR.x, 9, sq), y: sc.footR.y * (1 - sq) },
       };
-      holdSc = sm(b, a + 0.6, a + 0.75);
-      const weigh = Math.sin(Math.PI * 4 * clamp01((b - (a + 2.2)) / 2.2)) * sm(b, a + 2.1, a + 2.4) * (1 - sm(b, a + 4.1, a + 4.4));
-      const hx = lerp(HEAVY_X, xSc + 13, sm(b, a + 0.9, a + 1.7));
-      const hy = lerp(HEAVY_REST - HOLD_OFF, GROUND - 40 - 3 * weigh, sm(b, a + 0.9, a + 1.7));
-      sc = hand(sc, xSc, GROUND, dSc, -1, hx, hy, sm(b, a + 0.1, a + 0.55));
+      // the free hand steadies him on his front knee while he is down (AR4: never left
+      // hanging behind a body that leans forward over the ball)
+      sc = handFree(sc, xSc, GROUND, dSc, -1, xSc + 8 * dSc, GROUND - 15, sq);
+      holdSc = sm(b, a + 0.55, a + 0.7);
+      // one heft: the palm gives under the weight and comes back up (AR5: once, not a loop)
+      const heft = Math.sin(Math.PI * 2 * clamp01((b - (a + 1.95)) / 0.9));
+      const toChest = sm(b, a + 0.9, a + 1.7);
+      const hx = lerp(HEAVY_X, xSc + 13 * dSc, toChest);
+      const hy = lerp(HEAVY_REST - HOLD_OFF, GROUND - 40 + 3 * heft, toChest);
+      sc = handFree(sc, xSc, GROUND, dSc, 1, hx, hy, sm(b, a + 0.1, a + 0.55));
     } else if (n > RISK_N) {
-      sc = hand(sc, xSc, GROUND, dSc, -1, xSc + 13, GROUND - 40, 1);
+      // the iron ball held at his chest, in front of him whichever way he faces
+      sc = handFree(sc, xSc, GROUND, dSc, 1, xSc + 13 * dSc, GROUND - 40, 1);
     }
-    // b9: his other hand on the ladder's stile as he names it, until the helper starts
+    // b9: his free hand on the ladder's stile as he names it, until the helper starts
     // down; then he steps back out of the way (SC_LEGS)
-    if (A_BUILD[n]) sc = hand(sc, xSc, GROUND, dSc, 1, STILE.x, STILE.y, st(0.2, 0.3) * (1 - st(0.68, 0.72)));
+    if (A_BUILD[n]) sc = handFree(sc, xSc, GROUND, dSc, -1, STILE.x, STILE.y, st(0.2, 0.3) * (1 - st(0.68, 0.72)));
     const prevSc = carryFrom(heldSc, n, hHold(SC_P[p], t));
     const scMoving = wt.walking || SC_LEGS[n].length > 0;
     const figSc = keepHeld(heldSc, scMoving ? mixKeepLegs(prevSc, sc, tr) : mixStance(prevSc, sc, tr));
@@ -450,6 +485,7 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <ObjectArt parts={SLATE_ART} tone={TONE} />
       <Slate S={SCENE} />
       <ObjectArt parts={LADDER_ART} tone={TONE} />
+      {on(Q1) ? <DropLeader S={SCENE} /> : null}
       {/* cast: cap */}
       <Stickman D={DH} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       {/* cast: tophat */}
@@ -487,7 +523,7 @@ function Balls({ S, DH, DT }: { S: SharedValue<any>; DH: SharedValue<Bundle>; DT
   const heavy = useDerivedValue(() => {
     const v = S.value;
     const inH = wristOf(DH, 'wrL');
-    const inS = wristOf(DT, 'wrL');
+    const inS = wristOf(DT, 'wrR');
     const hh = v.holdHH;
     const hs = v.holdSc;
     const free = 1 - hh - hs < 0 ? 0 : 1 - hh - hs;
@@ -554,12 +590,22 @@ function Slate({ S }: { S: SharedValue<any> }) {
 
 // ── the two questions ────────────────────────────────────────────────────────
 
-/** Q1: the iron ball, the tennis ball, and the chalk line between their marks. */
+/**
+ * Q1: the iron ball, the tennis ball, and the chalk line between their marks. Both balls
+ * are held out in FRONT of him now, side by side, so the iron ball's name sits on a plate
+ * behind him with a hairline to the ball (`DropLeader`, drawn under him); the tennis ball's
+ * plate sits just past it, inside its own target. No two targets touch.
+ */
 const DROP_Q = [
-  { id: 'heavy', label: 'HEAVY', left: 173, top: 398, w: 61, h: 20, labelLeft: 2, labelW: 42, correct: false },
-  { id: 'light', label: 'LIGHT', left: 266, top: 399, w: 58, h: 18, labelLeft: 18, labelW: 38, correct: false },
-  { id: 'both', label: 'BOTH TOGETHER', left: 202, top: 507, w: 96, h: 12, labelLeft: 2, labelW: 92, correct: true },
+  { id: 'heavy', label: 'HEAVY', left: 192, top: 402, w: 47, h: 16, labelLeft: 2, labelW: 42, correct: false },
+  { id: 'light', label: 'LIGHT', left: 272, top: 401, w: 56, h: 18, labelLeft: 15, labelW: 38, correct: false },
+  { id: 'both', label: 'BOTH TOGETHER', left: (HEAVY_X + LIGHT_X) / 2 - 48, top: 507, w: 96, h: 12, labelLeft: 2, labelW: 92, correct: true },
 ];
+/** The hairline from the HEAVY plate to the iron ball, behind the helper who holds it. */
+function DropLeader({ S }: { S: SharedValue<any> }) {
+  const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+  return <Animated.View style={[styles.leader, fade]} pointerEvents="none" />;
+}
 function DropTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
@@ -636,6 +682,9 @@ const styles = StyleSheet.create({
   chalkBallBig: { width: 18, height: 18, borderRadius: 9 },
   chalkBallSmall: { width: 11, height: 11, borderRadius: 5.5 },
   clear: { flexGrow: 1 },
+  leader: {
+    position: 'absolute', left: 239, top: HELD_Y - 0.5, width: HEAVY_X - HEAVY_D / 2 - 239, height: 1, backgroundColor: INK,
+  },
   tag: {
     position: 'absolute', height: 12, alignItems: 'center', justifyContent: 'center',
     backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,

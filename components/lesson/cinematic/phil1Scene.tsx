@@ -22,11 +22,11 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  tint, bicycleWheel, bicycleFrame, repairStand, partsCrateBack, partsCrateFront, repairBill, wallBoard,
+  NATURAL, tint, bicycleWheel, bicycleFrame, repairStand, partsCrateBack, partsCrateFront, repairBill, wallBoard,
   workbench, pegboard, BIKE_AT, STAND_JAWS, WALL_SLATE, BENCH_SPIKE,
 } from './objects';
 import { BY_ID } from './wardrobe';
-import { DEEP, PAPER_LIT } from '@/components/shared/tone';
+import { PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // philosophy-foundations-1, "What Is Philosophy?" — A BICYCLE WORKSHOP.
@@ -38,7 +38,7 @@ import { DEEP, PAPER_LIT } from '@/components/shared/tone';
 //
 //   b0   the owner walks up to his bicycle, mended on its stand, a hand out at it.
 //   b1   the mechanic lays a hand on the new frame, points to the crate of old parts,
-//        pats the new saddle and taps the bill on its spike ("No charge"); the job
+//        pats the new saddle, and turns to his bench to tap the bill on its spike ("No charge"); the job
 //        board chalks NEW FRAME and NEW SADDLE under SQUEAKY WHEEL as he names them.
 //   b2   the owner gestures from the bicycle to the crate and back.
 //   b3   the philosopher walks in from the left and tips his hat; the owner turns.
@@ -46,10 +46,12 @@ import { DEEP, PAPER_LIT } from '@/components/shared/tone';
 //   b5   Q1: the crate, the bike and the bill each wear a question tag — tap one.
 //   b6   the mechanic lays his hand on the saddle: "I'd call the bicycle yours."
 //   b7   the owner steps to the crate and lifts the old wheel out of it.
-//   b8   the philosopher turns a hand to each of them in turn; the wheel held up.
+//   b8   the philosopher turns a hand to each of them in turn; the owner lowers the
+//        old wheel to rest in front of him.
 //   b9   Q2: the board is wiped to three rows — tap one.
 //   b10  the owner puts the old wheel back and takes his bicycle by the bars; the
-//        mechanic pulls the bill off the spike and hands it across the bars; the
+//        mechanic turns to the bench, pulls the bill off the spike, turns back with it
+//        at his chest and hands it across the bars; the
 //        board chalks WHAT'S FAIR? · WHAT'S REAL? · WHAT DO I OWE? as they are said.
 //   b11  at ease under the quotation: the mechanic steps back to his stand, the owner
 //        holds his bicycle and reads his bill.
@@ -148,8 +150,13 @@ const CRATE = { x: 180, y: 476, s: 48 };
 const OLD_IN = { x: 174, y: 468 };
 const WHEEL_R = WHEEL_D * 0.44;
 const OLD_GRAB = { x: OLD_IN.x, y: OLD_IN.y - WHEEL_R };
-/** Where the owner holds it up, out at his side. */
+/** Where the owner holds it up to show it, out in front of him (b7). */
 const OLD_HOLD = { x: 170, y: 446 };
+/**
+ * Where he holds it while he listens (b8–b9): lowered, close in front of him and below
+ * the shoulder (AR6), still hanging by its tyre from his hand.
+ */
+const OLD_REST = { x: 162, y: 458 };
 
 // ── the workbench, the bill on its spike, the pegboard ───────────────────────
 const BENCH = { x: 346, y: 476, w: 96, h: 48 };
@@ -174,7 +181,7 @@ const SLATE = {
 
 const BOARD_ART = wallBoard(BOARD.x, BOARD.y, BOARD.w, BOARD.h);
 const PEG_ART = pegboard(344, 392, 92, 84);
-const BENCH_ART = tint(workbench(BENCH.x, BENCH.y, BENCH.w, BENCH.h), 'wood');
+const BENCH_ART = workbench(BENCH.x, BENCH.y, BENCH.w, BENCH.h);
 const STAND_ART = tint(repairStand(STAND.x, STAND.y, STAND_S, STAND_S), 'silver');
 const FRONT_WHEEL_ART = bicycleWheel(FRONT.x, FRONT.y, WHEEL_D, WHEEL_D);
 const REAR_WHEEL_ART = bicycleWheel(REAR.x, REAR.y, WHEEL_D, WHEEL_D);
@@ -265,12 +272,17 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     if (A_REASON_B[n]) {
       so = hand(so, xOw, wo.dirV, 1, lerp(OLD_GRAB.x, OLD_HOLD.x, lift), lerp(OLD_GRAB.y, OLD_HOLD.y, lift), st(0.1, 0.26));
     }
-    if (n === LIVE_N - 2 || n === LIVE_N - 1) so = hand(so, xOw, wo.dirV, 1, OLD_HOLD.x, OLD_HOLD.y, 1);
+    // b8: once he has made his point he lowers it to rest in front of him; b9 it rests
+    if (n === LIVE_N - 2) {
+      const down = st(0.04, 0.22);
+      so = hand(so, xOw, wo.dirV, 1, lerp(OLD_HOLD.x, OLD_REST.x, down), lerp(OLD_HOLD.y, OLD_REST.y, down), 1);
+    }
+    if (n === LIVE_N - 1) so = hand(so, xOw, wo.dirV, 1, OLD_REST.x, OLD_REST.y, 1);
     // b10: the wheel back in the crate, then his bicycle by the bars and the bill in
     // his other hand
     if (A_LIVE[n]) {
       const back = st(0.02, 0.12);
-      so = hand(so, xOw, wo.dirV, 1, lerp(OLD_HOLD.x, OLD_GRAB.x, back), lerp(OLD_HOLD.y, OLD_GRAB.y, back), 1 - st(0.14, 0.19));
+      so = hand(so, xOw, wo.dirV, 1, lerp(OLD_REST.x, OLD_GRAB.x, back), lerp(OLD_REST.y, OLD_GRAB.y, back), 1 - st(0.14, 0.19));
       so = hand(so, xOw, wo.dirV, 1, GRIP.x, GRIP.y, st(0.4, 0.48));
       const low = st(0.68, 0.8);
       so = hand(so, xOw, wo.dirV, -1, lerp(PASS.x, BILL_LOW.x, low), lerp(PASS.y, BILL_LOW.y, low), st(0.55, 0.62));
@@ -311,25 +323,36 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const src2 = carrySource(cv, 2, n, ME_X[0]);
     const wm = walkOf(src2, ME_X, ME_D, ME_P, n, t, b, ME_DELAY[n]);
     const xMe = carry(cv, 2, n, wm.xp, wm.xn, wm.walking ? wm.walkU : tr);
+    // He turns to face what he reaches for (AR4): round to the bench for the bill on
+    // its spike, then back to the owner.
+    let dMe = wm.dirV;
+    if (A_PARTS[n]) {
+      const a = 0.74 * L;
+      const z = 0.97 * L;
+      dMe = b < a ? wm.dirV : b < z ? facing(-1, 1, b - a) : facing(1, -1, b - z);
+    }
+    if (A_LIVE[n] && b < ME_DELAY[n] - 0.05) dMe = b < 1.1 ? facing(-1, 1, b) : facing(1, -1, b - 1.1);
     let sm = wm.s;
     // b0: a hand resting on the saddle of the bicycle he has just finished
-    if (A_ENTER[n]) sm = hand(sm, xMe, wm.dirV, 1, SADDLE.x, SADDLE.y, 0.75);
+    if (A_ENTER[n]) sm = hand(sm, xMe, dMe, 1, SADDLE.x, SADDLE.y, 0.75);
     // b1: the new frame, the crate of the old parts, the new saddle, the bill
     if (A_PARTS[n]) {
-      sm = hand(sm, xMe, wm.dirV, 1, TUBE.x, TUBE.y, bp(0.1, 0.18, 0.32));
-      sm = hand(sm, xMe, wm.dirV, 1, CRATE.x, CRATE.y - 6, bp(0.3, 0.38, 0.5));
-      sm = hand(sm, xMe, wm.dirV, 1, SADDLE.x, SADDLE.y, bp(0.5, 0.58, 0.74));
-      sm = hand(sm, xMe, wm.dirV, -1, BILL_TAKE.x, BILL_TAKE.y, bp(0.8, 0.88, 0.99));
+      sm = hand(sm, xMe, dMe, 1, TUBE.x, TUBE.y, bp(0.1, 0.18, 0.32));
+      sm = hand(sm, xMe, dMe, 1, CRATE.x, CRATE.y - 6, bp(0.3, 0.38, 0.5));
+      sm = hand(sm, xMe, dMe, 1, SADDLE.x, SADDLE.y, bp(0.5, 0.58, 0.74));
+      sm = hand(sm, xMe, dMe, -1, BILL_TAKE.x, BILL_TAKE.y, bp(0.8, 0.88, 0.99));
     }
     // b6: his hand on the saddle — the bicycle is yours
-    if (A_REASON_A[n]) sm = hand(sm, xMe, wm.dirV, 1, SADDLE.x, SADDLE.y, st(0.06, 0.18));
+    if (A_REASON_A[n]) sm = hand(sm, xMe, dMe, 1, SADDLE.x, SADDLE.y, st(0.06, 0.18));
     // b10: the bill off the spike, round to the front, across the bars
     if (A_LIVE[n]) {
-      const carryIt = st(0.18, 0.24);
-      sm = hand(sm, xMe, wm.dirV, -1,
-        lerp(BILL_TAKE.x, xMe - 6, carryIt), lerp(BILL_TAKE.y, GROUND - 50, carryIt),
+      // taken while he faces the bench, brought in to his chest, and only then does he
+      // turn back with it — so it is never held out behind him
+      const carryIt = st(0.14, 0.18);
+      sm = hand(sm, xMe, dMe, -1,
+        lerp(BILL_TAKE.x, xMe + 4 * dMe, carryIt), lerp(BILL_TAKE.y, GROUND - 50, carryIt),
         st(0.04, 0.14) * (1 - st(0.5, 0.56)));
-      sm = hand(sm, xMe, wm.dirV, -1, PASS.x, PASS.y, bp(0.5, 0.58, 0.74));
+      sm = hand(sm, xMe, dMe, -1, PASS.x, PASS.y, bp(0.5, 0.58, 0.74));
     }
     const prevMe = carryFrom(heldMe, n, hHold(ME_P[p], t));
     const figMe = keepHeld(heldMe, wm.walking ? mixKeepLegs(prevMe, sm, tr) : mixStance(prevMe, sm, tr));
@@ -340,7 +363,7 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wheelNow = A_REASON_B[n] ? st(0.24, 0.28)
       : A_LIVE[n] ? 1 + st(0.11, 0.14)
         : n > LIVE_N ? 2 : n > LIVE_N - 4 ? 1 : 0;
-    const billNow = A_LIVE[n] ? st(0.13, 0.16) + st(0.57, 0.61) : n > LIVE_N ? 2 : 0;
+    const billNow = A_LIVE[n] ? st(0.11, 0.14) + st(0.57, 0.61) : n > LIVE_N ? 2 : 0;
     // the job board: the new parts chalked on as the mechanic names them, and the
     // three questions as the philosopher names them
     const frameNow = A_PARTS[n] ? st(0.26, 0.36) : n > PARTS_N ? 1 : 0;
@@ -352,7 +375,7 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     return {
       ow: pose(figOw, xOw, GROUND, K, wo.dirV, 1),
       ph: pose(figPh, xPh, GROUND, K, wp.dirV, 1),
-      me: pose(figMe, xMe, GROUND, K, wm.dirV, 1),
+      me: pose(figMe, xMe, GROUND, K, dMe, 1),
       wheelT: carry(cv, 3, n, wheelNow, wheelNow, tr),
       billT: carry(cv, 4, n, billNow, billNow, tr),
       frameLine: carry(cv, 5, n, frameNow, frameNow, tr),
@@ -541,7 +564,7 @@ const styles = StyleSheet.create({
   onTop: { zIndex: 2 },
   slate: {
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
-    backgroundColor: DEEP, overflow: 'hidden',
+    backgroundColor: NATURAL.slate.base, overflow: 'hidden',
   },
   chalkBlock: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   overlay: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },

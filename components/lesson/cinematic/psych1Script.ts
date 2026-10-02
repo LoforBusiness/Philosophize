@@ -22,15 +22,18 @@ export interface Psych1Beat extends BaseBeat {
   /**
    * What happens across this beat's line (the scene choreographs it):
    * boast — the taster steps up to the counter, sure of himself ·
-   * pour — beside the two poured cups the server stands a label by each, from under the
-   *        counter: BARGAIN by the left cup, then GOLD by the right ·
-   * taste — the taster sips one cup, then the other, and pushes the bargain cup away ·
-   * reveal — the server lifts the one coffee pot to show it ·
+   * pour — the taster steps up between the two poured cups; the server stands a label by
+   *        each, from under the counter: BARGAIN by the left cup, then GOLD by the right ·
+   * taste — the taster drinks from one cup, then turns and drinks from the other, each
+   *         lifted on its saucer, the cup alone taken to his lips (AR3), and slides the
+   *         bargain cup away ·
+   * reveal — the server turns to the one coffee pot, lifts it by its handle and turns to
+   *          show it ·
    * arrive — the psychologist walks in and tips his hat ·
    * define — the psychologist taps his own head, then opens a hand to the taster ·
    * sure — the taster folds his arms ·
    * method — the server swaps the two labels round as the psychologist describes it ·
-   * again — the taster sips both again and keeps the cup now labelled GOLD ·
+   * again — the taster lifts the cup now labelled GOLD on its saucer, sips, and keeps it ·
    * rest — everyone at ease under the quotation.
    */
   act?: 'boast' | 'pour' | 'taste' | 'reveal' | 'arrive' | 'define' | 'sure' | 'method' | 'again' | 'rest';

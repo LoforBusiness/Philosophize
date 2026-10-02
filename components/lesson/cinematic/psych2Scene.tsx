@@ -47,7 +47,7 @@ import { EMBER } from '@/components/shared/tone';
 //        hand to her chest, a hand to her ear, a hand to her eyes; behind her he picks
 //        up the jar's lid and holds it out to her. She does not see, and turns back.
 //   b3   the psychologist walks in from the left under the ceiling camera, which turns
-//        to watch him; he tips his hat and opens a hand to her, then to him, then both.
+//        to watch him; he tips his hat and, a moment later, opens both hands to them.
 //        The cap stands up and drops the lid in his own basket.
 //   b4   he points up at the camera ("a memory isn't a recording") and it turns back to
 //        the trolleys; his hands build something twice. The cap takes a jar of
@@ -57,7 +57,7 @@ import { EMBER } from '@/components/shared/tone';
 //   b6   he points down the slats; they turn over to one plain question, WHAT
 //        HAPPENED?, and he opens a hand to her.
 //   b7   the cap walks back to his trolley, taps his chest, rolls it back and forward at
-//        a crawl, and opens a hand to her; she puts her hands on her hips.
+//        a crawl, and opens a hand to her; she folds her arms.
 //   b8   one finger up, then down; her shopping list slips off her trolley's handle and
 //        drifts to the floor.
 //   b9   Q2: the camera, the jam on the floor and her shopping list — tap one.
@@ -93,12 +93,13 @@ const K = K_FIG * 0.76;
 const LINES = [3.91, 4.49, 5.37, 4.53, 7.97, 0, 7.11, 4.77, 6.17, 0, 4.1, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
-// hands on the hips, waiting for the answer, leaning in; and a posture for the crouch.
+// arms folded, waiting for the answer, leaning in; and a posture for the crouch.
 const TALK = 167;
 const EXPLAIN = 259;
 const LISTEN = 159;
 const NOD = 263;
-const HIPS = 163;
+/** Arms folded (her hands-on-hips pose held one hand up behind her in profile, AR4). */
+const FOLD = 161;
 const WAIT = 260;
 const LEAN = 177;
 /** Posture 13: down on the haunches, peering at the floor. */
@@ -148,7 +149,7 @@ const C_TURN: Track[] = BEATS.map((_, n) => (n === N_REBUILD ? [[0, -1], [0.46, 
 const H_LEGS: Track[] = BEATS.map((b) => (b.th ? [[0, 52]] : [[0, H_X0]]));
 const H_TURN: Track[] = BEATS.map(() => [[0, 1]]);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
-const B_P = [TALK, LISTEN, TALK, NOD, NOD, WAIT, NOD, HIPS, LISTEN, WAIT, LEAN, NOD, LISTEN];
+const B_P = [TALK, LISTEN, TALK, NOD, NOD, WAIT, NOD, FOLD, LISTEN, WAIT, LEAN, NOD, LISTEN];
 const C_P = [LISTEN, TALK, LISTEN, LISTEN, LISTEN, WAIT, NOD, TALK, NOD, WAIT, LISTEN, WAIT, LISTEN];
 const H_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, EXPLAIN, WAIT, EXPLAIN, NOD, EXPLAIN, WAIT, NOD, LEAN, LISTEN];
 
@@ -366,18 +367,19 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sb = hand(sb, xB, dB, -1, xB + 6, 436, face);
     }
     if (A_RETELL[n]) {
-      // her back to him: "flying round that corner" — an arm swept round from behind
-      // her and out in front, fast; "I promise you" — a hand to her chest; "I heard the
-      // glass break" — a hand to her ear; "before I even saw him" — a hand to her eyes
+      // her back to him: "flying round that corner" — an arm swept from her shoulder out
+      // in front of her, fast (never from behind her back, AR4); "I promise you" — a
+      // hand to her chest; "I heard the glass break" — a hand to her ear; "before I even
+      // saw him" — a hand to her eyes. Every target is measured the way she faces.
       const sweep = st(0.12, 0.3);
-      sb = hand(sb, xB, dB, 1, lerp(xB + 14, xB - 22, sweep), lerp(428, 456, sweep), bp(0.08, 0.14, 0.36));
-      sb = hand(sb, xB, dB, 1, xB - 3, 452, bp(0.36, 0.41, 0.52));
-      sb = hand(sb, xB, dB, 1, xB + 2, 431, bp(0.55, 0.6, 0.76));
+      sb = hand(sb, xB, dB, 1, lerp(xB + 6 * dB, xB + 24 * dB, sweep), lerp(436, 456, sweep), bp(0.08, 0.14, 0.36));
+      sb = hand(sb, xB, dB, 1, xB + 3 * dB, 452, bp(0.36, 0.41, 0.52));
+      sb = hand(sb, xB, dB, 1, xB - 2 * dB, 431, bp(0.55, 0.6, 0.76));
       sb = lookOf(sb, 0.12, bp(0.55, 0.6, 0.76));
-      sb = hand(sb, xB, dB, 1, xB - 8, 427, bp(0.78, 0.84, 0.98));
+      sb = hand(sb, xB, dB, 1, xB + 8 * dB, 427, bp(0.78, 0.84, 0.98));
     }
     if (A_SURE[n]) {
-      // hands on her hips already (the pose); her chin up at "just as certain"
+      // arms folded already (the pose); her chin up at "just as certain"
       sb = lookOf(sb, -0.16, bp(0.6, 0.7, 0.98));
     }
     if (A_REPLAY[n]) {
@@ -385,10 +387,11 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       // hands spread, "so who broke my jam?"
       const up = bp(0.12, 0.2, 0.6);
       sb = lookOf(sb, -0.34, up);
-      sb = hand(sb, xB, dB, 1, xB + 6, 417, bp(0.18, 0.26, 0.54));
+      sb = hand(sb, xB, dB, 1, xB + 6 * dB, 417, bp(0.18, 0.26, 0.54));
+      // both hands out in front of her, open (AR4: not one thrown behind)
       const spread = bp(0.66, 0.74, 0.98);
-      sb = hand(sb, xB, dB, 1, xB + 16 * dB, 456, spread);
-      sb = hand(sb, xB, dB, -1, xB - 12 * dB, 456, spread);
+      sb = hand(sb, xB, dB, 1, xB + 18 * dB, 458, spread);
+      sb = hand(sb, xB, dB, -1, xB + 7 * dB, 462, spread);
     }
     const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
@@ -412,10 +415,11 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     if (A_JAM[n]) {
       // "sorry" — a hand to his chest as he comes round; "barely moving" — hands low and
       // spread; then down on his haunches over the broken jar
-      sc = hand(sc, xC, dC, 1, xC - 3, 452, bp(0.02, 0.1, 0.24));
+      sc = hand(sc, xC, dC, 1, xC + 3 * dC, 452, bp(0.02, 0.1, 0.24));
+      // both hands low and open in front of him (AR4: not one thrown behind)
       const spread = bp(0.4, 0.48, 0.64);
-      sc = hand(sc, xC, dC, 1, xC - 13, 466, spread);
-      sc = hand(sc, xC, dC, -1, xC + 11, 466, spread);
+      sc = hand(sc, xC, dC, 1, xC + 16 * dC, 468, spread);
+      sc = hand(sc, xC, dC, -1, xC + 7 * dC, 471, spread);
       sc = mixStance(sc, postureStill(CROUCH, t), st(0.8, 0.92));
       lidT = st(0.76, 0.84);
     }
@@ -461,15 +465,13 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     let sh = bodyOf(wh, H_P, n, t, b);
     let aimNow = AIM_TROLLEYS;
     if (A_ARRIVE[n]) {
-      // the hat tipped once he has arrived; "two people" — a hand to her, then to him;
-      // "neither of them is lying" — both hands open
+      // the hat tipped once he has arrived; then, a pause later, "neither of them is
+      // lying" — both hands open in front of him. Two gestures, not four in a row (AR5).
       const after = wh.arrive / L;
       sh = hand(sh, xH, dH, 1, xH + 5 * dH, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.13));
-      sh = hand(sh, xH, dH, 1, xH + 22, 452, bp(0.4, 0.46, 0.55));
-      sh = hand(sh, xH, dH, 1, xH + 24, 444, bp(0.55, 0.61, 0.69));
       const open = bp(0.72, 0.8, 0.98);
-      sh = hand(sh, xH, dH, 1, xH + 18, 457, open);
-      sh = hand(sh, xH, dH, -1, xH - 14, 457, open);
+      sh = hand(sh, xH, dH, 1, xH + 18 * dH, 457, open);
+      sh = hand(sh, xH, dH, -1, xH + 8 * dH, 461, open);
       // the ceiling camera turns to watch him walk in
       aimNow = lerp(AIM_TROLLEYS, aimAt(xH), st(0.02, 0.16));
     }

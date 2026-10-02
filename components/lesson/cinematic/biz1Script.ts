@@ -22,8 +22,8 @@ export interface Biz1Beat extends BaseBeat {
   /**
    * What happens across this beat's line (the scene choreographs it):
    * cry — the maker squeezes a lemon into the jug and calls his price ·
-   * free — the partner hands a full cup across the stand to nobody in particular, beaming ·
-   * lemons — the maker tips the empty lemon crate to show it, and turns out his pocket ·
+   * free — the partner turns to the queue and holds a full cup out across the stand to nobody in particular, beaming ·
+   * lemons — the maker turns to the empty lemon crate and tips it to show it, then pats his pocket ·
    * arrive — the adviser walks in, tips his hat and lifts the lid of the empty cash tin ·
    * sale — the partner takes a pound coin for a cup; half goes to the lemon crate, half into the tin ·
    * proof — the adviser holds up the coin left in the tin ·

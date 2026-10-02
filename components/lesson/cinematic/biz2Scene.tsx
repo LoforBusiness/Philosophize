@@ -24,7 +24,7 @@ import { lineOf, stage, bump } from './pace';
 import {
   NATURAL, notepad, mug, deckOven, ovenDoor, macaronTray, macaron, rollTray, rollTrayRaw, sausageRoll, cakeStand,
   teapot, teacup, recipeBook, crystalBall, wallShelf, dawnWindow, bakeryCounter, OVEN_MOUTH, MACARON_GAP,
-  TEAPOT_GRIP, TEAPOT_SPOUT,
+  TEAPOT_GRIP, TEAPOT_SPOUT, type NaturalKey,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -39,38 +39,45 @@ import { BY_ID } from './wardrobe';
 //
 //   b0   the baker sets the last pink macaron in the gap on its plate, admires the
 //        row, and points out of the window at the crane next door.
-//   b1   the builder walks in from the cold, rubbing his hands, and shades his eyes
-//        to peer at the plate.
+//   b1   the builder walks in from the cold with his hands together, rubs them once as
+//        he arrives, and shades his eyes to peer at the plate.
 //   b2   the adviser walks in, tips his hat, points at the macarons, then opens a hand
 //        to the builder; the builder turns to him.
-//   b3   the adviser opens a hand to the builder, then rubs his own arms against the
-//        cold; the baker lifts a pink-iced sponge on its stand up onto the counter.
+//   b3   the adviser opens a hand to the builder, then hugs his arms across his chest
+//        against the cold; the baker walks along, TURNS to the cake under the counter,
+//        lifts the pink-iced sponge on its stand up onto it, and turns back.
 //   b4   Q1: the macarons, the cake, and the sausage rolls baking in the lit oven —
 //        tap one.
-//   b5   the baker walks to the oven, drops its door, slides the hot rolls out and
-//        sets them at the front of the counter, steaming; the door shut again.
-//   b6   the adviser taps his head, then points at the rolls; the baker lifts a small
-//        cup up from under the counter and pours the builder a little tea.
-//   b7   the builder lifts the small cup, holds it up, spreads his hands wide for a
-//        bigger one, and puts it back down.
+//   b5   the baker steps to the oven, drops its door by the handle with one hand,
+//        slides the hot tray out by its near end with the other and sets it at the
+//        front of the counter, steaming; the door shut again.
+//   b6   the adviser taps his head twice, then points at the rolls; the baker lifts a
+//        small cup and saucer up from under the counter and pours the builder a little
+//        tea from the teapot, held by its handle.
+//   b7   the builder lifts the small cup by its saucer and holds it out, raises his
+//        other hand above it — a cup this tall — and puts it back down.
 //   b8   Q2: her notepad on the counter, the recipe book and the crystal ball on the
 //        shelf — tap one.
-//   b9   the baker hands over a roll, then a big mug of tea from under the counter,
-//        steps along and holds up her notepad.
-//   b10  at ease under the quotation; b11 the summary.
+//   b9   the baker hands over a roll, then a big mug of tea by its handle from under
+//        the counter, which he takes round its body; she turns to her notepad, picks
+//        it up by its bottom edge, turns back and holds it up.
+//   b10  at ease under the quotation, the notepad held close; b11 the summary.
+//
+// (A person TURNS to what he reaches for or offers, and every hand shows, holds and
+// gives IN FRONT of the body — LESSON_RULES AR4. A turn is eased through a profile.)
 //
 // COMPOSITION, in stage units. The shop window (dawn, and the site's tower crane) is on
-// the left wall, 14–100 × 330–412, over the adviser's spot at 66; a BAKERY board hangs
-// 150–250 × 344–368. The deck oven stands behind the counter's left end, 160–222 ×
-// 412–500, its upper deck's mouth 164–206 × 429–459. The counter, duck-egg blue under a
-// marble top, runs 150–318 × 477–501, at the HIP (AP10). On it: the little teacup's
-// place 164, the hot rolls 175–201, the teapot 198, the notepad 226, the cake 239–265
-// and the macarons 264–304. The shelf 248–322 × 400–412 carries the recipe book (266)
-// and the crystal ball (304), above every head (422). The builder stands at the
-// counter's end, 146; the baker behind it, at 306 by the macarons, 268 by the cake, 194
-// at the oven and 184 at the pass. Every hand-off happens over the counter's end at
-// (165, 455), 19 units from both shoulders, inside the rig's ~23-unit safe reach.
-// Band [306, 514].
+// the left wall, 14–100 × 308–386, over the adviser's spot at 66; the painted BAKERY
+// sign hangs 150–250 × 344–368. The deck oven stands behind the counter, 212–274 ×
+// 418–500, its upper deck's mouth 228–270 × 434–462. The counter, duck-egg blue under a
+// marble top, runs 150–380 × 477–501, at the HIP (AP10). On it: the little teacup's
+// place 166, the teapot 169–187, the notepad 204, the hot rolls 247–277 once they are
+// out, the cake 289–315 and the macarons 324–364. The shelf 265–375 × 400–412 carries
+// the recipe book (288) and the crystal ball (352), above every head (422). The builder
+// stands at the counter's end, 146; the baker behind it, at 366 by the macarons, 286 by
+// the cake, 274 at the oven, 184 at the teapot and 186 at the pass. Every hand-off
+// happens over the counter's end at (166, 455), 20 units from both of them, inside the
+// rig's ~23-unit safe reach. Band [306, 514].
 //
 // SIMPLE ON PURPOSE (AP7): at most two figures move at once, everyone faces whom he
 // talks to, and the listeners hold listening poses that are alive but still.
@@ -119,11 +126,22 @@ const SERVE_N = A_SERVE.indexOf(1);
 /** Where each of them stands, beat by beat. The builder comes in on b1, the adviser on b2. */
 const PL_X = BEATS.map((_, n) => (n === 0 ? -30 : 146));
 const TH_X = BEATS.map((b) => (b.th ? 66 : -40));
-const BK_X = [366, 366, 366, 286, 286, 286, 184, 280, 280, 198, 198, 198];
-/** Which way each faces: the builder turns to the adviser while he first speaks. */
-const PL_D = [1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1];
-const TH_D = BEATS.map(() => 1);
-const BK_D = BEATS.map(() => -1);
+const BK_X = [366, 366, 366, 286, 286, 274, 184, 280, 280, 186, 186, 186];
+/**
+ * Which way each faces, and when he turns: per beat, [share of the line, facing]. The
+ * builder turns to the adviser while he first speaks; the baker TURNS to what she
+ * reaches for (AR4) — the cake under the counter, her notepad — and back to him.
+ */
+type Track = readonly (readonly number[])[];
+const PL_TURN: Track[] = [[1], [1], [-1], [-1], [-1], [1], [-1], [1], [1], [1], [1], [1]].map((d) => [[0, d[0]]]);
+const TH_TURN: Track[] = BEATS.map(() => [[0, 1]]);
+const BK_TURN: Track[] = [
+  [[0, -1]], [[0, -1]], [[0, -1]],
+  [[0, -1], [0.28, 1], [0.6, -1]],                // b3 the cake up from under the counter
+  [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1]],
+  [[0, -1], [0.78, 1], [0.88, -1]],               // b9 her notepad off the counter
+  [[0, -1]], [[0, -1]],
+];
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const PL_P = [LISTEN, TALK, LISTEN, NOD, WAIT, LISTEN, NOD, TALK, WAIT, NOD, NOD, LISTEN];
 const TH_P = [LISTEN, LISTEN, EXPLAIN, EXPLAIN, WAIT, LISTEN, EXPLAIN, LISTEN, WAIT, NOD, NOD, LISTEN];
@@ -150,6 +168,13 @@ const TRAY_ROLL = { x: HOT_AT.x + 9, y: HOT_AT.y - 1 };
 /** She holds the tray by its near end: her front hand this far along from its middle. */
 const TRAY_GRIP = 9;
 const CUP_AT = { x: 166, y: TOP - 4 };
+/** A teacup is held by its SAUCER, flat on the palm (AR2): the cup's middle this far above the wrist. */
+const SAUCER_UP = 5;
+/** A mug in her hand is held by its handle; in his, round its body: the mug's middle from the wrist. */
+const MUG_GRIP = { x: -5.7, y: -0.3 };
+const MUG_BODY = { x: 1.2, y: -1 };
+/** A notepad is held by its bottom edge: its middle this far above the wrist. */
+const NOTE_UP = 6;
 /** Where he puts the little cup back, at his own end, clear of the hand-offs. */
 const CUP_BACK = { x: 157, y: TOP - 4 };
 /** The door's bar handle, taken at its near end, beside the oven. */
@@ -158,16 +183,18 @@ const POT = { w: 18, h: 12.6 };
 const POT_AT = { x: 178, y: TOP - POT.h / 2 - 0.4 };
 const GRIP = { x: (TEAPOT_GRIP.x / 20 - 0.5) * POT.w, y: (TEAPOT_GRIP.y / 14 - 0.5) * POT.h };
 const SPOUT = { x: (TEAPOT_SPOUT.x / 20 - 0.5) * POT.w, y: (TEAPOT_SPOUT.y / 14 - 0.5) * POT.h };
-const NOTE_AT = { x: 212, y: TOP - 7 };
+const NOTE_AT = { x: 204, y: TOP - 7 };
 const CAKE_AT = { x: 302, y: TOP - 14 };
 const MAC = { x: 344, y: TOP - 6.5, w: 40, h: 13 };
 const GAP = { x: MAC.x - MAC.w / 2 + MACARON_GAP.x, y: MAC.y - MAC.h / 2 + MACARON_GAP.y };
 const BOOK_AT = { x: 288, y: 388 };
 const BALL_AT = { x: 352, y: 388 };
 /** Where a thing passes over the counter's end from one hand to the other. */
-const PASS = { x: 172, y: 455 };
+const PASS = { x: 166, y: 455 };
 /** Under the counter, where the cups and the cake are kept. */
 const BELOW = 491;
+/** Where the big mug is kept under the counter, in front of her at the pass. */
+const MUG_UNDER = 180;
 const POUR_HAND = { x: 181, y: 452 };
 const TILT = -38;
 
@@ -189,7 +216,9 @@ const CAKE_ART = cakeStand(0, 0, 26, 28);
 const POT_ART = teapot(0, 0, POT.w, POT.h);
 const CUP_ART = teacup(0, 0, 12, 8);
 const MUG_ART = mug(0, 0, 15, 15);
-const NOTE_ART = notepad(0, 0, 12, 14);
+// The notepad's card back is grey board, its pages paper (AR1): the parts the drawing
+// leaves in the stage's tone take board, the rest keep their own colours.
+const NOTE_ART = notepad(0, 0, 12, 14).map((q) => (q.nat || q.role === 'line' || q.role === 'lit' ? q : { ...q, nat: 'cardboard' as NaturalKey }));
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -215,32 +244,61 @@ function via(pts: readonly { x: number; y: number }[], us: readonly number[]) {
   return { x, y };
 }
 /**
+ * A BACK hand brought up in front: it comes forward at the hip first and only then
+ * rises, so on its way up it never passes behind his back (AR4).
+ */
+function lift(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const s1 = hand(s, x, dir, which, x + (dir < 0 ? -10 : 10), GROUND - 26, clamp01(w * 2.5));
+  return hand(s1, x, dir, which, tx, ty, clamp01((w - 0.4) / 0.6));
+}
+/** Which way a figure faces at time `b`, turning through a profile from its facing on screen. */
+function faceOf(src: number, turns: Track, b: number, L: number) {
+  'worklet';
+  let from = src;
+  let d = src;
+  for (let k = 0; k < turns.length; k += 1) {
+    const at = turns[k][0] * L;
+    if (b < at) break;
+    d = facing(from, turns[k][1], b - at);
+    from = turns[k][1];
+  }
+  return d;
+}
+/**
  * One figure's walk and facing for a beat. He walks from WHERE HE IS ON SCREEN — `src`,
  * read out of the carry — not from where the script says the last beat left him, so a
- * tap mid-walk never puts him anywhere in one frame (group L). He faces the way he
- * goes (C18), then turns to whom the beat has him face. `start` holds the walk back
- * until that many seconds into the beat (b9: she serves first, then steps along).
+ * tap mid-walk never puts him anywhere in one frame (group L); and he turns from the
+ * facing on screen (`dsrc`), the same way. He faces the way he goes (C18), then turns
+ * as the beat's track has him. `start` holds the walk back until that many seconds into
+ * the beat (b9: she serves first, then steps along).
  */
-function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number, start: number) {
+function walkOf(
+  src: number, dsrc: number, xs: readonly number[], turns: readonly Track[], codes: readonly number[],
+  n: number, t: number, b: number, L: number, start: number,
+) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
   const xp = src;
   const xn = xs[n];
   const walking = Math.abs(xn - xp) > 1;
-  const walkDur = walking ? moveTr(xp, xn, TR) : 0;
+  const wd = walking ? moveTr(xp, xn, TR) : 0;
   const bw = b - start;
-  const walkU = walking ? ease01(clamp01(bw / walkDur)) : 1;
-  const dp = n > 0 ? ds[p] : ds[n];
-  const way = xn > xp ? 1 : -1;
-  const dirV = walking
-    ? (bw <= 0 ? dp : lerp(facing(dp, way, bw), ds[n], clamp01((bw - walkDur) / 0.3)))
-    : facing(dp, ds[n], b);
+  const walkU = walking ? ease01(clamp01(bw / wd)) : 1;
+  const tk = turns[n];
+  let dirV = faceOf(dsrc, tk, b, L);
+  if (walking && bw > 0 && bw < wd + 0.3) {
+    const way = xn > xp ? 1 : -1;
+    const d0 = faceOf(dsrc, tk, start, L);
+    dirV = lerp(facing(d0, way, bw), faceOf(dsrc, tk, start + wd + 0.3, L), clamp01((bw - wd) / 0.3));
+  }
   // A walk held back starts from the pose he is IN, not the one the last beat left.
   const from = start > 0 ? hLive(codes[n], t, b) : hHold(codes[p], t);
   const s = walking && bw > 0
     ? travelStance(xp, xn, from, hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
     : hLive(codes[n], t, b);
-  return { xp, xn, walking, walkU, walkDur: walkDur + start, dirV, s };
+  return { xp, xn, walking, walkU, walkDur: wd + start, dirV, s };
 }
 
 const CAM = followMoves(BK_X, BEATS.map(kindOf), seedOf('business'));
@@ -249,7 +307,7 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldPl = useHeld();
   const heldTh = useHeld();
   const heldBk = useHeld();
-  const cv = useCarry(16);
+  const cv = useCarry(19);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -268,125 +326,148 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     };
 
     // ── the builder ─────────────────────────────────────────────────────────
-    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src0 = carrySource(cv, 0, n, PL_X[0]);
-    const wp = walkOf(src0, PL_X, PL_D, PL_P, n, t, b, 0);
+    const dsrc0 = carrySource(cv, 16, n, PL_TURN[0][0][1]);
+    const wp = walkOf(src0, dsrc0, PL_X, PL_TURN, PL_P, n, t, b, L, 0);
     const xPl = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
+    const dPl = carry(cv, 16, n, 0, wp.dirV, 1);
     let sp = wp.s;
-    // b1: in from the cold rubbing his hands, then a hand to his brow to peer at the plate
+    // b1: in from the cold with his hands together, a rub of them as he arrives (once
+    // back and forth, AR5), then a hand to his brow to peer at the plate
     if (A_BUILDER[n]) {
-      const jig = Math.sin(b * 14) * 1.6;
-      const rub = st(0, 0.06) * (1 - st(0.58, 0.66));
-      sp = hand(sp, xPl, wp.dirV, 1, xPl + 6 * wp.dirV, 452 + jig, rub);
-      sp = hand(sp, xPl, wp.dirV, -1, xPl + 4 * wp.dirV, 453 - jig, rub);
-      sp = hand(sp, xPl, wp.dirV, 1, xPl + 8, GROUND - 71, st(0.68, 0.76) * (1 - st(0.93, 1)));
+      const ru = clamp01((b / L - 0.48) / 0.14);
+      const jig = Math.sin(ru * Math.PI * 2) * 1.6;
+      const rub = st(0, 0.06) * (1 - st(0.62, 0.68));
+      sp = hand(sp, xPl, dPl, 1, xPl + 6 * dPl, 452 + jig, rub);
+      sp = lift(sp, xPl, dPl, -1, xPl + 4 * dPl, 453 - jig, rub);
+      sp = hand(sp, xPl, dPl, 1, xPl + 8, GROUND - 71, st(0.7, 0.78) * (1 - st(0.93, 1)));
     }
-    // b7: the little cup lifted, held up, his hands spread wide for a bigger one, cup down
+    // b7: the little cup lifted by its saucer and held out in front of him; then his
+    // other hand up above it — "a cup this tall" — both in front of him; the cup down
     if (A_QUIET[n]) {
-      const c = via([CUP_AT, { x: 160, y: 440 }, { x: 176, y: 447 }, { x: 160, y: 440 }, CUP_BACK],
-        [st(0.14, 0.26), st(0.32, 0.42), st(0.6, 0.68), st(0.72, 0.8)]);
-      sp = hand(sp, xPl, wp.dirV, 1, c.x, c.y - 2, st(0.02, 0.1) * (1 - st(0.84, 0.92)));
-      sp = hand(sp, xPl, wp.dirV, -1, 124, 447, st(0.32, 0.42) * (1 - st(0.6, 0.68)));
+      const c = via([{ x: CUP_AT.x, y: CUP_AT.y + SAUCER_UP }, { x: 164, y: 454 }, { x: 164, y: 463 }, { x: 164, y: 454 },
+        { x: CUP_BACK.x, y: CUP_BACK.y + SAUCER_UP }],
+      [st(0.14, 0.26), st(0.32, 0.42), st(0.6, 0.68), st(0.72, 0.8)]);
+      sp = hand(sp, xPl, dPl, 1, c.x, c.y, st(0.02, 0.1) * (1 - st(0.84, 0.92)));
+      sp = lift(sp, xPl, dPl, -1, 157, 437, st(0.3, 0.42) * (1 - st(0.6, 0.7)));
     }
-    // b9: the roll into his left hand, the mug into his right — and he keeps them after
+    // b9: the roll into his left hand, the mug into his right — and he keeps them after,
+    // close in front of him
     if (A_SERVE[n]) {
-      sp = hand(sp, xPl, wp.dirV, -1, lerp(PASS.x - 2, 150, st(0.52, 0.6)), lerp(PASS.y + 1, 461, st(0.52, 0.6)), st(0.38, 0.44));
-      sp = hand(sp, xPl, wp.dirV, 1, lerp(PASS.x - 1, 158, st(0.76, 0.84)), lerp(PASS.y - 2, 456, st(0.76, 0.84)), st(0.62, 0.68));
+      sp = lift(sp, xPl, dPl, -1, lerp(PASS.x - 2, 150, st(0.52, 0.6)), lerp(PASS.y + 1, 461, st(0.52, 0.6)), st(0.36, 0.44));
+      sp = hand(sp, xPl, dPl, 1, lerp(PASS.x - 1, 158, st(0.76, 0.84)), lerp(PASS.y - 2, 462, st(0.76, 0.84)), st(0.62, 0.68));
     }
     if (n > SERVE_N) {
-      sp = hand(sp, xPl, wp.dirV, -1, 150, 461, 1);
-      sp = hand(sp, xPl, wp.dirV, 1, 158, 456, 1);
+      sp = lift(sp, xPl, dPl, -1, 150, 461, 1);
+      sp = hand(sp, xPl, dPl, 1, 158, 462, 1);
     }
     const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t));
     const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));
 
     // ── the adviser ─────────────────────────────────────────────────────────
-    // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src1 = carrySource(cv, 1, n, TH_X[0]);
-    const wt = walkOf(src1, TH_X, TH_D, TH_P, n, t, b, 0);
+    const dsrc1 = carrySource(cv, 17, n, 1);
+    const wt = walkOf(src1, dsrc1, TH_X, TH_TURN, TH_P, n, t, b, L, 0);
     const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
+    const dTh = carry(cv, 17, n, 0, wt.dirV, 1);
     let stp = wt.s;
     // b2: he tips his hat once he has arrived, points at the macarons, then opens a
     // hand to the builder at the counter
     if (A_ARRIVE[n]) {
       const after = wt.walkDur / L;
-      stp = hand(stp, xTh, wt.dirV, 1, xTh + 5, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.15));
-      stp = hand(stp, xTh, wt.dirV, 1, MAC.x, MAC.y - 6, bp(0.42, 0.5, 0.62));
-      stp = hand(stp, xTh, wt.dirV, 1, xTh + 22, 452, bp(0.66, 0.74, 0.97));
+      stp = hand(stp, xTh, dTh, 1, xTh + 5, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.15));
+      stp = hand(stp, xTh, dTh, 1, MAC.x, MAC.y - 6, bp(0.42, 0.5, 0.62));
+      stp = hand(stp, xTh, dTh, 1, xTh + 22, 452, bp(0.66, 0.74, 0.97));
     }
-    // b3: a hand open to the builder, then his own arms rubbed against the cold
+    // b3: a hand open to the builder; then his arms hugged across his chest against the
+    // cold, a rub up and down them once (AR5), both hands in front of him
     if (A_DEFINE[n]) {
-      stp = hand(stp, xTh, wt.dirV, 1, xTh + 22, 450, bp(0.04, 0.12, 0.44));
-      const jig = Math.sin(b * 12) * 1.5;
-      const rub = st(0.5, 0.58) * (1 - st(0.9, 0.98));
-      stp = hand(stp, xTh, wt.dirV, 1, xTh - 3, 451 + jig, rub);
-      stp = hand(stp, xTh, wt.dirV, -1, xTh + 6, 452 - jig, rub);
+      stp = hand(stp, xTh, dTh, 1, xTh + 22, 450, bp(0.04, 0.12, 0.44));
+      const ru = clamp01((b / L - 0.6) / 0.2);
+      const jig = Math.sin(ru * Math.PI * 2) * 1.5;
+      const rub = st(0.5, 0.58) * (1 - st(0.88, 0.96));
+      stp = hand(stp, xTh, dTh, 1, xTh + 5, 453 + jig, rub);
+      stp = lift(stp, xTh, dTh, -1, xTh + 8, 452 - jig, rub);
     }
-    // b6: a tap on the side of his head — a guess — then a hand out to what is selling
+    // b6: two taps on the side of his head — a guess — then a hand out to what is selling
     if (A_GUESS[n]) {
-      const tap = Math.abs(Math.sin(b * 9)) * 2;
-      stp = hand(stp, xTh, wt.dirV, 1, xTh + 6, GROUND - 72 + tap * st(0.06, 0.1), bp(0.02, 0.08, 0.38));
-      stp = hand(stp, xTh, wt.dirV, 1, HOT_AT.x, HOT_AT.y - 6, st(0.46, 0.54) * (1 - st(0.92, 1)));
+      const tu = clamp01((b / L - 0.1) / 0.2);
+      const tap = Math.abs(Math.sin(tu * Math.PI * 2)) * 2;
+      stp = hand(stp, xTh, dTh, 1, xTh + 6, GROUND - 72 + tap, bp(0.02, 0.08, 0.38));
+      stp = hand(stp, xTh, dTh, 1, HOT_AT.x, HOT_AT.y - 6, st(0.46, 0.54) * (1 - st(0.92, 1)));
     }
     const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
     const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, tr) : mixStance(prevTh, stp, tr));
 
     // ── the baker, behind her counter ───────────────────────────────────────
-    // where she stands on screen at this beat's first frame (from the start when nothing is drawn yet)
+    // where she stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src2 = carrySource(cv, 2, n, BK_X[0]);
-    const wk = walkOf(src2, BK_X, BK_D, BK_P, n, t, b, A_SERVE[n] ? SERVE_STEP * L : 0);
+    const dsrc2 = carrySource(cv, 18, n, -1);
+    const wk = walkOf(src2, dsrc2, BK_X, BK_TURN, BK_P, n, t, b, L, A_SERVE[n] ? SERVE_STEP * L : 0);
     const xBk = carry(cv, 2, n, wk.xp, wk.xn, wk.walking ? wk.walkU : tr);
+    const dBk = carry(cv, 18, n, 0, wk.dirV, 1);
     let sk = wk.s;
     // b0: the last macaron into its gap, her hands clasped at the row, then a hand out
     // of the window to the site next door
     if (A_DISPLAY[n]) {
       const m = via([{ x: xBk - 6, y: 452 }, { x: GAP.x, y: GAP.y - 2 }], [st(0.1, 0.3)]);
-      sk = hand(sk, xBk, wk.dirV, 1, m.x, m.y, 1 - st(0.36, 0.44));
-      sk = hand(sk, xBk, wk.dirV, 1, xBk - 6, 449, bp(0.38, 0.48, 0.6));
-      sk = hand(sk, xBk, wk.dirV, -1, xBk - 4, 450, bp(0.38, 0.48, 0.6));
-      sk = hand(sk, xBk, wk.dirV, 1, 60, 396, st(0.6, 0.7) * (1 - st(0.92, 1)));
+      sk = hand(sk, xBk, dBk, 1, m.x, m.y, 1 - st(0.36, 0.44));
+      sk = hand(sk, xBk, dBk, 1, xBk - 6, 449, bp(0.38, 0.48, 0.6));
+      sk = lift(sk, xBk, dBk, -1, xBk - 4, 450, bp(0.38, 0.48, 0.6));
+      sk = hand(sk, xBk, dBk, 1, 60, 396, st(0.6, 0.7) * (1 - st(0.92, 1)));
     }
-    // b3: the cake up from under the counter and set beside the macarons
-    const cakeNow = A_DEFINE[n] ? st(0.22, 0.42) : n > DEFINE_N ? 1 : 0;
+    // b3: turned to it, the cake up from under the counter and set beside the macarons;
+    // then she turns back to them
+    const cakeNow = A_DEFINE[n] ? st(0.36, 0.5) : n > DEFINE_N ? 1 : 0;
     if (A_DEFINE[n]) {
       const cy = lerp(BELOW, CAKE_AT.y, cakeNow);
-      sk = hand(sk, xBk, wk.dirV, 1, CAKE_AT.x + 4, cy + 4, st(0.14, 0.2) * (1 - st(0.48, 0.56)));
+      sk = hand(sk, xBk, dBk, 1, CAKE_AT.x + 4, cy + 4, st(0.32, 0.38) * (1 - st(0.52, 0.58)));
     }
-    // b5: the oven door dropped, the hot rolls slid out and set at the front, door shut
+    // b5: the oven door dropped by its handle, the hot tray slid out by its near end and
+    // set at the front, the door shut. One hand works the door, the other the tray, so
+    // neither goes up and down over and over (AR5).
     const doorNow = A_BAKE[n] ? st(0.27, 0.33) * (1 - st(0.78, 0.86)) : 0;
     if (A_BAKE[n]) {
       const hy = lerp(HANDLE.y, HANDLE_DOWN.y, doorNow);
-      sk = hand(sk, xBk, wk.dirV, 1, GRAB_X, hy, st(0.22, 0.27) * (1 - st(0.33, 0.37)));
+      sk = lift(sk, xBk, dBk, -1, GRAB_X, hy, st(0.2, 0.27) * (1 - st(0.33, 0.37)));
       const tray = via([DECK, { x: DECK.x + 16, y: DECK.y + 3 }, { x: HOT_AT.x, y: HOT_AT.y - 3 }], [st(0.46, 0.56), st(0.6, 0.68)]);
-      const take = st(0.36, 0.42) * (1 - st(0.7, 0.74));
-      sk = hand(sk, xBk, wk.dirV, 1, tray.x + TRAY_GRIP, tray.y, take);
-      sk = hand(sk, xBk, wk.dirV, -1, tray.x + TRAY_GRIP + 6, tray.y + 1, take);
-      sk = hand(sk, xBk, wk.dirV, 1, GRAB_X, hy, st(0.74, 0.78) * (1 - st(0.86, 0.9)));
+      sk = hand(sk, xBk, dBk, 1, tray.x + TRAY_GRIP, tray.y, st(0.36, 0.42) * (1 - st(0.7, 0.74)));
+      sk = lift(sk, xBk, dBk, -1, GRAB_X, hy, st(0.72, 0.78) * (1 - st(0.86, 0.9)));
     }
-    // b6: a little cup up from under the counter and set down for him; the teapot
-    // lifted by its handle, tipped over the cup, and put back
+    // b6: a little cup and saucer up from under the counter and set down for him; the
+    // teapot lifted by its handle, tipped over the cup, and put back
     const cupLift = A_GUESS[n] ? st(0.33, 0.42) : 0;
     const potHold = A_GUESS[n] ? st(0.56, 0.58) * (1 - st(0.86, 0.88)) : 0;
     const tiltNow = A_GUESS[n] ? st(0.63, 0.67) * (1 - st(0.74, 0.78)) : 0;
     const pourNow = A_GUESS[n] ? bp(0.66, 0.7, 0.77) : 0;
     if (A_GUESS[n]) {
-      const c = via([{ x: 176, y: 482 }, { x: 176, y: 460 }, { x: CUP_AT.x + 2, y: CUP_AT.y - 3 }], [st(0.35, 0.42), st(0.44, 0.5)]);
-      sk = hand(sk, xBk, wk.dirV, 1, c.x, c.y, st(0.31, 0.35) * (1 - st(0.52, 0.56)));
+      const c = via([{ x: 176, y: 482 }, { x: 176, y: 460 }, { x: CUP_AT.x + 2, y: CUP_AT.y + SAUCER_UP }], [st(0.35, 0.42), st(0.44, 0.5)]);
+      sk = hand(sk, xBk, dBk, 1, c.x, c.y, st(0.31, 0.35) * (1 - st(0.52, 0.56)));
       const g = { x: POT_AT.x + GRIP.x, y: POT_AT.y + GRIP.y };
       const h = via([g, POUR_HAND, g], [st(0.57, 0.63), st(0.79, 0.86)]);
-      sk = hand(sk, xBk, wk.dirV, -1, h.x, h.y, st(0.52, 0.56) * (1 - st(0.88, 0.93)));
+      sk = lift(sk, xBk, dBk, -1, h.x, h.y, st(0.52, 0.56) * (1 - st(0.88, 0.93)));
     }
-    // b9: a roll from the tray over the counter, a big mug of tea up from under it and
-    // over, then along to her notepad and up with it
+    // b9: a roll from the tray over the counter, a big mug of tea up from under it by its
+    // handle and over; then turned to it, her notepad off the counter, and turned back
+    // to him she holds it up. While she turns it is held in front of her (xBk + dBk·lx).
     if (A_SERVE[n]) {
       const r = via([TRAY_ROLL, { x: xBk - 9, y: 456 }, PASS], [st(0.07, 0.12), st(0.4, 0.47)]);
-      sk = hand(sk, xBk, wk.dirV, 1, r.x, r.y, st(0, 0.05) * (1 - st(0.5, 0.56)));
-      const m = via([{ x: 194, y: 482 }, { x: 190, y: 456 }, { x: PASS.x + 1, y: PASS.y - 2 }], [st(0.56, 0.62), st(0.62, 0.7)]);
-      sk = hand(sk, xBk, wk.dirV, -1, m.x, m.y, st(0.5, 0.56) * (1 - st(0.74, 0.8)));
-      const nt = via([{ x: NOTE_AT.x, y: NOTE_AT.y - 2 }, { x: xBk - 15, y: 440 }], [st(0.86, 0.94)]);
-      sk = hand(sk, xBk, wk.dirV, 1, nt.x, nt.y, st(0.8, 0.85));
+      sk = hand(sk, xBk, dBk, 1, r.x, r.y, st(0, 0.05) * (1 - st(0.5, 0.56)));
+      // the mug hand goes down for it and, once it is handed over, down to her hip and away
+      const m = via([{ x: MUG_UNDER, y: 482 }, { x: MUG_UNDER - 2, y: 456 }, { x: PASS.x + 1, y: PASS.y - 2 },
+        { x: xBk + dBk * 8, y: 474 }], [st(0.56, 0.62), st(0.62, 0.7), st(0.74, 0.8)]);
+      sk = hand(sk, xBk, dBk, -1, m.x, m.y, st(0.5, 0.56) * (1 - st(0.8, 0.86)));
+      const lx = lerp(lerp(NOTE_AT.x - xBk, 14, st(0.86, 0.9)), 15, st(0.94, 1.02));
+      const ly = lerp(NOTE_AT.y + NOTE_UP, 440, st(0.94, 1.02));
+      sk = hand(sk, xBk, dBk, 1, xBk + dBk * lx, ly, st(0.8, 0.86));
     }
-    if (n > SERVE_N) sk = hand(sk, xBk, wk.dirV, 1, xBk - 15, 442, 1);
+    // after, she holds the notepad close in front of her while she listens
+    if (n > SERVE_N) {
+      const down = st(0.04, 0.24);
+      sk = hand(sk, xBk, dBk, 1, xBk + dBk * lerp(15, 12, down), lerp(440, 461, down), 1);
+    }
     const prevBk = carryFrom(heldBk, n, hHold(BK_P[p], t));
     const figBk = keepHeld(heldBk, wk.walking ? mixKeepLegs(prevBk, sk, tr) : mixStance(prevBk, sk, tr));
 
@@ -403,14 +484,14 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // mugT   0 under the counter · 1 her hand · 2 his
     const mugNow = A_SERVE[n] ? st(0.54, 0.62) + st(0.7, 0.74) : n > SERVE_N ? 2 : 0;
     // note   0 on the counter · 1 in her hand
-    const noteNow = A_SERVE[n] ? st(0.84, 0.86) : n > SERVE_N ? 1 : 0;
+    const noteNow = A_SERVE[n] ? st(0.85, 0.87) : n > SERVE_N ? 1 : 0;
     // steam over the rolls and the tea, once there is something hot
     const steamNow = A_BAKE[n] ? st(0.6, 0.72) : n > BAKE_N ? 1 : 0;
 
     return {
-      pl: pose(figPl, xPl, GROUND, K, wp.dirV, 1),
-      th: pose(figTh, xTh, GROUND, K, wt.dirV, 1),
-      bk: pose(figBk, xBk, GROUND, K, wk.dirV, 1),
+      pl: pose(figPl, xPl, GROUND, K, dPl, 1),
+      th: pose(figTh, xTh, GROUND, K, dTh, 1),
+      bk: pose(figBk, xBk, GROUND, K, dBk, 1),
       mac: carry(cv, 3, n, macNow, macNow, tr),
       cake: carry(cv, 4, n, cakeNow, cakeNow, tr),
       door: carry(cv, 5, n, doorNow, doorNow, tr),
@@ -523,23 +604,28 @@ function UnderCounter({ S, DK, DP, clock }: {
   S: SharedValue<any>; DK: SharedValue<Bundle>; DP: SharedValue<Bundle>; clock: SharedValue<number>;
 }) {
   const cakeP = useDerivedValue<Pt>(() => ({ x: CAKE_AT.x, y: lerp(BELOW, CAKE_AT.y, S.value.cake), o: S.value.cake > 0.01 ? 1 : 0 }));
+  // The cup and saucer ride on a flat palm, the saucer on the hand (AR2), level.
   const cupP = useDerivedValue<Pt>(() => {
     const u = S.value.cup;
     const bk = wrist(DK, 'wrR');
     const pl = wrist(DP, 'wrR');
     if (u <= 0.01) return { x: 176, y: BELOW, o: 0 };
-    if (u <= 1) return { x: lerp(176, bk.x, u), y: lerp(BELOW, bk.y + 2, u), o: 1 };
-    if (u <= 2) return { x: lerp(bk.x, CUP_AT.x, u - 1), y: lerp(bk.y + 2, CUP_AT.y, u - 1), o: 1 };
-    if (u <= 3) return { x: lerp(CUP_AT.x, pl.x, u - 2), y: lerp(CUP_AT.y, pl.y + 1, u - 2), o: 1 };
-    return { x: lerp(pl.x, CUP_BACK.x, u - 3), y: lerp(pl.y + 1, CUP_BACK.y, u - 3), o: 1 };
+    if (u <= 1) return { x: lerp(176, bk.x, u), y: lerp(BELOW, bk.y - SAUCER_UP, u), o: 1 };
+    if (u <= 2) return { x: lerp(bk.x, CUP_AT.x, u - 1), y: lerp(bk.y - SAUCER_UP, CUP_AT.y, u - 1), o: 1 };
+    if (u <= 3) return { x: lerp(CUP_AT.x, pl.x, u - 2), y: lerp(CUP_AT.y, pl.y - SAUCER_UP, u - 2), o: 1 };
+    return { x: lerp(pl.x, CUP_BACK.x, u - 3), y: lerp(pl.y - SAUCER_UP, CUP_BACK.y, u - 3), o: 1 };
   });
+  // The mug: up from under the counter by its handle in her hand, and taken round its
+  // body in his, its handle still toward her (AR2).
   const mugP = useDerivedValue<Pt>(() => {
     const u = S.value.mugT;
     const bk = wrist(DK, 'wrL');
     const pl = wrist(DP, 'wrR');
-    if (u <= 0.01) return { x: 192, y: BELOW, o: 0 };
-    if (u <= 1) return { x: lerp(192, bk.x, u), y: lerp(BELOW, bk.y + 1, u), o: 1 };
-    return { x: lerp(bk.x, pl.x, u - 1), y: lerp(bk.y + 1, pl.y + 1, u - 1), o: 1 };
+    const hx = bk.x + MUG_GRIP.x;
+    const hy = bk.y + MUG_GRIP.y;
+    if (u <= 0.01) return { x: MUG_UNDER, y: BELOW, o: 0 };
+    if (u <= 1) return { x: lerp(MUG_UNDER, hx, u), y: lerp(BELOW, hy, u), o: 1 };
+    return { x: lerp(hx, pl.x + MUG_BODY.x, u - 1), y: lerp(hy, pl.y + MUG_BODY.y, u - 1), o: 1 };
   });
   const cupSteam = useDerivedValue<Pt>(() => {
     const c = cupP.value;
@@ -602,10 +688,11 @@ function OnCounter({ S, DK, DP, clock }: {
     if (u <= 1) return { x: lerp(TRAY_ROLL.x, bk.x, u), y: lerp(TRAY_ROLL.y, bk.y + 1, u), o: clamp01(u * 8) };
     return { x: lerp(bk.x, pl.x, u - 1), y: lerp(bk.y + 1, pl.y + 1, u - 1), o: 1 };
   });
+  // The notepad is held by its bottom edge, upright.
   const noteP = useDerivedValue<Pt>(() => {
     const u = S.value.note;
     const a = wrist(DK, 'wrR');
-    return { x: lerp(NOTE_AT.x, a.x, u), y: lerp(NOTE_AT.y, a.y - 3, u), o: 1 };
+    return { x: lerp(NOTE_AT.x, a.x, u), y: lerp(NOTE_AT.y, a.y - NOTE_UP, u), o: 1 };
   });
   const hotSteam = useDerivedValue<Pt>(() => {
     const h = hotP.value;
@@ -723,10 +810,12 @@ const styles = StyleSheet.create({
   under: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: TOP + 24, overflow: 'hidden' },
   board: {
     position: 'absolute', left: 150, top: 344, width: 100, height: 24, borderRadius: 3,
-    backgroundColor: PLATE_FACE, borderWidth: 1.4, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+    // the shop's painted sign, in the same duck-egg as its counter and window frame (AR1)
+    backgroundColor: NATURAL.duckEgg.base, borderWidth: 1.4, borderColor: INK, alignItems: 'center', justifyContent: 'center',
   },
   boardText: {
-    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 16, letterSpacing: 2.4, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 16, letterSpacing: 2.4, color: NATURAL.duckEgg.label,
+    includeFontPadding: false,
   },
   mouthGlow: {
     position: 'absolute', left: MOUTH.x - MOUTH.w / 2 + 1, top: MOUTH.y - MOUTH.h / 2 + 1, width: MOUTH.w - 2, height: MOUTH.h - 2,

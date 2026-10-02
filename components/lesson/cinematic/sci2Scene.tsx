@@ -148,8 +148,12 @@ const HOLD_OFF = 4;
 const SHOW = { x: 352, y: 451 };
 /** Where the cap hands her the chalk. */
 const PASS = { x: 262, y: 458 };
-/** The tally she chalks on the middle riser's right-hand end. */
-const TALLY_X = [184, 188.5, 193, 197.5];
+/** The tally she chalks on the middle riser's right-hand end: the first two throws. */
+const TALLY_X = [184, 188.5];
+const TALLY_N = TALLY_X.length;
+/** Her two fists up in front of her, in a cheer: the far one higher, both clear of her head. */
+const CHEER_FAR = 20;
+const CHEER_NEAR = 15;
 const TALLY_TOP = RISER[1] + 2.5;
 const TALLY_LEN = 7.5;
 
@@ -180,7 +184,7 @@ const BUN_TURN: Track[] = [
 ];
 const CAP_LEGS: Track[] = BEATS.map((_, n) => (n < 6 ? [[0, CAP_X0]] : n === 6 ? [[0.02, CAP_X0 + 14], [0.33, CAP_LINE]] : [[0, CAP_LINE]]));
 const CAP_TURN: Track[] = [
-  [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1], [0.4, -1]], [[0.02, 1]],
+  [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1]], [[0, 1], [0.66, -1], [0.88, 1]], [[0, 1], [0.4, -1]], [[0.02, 1]],
   [[0, 1]], [[0, -1]], [[0, -1]], [[0, -1]],
 ];
 /** The scientist is off the stage, right, until he walks in on b3. */
@@ -398,7 +402,9 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // b0: her plane at her chest up the steps, then held up on "Watch this!"
     if (A_BOAST[n]) {
       const up = st(0.72, 0.82);
-      sb = hand(sb, xB, gB, dB, 1, xB + lerp(9, 10, up) * dB, gB - lerp(46, 72, up), 1);
+      // the target rides her own knee-bend (ft.bob) so the plane stays still at her chest
+      // through every step, rather than bobbing in her hand on each tread (AR5, AR6)
+      sb = hand(sb, xB, gB, dB, 1, xB + lerp(9, 10, up) * dB, gB - lerp(46, 72, up) - ft.bob * K * ft.w, 1);
     }
     // b1: wound back over her shoulder, and thrown out off the top step
     if (A_THROW[n]) {
@@ -408,13 +414,14 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const ty = lerp(lerp(gB - 72, gB - 66, back), gB - 60, fwd);
       sb = hand(sb, xB, gB, dB, 1, tx, ty, 1 - st(0.3, 0.42));
     }
-    // b2: both arms up once she is down on the bottom step
+    // b2: both fists up IN FRONT of her once she is down on the bottom step, toward the
+    // man she is crowing at, and one pump. Clear of her head (a hand straight up is lost
+    // in the head's silhouette) and never thrown back behind it (AR4).
     if (A_CLAIM[n]) {
       const up = st(0.36, 0.48);
       const pump = 3 * Math.sin(Math.PI * 2 * clamp01((f - 0.5) / 0.4)) * st(0.48, 0.52);
-      // a V, clear of her head: a hand straight up is lost in the head's silhouette
-      sb = hand(sb, xB, gB, dB, 1, xB + 26 * dB, gB - 64 - pump, up);
-      sb = hand(sb, xB, gB, dB, -1, xB - 24 * dB, gB - 63 - pump, up);
+      sb = hand(sb, xB, gB, dB, 1, xB + CHEER_FAR * dB, gB - 60 - pump, up);
+      sb = hand(sb, xB, gB, dB, -1, xB + CHEER_NEAR * dB, gB - 55 - pump, up);
     }
     // b6: out to catch her plane as it floats back to her
     if (A_LINE[n]) sb = hand(sb, xB, gB, dB, 1, xB + 14 * dB, 456, st(0.88, 0.95));
@@ -427,8 +434,8 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const ty = lerp(lerp(456, 432, back), 434, fwd);
       sb = hand(sb, xB, gB, dB, 1, tx, ty, 1 - st(0.16, 0.24));
       const cheer = bp(0.28, 0.34, 0.46);
-      sb = hand(sb, xB, gB, dB, 1, xB + 26 * dB, gB - 64, cheer);
-      sb = hand(sb, xB, gB, dB, -1, xB - 24 * dB, gB - 63, cheer);
+      sb = hand(sb, xB, gB, dB, 1, xB + CHEER_FAR * dB, gB - 60, cheer);
+      sb = hand(sb, xB, gB, dB, -1, xB + CHEER_NEAR * dB, gB - 55, cheer);
       sb = hand(sb, xB, gB, dB, 1, xB + 40 * dB, 470, bp(0.5, 0.58, 0.72));
       sb = hand(sb, xB, gB, dB, -1, xB + 6 * dB, gB - 76, bp(0.76, 0.82, 0.98));
     }
@@ -438,17 +445,24 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sb = hand(sb, xB, gB, dB, 1, PASS.x, PASS.y, bp(0.08, 0.15, 0.22));
       sqB = st(0.42, 0.5);
       sb = crouch(sb, sqB);
-      // each stroke drawn top to bottom, then the chalk lifted across to the next
-      const g = clamp01((f - 0.52) / 0.36) * 4;
-      const k = Math.min(3, Math.floor(g));
+      // the first two throws chalked: each stroke drawn top to bottom, then the chalk
+      // lifted across to the next — two strokes, then the hand rests (AR5)
+      const g = clamp01((f - 0.52) / 0.36) * TALLY_N;
+      const k = Math.min(TALLY_N - 1, Math.floor(g));
       const ph = g - k;
       const down = clamp01(ph / 0.7);
-      const over = k < 3 ? clamp01((ph - 0.7) / 0.3) : 0;
-      const tx = lerp(TALLY_X[k], TALLY_X[Math.min(3, k + 1)], ease01(over));
+      const over = k < TALLY_N - 1 ? clamp01((ph - 0.7) / 0.3) : 0;
+      const tx = lerp(TALLY_X[k], TALLY_X[Math.min(TALLY_N - 1, k + 1)], ease01(over));
       const ty = TALLY_TOP + TALLY_LEN * down * (1 - ease01(over));
       sb = hand(sb, xB, gB, dB, 1, tx, ty, st(0.46, 0.52) * (1 - st(0.92, 1)));
     }
-    if (A_REST[n]) sb = crouch(sb, 1 - st(0, 0.12));
+    if (A_REST[n]) {
+      sqB = 1 - st(0, 0.12);
+      sb = crouch(sb, sqB);
+    }
+    // down on her heels, her free hand rests on her front knee — never left hanging
+    // behind a body that leans forward (AR4)
+    sb = hand(sb, xB, gB, dB, -1, xB + 8 * dB, gB - 15, sqB);
     const prevB = carryFrom(heldB, n, hHold(BUN_P[p], t));
     const figB = keepHeld(heldB, wb.walking || ft.w > 0 ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
@@ -474,7 +488,11 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sc = crouch(sc, sqC);
       sc = hand(sc, xC, GROUND, dC, 1, HIS_NEAR - HOLD_OFF, 502, bp(0.14, 0.2, 0.3));
       sc = hand(sc, xC, GROUND, dC, 1, xC + 8 * dC, 464, st(0.26, 0.32));
-      sc = hand(sc, xC, GROUND, dC, -1, xC - 16 * dC, 452 + 3 * Math.sin(t * 9), bp(0.7, 0.76, 0.86)); // AP18: beckoning her over
+      // turned to face her (CAP_TURN), his hand out in front and two curls of it, then
+      // down (AR4: not waved behind him; AR5: two strokes and the hand rests)
+      const cs = Math.sin(Math.PI * 2 * clamp01((f - 0.74) / 0.1));
+      const curl = 3.5 * cs * cs;
+      sc = hand(sc, xC, GROUND, dC, -1, xC + (17 - curl) * dC, 452 - curl, bp(0.7, 0.74, 0.86)); // AP18: beckoning her over, twice
     }
     // b7: from his chest, wound back and thrown
     if (A_RETRY[n]) {
@@ -490,8 +508,9 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sc = hand(sc, xC, GROUND, dC, 1, xC + 3 * dC, 470, bp(0.0, 0.04, 0.08));
       sc = hand(sc, xC, GROUND, dC, 1, PASS.x, PASS.y, bp(0.06, 0.14, 0.24));
       const wide = bp(0.74, 0.82, 0.98);
-      sc = hand(sc, xC, GROUND, dC, 1, xC + 16 * dC, 432, wide);
-      sc = hand(sc, xC, GROUND, dC, -1, xC - 14 * dC, 434, wide);
+      // both arms open IN FRONT of him, to the day and to her (AR4)
+      sc = hand(sc, xC, GROUND, dC, 1, xC + 20 * dC, 436, wide);
+      sc = hand(sc, xC, GROUND, dC, -1, xC + 12 * dC, 444, wide);
     }
     const prevC = carryFrom(heldC, n, hHold(CAP_P[p], t));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
@@ -520,13 +539,28 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sqT = st(0.14, 0.2) * (1 - st(0.27, 0.32)) + st(0.56, 0.62) * (1 - st(0.74, 0.8));
       stt = crouch(stt, sqT);
       stt = hand(stt, xT, GROUND, dT, -1, CASE.x, CASE.y - 2, bp(0.15, 0.22, 0.3));
-      stt = hand(stt, xT, GROUND, dT, 1, SLOT.x + 1, SLOT.y - 2, bp(0.2, 0.25, 0.3));
-      // the blade walked out along the grass, the hook laid, her plane picked up
-      stt = hand(stt, xT, GROUND, dT, 1, xT + 12 * dT, 482, st(0.28, 0.34) * (1 - st(0.56, 0.6)));
-      stt = hand(stt, xT, GROUND, dT, 1, HOOK.x, HOOK.y - 3, bp(0.57, 0.62, 0.66));
-      stt = hand(stt, xT, GROUND, dT, 1, HERS_FAR - HOLD_OFF, 501, bp(0.64, 0.69, 0.76));
-      stt = hand(stt, xT, GROUND, dT, 1, xT + 9 * dT, 462, st(0.74, 0.8) * (1 - st(0.86, 0.94)));
-      stt = hand(stt, xT, GROUND, dT, 1, SHOW.x, SHOW.y, st(0.88, 0.96));
+      // ONE PATH for the working hand, each place handed straight on to the next — the
+      // hook out of the slot, the blade walked out along the grass, the hook laid, her
+      // plane picked up, held at his chest, held out — never back to his side between
+      // them, which read as the same jab over and over (AR5)
+      const PATH = [
+        [xT + 12 * dT, 482, 0.28, 0.34],
+        [HOOK.x, HOOK.y - 3, 0.57, 0.62],
+        [HERS_FAR - HOLD_OFF, 501, 0.64, 0.69],
+        [xT + 9 * dT, 462, 0.74, 0.8],
+        [SHOW.x, SHOW.y, 0.88, 0.96],
+      ];
+      let wx = SLOT.x + 1;
+      let wy = SLOT.y - 2;
+      for (let k = 0; k < PATH.length; k += 1) {
+        const u = st(PATH[k][2], PATH[k][3]);
+        wx = lerp(wx, PATH[k][0], u);
+        wy = lerp(wy, PATH[k][1], u);
+      }
+      stt = hand(stt, xT, GROUND, dT, 1, wx, wy, st(0.2, 0.25));
+      // down on his heels to lay the hook, his free hand on his front knee (AR4)
+      const knee = st(0.22, 0.26) * (1 - st(0.27, 0.32)) + st(0.56, 0.62) * (1 - st(0.74, 0.8));
+      stt = hand(stt, xT, GROUND, dT, -1, xT + 8 * dT, GROUND - 15, knee);
     }
     // b5: her plane held out for the question; b6: held, then floated back to her
     if (n === 5) stt = hand(stt, xT, GROUND, dT, 1, SHOW.x, SHOW.y, 1);
@@ -615,7 +649,7 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const chalkAt = { x: lerp(wC.x, wB.x, chalkT), y: lerp(wC.y, wB.y, chalkT) };
     // the tally, stroke by stroke
     const marksNow = A_TALLY[n]
-      ? st(0.52, 0.583) + st(0.61, 0.673) + st(0.7, 0.763) + st(0.79, 0.853)
+      ? st(0.52, 0.646) + st(0.7, 0.826)
       : n > 10 ? MARKS[n] : 0;
     // the rows on the risers: 0 none · 1 all three · 2 only the right one left
     const rowsNow = n === 9 ? 1 : n > 9 ? 2 : 0;

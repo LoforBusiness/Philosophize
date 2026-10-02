@@ -36,7 +36,7 @@ import { BY_ID } from './wardrobe';
 // knows it is his own tea mug; the psychologist (the top hat) walks in and shows how a
 // label sets what you see before you look.
 //
-//   b0   the visitor leans in to the showcase, hands behind his back, and peers; the
+//   b0   the visitor leans in to the showcase, hands clasped at his waist, and peers; the
 //        attendant sits on his stool under the window and nods along.
 //   b1   the attendant gets up, points at his mug, and walks round behind the plinth.
 //   b2   the psychologist walks in from the right, tips his hat, and taps his temple
@@ -73,7 +73,7 @@ import { BY_ID } from './wardrobe';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('psychology');
-const { RULE, STONE } = TONE;
+const { RULE } = TONE;
 const TR = 0.85;
 /** 78 units of figure in a 208-unit band: 37.5%, under check:scale's 38%. */
 const K = K_FIG * 0.76;
@@ -127,9 +127,15 @@ const VIS_LEGS: Track[] = BEATS.map((_, n) => (
 ));
 const VIS_TURN: Track[] = BEATS.map((_, n) => (n === 10 ? [[0, 1], [0.32, -1], [0.62, 1]] : [[0, 1]]));
 const ATT_LEGS: Track[] = BEATS.map((_, n) => (n === 0 ? [[0, A_X0]] : n === 1 ? [[0.36, A_X]] : [[0, A_X]]));
-/** He faces the visitor, turns to the psychologist when he walks in, and back for the mug. */
+/**
+ * He faces the visitor, turns to the psychologist when he walks in, and back for the mug.
+ * The mug stands in the case to his RIGHT, so he turns to it to lift it out (b7) and to
+ * put it back (b10), and turns back to the visitor with it: a thing is taken and set down
+ * in front of him, never reached for behind his back (AR4).
+ */
 const ATT_TURN: Track[] = BEATS.map((_, n) => (
-  n < 2 ? [[0, -1]] : n === 2 ? [[0, -1], [0.5, 1]] : n < 7 ? [[0, 1]] : n === 7 ? [[0, -1]] : [[0, -1]]
+  n < 2 ? [[0, -1]] : n === 2 ? [[0, -1], [0.5, 1]] : n < 7 ? [[0, 1]]
+    : n === 7 ? [[0, 1], [0.4, -1]] : n === 10 ? [[0, -1], [0.08, 1], [0.6, -1]] : [[0, -1]]
 ));
 /** The psychologist is off the stage, right, until he walks in on b2. */
 const PSY_LEGS: Track[] = BEATS.map((_, n) => (n < 2 ? [[0, P_X0]] : [[0, P_X]]));
@@ -293,15 +299,16 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
               : n < 10 ? 0.3
                 : A_LEAVE[n] ? (0.3 + 0.5 * bp(0.02, 0.14, 0.3)) * (1 - st(0.26, 0.36)) : 0;
     const lean = carry(cv, 2, n, leanNow, leanNow, tr);
-    // his hands go behind his back on b0 and stay there, but for the point on b5
+    // his hands come together in front of him on b0, clasped at his waist as he peers,
+    // and stay there but for the point on b5 (never behind his back: AR4)
     const backNow = A_ADMIRE[n] ? st(0.02, 0.2) : 1;
     const back = carry(cv, 3, n, backNow, backNow, tr);
     let sv = bodyOf(wv, VIS_P, n, t, b);
     const cock = A_PLAIN[n] ? bp(0.64, 0.72, 0.94) : 0;
     sv = { ...sv, tilt: sv.tilt - 0.34 * lean, neck: sv.neck - 0.2 * lean + 0.26 * cock };
     const pointV = A_PLAIN[n] ? bp(0.28, 0.36, 0.62) : 0;
-    sv = hand(sv, xV, dV, 1, xV - 7 * dV, 470, back * (1 - pointV));
-    sv = hand(sv, xV, dV, -1, xV - 9 * dV, 472, back);
+    sv = hand(sv, xV, dV, 1, xV + 7 * dV, 470, back * (1 - pointV));
+    sv = hand(sv, xV, dV, -1, xV + 5 * dV, 472, back);
     if (pointV > 0) sv = hand(sv, xV, dV, 1, MUG_BODY.x, MUG_BODY.y, pointV);
     const prevV = carryFrom(heldV, n, hHold(VIS_P[p], t));
     const figV = keepHeld(heldV, wv.walking ? mixKeepLegs(prevV, sv, tr) : mixStance(prevV, sv, tr));
@@ -322,19 +329,22 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // b1: up off the stool, a point at his mug, then round behind the plinth
     if (A_MINE[n]) sa = hand(sa, xA, dA, 1, MUG_BODY.x, MUG_BODY.y, bp(0.16, 0.22, 0.34));
     // b7: into the case from behind, the mug lifted out over its top and held out
+    // held out to the visitor: in front of him whichever way he faces, so as he turns
+    // the mug comes round with him (AR4) — at MUG_SHOW once he faces the visitor
+    const showX = xA + (A_X - MUG_SHOW.x) * dA;
     if (A_STICKER[n]) {
       const up = st(0.22, 0.38);
       const out = st(0.42, 0.56);
-      const hx = lerp(lerp(MUG_REST.x, MUG_UP.x, up), MUG_SHOW.x, out);
+      const hx = lerp(lerp(MUG_REST.x, MUG_UP.x, up), showX, out);
       const hy = lerp(lerp(MUG_REST.y, MUG_UP.y, up), MUG_SHOW.y, out);
       sa = hand(sa, xA, dA, 1, hx, hy, st(0.06, 0.18));
     } else if (A_CHECK[n] || Q2[n]) {
-      sa = hand(sa, xA, dA, 1, MUG_SHOW.x, MUG_SHOW.y, 1);
+      sa = hand(sa, xA, dA, 1, showX, MUG_SHOW.y, 1);
     } else if (A_LEAVE[n]) {
-      // b10: back over the case, down into it, and the hand away
+      // b10: turned back to the case with it, over it, down into it, and the hand away
       const up = st(0.12, 0.26);
       const down = st(0.28, 0.42);
-      const hx = lerp(lerp(MUG_SHOW.x, MUG_UP.x, up), MUG_REST.x, down);
+      const hx = lerp(lerp(showX, MUG_UP.x, up), MUG_REST.x, down);
       const hy = lerp(lerp(MUG_SHOW.y, MUG_UP.y, up), MUG_REST.y, down);
       sa = hand(sa, xA, dA, 1, hx, hy, 1 - st(0.48, 0.6));
     }
@@ -358,7 +368,8 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // b5: a card out of his coat, laid over the label, and the hand away
     if (A_PLAIN[n]) {
       const lay = st(0.06, 0.16);
-      sp = hand(sp, xP, dP, -1, lerp(xP + 4 * dP, LAY.x, lay), lerp(446, LAY.y, lay), st(0, 0.05) * (1 - st(0.22, 0.32)));
+      // (his coat's front is IN FRONT of him: the hand goes there forward, never up behind him, AR4)
+      sp = hand(sp, xP, dP, -1, lerp(xP + 13 * dP, LAY.x, lay), lerp(450, LAY.y, lay), st(0, 0.05) * (1 - st(0.22, 0.32)));
     }
     // b6: the covered label, then an open hand to the visitor
     if (A_AGAIN[n]) {
@@ -398,8 +409,9 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
 
     return {
       vis, att, psy,
-      mug: { x: mugAt.x, y: mugAt.y, o: side > 0.001 ? 1 : 0, sy: side, r: -18 * clamp01(flip * 2) },
-      base: { x: mugAt.x, y: mugAt.y, o: under > 0.001 ? 1 : 0, sy: under },
+      // in his hand the mug turns with him (its handle stays in his hand): mirrored as he faces left
+      mug: { x: mugAt.x, y: mugAt.y, o: side > 0.001 ? 1 : 0, sy: side, sx: lerp(1, dA, held), r: -18 * clamp01(flip * 2) * lerp(1, dA, held) },
+      base: { x: mugAt.x, y: mugAt.y, o: under > 0.001 ? 1 : 0, sy: under, sx: lerp(1, dA, held) },
       card: { x: cardAt.x, y: cardAt.y, o: cardIn, r: -24 * (1 - laid) * (1 - st(0.06, 0.16)), s: 0.4 + 0.6 * grow },
       q1: carry(cv, 12, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 13, n, Q2[p], Q2[n], tr),
@@ -517,9 +529,10 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   floor: floorStyle(TONE, GROUND),
+  // the skirting board: light oak, its top edge in the oak's shade (AR1)
   skirting: {
-    position: 'absolute', left: 0, right: 0, top: GROUND - 7, height: 7, backgroundColor: STONE,
-    borderTopWidth: 1.2, borderTopColor: RULE,
+    position: 'absolute', left: 0, right: 0, top: GROUND - 7, height: 7, backgroundColor: NATURAL.oak.base,
+    borderTopWidth: 1.2, borderTopColor: NATURAL.oak.shade,
   },
   ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },

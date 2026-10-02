@@ -185,6 +185,8 @@ const BROKEN_HALF = 18;
 const NEW_LEAN = { x: 345, y: 476.5, rot: -75.7 };
 const NEW_LAID = { x: GAP.mid, y: 502, rot: 0 };
 const NEW_GRIP = 16;
+/** Its tilt while carried, the far end low ahead of him. */
+const NEW_CARRY_ROT = -20;
 /** The other new plank, left leaning against the barn. */
 const SPARE = { x: 339, y: 476.5, rot: -79 };
 /** The cart: its axle stuck in the gap, and hauled out on the far bank. */
@@ -443,11 +445,12 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const ax = axleAt(axX);
     const tilt = tiltFor(ax.y, lerp(TIP_REST, TIP_HELD, lift));
     const tip = tipAt(ax.x, ax.y, tilt);
-    // b0: his hands spread wide, at "honest" and again at "twenty years"
+    // b0: his hands spread open in front of him, at "honest" and again at "twenty
+    // years" — the far hand stays forward of his body, never thrown back (AR4)
     if (A_STUCK[n]) {
       const spread = bp(0.12, 0.26, 0.5) + bp(0.62, 0.78, 0.98);
-      sc = hand(sc, xC, dC, 1, xC + 16 * dC, 462, spread);
-      sc = hand(sc, xC, dC, -1, xC - 8 * dC, 464, spread);
+      sc = hand(sc, xC, dC, 1, xC + 17 * dC, 462, spread);
+      sc = hand(sc, xC, dC, -1, xC + 5 * dC, 465, spread);
     }
     let crC = 0;
     if (A_RELIEF[n]) {
@@ -462,7 +465,11 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // b10: the new plank, from against the barn to the gap
     const nNow = A_MEND[n] ? st(0.2, 0.24) + st(0.7, 0.76) : n > MEND_N ? 2 : 0;
     const nT = carry(cv, 12, n, nNow, nNow, tr);
-    const nRotNow = A_MEND[n] ? lerp(NEW_LEAN.rot, NEW_LAID.rot, st(0.24, 0.3)) : n > MEND_N ? NEW_LAID.rot : NEW_LEAN.rot;
+    // carried one-handed near its end, its far end hangs low ahead of him the way a
+    // board carried that way does (AR2), and comes level only as he lays it in the gap
+    const nRotNow = A_MEND[n]
+      ? lerp(lerp(NEW_LEAN.rot, NEW_CARRY_ROT, st(0.24, 0.3)), NEW_LAID.rot, st(0.6, 0.7))
+      : n > MEND_N ? NEW_LAID.rot : NEW_LEAN.rot;
     const nRot = carry(cv, 13, n, nRotNow, nRotNow, tr);
     if (A_MEND[n]) {
       crC = st(0.6, 0.68) * (1 - st(0.8, 0.9));

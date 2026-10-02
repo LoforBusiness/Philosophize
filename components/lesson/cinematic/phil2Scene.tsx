@@ -18,12 +18,12 @@ import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
-import { reachHandTo } from './interact';
+import { reachHandTo, lipsAt, sipHandAt, sipTilt, sipHead } from './interact';
 import { useLinger } from './useLinger';
-import { lineOf, stage, bump } from './pace';
+import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, cakeSlice, cakePlate, fork, teaspoon, coffeeCup, bistroTable, specialsEasel, cafeFront,
-  EASEL_SLATE, CAFE_SIGN, CAFE_LEDGE,
+  NATURAL, cakeSlice, cakePlate, fork, teaspoon, cafeCup, saucer, bistroTable, specialsEasel, cafeFront,
+  EASEL_SLATE, CAFE_SIGN, CAFE_LEDGE, CAFE_CUP_GRIP, SAUCER_SIZE,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { EMBER, PAPER_LIT } from '@/components/shared/tone';
@@ -38,7 +38,8 @@ import { EMBER, PAPER_LIT } from '@/components/shared/tone';
 // specials board and shows what makes one good.
 //
 //   b0   the customer, at the café's serving hatch, takes her slice from the ledge,
-//        carries it to her table and sets it down; the man stirs his coffee.
+//        carries it to her table and sets it down; the man gives his coffee two turns
+//        of the spoon, lifts it out and holds it, bowl forward, by its handle.
 //   b1   the man counts the layers of icing at her with his teaspoon, then raises it.
 //   b2   the philosopher walks in from the left, tips his hat, a hand out to her; the
 //        man turns to him.
@@ -47,19 +48,24 @@ import { EMBER, PAPER_LIT } from '@/components/shared/tone';
 //   b4   Q1: the three lines are the things to tap.
 //   b5   he ticks her two reasons as "true reasons" is said, rules the line under them,
 //        and crosses the step down to her conclusion.
-//   b6   she eats two forkfuls (half the slice goes); the man waggles his spoon at it.
-//   b7   the philosopher holds a palm up to the man, then taps the two reasons.
+//   b6   she eats two forkfuls, tines down into the cake and up to her lips (half the
+//        slice goes); the man gives his spoon two shakes at it.
+//   b7   the philosopher holds a palm up to the man, then runs a finger down the two
+//        reasons.
 //   b8   Q2: he wipes the board and chalks three replies — tap one.
-//   b9   she points at the board, shrugs, and finishes the cake in two forkfuls.
-//   b10  at ease under the quotation: the man stirs his coffee again.
+//   b9   she points at the board, shrugs with her free hand, and finishes the cake in
+//        two forkfuls.
+//   b10  at ease under the quotation: the man lays his spoon on the saucer, lifts
+//        saucer and cup to his chest, drinks off the saucer (AR3) and holds them there.
 //
 // COMPOSITION, in stage units. The PHILOSOPHER stands at 40, at the LEFT end of the
 // specials EASEL (42–166 × 400–500, slate 49–158 × 421–479), so he faces the board and
 // the other two at once (N21) and writes from the end each line starts at: three chalk
 // rows at y 431 · 449 · 467, centred on 108, ticks in the gutter left of them (the
 // rig's safe reach is ~23 units from a shoulder at y 454 at this scale). The MAN stands
-// at 200 at his standing café table (hip height, top at 476), 214–250, his cup on it at
-// 222; hers is beside it, 254–290, her plate at 277. The CUSTOMER stands at 300; the
+// at 209 at his standing café table (hip height, top at 476), 214–250, his cup on its
+// saucer at 219; hers is beside it, 254–290, her plate at 277. The CUSTOMER stands at
+// 296, near enough to reach the slice's far end with her fork; the
 // CAFÉ FRONT fills the right, 296–400, its awning across the top (312–348), the
 // serving hatch 327–392 × 407–465 and its ledge at 464, where her slice waits at 364
 // until she takes it. Band [306, 514].
@@ -109,9 +115,9 @@ const FOLLOW_N = A_FOLLOW.indexOf(1);
 const CHALK_N = A_CHALK.indexOf(1);
 
 /** Where each of them stands, beat by beat. The philosopher is off the stage until b2. */
-const WO_X = BEATS.map(() => 300);
+const WO_X = BEATS.map(() => 296);
 const WO_START = 340;                       // at the serving hatch when the lesson opens
-const MA_X = BEATS.map(() => 200);
+const MA_X = BEATS.map(() => 209);
 const TH_X = BEATS.map((b) => (b.th ? 40 : -40));
 /** Seconds into b0 before she sets off from the hatch with her plate. */
 const WO_DELAY = BEATS.map((_, n) => (A_ORDER[n] ? 0.34 * LINES[n] : 0));
@@ -177,10 +183,51 @@ const TABLE_TOP = 476;
 const PL_LEDGE = { x: 364, y: LEDGE_TOP - 2.7 };
 const PL_TABLE = { x: 277, y: TABLE_TOP - 2.7 };
 const RIM = 11;
-/** The cup on his table. */
-const CUP_ON = { x: 222, y: TABLE_TOP - 5.6 };
-/** Where her fork comes to her mouth. */
-const MOUTH = { x: 282, y: 448 };
+/**
+ * His coffee is TWO things (AR3): a china cup on its saucer, so he can lift the two
+ * together and drink off the saucer. Both are psych1's cafe drawings at 0.8 of their
+ * size, so the cup is about half a head wide. The saucer stands on his table at 219;
+ * the cup is drawn about its HANDLE (AR2), which sits CUP_DX right of its body and
+ * CUP_DY above its foot.
+ */
+const CS = 0.8;
+const SAU_W = SAUCER_SIZE.w * CS;
+const SAU_H = SAUCER_SIZE.h * CS;
+const SAU_TOP = SAUCER_SIZE.top * CS - SAU_H / 2;                 // centre to where a cup's foot sits
+const SAUCER_ON = { x: 219, y: TABLE_TOP - SAU_H / 2 };
+const CUP_W = CAFE_CUP_GRIP.w * CS;
+const CUP_H = CAFE_CUP_GRIP.h * CS;
+const CUP_DX = (CAFE_CUP_GRIP.x - CAFE_CUP_GRIP.body) * CS;      // body to handle
+const CUP_DY = (CAFE_CUP_GRIP.foot - CAFE_CUP_GRIP.y) * CS;      // handle to foot
+/** The handle of a cup standing on a saucer whose centre is at (x, y). */
+const cupOn = (x: number, y: number) => {
+  'worklet';
+  return { x: x + CUP_DX, y: y + SAU_TOP - CUP_DY };
+};
+/** The cup's body on his table: where the spoon goes in to stir. */
+const CUP_ON = { x: SAUCER_ON.x, y: TABLE_TOP - 5.6 };
+/** The saucer held on his palm at his chest, below the shoulder (AR6), while he drinks and after. */
+const SAUCER_HOLD_DX = 13;
+const SAUCER_HOLD_Y = 461;
+/** The palm under the saucer: the saucer's centre is this far from the wrist. */
+const PALM = { dx: 2.5, dy: -2.4 };
+/** Where the spoon is laid: on the saucer, beside the cup. */
+const SPOON_ON_SAUCER = { dx: -4.6, dy: -1.6, r: 1.45 };
+/** How the spoon is held when he is not stirring: by its handle, the bowl forward. */
+const SP_REST = 1.25;
+/**
+ * Her fork: held by the end of its handle, its tines FORK_TIP from her wrist. Upright
+ * in her hand at rest, tipped DOWN into the cake, nearly upright at her lips. The
+ * windows of a beat's two forkfuls, as fractions of its line: [reach the plate],
+ * [up to her lips], [down for the second], [up again], [hand back to rest].
+ */
+const FORK_TIP = 12.5;
+const FORK_UP = 0.5;
+const FORK_DOWN = 2.3;
+const FORK_LIPS = 0.25;
+const CAKE_TOP = 466;
+const JAB_W = [0.05, 0.14, 0.16, 0.25, 0.36, 0.48, 0.58, 0.67, 0.76, 0.86];
+const CONCEDE_W = [0.52, 0.58, 0.6, 0.68, 0.72, 0.8, 0.86, 0.94, 2, 3];
 /** The slice's tip (its cut end, toward her) at a given amount of cake left. */
 const tipAt = (c: number) => {
   'worklet';
@@ -198,7 +245,16 @@ const CAKE_ART = cakeSlice(0, 0, CW, CH);
 const PLATE_ART = cakePlate(0, 0, 30, 10);
 const FORK_ART = fork(0, 0, 5, 14);
 const SPOON_ART = teaspoon(0, 0, 5, 12);
-const CUP_ART = coffeeCup(CUP_ON.x, CUP_ON.y, 14, 12);
+// drawn about its handle: cafeCup centres on its box, so shift the box by the grip
+const CUP_ART = cafeCup((CAFE_CUP_GRIP.w / 2 - CAFE_CUP_GRIP.x) * CS, (CAFE_CUP_GRIP.h / 2 - CAFE_CUP_GRIP.y) * CS, CUP_W, CUP_H);
+const SAUCER_ART = saucer(0, 0, SAU_W, SAU_H);
+
+/** A wrist's place on the stage, out of a figure's bundle. */
+function wristOf(w: Bundle, k: 'wrR' | 'wrL') {
+  'worklet';
+  const v = w[k];
+  return { x: v[0].translateX as number, y: v[1].translateY as number };
+}
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -247,7 +303,7 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldWo = useHeld();
   const heldTh = useHeld();
   const heldMa = useHeld();
-  const cv = useCarry(23);
+  const cv = useCarry(27);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -293,11 +349,11 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const p3 = reply(0.26, 0.32);
     // the slice: two forkfuls on b6 and two more on b9
     const cakeNow = n < 6 ? 1
-      : A_JAB[n] ? 1 - 0.25 * st(0.13, 0.17) - 0.25 * st(0.57, 0.61)
-        : A_CONCEDE[n] ? 0.5 - 0.25 * st(0.69, 0.73) - 0.25 * st(0.85, 0.89)
+      : A_JAB[n] ? 1 - 0.25 * st(0.12, 0.15) - 0.25 * st(0.46, 0.49)
+        : A_CONCEDE[n] ? 0.5 - 0.25 * st(0.57, 0.6) - 0.25 * st(0.79, 0.82)
           : n > 9 ? 0 : 0.5;
-    const morselNow = A_JAB[n] ? bp(0.13, 0.16, 0.3) + bp(0.57, 0.6, 0.74)
-      : A_CONCEDE[n] ? bp(0.69, 0.72, 0.84) + bp(0.85, 0.88, 0.97) : 0;
+    const morselNow = A_JAB[n] ? bp(0.12, 0.15, 0.26) + bp(0.46, 0.49, 0.68)
+      : A_CONCEDE[n] ? bp(0.57, 0.6, 0.68) + bp(0.79, 0.82, 0.94) : 0;
 
     // ── the customer ────────────────────────────────────────────────────────
     const src0 = carrySource(cv, 0, n, WO_START);
@@ -312,23 +368,36 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       const ty = lerp(lerp(PL_LEDGE.y - 1, 461, st(0.27, 0.34)), PL_TABLE.y - 1, st(0.62, 0.7));
       sw = hand(sw, xWo, dWo, 1, tx, ty, st(0.14, 0.23) * (1 - st(0.74, 0.82)));
     }
-    // b6, b9: forkfuls of cake, in the hand that holds the fork
-    if (A_JAB[n]) {
-      sw = hand(sw, xWo, dWo, -1, tipAt(1) - 4, 469, bp(0.05, 0.14, 0.22));
-      sw = hand(sw, xWo, dWo, -1, MOUTH.x, MOUTH.y, bp(0.16, 0.25, 0.36));
-      sw = hand(sw, xWo, dWo, -1, tipAt(0.75) - 4, 469, bp(0.48, 0.58, 0.65));
-      sw = hand(sw, xWo, dWo, -1, MOUTH.x, MOUTH.y, bp(0.6, 0.69, 0.82));
+    // b6, b9: forkfuls of cake (AR5: one path a forkful, never bumps on bumps). The
+    // fork is held by the end of its handle: it tips its tines DOWN into the cake at
+    // the slice's cut end, and comes up nearly upright to her lips, where her head dips
+    // to meet it.
+    let forkR = FORK_UP * dWo;
+    if (A_JAB[n] || A_CONCEDE[n]) {
+      const w = A_JAB[n] ? JAB_W : CONCEDE_W;
+      let d = 1 - st(w[2], w[3]);
+      d = lerp(d, 1, st(w[4], w[5]));
+      d = lerp(d, 0, st(w[6], w[7]));
+      const env = st(w[0], w[1]) * (1 - st(w[8], w[9]));
+      const c = A_JAB[n] ? lerp(1, 0.75, st(w[3], w[4])) : lerp(0.5, 0.25, st(w[3], w[4]));
+      const ds = dWo < 0 ? -1 : 1;
+      const rP = FORK_DOWN * ds;
+      const rM = FORK_LIPS * ds;
+      const lips = lipsAt(sw, { x: xWo, groundY: GROUND, k: K, dir: ds });
+      const wPx = tipAt(c) - 2 - FORK_TIP * Math.sin(rP);
+      const wPy = CAKE_TOP + FORK_TIP * Math.cos(rP);
+      const wMx = lips.x - FORK_TIP * Math.sin(rM);
+      const wMy = lips.y + FORK_TIP * Math.cos(rM);
+      sw = hand(sw, xWo, dWo, -1, lerp(wMx, wPx, d), lerp(wMy, wPy, d), env);
+      sw = sipHead(sw, 0.7 * (1 - d) * env);
+      forkR = lerp(FORK_UP * dWo, lerp(rM, rP, d), env);
     }
     if (A_CONCEDE[n]) {
-      // a hand to the board (my reasons were fine), a shrug (my conclusion wasn't),
-      // and the rest of the cake
-      sw = hand(sw, xWo, dWo, 1, xWo - 24, 446, bp(0.12, 0.2, 0.38));
-      sw = hand(sw, xWo, dWo, 1, xWo - 14, 444, bp(0.44, 0.52, 0.64));
-      sw = hand(sw, xWo, dWo, -1, xWo + 12, 444, bp(0.44, 0.52, 0.64));
-      sw = hand(sw, xWo, dWo, -1, tipAt(0.5) - 4, 469, bp(0.64, 0.71, 0.76));
-      sw = hand(sw, xWo, dWo, -1, MOUTH.x, MOUTH.y, bp(0.73, 0.79, 0.86));
-      sw = hand(sw, xWo, dWo, -1, tipAt(0.25) - 4, 469, bp(0.83, 0.87, 0.9));
-      sw = hand(sw, xWo, dWo, -1, MOUTH.x, MOUTH.y, st(0.88, 0.95));
+      // a hand to the board (my reasons were fine), a shrug (my conclusion wasn't):
+      // her free hand's, palm up IN FRONT of her (she faces left, so in front is -x);
+      // the fork hand stays with the cake (AR4, AR5)
+      sw = hand(sw, xWo, dWo, 1, xWo - 24, 446, bp(0.1, 0.18, 0.32));
+      sw = hand(sw, xWo, dWo, 1, xWo - 14, 444, bp(0.34, 0.41, 0.5));
     }
     const prevWo = carryFrom(heldWo, n, hHold(WO_P[p], t));
     const figWo = keepHeld(heldWo, ww.walking ? mixKeepLegs(prevWo, sw, tr) : mixStance(prevWo, sw, tr));
@@ -347,33 +416,38 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b3: the specials wiped, then her three lines chalked, from the end he stands at
     if (A_CHALK[n]) {
+      // the wipe is one stroke across and back as it goes down the slate (AR5);
+      // each line is chalked as a path that travels along it, not a scribble on the clock
       const yW = lerp(ROWS[0], ROWS[2], st(0.12, 0.26));
-      const xW = SL.left + 14 + 6 * Math.sin(b * 11);
+      const xW = SL.left + 14 + 6 * Math.sin(Math.PI * 2 * stageLin(b, L, 0.12, 0.26));
       const yR = ROWS[0] + (ROWS[1] - ROWS[0]) * st(0.52, 0.58) + (ROWS[2] - ROWS[1]) * st(0.73, 0.79);
-      const xR = lerp(lerp(ARG_START[0], ARG_START[1], st(0.52, 0.58)), ARG_START[2], st(0.73, 0.79)) + 4 + 2.5 * Math.sin(b * 13);
+      const xR = lerp(lerp(ARG_START[0], ARG_START[1], st(0.52, 0.58)), ARG_START[2], st(0.73, 0.79)) + 3
+        + 12 * (stageLin(b, L, 0.35, 0.5) * (1 - st(0.52, 0.58)) + stageLin(b, L, 0.58, 0.71) * (1 - st(0.73, 0.79)) + stageLin(b, L, 0.79, 0.93));
       const k = st(0.27, 0.34);
       sp = hand(sp, xTh, dTh, 1, lerp(xW, xR, k), lerp(yW, yR + 1, k), st(0.1, 0.16) * (1 - st(0.94, 0.99)));
     }
     // b5: a tick by each reason, the rule under them, a cross on the step down
     if (A_FOLLOW[n]) {
       const yF = ROWS[0] + (ROWS[1] - ROWS[0]) * st(0.44, 0.48) + (RULE_Y - ROWS[1]) * st(0.54, 0.6) + (ROWS[2] - RULE_Y) * st(0.8, 0.84);
-      const xF = lerp(lerp(lerp(ARG_START[0] - 5, ARG_START[1] - 5, st(0.44, 0.48)), SL.left + 12, st(0.54, 0.6)), ARG_START[2] - 5, st(0.8, 0.84))
-        + 1.5 * Math.sin(b * 12);
+      const xF = lerp(lerp(lerp(ARG_START[0] - 5, ARG_START[1] - 5, st(0.44, 0.48)), SL.left + 12, st(0.54, 0.6)), ARG_START[2] - 5, st(0.8, 0.84));
       sp = hand(sp, xTh, dTh, 1, xF, yF, st(0.26, 0.33) * (1 - st(0.95, 0.99)));
     }
     // b7: a palm up to the man (the attack is on her), then a tap on each reason
     if (A_PERSON[n]) {
+      // one path, not a string of bumps: to the first reason, down to the second, and
+      // home again (AR5)
       sp = hand(sp, xTh, dTh, 1, xTh + 20, 444, bp(0.06, 0.14, 0.42));
-      sp = hand(sp, xTh, dTh, 1, ARG_START[0] + 3, ROWS[0], bp(0.56, 0.62, 0.69));
-      sp = hand(sp, xTh, dTh, 1, ARG_START[1] + 3, ROWS[1], bp(0.67, 0.73, 0.8));
-      sp = hand(sp, xTh, dTh, 1, SL.left + 16, 440, bp(0.78, 0.86, 0.98));
+      const tx = lerp(ARG_START[0] + 3, ARG_START[1] + 3, st(0.67, 0.73));
+      const ty = lerp(ROWS[0], ROWS[1], st(0.67, 0.73));
+      sp = hand(sp, xTh, dTh, 1, tx, ty, st(0.54, 0.62) * (1 - st(0.84, 0.96)));
     }
     // b8: the board wiped, and three replies chalked
     if (n === REPLY_N) {
       const yW = lerp(ROWS[0], ROWS[2], st(0.02, 0.13));
-      const xW = SL.left + 14 + 6 * Math.sin(b * 11);
+      const xW = SL.left + 14 + 6 * Math.sin(Math.PI * 2 * stageLin(b, L, 0.02, 0.13));
       const yR = ROWS[0] + (ROWS[1] - ROWS[0]) * st(0.19, 0.21) + (ROWS[2] - ROWS[1]) * st(0.25, 0.27);
-      const xR = lerp(lerp(REPLY_START[0], REPLY_START[1], st(0.19, 0.21)), REPLY_START[2], st(0.25, 0.27)) + 3 + 2 * Math.sin(b * 13);
+      const xR = lerp(lerp(REPLY_START[0], REPLY_START[1], st(0.19, 0.21)), REPLY_START[2], st(0.25, 0.27)) + 3
+        + 8 * (stageLin(b, L, 0.15, 0.19) * (1 - st(0.19, 0.21)) + stageLin(b, L, 0.21, 0.25) * (1 - st(0.25, 0.27)) + stageLin(b, L, 0.27, 0.31));
       const k = st(0.13, 0.15);
       sp = hand(sp, xTh, dTh, 1, lerp(xW, xR, k), lerp(yW, yR + 1, k), st(0, 0.03) * (1 - st(0.42, 0.52)));
     }
@@ -386,9 +460,40 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const xMa = carry(cv, 2, n, wm.xp, wm.xn, wm.walking ? wm.walkU : tr);
     const dMa = carry(cv, 5, n, wm.dirV, wm.dirV, trD);
     let sm = wm.s;
-    // b0 and b10: stirring his coffee (AP18: the spoon going round IS the action)
-    if (A_ORDER[n]) sm = hand(sm, xMa, dMa, 1, CUP_ON.x + 1.4 * Math.sin(t * 7), 463, 0.9);
-    if (A_REST[n]) sm = hand(sm, xMa, dMa, 1, CUP_ON.x + 1.4 * Math.sin(t * 7), 463, st(0.05, 0.22)); // AP18: stirring
+    // whenever his spoon is not at work it rests in his hand at his waist, bowl
+    // forward, close in front of him: never up by his face while he listens (AR6)
+    sm = hand(sm, xMa, dMa, 1, xMa + 7 * dMa, 464, 1);
+    // b0: he stirs his coffee — two turns of the spoon round the cup, then he lifts it
+    // out and his hand rests (AR5). AP18: the spoon going round IS the action, and it ends.
+    if (A_ORDER[n]) {
+      const stir = 1.4 * Math.sin(Math.PI * 4 * stageLin(b, L, 0.06, 0.38));
+      sm = hand(sm, xMa, dMa, 1, CUP_ON.x + stir, 463, 1 - st(0.42, 0.52));
+    }
+    // b10: he drinks his coffee the way a person does (AR3). The spoon is laid on the
+    // saucer; his left hand lifts the saucer, cup and all, to his chest, his right
+    // steadying the cup by its handle; the cup alone goes up to his lips, tips to his
+    // face as his head dips to meet it, and comes back down onto the saucer, which he
+    // goes on holding, still and close, while the quotation is read (AR6).
+    const sipU = A_REST[n] ? st(0.48, 0.54) * (1 - st(0.64, 0.7)) : 0;
+    if (A_REST[n]) {
+      sm = sipHead(sm, sipU);
+      const lift = st(0.22, 0.34);
+      const held = { x: xMa + SAUCER_HOLD_DX * dMa + PALM.dx, y: SAUCER_HOLD_Y + PALM.dy };
+      const sau = { x: lerp(SAUCER_ON.x, held.x, lift), y: lerp(SAUCER_ON.y, held.y, lift) };
+      const grip = cupOn(sau.x, sau.y);
+      const spoonAt = {
+        x: SAUCER_ON.x + SPOON_ON_SAUCER.dx - 5 * Math.sin(SPOON_ON_SAUCER.r),
+        y: SAUCER_ON.y + SPOON_ON_SAUCER.dy + 5 * Math.cos(SPOON_ON_SAUCER.r),
+      };
+      const lips = sipHandAt(sm, { x: xMa, groundY: GROUND, k: K, dir: dMa < 0 ? -1 : 1 });
+      let rx = lerp(spoonAt.x, grip.x, st(0.14, 0.22));
+      let ry = lerp(spoonAt.y, grip.y, st(0.14, 0.22));
+      const up = st(0.42, 0.5) * (1 - st(0.68, 0.78));
+      rx = lerp(rx, lips.x, up);
+      ry = lerp(ry, lips.y, up);
+      sm = hand(sm, xMa, dMa, 1, rx, ry, st(0, 0.1));
+      sm = hand(sm, xMa, dMa, -1, sau.x - PALM.dx, sau.y - PALM.dy, st(0.1, 0.2));
+    }
     // b1: the spoon counts the layers — butter, sugar, icing — then a little salute
     if (A_SCOFF[n]) {
       sm = hand(sm, xMa, dMa, 1, 262, 470, bp(0.02, 0.07, 0.13));
@@ -397,20 +502,40 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sm = hand(sm, xMa, dMa, 1, xMa + 8 * dMa, 438, bp(0.66, 0.74, 0.94));
     }
     // b6: the spoon waggled at her plate
-    if (A_JAB[n]) sm = hand(sm, xMa, dMa, 1, 264 + 4 * Math.sin(b * 10), 458, bp(0.06, 0.16, 0.92));
+    // (two shakes of it, then it is held there: AR5)
+    if (A_JAB[n]) sm = hand(sm, xMa, dMa, 1, 264 + 4 * Math.sin(Math.PI * 4 * stageLin(b, L, 0.16, 0.5)), 458, bp(0.06, 0.16, 0.92));
     const prevMa = carryFrom(heldMa, n, hHold(MA_P[p], t));
     const figMa = keepHeld(heldMa, wm.walking ? mixKeepLegs(prevMa, sm, tr) : mixStance(prevMa, sm, tr));
 
     // ── the things that are carried ─────────────────────────────────────────
     // plateT 0 on the ledge · 1 in her hand · 2 on her table
     const plateNow = A_ORDER[n] ? st(0.22, 0.26) + st(0.69, 0.73) : 2;
-    const spRotNow = A_ORDER[n] || A_REST[n] ? Math.PI : 0.45 * dMa;
+    // the spoon: bowl down in the cup while he stirs, then held by its handle with the
+    // bowl forward; on b10 it is laid on the saucer
+    const spRotNow = A_ORDER[n] ? lerp(lerp(SP_REST * dMa, Math.PI, st(0.02, 0.08)), SP_REST * dMa, st(0.42, 0.52)) : SP_REST * dMa;
+    const spoonNow = A_REST[n] ? st(0.09, 0.12) : n > 10 ? 1 : 0;
+    const saucerNow = A_REST[n] ? st(0.19, 0.22) : n > 10 ? 1 : 0;
+    const cupNow = A_REST[n] ? st(0.4, 0.43) * (1 - st(0.76, 0.79)) : 0;
+    const ma = pose(figMa, xMa, GROUND, K, dMa, 1);
+    const spoonT = carry(cv, 23, n, spoonNow, spoonNow, tr);
+    const saucerT = carry(cv, 24, n, saucerNow, saucerNow, tr);
+    const cupT = carry(cv, 25, n, cupNow, cupNow, tr);
+    const wR = wristOf(ma, 'wrR');
+    const wL = wristOf(ma, 'wrL');
+    const sau = { x: lerp(SAUCER_ON.x, wL.x + PALM.dx, saucerT), y: lerp(SAUCER_ON.y, wL.y + PALM.dy, saucerT) };
+    const sitting = cupOn(sau.x, sau.y);
+    const tilt = (sipTilt(sipU, dMa) * Math.PI) / 180;
+    const cup = { x: lerp(sitting.x, wR.x, cupT), y: lerp(sitting.y, wR.y, cupT), o: 1, r: tilt };
 
     return {
       wo: pose(figWo, xWo, GROUND, K, dWo, 1),
       th: pose(figTh, xTh, GROUND, K, dTh, 1),
-      ma: pose(figMa, xMa, GROUND, K, dMa, 1),
+      ma,
+      sau: { x: sau.x, y: sau.y, o: 1, r: 0 },
+      cup,
+      spoonT,
       dWo,
+      forkR: carry(cv, 26, n, forkR, forkR, trD),
       plateT: carry(cv, 6, n, plateNow, plateNow, tr),
       cake: carry(cv, 7, n, cakeNow, cakeNow, tr),
       spec: carry(cv, 8, n, spec, spec, tr),
@@ -448,7 +573,6 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <ObjectArt parts={TABLE_M_ART} tone={TONE} />
       <ObjectArt parts={TABLE_W_ART} tone={TONE} />
       <View style={styles.ground} pointerEvents="none" />
-      <ObjectArt parts={CUP_ART} tone={TONE} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: plain */}
@@ -497,19 +621,30 @@ function Goods({ S, DW, DM }: { S: SharedValue<any>; DW: SharedValue<Bundle>; DM
   // The fork is in her other hand all lesson, its tines leaning the way she faces.
   const forkP = useDerivedValue<Pt>(() => {
     const h = wrist(DW, 'wrL');
-    const r = 0.5 * S.value.dWo;
+    const r = S.value.forkR;
     return { x: h.x + 6 * Math.sin(r), y: h.y - 6 * Math.cos(r), o: 1, r };
   });
   const morselP = useDerivedValue<Pt>(() => {
     const h = wrist(DW, 'wrL');
-    const r = 0.5 * S.value.dWo;
-    return { x: h.x + 12.5 * Math.sin(r), y: h.y - 12.5 * Math.cos(r), o: clamp01(S.value.morsel), r: 0 };
+    const r = S.value.forkR;
+    return { x: h.x + FORK_TIP * Math.sin(r), y: h.y - FORK_TIP * Math.cos(r), o: clamp01(S.value.morsel), r: 0 };
   });
+  // The spoon is held by the end of its handle (AR2), its middle 5 along it; on b10
+  // it is laid on the saucer and rides there.
   const spoonP = useDerivedValue<Pt>(() => {
     const h = wrist(DM, 'wrR');
     const r = S.value.spRot;
-    return { x: h.x + 5 * Math.sin(r), y: h.y - 5 * Math.cos(r), o: 1, r };
+    const u = S.value.spoonT;
+    const sa = S.value.sau;
+    const hx = h.x + 5 * Math.sin(r);
+    const hy = h.y - 5 * Math.cos(r);
+    return {
+      x: lerp(hx, sa.x + SPOON_ON_SAUCER.dx, u), y: lerp(hy, sa.y + SPOON_ON_SAUCER.dy, u), o: 1,
+      r: lerp(r, SPOON_ON_SAUCER.r, u),
+    };
   });
+  const sauP = useDerivedValue<Pt>(() => S.value.sau);
+  const cupP = useDerivedValue<Pt>(() => S.value.cup);
   const cake = useAnimatedStyle(() => ({
     transform: [{ translateX: plateP.value.x - 1 }, { translateY: plateP.value.y - 7.6 }],
   }));
@@ -543,6 +678,8 @@ function Goods({ S, DW, DM }: { S: SharedValue<any>; DW: SharedValue<Bundle>; DM
       <Animated.View style={[styles.rider, styles.onTop, morsel]} pointerEvents="none">
         <View style={styles.morsel} />
       </Animated.View>
+      <Rider at={sauP} art={SAUCER_ART} />
+      <Rider at={cupP} art={CUP_ART} />
       <Rider at={spoonP} art={SPOON_ART} lift />
     </>
   );

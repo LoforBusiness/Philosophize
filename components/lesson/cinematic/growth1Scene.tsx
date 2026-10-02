@@ -22,7 +22,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, tree, door, cup, wheel, flowerpot, puddle, wateringCan, sunflowerStem, sunflowerHead,
+  NATURAL, tint, gardenTree, door, mug, shedWheel, flowerpot, puddle, wateringCan, sunflowerStem, sunflowerHead,
   shed, shedDoor, gardenWall, houseFront, CAN_GRIP, CAN_ROSE, SHED_DOORWAY,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -166,23 +166,27 @@ const CAN_HOOK = { x: 360, y: 446 };
 const ROSE = { x: ((CAN_ROSE.x - CAN_GRIP.x) * CAN_W) / 100, y: ((CAN_ROSE.y - CAN_GRIP.y) * CAN_H) / 100 };
 /** Where the teacher hands the can across to her, between the two of them. */
 const PASS = { x: 143, y: 454 };
-/** The mug: its handle is the grip, and its far lip is where the water leaves it. */
-const MUG = 12;
-const MUG_LIP = { x: -8.9, y: -2.9 };
+/**
+ * The mug, a blue-glazed one with tea-coloured water in it (growth2's `mug`): about
+ * half a head wide (AR2), its handle the grip, and its far lip where the water leaves it.
+ */
+const MUG_W = 11;
+const MUG_H = 12;
+const MUG_LIP = { x: -0.8 * MUG_W, y: -0.33 * MUG_H };
 
-/** A tree at the back of the garden, in the stage's own tone: setting, not a thing anyone uses. */
-const TREE_ART = tree(318, 426, 150, 160);
+/** A tree at the back of the garden: a bark trunk under a green canopy (AR1). */
+const TREE_ART = gardenTree(318, 426, 150, 160);
 const HOUSE_ART = houseFront(30, 407, 60, 186);
 const DOOR_ART = tint(door(30, 452, 38, 96), 'doorPaint');
 const WALL_ART = gardenWall(WALL.x, GROUND - WALL.h / 2, WALL.w, WALL.h);
 const SPARE_ART = flowerpot(SPARE.x, SPARE.y, SPARE.s, SPARE.s, 'drySoil');
 const HIS_POT_ART = flowerpot(HIS_POT, 489, 22, 22);
 const SHED_ART = shed(SHED.x, SHED.y, SHED.w, SHED.h);
-const WHEEL_ART = wheel(372 - DOORWAY.left, 484 - DOORWAY.top, 28, 28);
+const WHEEL_ART = shedWheel(372 - DOORWAY.left, 484 - DOORWAY.top, 28, 28);
 // The things that move are drawn about the point they are held by, and carried by a rider.
 const POT_ART = flowerpot(0, 0, 22, 22);
 const CAN_ART = wateringCan(((50 - CAN_GRIP.x) * CAN_W) / 100, ((50 - CAN_GRIP.y) * CAN_H) / 100, CAN_W, CAN_H);
-const MUG_ART = cup(-0.38 * MUG, -0.04 * MUG, MUG, MUG);
+const MUG_ART = mug(-0.4 * MUG_W, -0.03 * MUG_H, MUG_W, MUG_H);
 const LEAF_ART = shedDoor(-DOORWAY.w / 2, DOORWAY.h / 2, DOORWAY.w, DOORWAY.h);
 const PUDDLE_ART = puddle(0, 0, 58, 9);
 /** The sunflower: the stalk about its base, the head about its own centre. */
@@ -196,13 +200,34 @@ const WATER = NATURAL.water.base;
 const WATER_DEEP = NATURAL.water.shade;
 const SEED = NATURAL.seedhead.base;
 
+/**
+ * AR4: the explaining pose (259) rests its FAR hand raised and 13 units behind the
+ * spine, which side-on is an arm thrown back. A person explaining holds both hands in
+ * front of him, so the far one comes forward to sit beside the near one.
+ */
+function inFront(code: number, s: Stance): Stance {
+  'worklet';
+  return code === EXPLAIN ? { ...s, fistL: { x: 8, y: -3 } } : s;
+}
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return inFront(code, emoteStill(code, t));
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return inFront(code, emoteStillLive(code, t, bt));
+}
+/**
+ * A hand holding something against the body, in the figure's own frame (pelvis-local
+ * units, +x forward, −y up): the thing rides WITH him as he walks and breathes rather
+ * than hanging at a fixed point on the stage while his body moves under it (AR6).
+ */
+function holdAt(s: Stance, which: 1 | -1, lx: number, ly: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const cur = which > 0 ? s.fistR : s.fistL;
+  const m = { x: lerp(cur.x, lx, w), y: lerp(cur.y, ly, w) };
+  return which > 0 ? { ...s, fistR: m } : { ...s, fistL: m };
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -329,10 +354,11 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
     if (A_PLANT[n]) {
       // the pot carried out in both hands, set down at the rim, then the seed pressed in
       const carryW = 1 - st(0.54, 0.6);
-      sb = hand(sb, xB, dB, 1, xB + 10 * dB, 462, carryW);
-      sb = hand(sb, xB, dB, -1, xB + 8 * dB, 464, carryW);
-      sb = hand(sb, xB, dB, 1, HER_POT, TOP_RIM - 1, bp(0.44, 0.52, 0.58));
-      sb = hand(sb, xB, dB, 1, HER_POT, TOP_RIM, bp(0.58, 0.66, 0.76));
+      sb = holdAt(sb, 1, 13, -16, carryW);
+      sb = holdAt(sb, -1, 10.5, -13.5, carryW);
+      // ONE reach down to the rim (AR5): she sets the pot down, and with the hand still
+      // there presses the seed in — a small push down — then the hand comes away.
+      sb = hand(sb, xB, dB, 1, HER_POT, TOP_RIM - 1 + 1.5 * bp(0.6, 0.65, 0.72), st(0.44, 0.52) * (1 - st(0.72, 0.8)));
     }
     if (A_FLOOD[n]) {
       // down for the can, up with it, over the pot and tip it, then back down with it
@@ -343,9 +369,10 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
     }
     // b8–b10: the can she took from the teacher, and what she does with it
     if (A_EASY[n]) sb = hand(sb, xB, dB, 1, PASS.x, PASS.y, st(0.85, 0.92));
-    if (Q2[n]) sb = hand(sb, xB, dB, 1, xB + 8 * dB, 466, 1);
+    // the can carried as a person carries one: by its handle, the arm down at her side
+    if (Q2[n]) sb = holdAt(sb, 1, 8, 1, 1);
     if (A_DAILY[n]) {
-      sb = hand(sb, xB, dB, 1, xB + 8 * dB, 466, 1 - st(0.54, 0.64));
+      sb = holdAt(sb, 1, 8, 1, 1 - st(0.54, 0.64));
       sb = hand(sb, xB, dB, 1, 114, 462, st(0.04, 0.14) * (1 - st(0.36, 0.42)));
       sb = hand(sb, xB, dB, 1, CAN_DOOR.x, CAN_DOOR.y, bp(0.54, 0.64, 0.76));
     }
@@ -394,7 +421,7 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
     // b8: the can off its hook, carried across the garden and handed to her
     if (A_EASY[n]) {
       stt = hand(stt, xT, dT, 1, CAN_HOOK.x, CAN_HOOK.y, bp(0.04, 0.1, 0.16));
-      stt = hand(stt, xT, dT, 1, xT + 12 * dT, 458, st(0.1, 0.17) * (1 - st(0.87, 0.92)));
+      stt = holdAt(stt, 1, 8, 1, st(0.1, 0.17) * (1 - st(0.87, 0.92)));
       stt = hand(stt, xT, dT, 1, PASS.x, PASS.y, bp(0.87, 0.92, 1.0));
     }
     const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
@@ -701,7 +728,7 @@ const styles = StyleSheet.create({
   },
   hook: {
     position: 'absolute', left: CAN_HOOK.x - DOORWAY.left - 1, top: 0, width: 2, height: CAN_HOOK.y - DOORWAY.top - 2,
-    backgroundColor: RULE,
+    backgroundColor: NATURAL.iron.base,
   },
   stream: {
     position: 'absolute', left: 0, top: 0, width: 4.4, borderRadius: 2.2, backgroundColor: WATER,

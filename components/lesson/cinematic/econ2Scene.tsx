@@ -20,7 +20,7 @@ import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, RUN } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
-import { lineOf, stage, bump } from './pace';
+import { lineOf, stage, stageLin, bump } from './pace';
 import {
   NATURAL, type NaturalKey, furledUmbrella, umbrellaRack, priceTag, hangingSign, shopAwning, cornerShop,
   rainCloud, sun, panelVan, vanDoor, carton, UMB_HOOK, RACK_RAIL, RACK_TAG_HOOK, TAG_FACE, SIGN_FACE,
@@ -83,13 +83,16 @@ const K = K_FIG * 0.76;
 /**
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, economics-foundations-2). 0 for a beat with no voice.
+ * b5 (4.76s voiced) and b9 (4.0s) run on after their lines: the chalking, and the
+ * umbrella handed across, are each a stroke at a time with a pause between (AR5).
  */
-const LINES = [4.59, 4.24, 5.24, 4.74, 0, 4.76, 6.21, 4.22, 0, 4, 0, 0];
+const LINES = [4.59, 4.24, 5.24, 4.74, 0, 6.2, 6.21, 4.22, 0, 4.6, 0, 0];
 
-// The held poses (moves.ts act + 99): talking, explaining, nodding along, leaning in,
-// and waiting for an answer.
+// The held poses (moves.ts act + 99): talking with the hands, nodding along, leaning in,
+// and waiting for an answer. EXPLAINING (259) is not used: its resting far hand sits at
+// the chest a little behind the spine, and as his weight moves it reads as an arm held
+// back (AR4) — the economist explains with TALK, both hands in front of him.
 const TALK = 167;
-const EXPLAIN = 259;
 const NOD = 263;
 const LEAN = 177;
 const WAIT = 161;
@@ -124,13 +127,13 @@ const CP_X = BEATS.map(() => 66);
  * b7, when she turns to the van and back.
  */
 const CP_DE = [1, 1, -1, -1, -1, 1, -1, 1, 1, -1, -1, -1];
-const CP_DA = [0, 0, 0.3, 0, 0, 0, 0.04, 0.04, 0, 0.42, 0, 0];
+const CP_DA = [0, 0, 0.3, 0, 0, 0, 0.04, 0.04, 0, 0.63, 0, 0];
 const TH_DE = BEATS.map(() => 1);
 const BN_DE = BEATS.map(() => -1);
 /** What each is doing with his body: talking while he speaks, alive while he listens (N21). */
 const CP_P = [TALK, NOD, NOD, LEAN, WAIT, TALK, LEAN, LEAN, WAIT, TALK, NOD, WAIT];
 const BN_P = [WAIT, TALK, NOD, LEAN, WAIT, NOD, LEAN, TALK, WAIT, NOD, NOD, WAIT];
-const TH_P = [WAIT, WAIT, EXPLAIN, EXPLAIN, WAIT, NOD, EXPLAIN, NOD, WAIT, NOD, NOD, WAIT];
+const TH_P = [WAIT, WAIT, TALK, TALK, WAIT, NOD, TALK, NOD, WAIT, NOD, NOD, WAIT];
 
 // ── the shop, the rack and its umbrellas ─────────────────────────────────────
 const SHOP_ART = cornerShop(106, 403, 212, 194);
@@ -167,8 +170,14 @@ const UMB = 40;
 const umbArt = (fill: NaturalKey) =>
   furledUmbrella(-(UMB_HOOK.x - 50) * (UMB / 100), -(UMB_HOOK.y - 50) * (UMB / 100), UMB, UMB, fill);
 const UMB_ARTS = UMB_FILL.map(umbArt);
-/** The moment (fraction of b1's line) she takes each of k = 7 … 3. */
-const GRAB_M = [0.44, 0.6, 0.7, 0.8, 0.9];
+/**
+ * b1: she GATHERS five umbrellas in one stroke (AR5), her hand running along the rail
+ * from the crook nearest her (k = 7) to k = 3 between these two fractions of the line,
+ * each crook coming into her hand as it passes; then the bunch goes under her arm.
+ */
+const SWEEP = [0.42, 0.8];
+const GRAB_M = [0, 1, 2, 3, 4].map((j) => SWEEP[0] + (SWEEP[1] - SWEEP[0]) * (j / 4));
+const TUCK = [0.84, 0.92];
 /** Where the seller hands the economist his umbrella: inside both arms' reach. */
 const PASS = { x: 48, y: 452 };
 
@@ -255,6 +264,15 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       'worklet';
       return bump(b, L, a, m, z);
     };
+    // the same, in SECONDS into the beat rather than fractions of its line
+    const sAt = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a / L, z / L);
+    };
+    const sLin = (a: number, z: number) => {
+      'worklet';
+      return stageLin(b, L, a / L, z / L);
+    };
 
     // ── the passer-by ───────────────────────────────────────────────────────
     const src0 = carrySource(cv, 0, n, BN_X[0]);
@@ -269,12 +287,13 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // her armful: from her first grab on, the far hand holds the bundle at her waist
     const keep = n > POUR_N ? 1 : n === POUR_N ? st(0.3, 0.4) : 0;
     sb = hand(sb, xBn, dBn, -1, xBn + 5 * dBn, 457, keep);
-    // b1: five umbrellas off the rack, the nearest first
+    // b1: her hand along the rail, gathering the crooks as it goes, and the bunch under her arm
     if (A_POUR[n]) {
-      for (let j = 0; j < 5; j++) {
-        const m = GRAB_M[j];
-        sb = hand(sb, xBn, dBn, 1, RX[7 - j] + 1, RAIL_Y + 2, bp(m - 0.06, m, m + 0.06));
-      }
+      const along = stageLin(b, L, SWEEP[0], SWEEP[1]);
+      const tuck = st(TUCK[0], TUCK[1]);
+      const rx = lerp(lerp(RX[7] + 1, RX[3] + 1, along), xBn + 5 * dBn, tuck);
+      const ry = lerp(RAIL_Y + 2, 457, tuck);
+      sb = hand(sb, xBn, dBn, 1, rx, ry, st(SWEEP[0] - 0.08, SWEEP[0]) * (1 - st(TUCK[1], TUCK[1] + 0.06)));
     }
     // b7: she points at the van, then turns back and waves a hand at the seller
     if (A_VAN[n]) {
@@ -291,15 +310,18 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const dTh = carry(cv, 4, n, wt.dirV, wt.dirV, trD);
     let sp = wt.s;
     let spray = 0;
-    // b2: tips his hat (the rain flies off it), brushes his shoulder twice, then opens
+    // b2: tips his hat (the rain flies off it), brushes the rain off his shoulder, then opens
     // a hand to her armful — "how many people want one"
     if (A_ARRIVE[n]) {
       const after = wt.walkDur / L;
-      sp = hand(sp, xTh, dTh, 1, xTh + 5 * dTh, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.16));
+      // ONE stroke of the hand (AR5): up to the brim, down across his shoulder, and out
+      // to her armful, without going back to his side in between
+      const down = st(after + 0.12, after + 0.2);
+      const out = st(0.6, 0.7);
+      const hx = lerp(lerp(xTh + 5 * dTh, xTh - 1 * dTh, down), xTh + 22 * dTh, out);
+      const hy = lerp(lerp(GROUND - 76, 452, down), 450, out);
+      sp = hand(sp, xTh, dTh, 1, hx, hy, st(after + 0.02, after + 0.08) * (1 - st(0.86, 0.96)));
       spray = st(after + 0.06, after + 0.2);
-      sp = hand(sp, xTh, dTh, 1, xTh - 1 * dTh, 452, bp(after + 0.16, after + 0.19, after + 0.22));
-      sp = hand(sp, xTh, dTh, 1, xTh - 1 * dTh, 452, bp(after + 0.22, after + 0.25, after + 0.28));
-      sp = hand(sp, xTh, dTh, 1, xTh + 22, 450, bp(0.56, 0.66, 0.84));
     }
     // b3: a hand raised a step at a time — at each price — and then it jumps
     if (A_DEMAND[n]) {
@@ -313,9 +335,9 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sp = hand(sp, xTh, dTh, 1, tx, ty, st(0.28, 0.35) * (1 - st(0.95, 0.99)));
     }
     // b9 on: he takes the umbrella from the seller and holds it by the crook at his side
-    const holdTh = n > SETTLE_N ? 1 : n === SETTLE_N ? st(0.48, 0.56) : 0;
+    const holdTh = n > SETTLE_N ? 1 : n === SETTLE_N ? sAt(3.0, 3.4) : 0;
     if (holdTh > 0) {
-      const k = n === SETTLE_N ? st(0.6, 0.7) : 1;
+      const k = n === SETTLE_N ? sAt(3.6, 4.1) : 1;
       sp = hand(sp, xTh, dTh, 1, lerp(PASS.x, xTh + 8 * dTh, k), lerp(PASS.y, 458, k), holdTh);
     }
     const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
@@ -331,39 +353,48 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // b0: an umbrella off the rail, waved at the empty street, hung back; a palm to the sun
     if (A_SUNNY[n]) {
       const lift = st(0.12, 0.2) * (1 - st(0.5, 0.58));
-      const waveE = st(0.18, 0.24) * (1 - st(0.44, 0.5));
-      swing = 0.28 * Math.sin(b * 8) * waveE;
-      sc = hand(sc, xCp, dCp, 1, lerp(RX[0] - 1, xCp + 14 + 4 * Math.sin(b * 8) * waveE, lift), lerp(RAIL_Y + 1, 436, lift),
+      // AR5: the umbrella is waved ONCE — one swing out and back, over a second — and then
+      // held up still; a wave that ran on for the line would be a hand sawing the air
+      const waveE = st(0.18, 0.22) * (1 - st(0.38, 0.42));
+      const waveS = Math.sin(2 * Math.PI * stageLin(b, L, 0.2, 0.4));
+      swing = 0.28 * waveS * waveE;
+      sc = hand(sc, xCp, dCp, 1, lerp(RX[0] - 1, xCp + 14 + 4 * waveS * waveE, lift), lerp(RAIL_Y + 1, 436, lift),
         st(0.02, 0.1) * (1 - st(0.64, 0.72)));
       sc = hand(sc, xCp, dCp, 1, xCp + 18, 430, bp(0.72, 0.8, 0.97));
     }
-    // b5 and b9: the old price wiped off the tag and the new one chalked on
-    const chalk = (s: Stance, a: number): Stance => {
+    // b5 and b9: the old price wiped off the tag and the new one chalked on — a PATH, not
+    // a loop on the clock (AR5): one rub across the slate, back to the start of the
+    // figures, and the chalk along them, rising and falling once. `a0` is in seconds.
+    const chalk = (s0: Stance, a0: number): Stance => {
       'worklet';
-      const wipe = bump(b, L, a, a + 0.03, a + 0.1);
-      const write = bump(b, L, a + 0.09, a + 0.12, a + 0.27);
-      const wx = TAG_MID.x + 3 * Math.sin(b * 14);
-      const cx = lerp(TAG_MID.x - 6, TAG_MID.x + 5, stage(b, L, a + 0.12, a + 0.25)) + Math.sin(b * 21);
-      const cy = TAG_MID.y + 1.5 * Math.sin(b * 17);
-      return hand(hand(s, xCp, dCp, 1, wx, TAG_MID.y, wipe), xCp, dCp, 1, cx, cy, write);
+      const on = sAt(a0, a0 + 0.4) * (1 - sAt(a0 + 1.95, a0 + 2.4));
+      const wu = sAt(a0 + 0.4, a0 + 0.8);
+      const lu = sAt(a0 + 0.8, a0 + 1.1);
+      const cu = sLin(a0 + 1.1, a0 + 1.9);
+      const x = lu < 1 ? lerp(lerp(TAG_MID.x - 3, TAG_MID.x + 3, wu), TAG_MID.x - 6, lu) : lerp(TAG_MID.x - 6, TAG_MID.x + 5, cu);
+      const y = TAG_MID.y - 1.4 * Math.sin(Math.PI * cu);
+      return hand(s0, xCp, dCp, 1, x, y, on);
     };
     if (A_RAISE[n]) {
-      // "Three left" — at the rack; "a queue round the corner" — out at the street;
-      // "I hate to do it" — a hand to the back of his neck
-      sc = hand(sc, xCp, dCp, 1, RX[1], 474, bp(0.02, 0.08, 0.17));
-      sc = hand(sc, xCp, dCp, 1, xCp + 30, 440, bp(0.19, 0.27, 0.45));
-      sc = hand(sc, xCp, dCp, 1, xCp - 4 * dCp, 440, bp(0.5, 0.56, 0.66));
-      sc = chalk(sc, 0.67);
+      // ONE hand, held at each place it goes: "three left" — at the rack; "a queue round
+      // the corner" — out at the street; "I hate to do it" — to the back of his neck;
+      // and on to the tag to chalk the new price
+      const toStreet = sAt(1.0, 1.5);
+      const toNeck = sAt(2.2, 2.7);
+      const hx = lerp(lerp(RX[1], xCp + 30 * dCp, toStreet), xCp - 4 * dCp, toNeck);
+      const hy = lerp(lerp(474, 440, toStreet), 440, toNeck);
+      sc = hand(sc, xCp, dCp, 1, hx, hy, sAt(0.1, 0.4) * (1 - sAt(3.4, 3.9)));
+      sc = chalk(sc, 3.5);
     }
-    // b9: chalked down to six; an umbrella off the rail and across to the economist
+    // b9: chalked down to six; an umbrella off the rail and, as he turns, across to the economist
     let k0a = n > SETTLE_N ? 1 : 0;
     let k0b = n > SETTLE_N ? 1 : 0;
     if (A_SETTLE[n]) {
-      sc = chalk(sc, 0.02);
-      const k = st(0.42, 0.52);
-      sc = hand(sc, xCp, dCp, 1, lerp(RX[0] - 1, PASS.x, k), lerp(RAIL_Y + 1, PASS.y, k), st(0.3, 0.36) * (1 - st(0.6, 0.68)));
-      k0a = st(0.35, 0.38);
-      k0b = st(0.55, 0.58);
+      sc = chalk(sc, 0.1);
+      const k = sAt(2.6, 3.2);
+      sc = hand(sc, xCp, dCp, 1, lerp(RX[0] - 1, PASS.x, k), lerp(RAIL_Y + 1, PASS.y, k), sAt(2.2, 2.6) * (1 - sAt(3.5, 3.9)));
+      k0a = sAt(2.55, 2.7);
+      k0b = sAt(3.42, 3.55);
     }
     if (A_SUNNY[n]) k0a = st(0.1, 0.14) * (1 - st(0.56, 0.6));
     const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t));
@@ -373,7 +404,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const took = (j: number) => {
       'worklet';
       const m = GRAB_M[j];
-      return n > POUR_N ? 2 : n === POUR_N ? st(m - 0.01, m + 0.01) + st(m + 0.01, m + 0.06) : 0;
+      return n > POUR_N ? 2 : n === POUR_N ? st(m - 0.01, m + 0.02) + st(TUCK[0], TUCK[1]) : 0;
     };
 
     // ── the sky, the street and the two boards ──────────────────────────────
@@ -382,9 +413,9 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const heavyNow = n > DEMAND_N ? 1 : n === DEMAND_N ? st(0.6, 0.8) : 0;
     const vanNow = n > VAN_N ? 1 : n === VAN_N ? st(0, 0.36) : 0;
     const doorNow = n > VAN_N ? 1 : n === VAN_N ? st(0.4, 0.54) : 0;
-    const p5 = n < RAISE_N ? 1 : n === RAISE_N ? 1 - st(0.68, 0.75) : 0;
-    const p12 = n < RAISE_N ? 0 : n === RAISE_N ? st(0.8, 0.93) : n < SETTLE_N ? 1 : n === SETTLE_N ? 1 - st(0.03, 0.1) : 0;
-    const p6 = n < SETTLE_N ? 0 : n === SETTLE_N ? st(0.15, 0.28) : 1;
+    const p5 = n < RAISE_N ? 1 : n === RAISE_N ? 1 - sAt(3.9, 4.3) : 0;
+    const p12 = n < RAISE_N ? 0 : n === RAISE_N ? sAt(4.6, 5.4) : n < SETTLE_N ? 1 : n === SETTLE_N ? 1 - sAt(0.5, 0.9) : 0;
+    const p6 = n < SETTLE_N ? 0 : n === SETTLE_N ? sAt(1.2, 2.0) : 1;
 
     return {
       bn: pose(figBn, xBn, GROUND, K, dBn, 1),

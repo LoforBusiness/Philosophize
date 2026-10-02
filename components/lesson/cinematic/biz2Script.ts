@@ -25,10 +25,10 @@ export interface Biz2Beat extends BaseBeat {
    * display — the baker sets the last pink macaron on its tray and admires the row ·
    * builder — the customer comes in from the cold, rubbing his hands, and peers at the tray ·
    * arrive — the adviser walks in, tips his hat and looks from the tray to the customer ·
-   * define — he opens a hand towards the customer, then rubs his own arms against the cold, while the baker lifts a cake up onto the counter ·
+   * define — he opens a hand towards the customer, then hugs his arms across his chest against the cold, while the baker turns and lifts a cake up onto the counter ·
    * bake — the baker drops the oven door, slides the hot sausage rolls out and sets them at the front ·
-   * guess — the adviser taps the side of his head, then points at the rolls; the baker pours the customer a small cup of tea ·
-   * quiet — the customer holds up a small cup and spreads his hands to show a bigger one ·
+   * guess — the adviser taps the side of his head twice, then points at the rolls; the baker pours the customer a small cup of tea ·
+   * quiet — the customer holds out a small cup by its saucer and raises his other hand above it to show a bigger one ·
    * serve — the baker hands over a roll and a large mug of tea, and holds up her notepad ·
    * rest — everyone at ease under the quotation.
    */

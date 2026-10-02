@@ -125,14 +125,14 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.0,
   },
   {
-    act: 'tally', th: true, start: 1, tape: 1, marks: 4,
+    act: 'tally', th: true, start: 1, tape: 1, marks: 2,
     speaker: 'cap',
     text: 'Ten throws each, and we’ll chalk up every one. Lovely day for it!',
     pace: ['even', 'brisk'],
     dur: 1.8,
   },
   {
-    act: 'rest', th: true, start: 1, tape: 1, marks: 4,
+    act: 'rest', th: true, start: 1, tape: 1, marks: 2,
     quote: {
       id: 'lq-science-foundations-2-1',
       text: 'Extraordinary claims require extraordinary evidence.',
@@ -144,7 +144,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 3.0,
   },
   {
-    th: true, start: 1, tape: 1, marks: 4,
+    th: true, start: 1, tape: 1, marks: 2,
     summary: {
       title: 'What Makes a Fair Test?',
       points: [

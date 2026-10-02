@@ -35,8 +35,24 @@ export async function armRestTable() {
       const s = f(t);
       lx += s.fistL.x; ly += s.fistL.y; rx += s.fistR.x; ry += s.fistR.y; n += 1;
     }
-    return [lx, ly, rx, ry].map((v) => Math.round((v / n) * 10) / 10);
+    return front([lx, ly, rx, ry].map((v) => Math.round((v / n) * 10) / 10));
   };
+  // AND A RESTING HAND IS NEVER BEHIND THE BODY (LESSON_RULES AR4, 2026-10-01). The
+  // living holds swing a hand back on their loop, so the average of 24 of them sat
+  // raised behind the spine — EXPLAINING (259) put its far hand 13 back at chest height,
+  // which is most of the arms a reader saw thrown back while a figure merely talked. A
+  // raised hand that averages behind the back comes round in FRONT of the chest, kept
+  // below the head so the forearm is not swallowed; a hanging hand that averages further
+  // back than a resting arm hangs is brought in to where a resting arm hangs.
+  function front(v) {
+    const out = v.slice();
+    for (const i of [0, 2]) {
+      const x = out[i], y = out[i + 1];
+      if (y < 0 && x < -6) { out[i] = 6; out[i + 1] = Math.max(y, -16); }
+      else if (x < -16) out[i] = -12;
+    }
+    return out;
+  }
   const acts = [];
   for (let a = 1; a <= ACTS; a += 1) {
     let ok = true;

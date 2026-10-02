@@ -347,11 +347,17 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived; then a finger up each line in turn
       const after = moveTr(-40, 84, TR) / L;
-      stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.13));
+      // the hand goes from the brim of his hat straight out to the chart, never back to
+      // his side in between (AR5)
+      stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, st(after + 0.01, after + 0.06));
+      // then ONE pointing hand follows the dot up the ice cream line, crosses to the
+      // sunburn line's foot and follows it up, and stays on its top as he finishes — the
+      // chart is past his reach, so the arm points along the line the dot is drawing
+      // rather than dropping back to his side between the two (AR5)
       const ice = along(ICE_PTS, st(0.6, 0.76));
       const burn = along(BURN_PTS, st(0.79, 0.95));
-      stt = hand(stt, xT, dT, 1, ice.x, ice.y, bp(0.56, 0.6, 0.79));
-      stt = hand(stt, xT, dT, 1, burn.x, burn.y, bp(0.76, 0.79, 0.99));
+      const cross = st(0.76, 0.79);
+      stt = hand(stt, xT, dT, 1, lerp(ice.x, burn.x, cross), lerp(ice.y, burn.y, cross), st(after + 0.1, after + 0.17));
     }
     if (A_HIDDEN[n]) {
       // up both lines together; then up at the sun, held as the cloud drifts off it
@@ -398,6 +404,8 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const lick = A_REST[n] ? bp(0.1, 0.24, 0.38) + bp(0.55, 0.69, 0.83) : 0;
     const standCone = { x: xP + 9 * dP, y: 462 - 15 * eye };
     const sitCone = { x: xP + 12 * dP, y: 478 - 14 * lick };
+    // and his head dips to meet the scoop as it comes up (AR3: the mouth meets the food)
+    sp = { ...sp, neck: sp.neck - 0.12 * lick };
     sp = hand(sp, xP, dP, 1, lerp(standCone.x, sitCone.x, seat), lerp(standCone.y, sitCone.y, seat), 1);
     const prevP = carryFrom(heldP, n, SITS[p] ? onSand(t) : hHold(PL_P[p], t));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
@@ -419,15 +427,20 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const creamOn = A_CREAM[n] ? st(0.03, 0.08) * (1 - st(0.4, 0.46)) : 0;
     if (A_CREAM[n]) {
       sb = hand(sb, xB, dB, -1, xB + 8 * dB, 470, creamOn);
-      const rub = bp(0.1, 0.18, 0.26) + bp(0.26, 0.34, 0.42);
+      // one slow stroke down the forearm, and the hand rests where it ended (AR5)
+      const rub = st(0.14, 0.34);
       sb = hand(sb, xB, dB, 1, xB + lerp(3, 12, rub) * dB, lerp(462, 470, rub), st(0.08, 0.12) * (1 - st(0.42, 0.48)));
-      sb = hand(sb, xB, dB, 1, HATCH_HAND.x - 3, HATCH_HAND.y + 3, bp(0.6, 0.68, 0.8));
+      // out to the hatch for the cornet; the hand that takes it brings it straight up in
+      // front of her (holdCone, below), never back to her side first
+      sb = hand(sb, xB, dB, 1, HATCH_HAND.x - 3, HATCH_HAND.y + 3, st(0.6, 0.68));
     }
     const coneNow = A_CREAM[n] ? st(0.5, 0.58) + st(0.67, 0.71) : n > 10 ? 2 : 0;
     const coneT = carry(cv, 11, n, coneNow, coneNow, tr);
     const lickB = A_REST[n] ? bp(0.3, 0.44, 0.58) : 0;
     const holdCone = A_CREAM[n] ? st(0.78, 0.86) : n > 10 ? 1 : 0;
     if (holdCone > 0) sb = hand(sb, xB, dB, 1, xB + 9 * dB, 462 - 12 * lickB, holdCone);
+    // her head dips to meet the scoop as it comes up (AR3)
+    sb = { ...sb, neck: sb.neck - 0.12 * lickB };
     const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
     const bn = pose(figB, xB, GROUND, K, dB, 1);

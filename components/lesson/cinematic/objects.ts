@@ -100,10 +100,13 @@ export const NATURAL = {
   enamel:     { base: '#B03A2E', shade: '#852A21', label: '#FAFAF7', what: 'a bicycle frame, new, in red enamel' },
   rust:       { base: '#94583A', shade: '#6E412B', label: '#FAFAF7', what: 'old rusted steel — a worn-out part' },
   paper:      { base: '#F2EEE3', shade: '#D8D0BE', label: '#1A1A1A', what: 'paper — a bill, a receipt, a ticket' },
+  hardboard:  { base: '#BC9468', shade: '#94704A', label: '#1A1A1A', what: 'a workshop pegboard in brown hardboard' },
   // psych1 colours:
   coffee:     { base: '#5A3620', shade: '#3E2415', label: '#FAFAF7', what: 'brewed coffee, in a pot or a cup' },
   porcelain:  { base: '#F4F1EA', shade: '#D6D0C3', label: '#1A1A1A', what: 'a white china cup and saucer' },
   glass:      { base: '#DCE6EA', shade: '#B6C6CD', label: '#1A1A1A', what: 'clear glass, a coffee pot' },
+  counterPaint: { base: '#3F6B5C', shade: '#2E5145', label: '#FAFAF7', what: 'a café counter\'s fluted front, painted deep green' },
+  cafeWall:   { base: '#DCE4DE', shade: '#BCC9C0', label: '#1A1A1A', what: 'a café\'s back wall, painted pale green-grey' },
   // growth1 colours:
   petal:      { base: '#F2B32C', shade: '#C98A1A', label: '#1A1A1A', what: 'a sunflower\'s petals, a buttercup' },
   seedhead:   { base: '#6A4024', shade: '#4A2C18', label: '#FAFAF7', what: 'a sunflower\'s seed disc, dark seeds' },
@@ -112,6 +115,9 @@ export const NATURAL = {
   doorPaint:  { base: '#2F5D7C', shade: '#234862', label: '#FAFAF7', what: 'a front door painted blue' },
   coping:     { base: '#C2BBAB', shade: '#9E9888', label: '#1A1A1A', what: 'a wall\'s stone coping, a stone step' },
   felt:       { base: '#4A4D52', shade: '#35383C', label: '#FAFAF7', what: 'roofing felt, a slate roof, a shed\'s dark inside' },
+  render:     { base: '#BCD2CC', shade: '#97B0A9', label: '#1A1A1A', what: 'a terraced house\'s painted render, pale sea-green' },
+  sashWhite:  { base: '#F3F2EC', shade: '#CFCDC2', label: '#1A1A1A', what: 'a sash window\'s white-painted frame' },
+  houseGlass: { base: '#4E6470', shade: '#3A4B55', label: '#FAFAF7', what: 'a house window\'s glass, the room dark behind it' },
   // biz1 colours:
   lemon:      { base: '#F2CF2E', shade: '#C9A51C', label: '#1A1A1A', what: 'a lemon\'s rind' },
   lemonade:   { base: '#F4E9A6', shade: '#D9CB7E', label: '#1A1A1A', what: 'cloudy lemonade in a jug or a cup' },
@@ -133,6 +139,7 @@ export const NATURAL = {
   frosting:   { base: '#F4E8C8', shade: '#D9C79C', label: '#1A1A1A', what: 'cream-cheese frosting, icing' },
   marble:     { base: '#ECEAE4', shade: '#C8C5BC', label: '#1A1A1A', what: 'a white marble café table top' },
   awning:     { base: '#A12E36', shade: '#7B2229', label: '#FAFAF7', what: 'a café awning\'s red canvas stripe' },
+  shopfront:  { base: '#2F5E52', shade: '#234840', label: '#FAFAF7', what: 'a pavement café\'s front, painted deep green' },
   // psych2 colours:
   jam:        { base: '#9E2633', shade: '#741A24', label: '#FAFAF7', what: 'strawberry jam, dark red, in a jar or spilt' },
   marmalade:  { base: '#D9822B', shade: '#AD6420', label: '#1A1A1A', what: 'orange marmalade in a jar' },
@@ -150,6 +157,11 @@ export const NATURAL = {
   mugGlaze:   { base: '#3D6E99', shade: '#2C5273', label: '#FAFAF7', what: 'a mug glazed blue' },
   biscuit:    { base: '#D9A85E', shade: '#B5854A', label: '#1A1A1A', what: 'a baked biscuit, a digestive' },
   wrapper:    { base: '#5B2A6E', shade: '#43204F', label: '#FAFAF7', what: 'a chocolate bar\'s purple wrapper' },
+  cupboard:   { base: '#A9BCC6', shade: '#879BA6', label: '#1A1A1A', what: 'kitchen cupboards painted a pale blue-grey' },
+  clockRed:   { base: '#B8423A', shade: '#8E3029', label: '#FAFAF7', what: 'a kitchen wall clock\'s red rim, its red second hand' },
+  bowlGlaze:  { base: '#3F6F98', shade: '#2F5577', label: '#FAFAF7', what: 'a fruit bowl glazed blue' },
+  padBack:    { base: '#8F8578', shade: '#706757', label: '#1A1A1A', what: 'a notepad\'s grey board back' },
+  skyPane:    { base: '#CFE3EE', shade: '#B5D1E1', label: '#1A1A1A', what: 'an afternoon sky seen through a window\'s glass' },
   // biz2 colours:
   macaron:    { base: '#F3B5C7', shade: '#D88FA6', label: '#1A1A1A', what: 'pastel-pink macaron shells, pink cake icing' },
   pastryRaw:  { base: '#EFDDB2', shade: '#D2BC8A', label: '#1A1A1A', what: 'raw, unbaked puff pastry' },
@@ -163,8 +175,14 @@ export const NATURAL = {
   duckEgg:    { base: '#B4D6CD', shade: '#8EB5AB', label: '#1A1A1A', what: 'a bakery counter painted duck-egg blue' },
   ovenGlow:   { base: '#F5A447', shade: '#D9822B', label: '#1A1A1A', what: 'the glow inside a hot oven' },
   ovenGlass:  { base: '#5A4636', shade: '#3D2F24', label: '#FAFAF7', what: 'an oven door\'s smoked-glass window' },
+  // econ1 colours:
+  cherry:     { base: '#9B2335', shade: '#6F1925', label: '#FAFAF7', what: 'a cherry pie\'s red filling, showing through its lattice' },
+  pastry:     { base: '#E2B46C', shade: '#BE8E47', label: '#1A1A1A', what: 'a pie\'s golden glazed pastry — its lattice and its crimped rim' },
+  marketCanvas: { base: '#2E7D4F', shade: '#225E3B', label: '#FAFAF7', what: 'a market stall\'s green-and-white striped canopy, its green' },
+  paperback:  { base: '#D9732A', shade: '#AE5A1D', label: '#1A1A1A', what: 'a paperback book\'s orange cover' },
   // econ2 colours:
-  umbRed:     { base: '#B3343A', shade: '#87272C', label: '#FAFAF7', what: 'a red umbrella\'s nylon canopy' },
+  stucco:     { base: '#E6D9BF', shade: '#C9B999', label: '#1A1A1A', what: 'a corner shop\'s cream rendered wall' },
+  umbRed:    { base: '#B3343A', shade: '#87272C', label: '#FAFAF7', what: 'a red umbrella\'s nylon canopy' },
   umbNavy:    { base: '#2E4A72', shade: '#213656', label: '#FAFAF7', what: 'a navy umbrella\'s nylon canopy' },
   umbYellow:  { base: '#E9B826', shade: '#BE931A', label: '#1A1A1A', what: 'a yellow umbrella\'s nylon canopy' },
   umbBlack:   { base: '#34383D', shade: '#22252A', label: '#FAFAF7', what: 'a black umbrella\'s nylon canopy' },
@@ -985,7 +1003,7 @@ function phil1Ring(role: Role, cx: number, cy: number, r: number, t: number, n =
 // drawn solid, a bicycle's wheel reads as a disc brake or a plate. So the tyre is a
 // ring of ink and there is nothing behind the spokes at all.
 const BICYCLE_WHEEL: ObjPart[] = [
-  oEll('mass', 50, 50, 16, 16),                                 // the hub
+  { ...oEll('mass', 50, 50, 16, 16), nat: 'silver' },           // the hub, bright steel
   ...Array.from({ length: 12 }, (_, i) => {                     // twelve spokes, hub to rim
     const a = ((i * 30 + 15) * Math.PI) / 180;
     return oBar('line', 50 + Math.cos(a) * 7, 50 + Math.sin(a) * 7, 50 + Math.cos(a) * 40, 50 + Math.sin(a) * 40, 2.4);
@@ -1121,13 +1139,14 @@ export const repairBill = (x: number, y: number, w: number, h: number) => fit(ti
 // draw, because the writing on it changes.
 const WALL_BOARD: ObjPart[] = [
   oRect('mass', 50, 58, 100, 80, 0, 2),                         // the frame
-  oRect('dark', 50, 58, 88, 68, 0, 1),                          // the slate
+  { ...oRect('dark', 50, 58, 88, 68, 0, 1), nat: 'slate' },     // the slate, dark grey stone
   oRect('face', 50, 99.5, 72, 4, 0, 1),                         // the chalk ledge under it
   oBar('line', 50, 2, 12, 18, 1.8),                             // the cord, from the nail …
   oBar('line', 50, 2, 88, 18, 1.8),                             // … to both corners
   oEll('line', 50, 2, 4, 4),                                    // and the nail
 ];
-export const wallBoard = (x: number, y: number, w: number, h: number) => fit(tint(WALL_BOARD, 'wood'), x, y, w, h);
+export const wallBoard = (x: number, y: number, w: number, h: number) =>
+  fit(WALL_BOARD.map((p) => (p.nat || p.role === 'line' || p.role === 'lit' ? p : { ...p, nat: 'wood' as NaturalKey })), x, y, w, h);
 /** The slate inside the frame, in the board's own square. */
 export const WALL_SLATE = { x: 50, y: 58, w: 88, h: 68 } as const;
 
@@ -1143,13 +1162,14 @@ const WORKBENCH: ObjPart[] = [
   oRect('mass', 50, 86, 88, 5, 0, 1),                           // the low shelf
   oRect('mass', 50, 53, 100, 8, 0, 1.5),                        // the top, thick
   oRect('face', 50, 61, 92, 8, 0, 1),                           // its apron, in shade
-  oRect('mass', 84, 43, 14, 11, 0, 1.5),                        // the vice, on the top's end
-  oRect('dark', 84, 43, 2.4, 11, 0, 1),                         // its jaws
+  { ...oRect('mass', 84, 43, 14, 11, 0, 1.5), nat: 'iron' },    // the vice, cast iron, on the top's end
+  { ...oRect('dark', 84, 43, 2.4, 11, 0, 1), nat: 'iron' },     // its jaws
   oBar('line', 77, 46, 70, 46, 2.4),                            // and its screw handle
   oEll('line', 7, 48.2, 10, 3),                                 // the spike's round foot
   oBar('line', 7, 48, 7, 12, 2.4),                              // and its nail
 ];
-export const workbench = (x: number, y: number, w: number, h: number) => fit(WORKBENCH, x, y, w, h);
+export const workbench = (x: number, y: number, w: number, h: number) =>
+  fit(WORKBENCH.map((p) => (p.nat || p.role === 'line' || p.role === 'lit' ? p : { ...p, nat: 'wood' as NaturalKey })), x, y, w, h);
 /** The spike's point, in the bench's own square. */
 export const BENCH_SPIKE = { x: 7, y: 12 } as const;
 
@@ -1158,17 +1178,21 @@ export const BENCH_SPIKE = { x: 7, y: 12 } as const;
 // REFERENCE. The wall of a bicycle workshop is hung with what it runs on: spare
 // TYRES looped over pegs and SPANNERS in a row, on a board punched with a grid of
 // holes. The grid is the field mark of a pegboard; the tyres are what make it a
-// bicycle shop's. Tools and tyres are ink — rubber and dark steel against the board.
+// bicycle shop's. The board is brown HARDBOARD (photographs of workshop walls: the
+// common one is the colour of a cardboard box, punched with dark holes); the tyre is
+// black rubber, in ink, and the spanners are bright steel.
 const PEGBOARD: ObjPart[] = [
-  oRect('mass', 50, 50, 100, 96, 0, 2),                         // the board
-  oRect('face', 50, 97.5, 100, 5, 0, 1),                        // its lower edge, in shade
-  ...[14, 30, 46, 62, 78].flatMap((y) => [12, 28, 44, 60, 76, 92].map((x) => oEll('dark', x, y, 2.4, 2.4))), // the holes
+  { ...oRect('mass', 50, 50, 100, 96, 0, 2), nat: 'hardboard' }, // the board
+  { ...oRect('face', 50, 97.5, 100, 5, 0, 1), nat: 'hardboard' }, // its lower edge, in shade
+  ...[14, 30, 46, 62, 78].flatMap((y) => [12, 28, 44, 60, 76, 92].map((x) => ({ ...oEll('dark', x, y, 2.4, 2.4), nat: 'felt' as NaturalKey }))), // the holes
   oBar('line', 70, 14, 70, 22, 3),                              // a peg …
   ...phil1Ring('line', 70, 44, 20, 6.5),                        // … with a spare tyre on it
   oBar('line', 20, 16, 20, 20, 3),                              // two more pegs …
   oBar('line', 36, 16, 36, 20, 3),
-  oBar('line', 20, 22, 20, 56, 4.4), oEll('line', 20, 60, 9, 8), oEll('lit', 20, 62, 4, 4), // … and two spanners
-  oBar('line', 36, 22, 36, 48, 4), oEll('line', 36, 52, 8, 7), oEll('lit', 36, 54, 3.6, 3.6),
+  ...[oBar('mass', 20, 22, 20, 56, 4.4), oEll('mass', 20, 60, 9, 8)].map((p) => ({ ...p, nat: 'silver' as NaturalKey })), // … and two spanners
+  oEll('lit', 20, 62, 4, 4),
+  ...[oBar('mass', 36, 22, 36, 48, 4), oEll('mass', 36, 52, 8, 7)].map((p) => ({ ...p, nat: 'silver' as NaturalKey })),
+  oEll('lit', 36, 54, 3.6, 3.6),
 ];
 export const pegboard = (x: number, y: number, w: number, h: number) => fit(PEGBOARD, x, y, w, h);
 
@@ -1259,7 +1283,7 @@ const MENU_BOARD: ObjPart[] = [
   oBar('line', 74, 12, 50, 1, 1.6),
   oEll('line', 50, 1.5, 4, 3),
   ...psychNat('wood', oRect('mass', 50, 52, 100, 84, 0, 3)),     // the frame
-  oRect('dark', 50, 52, 88, 72, 0, 1.5),                         // the slate inside it
+  ...psychNat('slate', oRect('dark', 50, 52, 88, 72, 0, 1.5)),   // the slate inside it
   ...psychNat('wood', oRect('mass', 50, 96, 92, 7, 0, 2)),       // and the chalk ledge under it
 ];
 export const menuBoard = (x: number, y: number, w: number, h: number) => fit(MENU_BOARD, x, y, w, h);
@@ -1269,14 +1293,90 @@ export const menuBoard = (x: number, y: number, w: number, h: number) => fit(MEN
 // REFERENCE. A café counter is a thick WOODEN TOP over a FLUTED front — narrow
 // vertical boards or reeds, which is what separates it from a market stall's plain
 // planks — standing on a dark KICK PLATE at the floor.
+// (2026-10-01, AR1) The front is PAINTED — a deep café green, the colour a fluted
+// counter front most often wears — and each flute is a groove in that paint, in its
+// own shade; the kick plate is dark wood.
 const CAFE_COUNTER: ObjPart[] = [
   ...psychNat('wood', oRect('mass', 50, 9, 100, 18, 0, 1.5)),    // the wooden top, lit
-  oRect('mass', 50, 58, 96, 80, 0, 1),                           // the front
+  ...psychNat('counterPaint', oRect('mass', 50, 58, 96, 80, 0, 1)), // the painted front
   ...psychNat('wood', oRect('dark', 50, 20, 100, 5)),            // the top's underside
-  ...[8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88].map((x) => oBar('dark', x, 28, x, 86, 4)),   // the flutes
-  oRect('dark', 50, 94, 96, 10),                                 // the kick plate
+  ...psychNat('counterPaint',                                    // the flutes, grooves in the paint
+    ...[8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88].map((x) => oBar('dark', x, 28, x, 86, 4))),
+  ...psychNat('wood', oRect('dark', 50, 94, 96, 10)),            // the kick plate
 ];
 export const cafeCounter = (x: number, y: number, w: number, h: number) => fit(CAFE_COUNTER, x, y, w, h);
+
+// ── THE CUP AND ITS SAUCER, APART (2026-10-01, LESSON_RULES AR3) ─────────────
+//
+// The owner: *"if there's a saucer, then they grab the saucer and the cup, but then
+// when they drink it, it looks like they actually drink it. Off the saucer."* So the
+// café cup is two drawings, not one: the SAUCER, which a hand lifts from the counter
+// and holds flat at the chest, and the CUP, which the other hand takes off it by the
+// handle and carries to the lips. REFERENCE (scratchpad/ref/psy1cup2-*, an espresso
+// cup on its saucer): a white china bowl a little wider at the rim than at its foot,
+// on a low FOOT RING; a ring handle standing clear of the wall, about half the cup's
+// height; the coffee's surface seen in the rim; the saucer a flat dish wider than the
+// cup with a shallow WELL where the foot sits. Real units, so a cup is about half a
+// head wide (the head is 30 at a lesson's K 0.76).
+const p1In = (ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] => {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+};
+/** The cup alone, 16 × 11.4: its body centred at x 6.6, its handle on the RIGHT. */
+const CAFE_CUP: ObjPart[] = p1In(16, 10.6, [
+  ...psychNat('porcelain',
+    oBar('mass', 11.8, 3.2, 14.8, 3.2, 1.5),                     // the handle, a ring standing
+    oBar('mass', 14.8, 3.2, 14.8, 6.6, 1.5),                     // clear of the wall
+    oBar('mass', 14.8, 6.6, 11.2, 7.8, 1.5),
+    ...trapezoid('mass', 6.6, 4.9, 13, 9.8, 7.2),                // the bowl, narrowing …
+    oEll('mass', 6.6, 8.2, 9.8, 2.8),                            // … and rounding into its foot
+    oRect('mass', 6.6, 9.9, 6, 1.2, 0, 0.3),                     // the foot ring
+    oEll('mass', 6.6, 1.3, 13, 2.4),                             // the rim, from a little above
+    oRect('dark', 10.4, 5.4, 2, 6.4, 0, 0.6),                    // the wall turned from the lamp
+  ),
+  ...psychNat('coffee', oEll('mass', 6.6, 1.35, 10.6, 1.5)),      // and the coffee in it
+  oBar('lit', 2.7, 3.4, 3.3, 7.8, 0.7),                          // the glaze's shine
+]);
+/** The handle, where a hand holds it, in the cup's 16 × 10.6 box (from its top-left). */
+export const CAFE_CUP_GRIP = { x: 14.8, y: 4.9, w: 16, h: 10.6, foot: 10.5, body: 6.6 } as const;
+/** The cup, centred on (x, y). A scene draws it about its handle by centring it at (w/2 − grip.x, h/2 − grip.y). */
+export const cafeCup = (x: number, y: number, w: number = CAFE_CUP_GRIP.w, h: number = CAFE_CUP_GRIP.h) => fit(CAFE_CUP, x, y, w, h);
+/** The saucer, 18 × 3.4, drawn about its centre. Its top, where the cup's foot sits, is 1 above it. */
+const SAUCER: ObjPart[] = p1In(18, 3.4, [
+  ...psychNat('porcelain',
+    oEll('mass', 9, 1.9, 18, 3),                                 // the dish
+    oRect('face', 9, 2.9, 9, 1, 0, 0.4),                         // its foot, under it
+    oEll('dark', 9, 1.4, 10, 1.3),                               // the well the cup sits in
+  ),
+  oBar('lit', 2.4, 1.6, 6, 1.1, 0.5),                            // the glaze on the near rim
+]);
+export const SAUCER_SIZE = { w: 18, h: 3.4, top: 1 } as const;
+export const saucer = (x: number, y: number, w: number = SAUCER_SIZE.w, h: number = SAUCER_SIZE.h) => fit(SAUCER, x, y, w, h);
+
+// ── CAFÉ WINDOW ──────────────────────────────────────────────────────────────
+//
+// REFERENCE: a café's back window is a sash in a WHITE-PAINTED frame, four panes of
+// glass that show the pale daylight outside, glazing bars between them, and a wooden
+// SILL proud of the wall. The shared `window` paints its panes paper and its frame in
+// the lesson's stage tone (AR1): this one is the colours a window is.
+const CAFE_WINDOW: ObjPart[] = [
+  ...psychNat('plinthWhite', oRect('mass', 50, 46, 78, 84, 0, 2)), // the painted frame
+  ...psychNat('clearSky',                                         // four panes of daylight
+    oRect('dark', 31, 28, 28, 30, 0, 1), oRect('dark', 69, 28, 28, 30, 0, 1),
+    oRect('dark', 31, 64, 28, 30, 0, 1), oRect('dark', 69, 64, 28, 30, 0, 1),
+  ),
+  oBar('lit', 22, 40, 34, 18, 3), oBar('lit', 60, 76, 72, 54, 3), // a glint on the glass
+  oBar('line', 50, 8, 50, 84, 4),                                // the glazing bars
+  oBar('line', 14, 46, 86, 46, 4),
+  ...psychNat('wood', oRect('mass', 50, 92, 96, 8, 0, 1.5)),     // the sill, proud of the frame
+  ...psychNat('wood', oRect('dark', 50, 98, 96, 5, 0, 1.5)),
+];
+export const cafeWindow = (x: number, y: number, w: number, h: number) => fit(CAFE_WINDOW, x, y, w, h);
 
 // ── psych1: objects for this lesson go ABOVE this line ──
 
@@ -1470,18 +1570,48 @@ export const gardenWall = (x: number, y: number, w: number, h: number) => fit(GA
 // the wall meets the ground, and a stone STEP at the door. The door itself is the
 // library's `door`, hung by the scene in the opening at (50, 72). The step and the
 // plinth are what put the wall on the ground rather than floating as a card.
+// In its own colours (AR1): a pale sea-green painted render, a white sash, dark glass
+// with the sky caught in its top panes, and a darker plinth band of the same render.
 const HOUSE_FRONT: ObjPart[] = [
-  oRect('mass', 50, 50, 100, 100),                                // the rendered wall
-  oRect('dark', 50, 96, 100, 8),                                  // the plinth band
-  oRect('dark', 50, 24, 50, 30, 0, 1),                            // the window's frame, set in
-  oRect('lit', 38, 17, 18, 11, 0, 0.5),                           // its four panes
-  oRect('lit', 62, 17, 18, 11, 0, 0.5),
-  oRect('lit', 38, 31, 18, 11, 0, 0.5),
-  oRect('lit', 62, 31, 18, 11, 0, 0.5),
+  g1(oRect('mass', 50, 50, 100, 100), 'render'),                  // the rendered wall
+  g1(oRect('dark', 50, 96, 100, 8), 'render'),                    // the plinth band
+  g1(oRect('dark', 50, 24, 50, 30, 0, 1), 'sashWhite'),           // the window's frame, set in
+  g1(oRect('dark', 38, 17, 18, 11, 0, 0.5), 'houseGlass'),        // its four panes
+  g1(oRect('dark', 62, 17, 18, 11, 0, 0.5), 'houseGlass'),
+  g1(oRect('dark', 38, 31, 18, 11, 0, 0.5), 'houseGlass'),
+  g1(oRect('dark', 62, 31, 18, 11, 0, 0.5), 'houseGlass'),
+  oBar('lit', 31, 14, 37, 14, 1.4),                               // the sky caught in the glass
+  oBar('lit', 55, 14, 61, 14, 1.4),
   oRect('line', 50, 40.5, 58, 2.4, 0, 0.5),                      // and its sill, proud of it
   g1(oRect('mass', 50, 98, 74, 4, 0, 1), 'coping'),               // the stone step
 ];
 export const houseFront = (x: number, y: number, w: number, h: number) => fit(HOUSE_FRONT, x, y, w, h);
+
+// ── GARDEN TREE ──────────────────────────────────────────────────────────────
+//
+// The library's `tree` (reference above it: a short flared trunk, one scalloped canopy
+// low on it), in the colours it is (AR1): a bark-brown trunk under a green canopy whose
+// underside is the leaf's own shade.
+const GARDEN_TREE: ObjPart[] = TREE.map((p, i) => ({ ...p, nat: i < 3 ? 'bark' : 'leaf' } as ObjPart));
+export const gardenTree = (x: number, y: number, w: number, h: number) => fit(GARDEN_TREE, x, y, w, h);
+
+// ── BICYCLE IN THE SHED ──────────────────────────────────────────────────────
+//
+// phil1's `bicycleWheel` (reference: an OPEN wheel — tyre, thin rim, wire spokes with
+// daylight between them), seen in the DARK of a shed doorway, where its ink spokes and
+// ink tyre vanish. So the spokes catch the light, the hub is bright steel, and the tyre
+// is black rubber against the shed's dark inside.
+const SHED_WHEEL: ObjPart[] = [
+  ...Array.from({ length: 12 }, (_, i) => {
+    const a = ((i * 30 + 15) * Math.PI) / 180;
+    return oBar('lit', 50 + Math.cos(a) * 7, 50 + Math.sin(a) * 7, 50 + Math.cos(a) * 40, 50 + Math.sin(a) * 40, 1.8);
+  }),
+  ...phil1Ring('lit', 50, 50, 39, 2.4),                           // the steel rim inside the tyre
+  ...phil1Ring('line', 50, 50, 44, 8),                            // the tyre, black rubber
+  g1(oEll('mass', 50, 50, 16, 16), 'silver'),                     // the hub
+  oEll('line', 50, 50, 5, 5),                                     // and the axle nut
+];
+export const shedWheel = (x: number, y: number, w: number, h: number) => fit(SHED_WHEEL, x, y, w, h);
 
 // ── growth1: objects for this lesson go ABOVE this line ──
 
@@ -1513,7 +1643,7 @@ const LEMON_STAND: ObjPart[] = [
     oRect('mass', 50, 19, 100, 36, 0, 2),                        // the name board, overhanging them
     oRect('dark', 50, 37.6, 96, 1.6),                            // its shadow on the uprights
   ),
-  oRect('dark', 50, 19, 93, 30, 0, 1),                           // the slate let into it
+  ...biz1Nat('slate', oRect('dark', 50, 19, 93, 30, 0, 1)),       // the slate let into it
   ...biz1Nat('lemon',
     oEll('mass', 4, 2.5, 7, 5.5), oEll('mass', 96, 2.5, 7, 5.5), // painted lemons on its corners
   ),
@@ -1608,7 +1738,7 @@ export const reamer = (x: number, y: number, w: number, h: number) => fit(REAMER
 // inside the rim — which is what says a drink rather than an empty cup.
 const PAPER_CUP: ObjPart[] = [
   ...biz1Nat('paper', ...trapezoid('mass', 50, 58, 90, 64, 78)),  // the cup, tapering to its foot
-  oBar('line', 12, 44, 88, 44, 5),                                // the printed band
+  ...biz1Nat('lemon', oBar('dark', 12, 44, 88, 44, 7)),           // the printed band, lemon yellow
   ...biz1Nat('paper', oEll('mass', 50, 18, 96, 16)),              // the rolled rim
   ...biz1Nat('lemonade', oEll('dark', 50, 19, 78, 9)),            // and the lemonade in it
 ];
@@ -1706,7 +1836,7 @@ const CUP_BIN: ObjPart[] = [
     oRect('mass', 50, 18, 18, 26, 6, 2), oEll('mass', 51, 6, 22, 8, 6),       // crooked, rims up
     oRect('mass', 73, 22, 18, 26, 24, 2), oEll('mass', 78, 11, 22, 8, 24),
   ),
-  ...trapezoid('mass', 50, 64, 96, 76, 72),                       // the basket
+  ...biz1Nat('silver', ...trapezoid('mass', 50, 64, 96, 76, 72)), // the basket, galvanised wire
   oBar('line', 2, 29, 98, 29, 4),                                 // its rim
   ...[18, 34, 50, 66, 82].map((x) => oBar('line', x, 32, 50 + (x - 50) * 0.8, 98, 2)), // and its wires
 ];
@@ -2236,8 +2366,10 @@ export const EASEL_SLATE = { x: 50, y: 50, w: 88, h: 58 } as const;
 // (`CAFE_HATCH` and `CAFE_LEDGE`, in the square.)
 const AWN_X = [6, 18, 30, 42, 54, 66, 78, 90];
 const CAFE_FRONT: ObjPart[] = [
-  oRect('mass', 56, 58, 88, 84),                                   // the wall
-  oRect('face', 56, 99, 88, 2),                                    // its foot, in shade
+  ...phil2N('shopfront',                                           // painted deep green, as the
+    oRect('mass', 56, 58, 88, 84),                                 // Margate terrace's fronts are
+    oRect('face', 56, 99, 88, 2),                                  // its foot, in shade
+  ),
   ...phil2N('awning',
     oRect('mass', 50, 10, 100, 14, 0, 1),                          // the awning's canvas
     ...AWN_X.map((x) => oEll('mass', x, 18.5, 12, 6)),             // its scalloped valance
@@ -2248,7 +2380,7 @@ const CAFE_FRONT: ObjPart[] = [
   oRect('lit', 61, 30, 44, 7, 0, 1),                               // the name board
   oRect('lit', 61, 67, 62, 30, 0, 1),                              // the hatch, onto a lit room
   oBar('line', 34, 61, 88, 61, 1),                                 // the shelf in it
-  oEll('dark', 42, 58.5, 6, 4), oEll('dark', 52, 58.5, 6, 4), oEll('dark', 74, 58.5, 6, 4),   // cups on the shelf
+  ...phil2N('mugGlaze', oEll('dark', 42, 58.5, 6, 4), oEll('dark', 52, 58.5, 6, 4), oEll('dark', 74, 58.5, 6, 4)),   // blue cups on the shelf
   oBar('line', 30, 52, 30, 82, 1.4), oBar('line', 92, 52, 92, 82, 1.4), oBar('line', 30, 52, 92, 52, 1.4),   // its frame
   ...phil2N('wood',
     oRect('mass', 61, 83, 70, 3.4, 0, 1),                          // the ledge along the sill
@@ -2501,11 +2633,11 @@ const g2 = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p
 // at the front, a row of DRAWERS under it, DOORS below the drawers, each with a bar
 // HANDLE, and a recessed KICKBOARD at the floor. The worktop's overhang and the
 // drawer-over-door rhythm are what say kitchen rather than sideboard. Worktop in pale
-// beech; the units in the stage's own tone.
+// beech; the doors and drawers painted a pale blue-grey (AR1), the kickboard their shade.
 const KITCHEN_UNIT: ObjPart[] = [
-  oRect('mass', 50, 56, 96, 80, 0, 1),                            // the carcass
-  oRect('face', 95, 56, 6, 80, 0, 1),                              // its end, turned from the lamp
-  oRect('dark', 50, 96.5, 90, 7),                                  // the kickboard, set back
+  ...g2('cupboard', oRect('mass', 50, 56, 96, 80, 0, 1)),          // the carcass
+  ...g2('cupboard', oRect('face', 95, 56, 6, 80, 0, 1)),           // its end, turned from the lamp
+  ...g2('cupboard', oRect('dark', 50, 96.5, 90, 7)),               // the kickboard, set back
   ...g2('beech', oRect('mass', 50, 7, 100, 14, 0, 1.5)),           // the worktop, proud of the front
   ...g2('beech', oRect('dark', 50, 15.5, 96, 3)),                  // and its shadow on the units
   oBar('line', 4, 36, 96, 36, 1.4),                                // the drawers over the doors
@@ -2536,10 +2668,11 @@ export const splashback = (x: number, y: number, w: number, h: number) => fit(SP
 //
 // REFERENCE. A kitchen wall clock is a round white DIAL in a raised RIM, marked with
 // twelve hour TICKS, the four quarters heavier than the rest. The hands are the
-// scene's to draw, because they move. Drawn in a square: a clock is a circle.
+// scene's to draw, because they move. Drawn in a square: a clock is a circle. Its rim
+// painted red (AR1), as a kitchen clock's often is.
 const WALL_CLOCK: ObjPart[] = [
-  oEll('mass', 50, 50, 98, 98),                                    // the rim
-  oEll('dark', 54, 54, 90, 90),                                    // its inner edge, in shade
+  ...g2('clockRed', oEll('mass', 50, 50, 98, 98)),                 // the rim
+  ...g2('clockRed', oEll('dark', 54, 54, 90, 90)),                 // its inner edge, in shade
   oEll('lit', 50, 50, 82, 82),                                     // the dial
   ...Array.from({ length: 12 }, (_, i) => {
     const a = (i / 12) * Math.PI * 2;
@@ -2676,17 +2809,17 @@ export const CHAIR_SEAT_Y = 59;
 // ellipse from above with the inside in shadow, and the fruit sitting IN it — piled
 // above the rim, their lower halves hidden by the bowl's front wall. So it is two
 // objects: `fruitBowl` (the whole bowl, inside included) drawn under the fruit, and
-// `fruitBowlFront` (its front wall) drawn over them.
+// `fruitBowlFront` (its front wall) drawn over them. Glazed blue (AR1), like the mug.
 const BOWL_FRONT: ObjPart[] = [
-  ...trapezoid('mass', 50, 52, 96, 60, 36),                        // the bowl's wall, narrowing down
-  oRect('mass', 50, 78, 40, 14, 0, 2),                             // its foot
-  oRect('dark', 50, 70, 54, 6),                                    // the shadow under its belly
-  oBar('dark', 82, 40, 70, 66, 7),                                 // the side turned from the lamp
+  ...g2('bowlGlaze', ...trapezoid('mass', 50, 52, 96, 60, 36)),    // the bowl's wall, narrowing down
+  ...g2('bowlGlaze', oRect('mass', 50, 78, 40, 14, 0, 2)),         // its foot
+  ...g2('bowlGlaze', oRect('dark', 50, 70, 54, 6)),                // the shadow under its belly
+  ...g2('bowlGlaze', oBar('dark', 82, 40, 70, 66, 7)),             // the side turned from the lamp
   oBar('lit', 4, 35, 96, 35, 2.2),                                 // its rim, catching the lamp
 ];
 const BOWL: ObjPart[] = [
-  oEll('mass', 50, 34, 98, 20),                                    // the rim, from above
-  oEll('dark', 50, 33, 86, 14),                                    // and the inside, in shadow
+  ...g2('bowlGlaze', oEll('mass', 50, 34, 98, 20)),                // the rim, from above
+  ...g2('bowlGlaze', oEll('dark', 50, 33, 86, 14)),                // and the inside, in shadow
   ...BOWL_FRONT,
 ];
 export const fruitBowl = (x: number, y: number, w: number, h: number) => fit(BOWL, x, y, w, h);
@@ -2714,7 +2847,7 @@ export const chocolateBar = (x: number, y: number, w: number, h: number) => fit(
 // as an edge under the pages. The spiral is what says notepad rather than a sheet. The
 // tally marks on it are the scene's, because one is added.
 const NOTEPAD: ObjPart[] = [
-  oRect('face', 52, 54, 96, 88, 0, 2),                             // the card back, edged in shade
+  ...g2('padBack', oRect('face', 52, 54, 96, 88, 0, 2)),           // the card back, edged in shade
   ...g2('paper', oRect('mass', 48, 52, 92, 88, 0, 2)),             // the pages
   ...[30, 44, 58, 72, 86].map((y) => g2('paper', oBar('dark', 8, y, 88, y, 1.2))[0]), // ruled lines
   ...[16, 32, 48, 64, 80].map((x) => oEll('line', x, 9, 7, 12)),   // the spiral's loops
@@ -2733,6 +2866,17 @@ const PENCIL: ObjPart[] = [
   oRect('line', 98, 50, 4, 44),                                    // the ferrule's edge
 ];
 export const pencil = (x: number, y: number, w: number, h: number) => fit(PENCIL, x, y, w, h);
+
+// ── KITCHEN WINDOW ───────────────────────────────────────────────────────────
+//
+// The library's `window` (reference above it: a frame, four panes on a mullion and a
+// transom, a projecting sill), in the colours it is (AR1): a white-painted frame and
+// sill, and the afternoon sky in the glass.
+const KITCHEN_WINDOW: ObjPart[] = WINDOW.map((p) => (
+  p.role === 'lit' ? { ...p, role: 'dark', nat: 'skyPane' } as ObjPart
+    : p.role === 'mass' || p.role === 'dark' ? { ...p, nat: 'sashWhite' } as ObjPart : p
+));
+export const kitchenWindow = (x: number, y: number, w: number, h: number) => fit(KITCHEN_WINDOW, x, y, w, h);
 
 // ── growth2: objects for this lesson go ABOVE this line ──
 
@@ -3196,8 +3340,8 @@ export const shopAwning = (x: number, y: number, w: number, h: number) => fit(SH
 // say this is the END of the building, where the street goes round the corner.
 const QUOIN_Y = [5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85];
 const CORNER_SHOP: ObjPart[] = [
-  oRect('mass', 50, 50, 100, 100),                                 // the wall
-  oRect('face', 50, 98, 100, 4),                                   // its plinth
+  ...econ2N('stucco', oRect('mass', 50, 50, 100, 100)),            // the wall, cream render
+  ...econ2N('coping', oRect('face', 50, 98, 100, 4)),              // its stone plinth
   ...econ2N('doorPaint',
     oRect('face', 12.3, 75, 17, 51),                               // the door's frame
     oRect('mass', 12.3, 75.5, 14, 49, 0, 0.6),                     // the door
@@ -3205,7 +3349,7 @@ const CORNER_SHOP: ObjPart[] = [
   ),
   ...econ2N('glass', oRect('dark', 12.3, 64, 9.6, 15, 0, 0.6)),     // its glazed top panel
   oEll('line', 17.4, 77, 1.2, 2.4),                                // its knob
-  oRect('face', 70.8, 71.4, 45.6, 44.6, 0, 0.6),                   // the shop window's frame
+  ...econ2N('doorPaint', oRect('face', 70.8, 71.4, 45.6, 44.6, 0, 0.6)), // the shop window's frame, painted as the door
   ...econ2N('glass', oRect('mass', 70.8, 71.2, 42.4, 41.2, 0, 0.4)),
   oBar('line', 70.8, 51, 70.8, 91.6, 1),                           // its mullion
   oBar('lit', 55, 58, 52, 66, 1.4), oBar('lit', 59, 58, 54.5, 70, 1.4),   // the light on the glass
@@ -3304,6 +3448,114 @@ const CARTON: ObjPart[] = econ2N('cardboard',
   oRect('dark', 50, 60, 10, 76),                                   // the tape
 );
 export const carton = (x: number, y: number, w: number, h: number) => fit(CARTON, x, y, w, h);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE MARKET STALL IN ITS OWN COLOURS, for Economics lesson 1 (2026-10-01, AR1).
+// The shared `pie`, `loaf` and `stall` above are struck in a branch's tones, and in the
+// lesson they came out as grey-green discs under a blue-grey canopy. These are drawn
+// against references fetched with `node scripts/get-reference.mjs` (scratchpad/ref/
+// econ1-*): a cherry pie with a lattice top in its glass dish, a peach pie cooling in
+// its tin, bloomer loaves stacked on a market stall in Epping, and Shepherd's Bush
+// Market's striped canopies. Each is drawn true to its own proportion inside the
+// square, so a scene asks for a SQUARE box.
+// ─────────────────────────────────────────────────────────────────────────────
+const econ1N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+
+// ── PIE ──────────────────────────────────────────────────────────────────────
+//
+// REFERENCE (the cherry pie with a lattice top, 2006; the peach pie on its rack): seen
+// a little from above, a pie is a DISH that tapers to its foot with a lip round its
+// top; a golden CRUST rim, CRIMPED into a fluted edge all the way round; and inside it
+// the FILLING, dark red, showing in squares between a LATTICE of pastry strips. The
+// crimped rim and the red squares in the lattice are the field marks: a smooth golden
+// ellipse is a cake, and a grey one is a stone. Content: x 2–98, y 22–80.
+const PIE_CRIMPS = Array.from({ length: 16 }, (_, i) => (i / 16) * Math.PI * 2);
+const ECON1_PIE: ObjPart[] = [
+  ...econ1N('porcelain', ...trapezoid('face', 50, 71, 88, 68, 16)),  // the dish, tapering to its foot
+  ...econ1N('porcelain', oRect('mass', 50, 61.5, 98, 6, 0, 3)),      // its lip
+  ...econ1N('pastry',
+    oEll('mass', 50, 45, 94, 34),                                    // the crust round the top
+    ...PIE_CRIMPS.map((a) => oEll('mass', 50 + 46 * Math.cos(a), 45 + 16.5 * Math.sin(a), 9, 7)), // its crimped edge
+  ),
+  ...econ1N('cherry', oEll('mass', 50, 44, 82, 25)),                  // the filling inside the rim
+  ...econ1N('pastry',                                                // the lattice: two strips one way …
+    oBar('mass', 13, 40, 87, 40, 4.2),
+    oBar('mass', 13, 49, 87, 49, 4.2),
+    oBar('mass', 32, 32.5, 30, 55.5, 4.6),                           // … and three across, leaning with the dish
+    oBar('mass', 50, 31.5, 50, 56.5, 4.6),
+    oBar('mass', 68, 32.5, 70, 55.5, 4.6),
+  ),
+  oEll('lit', 30, 31.5, 12, 2.4, -6),                                // the glaze catching the lamp
+];
+export const econ1Pie = (x: number, y: number, w: number, h: number) => fit(ECON1_PIE, x, y, w, h);
+/** The pie's foot, in its own square: where it stands on a counter or rests on a palm. */
+export const ECON1_PIE_FOOT = 79 as const;
+
+// ── LOAF ─────────────────────────────────────────────────────────────────────
+//
+// REFERENCE (bloomer loaves for sale at Copped Hall, Epping): a bloomer is a long
+// DOME, rounded at both ends, on a FLAT base, its top baked a deeper brown than its
+// sides, with SCORES slashed across it at a slant that open to the pale crumb. The
+// pale slashes on a brown dome are what say bread. Content: x 2–98, y 34–78.
+const ECON1_LOAF: ObjPart[] = [
+  ...econ1N('crust',
+    oEll('mass', 50, 54, 96, 42),                                    // the dome
+    oRect('mass', 50, 66, 94, 18, 0, 9),                             // rounding down to a flat base
+    oEll('dark', 50, 47, 78, 20),                                    // the top, baked darker
+  ),
+  ...econ1N('crumb',                                                 // four scores, open to the crumb
+    oBar('dark', 21, 55, 30, 40, 4.6),
+    oBar('dark', 37, 53, 46, 37, 4.6),
+    oBar('dark', 53, 53, 62, 37, 4.6),
+    oBar('dark', 69, 55, 78, 40, 4.6),
+  ),
+  oEll('lit', 34, 39.5, 13, 2.6, -10),                               // a dusting of flour
+];
+export const econ1Loaf = (x: number, y: number, w: number, h: number) => fit(ECON1_LOAF, x, y, w, h);
+/** The loaf's base, in its own square. */
+export const ECON1_LOAF_FOOT = 75 as const;
+
+// ── PAPERBACK ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (any paperback lying on a table): seen from the front and a little above,
+// a book lying flat is its FRONT COVER, a band of PAGE EDGES under it, ruled with the
+// leaves, and the back cover's edge at the foot. The pale band of pages between two
+// covers is what says book rather than tile. Content: x 2–98, y 30–71.
+const ECON1_BOOK: ObjPart[] = [
+  ...econ1N('paperback', oRect('mass', 50, 44, 96, 28, 0, 2)),       // the front cover
+  ...econ1N('paper', oRect('face', 51, 63, 92, 10, 0, 1)),           // the page edges under it
+  ...econ1N('paperback', oRect('face', 50, 69.2, 96, 3.2, 0, 1)),    // the back cover at the foot
+  ...econ1N('paperback', oRect('dark', 8, 44, 6, 28)),               // the spine's fold
+  oRect('lit', 56, 39, 56, 7, 0, 1),                                 // the white title panel
+  oBar('line', 36, 50.5, 76, 50.5, 1.4),                             // the author's name
+  oBar('line', 7, 61.5, 95, 61.5, 0.6), oBar('line', 7, 65, 95, 65, 0.6), // the leaves
+];
+export const econ1Book = (x: number, y: number, w: number, h: number) => fit(ECON1_BOOK, x, y, w, h);
+/** The book's foot, in its own square: the edge it lies on, and the edge a hand takes. */
+export const ECON1_BOOK_FOOT = 70.8 as const;
+
+// ── STALL ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Shepherd's Bush Market): the same stall as `stall` above, in its own
+// colours — two WOODEN posts, a canopy of GREEN-AND-WHITE striped canvas, and a
+// scalloped valance whose scallops alternate the two.
+const ECON1_STALL: ObjPart[] = [
+  ...econ1N('wood',
+    oBar('mass', 8, 16, 8, 100, 3),                                  // the two posts, down to the ground
+    oBar('mass', 92, 16, 92, 100, 3),
+  ),
+  ...econ1N('marketCanvas',
+    ...trapezoid('mass', 50, 13, 84, 100, 18),                       // the canopy, sloping to the front
+    oRect('mass', 50, 25, 100, 6),                                   // the valance's band
+  ),
+  oRect('lit', 22, 13, 9, 16, 0, 0),                                 // its white stripes
+  oRect('lit', 41, 13, 9, 16, 0, 0),
+  oRect('lit', 59, 13, 9, 16, 0, 0),
+  oRect('lit', 78, 13, 9, 16, 0, 0),
+  ...[6, 18.5, 31, 43.5, 56, 68.5, 81, 93.5].map((x, k) =>          // the scallops, green and white by turns
+    ({ ...oEll('mass', x, 28, 12, 10), nat: (k % 2 ? 'canvasWhite' : 'marketCanvas') as NaturalKey })),
+];
+export const econ1Stall = (x: number, y: number, w: number, h: number) => fit(ECON1_STALL, x, y, w, h);
 
 // ── econ2: objects for this lesson go ABOVE this line ──
 
@@ -4772,7 +5024,7 @@ const TICKET_KIOSK: ObjPart[] = [
   ...e3N('signBoard', oRect('mass', 50, 31, 89.5, 8.7, 0, 0.6)), // the sign board
   ...e3N('felt', oBar('mass', 0, 26.1, 50, 1.1, 4.6), oBar('mass', 50, 1.1, 100, 26.1, 4.6)), // the roof's edge
   oBar('lit', 2.6, 27.4, 50, 4.6, 1.45), oBar('lit', 50, 4.6, 97.4, 27.4, 1.45), // the bargeboards' white trim
-  oRect('dark', 50, 62, 84.2, 45.7),                             // the window: the booth's inside
+  ...e3N('newWood', oRect('dark', 50, 62, 84.2, 45.7)),         // the window: the booth's inside, lined in pine
   oBar('lit', 7.9, 39.1, 92.1, 39.1, 1.3),                       // the window's white frame
   oBar('lit', 7.9, 39.1, 7.9, 84.8, 1.3), oBar('lit', 92.1, 39.1, 92.1, 84.8, 1.3),
   oBar('line', 9.2, 60.9, 19.7, 60.9, 1.05), oBar('line', 40.8, 60.9, 51.3, 60.9, 1.05), // the ticket-roll rails
@@ -5347,9 +5599,9 @@ export const OBJECTS = {
   // phil1:
   bicycleWheel, bicycleFrame, repairStand, partsCrateBack, partsCrateFront, repairBill, wallBoard, workbench, pegboard,
   // psych1:
-  carafe, coffeeCup, tentCard, menuBoard, cafeCounter,
+  carafe, coffeeCup, tentCard, menuBoard, cafeCounter, cafeCup, saucer, cafeWindow,
   // growth1:
-  flowerpot, puddle, wateringCan, sunflower, shed, shedDoor, gardenWall, houseFront,
+  flowerpot, puddle, wateringCan, sunflower, shed, shedDoor, gardenWall, houseFront, gardenTree, shedWheel,
   // biz1:
   lemonStand, standCounter, lemon, lemonadeJug, reamer, paperCup, cupStack, cashTin, tinLid, lemonCrateBack, lemonCrateFront, queueSign, cupBin,
   // sci1:
@@ -5362,9 +5614,11 @@ export const OBJECTS = {
   trolley, jamJar, jamSplat, jamLid, aisleSign, cctvMount, cctvCamera, cctvScreen, shelfEnd, shoppingList,
   // growth2:
   kitchenUnit, splashback, wallClock, kettle, mug, biscuitJar, jarLid, biscuit, kitchenChair, fruitBowl, fruitBowlFront,
-  chocolateBar, notepad, pencil,
+  chocolateBar, notepad, pencil, kitchenWindow,
   // biz2:
   deckOven, ovenDoor, macaronTray, macaron, rollTray, rollTrayRaw, sausageRoll, cakeStand, teapot, teacup, recipeBook, crystalBall, wallShelf, dawnWindow, bakeryCounter,
+  // econ1:
+  econ1Pie, econ1Loaf, econ1Book, econ1Stall,
   // econ2:
   furledUmbrella, umbrellaRack, priceTag, hangingSign, shopAwning, cornerShop, rainCloud, sun, panelVan, vanDoor, carton,
   // sci2:

@@ -18,16 +18,15 @@ import {
 import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
-import { emoteStill, emoteStillLive, strideMode, actStance } from './moves';
+import { emoteStill, emoteStillLive, strideMode } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  tint, bench, runningTrack, trackVerge, parkNoticeBoard, goalCard, wallCalendar, stopwatch, sportsBottle,
+  NATURAL, tint, bench, runningTrack, trackVerge, parkNoticeBoard, goalCard, wallCalendar, stopwatch, sportsBottle,
   litterBin, newspaper, ballpoint, floodlight, parkTree, CAL_TUESDAY, WATCH_DIAL,
 } from './objects';
 import { BY_ID } from './wardrobe';
-import { EMBER } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // personal-growth-foundations-3, "How to Set a Goal That Works" — A PARK RUNNING
@@ -198,13 +197,22 @@ const WATCH_ART = stopwatch(0, WATCH.h / 2, WATCH.w, WATCH.h);
 const PEN_ART = ballpoint(0, PEN.h / 2, PEN.w, PEN.h);
 const PAPER_ART = newspaper(0, 0, PAPER.w, PAPER.h);
 
+/**
+ * AR4: the explaining pose (259) rests its FAR hand raised and 13 units behind the
+ * spine, which side-on is an arm thrown back. A person explaining holds both hands in
+ * front of him, so the far one comes forward to sit beside the near one.
+ */
+function inFront(code: number, s: Stance): Stance {
+  'worklet';
+  return code === EXPLAIN ? { ...s, fistL: { x: 8, y: -3 } } : s;
+}
 function hHold(code: number, t: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return inFront(code, emoteStill(code, t));
 }
 function hLive(code: number, t: number, bt: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return inFront(code, emoteStillLive(code, t, bt));
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -313,8 +321,17 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
     // b0: her card held out, pinned at the board's right-hand end, and the stretch once
     // she has walked along to her friend's end
     if (A_WISH[n]) {
-      const stretch = st(0.8, 1);
-      if (!wr.walking && stretch > 0) sr = actStance(13, t, stretch);
+      // the stretch, once: both arms straight up over her head and a lean back, looking
+      // up, then down again. Side-on a person stretches UP, not fore and aft: the far arm
+      // flung back behind her is an arm thrown back (AR4).
+      const e = wr.walking ? 0 : Math.sin(Math.PI * ease01(st(0.8, 1)));
+      if (e > 0) {
+        sr = {
+          ...sr, tilt: sr.tilt + e * 0.12, neck: sr.neck - e * 0.2,
+          fistL: { x: lerp(sr.fistL.x, -1, e), y: lerp(sr.fistL.y, -54, e) },
+          fistR: { x: lerp(sr.fistR.x, 5, e), y: lerp(sr.fistR.y, -56, e) },
+        };
+      }
       sr = hand(sr, xR, dR, 1, xR + 12 * dR, GETFIT_AT.y, 1 - st(0.24, 0.3));
       sr = hand(sr, xR, dR, 1, GETFIT_AT.x + GRIP, GETFIT_AT.y, st(0.03, 0.12) * (1 - st(0.22, 0.29)));
     }
@@ -327,7 +344,8 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
       // The hand sits back from the pen's tip by the slant it is held at (PEN_TIP).
       const tip = { x: TUE.x + 3.6 * Math.cos(a) - PEN_TIP.x, y: TUE.y + 2.2 * Math.sin(a) - PEN_TIP.y };
       sr = hand(sr, xR, dR, 1, tip.x, tip.y, st(0.1, 0.16) * (1 - st(0.42, 0.47)));
-      sr = hand(sr, xR, dR, 1, PEN_HANG.x, PEN_HANG.y + 4, bp(0.42, 0.46, 0.52));
+      // and she lets go where she is: the pen swings back to hang on its string by
+      // itself (no second stroke of the hand back to the hook, AR5)
     }
     const prevR = carryFrom(heldR, n, hHold(R_P[p], t));
     const figR = keepHeld(heldR, wr.walking ? mixKeepLegs(prevR, sr, tr) : mixStance(prevR, sr, tr));
@@ -391,7 +409,7 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
     }
     // b10–b11: the stopwatch raised and started as she sets off; up where he can watch it
     const watchUp = A_PLAN[n] ? st(0.4, 0.5) : n > 10 ? 1 : 0;
-    if (watchUp > 0) stt = hand(stt, xT, dT, 1, xT + 9 * dT, 444 - 2 * (A_PLAN[n] ? bp(0.5, 0.53, 0.58) : 0), watchUp);
+    if (watchUp > 0) stt = hand(stt, xT, dT, 1, xT + 9 * dT, 457 - 2 * (A_PLAN[n] ? bp(0.5, 0.53, 0.58) : 0), watchUp);
     const prevT = carryFrom(heldT, n, hHold(T_P[p], t));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
@@ -405,7 +423,7 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const wR = wristOf(run, 'wrR');
     const getHeld = { x: wR.x + GRIP * dR, y: wR.y };
     // the pen: 0 hanging on its string · 1 in her hand
-    const penNow = A_PLAN[n] ? st(0.08, 0.11) * (1 - st(0.46, 0.5)) : 0;
+    const penNow = A_PLAN[n] ? st(0.08, 0.11) * (1 - st(0.41, 0.46)) : 0;
     const penT = carry(cv, 9, n, penNow, penNow, tr);
     const penAt = { x: lerp(PEN_HANG.x, wR.x + PEN_GRIP.x * dR, penT), y: lerp(PEN_HANG.y, wR.y + PEN_GRIP.y, penT) };
     // the stopwatch's hand: seconds since she set off
@@ -627,11 +645,11 @@ const styles = StyleSheet.create({
   },
   ring: {
     position: 'absolute', left: TUE.x - 6, top: TUE.y - 4, width: 12, height: 8, borderRadius: 4,
-    borderWidth: 1.2, borderColor: EMBER,
+    borderWidth: 1.2, borderColor: NATURAL.penBlue.base,
   },
   watchHand: {
     position: 'absolute', left: -0.35, top: DIAL.y - DIAL.r * 0.75, width: 0.7, height: DIAL.r * 0.75, borderRadius: 0.35,
-    backgroundColor: EMBER, transformOrigin: '50% 100%',
+    backgroundColor: NATURAL.clockRed.base, transformOrigin: '50% 100%',
   },
   clear: { flexGrow: 1 },
   place: { flexGrow: 1 },

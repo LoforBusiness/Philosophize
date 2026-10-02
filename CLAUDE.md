@@ -8425,6 +8425,20 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   its plate's width came from a data table no static check could read. `check:replay`
   runs every scene and measures every label against its font on every beat: two units of
   air beside each word, no more lines than the plate holds, and no plate off its object.
+- **Things are their own colours, and hands use them as people do (group AR, 2026-10-01).**
+  The owner: the first lessons looked *"created only with the color palette"* (econ1's pie
+  and loaf were grey-green discs in the branch's olive), and arms went *"too far
+  backwards"* or repeated *"the same movement over and over"* (biz1's partner held her cup
+  up behind her own head; a spoon stirred for a whole line). In a dialogue lesson every
+  object now wears its real colours from `NATURAL` (AR1; the stage tone is only for the
+  floor, plates and diagrams); a thing is held by its handle, crook or edge and hangs from
+  that grip (AR2); a drink goes to the lips and a cup is drunk off its saucer, held flat
+  in the other hand (AR3, `lipsAt`/`sipHandAt`/`saucerHandAt`/`sipTilt`/`sipHead` in
+  interact.ts); no hand is thrown behind the body — he turns first (AR4); a stroke plays at
+  most twice (AR5, which ends AP18's licence for a loop); and a held thing rests close in
+  front of him (AR6). `check:replay` measures AR1, AR4 and AR5 on every dialogue lesson
+  (found 28, 106 and 30 before the pass); `sheet:lesson-objects` draws a lesson object in
+  plain Node again (`sheet:objects` now draws the insignia's).
 - **Every road has two lessons** (2026-09-30), the second appended to its foundations
   unit: What Makes an Argument Good? (a café table and a slice of carrot cake), Why
   Memory Gets Things Wrong (two trolleys and a jar of jam), How Habits Work (a kitchen

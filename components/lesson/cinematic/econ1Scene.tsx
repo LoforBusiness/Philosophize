@@ -14,16 +14,19 @@ import {
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
-import { stageTone, stageToneOf } from './stageTones';
+import { stageTone } from './stageTones';
 import { floorStyle, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import { stall, counter, pie, loaf, note, chalkboard, book, coin } from './objects';
+import {
+  NATURAL, tint, oTri, counter, note, chalkboard, coin, econ1Pie, econ1Loaf, econ1Book, econ1Stall,
+  ECON1_PIE_FOOT, ECON1_LOAF_FOOT, ECON1_BOOK_FOOT, type NaturalKey, type ObjPart,
+} from './objects';
 import { BY_ID } from './wardrobe';
-import { DEEP, EMBER, OLIVE, PAPER_LIT } from '@/components/shared/tone';
+import { EMBER, PAPER_LIT } from '@/components/shared/tone';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // economics-foundations-1, "What Is Economics?" — A SATURDAY MARKET STALL.
@@ -37,9 +40,12 @@ import { DEEP, EMBER, OLIVE, PAPER_LIT } from '@/components/shared/tone';
 //   b3   the stall-holder steps to the bread and holds up the last loaf as the
 //        economist names it; the shopper listens.
 //   b4   the stall-holder comes to the shopper's end. Note across the counter, laid
-//        down; two coins of change laid beside it; the book lifted and handed over.
+//        down; he turns to his own side and lays two coins of change there; turns
+//        back, and the book is lifted and handed over. The shopper holds it in front
+//        of him from here on.
 //   b5   Q1: the note, the change and the pie lie on the counter — tap one.
-//   b6   the change goes into the shopper's hand and pocket, the note into the
+//   b6   the stall-holder turns to pick the change up and carries it across as he
+//        turns back; it goes into the shopper's hand and pocket, the note into the
 //        stall-holder's.
 //   b7   the stall-holder steps back to the last loaf; both customers reach for it;
 //        he puts a hand to his chin.
@@ -62,7 +68,6 @@ import { DEEP, EMBER, OLIVE, PAPER_LIT } from '@/components/shared/tone';
 
 const TONE = stageTone('economics');
 const { RULE } = TONE;
-const WOOD = stageToneOf(OLIVE);
 const TR = 0.85;
 /** 78 units of figure in a 208-unit band: 37.5%, under check:scale's 38%. */
 const K = K_FIG * 0.76;
@@ -70,14 +75,17 @@ const K = K_FIG * 0.76;
 /**
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, economics-foundations-1), except b4, whose line is 1.3s
- * and whose trade needs about five — the hand-offs run on after the line ends.
+ * and whose trade needs about six and a half — the stall-holder's walk to the
+ * shopper's end, and then each hand-off with a pause after it (AR5: a trade is a
+ * sequence of separate reaches, not a hand sawing the air).
  */
-const LINES = [3.61, 3.47, 5.68, 6.02, 5, 0, 6.38, 4.33, 0, 0, 0];
+const LINES = [3.61, 3.47, 5.68, 6.02, 6.6, 0, 6.38, 4.33, 0, 0, 0];
 
-// The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
-// leaning in to listen.
+// The held poses (moves.ts act + 99): talking with the hands, listening, nodding along,
+// leaning in to listen. EXPLAINING (259) is not used: its resting far hand sits at the
+// chest a little behind the spine, and as his weight moves it reads as an arm held back
+// (AR4) — the economist explains with TALK, both hands in front of him.
 const TALK = 167;
-const EXPLAIN = 259;
 const LISTEN = 159;
 const NOD = 263;
 const LEAN = 177;
@@ -105,33 +113,44 @@ const TH_D = BEATS.map(() => 1);
 const CP_D = BEATS.map(() => -1);
 /** What each is doing with his body: talking while he speaks, listening while he does not. */
 const PL_P = [TALK, LISTEN, LISTEN, NOD, TALK, LISTEN, NOD, LEAN, LISTEN, NOD, LISTEN];
-const TH_P = [LISTEN, LISTEN, EXPLAIN, EXPLAIN, LISTEN, NOD, EXPLAIN, LEAN, LISTEN, NOD, LISTEN];
-const CP_P = [LISTEN, TALK, LISTEN, NOD, LISTEN, LEAN, NOD, TALK, EXPLAIN, NOD, LISTEN];
+const TH_P = [LISTEN, LISTEN, TALK, TALK, LISTEN, NOD, TALK, LEAN, LISTEN, NOD, LISTEN];
+const CP_P = [LISTEN, TALK, LISTEN, NOD, LISTEN, LEAN, NOD, TALK, NOD, NOD, LISTEN];
 
 // ── the stall and what is on it ──────────────────────────────────────────────
 const STALL_X = 290;
 const STALL_W = 180;
 const TOP = 477;                                   // the counter's top, at his hip
-const BOOK_AT = { x: 222, y: TOP - 10 };
+/** The book, the pie and the loaf are placed by their FOOT (AR2): the edge they stand on,
+ *  which is where a hand goes under them to lift them. The note and the coins by their middle. */
+const BOOK_AT = { x: 222, y: TOP };
 const NOTE_AT = { x: 234, y: TOP - 5.5 };
 const COINS_AT = { x: 258, y: TOP - 5 };
-const PIE_AT = { x: 292, y: TOP - 11 };
-const LOAF_AT = { x: 340, y: TOP - 10.5 };
+const PIE_AT = { x: 292, y: TOP };
+const LOAF_AT = { x: 340, y: TOP };
 /** Where a thing passes across the counter from one hand to the other. */
 const PASS = { x: 216, y: 462 };
 /** The pavement A-board, and the slate inside its frame. */
 const BOARD = { x: 118, w: 104, h: 86 };
 const SLATE = { left: 82, top: 423, w: 72, h: 51 };
 
-const STALL_ART = stall(STALL_X, 420, STALL_W, 160);
-const COUNTER_ART = counter(STALL_X, 488, STALL_W, 24);
-const BOARD_ART = chalkboard(BOARD.x, 500 - BOARD.h / 2, BOARD.w, BOARD.h).filter((p) => p.role === 'mass' || p.role === 'line');
-// The things that move are drawn about their own centre and carried by a rider.
-const NOTE_ART = note(0, 0, 20, 11);
-const COIN_ART = coin(0, 0, 9, 9);
-const BOOK_ART = book(0, 0, 30, 20);
-const PIE_ART = pie(0, 0, 34, 22);
-const LOAF_ART = loaf(0, 0, 32, 21);
+// Every object in its own colours (AR1): a green-and-white striped canopy on wooden
+// posts, a wooden counter and A-board, a cherry pie in its dish, a bloomer loaf, an
+// orange paperback, a ten-pound note and two pound coins.
+const STALL_ART = econ1Stall(STALL_X, 420, STALL_W, 160);
+const COUNTER_ART = tint(counter(STALL_X, 488, STALL_W, 24), 'wood');
+const BOARD_ART = tint(chalkboard(BOARD.x, 500 - BOARD.h / 2, BOARD.w, BOARD.h).filter((p) => p.role === 'mass' || p.role === 'line'), 'wood');
+// The things that move are carried by a rider: the note and the coins about their middle,
+// the book, the pie and the loaf about their FOOT, so a hand under one lifts it.
+const NOTE_ART = tint(note(0, 0, 20, 11), 'note10');
+const COIN_ART = tint(coin(0, 0, 9, 9), 'brass');
+const BOOK_S = 30;
+const PIE_S = 36;
+const LOAF_S = 34;
+const BOOK_ART = econ1Book(0, -(ECON1_BOOK_FOOT - 50) * (BOOK_S / 100), BOOK_S, BOOK_S);
+const PIE_ART = econ1Pie(0, -(ECON1_PIE_FOOT - 50) * (PIE_S / 100), PIE_S, PIE_S);
+const LOAF_ART = econ1Loaf(0, -(ECON1_LOAF_FOOT - 50) * (LOAF_S / 100), LOAF_S, LOAF_S);
+/** When the trade on b4 starts: the moment the stall-holder reaches the shopper's end. */
+const T_TRADE = moveTr(356, 240, TR);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -177,7 +196,7 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldPl = useHeld();
   const heldTh = useHeld();
   const heldCp = useHeld();
-  const cv = useCarry(11);
+  const cv = useCarry(12);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -194,6 +213,16 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       'worklet';
       return bump(b, L, a, m, z);
     };
+    // the same two, in SECONDS into the beat rather than fractions of its line
+    const sAt = (a: number, z: number) => {
+      'worklet';
+      return stage(b, L, a / L, z / L);
+    };
+    const bAt = (a: number, m: number, z: number) => {
+      'worklet';
+      return bump(b, L, a / L, m / L, z / L);
+    };
+    const T = T_TRADE;
 
     // ── the shopper ─────────────────────────────────────────────────────────
     // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
@@ -203,15 +232,20 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     let sp = wp.s;
     // b0: the note held out as he arrives
     if (A_ENTER[n]) sp = hand(sp, xPl, wp.dirV, 1, xPl + 16, GROUND - 58, st(0.7, 0.9));
-    // b4: the note across the counter, then his other hand takes the book
-    if (A_BUY[n]) {
-      sp = hand(sp, xPl, wp.dirV, 1, PASS.x, PASS.y, bp(0.36, 0.46, 0.58));
-      sp = hand(sp, xPl, wp.dirV, -1, PASS.x, PASS.y + 2, bp(0.84, 0.9, 0.99));
+    // b4: the note held across the counter until the stall-holder takes it
+    if (A_BUY[n]) sp = hand(sp, xPl, wp.dirV, 1, PASS.x, PASS.y, bAt(T - 0.5, T + 0.35, T + 1.05));
+    // b4 on: his left hand takes the book at the counter's end, then holds it close in
+    // front of him, below the chest, for the rest of the lesson (AR6) — never at his side
+    // or behind him, where the listening pose would leave it
+    const bookIn = A_BUY[n] ? sAt(T + 3.1, T + 3.5) : n > 4 ? 1 : 0;
+    if (bookIn > 0) {
+      const home = A_BUY[n] ? sAt(T + 3.75, T + 4.35) : 1;
+      sp = hand(sp, xPl, wp.dirV, -1, lerp(PASS.x, xPl + 9 * wp.dirV, home), lerp(PASS.y + 2, 470, home), bookIn);
     }
     // b6: the change into his hand, and into his pocket
     if (A_SETTLE[n]) {
-      sp = hand(sp, xPl, wp.dirV, 1, PASS.x, PASS.y, bp(0.2, 0.3, 0.4));
-      sp = hand(sp, xPl, wp.dirV, 1, xPl - 3, GROUND - 30, bp(0.4, 0.48, 0.58));
+      sp = hand(sp, xPl, wp.dirV, 1, PASS.x, PASS.y, bAt(1.3, 1.95, 2.6));
+      sp = hand(sp, xPl, wp.dirV, 1, xPl + 2, GROUND - 30, bAt(2.6, 3.1, 3.7));
     }
     // b7: he reaches for the last loaf
     if (A_LOAF[n]) sp = hand(sp, xPl, wp.dirV, 1, LOAF_AT.x, LOAF_AT.y, st(0.34, 0.46) * (1 - st(0.86, 0.96)));
@@ -241,38 +275,51 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const src2 = carrySource(cv, 2, n, CP_X[0]);
     const wc = walkOf(src2, CP_X, CP_D, CP_P, n, t, b);
     const xCp = carry(cv, 2, n, wc.xp, wc.xn, wc.walking ? wc.walkU : tr);
+    // He faces the shopper's end of the counter, and TURNS to his own side of it to lay
+    // the change down (b4) and to pick it up again (b6): the coins lie at 258, behind
+    // him as he faces the shopper, and an arm thrown back to them is AR4's fault.
+    const dCpNow = A_BUY[n]
+      ? (b < T + 1.4 ? wc.dirV : b < T + 2.65 ? facing(-1, 1, b - (T + 1.4)) : facing(1, -1, b - (T + 2.65)))
+      : A_SETTLE[n] ? (b < 1.05 ? facing(-1, 1, b) : facing(1, -1, b - 1.05)) : wc.dirV;
+    const dC = carry(cv, 11, n, dCpNow, dCpNow, ease01(b / 0.3));
     let sc = wc.s;
     // b0: a hand resting on his counter, squaring the goods
-    if (A_ENTER[n]) sc = hand(sc, xCp, wc.dirV, 1, xCp - 14, TOP - 4, 0.75);
-    // b1: he lifts the pie to show it, sets it down, then points along to the book
+    if (A_ENTER[n]) sc = hand(sc, xCp, dC, 1, xCp - 14, TOP - 4, 0.75);
+    // b1: he lifts the pie by its dish to show it, sets it down, then points along to the book
     const pieLift = A_OFFER[n] ? bp(0.1, 0.3, 0.52) : 0;
     if (A_OFFER[n]) {
-      sc = hand(sc, xCp, wc.dirV, 1, PIE_AT.x, PIE_AT.y - 22 * pieLift, bp(0.02, 0.1, 0.58));
-      sc = hand(sc, xCp, wc.dirV, -1, BOOK_AT.x, BOOK_AT.y, bp(0.6, 0.7, 0.92));
+      sc = hand(sc, xCp, dC, 1, PIE_AT.x, PIE_AT.y - 22 * pieLift, bp(0.02, 0.1, 0.58));
+      sc = hand(sc, xCp, dC, -1, BOOK_AT.x, BOOK_AT.y, bp(0.6, 0.7, 0.92));
     }
-    // b3: he holds up the last loaf as the economist names the bread
+    // b3: he holds up the last loaf, his hand under it, as the economist names the bread
     const loafLift = A_SCARCE[n] ? bp(0.3, 0.46, 0.78) : 0;
-    if (A_SCARCE[n]) sc = hand(sc, xCp, wc.dirV, 1, LOAF_AT.x, LOAF_AT.y - 26 * loafLift, bp(0.2, 0.3, 0.86));
-    // b4: the trade — the note taken and laid down, the change laid by it, the book
-    // lifted and handed over
+    if (A_SCARCE[n]) sc = hand(sc, xCp, dC, 1, LOAF_AT.x, LOAF_AT.y - 26 * loafLift, bp(0.2, 0.3, 0.86));
+    // b4: the trade, one hand-off at a time, each ONE stroke of the hand (AR5) — the note
+    // taken at the counter's end and carried straight to where it is laid; a turn to his
+    // own side, the change out of his apron pocket (it comes into his hand at his hip)
+    // and laid there; a turn back, and the book lifted and carried straight across
     if (A_BUY[n]) {
-      sc = hand(sc, xCp, wc.dirV, 1, PASS.x, PASS.y, bp(0.42, 0.47, 0.54));
-      sc = hand(sc, xCp, wc.dirV, 1, NOTE_AT.x, NOTE_AT.y, bp(0.5, 0.56, 0.63));
-      sc = hand(sc, xCp, wc.dirV, 1, COINS_AT.x, COINS_AT.y, bp(0.63, 0.7, 0.78));
-      sc = hand(sc, xCp, wc.dirV, -1, BOOK_AT.x, BOOK_AT.y, bp(0.77, 0.81, 0.86));
-      sc = hand(sc, xCp, wc.dirV, -1, PASS.x, PASS.y, bp(0.83, 0.9, 0.99));
+      const noteGo = sAt(T + 0.45, T + 0.95);
+      sc = hand(sc, xCp, dC, 1, lerp(PASS.x, NOTE_AT.x, noteGo), lerp(PASS.y, NOTE_AT.y, noteGo),
+        sAt(T, T + 0.4) * (1 - sAt(T + 1.0, T + 1.4)));
+      sc = hand(sc, xCp, dC, 1, COINS_AT.x, COINS_AT.y, bAt(T + 1.75, T + 2.2, T + 2.65));
+      const bookGo = sAt(T + 3.3, T + 3.75);
+      sc = hand(sc, xCp, dC, -1, lerp(BOOK_AT.x, PASS.x, bookGo), lerp(BOOK_AT.y, PASS.y + 2, bookGo),
+        sAt(T + 2.9, T + 3.25) * (1 - sAt(T + 3.85, T + 4.35)));
     }
-    // b6: the change handed across, then the note taken into his own pocket
+    // b6: turned to his side, the change picked up and, as he turns back, carried in the
+    // one stroke across to the shopper; then the note taken into his own pocket
     if (A_SETTLE[n]) {
-      sc = hand(sc, xCp, wc.dirV, 1, COINS_AT.x, COINS_AT.y, bp(0.06, 0.14, 0.22));
-      sc = hand(sc, xCp, wc.dirV, 1, PASS.x, PASS.y, bp(0.2, 0.3, 0.4));
-      sc = hand(sc, xCp, wc.dirV, 1, NOTE_AT.x, NOTE_AT.y, bp(0.54, 0.62, 0.7));
-      sc = hand(sc, xCp, wc.dirV, 1, xCp + 2, GROUND - 32, bp(0.68, 0.76, 0.86));
+      const coinGo = sAt(1.0, 1.85);
+      sc = hand(sc, xCp, dC, 1, lerp(COINS_AT.x, PASS.x, coinGo), lerp(COINS_AT.y, PASS.y, coinGo),
+        sAt(0.4, 0.8) * (1 - sAt(2.0, 2.6)));
+      sc = hand(sc, xCp, dC, 1, NOTE_AT.x, NOTE_AT.y, bp(0.54, 0.62, 0.7));
+      sc = hand(sc, xCp, dC, 1, xCp + 2 * dC, GROUND - 32, bp(0.68, 0.76, 0.86));
     }
     // b7: a hand to his chin — thinking about the price
     if (A_LOAF[n]) {
       const after = wc.walkDur / L;
-      sc = hand(sc, xCp, wc.dirV, 1, xCp - 5, GROUND - 52, st(after + 0.34, after + 0.44));
+      sc = hand(sc, xCp, dC, 1, xCp - 5, GROUND - 52, st(after + 0.34, after + 0.44));
     }
     const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t));
     const figCp = keepHeld(heldCp, wc.walking ? mixKeepLegs(prevCp, sc, tr) : mixStance(prevCp, sc, tr));
@@ -283,18 +330,18 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // coinT  0 not yet · 1 in the stall-holder's hand · 2 on the counter · 3 his hand
     //        again · 4 the shopper's · 5 pocketed
     // bookT  0 on the counter · 1 the stall-holder's left hand · 2 the shopper's
-    const noteNow = A_BUY[n] ? st(0.44, 0.48) + st(0.53, 0.58)
+    const noteNow = A_BUY[n] ? sAt(T + 0.3, T + 0.45) + sAt(T + 0.95, T + 1.1)
       : A_SETTLE[n] ? 2 + st(0.58, 0.63) + st(0.72, 0.8)
         : n > 6 ? 4 : n > 4 ? 2 : 0;
-    const coinNow = A_BUY[n] ? st(0.6, 0.63) + st(0.66, 0.72)
-      : A_SETTLE[n] ? 2 + st(0.1, 0.15) + st(0.26, 0.31) + st(0.46, 0.54)
+    const coinNow = A_BUY[n] ? sAt(T + 1.7, T + 1.85) + sAt(T + 2.15, T + 2.3)
+      : A_SETTLE[n] ? 2 + sAt(0.75, 0.95) + sAt(1.8, 2.0) + sAt(2.95, 3.45)
         : n > 6 ? 5 : n > 4 ? 2 : 0;
-    const bookNow = A_BUY[n] ? st(0.79, 0.83) + st(0.87, 0.92) : n > 4 ? 2 : 0;
+    const bookNow = A_BUY[n] ? sAt(T + 3.15, T + 3.3) + sAt(T + 3.75, T + 3.9) : n > 4 ? 2 : 0;
 
     return {
       pl: pose(figPl, xPl, GROUND, K, wp.dirV, 1),
       th: pose(figTh, xTh, GROUND, K, wt.dirV, 1),
-      cp: pose(figCp, xCp, GROUND, K, wc.dirV, 1),
+      cp: pose(figCp, xCp, GROUND, K, dC, 1),
       noteT: carry(cv, 3, n, noteNow, noteNow, tr),
       coinT: carry(cv, 4, n, coinNow, coinNow, tr),
       bookT: carry(cv, 5, n, bookNow, bookNow, tr),
@@ -317,8 +364,8 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <ObjectArt parts={STALL_ART} tone={TONE} />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
-      <ObjectArt parts={COUNTER_ART} tone={WOOD} />
-      <ObjectArt parts={BOARD_ART} tone={WOOD} />
+      <ObjectArt parts={COUNTER_ART} tone={TONE} />
+      <ObjectArt parts={BOARD_ART} tone={TONE} />
       <Board S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
@@ -333,30 +380,34 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 }
 
 // ── the market's bunting, strung from the stall's post to the edge of the stage ─
+//
+// Cotton pennants in their own colours (AR1), each a triangle hanging from the string
+// by its top edge. The string SAGS between its ends, as bunting does: two runs, each
+// tipped 1.6 degrees about its middle, meeting low at x 106 — and each pennant hangs
+// from the string where it actually is.
 
 const FLAGS = [0, 1, 2, 3, 4, 5, 6, 7];
+const SAG = Math.tan((1.6 * Math.PI) / 180);
+const stringY = (x: number) => (x < 106 ? 348.1 + (x - 53) * SAG : 348.1 - (x - 159) * SAG);
+const PENNANT: NaturalKey[] = ['pennantRed', 'pennantMustard', 'pennantTeal', 'canvasWhite'];
+const BUNTING_ART: ObjPart[] = FLAGS.map((k) => {
+  const cx = 18.5 + k * 23;
+  return { ...oTri('mass', cx, stringY(cx) + 5.2, 10, 11, 'down'), nat: PENNANT[k % 4] };
+});
 function Bunting() {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {/* the string SAGS between its ends, as bunting does: two runs meeting low in the middle */}
+      <ObjectArt parts={BUNTING_ART} tone={TONE} />
       <View style={styles.stringL} />
       <View style={styles.stringR} />
-      {FLAGS.map((k) => (
-        <View
-          key={k}
-          style={[styles.flag, { left: 14 + k * 23, top: 347 + 3 * Math.sin((k / 7) * Math.PI) },
-            k % 2 ? styles.flagPale : null, k === 5 ? styles.flagSpark : null]}
-        />
-      ))}
     </View>
   );
 }
 
 // ── the things on the counter, and the ones in people's hands ────────────────
 
-function Rider({ at, art, tone, lift }: {
-  at: SharedValue<{ x: number; y: number; o: number }>; art: ReturnType<typeof note>;
-  tone: ReturnType<typeof stageTone>; lift?: boolean;
+function Rider({ at, art, lift }: {
+  at: SharedValue<{ x: number; y: number; o: number }>; art: ReturnType<typeof note>; lift?: boolean;
 }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
@@ -364,7 +415,7 @@ function Rider({ at, art, tone, lift }: {
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={tone} />
+      <ObjectArt parts={art} tone={TONE} />
     </Animated.View>
   );
 }
@@ -405,11 +456,11 @@ function Goods({ S, DP, DC }: { S: SharedValue<any>; DP: SharedValue<Bundle>; DC
   const loafP = useDerivedValue(() => ({ x: LOAF_AT.x, y: LOAF_AT.y - 26 * S.value.loafLift, o: 1 }));
   return (
     <>
-      <Rider at={pieP} art={PIE_ART} tone={WOOD} />
-      <Rider at={loafP} art={LOAF_ART} tone={WOOD} />
-      <Rider at={bookP} art={BOOK_ART} tone={TONE} />
-      <Rider at={coinP} art={COIN_ART} tone={WOOD} />
-      <Rider at={noteP} art={NOTE_ART} tone={TONE} lift />
+      <Rider at={pieP} art={PIE_ART} />
+      <Rider at={loafP} art={LOAF_ART} />
+      <Rider at={bookP} art={BOOK_ART} />
+      <Rider at={coinP} art={COIN_ART} />
+      <Rider at={noteP} art={NOTE_ART} lift />
     </>
   );
 }
@@ -503,17 +554,11 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 105, top: 347.5, width: 108, height: 1.2, backgroundColor: INK,
     transform: [{ rotate: '-1.6deg' }],
   },
-  flag: {
-    position: 'absolute', width: 9, height: 9, borderWidth: 1, borderColor: INK, backgroundColor: TONE.STONE,
-    transform: [{ rotate: '45deg' }],
-  },
-  flagPale: { backgroundColor: PAPER_LIT },
-  flagSpark: { backgroundColor: EMBER },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   onTop: { zIndex: 2 },
   slate: {
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
-    backgroundColor: DEEP, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    backgroundColor: NATURAL.slate.base, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   priceBlock: { alignItems: 'center' },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

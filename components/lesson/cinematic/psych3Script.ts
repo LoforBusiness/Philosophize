@@ -23,7 +23,7 @@ import type { BaseBeat } from './cinematicKit';
 export interface Psych3Beat extends BaseBeat {
   /**
    * What happens across this beat’s line (the scene choreographs it):
-   * admire — the visitor leans in to the showcase, hands behind his back, and peers ·
+   * admire — the visitor leans in to the showcase, hands clasped at his waist, and peers ·
    * mine — the attendant gets up from his stool, points at the mug and goes round
    *   behind the plinth ·
    * arrive — the psychologist walks in, stops by the plinth and taps his temple ·

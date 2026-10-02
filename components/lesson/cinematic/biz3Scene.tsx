@@ -36,21 +36,24 @@ import { PAPER_LIT } from '@/components/shared/tone';
 // sells his candles for fifty pence; the customer (the bun) would happily pay far
 // more; the adviser (the top hat) shows where a price comes from.
 //
-//   b0   the maker sets a cranberry candle at the front of his stall, takes the chalk
-//        off the top of the tag and chalks 50p on it; the customer walks up.
+//   b0   the maker sets a cranberry candle at the front of his stall, turns to his tag,
+//        takes the chalk off its ledge and chalks 50p on it, and turns back; the
+//        customer walks up.
 //   b1   she picks the candle up, sniffs it — its scent rises — and holds it to her chest.
 //   b2   the adviser walks in, tips his hat, opens a hand to the maker on "an hour of
 //        work", then passes it over the wax and the jars; the maker turns to him.
 //   b3   the adviser lifts the block of wax and an empty jar off the stall, one in each
-//        hand, holds them up, and sets them back down.
+//        hand, holds them up in front of him, and sets them back down.
 //   b4   Q1: the empty jars, her shopping bag and the bunting — tap one.
 //   b5   the maker covers his mouth with his hand, then turns and opens it to her.
 //   b6   the adviser points to the candle in her hands, then to her face.
-//   b7   she pulls a length of ribbon off the spool at the table's end and holds it up.
+//   b7   she pulls a length of ribbon off the spool at the table's end, holds it up,
+//        and brings it in close to keep.
 //   b8   the adviser holds one hand low and one high, and brings them together.
 //   b9   Q2: three chalk tags hang on the cloth, 50p, £4 and £20 — tap one.
-//   b10  the maker steps along, wipes the tag, chalks £4, and ties her ribbon on the
-//        candle she holds out to him.
+//   b10  the maker steps along, turns to the tag, wipes it, chalks £4, turns back and
+//        ties her ribbon on the candle she holds out to him. (A person turns to what
+//        he works at, and every hand works IN FRONT of the body — LESSON_RULES AR4.)
 //   b11  at ease under the quotation; b12 the summary.
 //
 // COMPOSITION, in stage units. A navy pop-up gazebo, 94–302 × 318–500, its legs at 100
@@ -58,8 +61,8 @@ import { PAPER_LIT } from '@/components/shared/tone';
 // from 102 to 294, 360–374. The trestle under its cream cloth runs 100–296 × 477–501,
 // its top at the people's HIP (AP10). On it, left to right: the block of soy wax 101–115,
 // the two empty jars 115–140, a wooden riser crate 150–192 with three candles on it,
-// two more candles at 206 and 219, the chalk tent tag 241–269 (the chalk on its top
-// edge), the cranberry candle for sale at 273–285 and the spool of ribbon 284–296, its
+// two more candles at 206 and 219, the chalk tent tag 241–269 (the chalk on its foot,
+// in his reach), the cranberry candle for sale at 273–285 and the spool of ribbon 284–296, its
 // tail hanging over the table's end. The adviser stands at the table's left end at
 // 98, the maker behind it at 238 (262 when he works the tag), the customer at
 // its right end at 306, her canvas tote on the ground behind her at 321–343. The next
@@ -111,9 +114,11 @@ const CP_LEGS: Track[] = [
   [[0, 262]], [[0, 262]], [[0.02, 238]], [[0, 238]], [[0, 238]], [[0, 238]], [[0, 238]],
   [[0, 238]], [[0, 238]], [[0, 238]], [[0.01, 262]], [[0, 262]], [[0, 262]],
 ];
+// The maker TURNS to his chalk tag to write on it (AR4) — it stands on his left, and
+// the customer is on his right — and turns back to her when he has done.
 const CP_TURN: Track[] = [
-  [[0, 1]], [[0, 1]], [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1], [0.55, 1]], [[0, 1]],
-  [[0, 1]], [[0.04, -1]], [[0, -1]], [[0, 1]], [[0, 1]], [[0, 1]],
+  [[0, 1], [0.3, -1], [0.84, 1]], [[0, 1]], [[0, -1]], [[0, -1]], [[0, -1]], [[0, -1], [0.55, 1]], [[0, 1]],
+  [[0, 1]], [[0.04, -1]], [[0, -1]], [[0, 1], [0.24, -1], [0.72, 1]], [[0, 1]], [[0, 1]],
 ];
 /** The customer walks up from off the stage, right, on b0. */
 const PL_LEGS: Track[] = BEATS.map(() => [[0, 306]]);
@@ -153,8 +158,8 @@ const SLATE = {
   w: TAG.w * TENT_FACE.w,
   h: TAG.h * TENT_FACE.h,
 };
-/** The chalk, resting on the tag's top edge. */
-const CHALK_AT = { x: 261, y: 454.2 };
+/** The chalk, lying on the tag's foot — its chalk ledge — within his reach. */
+const CHALK_AT = { x: 257, y: 475.2 };
 const SPOOL = { x: 290, y: 473, w: 12, h: 16 };
 /** The spool's tail, hanging over the table's edge, where her hand takes the ribbon. */
 const TAIL = { x: 295, y: 474 };
@@ -196,6 +201,27 @@ function hLive(code: number, t: number, bt: number): Stance {
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
   return w <= 0 ? s : reachHandTo(s, { x, groundY: GROUND, k: K, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
+}
+/** A point moved along a chain of stops by the stage values that carry it between them. */
+function via(pts: readonly { x: number; y: number }[], us: readonly number[]) {
+  'worklet';
+  let x = pts[0].x;
+  let y = pts[0].y;
+  for (let k = 0; k < us.length; k++) {
+    x = lerp(x, pts[k + 1].x, us[k]);
+    y = lerp(y, pts[k + 1].y, us[k]);
+  }
+  return { x, y };
+}
+/**
+ * A BACK hand brought up in front: it comes forward at the hip first and only then
+ * rises, so on its way up it never passes behind his back (AR4).
+ */
+function lift(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
+  'worklet';
+  if (w <= 0) return s;
+  const s1 = hand(s, x, dir, which, x + (dir < 0 ? -10 : 10), GROUND - 26, clamp01(w * 2.5));
+  return hand(s1, x, dir, which, tx, ty, clamp01((w - 0.4) / 0.6));
 }
 
 /**
@@ -290,14 +316,16 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // edge into his left, 50p chalked on the slate, and the chalk put back
     if (A_CHEAP[n]) {
       const set = st(0.06, 0.22);
-      sc = hand(sc, xC, dC, 1, lerp(xC + 7, FRONT.x, set), lerp(452, FRONT.y - GRIP, set), 1 - st(0.28, 0.36));
-      const write = st(0.4, 0.72);
-      // AP18: the chalk writing — a stroke up and down as it travels along the slate
-      const stroke = Math.sin(b * 26) * 1.4 * write * (1 - write) * 4;
-      sc = hand(sc, xC, dC, -1, CHALK_AT.x, CHALK_AT.y, bp(0.28, 0.34, 0.4));
-      sc = hand(sc, xC, dC, -1, lerp(SLATE.left + 5, SLATE.left + SLATE.w - 5, write), SLATE.top + SLATE.h / 2 + stroke,
-        st(0.36, 0.4) * (1 - st(0.74, 0.8)));
-      sc = hand(sc, xC, dC, -1, CHALK_AT.x, CHALK_AT.y, bp(0.74, 0.8, 0.9));
+      sc = hand(sc, xC, dC, 1, lerp(xC + 7, FRONT.x, set), lerp(452, FRONT.y - GRIP, set), 1 - st(0.26, 0.34));
+      // turned to the tag: the chalk off its top edge; the price written as a PATH that
+      // travels along the slate (AR5), not a stroke on the clock; the chalk back
+      // The hand goes for the chalk AS he turns, held in front of his body (xC + dC·lx),
+      // so it travels one way to it rather than swinging round and coming back.
+      const write = st(0.5, 0.72);
+      const grab = { x: xC + dC * (xC - CHALK_AT.x), y: CHALK_AT.y };
+      const k = via([grab, { x: SLATE.left + 5, y: SLATE.top + SLATE.h / 2 + 1 }, { x: SLATE.left + SLATE.w - 5, y: SLATE.top + SLATE.h / 2 - 1 }, CHALK_AT],
+        [st(0.46, 0.5), write, st(0.72, 0.76)]);
+      sc = hand(sc, xC, dC, -1, k.x, k.y, st(0.32, 0.42) * (1 - st(0.76, 0.82)));
     }
     // b5: a hand over his mouth on "Oh dear"; then, turned to her, a hand opened to her
     if (A_DEAR[n]) {
@@ -307,19 +335,22 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // b10: the old price wiped off, the chalk from the tag's edge, £4 chalked, the chalk
     // back; then his right hand ties her ribbon on the candle she holds out
     if (A_TAG[n]) {
-      // AP18: wiping the slate clean, side to side
-      const wipe = Math.sin(b * 15) * 5;
-      sc = hand(sc, xC, dC, -1, TAG.x + wipe, SLATE.top + SLATE.h / 2, bp(0.22, 0.26, 0.4));
-      sc = hand(sc, xC, dC, -1, CHALK_AT.x, CHALK_AT.y, bp(0.38, 0.42, 0.46));
-      const write = st(0.46, 0.62);
-      // AP18: the chalk writing — a stroke up and down as it travels along the slate
-      const stroke = Math.sin(b * 26) * 1.4 * write * (1 - write) * 4;
-      sc = hand(sc, xC, dC, -1, lerp(SLATE.left + 6, SLATE.left + SLATE.w - 7, write), SLATE.top + SLATE.h / 2 + stroke,
-        st(0.44, 0.46) * (1 - st(0.62, 0.66)));
-      sc = hand(sc, xC, dC, -1, CHALK_AT.x, CHALK_AT.y, bp(0.62, 0.66, 0.74));
-      // AP18: tying the bow — the knot pulled one way and the other
-      const tie = Math.sin(b * 16) * 1.5 * st(0.7, 0.74) * (1 - st(0.86, 0.9));
-      sc = hand(sc, xC, dC, 1, 279 + tie, 456, st(0.66, 0.72) * (1 - st(0.92, 0.98)));
+      // turned to the tag (AR4): the old price wiped off — AP18: one wipe across and
+      // back, then the hand rests (AR5)
+      // (his right hand wipes, then ties; his left takes the chalk from the ledge)
+      const wu = clamp01((b / L - 0.34) / 0.08);
+      const wipe = Math.sin(wu * Math.PI * 2) * 5;
+      sc = hand(sc, xC, dC, 1, TAG.x + wipe, SLATE.top + SLATE.h / 2, bp(0.3, 0.34, 0.44));
+      // the new price written as a path that travels along the slate, the chalk back on its ledge
+      const write = st(0.52, 0.64);
+      const grab = { x: xC + dC * (xC - CHALK_AT.x), y: CHALK_AT.y };
+      const k = via([grab, { x: SLATE.left + 6, y: SLATE.top + SLATE.h / 2 + 1 }, { x: SLATE.left + SLATE.w - 7, y: SLATE.top + SLATE.h / 2 - 1 }, CHALK_AT],
+        [st(0.48, 0.52), write, st(0.64, 0.68)]);
+      sc = hand(sc, xC, dC, -1, k.x, k.y, st(0.22, 0.28) * (1 - st(0.68, 0.74)));
+      // turned back to her: AP18: tying the bow — the knot pulled tight once (AR5)
+      const tu = clamp01((b / L - 0.86) / 0.05);
+      const tie = Math.sin(tu * Math.PI) * 1.5;
+      sc = hand(sc, xC, dC, 1, 281, 456 - tie, st(0.81, 0.85) * (1 - st(0.94, 0.99)));
     }
     const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
@@ -337,18 +368,20 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     }
     // from b2 on, the candle held to her chest; b10 holds it out to him to be tied
     if (n > 1) {
-      const out = A_TAG[n] ? st(0.58, 0.66) * (1 - st(0.92, 0.99)) : 0;
+      const out = A_TAG[n] ? st(0.66, 0.74) * (1 - st(0.94, 0.99)) : 0;
       sp = hand(sp, xP, dP, 1, lerp(HOLD.x, 283, out), lerp(HOLD.y, 459, out), 1);
     }
-    // b7: a length of ribbon pulled off the spool and held up; held after, until it is tied
+    // b7: a length of ribbon pulled off the spool and held up to show; held close after,
+    // in front of her and below her shoulder (AR6), until it is tied
     if (A_RIBBON[n]) {
-      sp = hand(sp, xP, dP, -1, TAIL.x, TAIL.y, st(0.04, 0.2));
-      sp = hand(sp, xP, dP, -1, xP - 12, 428, st(0.3, 0.55));
+      sp = lift(sp, xP, dP, -1, TAIL.x, TAIL.y, st(0.04, 0.2));
+      sp = hand(sp, xP, dP, -1, xP - 12, 428, st(0.3, 0.55) * (1 - st(0.82, 0.98)));
     }
-    if (n > RIBBON_N) {
-      const give = A_TAG[n] ? st(0.58, 0.66) : 0;
-      const back = A_TAG[n] ? st(0.84, 0.94) : 0;
-      sp = hand(sp, xP, dP, -1, lerp(xP - 10, 285, give), lerp(447, 454, give), n > TAG_N ? 0 : 1 - back);
+    if (n > RIBBON_N || A_RIBBON[n]) {
+      const rest = A_RIBBON[n] ? st(0.82, 0.98) : 1;
+      const give = A_TAG[n] ? st(0.66, 0.74) : 0;
+      const back = A_TAG[n] ? st(0.88, 0.96) : 0;
+      sp = hand(sp, xP, dP, -1, lerp(xP - 8, 285, give), lerp(462, 454, give), (n > TAG_N ? 0 : 1 - back) * rest);
     }
     const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
@@ -363,16 +396,18 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     if (A_ARRIVE[n]) {
       const after = wt.end / L;
       stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.12));
-      stt = hand(stt, xT, dT, 1, 150, 446, bp(0.53, 0.6, 0.7));
-      stt = hand(stt, xT, dT, 1, WAX_AT.x, WAX_AT.y - 12, bp(0.72, 0.78, 0.84));
-      stt = hand(stt, xT, dT, 1, JAR_AT.x + 6, JAR_AT.y - 14, bp(0.82, 0.88, 0.98));
+      // one open hand that travels from the maker over the jars to the wax (AR5)
+      const k = { x: lerp(lerp(150, JAR_AT.x + 6, st(0.66, 0.74)), WAX_AT.x, st(0.76, 0.84)),
+        y: lerp(lerp(446, JAR_AT.y - 14, st(0.66, 0.74)), WAX_AT.y - 12, st(0.76, 0.84)) };
+      stt = hand(stt, xT, dT, 1, k.x, k.y, st(0.53, 0.6) * (1 - st(0.9, 0.98)));
     }
     // b3: the wax in his left hand and an empty jar in his right, held up, set back down
     const waxUp = A_COST[n] ? st(0.12, 0.22) * (1 - st(0.78, 0.86)) : 0;
     const jarUp = A_COST[n] ? st(0.24, 0.34) * (1 - st(0.78, 0.86)) : 0;
     if (A_COST[n]) {
-      stt = hand(stt, xT, dT, -1, lerp(WAX_AT.x, 86, waxUp), lerp(WAX_AT.y - 4, 442, waxUp), st(0.02, 0.1) * (1 - st(0.88, 0.95)));
-      stt = hand(stt, xT, dT, 1, lerp(JAR_AT.x - 1, 115, jarUp), lerp(JAR_AT.y - GRIP, 440, jarUp), st(0.14, 0.22) * (1 - st(0.88, 0.95)));
+      // both held up IN FRONT of him to show them (AR4), the wax by its near end
+      stt = lift(stt, xT, dT, -1, lerp(WAX_AT.x - 5, 104, waxUp), lerp(WAX_AT.y - 1.5, 446, waxUp), st(0.02, 0.1) * (1 - st(0.88, 0.95)));
+      stt = hand(stt, xT, dT, 1, lerp(JAR_AT.x - 1, 117, jarUp), lerp(JAR_AT.y - GRIP, 442, jarUp), st(0.14, 0.22) * (1 - st(0.88, 0.95)));
     }
     // b6: a hand to the candle in her hands, then up to her face
     if (A_VALUE[n]) {
@@ -387,7 +422,7 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const low = 3 * bp(0.36, 0.44, 0.58);
       const high = 3 * bp(0.7, 0.78, 0.88);
       stt = hand(stt, xT, dT, 1, lerp(114, 110, meet), lerp(464 - low, 447, meet), apart);
-      stt = hand(stt, xT, dT, -1, lerp(106, 108, meet), lerp(428 + high, 445, meet), apart);
+      stt = lift(stt, xT, dT, -1, lerp(106, 108, meet), lerp(428 + high, 445, meet), apart);
     }
     const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
@@ -399,18 +434,18 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // cand   0 the maker's hand · 1 at the front of the stall · 2 the customer's hand
     const candNow = A_CHEAP[n] ? st(0.2, 0.25) : A_SNIFF[n] ? 1 + st(0.16, 0.2) : n > 1 ? 2 : 0;
     const cand = carry(cv, 6, n, candNow, candNow, tr);
-    const bowNow = A_TAG[n] ? st(0.78, 0.86) : n > TAG_N ? 1 : 0;
+    const bowNow = A_TAG[n] ? st(0.86, 0.92) : n > TAG_N ? 1 : 0;
     // rib    0 on the spool · 1 in her left hand · 2 tied on the candle
-    const ribNow = A_RIBBON[n] ? st(0.18, 0.22) : A_TAG[n] ? 1 + st(0.72, 0.82) : n > TAG_N ? 2 : n > RIBBON_N ? 1 : 0;
+    const ribNow = A_RIBBON[n] ? st(0.18, 0.22) : A_TAG[n] ? 1 + st(0.82, 0.88) : n > TAG_N ? 2 : n > RIBBON_N ? 1 : 0;
     const rib = carry(cv, 7, n, ribNow, ribNow, tr);
     // chalk  0 on the tag's edge · 1 in the maker's left hand
-    const chalkNow = A_CHEAP[n] ? st(0.32, 0.34) * (1 - st(0.82, 0.84))
-      : A_TAG[n] ? st(0.4, 0.42) * (1 - st(0.69, 0.71)) : 0;
+    const chalkNow = A_CHEAP[n] ? st(0.41, 0.43) * (1 - st(0.75, 0.77))
+      : A_TAG[n] ? st(0.34, 0.36) * (1 - st(0.67, 0.69)) : 0;
     const chalk = carry(cv, 8, n, chalkNow, chalkNow, tr);
     // the price on the tag: 50p chalked on b0, wiped on b10, then £4
-    const oldWNow = A_CHEAP[n] ? st(0.42, 0.72) : 1;
-    const oldONow = A_TAG[n] ? 1 - st(0.24, 0.38) : n > TAG_N ? 0 : 1;
-    const freshNow = A_TAG[n] ? st(0.48, 0.62) : n > TAG_N ? 1 : 0;
+    const oldWNow = A_CHEAP[n] ? st(0.5, 0.72) : 1;
+    const oldONow = A_TAG[n] ? 1 - st(0.32, 0.42) : n > TAG_N ? 0 : 1;
+    const freshNow = A_TAG[n] ? st(0.52, 0.64) : n > TAG_N ? 1 : 0;
     const sniffNow = A_SNIFF[n] ? bp(0.34, 0.44, 0.7) : 0;
 
     const wCR = wristOf(cap, 'wrR');
@@ -433,9 +468,10 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       candle: { x: candAt.x, y: candAt.y, o: 1 },
       bow: { x: candAt.x, y: candAt.y + 0.5, o: carry(cv, 11, n, bowNow, bowNow, tr) },
       ribbon: { x: ribAt.x, y: ribAt.y, o: clamp01(rib * 6) * (rib > 1 ? 1 - (rib - 1) : 1) },
-      wax: { x: lerp(WAX_AT.x, wTL.x, wax), y: lerp(WAX_AT.y, wTL.y + 4, wax), o: 1 },
+      wax: { x: lerp(WAX_AT.x, wTL.x + 5 * dT, wax), y: lerp(WAX_AT.y, wTL.y + 1.5, wax), o: 1 },
       jar: { x: lerp(JAR_AT.x, wTR.x + 1, jar), y: lerp(JAR_AT.y, wTR.y + GRIP, jar), o: 1 },
-      chalk: { x: lerp(CHALK_AT.x, wCL.x, chalk), y: lerp(CHALK_AT.y, wCL.y, chalk), o: 1 },
+      // the chalk held by one end, its point forward and down to the slate (AR2)
+      chalk: { x: lerp(CHALK_AT.x, wCL.x + 2.2 * dC, chalk), y: lerp(CHALK_AT.y, wCL.y + 0.5, chalk), o: 1, r: -14 * chalk },
       oldW: carry(cv, 12, n, oldWNow, oldWNow, tr),
       oldO: carry(cv, 13, n, oldONow, oldONow, tr),
       fresh: carry(cv, 14, n, freshNow, freshNow, tr),
@@ -536,7 +572,7 @@ function Wares({ S }: { S: SharedValue<any> }) {
   const waxP = useDerivedValue<At>(() => S.value.wax);
   const jarP = useDerivedValue<At>(() => S.value.jar);
   const chalkSt = useAnimatedStyle(() => ({
-    transform: [{ translateX: S.value.chalk.x }, { translateY: S.value.chalk.y }, { rotate: '-14deg' }],
+    transform: [{ translateX: S.value.chalk.x }, { translateY: S.value.chalk.y }, { rotate: `${S.value.chalk.r}deg` }],
   }));
   return (
     <>

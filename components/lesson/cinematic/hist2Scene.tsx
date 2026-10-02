@@ -56,7 +56,8 @@ import { BY_ID } from './wardrobe';
 //        shelf, and the portrait — tap one.
 //   b8   he crouches to the hatbox again, draws out the folded newspaper in a puff of
 //        dust, stands and opens it: 1916, and a heap of potatoes.
-//   b9   she leans in to peer at it, claps three times, and lifts her chin, proud.
+//   b9   she leans in to peer at it, claps once and keeps her hands clasped, and lifts
+//        her chin, proud.
 //   b10  at ease under the quotation.
 //
 // COMPOSITION, in stage units. The gable end of an attic: the rafters climb from the
@@ -179,21 +180,24 @@ const LETTER_ART = oldLetter(0, 0, 14, 18);
 const NEWS_ART = oldNewspaper(0, 0, 30, 26);
 
 // Where the things are held, passed and laid down.
-/** Her hand on the book's near edge, 7 units in front of her; the book's centre 7 units on. */
-const BN_HOLD = { dx: 7, y: 447 };
+/**
+ * Her hand on the book's near edge, 7 units in front of her; the book's centre 7 units on.
+ * Held at her CHEST, below the shoulder (y ~456), never up in front of her face (AR6).
+ */
+const BN_HOLD = { dx: 7, y: 463 };
 /** The plain man's hand on the letter's near edge, 12 in front of him; the letter 6 units on. */
-const PL_HOLD = { x: PL - 12, y: 447 };
+const PL_HOLD = { x: PL - 12, y: 463 };
 /**
  * Across the trunk's corners, each giver stepped in: the book (her hand 160, his 174,
  * the book's centre 167), the letter (his 206, the plain man's 218, its centre 212).
  */
-const BOOK_PASS = { bn: 160, th: 174, y: 448 };
-const LETTER_PASS = { th: 206, pl: 218, y: 448 };
+const BOOK_PASS = { bn: 160, th: 174, y: 461 };
+const LETTER_PASS = { th: 206, pl: 218, y: 461 };
 /** Laid on the lid: the book at 174, the letter at 206, either side of the leaflet. */
 const BOOK_LID = { x: 174, y: 460 };
 const LETTER_LID = { x: 206, y: 461 };
 /** The newspaper held open in both his hands, in front of his chest. */
-const NEWS_HANDS = { front: PL - 24, back: PL + 2, y: 456 };
+const NEWS_HANDS = { front: PL - 24, back: PL + 2, y: 462 };
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -305,8 +309,8 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // in this book", then shut — the back hand lets go
       const lift = 6 * bp(0.5, 0.62, 0.84);
       const both = 1 - st(0.86, 0.96);
-      sb = hand(sb, xB, dB, 1, xB + lerp(BN_HOLD.dx, 23, both), lerp(BN_HOLD.y, 446 - lift, both), 1);
-      sb = hand(sb, xB, dB, -1, xB + 5, 446 - lift, both);
+      sb = hand(sb, xB, dB, 1, xB + lerp(BN_HOLD.dx, 23, both), lerp(BN_HOLD.y, 458 - lift, both), 1);
+      sb = hand(sb, xB, dB, -1, xB + 5, 458 - lift, both);
       sb = lookOf(sb, -0.2, bp(0.5, 0.62, 0.86));
     } else if (bnHolds > 0) {
       let hx = xB + BN_HOLD.dx;
@@ -325,21 +329,29 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     if (A_PRINTED[n]) {
       // two taps on the glossy cover with her other hand, then chin up
-      sb = hand(sb, xB, dB, -1, xB + 15, 444, bp(0.06, 0.13, 0.2) + bp(0.2, 0.27, 0.34));
+      sb = hand(sb, xB, dB, -1, xB + 15, 457, bp(0.06, 0.13, 0.2) + bp(0.2, 0.27, 0.34));
       sb = lookOf(sb, -0.24, bp(0.6, 0.72, 0.98));
     }
     if (A_HERO[n]) {
-      // she leans in to peer at the newspaper; three claps; then chin up, proud
+      // she leans in to peer at the newspaper; one delighted clap, her hands staying
+      // clasped together at her chest (AR5: a clap, not a run of them); then chin up,
+      // proud
       const peer = st(0.0, 0.18) * (1 - st(0.28, 0.36));
       sb = lookOf({ ...sb, tilt: sb.tilt + 0.1 * peer }, 0.2, peer);
-      const clap = bp(0.36, 0.41, 0.46) + bp(0.48, 0.53, 0.58) + bp(0.6, 0.65, 0.7);
-      const up = st(0.32, 0.37) * (1 - st(0.74, 0.8));
-      sb = hand(sb, xB, dB, 1, xB + lerp(21, 13, clap), 446, up);
-      sb = hand(sb, xB, dB, -1, xB + lerp(-3, 11, clap), 446, up);
+      const clap = st(0.42, 0.5);
+      const up = st(0.32, 0.4) * (1 - st(0.74, 0.8));
+      sb = hand(sb, xB, dB, 1, xB + lerp(19, 13, clap), 452, up);
+      sb = hand(sb, xB, dB, -1, xB + lerp(5, 11, clap), 452, up);
       const proud = st(0.8, 0.9);
-      sb = hand(sb, xB, dB, 1, xB + 6, 450, proud);
-      sb = hand(sb, xB, dB, -1, xB + 3, 452, proud);
+      sb = hand(sb, xB, dB, 1, xB + 6, 461, proud);
+      sb = hand(sb, xB, dB, -1, xB + 3, 463, proud);
       sb = lookOf(sb, -0.26, proud);
+    }
+    if (A_REST[n]) {
+      // under the quotation her hands stay folded in front of her, where "proud" left
+      // them, and only her head nods along: a hand never swings back through her (AR4)
+      sb = hand(sb, xB, dB, 1, xB + 6, 461, 1);
+      sb = hand(sb, xB, dB, -1, xB + 3, 463, 1);
     }
     const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
@@ -628,9 +640,9 @@ function Goods({ S, DB, DP, DH }: {
 
 /** Q1: the book, the leaflet and the letter, each with the year it was made. The letter is the primary source. */
 const SOURCE_Q = [
-  { id: 'book', year: '1985', left: BN + 14 - 14, top: 432, w: 28, h: 38, correct: false },
+  { id: 'book', year: '1985', left: BN + 14 - 14, top: 446, w: 28, h: 38, correct: false },
   { id: 'leaflet', year: '2010', left: LEAFLET.x - 14, top: 450, w: 28, h: 36, correct: false },
-  { id: 'letter', year: '1916', left: PL - 18 - 14, top: 432, w: 28, h: 38, correct: true },
+  { id: 'letter', year: '1916', left: PL - 18 - 14, top: 446, w: 28, h: 38, correct: true },
 ];
 function SourceTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;

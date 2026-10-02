@@ -307,18 +307,18 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = hand(sb, xB, dB, -1, xB + 14 * dB, 465, st(0.12, 0.22));
       sb = hand(sb, xB, dB, -1, xB + 9 * dB, 431, st(0.42, 0.56));
     } else if (n >= 1 && n <= 9) {
-      // the note held in front of her, still (AP18)
-      sb = hand(sb, xB, dB, -1, xB + 7 * dB, 452, 1);
+      // the note held in front of her at her waist, still and close (AP18, AR6)
+      sb = hand(sb, xB, dB, -1, xB + 7 * dB, 462, 1);
       if (A_HAPPY[n]) {
         // hugged to her chest with both hands while she twirls round
-        sb = hand(sb, xB, dB, -1, xB + 3 * dB, 449, st(0.04, 0.14));
-        sb = hand(sb, xB, dB, 1, xB + 5 * dB, 453, bp(0.04, 0.14, 0.66));
+        sb = hand(sb, xB, dB, -1, xB + 3 * dB, 456, st(0.04, 0.14));
+        sb = hand(sb, xB, dB, 1, xB + 5 * dB, 459, bp(0.04, 0.14, 0.66));
       }
     } else if (A_HAND[n]) {
       // to the box, the note let go into it, and a little wave goodbye
       const r = 1 - st(0.88, 0.98);
-      const wave = 3 * (bp(0.66, 0.7, 0.74) - bp(0.74, 0.78, 0.82));
-      sb = hand(sb, xB, dB, -1, xB + 7 * dB, 452, r);
+      const wave = 3.5 * bp(0.68, 0.73, 0.8);                      // one small flick goodbye (AR5)
+      sb = hand(sb, xB, dB, -1, xB + 7 * dB, 462, r);
       sb = hand(sb, xB, dB, -1, 160, 466, st(0.16, 0.34) * r);
       sb = hand(sb, xB, dB, -1, xB + 10 * dB + wave, 438, st(0.56, 0.66) * r);
     }
@@ -331,8 +331,8 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const dC = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), CP_TURN[n], b, L), 1);
     let sc = bodyOf(wc, CP_P, n, t, b);
     if (A_FIND[n]) {
-      // stamping the returned books: the stamp comes down on the top one three times
-      const hit = bp(0.08, 0.14, 0.22) + bp(0.36, 0.42, 0.5) + bp(0.66, 0.72, 0.8);
+      // stamping the returned books: the stamp comes down on the top one twice (AR5)
+      const hit = bp(0.12, 0.18, 0.26) + bp(0.5, 0.56, 0.64);
       sc = hand(sc, xC, dC, 1, STAMP_ON.x, STAMP_ON.y - 8 * (1 - hit), 1);
     }
     if (A_WORRY[n]) {
@@ -370,11 +370,13 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.02, after + 0.08, after + 0.2));
     }
     if (A_WEIGH[n]) {
-      // both hands out like a pair of scales: up on "help", down on "harm"
+      // both hands out IN FRONT of him like the two pans of a pair of scales, one
+      // further out than the other (AR4: never one thrown behind his back): the far one
+      // up on "help", then down on "harm"
       const out = st(0.08, 0.2);
       const tilt = st(0.45, 0.6) - 2 * st(0.74, 0.88);
-      stt = hand(stt, xT, dT, 1, xT + 17 * dT, 447 - 6 * tilt, out);
-      stt = hand(stt, xT, dT, -1, xT - 15 * dT, 447 + 6 * tilt, out);
+      stt = hand(stt, xT, dT, 1, xT + 20 * dT, 447 - 6 * tilt, out);
+      stt = hand(stt, xT, dT, -1, xT + 9 * dT, 447 + 6 * tilt, out);
     }
     if (A_RULE[n]) {
       // up at the sign over the desk, then at the note in her hand
@@ -385,8 +387,8 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // the two hands out level, and brought together
       const out = st(0.04, 0.16);
       const join = st(0.42, 0.6);
-      stt = hand(stt, xT, dT, 1, xT + lerp(17, 12, join) * dT, 448, out);
-      stt = hand(stt, xT, dT, -1, xT + lerp(-15, 9, join) * dT, 448.6, out);
+      stt = hand(stt, xT, dT, 1, xT + lerp(20, 14, join) * dT, 448, out);
+      stt = hand(stt, xT, dT, -1, xT + lerp(8, 12, join) * dT, 448.6, out);
     }
     const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
