@@ -7,6 +7,7 @@ import { subjectOfBranch } from '@/data/subjects';
 import type { Lesson } from '@/data/types';
 import LessonRunner from '@/components/lesson/LessonRunner';
 import LessonLoader from '@/components/lesson/LessonLoader';
+import { useCurtainLift } from '@/components/shared/Curtain';
 import { exitLesson } from '@/components/lesson/exitLesson';
 import { track } from '@/lib/posthog';
 import { Logic1Lesson } from '@/components/lesson/cinematic/logic1Scene';
@@ -626,6 +627,9 @@ export default function LessonScreen() {
     setTestLesson(testing ? lessonId : null);
   }, [lessonId, testing, setTestLesson]);
   const [loading, setLoading] = useState(true);
+  // Quick Start arrives behind the curtain (components/shared/Curtain.tsx); the
+  // route lifts it once drawn, whichever of its screens that turns out to be.
+  useCurtainLift();
 
   const isPro = useSubscriptionStore((s) => s.isPro);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);

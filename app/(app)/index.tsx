@@ -10,6 +10,7 @@ import QuickStartCard from '@/components/home/QuickStartCard';
 import HomeHeader from '@/components/home/HomeHeader';
 import SubjectCarousel from '@/components/home/SubjectCarousel';
 import Arrive from '@/components/home/Arrive';
+import { useCurtainLift } from '@/components/shared/Curtain';
 import { useWidgetPlaced } from '@/lib/widget/useWidgetPlaced';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -38,6 +39,8 @@ const PAD = 24;
 // they are sixty dp below.
 
 export default function HomeScreen() {
+  // A road's back arrow returns here behind the curtain; Home lifts it once drawn.
+  useCurtainLift();
   const streakRaw = useUserDataStore((s) => s.streak);
   const lastLessonDate = useUserDataStore((s) => s.lastLessonDate);
   const restDaysEarned = useUserDataStore((s) => s.restDaysEarned);

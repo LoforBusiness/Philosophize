@@ -51,12 +51,26 @@ export const unstable_settings = { anchor: 'index' };
 // reads as the page settling onto the desk instead of a hard cut. It belongs in
 // ONE place, because the screens themselves no longer animate on focus (see
 // ScreenTransition) — two fades stacked on one push looked worse than either.
+//
+// ── AND A SCREEN OPENED FROM HOME DOES NOT ANIMATE HERE AT ALL (2026-10-01) ──
+//
+//   "if I click on one of the subjects … it's pretty laggy or it's pretty glitchy
+//    … This is also for the quick start."
+//
+// A road or a lesson opened from Home changes TAB as well as pushing, and the tab
+// navigator already cross-fades Home into Learn over 340ms. With this stack's own
+// rise-and-fade running at the same time, two animations multiplied on one screen,
+// and while the pushed screen was still faint the Learn tab's grid underneath it
+// (the anchor) — or whatever road was last open there — showed through. So a push
+// carrying `from=home` lands instantly inside a tab that is itself fading in: one
+// movement, Home dissolving into the destination, and nothing else on the glass.
+// `openSubject` and the Quick Start card both send it.
 export default function BranchesLayout() {
   return (
     <Stack
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
-        animation: 'fade_from_bottom',
+        animation: (route.params as { from?: string } | undefined)?.from === 'home' ? 'none' : 'fade_from_bottom',
         animationDuration: 340,
         // The branch screen underneath a lesson stops re-rendering while the
         // lesson is up. `BranchWorld` already pauses its own frame callback on
@@ -64,7 +78,7 @@ export default function BranchesLayout() {
         // means the walked road is not being re-rendered behind an opaque
         // cinematic screen for the length of a lesson.
         freezeOnBlur: true,
-      }}
+      })}
     />
   );
 }

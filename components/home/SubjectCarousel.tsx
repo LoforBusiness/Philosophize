@@ -41,6 +41,7 @@ import Animated, {
 import SubjectCard from '@/components/subjects/SubjectCard';
 import { CARD_GAP, PARALLAX, cardWidth } from '@/components/subjects/tileLayout';
 import { openSubject } from '@/components/lesson/lessonNav';
+import { curtainTo } from '@/components/shared/Curtain';
 import { SUBJECTS, type Subject } from '@/data/subjects';
 import { branchCountsFromUnits } from '@/data';
 import { useUserDataStore } from '@/stores/userDataStore';
@@ -70,7 +71,9 @@ function ShelfCard({
   return (
     <Animated.View style={[index > 0 && styles.gap, card]}>
       <SubjectCard subject={subject} done={done} width={width} artStyle={art}
-        onPress={() => openSubject(subject.slug, 'home')} />
+        // Behind the curtain: a fade through paper rather than the tab navigator's
+        // fade, which snapped Home out (components/shared/Curtain.tsx).
+        onPress={() => curtainTo(() => openSubject(subject.slug, 'home'))} />
     </Animated.View>
   );
 }

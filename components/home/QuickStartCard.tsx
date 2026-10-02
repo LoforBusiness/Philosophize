@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, type LayoutChangeEvent } from 'react-native';
 import { openLesson } from '@/components/lesson/lessonNav';
+import { curtainTo } from '@/components/shared/Curtain';
 import { openIntro, PROFESSOR_INTRO_ON } from '@/components/professor/openIntro';
 import Card from '@/components/ui/Card';
 import { mix } from '@/components/shared/tone';
@@ -85,9 +86,11 @@ export default function QuickStartCard({ style }: Props) {
 
   // Through lessonNav, ANCHORED: pushed plainly from Home into a Learn tab not yet
   // built, the lesson arrived with no branch list under it (see lessonNav.ts).
+  // Behind the curtain (components/shared/Curtain.tsx), and `from=home` so the Learn
+  // stack adds no push animation of its own under it (branches/_layout).
   const open = intro
     ? () => openIntro('home')
-    : () => pick && openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id);
+    : () => pick && curtainTo(() => openLesson(pick.branch.slug, pick.unit.slug, pick.lesson.id, '?from=home'));
   // The intro's words. Short on purpose: the title is 34pt in a card that is 236pt
   // wide on a 320dp phone, and it has two lines.
   // The tab says only what the card is: a long branch name up there ran into the

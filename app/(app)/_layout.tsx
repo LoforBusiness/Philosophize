@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TabIcon, { type TabIconName } from '@/components/shared/TabIcon';
 import { touch } from '@/lib/feedback';
 import { useUIStore } from '@/stores/uiStore';
+import Curtain, { useInstantTabs } from '@/components/shared/Curtain';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WARMING THE TABS, AND WHY IT IS NOT DONE UNDER THE LAUNCH ANIMATION
@@ -159,6 +160,9 @@ export default function AppLayout() {
   // its own. On a hidden route (settings, the paywall, the streak) no tab is open,
   // which is also what the bar itself shows.
   const current = segments[0] === '(app)' ? (segments[1] ?? 'index') : null;
+  // A journey from Home to a subject or a lesson changes tab behind the curtain,
+  // with this navigator's fade off (components/shared/Curtain.tsx says why).
+  const instantTabs = useInstantTabs();
 
   // How many of WARM have been built — see the note at the top of the file.
   const [warm, setWarm] = useState(0);
@@ -231,7 +235,14 @@ export default function AppLayout() {
         // reads as a blink no matter how gently the new screen fades in. A real
         // cross-dissolve keeps BOTH screens on the glass for the whole handover,
         // so there is never an empty frame.
-        animation: 'fade',
+        //
+        // AND IT ONLY HOLDS WHILE THE NAVIGATOR RENDERS ONCE (2026-10-01).
+        // BottomTabView re-runs the fade on every render and, on the second, snaps
+        // the tab being left to invisible. A journey from Home renders it twice
+        // (the Learn stack lifts its state ~90ms after the tab is focused), so
+        // those journeys go behind components/shared/Curtain.tsx, which switches
+        // this off while it is down.
+        animation: instantTabs ? 'none' : 'fade',
         transitionSpec: {
           animation: 'timing',
           config: { duration: 340, easing: Easing.out(Easing.cubic) },
@@ -343,6 +354,7 @@ export default function AppLayout() {
           a route can always be reached by URL, so the tab config is not the lock. */}
       <Tabs.Screen name="devlessons" options={{ href: null }} />
     </Tabs>
+    <Curtain />
     </View>
   );
 }

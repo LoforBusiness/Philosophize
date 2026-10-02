@@ -4,6 +4,7 @@ import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView, AnimatePresence } from 'moti';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { getBranchBySlug, lessonAccess, tasteFor } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
 import type { GlyphName } from '@/components/shared/Glyph';
@@ -21,11 +22,33 @@ import Poster from '@/components/subjects/Poster';
 import type { PosterKey } from '@/components/subjects/posters';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
+import { skyFor } from '@/components/branch/sceneArt';
 import { isNewLesson } from '@/data/lessonAdded';
 import { openReview, backFromBranch } from '@/components/lesson/lessonNav';
+import { curtainTo, useCurtainLift } from '@/components/shared/Curtain';
 import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+// ── THE ROAD IS BUILT ONCE THE SCREEN HAS ARRIVED, NOT UNDER THE FINGER ─────
+//
+//   "if I click on one of the subjects … it's pretty laggy or it's pretty glitchy
+//    and it's not very smooth." (2026-10-01)
+//
+// The road is the heaviest thing a tap from Home or the Learn grid opens: the
+// scenery strips, every road sign, the stickman and the masthead's drawing. Built in
+// the same commit as the navigation, all of it had to exist before the first frame
+// of the transition could be drawn — measured in the real tab shell at 4× CPU, the
+// tap froze Home for 883ms and the screen then appeared already half faded in, so
+// the reader saw a stall and a jump instead of a movement.
+//
+// So the screen arrives LIGHT — top bar, masthead in its own colour, the road's sky
+// — and the world and the masthead's picture are built when the 340ms transition
+// has finished (the tab cross-fade from Home, or this stack's rise from the grid),
+// then fade in over the sky. The build still costs what it costs; it is paid while
+// nothing on the screen is moving, where a stall cannot be seen.
+const ARRIVE_MS = 380;
+const WORLD_H = 360; // BranchWorld's own height (H in BranchWorld.tsx)
 /** A course with no photograph: an empty source, so the masthead shows its own hue. */
 const NO_ART = { uri: '' };
 
@@ -106,6 +129,23 @@ export default function BranchDetailScreen() {
   const [focusUnitId, setFocusUnitId] = useState<string | null>(null);
   // The masthead's measured box, which its poster is drawn for.
   const [mastBox, setMastBox] = useState({ w: 0, h: 0 });
+  // A subject opened from Home arrives behind the curtain; lift it once drawn.
+  useCurtainLift();
+  // See ARRIVE_MS: the world and the poster are built once the screen has landed.
+  const [built, setBuilt] = useState(false);
+  const worldIn = useSharedValue(0);
+  useEffect(() => {
+    // Counted from the FIRST FRAME, not from the commit: the transition cannot start
+    // until this screen has been drawn once, so a timer started at commit lands the
+    // build in the middle of the fade whenever the commit itself was slow.
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const f = requestAnimationFrame(() => { t = setTimeout(() => setBuilt(true), ARRIVE_MS); });
+    return () => { cancelAnimationFrame(f); if (t) clearTimeout(t); };
+  }, []);
+  useEffect(() => {
+    if (built) worldIn.value = withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) });
+  }, [built, worldIn]);
+  const worldStyle = useAnimatedStyle(() => ({ opacity: worldIn.value }));
 
 
   // Progress is per-unit: each unit tracks its own completed count. Since the
@@ -380,10 +420,17 @@ export default function BranchDetailScreen() {
         <View style={styles.topBar}>
           <Pressable
             onPress={() => {
-              // Pop to the grid first, so the Learn tab is left on its list; then, for a
-              // road opened from Home's shelf, bring Home forward.
+              // Pop to the grid, so the Learn tab is left on its list; then, for a
+              // road opened from Home's shelf, bring Home forward. Both happen behind
+              // the curtain, so the grid swapping in is never seen (Curtain.tsx).
+              if (from === 'home') {
+                curtainTo(() => {
+                  backFromBranch();
+                  router.navigate('/(app)');
+                });
+                return;
+              }
               backFromBranch();
-              if (from === 'home') router.navigate('/(app)');
             }}
             hitSlop={10}
             style={styles.backRow}
@@ -472,8 +519,10 @@ export default function BranchDetailScreen() {
               if (Math.round(w) !== mastBox.w || Math.round(h) !== mastBox.h) setMastBox({ w: Math.round(w), h: Math.round(h) });
             }}
           >
-            {posterKey && subject && mastBox.w > 0 ? (
-              <Poster art={posterKey} hue={subject.hue} width={mastBox.w} height={mastBox.h} style={[StyleSheet.absoluteFill, styles.mastPoster]} />
+            {built && posterKey && subject && mastBox.w > 0 ? (
+              <Animated.View style={[StyleSheet.absoluteFill, worldStyle]} pointerEvents="none">
+                <Poster art={posterKey} hue={subject.hue} width={mastBox.w} height={mastBox.h} style={[StyleSheet.absoluteFill, styles.mastPoster]} />
+              </Animated.View>
             ) : null}
             <LinearGradient colors={MAST_SCRIM} style={StyleSheet.absoluteFill} />
             <Text style={styles.mastKicker}>{kicker}</Text>
@@ -497,6 +546,10 @@ export default function BranchDetailScreen() {
 
               NOT MINE TO OPEN: `BranchWorld` is its own art system, validated by
               `npm run check:walk` — not touched here, not even its import. */}
+          {/* The road's own sky until the world is built over it (ARRIVE_MS). */}
+          <View style={{ height: WORLD_H, backgroundColor: skyFor(branch.slug) }}>
+          {built ? (
+          <Animated.View style={[StyleSheet.absoluteFill, worldStyle]}>
           <BranchWorld
             lessons={worldLessons}
             current={worldAt}
@@ -519,6 +572,9 @@ export default function BranchDetailScreen() {
             }}
             onLocked={() => openPaywall()}
           />
+          </Animated.View>
+          ) : null}
+          </View>
         </ScrollView>
 
         {/* The drawer itself, drawn AFTER the scroll view so it lies over the
