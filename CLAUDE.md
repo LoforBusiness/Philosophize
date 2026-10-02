@@ -8314,6 +8314,19 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   never a figure who does not speak; `check:dialogue` holds both, and that no two cast
   members share a voice, a costume or a trait. `economics-foundations-1` keeps its three
   as voiced.
+- **AND THE PERSONALITIES HAVE THEIR OWN SECTION: LESSON_RULES GROUP AS (2026-10-02).**
+  The owner rewrote three of them and asked for one place to create, change or retire
+  them. The top hat is the IRRITABLE TEACHER: still teaches precisely, but the others try
+  his patience — curt, sighing, grumpy LEGO Batman put-downs about THEM, never about
+  himself. The plain one is VAIN and PASSIVE-AGGRESSIVE: the needle as before, plus LEGO
+  Batman's ego — the hero of his own story, humour about HIMSELF. The cap is KIND and
+  HELPFUL, and never sarcastic; the bun is unchanged. Rudeness is comic, not cruel, aimed
+  at what somebody DID and never at the reader (AS1). `check:dialogue` (AS6) fails a
+  `cast.ts` trait that no AS heading names, so the two change together. The 21 voiced
+  lessons keep their lines until rewritten (rewriting means voicing again).
+- **And a dialogue lesson is built the AR7 way**: turns as tracks, holds in the figure's
+  own frame, objects on the wrist by their grip, sips at pauses, strokes as paths, and a
+  final look on a quiet Metro. AP12 ends with the checklist a new lesson is done by.
 - **Two traps, both measured.** A re-measure of one lesson DROPS the corpus's
   `wardrobeReach` and `poseReach` records from `mustBoxes.ts.json` — splice the new
   rows into a backup instead of keeping the harness's file. And a stickman's legs are a

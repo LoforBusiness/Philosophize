@@ -16,6 +16,7 @@
 //   AP8  no row in any table the narrated-lesson player layers read
 //   AP13 at least two speakers, and nobody staged who never speaks
 //   AP14 every cast member has a trait and a character, and no two share one
+//   AS6  every cast member's trait is named in a group AS heading of LESSON_RULES
 //   AP17 every line states its pace, even or brisk (there is no slow), and takes its
 //        pauses from its punctuation
 //   AP18 a scene poses its people with still hands (emoteStill, postureStill)
@@ -79,6 +80,21 @@ const ids = new Set(lessons.map((l) => l.id));
     for (const [k, v] of [['voice', m.voice?.name], ['costume', m.costume], ['trait', m.trait]]) {
       if (seen[k].has(v)) fail(k === 'trait' ? 'AP14' : 'AP2', 'cast', `${who} and ${seen[k].get(v)} share one ${k} (${v})`);
       else seen[k].set(v, who);
+    }
+  }
+  // AS6 — WHO EACH OF THEM IS LIVES IN THE RULE BOOK. Every word of a member's trait is
+  // named in one `### AS… ·` heading of LESSON_RULES, so a personality cannot be changed
+  // in cast.ts without its rule, or the other way round.
+  const rulesFile = [ROOT, REPO].map((r) => path.join(r, 'docs', 'LESSON_RULES.md')).find((f) => fs.existsSync(f));
+  const heads = rulesFile
+    ? [...fs.readFileSync(rulesFile, 'utf8').matchAll(/^### AS\d+ · (.+)$/gm)].map((m) => m[1].toLowerCase())
+    : [];
+  for (const who of SPEAKERS) {
+    const m = CAST[who];
+    if (!m || !m.trait) continue;
+    const words = m.trait.toLowerCase().split('-');
+    if (!heads.some((h) => words.every((w) => h.includes(w)))) {
+      fail('AS6', 'cast', `${who}'s trait "${m.trait}" is named in no group AS heading of LESSON_RULES — a personality changes in both places at once`);
     }
   }
 }

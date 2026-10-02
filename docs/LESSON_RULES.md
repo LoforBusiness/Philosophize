@@ -10989,12 +10989,10 @@ the friction the idea needs, not in a fixed order.
 > oblivious. These are the different character traits I want for the different stick
 > men."* (2026-09-30)
 
-| | voice | is | which sounds like |
-|---|---|---|---|
-| **Top hat** | Algieba, en-GB | the TEACHER | He names the idea the others have just walked into and says why it matters — as a story, patient, precise, a little amused. |
-| **Newsboy cap** | Zubenelgenubi, en-AU | KIND | Assumes the best of everybody, helps before he is asked, takes a loss without complaint. |
-| **Plain** | Sadachbia, en-GB | PASSIVE-AGGRESSIVE | Polite on the surface and pointed underneath: faint praise, a dry aside, "no, no, it is fine." |
-| **Bun** | Kore, en-US | OBLIVIOUS | Cheerful and one step behind: misses the point, takes the figure of speech literally, asks what the reader was too polite to ask. |
+**WHO EACH OF THEM IS LIVES IN GROUP AS** — since 2026-10-02 the personalities have a
+section of their own, so they can be created, changed or retired in one place: the top
+hat the IRRITABLE TEACHER, the plain one VAIN and PASSIVE-AGGRESSIVE, the cap KIND and
+HELPFUL, the bun OBLIVIOUS. This rule is why a dialogue lesson has characters at all.
 
 The traits live in `cast.ts` beside the voices (`trait`, `character`), and a script is
 written FROM them:
@@ -11011,7 +11009,7 @@ written FROM them:
   is not stupid: she is never the butt for long, and she is often the one who is right
   by accident.
 - **A trait is a lean, not a tic.** One dry aside in a lesson lands; one in every line
-  is a catchphrase. The teacher may be warm; the kind one may be firm.
+  is a catchphrase (AS1). The kind one may be firm.
 - **The fourth is a woman, and a low hair BUN is all she wears** (`wardrobe.ts`, costume
   `bun`). Three drawings were rejected on the way: a ponytail and a flared skirt (*"too
   childish"*), a blazer and a pencil skirt (*"the skirt … does not fit the body"*), and
@@ -11072,13 +11070,18 @@ named or that the build showed were load-bearing:
    a sequence of diagrams. The idea is something the people there DO — pay, run out,
    change a price — and the words name what the reader is watching.
 2. **Two to four people (AP13), each always the same voice, costume and character
-   (AP14)**, the words under the stage with the speaker's face beside them. The Top Hat
-   teaches; the others live the example, and they are always dealing with each other.
-3. **Few objects, each one real** — drawn from a fetched reference (AP5), coloured as it
-   is (AP11), and used: handed over, set down, counted. An object nobody touches is
+   (AP14, and who each one is: group AS)**, the words under the stage with the speaker's
+   face beside them. The Top Hat teaches, a little irritably; the others live the
+   example, and they are always dealing with each other.
+3. **Few objects, each one real** — drawn from a fetched reference (AP5), in the colours
+   it really is (AR1: must, not may — the stage tone is only for the floor, plates and
+   diagrams), and used: handed over, set down, counted. An object nobody touches is
    decoration.
-4. **Hands meet what they hold, and the counter is at the hip** (AP5, AP10). Contact is
-   staged at a point both arms reach, and a figure is never hidden behind his own stall.
+4. **Hands use things as people do** (group AR): held by the handle, crook or edge
+   (AR2), a drink drunk off its saucer (AR3), never an arm thrown behind the body — he
+   turns first (AR4), no stroke repeated (AR5), a held thing kept close (AR6), built the
+   AR7 way. Contact is staged at a point both arms reach, the counter is at the hip
+   (AP10), and a figure is never hidden behind his own stall.
 5. **The scene is paced to the voice** (AP9): lines are rendered first, and each act runs
    across its line's measured length, so the picture is moving for the whole sentence.
 6. **Two questions, answered by tapping things on the stage** — the costs on the
@@ -11088,6 +11091,22 @@ named or that the build showed were load-bearing:
    chair or visitor (AP8). Less that can go wrong, and less to read.
 8. **A first lesson is a foundation** (AP3): what the subject is and why it matters, at
    most three ideas.
+
+**BEFORE A DIALOGUE LESSON IS CALLED DONE** — the order the 21 were actually built in:
+
+- [ ] The lines are written FROM the characters (group AS) and pass the prose checks
+      BEFORE a character is spent on voicing them (AP18's "voice a lesson once").
+- [ ] Voiced once through `render-narration`, at its AP17 pace; `check:narration` green.
+- [ ] One real place; every object drawn from a reference and in its own colours (AR1).
+- [ ] Every hand act built the AR7 way: turns as tracks, holds in the figure's frame,
+      objects on the wrist by their grip, sips at pauses, strokes as paths.
+- [ ] `check:replay` green on the lesson: AR1, AR4, AR5, AQ1, N21, C20c and cuts at zero.
+- [ ] `check:dialogue`, `check:objects`, `check:shade`, `check:fits`, `check:legible`,
+      `check:smooth`, `check:still`, `check:idle`, `check:turn` green.
+- [ ] Looked at on a quiet Metro: every beat (`sheet-beats`), and every hand act close up
+      at several moments inside it (AR2, AR3, AR6 are judged by eye).
+- [ ] Must-boxes measured, spliced, `make:tours` and `make:gaze` re-run, `npm run check`
+      green from a file, not through a pipe.
 
 ### AP15 · One road per subject, and a subject opens on its road
 
@@ -11460,3 +11479,158 @@ turn, while the figure stands, and fails more than `AR_RUN` (4) in a row.
   moment it is put down; it never floats a frame behind.
 
 Held by eye on the beat sheet, and by AR4 for the far end of it.
+
+### AR7 · How it is built: the techniques that made AR1–AR6 hold
+
+The pass that applied this group to all 21 dialogue lessons (2026-10-02) was done by seven
+builders at once, and they converged on the same handful of constructions. The owner's
+verdict on the result: *"the lessons have seemed to improve a lot."* Build the next lesson
+with them from the start rather than fixing it afterwards.
+
+1. **A TURN IS A TRACK.** Each figure carries, per beat, the moments in the line at which
+   he turns and which way: `[[share of line, facing], …]`, eased through `facing()` and
+   started from the facing ON SCREEN (a carry slot), so a quick tap never snaps him round.
+   This is what AR4 asks for — he turns to the crate, the bench, the person he hands
+   something to — and it is the fix for almost every thrown-back arm.
+2. **A HELD THING IS PLACED IN THE FIGURE'S OWN FRAME**: its hand target is `x + dir · lx`,
+   not a fixed stage point, so it turns with him and stays in front through the turn.
+3. **A HAND THAT RISES COMES FORWARD FIRST**: a back hand is brought round to the hip in
+   front before it is raised, so it never passes behind the back on the way up.
+4. **A HELD OBJECT IS DRAWN ABOUT ITS GRIP AND PUT ON THE WRIST EVERY FRAME** — read off
+   the pose bundle (`wrR`/`wrL`), never off a carried track, which lags the hand through
+   the beat-start blend and lets the object float. Where one object is drawn for several
+   scenes, export its grip point (`CAFE_CUP_GRIP`) and offset the drawing by it at the
+   size the scene draws it; a drawing centred on its body and placed by its handle is the
+   one bug the shared cup had.
+5. **A REPEATED MOTION IS A PATH**: chalking a word, gathering umbrellas off a rail,
+   counting layers — the hand travels through the points once, with a pause at each, and
+   a stroke that must repeat (a stir) is windowed to two turns (AR5).
+6. **A SIP IS TIMED TO A PAUSE IN THE TALK**, by share of a beat's line, at most twice a
+   line, and never on a clock.
+7. **A STILL POSE'S RESTING HANDS ARE IN FRONT** by construction: `make-arm-rest.mjs` puts
+   any hand that averages behind the back in front of the chest, so `emoteStill` cannot
+   reintroduce AR4 — re-run it after changing a held pose.
+8. **SEVERAL BUILDERS AT ONCE**: each owns its scenes and its marker sections of
+   `objects.ts` (`// <stem> colours:` and `// ── <stem>: objects for this lesson go ABOVE
+   this line ──`), re-reads the file before every edit and never rewrites it whole. Every
+   save of a shared file hot-reloads Metro and scrambles every other builder's beat sheet,
+   so the FINAL review is done once the builders have stopped, on a quiet Metro: every beat
+   of every lesson (`sheet-beats`), then close-ups of every hand act at several moments
+   inside it.
+
+## Group AS · The cast: who each stickman is
+
+> *"I want a specific rule section that has the stickman's personalities that you can
+> create, edit or remove … the plain stickman's personality to be updated to still have
+> that passive aggressiveness, but I also want a sort of LEGO Batman humor/rudeness … The
+> cap stickman which is kind, I want still a kind personality and also a helpful one too.
+> And for the tophat stickman which is more of the teacher/lecturer, I want him still to
+> be that, but I want him to have a little anger/irritation for the others. I also want a
+> sort of rude, passive aggressive, LEGO Batman type humor, but be sure the plain stickman
+> and the tophat stickman aren't the same in personality, I want them to have their
+> distinct personality."* (2026-10-02)
+
+**This group is the one place the personalities live.** To create, change or retire a
+person, change their rule here AND their `trait` and `character` in `cast.ts` in the same
+commit: `check:dialogue` fails a cast member whose trait is not named in an AS heading
+below. AP14 says why a lesson has characters at all; this group says who they are.
+
+| | voice | is | his humour is about |
+|---|---|---|---|
+| **Top hat** (AS2) | Algieba, en-GB | the IRRITABLE TEACHER | THEM — the others trying his patience |
+| **Plain** (AS3) | Sadachbia, en-GB | VAIN and PASSIVE-AGGRESSIVE | HIMSELF — the hero of his own story |
+| **Newsboy cap** (AS4) | Zubenelgenubi, en-AU | KIND and HELPFUL | nobody — he is not the one making jokes |
+| **Bun** (AS5) | Kore, en-US | OBLIVIOUS | the words — she takes them literally |
+
+### AS1 · How a character is written
+
+- **A line belongs to one person** (AP14). Read it with the speaker's name covered: if it
+  could be anybody's, it is narration with a name on it. The same fact said by the
+  irritated teacher, the vain one, the helpful one and the one who missed the point is
+  four different lines.
+- **The rudeness is comic, never cruel.** LEGO Batman is the register: deadpan,
+  self-serious, overstated, and funny because it is out of proportion to the moment — a
+  family film, not a roast. Nobody is mocked for how clever they are, how they look, or
+  who they are; the jab is at what somebody just DID (interrupted, guessed, showed off,
+  missed it) and at the situation. And never, ever at the reader (CLAUDE.md §7).
+- **A trait is a lean, not a tic.** One or two barbs from a character in a lesson land;
+  one in every line is a catchphrase, and a catchphrase dies by the third lesson. The
+  example lines below show the register and are never reused.
+- **The lesson still teaches.** Every joke rides on a line that is also carrying the
+  idea, or sits in a short reaction beside it. A barb that pushes the explanation out
+  is cut, however good it is.
+- **Humour comes from the WORDS.** The voices cannot act: a line is funny on the page
+  or not at all, and it still passes the ear and plain-words checks (groups AC, AD, J)
+  at its AP17 pace. A jab is short — short lines are the funny ones anyway.
+
+### AS2 · The top hat: the IRRITABLE TEACHER
+
+He is still the one who knows. He names the idea the others have just walked into, says
+why it matters, and says it precisely — that has not changed and it is not optional. What
+has changed is his patience: the others try it, and he lets it show.
+
+- **IRRITATION AT WHAT THEY DO**: being interrupted, being second-guessed, being made to
+  say it twice, the plain one taking credit, the bun's literal reading. A curt
+  correction, a weary sigh put into words, a beat of silence on the page before he
+  answers.
+- **HIS HUMOUR IS GRUMPY, NOT VAIN**: the brooding, put-upon half of LEGO Batman — the
+  loner who did not ask for company, delivering a put-down with the gravity of a funeral.
+  He never brags about himself. His jokes are about THEM and the mess they are making.
+- **AND HE TEACHES ANYWAY**: the sigh comes first, the explanation follows, and the
+  explanation is clear and kind to the idea even when he is short with the people.
+
+*Register:* "As I said. A moment ago. In English." · "I work alone. Today, apparently, I
+work with all of you." · "No. Put the pie down. Now listen."
+
+### AS3 · The plain one: VAIN and PASSIVE-AGGRESSIVE
+
+Still polite on the surface and pointed underneath — faint praise, a dry aside, "no, no,
+it is fine" — and now with LEGO Batman's EGO: he is the hero of his own story.
+
+- **PASSIVE-AGGRESSIVE**: the compliment with a needle in it, the "fine" that is not,
+  the helpful remark that is a complaint.
+- **VAIN, DEADPAN AND DRAMATIC**: he narrates himself as a legend, claims he knew it all
+  along, takes the credit, announces his own brilliance with a straight face, and sulks
+  for one line when somebody else is right. He is never actually as good as he says,
+  and the lesson lets that show.
+- **HIS HUMOUR IS ABOUT HIMSELF.** That is the line between him and the top hat: the top
+  hat is irritated BY people, the plain one is impressed WITH himself. When the two meet,
+  the top hat deflates him, and he takes it as a compliment.
+
+*Register:* "Obviously. I was about to say that, but louder." · "No, no, you go ahead. I
+will just stand here. Being right." · "I have been doing this for years. Mostly in the
+dark."
+
+### AS4 · The newsboy cap: KIND and HELPFUL
+
+Assumes the best of everybody, helps before he is asked, and takes a loss without
+complaint — which is often exactly what the lesson needs somebody to do. And now he is
+the HELPFUL one in so many words:
+
+- **HE HELPS IN DEEDS AND IN WORDS**: fetches the thing, shows the step, offers to go
+  first, and when the top hat has been curt he says the same idea again in plainer words
+  for whoever missed it.
+- **HE SMOOTHS THINGS OVER** when the top hat and the plain one get sharp with each other
+  or with the bun — a kind word, a practical suggestion, never a lecture about manners.
+- **HE IS NEVER SARCASTIC.** Not once. He is the one line in the lesson a reader can take
+  entirely at face value, and that is what makes the other two funny.
+
+*Register:* "Here, let me hold that while you look." · "I think he means the price goes
+up when there's less of it. Like the last loaf." · "Don't mind him. He's like this before
+lunch."
+
+### AS5 · The bun: OBLIVIOUS
+
+Unchanged. Cheerful, and one step behind: she misses the point, takes the figure of
+speech literally, and asks the question the reader was too polite to ask. Never stupid —
+her wrong turn is the misconception the lesson is about to correct, she is never the butt
+for long, and she is often the one who is right by accident. The top hat's irritation
+and the plain one's ego both bounce off her, which is half of why they are funny.
+
+### AS6 · The cast is held to its rules
+
+`check:dialogue` holds that every member of `CAST` has a trait and a character, that no
+two share one, and that every trait is named in an AS heading of this file. Lessons
+voiced before a character changed keep their voiced lines until they are rewritten —
+rewriting a line means voicing it again (AC14) — so a change here binds every lesson
+WRITTEN from the day it is made.
