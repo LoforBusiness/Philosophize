@@ -37,7 +37,8 @@ export interface PassLine {
   id: 'lessons' | 'narrated' | 'reviews' | 'units';
   /** What the row is about. Short: it sits beside two narrow columns. */
   label: string;
-  /** What a free account gets. Always `null` now: not at all. */
+  /** What a free account gets: `null` for none at all. Only the lessons row has one —
+   *  the single free lesson a new reader chooses (data/index.ts, lessonAccess). */
   free: string | null;
   /** What the Pass gets, said as a phrase for the certificate. */
   pass: string;
@@ -70,7 +71,7 @@ export const PASS_LINES: readonly PassLine[] = [
   {
     id: 'lessons',
     label: `All ${SHAPE.lessons} lessons`,
-    free: null,
+    free: '1',
     pass: `All ${SHAPE.lessons}, across ${SHAPE.branches} courses`,
   },
   {

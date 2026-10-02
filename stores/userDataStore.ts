@@ -461,6 +461,15 @@ interface UserDataState {
    */
   seenProfessorIntro: boolean;
   /**
+   * THE ONE FREE LESSON (2026-10-01): the first lesson this account finished, or
+   * null while they have finished none. Without the Pass, null opens any lesson they
+   * have reached and an id opens that one lesson only (data/index.ts lessonAccess).
+   * Set on the first completion whoever completes it, so a reader whose Pass lapses
+   * keeps the lesson they began with and no more. Cloud-synced, first value wins, so
+   * reinstalling the app does not hand out another.
+   */
+  freeLesson: string | null;
+  /**
    * WHICH welcome they have seen, not merely whether they have seen one.
    *
    * `hasSeenWelcome` is a one-way latch, so a change to the intro could never reach
@@ -850,6 +859,7 @@ export const useUserDataStore = create<UserDataState>()(
       hasSeenWelcome: false,
       welcomeVersion: 0,
       seenProfessorIntro: false,
+      freeLesson: null,
       _hasHydrated: false,
       _syncOwnerId: null,
 
@@ -991,6 +1001,8 @@ export const useUserDataStore = create<UserDataState>()(
             const next = Math.max(state.lessonsByUnit[info.unitId] ?? 0, info.indexInUnit + 1);
             lessonsByUnit = { ...state.lessonsByUnit, [info.unitId]: next };
           }
+          // The first lesson finished is the one free lesson, kept for good.
+          const freeLesson = state.freeLesson ?? (info ? lessonId : null);
           // WHO THIS LESSON WAS ABOUT, credited on every completion.
           //
           // Not gated on it being the FIRST completion, unlike the unit pointer
@@ -1004,6 +1016,7 @@ export const useUserDataStore = create<UserDataState>()(
           }
           return {
             lessonsByUnit,
+            freeLesson,
             // Keep the per-branch mirror consistent with the per-unit source.
             lessonsByBranch: branchCountsFromUnits(lessonsByUnit),
             philosopherLessons,
@@ -1215,6 +1228,7 @@ export const useUserDataStore = create<UserDataState>()(
           unitsReviewed: [],
           badgesInitialized: true,
           seenProfessorIntro: false,
+          freeLesson: null,
           displayName: 'Philosopher',
           email: '',
           bio: '',
@@ -1276,6 +1290,7 @@ export const useUserDataStore = create<UserDataState>()(
           subjectDays: {},
           badgesInitialized: true,
           seenProfessorIntro: false,
+          freeLesson: null,
           displayName: 'Philosopher',
           email: '',
           bio: '',
@@ -1364,6 +1379,7 @@ export const useUserDataStore = create<UserDataState>()(
         hasSeenWelcome: state.hasSeenWelcome,
         welcomeVersion: state.welcomeVersion,
         seenProfessorIntro: state.seenProfessorIntro,
+        freeLesson: state.freeLesson,
         _syncOwnerId: state._syncOwnerId,
       }),
       // Merge persisted settings over defaults so newly-added keys are present.

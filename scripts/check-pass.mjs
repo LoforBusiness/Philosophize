@@ -70,21 +70,44 @@ ok(V.PASS_LINES.length === GATES.length,
 ok(GATES.every((g) => LINE(g)), 'every gate has a row',
   GATES.filter((g) => !LINE(g)).join(' ') || 'all present');
 ok(new Set(V.PASS_LINES.map((l) => l.id)).size === V.PASS_LINES.length, 'no id appears twice');
-ok(V.PASS_LINES.every((l) => l.free === null),
-  'the Free column has none of any row — every lesson needs the Pass');
+ok(V.PASS_LINES.every((l) => (l.id === 'lessons' ? l.free === '1' : l.free === null)),
+  'the Free column has one lesson and nothing else — every other lesson needs the Pass');
 
 // ── the lessons ──────────────────────────────────────────────────────────────
+//
+// ONE FREE LESSON (2026-10-01): a reader without the Pass may open any lesson they
+// have reached until they finish one, and after that only that one. Checked as
+// the gate the screens call, with the taste worked out from `freeLesson` itself.
 {
   let leaks = 0, refused = 0;
   for (const startable of [true, false]) {
     for (let done = 0; done <= 6; done++) {
       for (let li = 0; li <= done; li++) {
         if (DATA.lessonAccess(li, done, startable, false).open) leaks++;
+        if (DATA.lessonAccess(li, done, startable, false, 'none').open) leaks++;
         if (!DATA.lessonAccess(li, done, startable, true).open) refused++;
       }
     }
   }
-  ok(leaks === 0, 'no lesson opens without the Pass', `${leaks} open`);
+  ok(leaks === 0, 'once the free lesson is spent, no other lesson opens without the Pass', `${leaks} open`);
+  ok(DATA.tasteFor('a', null) === 'open' && DATA.tasteFor('a', 'a') === 'this' && DATA.tasteFor('a', 'b') === 'none'
+    && DATA.tasteFor('a', undefined) === 'none',
+    'the taste is open before any lesson is finished, that lesson after, and the paywall when unknown');
+  ok(DATA.lessonAccess(0, 0, true, false, 'open').open && !DATA.lessonAccess(1, 0, true, false, 'open').open
+    && !DATA.lessonAccess(0, 0, false, false, 'open').open,
+    'a new reader may start any lesson they have reached, and none further on');
+  ok(DATA.lessonAccess(0, 1, true, false, 'this').open, 'and keeps the lesson they chose, to read again');
+  const store = read('stores/userDataStore.ts');
+  ok(/const freeLesson = state\.freeLesson \?\? \(info \? lessonId : null\)/.test(store),
+    'the first lesson finished becomes the free one, and is never replaced');
+  const sync = read('lib/supabase/sync.ts');
+  ok(/'freeLesson'/.test(sync) && /const freeLesson = remote\.freeLesson \?\? local\.freeLesson \?\? null/.test(sync),
+    'and it travels with the account, so a second phone grants no second lesson');
+  const route = read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx');
+  const road = read('app/(app)/branches/[branchSlug]/index.tsx');
+  ok(/lessonAccessibility\(lessonId, lessonsByUnit, isPro, freeLesson\)/.test(route)
+    && /tasteFor\(lesson\.id, freeLesson\)/.test(road),
+    'the lesson screen and the road both ask with the reader’s free lesson');
   ok(refused === 0, 'and the Pass opens every lesson a reader has reached', `${refused} refused`);
   let lessons = 0;
   for (const b of DATA.ALL_BRANCHES) for (const u of b.paths) lessons += u.lessons.length;
@@ -437,7 +460,8 @@ head('7 · THE CERTIFICATE, AND EVERY FIGURE PRINTED ON IT');
     'and the tab draws that chart, with its arrival');
   ok(cmp.length === V.PASS_LINES.length && cmp.every((r, i) => r.id === V.PASS_LINES[i].id),
     'the chart has one row per PASS_LINES entry, in the same order', cmp.map((r) => r.id).join(' · '));
-  ok(cmp.every((r) => r.free.kind === 'no'), 'every Free cell is a cross — the free tier has no lessons at all');
+  ok(cmp.every((r) => (r.id === 'lessons' ? r.free.kind === 'value' && r.free.text === '1' : r.free.kind === 'no')),
+    'the Free column says 1 lesson and is a cross on every other row');
   ok(cmp.every((r) => r.pass.kind === 'yes'), 'and every Pass cell a tick');
   ok(cmp.every((r) => r.label === LINE(r.id).label), 'each row is labelled from PASS_LINES, not re-typed');
 

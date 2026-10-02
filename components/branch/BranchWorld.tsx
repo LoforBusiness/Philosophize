@@ -156,7 +156,9 @@ export default function BranchWorld({
   const hopDist = useSharedValue(0);
   const clock = useSharedValue(0);
   const [at, setAt] = useState(current);
-  const [busy, setBusy] = useState(false);
+  // Busy from the first frame when this screen opens to a walk, so the sign he is
+  // about to walk to does not open for a frame and then close again before he goes.
+  const [busy, setBusy] = useState(() => !!advanceTo);
 
   // STOPPED WHEN THIS SCREEN IS NOT THE ONE YOU ARE LOOKING AT.
   //
@@ -247,7 +249,7 @@ export default function BranchWorld({
     // walk was invisible: the figure was placed at its destination and then asked
     // to walk there.
     const from = markers[advanceTo.from] ?? markers[at];
-    if (!target || !from) { advanceTo.done(); return; }
+    if (!target || !from) { setBusy(false); advanceTo.done(); return; }
     setBusy(true);
     figX.value = from.x;
     camX.value = camFor(from.x);
@@ -397,7 +399,7 @@ export default function BranchWorld({
         <Stickman D={D} k={FIG_K} />
       </Animated.View>
 
-      <MarkerLayer camX={camX} markers={markers} lessons={lessons} at={at} m={vp.m} onTap={tapLesson} />
+      <MarkerLayer camX={camX} markers={markers} lessons={lessons} at={busy ? -1 : at} m={vp.m} onTap={tapLesson} />
     </View>
   );
 }
@@ -524,6 +526,8 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
         const i = mk.i;
         const l = lessons[i];
         if (!l || l.hidden) return null;
+        // -1 while he is walking or hopping: the sign he is leaving fades back to
+        // plain as he sets off, and the one he reaches opens on arrival.
         const here = i === at;
         // The road's own colour, read off the unit id the way the scenery is.
         const road = l.unitId.slice(0, l.unitId.lastIndexOf('-'));
@@ -577,6 +581,7 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
               done={l.done}
               locked={!l.accessible}
               isNew={!!l.isNew && !l.review}
+              needsPass={!!l.needsPass}
             />
           </Pressable>
         );

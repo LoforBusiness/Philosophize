@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Easing, InteractionManager } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Easing, InteractionManager, View } from 'react-native';
 import { Tabs, router, useSegments } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TabIcon, { type TabIconName } from '@/components/shared/TabIcon';
@@ -93,6 +93,21 @@ const SETTLE_MS = 1200;
 // InteractionManager, so a tap or an animation goes first.
 const STEP_MS = 420;
 
+// ── AND IT WAITS FOR THE READER (2026-10-01) ────────────────────────────────
+//
+// "Sometimes when I first open the app, getting to the lesson or tapping on the
+// lesson cards … there's a little bit of lag … or it just doesn't happen right
+// away." The warm-up runs from 1.2s after the launch screen lifts to about 3.7s,
+// which is exactly when a new reader is tapping their first cards — and a tab
+// being built is one long blocking commit, so a tap landing during one waits for
+// it. InteractionManager does not help: a Pressable registers no interaction.
+//
+// So a step is held back for QUIET_MS after the last touch anywhere in the app,
+// and not taken at all while a lesson or the intro is on screen, where building
+// Profile underneath steals frames from the lesson's own opening. The tabs still
+// all get built — just in the gaps, never across a press.
+const QUIET_MS = 1500;
+
 /**
  * A tab's icon, and whether its tab is the one the reader is on.
  *
@@ -148,18 +163,31 @@ export default function AppLayout() {
   // How many of WARM have been built — see the note at the top of the file.
   const [warm, setWarm] = useState(0);
   const launchDone = useUIStore((s) => s.launchDone);
+  // When the reader last touched the screen, and whether a lesson is up: read by
+  // the warm-up's timer, so they are refs rather than state (a touch must not
+  // re-render the tab navigator).
+  const lastTouch = useRef(0);
+  const busyRef = useRef(false);
+  busyRef.current = inLesson;
   useEffect(() => {
     if (!launchDone || warm >= WARM.length) return;
     let live = true;
     let interaction: { cancel: () => void } | null = null;
-    const t = setTimeout(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const step = () => {
       if (!live) return;
+      const since = Date.now() - lastTouch.current;
+      if (busyRef.current || since < QUIET_MS) {
+        t = setTimeout(step, busyRef.current ? QUIET_MS : QUIET_MS - since + 40);
+        return;
+      }
       // A tap or an animation already in flight goes first: a screen being built
       // is never more urgent than the screen the reader is looking at.
       interaction = InteractionManager.runAfterInteractions(() => {
         if (live) setWarm((n) => n + 1);
       });
-    }, warm === 0 ? SETTLE_MS : STEP_MS);
+    };
+    t = setTimeout(step, warm === 0 ? SETTLE_MS : STEP_MS);
     return () => {
       live = false;
       clearTimeout(t);
@@ -180,6 +208,9 @@ export default function AppLayout() {
   }, [launchDone, pendingOpen]);
 
   return (
+    // Any touch anywhere, recorded and nothing else: no responder is claimed, so no
+    // press below is affected. It only tells the warm-up when to stand back.
+    <View style={{ flex: 1 }} onTouchStart={() => { lastTouch.current = Date.now(); }}>
     <Tabs
       // BACK GOES WHERE YOU CAME FROM. The default `backBehavior` is
       // 'firstRoute', so `router.back()` on a hidden route pushed from a tab —
@@ -312,5 +343,6 @@ export default function AppLayout() {
           a route can always be reached by URL, so the tab config is not the lock. */}
       <Tabs.Screen name="devlessons" options={{ href: null }} />
     </Tabs>
+    </View>
   );
 }

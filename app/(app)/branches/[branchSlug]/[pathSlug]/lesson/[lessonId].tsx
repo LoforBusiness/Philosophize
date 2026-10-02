@@ -630,6 +630,9 @@ export default function LessonScreen() {
   const isPro = useSubscriptionStore((s) => s.isPro);
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const hasHydrated = useUserDataStore((s) => s._hasHydrated);
+  // The one free lesson (userDataStore.freeLesson): a reader without the Pass may
+  // open any lesson they have reached until they finish one, and then only that one.
+  const freeLesson = useUserDataStore((s) => s.freeLesson);
   // The gate screens are their own components now (components/paywall/), so the
   // reader's name, rank and card width are read where they are drawn rather than
   // here — this route was carrying six store reads and a width calculation for
@@ -652,7 +655,7 @@ export default function LessonScreen() {
   //
   // A ONE-WAY latch: openable → stays openable until they leave. It does not
   // latch the other way, so buying the Pass mid-lesson still unlocks at once.
-  const live = lessonAccessibility(lessonId, lessonsByUnit, isPro);
+  const live = lessonAccessibility(lessonId, lessonsByUnit, isPro, freeLesson);
   const everOpen = useRef(false);
   if (live.accessible) everOpen.current = true;
   const access = everOpen.current ? { accessible: true, gatedByPro: false } : live;

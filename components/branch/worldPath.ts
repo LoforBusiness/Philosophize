@@ -301,25 +301,19 @@ export function jumpForSpan(i: number): { at: number; h: number } | null {
  * How the figure travels this span — deterministic from the lesson index, so the
  * same hop is always the same journey.
  *
- * Codes are `moves.gaitFor`: 24 walk · 25 stroll · 26 hurry · 27 run ·
- * 28 trudge · 29 march · 32 skip. A run every time would be exhausting and a
- * walk every time is what this was complained about for; varying it by index
- * means the road has moods without anything being random.
+ * Codes are moves.gaitFor's: 24 walk · 27 run.
  *
- * THE LAST TWO ARE THE JOKE, AND THEY ARE RARE ON PURPOSE. 8% each: about one
- * journey in twelve, so a reader meets a march or a skip perhaps three times
- * across a branch. At 20% they would stop being a surprise and start being what
- * the walk is, which is the opposite of the point.
+ * ONLY THOSE TWO (2026-10-01). The road used to deal seven gaits — a stroll, a
+ * hurry, a trudge, and a march and a skip as the joke — and the owner: "change the
+ * walking to be not as strange … like the skipping animation, the really slow
+ * walking animation … I want more normal walking or running." So a span is a plain
+ * walk about two times in three and a run the rest. The other five stay in moves.ts
+ * (check:walk still measures them) and nothing deals them.
  */
 export function gaitForSpan(i: number): number {
   const r = hash(i * 31 + 5);
-  if (r < 0.15) return 27;       // a run
-  if (r < 0.31) return 26;       // a hurry
-  if (r < 0.47) return 25;       // a stroll
-  if (r < 0.55) return 28;       // a trudge
-  if (r < 0.63) return 29;       // a march, for no reason at all
-  if (r < 0.71) return 32;       // a skip
-  return 24;                     // a plain walk
+  if (r < 0.35) return 27;       // a run
+  return 24;                     // a walk
 }
 
 /**

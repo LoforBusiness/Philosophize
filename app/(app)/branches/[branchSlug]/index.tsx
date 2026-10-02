@@ -4,7 +4,7 @@ import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView, AnimatePresence } from 'moti';
-import { getBranchBySlug, lessonAccess } from '@/data';
+import { getBranchBySlug, lessonAccess, tasteFor } from '@/data';
 import type { Path as Unit, Lesson } from '@/data/types';
 import type { GlyphName } from '@/components/shared/Glyph';
 import SketchIcon from '@/components/shared/SketchIcon';
@@ -82,6 +82,8 @@ export default function BranchDetailScreen() {
   const hue = BRANCH[branchSlug as keyof typeof BRANCH] ?? C.HUE;
   const lessonsByUnit = useUserDataStore((s) => s.lessonsByUnit);
   const isPro = useSubscriptionStore((s) => s.isPro);
+  // The one free lesson: null until they finish a lesson, then that lesson's id.
+  const freeLesson = useUserDataStore((s) => s.freeLesson);
   const openPaywall = useUIStore((s) => s.openPaywall);
 
   // ── THE UNITS DRAWER ───────────────────────────────────────────────────────
@@ -130,7 +132,7 @@ export default function BranchDetailScreen() {
       // finished for a free reader — they did it — but it no longer opens for
       // them, so the drawer can show it, tick it, and put a lock on it.
       const state: LessonState = li < done ? 'done' : li === done ? 'current' : 'locked';
-      const { open, needsPass } = lessonAccess(li, done, startable, isPro);
+      const { open, needsPass } = lessonAccess(li, done, startable, isPro, tasteFor(lesson.id, freeLesson));
       return { lesson, li, state, open, needsPass };
     });
 

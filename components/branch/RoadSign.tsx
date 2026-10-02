@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
-  cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
+  cancelAnimation, Easing, interpolateColor, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
 import SketchIcon, { type SketchIconName } from '@/components/shared/SketchIcon';
 import {
@@ -54,7 +54,7 @@ export const TITLE_LINE = 18;
 export const TITLE_LINES = 3;
 
 export default function RoadSign({
-  title, hue, label, icon, here, done, locked, isNew,
+  title, hue, label, icon, here, done, locked, isNew, needsPass = false,
 }: {
   title: string;
   /** The road's colour. */
@@ -66,34 +66,72 @@ export default function RoadSign({
   done: boolean;
   locked: boolean;
   isNew: boolean;
+  /** Locked because the Pass would open it, rather than because it is further on. */
+  needsPass?: boolean;
 }) {
   const r = ramp(hue);
-  const face = locked ? LOCK_FACE : here ? r.base : PAPER_LIT;
-  const edge = locked ? LOCK_EDGE : here ? r.shade : mix(r.base, PAPER, 0.55);
+  // EVERY COLOUR AS A PAIR — away and here — so arriving at a sign is a blend, not a
+  // switch (2026-10-01): "when the stick man arrives at a new sign … not a snappy
+  // change of the sign, but a smooth one." One value, 0 → 1, runs the face, the
+  // edge, the strip, the title's ink and the nails together, and the TAP TO START
+  // pill opens out of the board as the same value rises. A locked board has one
+  // look either way, so both ends of its pairs are the same colour.
+  const away = {
+    face: locked ? LOCK_FACE : PAPER_LIT,
+    edge: locked ? LOCK_EDGE : mix(r.base, PAPER, 0.55),
+    strip: locked ? LOCK_EDGE : r.base,
+    ink: locked ? MID : INK,
+    nail: locked ? LOCK_MARK : mix(r.base, PAPER, 0.45),
+  };
+  const near = locked ? away : { face: r.base, edge: r.shade, strip: r.shade, ink: PAPER, nail: r.lit };
   const ledge = locked ? LOCK_EDGE : r.shade;
-  const ink = locked ? MID : here ? PAPER : INK;
-  const strip = locked ? LOCK_EDGE : here ? r.shade : r.base;
   const post = locked ? LOCK_MARK : mix(r.shade, INK, 0.25);
+
+  const v = useSharedValue(here ? 1 : 0);
+  useEffect(() => {
+    v.value = withTiming(here ? 1 : 0, { duration: here ? 520 : 320, easing: Easing.inOut(Easing.cubic) });
+  }, [here, v]);
+  // Colours as plain strings into each style, never a helper function: a plain
+  // function captured by a worklet throws on the UI thread (§17 rule 6).
+  const [f0, f1, e0, e1] = [away.face, near.face, away.edge, near.edge];
+  const [s0, s1, i0, i1, n0, n1] = [away.strip, near.strip, away.ink, near.ink, away.nail, near.nail];
+  const boardS = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(v.value, [0, 1], [f0, f1]),
+    borderColor: interpolateColor(v.value, [0, 1], [e0, e1]),
+  }));
+  const stripS = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(v.value, [0, 1], [s0, s1]) }));
+  const inkS = useAnimatedStyle(() => ({ color: interpolateColor(v.value, [0, 1], [i0, i1]) }));
+  const nailS = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(v.value, [0, 1], [n0, n1]) }));
+  // The pill grows from nothing to its height, so the board rises smoothly on its
+  // post rather than jumping taller by a line.
+  const goS = useAnimatedStyle(() => {
+    const u = Math.min(1, Math.max(0, (v.value - 0.25) / 0.75));
+    return { height: GO_H * v.value, opacity: u, transform: [{ scale: 0.8 + 0.2 * u }] };
+  });
 
   return (
     <View style={st.wrap}>
       <View style={st.boardBox}>
         <View style={[st.ledge, { backgroundColor: ledge }]} />
-        <View style={[st.board, { backgroundColor: face, borderColor: edge }]}>
-          <View style={[st.strip, { backgroundColor: strip }]}>
+        <Animated.View style={[st.board, boardS]}>
+          <Animated.View style={[st.strip, stripS]}>
             <SketchIcon name={locked ? 'lock' : icon} size={11} color={locked ? MID : PAPER} />
             <Text style={[st.stripText, { color: locked ? MID : PAPER }]} numberOfLines={1}>{label}</Text>
-          </View>
-          <Text style={[st.title, { color: ink }]}>{title}</Text>
-          {here && !locked ? (
-            <View style={[st.go, { backgroundColor: PAPER }]}>
-              <Text style={[st.goText, { color: r.shade }]}>TAP TO START</Text>
+          </Animated.View>
+          <Animated.Text style={[st.title, inkS]}>{title}</Animated.Text>
+          {/* Mounted at every sign and opened by the value, so it can grow in. A
+              locked board says what would open it instead. */}
+          <Animated.View style={[st.goBox, goS]} pointerEvents="none">
+            <View style={[st.go, { backgroundColor: locked ? PAPER_LIT : PAPER }]}>
+              <Text style={[st.goText, { color: locked ? MID : r.shade }]} numberOfLines={1}>
+                {!locked ? 'TAP TO START' : needsPass ? 'UNLOCK WITH THE PASS' : 'FINISH THE ONE BEFORE'}
+              </Text>
             </View>
-          ) : null}
+          </Animated.View>
           {/* Two nail heads, where a board is fixed to its post. */}
-          <View style={[st.nail, st.nailL, { backgroundColor: locked ? LOCK_MARK : here ? r.lit : mix(strip, PAPER, 0.45) }]} />
-          <View style={[st.nail, st.nailR, { backgroundColor: locked ? LOCK_MARK : here ? r.lit : mix(strip, PAPER, 0.45) }]} />
-        </View>
+          <Animated.View style={[st.nail, st.nailL, nailS]} />
+          <Animated.View style={[st.nail, st.nailR, nailS]} />
+        </Animated.View>
         {done && !locked ? (
           <View style={[st.tick, { backgroundColor: here ? PAPER : r.base, borderColor: here ? r.shade : PAPER_LIT }]}>
             <SketchIcon name="check" size={12} color={here ? r.base : PAPER} />
@@ -168,6 +206,8 @@ export function ComingSoonBoard({ hue, road }: { hue: string; road: string }) {
 }
 
 const LIP = 4;
+/** The TAP TO START pill's full height, margin included: what the board grows by on arrival. */
+const GO_H = 26;
 
 const st = StyleSheet.create({
   wrap: { width: SIGN_W + 24, alignItems: 'center' },
@@ -186,6 +226,7 @@ const st = StyleSheet.create({
     width: TEXT_W, fontFamily: 'PlayfairDisplay_700Bold', fontSize: TITLE_PX, lineHeight: TITLE_LINE,
     textAlign: 'center',
   },
+  goBox: { alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' },
   go: { marginTop: 6, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
   goText: { fontFamily: 'Inter_700Bold', fontSize: 8.5, letterSpacing: 1.2, includeFontPadding: false },
   // In the header strip's corners, clear of the title whatever its length.

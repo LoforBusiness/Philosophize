@@ -9,6 +9,7 @@ import PassDoor from '@/components/paywall/PassDoor';
 import TrialStatus from '@/components/paywall/TrialStatus';
 import { INK, MID, PATINA } from '@/components/shared/tone';
 import { useSubscriptionStore, usePassState } from '@/stores/subscriptionStore';
+import { useUserDataStore } from '@/stores/userDataStore';
 import { C, SPACE } from '@/constants/design';
 import { BILLING_PERIOD_LABEL } from '@/constants/subscription';
 import { TERMS_URL, PRIVACY_URL } from '@/constants/legal';
@@ -45,6 +46,7 @@ export default function HardPaywall({ source, onClose, onUnlocked, inSheet = fal
   inSheet?: boolean;
 }) {
   const isPro = useSubscriptionStore((s) => s.isPro);
+  const tasted = useUserDataStore((s) => s.freeLesson != null);
   const available = useSubscriptionStore((s) => s.available);
   const restore = useSubscriptionStore((s) => s.restore);
   const state = usePassState();
@@ -111,6 +113,11 @@ export default function HardPaywall({ source, onClose, onUnlocked, inSheet = fal
           {isPro ? 'You hold the ' : 'Unlock every lesson with the '}
           <Text style={st.h1Accent}>{'Scholar’s Pass'}</Text>
         </Text>
+        {!isPro && tasted ? (
+          // The one free lesson is spent (data/index.ts, lessonAccess): say so, so a
+          // reader who has just enjoyed it knows why the next one asks.
+          <Text style={st.tasted}>You’ve read your free lesson. The rest open with the Pass.</Text>
+        ) : null}
         {!isPro ? (
           <Text style={st.sub}>Everything else in Ashmere stays free, for everyone.</Text>
         ) : null}
@@ -180,6 +187,10 @@ const st = StyleSheet.create({
   sub: {
     fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20, color: MID,
     textAlign: 'center', marginTop: SPACE[2],
+  },
+  tasted: {
+    fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 20, color: INK,
+    textAlign: 'center', marginTop: SPACE[3],
   },
   trial: { marginTop: SPACE[4] },
 

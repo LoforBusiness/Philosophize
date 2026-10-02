@@ -2192,6 +2192,18 @@ Four rows, each a cross on Free and a tick on the Pass, and all four enforced:
 | Unit reviews | no | all of them | the review route draws `HardPaywall` without the Pass |
 | Start any unit | no | any, any time | `lessonAccess` with `unitStartable` ignored on the Pass |
 
+**AND ONE FREE LESSON, OF THE READER'S CHOOSING (2026-10-01).** *"A free user,
+when they first download the app, can play one free lesson of their choosing … after
+they've completed it, then the other lessons lock up."* `userDataStore.freeLesson` is
+null until the account finishes its first lesson and is that lesson's id for good
+after (cloud-synced, first value wins, so a reinstall grants no second one).
+`lessonAccess` takes a `taste` (`tasteFor(id, freeLesson)`): `'open'` opens any
+lesson the reader has reached, `'this'` keeps their lesson open to replay, and the
+default `'none'` is the hard paywall — so a caller that does not pass it can never
+leak a free lesson. The chart's Free cell on the lessons row reads **1**, the
+paywall tells a reader who has used it why it is asking, and `check:pass` §1 holds
+all of it.
+
 **Free for everyone**, and said just as loudly (the tiles under the chart): all the
 thinkers, their quotations to save, their quizzes, the ranks, the badges, XP and
 the streak, Quote of the Day, the widget, Profile and Settings. A hard paywall that

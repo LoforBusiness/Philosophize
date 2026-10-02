@@ -135,9 +135,36 @@ export function branchCountsFromUnits(
  * The one transition that can hurt now is a trial EXPIRING while a lesson is
  * open. The lesson route's one-way latch holds it (`check:access` walks it).
  */
+/**
+ * ── AND ONE LESSON TO TASTE (2026-10-01) ────────────────────────────────────
+ *
+ * The owner: "a free user, when they first download the app, can play one free
+ * lesson of their choosing, but they can only play that one lesson … after
+ * they've completed it, then the other lessons lock up." `taste` says where the
+ * reader stands with it (`tasteFor`):
+ *
+ *  • 'open' — they have finished no lesson yet: any lesson they have REACHED
+ *    opens, which on a fresh install is the first lesson of every subject;
+ *  • 'this' — this is the lesson they had: it stays theirs to read again;
+ *  • 'none' — anything else, and the DEFAULT, so a caller that does not know
+ *    about the taste gets the hard paywall rather than a free lesson.
+ */
+export type Taste = 'open' | 'this' | 'none';
+
+/** Where a reader stands with their one free lesson, for this lesson. */
+export function tasteFor(lessonId: string, freeLesson: string | null | undefined): Taste {
+  if (freeLesson === null) return 'open';
+  return freeLesson === lessonId ? 'this' : 'none';
+}
+
 export function lessonAccess(
-  li: number, unitDone: number, unitStartable: boolean, isPro: boolean
+  li: number, unitDone: number, unitStartable: boolean, isPro: boolean, taste: Taste = 'none'
 ): { open: boolean; needsPass: boolean } {
+  if (!isPro && taste === 'this') return { open: true, needsPass: false };   // their free lesson
+  if (!isPro && taste === 'open') {
+    if (li > unitDone || !unitStartable) return { open: false, needsPass: false }; // not reached yet
+    return { open: true, needsPass: false };                                       // the taste
+  }
   if (!isPro) return { open: false, needsPass: true };            // the hard paywall
   if (li > unitDone) return { open: false, needsPass: false };   // not reached yet
   return { open: true, needsPass: false };                       // next, or a replay
@@ -149,7 +176,9 @@ export function lessonAccess(
 export function lessonAccessibility(
   lessonId: string,
   lessonsByUnit: Record<string, number>,
-  isPro: boolean
+  isPro: boolean,
+  /** The reader's one free lesson (userDataStore.freeLesson). Leave it out for the hard paywall. */
+  freeLesson?: string | null,
 ): { accessible: boolean; gatedByPro: boolean } {
   const found = getLessonById(lessonId);
   if (!found) return { accessible: false, gatedByPro: false };
@@ -166,7 +195,7 @@ export function lessonAccessibility(
     }
   }
   const startable = isPro || ui === 0 || allPrevComplete;
-  const a = lessonAccess(li, unitDone, startable, isPro);
+  const a = lessonAccess(li, unitDone, startable, isPro, tasteFor(lessonId, freeLesson));
   return { accessible: a.open, gatedByPro: a.needsPass };
 }
 
