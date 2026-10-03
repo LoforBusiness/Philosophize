@@ -5709,7 +5709,7 @@ THREE WAYS.**
 
 A sign blends into TAP TO START as the figure arrives, and the road ends at a
 `ComingSoonBoard` (`Branch.more`). A journey from Home arrives behind the paper
-curtain (§19), and the road builds its world only once it has arrived (`ARRIVE_MS`).
+curtain (§19), and the road's world arrives with it: built in the first render behind the curtain, or on the screen's first frame when it rises from Learn (`WORLD_FADE_MS`), its scenery baked into pictures by `make:road-art`.
 
 What a viewer complained about, and what the answers cost:
 
@@ -6282,7 +6282,7 @@ gradients, no glows, no new colours. The lessons were deliberately not touched �
 ### Drawn places, and a curtain (2026-10-01/02)
 
 - **Profile opens on a drawn PLACE.** The ten profile pictures are scenes in the Quick Start style (`components/shared/profileScenes.ts`, `npm run make:profile-art`), with ids unchanged. Each stands on a dark ground: the avatar straddles the horizon, and the name, the rank chip and LESSONS · DAY STREAK · TOTAL XP sit on the earth, so nothing needs a scrim. Home's masthead dropped its scrim too. `npm run check:profile-art` measures all ten, but it is not in `npm run check`. (The Pass tab's member's card and its reading room are in §14.)
-- **A journey from Home fades through paper** (`components/shared/Curtain.tsx`). `curtainTo` covers in 150ms, the navigation happens underneath with the tab fade off (`useInstantTabs`), and the destination lifts it once drawn (`useCurtainLift`, 260ms). The navigator's own cross-fade never ran: it snapped Home out on its second render. The road arrives light and builds its world after (`ARRIVE_MS`, 380).
+- **A journey from Home fades through paper** (`components/shared/Curtain.tsx`). `curtainTo` covers in 150ms, the navigation happens underneath with the tab fade off (`useInstantTabs`), and the destination lifts it once drawn (`useCurtainLift`, 260ms). The navigator's own cross-fade never ran: it snapped Home out on its second render. The road's world is built behind the curtain, so it lifts onto a finished road (`WORLD_FADE_MS`; it waited 380ms and faded in after the screen until 2026-10-03).
 
 ### Struck things are shaded, and that is not a second colour
 

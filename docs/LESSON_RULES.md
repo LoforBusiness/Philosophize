@@ -10365,6 +10365,32 @@ inside a button.
 
 ---
 
+
+### AI8 · A lesson begins with a fade, never a cut or a re-layout
+
+> *"when it starts there is a pause and then something glitches and then it starts …
+> there's a small pause, and then something moves, and then it starts. I don't want that
+> glitch or that movement."* (2026-10-03)
+
+Filmed frame by frame through the real route (`scratchpad/h5/startfilm.mjs` records every
+painted frame and how much each one changed), the start of every lesson had two faults:
+
+1. **THE PICTURE SHRANK AND JUMPED WHEN THE BREATH ENDED.** The tap hint is one slice of the
+   stage / deck / hint split (`tapLayer`, flex 8). It was unmounted while the guide or the
+   opening breath (AP19) held, so the stage took its slice; when the breath ended the hint
+   mounted, the stage lost the slice, and `fit` rescaled the whole picture between two
+   frames (L6, arriving through the hint). Anything in that split is ALWAYS laid out; what
+   waits is its opacity (`OpeningVeil`), and it fades in (280 ms), as the first line does.
+2. **A FRAME OF BLANK PAPER BETWEEN THE LOADER AND THE LESSON.** The route swapped them in
+   one render, and a stage draws nothing until it has measured its own box. The loader now
+   stays over the lesson while it mounts and lifts off it once the stage has drawn
+   (`LoaderHandoff`; the player calls `setDrawn` two frames after it measures), and the
+   breath counts from the moment the lesson is uncovered (`LessonGuideHost revealed`).
+
+`check:guide` holds all of it: the hint is never unmounted for the breath, the first line
+is veiled rather than unmounted, the route hands over through `LoaderHandoff`, and the
+breath waits for the reveal.
+
 ## Group AL · Nothing moves him up and down on a clock
 
 > *"sometimes the stickman will be moving up and down while standing or in general

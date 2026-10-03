@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent, type GestureResponderEvent } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent, type GestureResponderEvent, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue, useFrameCallback, useAnimatedStyle, useAnimatedReaction, useDerivedValue, runOnJS,
@@ -53,7 +53,7 @@ import {
 import { tapSide } from './tapNav';
 import EdgeFlash, { useEdgeFlash } from './EdgeFlash';
 import WordsToggle from './WordsToggle';
-import { useGuideStore, GUIDE_HOLD, isHeld, setOpening } from './lessonGuideState';
+import { useGuideStore, GUIDE_HOLD, isHeld, setOpening, setDrawn } from './lessonGuideState';
 
 /** A graded beat's answer, kept so going back onto it shows it as it was left. */
 interface Kept { id: string; ok: boolean; pos: number; pos2: number; sem: number }
@@ -167,8 +167,22 @@ const BED_GAIN = 0.55;
 /** How long after a line's last word a `tail` sound comes in (AT6). */
 const TAIL_AFTER_S = 0.3;
 
-/** The first line during the opening breath (AP19): laid out, so nothing reflows, and not drawn. */
-const WAITING = { opacity: 0 } as const;
+/**
+ * Something laid out from the first frame and shown only once the lesson begins (AP19,
+ * AI8): the first line during the opening breath, and the tap hint behind the guide. It
+ * keeps its place, so nothing reflows when it arrives, and it fades in rather than
+ * appearing, so the moment the lesson begins is a fade, not a cut.
+ */
+function OpeningVeil({ hidden, style, children }: { hidden: boolean; style?: ViewStyle; children: ReactNode }) {
+  const o = useSharedValue(hidden ? 0 : 1);
+  useEffect(() => {
+    o.value = hidden ? 0 : withTiming(1, { duration: VEIL_IN_MS, easing: Easing.out(Easing.cubic) });
+  }, [hidden, o]);
+  const st = useAnimatedStyle(() => ({ opacity: o.value }));
+  return <Animated.View style={[style, st]}>{children}</Animated.View>;
+}
+/** How long the first line and the tap hint take to fade in when the lesson begins. */
+const VEIL_IN_MS = 280;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
@@ -323,6 +337,16 @@ export default function CinematicPlayer({
   const [targetCount, setTargetCount] = useState(0);
   const [done, setDone] = useState(false);
   const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
+  // THE STAGE HAS DRAWN (AI8). Until the stage has measured itself it draws nothing, so
+  // the route keeps the loader over it; two frames after the measure, the picture is on
+  // screen, and the loader may lift off it (LoaderHandoff). Above the early return.
+  const measured = boxSize.w > 0;
+  useEffect(() => {
+    if (!measured) return;
+    let r2 = 0;
+    const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setDrawn(true)); });
+    return () => { cancelAnimationFrame(r1); cancelAnimationFrame(r2); };
+  }, [measured]);
   // Which beat's content the DECK is currently showing. It lags `i` by the fade-out,
   // because the deck keeps the outgoing beat on screen until it has faded to nothing
   // — see `gone` below.
@@ -1511,7 +1535,7 @@ export default function CinematicPlayer({
                 {/* The first line is not drawn during the opening breath (AP19): its
                     place is kept, so nothing reflows when it arrives. */}
                 {beat.text ? (
-                  <View style={opening ? WAITING : null}>
+                  <OpeningVeil hidden={opening}>
                   <SpokenBy who={beat.speaker}>
                   <NarrationText
                     text={beat.text}
@@ -1526,7 +1550,7 @@ export default function CinematicPlayer({
                     }}
                   />
                   </SpokenBy>
-                  </View>
+                  </OpeningVeil>
                 ) : null}
                 {/* The snapshot lives UNDER the paragraph rather than floating
                     over it: group S spends its whole length on words being
@@ -1611,16 +1635,17 @@ export default function CinematicPlayer({
           </QuestionAccentProvider>
         </View>
 
-        {/* Not while the lesson guide is up: it says the same thing, and the
-            nudge read straight through the guide's glass under its buttons. */}
-        {!guideOpen ? (
-          <View style={styles.tapLayer}>
-            <TapNudge
-              label={locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
-              resting={locked}
-            />
-          </View>
-        ) : null}
+        {/* Not shown while the lesson guide is up or the breath runs: it says the same
+            thing, and the nudge read straight through the guide's glass. But it is ALWAYS
+            LAID OUT: it is one slice of the stage/deck/hint split, so mounting it when the
+            breath ended took that slice from the stage, which shrank and jumped up on the
+            frame the lesson began (AI8). Now only its opacity changes. */}
+        <OpeningVeil hidden={guideOpen} style={styles.tapLayer}>
+          <TapNudge
+            label={locked ? 'Choose an answer' : last ? 'Finish' : 'Tap to continue'}
+            resting={locked}
+          />
+        </OpeningVeil>
 
         {/* Which way the tap went — above everything in the body, taking no touch. */}
         <EdgeFlash back={flashBack} fwd={flashFwd} />

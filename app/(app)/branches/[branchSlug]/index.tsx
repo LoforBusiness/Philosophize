@@ -30,24 +30,28 @@ import { hasReview } from '@/components/lesson/cinematic/review/UnitReview';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
-// ── THE ROAD IS BUILT ONCE THE SCREEN HAS ARRIVED, NOT UNDER THE FINGER ─────
+// ── THE ROAD ARRIVES WITH THE SCREEN, NOT AFTER IT ───────────────────────────
 //
 //   "if I click on one of the subjects … it's pretty laggy or it's pretty glitchy
 //    and it's not very smooth." (2026-10-01)
+//   "the top of this screen will show up … but the road that the stickman walks on
+//    … takes a little bit to show up." (2026-10-03)
 //
-// The road is the heaviest thing a tap from Home or the Learn grid opens: the
-// scenery strips, every road sign, the stickman and the masthead's drawing. Built in
-// the same commit as the navigation, all of it had to exist before the first frame
-// of the transition could be drawn — measured in the real tab shell at 4× CPU, the
-// tap froze Home for 883ms and the screen then appeared already half faded in, so
-// the reader saw a stall and a jump instead of a movement.
+// The first note moved the world's build out of the tap: built in the same commit as
+// the navigation, it froze Home for 883ms at 4× CPU. So the world was built 380ms after
+// the screen's first frame and faded in over 260ms — which is the second note: the top
+// of the screen, then an empty sky for the best part of a second, then the road.
 //
-// So the screen arrives LIGHT — top bar, masthead in its own colour, the road's sky
-// — and the world and the masthead's picture are built when the 340ms transition
-// has finished (the tab cross-fade from Home, or this stack's rise from the grid),
-// then fade in over the sky. The build still costs what it costs; it is paid while
-// nothing on the screen is moving, where a stall cannot be seen.
-const ARRIVE_MS = 380;
+// What made the build expensive is gone: every scenery layer was an <Svg> painted on
+// the UI thread (24–40 MB of path fills a road); they are baked pictures now
+// (make:road-art, BranchWorld's SceneStrip), and the world's parts no longer rebuild
+// twice after mounting (memo). So the world is built as soon as it can be:
+//   · FROM HOME the screen arrives behind the paper curtain with no transition, so the
+//     world is built in the FIRST render and the curtain lifts onto a finished road;
+//   · FROM THE LEARN GRID the screen rises with the native fade, so the world is built
+//     on the first frame after the screen is drawn (the tap is never held up) and fades
+//     in over WORLD_FADE_MS while the screen is still rising.
+const WORLD_FADE_MS = 160;
 const WORLD_H = 360; // BranchWorld's own height (H in BranchWorld.tsx)
 /** A course with no photograph: an empty source, so the masthead shows its own hue. */
 const NO_ART = { uri: '' };
@@ -131,19 +135,19 @@ export default function BranchDetailScreen() {
   const [mastBox, setMastBox] = useState({ w: 0, h: 0 });
   // A subject opened from Home arrives behind the curtain; lift it once drawn.
   useCurtainLift();
-  // See ARRIVE_MS: the world and the poster are built once the screen has landed.
-  const [built, setBuilt] = useState(false);
-  const worldIn = useSharedValue(0);
+  // See WORLD_FADE_MS: behind the curtain the world is built at once; risen from the
+  // Learn grid it is built on the screen's first frame and fades in during the rise.
+  const behindCurtain = from === 'home';
+  const [built, setBuilt] = useState(behindCurtain);
+  const worldIn = useSharedValue(behindCurtain ? 1 : 0);
   useEffect(() => {
-    // Counted from the FIRST FRAME, not from the commit: the transition cannot start
-    // until this screen has been drawn once, so a timer started at commit lands the
-    // build in the middle of the fade whenever the commit itself was slow.
-    let t: ReturnType<typeof setTimeout> | undefined;
-    const f = requestAnimationFrame(() => { t = setTimeout(() => setBuilt(true), ARRIVE_MS); });
-    return () => { cancelAnimationFrame(f); if (t) clearTimeout(t); };
+    if (built) return;
+    const f = requestAnimationFrame(() => setBuilt(true));
+    return () => cancelAnimationFrame(f);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (built) worldIn.value = withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) });
+    if (built && worldIn.value < 1) worldIn.value = withTiming(1, { duration: WORLD_FADE_MS, easing: Easing.out(Easing.cubic) });
   }, [built, worldIn]);
   const worldStyle = useAnimatedStyle(() => ({ opacity: worldIn.value }));
 
@@ -546,7 +550,7 @@ export default function BranchDetailScreen() {
 
               NOT MINE TO OPEN: `BranchWorld` is its own art system, validated by
               `npm run check:walk` — not touched here, not even its import. */}
-          {/* The road's own sky until the world is built over it (ARRIVE_MS). */}
+          {/* The road's own sky until the world is built over it (WORLD_FADE_MS). */}
           <View style={{ height: WORLD_H, backgroundColor: skyFor(branch.slug) }}>
           {built ? (
           <Animated.View style={[StyleSheet.absoluteFill, worldStyle]}>

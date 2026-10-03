@@ -27,6 +27,12 @@ interface GuideState {
   open: boolean;
   /** The opening breath (LESSON_RULES AP19): the lesson is on screen and has not begun. */
   opening: boolean;
+  /**
+   * The lesson's stage has measured itself and drawn (AP19, AI8). Until then the stage is
+   * an empty box, so the route keeps the loader over it (LoaderHandoff) and lifts it only
+   * once this is true: the reader never sees a frame of blank paper between the two.
+   */
+  drawn: boolean;
   wordsRef: RefObject<View | null> | null;
   setWordsRef: (r: RefObject<View | null> | null) => void;
 }
@@ -34,6 +40,7 @@ interface GuideState {
 export const useGuideStore = create<GuideState>((set) => ({
   open: false,
   opening: false,
+  drawn: false,
   wordsRef: null,
   setWordsRef: (r) => set({ wordsRef: r }),
 }));
@@ -67,6 +74,11 @@ export function setGuideOpen(open: boolean) {
  * never skips the first line.
  */
 export const OPENING_MS = 1300;
+
+/** The stage has drawn its first frame (the player), or a new lesson is about to mount (the route). */
+export function setDrawn(drawn: boolean) {
+  if (useGuideStore.getState().drawn !== drawn) useGuideStore.setState({ drawn });
+}
 
 export function setOpening(opening: boolean) {
   if (useGuideStore.getState().opening !== opening) useGuideStore.setState({ opening });

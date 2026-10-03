@@ -209,7 +209,8 @@
     "sheet:subjects": "node scripts/sheet-subjects.mjs",
     "check:dialogue": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-dialogue.mjs",
     "check:plates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/lib/register.mjs scripts/check-plates.mjs",
-    "make:plates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/lib/register.mjs scripts/make-plates.mjs"
+    "make:plates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/lib/register.mjs scripts/make-plates.mjs",
+    "make:road-art": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/lib/register.mjs scripts/make-road-art.mjs"
   },
   "overrides": {
     "@expo/require-utils": "56.1.6"

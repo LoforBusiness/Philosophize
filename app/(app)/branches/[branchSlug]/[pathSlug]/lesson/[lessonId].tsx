@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getLessonById, lessonAccessibility } from '@/data';
 import { subjectOfBranch } from '@/data/subjects';
 import type { Lesson } from '@/data/types';
-import LessonLoader from '@/components/lesson/LessonLoader';
+import LoaderHandoff from '@/components/lesson/LoaderHandoff';
 import { useCurtainLift } from '@/components/shared/Curtain';
 import { exitLesson } from '@/components/lesson/exitLesson';
 import { track } from '@/lib/posthog';
@@ -112,7 +112,6 @@ export default function LessonScreen() {
   useEffect(() => {
     setTestLesson(testing ? lessonId : null);
   }, [lessonId, testing, setTestLesson]);
-  const [loading, setLoading] = useState(true);
   // Quick Start arrives behind the curtain (components/shared/Curtain.tsx); the
   // route lifts it once drawn, whichever of its screens that turns out to be.
   useCurtainLift();
@@ -220,22 +219,24 @@ export default function LessonScreen() {
 
   return (
     <ScreenTransition bg="#FAFAF7">
-      {loading ? (
-        <LessonLoader onDone={() => setLoading(false)} />
-      ) : (
-        // THE LESSON GUIDE is mounted HERE, around the lesson, rather than inside a
-        // player: the browser harnesses render lesson components directly, so they
-        // can never meet it (components/lesson/cinematic/LessonGuide.tsx).
-        <LessonGuideHost>
-          <StartedRunner
-            Runner={Runner}
-            lesson={result.lesson}
-            branchSlug={result.branch.slug}
-            unitId={result.path.id}
-            format="cinematic"
-          />
-        </LessonGuideHost>
-      )}
+      {/* The loader stays over the lesson until its stage has drawn, then lifts off it
+          (LoaderHandoff, AI8): no blank frame between the two. */}
+      <LoaderHandoff>
+        {(revealed) => (
+          // THE LESSON GUIDE is mounted HERE, around the lesson, rather than inside a
+          // player: the browser harnesses render lesson components directly, so they
+          // can never meet it (components/lesson/cinematic/LessonGuide.tsx).
+          <LessonGuideHost revealed={revealed}>
+            <StartedRunner
+              Runner={Runner}
+              lesson={result.lesson}
+              branchSlug={result.branch.slug}
+              unitId={result.path.id}
+              format="cinematic"
+            />
+          </LessonGuideHost>
+        )}
+      </LoaderHandoff>
     </ScreenTransition>
   );
 }

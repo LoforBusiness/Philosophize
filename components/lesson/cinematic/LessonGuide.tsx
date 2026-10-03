@@ -406,7 +406,15 @@ const styles = StyleSheet.create({
  * — so the player's very first frame and its first narration effect already see it
  * held. Arming it in an effect would let the opening line start and then be cut.
  */
-export function LessonGuideHost({ children }: { children: ReactNode }) {
+export function LessonGuideHost({ children, revealed = true }: {
+  children: ReactNode;
+  /**
+   * The lesson is on screen: the route's loader has lifted off it (LoaderHandoff). The
+   * breath counts from here, so the reader gets all of it, not what is left of it after
+   * the loader's fade.
+   */
+  revealed?: boolean;
+}) {
   const setSetting = useUserDataStore((s) => s.setSetting);
   const [mounted, setMounted] = useState(() => {
     const on = useUserDataStore.getState().settings.lessonGuide;
@@ -419,10 +427,10 @@ export function LessonGuideHost({ children }: { children: ReactNode }) {
   // the first line begins, and a tap on the lesson can end it sooner (the player).
   const guideUp = useGuideStore((s) => s.open);
   useEffect(() => {
-    if (guideUp) return;
+    if (guideUp || !revealed) return;
     const t = setTimeout(() => setOpening(false), OPENING_MS);
     return () => clearTimeout(t);
-  }, [guideUp]);
+  }, [guideUp, revealed]);
   // Leaving the lesson must never leave the next one held.
   useEffect(() => () => { setGuideOpen(false); setOpening(false); }, []);
   const release = useCallback(() => setGuideOpen(false), []);

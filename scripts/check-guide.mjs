@@ -101,7 +101,7 @@ for (const name of PLAYERS) {
 // ── 3. THE ROUTE, AND NO HARNESS ─────────────────────────────────────────────
 {
   const route = strip(read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'));
-  if (!/<LessonGuideHost>\s*<StartedRunner/.test(route)) bad('the lesson route does not mount the guide around a cinematic lesson');
+  if (!/<LessonGuideHost[^>]*>\s*<StartedRunner/.test(route)) bad('the lesson route does not mount the guide around a cinematic lesson');
   else ok('the lesson route mounts the guide around every cinematic lesson');
   const harness = [];
   for (const dir of ['scripts', 'scripts/lib']) {
@@ -170,9 +170,20 @@ for (const name of PLAYERS) {
   if (!/setTimeout\(\(\) => setOpening\(false\), OPENING_MS\)/.test(host)) missing.push('the guide host never ends the breath after OPENING_MS');
   if (!/useGuideStore\(isHeld\)/.test(pl)) missing.push('the player\'s voice is not held for the breath (useGuideStore(isHeld))');
   if (!/getState\(\)\.opening\) \{ setOpening\(false\); return; \}/.test(pl)) missing.push('a tap during the breath does not start the lesson');
-  if (!/style=\{opening \? WAITING : null\}/.test(pl)) missing.push('the first line\'s words are drawn during the breath');
-  if (missing.length) bad('the opening breath (AP19) is not wired end to end', missing);
-  else ok(`the opening breath: ${ms} ms, held with the guide, armed by the route, the words wait, a tap starts it`);
+  if (!/<OpeningVeil hidden=\{opening\}>/.test(pl)) missing.push('the first line\'s words are drawn during the breath');
+  // AI8 — THE MOMENT IT BEGINS IS A FADE, NOT A CUT OR A RE-LAYOUT. The tap hint is one
+  // slice of the stage/deck/hint split; unmounted during the breath, it took its slice
+  // back from the stage on the frame the lesson began, and the whole picture shrank and
+  // jumped. It stays laid out and only its opacity changes.
+  if (!/<OpeningVeil hidden=\{guideOpen\} style=\{styles\.tapLayer\}>/.test(pl)) missing.push('the tap hint is mounted only after the breath, so the stage shrinks when the lesson begins (AI8)');
+  if (/\{!guideOpen \? \(\s*<View style=\{styles\.tapLayer\}>/.test(pl)) missing.push('the tap hint is still unmounted while the guide or the breath holds (AI8)');
+  // and the route keeps the loader over the lesson until its stage has drawn
+  const route = strip(read('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx'));
+  if (!/<LoaderHandoff>/.test(route) || !/<LessonGuideHost revealed=\{revealed\}>/.test(route)) missing.push('the lesson route swaps the loader for the lesson in one render, so a blank frame shows between them (AI8)');
+  if (!/setDrawn\(true\)/.test(pl)) missing.push('the player never says its stage has drawn, so the loader cannot wait for it (AI8)');
+  if (!/if \(guideUp \|\| !revealed\) return;/.test(host)) missing.push('the breath starts under the loader instead of once the lesson is uncovered (AI8)');
+  if (missing.length) bad('the opening breath (AP19, AI8) is not wired end to end', missing);
+  else ok(`the opening breath: ${ms} ms from the moment the loader lifts off a drawn lesson, held with the guide, the words and the hint fade in without moving the stage, a tap starts it`);
 }
 
 console.log('\nBACK, FORWARD, THE Aa BUTTON AND THE LESSON GUIDE\n');

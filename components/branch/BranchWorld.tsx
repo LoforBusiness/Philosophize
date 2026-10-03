@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions, Image } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Animated, {
   useSharedValue, useAnimatedStyle, useDerivedValue, useFrameCallback,
@@ -16,6 +16,7 @@ import {
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
 import { sceneLayers, discFor, skyFor, earthFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
 import RoadSign, { ComingSoonBoard } from './RoadSign';
+import { ROAD_ART } from './roadArt';
 import { BRANCH } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -384,6 +385,7 @@ export default function BranchWorld({
   const figStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: figX.value - camX.value }],
   }));
+  const figure = useMemo(() => <Stickman D={D} k={FIG_K} />, [D]);
 
   return (
     // THE SKY IS THE PLACE'S OWN. Cloud only reads against something darker than
@@ -391,15 +393,18 @@ export default function BranchWorld({
     // ground — so a single near-white sky for all six was quietly forbidding the
     // one shape they all have in common.
     <View style={{ height: H, backgroundColor: skyFor(where), overflow: 'hidden' }}>
-      <SceneBack camX={camX} place={where} unit={vp.s} width={width} />
-      <GroundBand camX={camX} chunk={vp.c} place={where} />
+      {/* MEMOISED, each of them (2026-10-03): the world re-renders twice straight after
+          it mounts, and every part was rebuilt both times although nothing it draws had
+          changed — measured at 4× CPU, 290 ms of the road's arrival was those two passes. */}
+      <SceneBackM camX={camX} place={where} unit={vp.s} width={width} />
+      <GroundBandM camX={camX} chunk={vp.c} place={where} />
 
       {/* THE FIGURE, drawn BEFORE the signs so it can never cover a lesson's name. */}
       <Animated.View style={[styles.figWrap, figStyle]} pointerEvents="none">
-        <Stickman D={D} k={FIG_K} />
+        {figure}
       </Animated.View>
 
-      <MarkerLayer camX={camX} markers={markers} lessons={lessons} at={busy ? -1 : at} m={vp.m} onTap={tapLesson} />
+      <MarkerLayerM camX={camX} markers={markers} lessons={lessons} at={busy ? -1 : at} m={vp.m} onTap={tapLesson} />
     </View>
   );
 }
@@ -428,13 +433,13 @@ function SceneBack({ camX, place, unit, width }: {
         }} />
       ) : null}
       {layers.map((l, i) => (
-        <SceneStrip key={place + unit + '.' + i} camX={camX} layer={l} />
+        <SceneStrip key={place + unit + '.' + i} camX={camX} layer={l} art={ROAD_ART[`${place}:${unit}`]?.[i]} />
       ))}
     </View>
   );
 }
 
-function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerArt }) {
+function SceneStrip({ camX, layer, art }: { camX: SharedValue<number>; layer: LayerArt; art?: number }) {
   const { d, tone, k, top, h, under, underTone } = layer;
   const st = useAnimatedStyle(() => {
     const t = camX.value * k;
@@ -446,12 +451,19 @@ function SceneStrip({ camX, layer }: { camX: SharedValue<number>; layer: LayerAr
   // `under` is the shaded face of the same mass, drawn first and in the SAME
   // surface — one <Svg>, two <Path>s. A second layer would be a second thing to
   // rasterise and a second thing to keep in register with this one.
-  const tile = (left: number) => (
+  // A BAKED LAYER IS ONE PICTURE (make:road-art), drawn at both tiles: decoded once, off
+  // the UI thread, and shared by the two copies. Live, each tile was an <Svg> painted
+  // into its own bitmap on the UI thread when the road was built — 24–40 MB of path fills
+  // a road, which is why the road arrived after the rest of the screen (2026-10-03).
+  // The <Svg> stays as the fallback for a layer that has no picture.
+  const tile = (left: number) => (art !== undefined ? (
+    <Image key={left} source={art} fadeDuration={0} style={{ position: 'absolute', left, top: 0, width: TILE_W, height: h }} />
+  ) : (
     <Svg key={left} style={{ position: 'absolute', left, top: 0 }} width={TILE_W} height={h} viewBox={box}>
       {under ? <SvgPath d={under} fill={underTone} /> : null}
       <SvgPath d={d} fill={tone} />
     </Svg>
-  );
+  ));
   return (
     <Animated.View
       style={[{ position: 'absolute', left: 0, top, width: TILE_W * 2, height: h }, st]}
@@ -593,3 +605,8 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
 const styles = StyleSheet.create({
   figWrap: { position: 'absolute', left: 0, top: 0 },
 });
+
+// The world's parts, rebuilt only when their own props change (see the render above).
+const SceneBackM = memo(SceneBack);
+const GroundBandM = memo(GroundBand);
+const MarkerLayerM = memo(MarkerLayer);

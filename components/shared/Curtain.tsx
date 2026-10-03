@@ -24,7 +24,7 @@ import { C } from '@/constants/design';
 //     90ms later — so Home vanished on the first frame and the new screen faded
 //     in over blank paper. A dissolve the layout promised and the phone never drew.
 //   · THE TAP FROZE BEFORE ANYTHING MOVED, while the destination was built (see
-//     ARRIVE_MS in the road screen), so the fade's opening was spent behind a
+//     WORLD_FADE_MS in the road screen), so the fade's opening was spent behind a
 //     still Home and the screen then appeared half arrived — a stall and a jump.
 //   · TWO ANIMATIONS RAN AT ONCE: the tab fade and the Learn stack's own push, and
 //     while the pushed screen was faint the stack's grid showed through.
