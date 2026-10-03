@@ -51,6 +51,7 @@ export interface Sci2Beat extends BaseBeat {
 
 export const BEATS: Sci2Beat[] = [
   {
+    bed: 'park',
     act: 'boast', start: 0, tape: 0, marks: 0,
     speaker: 'bun',
     text: 'Mine has the pointy nose, so it’ll fly the furthest. Watch this!',
@@ -58,6 +59,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'plane', at: 0.69, gain: 0.8 }, { id: 'plane', at: 2.9, gain: 0.8 }],
     act: 'throw', start: 0, tape: 0, marks: 0,
     speaker: 'cap',
     text: 'Off you go, then. Goodness, it went miles, and mine barely made it past my feet!',
@@ -79,6 +81,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'tape', at: 2.38, gain: 0.8 }],
     act: 'fair', th: true, start: 0, tape: 1, marks: 0,
     speaker: 'tophat',
     text: 'A fair test changes one thing, and keeps everything else the same. Then you know what made the difference.',
@@ -95,6 +98,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'plane', at: 6.34, gain: 0.8 }],
     act: 'line', th: true, start: 1, tape: 1, marks: 0,
     speaker: 'cap',
     text: 'Shall we both throw from this line, then? Same paper, same arm, nice and gentle.',
@@ -102,6 +106,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'plane', at: 0.38, gain: 0.8 }],
     act: 'retry', th: true, start: 1, tape: 1, marks: 0,
     speaker: 'bun',
     text: 'Mine won again! Only by a little, but it still won.',
@@ -109,6 +114,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'whoosh', at: 0.93, gain: 0.8 }],
     act: 'luck', th: true, start: 1, tape: 1, marks: 0,
     speaker: 'tophat',
     text: 'One throw can be luck, a gust or a wobble. Repeat it many times, and the luck starts to cancel out.',
@@ -125,6 +131,7 @@ export const BEATS: Sci2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chalk', at: 2.05, gain: 0.8 }],
     act: 'tally', th: true, start: 1, tape: 1, marks: 2,
     speaker: 'cap',
     text: 'Ten throws each, and we’ll chalk up every one. Lovely day for it!',

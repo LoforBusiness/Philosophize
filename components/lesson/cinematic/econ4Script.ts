@@ -44,6 +44,8 @@ export interface Econ4Beat extends BaseBeat {
 
 export const BEATS: Econ4Beat[] = [
   {
+    bed: 'garden',
+    sfx: [{ id: 'hen', at: 3.64, gain: 0.8 }],
     act: 'peck', traded: 0,
     speaker: 'bun',
     text: 'I’m growing tomatoes and keeping a hen this year. The hen is eating the tomatoes.',
@@ -81,6 +83,7 @@ export const BEATS: Econ4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'hen', at: 3, gain: 0.8 }],
     act: 'swap', econ: true, traded: 1,
     speaker: 'bun',
     text: 'So I give him tomatoes, and he gives me eggs. And I don’t have to talk to the hen.',
@@ -88,6 +91,7 @@ export const BEATS: Econ4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'chalk', at: 0.64, gain: 0.8 }, { id: 'chalk', at: 2.14, gain: 0.8 }],
     act: 'gain', econ: true, traded: 1,
     speaker: 'tophat',
     text: 'You both end up with more than you’d make doing everything yourselves. Trade isn’t one side winning.',
@@ -111,6 +115,7 @@ export const BEATS: Econ4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'hen', at: 0.8, gain: 0.8 }],
     act: 'hen', econ: true, traded: 1,
     speaker: 'bun',
     text: 'Then my hen should live with his hens. She’ll be much happier there, I think.',

@@ -45,6 +45,8 @@ export interface Biz1Beat extends BaseBeat {
 
 export const BEATS: Biz1Beat[] = [
   {
+    bed: 'market',
+    sfx: [{ id: 'squeeze', at: 0.39, gain: 0.8 }],
     act: 'cry', tin: 0,
     speaker: 'cap',
     text: 'Fresh lemonade, made with lemons, sugar and a bit of love! One pound a cup.',
@@ -59,6 +61,7 @@ export const BEATS: Biz1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'crate', at: 2.22, gain: 0.8 }],
     act: 'lemons', tin: 0,
     speaker: 'cap',
     text: 'Good on you. I’ll buy more lemons out of my own pocket, I suppose.',
@@ -66,6 +69,7 @@ export const BEATS: Biz1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cashbox', at: 5.44, gain: 0.8 }],
     act: 'arrive', th: true, tin: 0,
     speaker: 'tophat',
     text: 'A long queue, and an empty tin. A business makes something people want and sells it for more than it cost to make.',
@@ -73,6 +77,7 @@ export const BEATS: Biz1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'coin', at: 4.53, gain: 0.8 }],
     act: 'sale', th: true, tin: 1,
     speaker: 'bun',
     text: 'Oh! So I take the pound, and the lemons get paid for out of it?',
@@ -89,6 +94,7 @@ export const BEATS: Biz1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'crate', at: 2.39, gain: 0.8 }],
     act: 'proof', th: true, tin: 1,
     speaker: 'tophat',
     text: 'Profit isn’t greed. It’s proof that people valued the lemonade more than it cost to make.',
@@ -119,6 +125,7 @@ export const BEATS: Biz1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'water', at: 2.07, gain: 0.8 }, { id: 'coin', at: 4.67, gain: 0.8 }],
     act: 'split', th: true, tin: 2,
     speaker: 'cap',
     text: 'Right, I’ll squeeze, you serve, and the pound goes in the tin. Beauty.',

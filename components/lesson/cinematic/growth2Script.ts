@@ -54,6 +54,8 @@ export interface Growth2Beat extends BaseBeat {
 
 export const BEATS: Growth2Beat[] = [
   {
+    bed: 'kitchen',
+    sfx: [{ id: 'clockchime', at: 0.85, gain: 0.8 }, { id: 'jarlid', at: 2.56, gain: 0.8 }],
     act: 'chime', hour: 1, lid: 1, bowl: 0,
     speaker: 'cap',
     text: 'Three o’clock already! Time for a cup of tea, and just the one biscuit.',
@@ -61,6 +63,7 @@ export const BEATS: Growth2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'pencil', at: 1.51, gain: 0.8 }],
     act: 'count', hour: 1, lid: 1, bowl: 0,
     speaker: 'plain',
     text: 'Just the one, at three, every day this week. Not that I’ve been counting.',
@@ -91,6 +94,7 @@ export const BEATS: Growth2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chair', at: 3.7, gain: 0.8 }, { id: 'mug', at: 4.42, gain: 0.8 }],
     act: 'reward', th: true, hour: 1, lid: 1, bowl: 0,
     speaker: 'cap',
     text: 'I suppose it’s the break I’m after. Ten quiet minutes, and a sit down.',
@@ -98,6 +102,7 @@ export const BEATS: Growth2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'jarlid', at: 4.74, gain: 0.8 }, { id: 'mug', at: 5.95, gain: 0.8 }],
     act: 'rule', th: true, hour: 1, lid: 0, bowl: 1,
     speaker: 'tophat',
     text: 'Then keep the cue, and keep the reward. Change only the routine in the middle.',
@@ -128,6 +133,7 @@ export const BEATS: Growth2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chair', at: 4.61, gain: 0.8 }],
     act: 'swap', th: true, hour: 1, lid: 0, bowl: 1,
     speaker: 'cap',
     text: 'An apple and a cup of tea, then. Do you know, it’s the sitting down I like best.',

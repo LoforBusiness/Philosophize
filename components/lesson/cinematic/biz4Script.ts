@@ -49,6 +49,8 @@ export interface Biz4Beat extends BaseBeat {
 
 export const BEATS: Biz4Beat[] = [
   {
+    bed: 'street',
+    sfx: [{ id: 'cashbox', at: 0.48, gain: 0.8 }, { id: 'paper', at: 2.01, gain: 0.8 }],
     act: 'count', board: 0,
     speaker: 'plain',
     text: 'Three hundred pounds today. As I suspected, I’m a business genius.',
@@ -56,6 +58,7 @@ export const BEATS: Biz4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 0.66, gain: 0.8 }],
     act: 'receipts', board: 0,
     speaker: 'cap',
     text: 'Brilliant day! Here are the receipts for the bread, the fuel and the pitch.',
@@ -63,6 +66,7 @@ export const BEATS: Biz4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'knock', at: 3.22, gain: 0.8 }],
     act: 'arrive', sums: true, board: 0,
     speaker: 'tophat',
     text: 'The three hundred pounds is your revenue: all the money that came in. It isn’t what you keep.',
@@ -70,6 +74,7 @@ export const BEATS: Biz4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'paper', at: 2.73, gain: 0.8 }],
     act: 'costs', sums: true, board: 0,
     speaker: 'tophat',
     text: 'Costs are what you paid to make those sales. The bread, the fuel and the pitch came to two hundred and twenty pounds.',
@@ -93,6 +98,7 @@ export const BEATS: Biz4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'chalk', at: 1.74, gain: 0.8 }, { id: 'chalk', at: 4.44, gain: 0.8 }],
     act: 'sum', sums: true, board: 1,
     speaker: 'tophat',
     text: 'Take the costs away from the revenue: three hundred, less two hundred and twenty, leaves eighty pounds. That’s your profit.',
@@ -100,6 +106,7 @@ export const BEATS: Biz4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'cashbox', at: 2.89, gain: 0.8 }],
     act: 'shrink', sums: true, board: 1,
     speaker: 'plain',
     text: 'Eighty pounds. Still a genius, just a slightly smaller one.',

@@ -54,6 +54,7 @@ export interface Psych3Beat extends BaseBeat {
 
 export const BEATS: Psych3Beat[] = [
   {
+    bed: 'museum',
     act: 'admire', cover: 0, mug: 0,
     speaker: 'cap',
     text: 'Would you look at that. A royal cup, fourteen hundred years old, and every chip so delicate.',
@@ -61,6 +62,7 @@ export const BEATS: Psych3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'chair', at: 0.1, gain: 0.8 }],
     act: 'mine', cover: 0, mug: 0,
     speaker: 'plain',
     text: 'Remarkable. That’s my tea mug, left on the plinth ten minutes ago.',
@@ -91,6 +93,7 @@ export const BEATS: Psych3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'paper', at: 0.13, gain: 0.8 }, { id: 'cardflip', at: 0.97, gain: 0.8 }],
     act: 'plain', th: true, cover: 1, mug: 0,
     speaker: 'cap',
     text: 'Well, now it just looks like a mug with a chip in it. Funny, that.',
@@ -128,6 +131,7 @@ export const BEATS: Psych3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'mug', at: 2.18, gain: 0.8 }],
     act: 'leave', th: true, cover: 1, mug: 2,
     speaker: 'cap',
     text: 'A dishwasher-safe treasure, then. I’ll still give it a nice look on my way out.',

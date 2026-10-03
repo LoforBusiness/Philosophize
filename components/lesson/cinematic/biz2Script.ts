@@ -47,6 +47,7 @@ export interface Biz2Beat extends BaseBeat {
 
 export const BEATS: Biz2Beat[] = [
   {
+    bed: 'cafe',
     act: 'display', tray: 0, steam: 0,
     speaker: 'bun',
     text: 'Fresh lavender macarons, all in pastel pink! The builders next door are going to love them.',
@@ -68,6 +69,7 @@ export const BEATS: Biz2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'plate', at: 3.41, gain: 0.8 }],
     act: 'define', th: true, tray: 1, steam: 0,
     speaker: 'tophat',
     text: 'Your customer is the person whose problem you solve. His problem is a cold morning, and a long shift ahead.',
@@ -84,6 +86,7 @@ export const BEATS: Biz2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'oven', at: 1.59, gain: 0.8 }, { id: 'can', at: 4.01, gain: 0.8 }],
     act: 'bake', th: true, tray: 2, steam: 1,
     speaker: 'bun',
     text: 'Sausage rolls, coming right up! Although I’m sure everyone secretly wants a macaron.',
@@ -91,6 +94,7 @@ export const BEATS: Biz2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cup', at: 2.64, gain: 0.8 }, { id: 'pourcup', at: 3.48, gain: 0.8 }],
     act: 'guess', th: true, tray: 2, steam: 1,
     speaker: 'tophat',
     text: 'That’s a guess, and a guess can be checked. Watch what sells, and ask the people buying it.',
@@ -98,6 +102,7 @@ export const BEATS: Biz2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'cup', at: 4.14, gain: 0.8 }],
     act: 'quiet', th: true, tray: 2, steam: 1,
     speaker: 'plain',
     text: 'Since nobody asked, a bigger cup of tea would be nice. Not that anyone ever asks.',
@@ -114,6 +119,7 @@ export const BEATS: Biz2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'paper', at: 4.16, gain: 0.8 }],
     act: 'serve', th: true, tray: 2, steam: 1,
     speaker: 'bun',
     text: 'One sausage roll, and one very large tea. Oh, and I’ve written it all down!',

@@ -47,6 +47,7 @@ export interface Sci3Beat extends BaseBeat {
 
 export const BEATS: Sci3Beat[] = [
   {
+    bed: 'beach',
     act: 'chart', shade: 0, sun: 0,
     speaker: 'bun',
     text: 'Look at the chart! When ice cream sales go up, so does sunburn, so ice cream must burn you!',
@@ -91,6 +92,7 @@ export const BEATS: Sci3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'umbrella', at: 4.91, gain: 0.8 }],
     act: 'change', th: true, shade: 1, sun: 1,
     speaker: 'tophat',
     text: 'To show that one thing causes another, change only that thing. Then watch whether the other one follows.',
@@ -121,6 +123,7 @@ export const BEATS: Sci3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'squeeze', at: 0.37, gain: 0.8 }],
     act: 'cream', th: true, shade: 1, sun: 1,
     speaker: 'bun',
     text: 'Sun cream, then, and an ice cream anyway. Science is delicious!',

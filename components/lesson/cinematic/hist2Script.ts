@@ -48,6 +48,8 @@ export interface Hist2Beat extends BaseBeat {
 
 export const BEATS: Hist2Beat[] = [
   {
+    bed: 'attic',
+    sfx: [{ id: 'book', at: 5.16, gain: 0.8 }],
     act: 'boast', note: 0, news: 0,
     speaker: 'bun',
     text: 'My great-grandad captured a whole castle by himself! It says so, right here in this book.',
@@ -55,6 +57,7 @@ export const BEATS: Hist2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 2.68, gain: 0.8 }],
     act: 'letter', note: 1, news: 0,
     speaker: 'plain',
     text: 'How thrilling. Then why does his own letter say he spent that week peeling potatoes?',
@@ -85,6 +88,7 @@ export const BEATS: Hist2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'knock', at: 0.79, gain: 0.8 }, { id: 'knock', at: 1.63, gain: 0.8 }],
     act: 'printed', th: true, note: 1, news: 0,
     speaker: 'bun',
     text: 'But the book is printed, with pictures and everything. Printed things are true, aren’t they?',
@@ -92,6 +96,7 @@ export const BEATS: Hist2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'book', at: 2.04, gain: 0.8 }],
     act: 'check', th: true, note: 1, news: 0,
     speaker: 'tophat',
     text: 'Printed isn’t the same as checked. When two sources disagree, a historian looks for a third from the time, to see which story it backs.',
@@ -108,6 +113,7 @@ export const BEATS: Hist2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'paper', at: 3.4, gain: 0.8 }],
     act: 'paper', th: true, note: 1, news: 1,
     speaker: 'plain',
     text: 'The local paper from that very week is in the box too. No castles, I’m afraid, but a great many potatoes.',
@@ -115,6 +121,7 @@ export const BEATS: Hist2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'clap', at: 1.7, gain: 0.8 }],
     act: 'hero', th: true, note: 1, news: 1,
     speaker: 'bun',
     text: 'So he fed the whole regiment! That makes me even prouder.',

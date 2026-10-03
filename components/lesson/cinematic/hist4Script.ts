@@ -42,6 +42,8 @@ export interface Hist4Beat extends BaseBeat {
 
 export const BEATS: Hist4Beat[] = [
   {
+    bed: 'square',
+    sfx: [{ id: 'paper', at: 2.93, gain: 0.8 }],
     act: 'photo',
     speaker: 'bun',
     text: 'I found a photo of this square from a hundred years ago. Everything’s different!',
@@ -100,6 +102,7 @@ export const BEATS: Hist4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 1.34, gain: 0.8 }],
     act: 'pace', hist: true,
     speaker: 'tophat',
     text: 'Of course you do. Some change is quick, some is slow, and some things barely change at all.',
@@ -116,6 +119,7 @@ export const BEATS: Hist4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'bell', at: 0.28 }],
     act: 'rest', hist: true,
     quote: {
       id: 'lq-history-foundations-4-1',

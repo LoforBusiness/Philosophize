@@ -47,6 +47,7 @@ export interface Hist3Beat extends BaseBeat {
 
 export const BEATS: Hist3Beat[] = [
   {
+    bed: 'river',
     act: 'stuck', plank: 0, cart: 0,
     speaker: 'cap',
     text: 'I only drove over it, honest. Same as every market day for twenty years!',
@@ -68,6 +69,7 @@ export const BEATS: Hist3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'crack', at: 0.53, gain: 0.8 }, { id: 'plank', at: 5.28, gain: 0.8 }],
     act: 'rot', th: true, plank: 1, cart: 0,
     speaker: 'tophat',
     text: 'This plank has been rotting for years. That’s a long-term cause, building up before anyone noticed.',
@@ -84,6 +86,7 @@ export const BEATS: Hist3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'thud', at: 2.48, gain: 0.8 }],
     act: 'relief', th: true, plank: 1, cart: 1,
     speaker: 'cap',
     text: 'So it wasn’t my cart at all, then? Oh, that’s a relief.',
@@ -98,6 +101,7 @@ export const BEATS: Hist3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'knock', at: 1.76, gain: 0.8 }, { id: 'knock', at: 2.25, gain: 0.8 }],
     act: 'year', th: true, plank: 1, cart: 1,
     speaker: 'plain',
     text: 'And without the cart, it would have rotted for another year. Lovely.',
@@ -121,6 +125,7 @@ export const BEATS: Hist3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'plank', at: 4.75, gain: 0.8 }],
     act: 'mend', th: true, plank: 2, cart: 1,
     speaker: 'cap',
     text: 'Then I’ll mend the plank myself, and go round by the ford until it’s done.',

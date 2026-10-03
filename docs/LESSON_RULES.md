@@ -12008,6 +12008,43 @@ good quality.**
 - **The setting decides.** Sound follows the Sound setting (`soundEffects`), and is
   silent on the web, as the voice is.
 
+### AT8 · Every lesson is heard, and a sound lands with its action
+
+> *"I want sound effects in all of the lessons … adding correct sound effects to different
+> interactions, different things in lessons that would sound good with sound effects. Make
+> sure everything is lined up with when the sound comes on. When the action happens."*
+> (2026-10-03)
+
+- **Every lesson has its place and its actions.** A `bed` for where it is (a café, a
+  station, a rainy street, a beach) and a cue for each thing on the stage that would make
+  a sound: chalk on a board, a cup on its saucer, a coin in a tin, a ball landing, a bell.
+  `check:sfx` fails a lesson with no sound at all.
+- **A cue is timed on the BEAT CLOCK**, the clock the scene draws its action on: `at` is
+  seconds into the beat, worked out from the scene's own staging (`stage(bt, L, a, b)` at
+  fraction `b` of `LINES[n]` for a thing set down, the start of the stage for a thing
+  that runs, like writing). The player fires it off `bt` itself, as footfalls once were, so
+  a dropped frame delays the sound with the picture. A cue later than its beat's action
+  (the line re-voiced, `LINES` changed) fails `check:sfx`. Re-time the cues when a lesson's
+  `LINES` move.
+- **The clip's hit is its first moment.** A foley cut is made with `onset`, which starts
+  it 10ms before the recording's first sound within 24dB of its loudest, so the sound
+  lands on the frame the hand does.
+- **Under a voice, only FOLEY** — the small sound of what a hand is doing (`foley: true`
+  in `sfxcuts.mjs`): levelled to −27 LUFS or quieter (the voices are about −18), played at
+  0.85 or less, heard for 3.5s at most. Most actions happen while someone is talking, and
+  the owner's first condition (*"never heard over a voice"*) is kept for everything that
+  could cover a word: a crowd, a cheer, a bell, a train is still a `lead`, a `tail`, or on
+  a beat with no line. Footsteps on an ordinary walk and hat tips stay silent (the
+  footfalls were removed by name on 2026-09-11).
+- **An answer is heard.** A right answer tapped on the stage is stamped as Target's seal
+  lands (290ms); a wrong one knocks softly as it starts to sink (60ms). `PICK_SFX` in the
+  player; `check:sfx` holds that both are clips.
+- **A beat change hushes the last beat at once** (a layout effect on the beat), not on the
+  text swap after it, or a cue early in the new beat would be faded out by its own
+  arrival.
+- **A sound is not a stage change.** `muststamp` leaves `sfx` and `bed` out of a script's
+  stamp unless the scene reads its own cue times (`.sfx`, as hist5 does).
+
 ### AT7 · A big set is baked: its still scenery is one picture
 
 > *"it is extremely laggy. The camera movement, the movement of different things … it needs

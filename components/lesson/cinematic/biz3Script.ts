@@ -46,6 +46,8 @@ export interface Biz3Beat extends BaseBeat {
 
 export const BEATS: Biz3Beat[] = [
   {
+    bed: 'market',
+    sfx: [{ id: 'jar', at: 0.84, gain: 0.8 }, { id: 'chalk', at: 1.92, gain: 0.8 }],
     act: 'cheap', price: 1, held: 0,
     speaker: 'cap',
     text: 'Fifty pence a candle! I’d hate for anyone to go without.',
@@ -67,6 +69,7 @@ export const BEATS: Biz3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'jar', at: 5.3, gain: 0.8 }],
     act: 'cost', th: true, price: 1, held: 1,
     speaker: 'tophat',
     text: 'The wax and the jar alone cost two pounds. At fifty pence, every candle he sells makes him poorer.',
@@ -97,6 +100,7 @@ export const BEATS: Biz3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'whoosh', at: 0.79, gain: 0.8 }],
     act: 'ribbon', th: true, price: 1, held: 1,
     speaker: 'bun',
     text: 'Oh, and six pounds if it comes with a ribbon!',
@@ -120,6 +124,7 @@ export const BEATS: Biz3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'whoosh', at: 1.5, gain: 0.8 }, { id: 'chalk', at: 2.29, gain: 0.8 }],
     act: 'tag', th: true, price: 2, held: 2,
     speaker: 'cap',
     text: 'Four pounds, then. And the ribbon’s on the house, for my first customer.',

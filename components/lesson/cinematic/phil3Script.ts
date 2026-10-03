@@ -51,6 +51,8 @@ export interface Phil3Beat extends BaseBeat {
 
 export const BEATS: Phil3Beat[] = [
   {
+    bed: 'room',
+    sfx: [{ id: 'book', at: 0.32, gain: 0.8 }, { id: 'stamp', at: 0.96, gain: 0.8 }],
     act: 'find', note: 1, poster: 0,
     speaker: 'bun',
     text: 'Look what fell out of my library book! Twenty pounds, and no name on it anywhere.',
@@ -58,6 +60,7 @@ export const BEATS: Phil3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 1.92, gain: 0.8 }, { id: 'pin', at: 3.32, gain: 0.8 }],
     act: 'worry', note: 1, poster: 1,
     speaker: 'cap',
     text: 'Oh, the poor soul who lost that. I’ll pin a notice up, just in case.',
@@ -102,6 +105,7 @@ export const BEATS: Phil3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'stamp', at: 3.02, gain: 0.8 }],
     act: 'sign', th: true, note: 1, poster: 1,
     speaker: 'cap',
     text: 'The rule’s on the wall, love. Anything found comes straight to the front desk.',
@@ -125,6 +129,7 @@ export const BEATS: Phil3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'paper', at: 2.21, gain: 0.8 }],
     act: 'hand', th: true, note: 2, poster: 1,
     speaker: 'bun',
     text: 'Fine, the note goes in the box. Goodbye, twenty pounds, you were lovely!',

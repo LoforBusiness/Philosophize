@@ -44,6 +44,7 @@ export interface Sci1Beat extends BaseBeat {
 
 export const BEATS: Sci1Beat[] = [
   {
+    bed: 'garden',
     act: 'claim',
     speaker: 'plain',
     text: 'The heavy ball lands first, of course. Everybody knows that.',
@@ -51,6 +52,7 @@ export const BEATS: Sci1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'creak', at: 1.4, gain: 0.8 }],
     act: 'climb',
     speaker: 'cap',
     text: 'Could be, mate. I’m up the ladder anyway, so I’ll drop them both and we’ll see.',
@@ -74,6 +76,7 @@ export const BEATS: Sci1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'thud', at: 0.9, gain: 0.8 }, { id: 'bounce', at: 1.24, gain: 0.8 }],
     act: 'drop', th: true, fell: true,
     speaker: 'cap',
     text: 'There you go, both at once. Sorry, mate.',
@@ -111,6 +114,7 @@ export const BEATS: Sci1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'creak', at: 6.14, gain: 0.8 }, { id: 'creak', at: 7.81, gain: 0.8 }],
     act: 'build', th: true, fell: true,
     speaker: 'tophat',
     text: 'Ideas that pass their tests get built on. That’s technology: tested knowledge put to work, like the ladder he’s standing on.',

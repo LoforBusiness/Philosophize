@@ -49,6 +49,8 @@ export interface Phil2Beat extends BaseBeat {
 
 export const BEATS: Phil2Beat[] = [
   {
+    bed: 'cafe',
+    sfx: [{ id: 'stir', at: 0.36, gain: 0.8 }, { id: 'cup', at: 4.41, gain: 0.8 }],
     act: 'order', board: 0, cake: 1,
     speaker: 'bun',
     text: 'One slice of carrot cake, please! Carrots are good for you, so carrot cake counts as healthy.',
@@ -70,6 +72,7 @@ export const BEATS: Phil2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'chalk', at: 2.4, gain: 0.8 }, { id: 'chalk', at: 3.98, gain: 0.8 }],
     act: 'chalk', th: true, board: 1, cake: 1,
     speaker: 'tophat',
     text: 'The customer’s argument goes up on the board. Carrots are healthy, and this cake has carrots, so this cake is healthy.',
@@ -86,6 +89,7 @@ export const BEATS: Phil2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chalktap', at: 2.02, gain: 0.8 }, { id: 'chalk', at: 3.29, gain: 0.8 }],
     act: 'follow', th: true, board: 1, cake: 1,
     speaker: 'tophat',
     text: 'A good argument needs two things. True reasons, and a conclusion that follows from them.',
@@ -93,6 +97,7 @@ export const BEATS: Phil2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'cup', at: 0.53, gain: 0.8 }],
     act: 'jab', th: true, board: 1, cake: 0.5,
     speaker: 'plain',
     text: 'Well, she would say that. She has cake for breakfast.',
@@ -116,6 +121,7 @@ export const BEATS: Phil2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'cup', at: 3.07, gain: 0.8 }],
     act: 'concede', th: true, board: 2, cake: 0,
     speaker: 'bun',
     text: 'Oh! So my reasons were fine, and my conclusion wasn’t. I’m still finishing the cake.',
@@ -123,6 +129,7 @@ export const BEATS: Phil2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cup', at: 3.16, gain: 0.8 }],
     act: 'rest', th: true, board: 2, cake: 0,
     quote: {
       id: 'lq-philosophy-foundations-2-1',

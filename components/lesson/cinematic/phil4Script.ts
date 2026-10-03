@@ -42,6 +42,8 @@ export interface Phil4Beat extends BaseBeat {
 
 export const BEATS: Phil4Beat[] = [
   {
+    bed: 'station',
+    sfx: [{ id: 'paper', at: 3.57, gain: 0.8 }],
     act: 'glance', read: 0,
     speaker: 'plain',
     text: 'Quarter past nine, and my train is at half past. I always know these things.',
@@ -79,6 +81,7 @@ export const BEATS: Phil4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'coinflip', at: 1, gain: 0.8 }],
     act: 'luck', read: 0,
     speaker: 'tophat',
     text: 'A lucky guess can be true. Luck isn’t a reason, though, so a lucky guess isn’t knowledge.',
@@ -100,6 +103,7 @@ export const BEATS: Phil4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'paper', at: 2.05, gain: 0.8 }],
     act: 'board', read: 1,
     speaker: 'plain',
     text: 'Half past nine, on time. Now I know it, and I’d like that written down somewhere.',
@@ -116,6 +120,7 @@ export const BEATS: Phil4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'train', at: 0.32 }],
     act: 'rest', read: 1,
     quote: {
       id: 'lq-philosophy-foundations-4-1',

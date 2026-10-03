@@ -50,6 +50,8 @@ export interface Growth3Beat extends BaseBeat {
 
 export const BEATS: Growth3Beat[] = [
   {
+    bed: 'park',
+    sfx: [{ id: 'pin', at: 0.92, gain: 0.8 }],
     act: 'wish', card: 1, diary: 0,
     speaker: 'bun',
     text: 'This year, I’m getting fit! I’ll start properly once the weather’s warmer.',
@@ -57,6 +59,7 @@ export const BEATS: Growth3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 0.14, gain: 0.8 }],
     act: 'again', card: 1, diary: 0,
     speaker: 'plain',
     text: 'Same goal as last year, I believe. And the year before that.',
@@ -94,6 +97,7 @@ export const BEATS: Growth3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'pin', at: 1.79, gain: 0.8 }],
     act: 'step', th: true, card: 2, diary: 0,
     speaker: 'tophat',
     text: 'Good. Make the first step small enough to start today, then make it a little bigger each week.',
@@ -101,6 +105,7 @@ export const BEATS: Growth3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'paper', at: 0.14, gain: 0.8 }],
     act: 'when', th: true, card: 2, diary: 0,
     speaker: 'plain',
     text: 'And when is this lap happening, then? I only ask.',
@@ -124,6 +129,7 @@ export const BEATS: Growth3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'pencil', at: 1.02, gain: 0.8 }, { id: 'stopwatch', at: 3.18, gain: 0.8 }],
     act: 'plan', th: true, card: 2, diary: 1,
     speaker: 'bun',
     text: 'Tuesday, half past seven, one lap. Oh, I’ll even bring the proper trainers!',

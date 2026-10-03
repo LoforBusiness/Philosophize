@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions, type LayoutChangeEvent, type GestureResponderEvent, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -166,6 +166,16 @@ export type SceneComponent = ComponentType<SceneApi>;
 const BED_GAIN = 0.55;
 /** How long after a line's last word a `tail` sound comes in (AT6). */
 const TAIL_AFTER_S = 0.3;
+/**
+ * AN ANSWER TAPPED ON THE STAGE IS HEARD (AT6), timed to Target's own reaction: a right
+ * one is stamped — the seal drops in 180ms after the tap and reaches the paper at 290ms,
+ * which is when the stamp is heard — and a wrong one is a soft knock as it starts to
+ * sink (60ms). Seconds after the tap.
+ */
+const PICK_SFX = {
+  right: { id: 'seal', at: 0.29, gain: 0.8 },
+  wrong: { id: 'knock', at: 0.06, gain: 0.7 },
+} as const satisfies Record<string, { id: SfxId; at: number; gain: number }>;
 
 /**
  * Something laid out from the first frame and shown only once the lesson begins (AP19,
@@ -412,16 +422,18 @@ export default function CinematicPlayer({
   }, [narrated, narrationOn, shown, done, guideOpen, lesson.id, beats]);
 
   // ── SOUND EFFECTS AND THE BED (LESSON_RULES AT6) ─────────────────────────────
-  // Only a lesson whose script declares one has any of this. A cue never plays over a
-  // voice: `lead` is at the beat's start, before a line that waits for it; `tail` once
-  // the line has been said; a number is seconds into a beat with no line. The bed is a
-  // loop under everything, held down while a line is said. It follows `shown`, like the
-  // voice it must not cover.
+  // Only a lesson whose script declares one has any of this. `lead` is at the beat's
+  // start, before a line that waits for it; `tail` once the line has been said; a number
+  // is seconds on the BEAT clock, when the action it belongs to happens on the stage —
+  // under a line only if it is quiet foley, never a crowd (check:sfx). The bed is a loop
+  // under everything, held down while a line is said, and follows `shown`, like the
+  // voice. An answer tapped on the stage is heard too: the seal strikes on a right one,
+  // a finger taps a wrong one (PICK_SFX).
   const usesSfx = useMemo(() => beats.some((b) => !!b.sfx || b.bed !== undefined), [beats]);
   const sfxOn = useUserDataStore((s) => s.settings.soundEffects !== false) && sounded && sfx.isSupported();
   useEffect(() => {
     if (!usesSfx) return;
-    const ids = new Set<SfxId>();
+    const ids = new Set<SfxId>([PICK_SFX.right.id, PICK_SFX.wrong.id]);
     for (const b of beats) {
       for (const c of b.sfx ?? []) ids.add(c.id);
       if (b.bed) ids.add(b.bed);
@@ -429,6 +441,25 @@ export default function CinematicPlayer({
     sfx.prepare([...ids]);
     return () => sfx.release();
   }, [usesSfx, beats]);
+  // The timed cues of every beat, in order — what the beat clock fires (see `cueAt`).
+  const timedCues = useMemo(
+    () => beats.map((b) => (b.sfx ?? []).filter((c) => typeof c.at === 'number').sort((a, b2) => (a.at as number) - (b2.at as number))),
+    [beats],
+  );
+  const sfxLive = useRef({ on: false, beat: 0 });
+  sfxLive.current = { on: usesSfx && sfxOn && !done, beat: i };
+  const soundCue = useCallback((beat: number, k: number) => {
+    const live = sfxLive.current;
+    if (!live.on || beat !== live.beat) return;
+    const c = timedCues[beat]?.[k];
+    if (c) sfx.play(c.id, c.gain ?? 1);
+  }, [timedCues]);
+  // A NEW BEAT SILENCES THE LAST ONE'S EFFECTS AT ONCE — on the beat, not on the text
+  // swap that follows it, because the beat clock starts here and so do its cues: hushed
+  // any later, a cue early in the new beat would be faded out by its own beat's arrival.
+  useLayoutEffect(() => {
+    if (usesSfx) sfx.hush();
+  }, [i, usesSfx]);
 
   const clock = useSharedValue(0);
   // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
@@ -523,6 +554,11 @@ export default function CinematicPlayer({
   const swishAt = useSharedValue<number[]>([]);
   const swishKind = useSharedValue<number[]>([]);
   const swished = useSharedValue(0);
+  // A beat's timed sounds (AT6): their times on the BEAT clock, in order, and how many
+  // have sounded. They fire off `bt` for the reason footfalls did: the picture they
+  // belong to is drawn off `bt`, so a dropped frame delays the sound with the action.
+  const cueAt = useSharedValue<number[]>([]);
+  const cued = useSharedValue(0);
   // Progress fills SMOOTHLY toward the next mark rather than jumping on each tap.
   const progress = useSharedValue((i + 1) / beats.length);
   const fillStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.value }] }));
@@ -905,6 +941,8 @@ export default function CinematicPlayer({
     swishAt.value = g.map((x) => x.at);
     swishKind.value = g.map((x) => x.kind);
     swished.value = 0;
+    cueAt.value = (timedCues[i] ?? []).map((c) => c.at as number);
+    cued.value = 0;
     // AN ANSWERED BEAT RETURNS WITH ITS CONTROL WHERE THE READER LEFT IT — in the
     // same statement that rewinds the clock, so the control and the scene that reads
     // it (R7c) never draw one frame at the question's starting position first.
@@ -982,6 +1020,19 @@ export default function CinematicPlayer({
           const kind = swishKind.value[j - 1] ?? 0;
           swished.value = j;
           runOnJS(gestured)(kind);
+        }
+      }
+      // …and a beat's timed sound effects (AT6), each when the action it belongs to
+      // happens. The beat travels with the cue, so one that fires as the reader taps on
+      // can tell it is late and stay quiet.
+      const ca = cueAt.value;
+      let c = cued.value;
+      if (c < ca.length) {
+        const from = c;
+        while (c < ca.length && t >= ca[c]) c += 1;
+        if (c !== from) {
+          cued.value = c;
+          for (let q = from; q < c; q += 1) runOnJS(soundCue)(bi.value, q);
         }
       }
     },
@@ -1070,9 +1121,9 @@ export default function CinematicPlayer({
   // The cues and the bed for the beat on screen (see the note at `usesSfx`).
   useEffect(() => {
     if (!usesSfx) return;
-    // whatever the last beat was still sounding goes quiet before this one's line (AT6)
-    sfx.hush();
-    if (!sfxOn || done) { sfx.bed(null); return; }
+    // whatever the last beat was still sounding went quiet when the beat changed (the
+    // layout effect at `usesSfx`), before this one's line; turned off, everything stops
+    if (!sfxOn || done) { sfx.hush(); sfx.bed(null); return; }
     let bedNow: SfxId | null = null;
     for (let k = shown; k >= 0; k -= 1) {
       const b = beats[k];
@@ -1085,8 +1136,10 @@ export default function CinematicPlayer({
     const said = narrationOn && line && b.text === line.text ? line.dur : 0;
     const wait = b.voiceAfter ?? 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
+    // a timed cue fires off the beat clock instead (`cueAt`), with the action it belongs to
     for (const c of b.sfx ?? []) {
-      const at = c.at === 'lead' ? 0 : c.at === 'tail' ? wait + said + TAIL_AFTER_S : c.at;
+      if (typeof c.at === 'number') continue;
+      const at = c.at === 'lead' ? 0 : wait + said + TAIL_AFTER_S;
       timers.push(setTimeout(() => sfx.play(c.id, c.gain ?? 1), at * 1000));
     }
     // the bed comes down for the line and back up after it
@@ -1173,6 +1226,12 @@ export default function CinematicPlayer({
     setPickedOk(isCorrect);
     kept.current[i] = { id, ok: isCorrect, pos: dragPos.value, pos2: dragPos2.value, sem: pickPos.value };
     answeredHere.current = i;
+    // …and the answer is heard, in time with Target's reaction to it (PICK_SFX).
+    if (sfxLive.current.on) {
+      const p = isCorrect ? PICK_SFX.right : PICK_SFX.wrong;
+      const at = i;
+      setTimeout(() => { if (sfxLive.current.on && sfxLive.current.beat === at) sfx.play(p.id, p.gain); }, p.at * 1000);
+    }
     if (graded) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);

@@ -41,6 +41,8 @@ export interface Sci4Beat extends BaseBeat {
 
 export const BEATS: Sci4Beat[] = [
   {
+    bed: 'park',
+    sfx: [{ id: 'stopwatch', at: 0.3, gain: 0.8 }, { id: 'pencil', at: 1.65, gain: 0.8 }],
     act: 'time', rows: 1,
     speaker: 'bun',
     text: 'One swing took three seconds. That’s the experiment done, then!',
@@ -55,6 +57,7 @@ export const BEATS: Sci4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'stopwatch', at: 0.25, gain: 0.8 }, { id: 'pencil', at: 1.35, gain: 0.8 }],
     act: 'again', rows: 3,
     speaker: 'bun',
     text: 'Two point eight, and now three point one. The swing keeps changing its mind!',
@@ -85,6 +88,7 @@ export const BEATS: Sci4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'pencil', at: 1.1, gain: 0.8 }],
     act: 'odd', rows: 4,
     speaker: 'bun',
     text: 'I got two seconds once, while a dog ran past. Shall I just rub that one out?',
@@ -92,6 +96,7 @@ export const BEATS: Sci4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'swing', at: 2.68, gain: 0.8 }, { id: 'stopwatch', at: 3.88, gain: 0.8 }],
     act: 'check', rows: 4,
     speaker: 'tophat',
     text: 'Don’t hide it. A result far from the others means something went wrong, so find out what and measure again.',
@@ -108,6 +113,7 @@ export const BEATS: Sci4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'pencil', at: 1.2, gain: 0.8 }],
     act: 'done', rows: 4,
     speaker: 'bun',
     text: 'The average of my three good ones is about three seconds. So I was right all along!',

@@ -149,7 +149,17 @@ const PROSE_KEYS = ['text', 'cite', 'explain', 'prompt', 'reads', 'author', 'wor
   'markup'];
 
 function proselessScript(file) {
-  const src = fs.readFileSync(file, 'utf8');
+  let src = fs.readFileSync(file, 'utf8');
+  // A beat's SOUND (AT6) — its `sfx` cues and its `bed` — is heard, never drawn, so it
+  // cannot move a box, unless the scene reads its cue times to pace a picture (hist5
+  // does). Each cue list is one line; a bed is a key on the beat's first line.
+  const scene = file.replace(/Script\.ts$/, 'Scene.tsx');
+  const sceneReadsSound = fs.existsSync(scene) && /\.sfx\b/.test(fs.readFileSync(scene, 'utf8'));
+  if (!sceneReadsSound) {
+    src = src
+      .replace(/\n[ \t]*sfx\s*:\s*\[[^\n]*\],?[ \t]*(?=\n)/g, '')
+      .replace(/\bbed\s*:\s*(?:'[a-z0-9-]+'|null)\s*,\s*/g, '');
+  }
   const re = new RegExp(
     `\\b(${PROSE_KEYS.join('|')})(\\s*:\\s*)(['"\`])((?:\\\\.|(?!\\3)[^\\\\])*)\\3`,
     'g',

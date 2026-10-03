@@ -57,6 +57,8 @@ export interface Psych2Beat extends BaseBeat {
 
 export const BEATS: Psych2Beat[] = [
   {
+    bed: 'supermarket',
+    sfx: [{ id: 'trolley', at: 0.96, gain: 0.8 }],
     act: 'bump', spill: 0, sign: 0, screen: 0,
     speaker: 'bun',
     text: 'Oh, hello! I think our trolleys just met.',
@@ -64,6 +66,7 @@ export const BEATS: Psych2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'jarbreak', at: 3.61, gain: 0.8 }],
     act: 'jam', spill: 1, sign: 0, screen: 0,
     speaker: 'cap',
     text: 'Sorry, that was my fault. I was barely moving, but there goes your jam.',
@@ -78,6 +81,7 @@ export const BEATS: Psych2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'jarlid', at: 1.05, gain: 0.8 }],
     act: 'arrive', th: true, spill: 1, sign: 0, screen: 0,
     speaker: 'tophat',
     text: 'You both saw the same bump, and you remember it differently. Neither of you is lying.',
@@ -85,6 +89,7 @@ export const BEATS: Psych2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'jar', at: 7.34, gain: 0.8 }],
     act: 'rebuild', th: true, spill: 1, sign: 0, screen: 0,
     speaker: 'tophat',
     text: 'A memory isn’t a recording. Each time you remember something, your brain builds it again, and fills the gaps with whatever seems to fit.',
@@ -101,6 +106,7 @@ export const BEATS: Psych2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'cardflip', at: 3.55, gain: 0.8 }],
     act: 'word', th: true, spill: 1, sign: 2, screen: 0,
     speaker: 'tophat',
     text: 'The words of a question can change the memory itself. So a careful interviewer asks what happened, and lets the person tell it.',
@@ -115,6 +121,7 @@ export const BEATS: Psych2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'paper', at: 4.81, gain: 0.8 }],
     act: 'confident', th: true, spill: 1, sign: 2, screen: 0,
     speaker: 'tophat',
     text: 'Feeling sure isn’t the same as being right. A story can feel more certain each time it’s told, even as the details drift.',

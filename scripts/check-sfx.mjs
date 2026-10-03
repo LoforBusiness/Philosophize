@@ -26,6 +26,10 @@ import { pathToFileURL } from 'node:url';
 import { SOURCES, CUTS } from './lib/sfxcuts.mjs';
 
 const ROOT = process.cwd();
+/** Foley (a cut marked `foley`) may sound under a line: this quiet, this short, this soft. */
+const FOLEY_LOUD = -27;
+const FOLEY_MAX_S = 3.5;
+const FOLEY_GAIN = 0.85;
 const errs = [];
 const fail = (s) => errs.push(s);
 
@@ -63,12 +67,33 @@ const DIR = path.join(ROOT, 'components', 'lesson', 'cinematic');
 const LESSONS = (await import('./lib/narration.mjs')).LESSONS;
 let cues = 0;
 let lessons = 0;
+const cutOf = new Map(CUTS.map((c) => [c.id, c]));
+for (const c of CUTS) {
+  if (c.foley && c.bed) fail(`cut ${c.id} cannot be both foley and a bed`);
+  if (c.foley && c.loud > FOLEY_LOUD) fail(`cut ${c.id} is foley and set to ${c.loud} LUFS; foley is ${FOLEY_LOUD} or quieter`);
+}
+// the answer sounds the player plays on a stage tap (PICK_SFX in CinematicPlayer)
+const player = fs.readFileSync(path.join(DIR, 'CinematicPlayer.tsx'), 'utf8');
+for (const m of player.matchAll(/(right|wrong): \{ id: '(\w+)', at: ([\d.]+)/g)) {
+  if (!table.has(m[2])) fail(`PICK_SFX.${m[1]} plays "${m[2]}", which is not a clip`);
+}
 for (const [id, file] of Object.entries(LESSONS)) {
   const src = fs.readFileSync(path.join(DIR, file), 'utf8');
-  if (!/\bsfx:|\bbed:/.test(src)) continue;
+  // EVERY LESSON IS HEARD (2026-10-03): "I want sound effects in all of the lessons."
+  if (!/\bsfx:|\bbed:/.test(src)) { fail(`${id} has no sound: give its place a bed and its actions their cues`); continue; }
   lessons += 1;
+  // the scene's own line lengths, which its actions are timed against: a cue past the
+  // end of its beat's action is one left behind when the line was re-voiced
+  const sceneFile = path.join(DIR, file.replace(/Script\.ts$/, 'Scene.tsx'));
+  const lm = fs.existsSync(sceneFile) ? fs.readFileSync(sceneFile, 'utf8').match(/\nconst LINES = \[([^\]]*)\]/) : null;
+  const LINES = lm ? lm[1].split(',').map(Number) : [];
   const { BEATS } = await import(pathToFileURL(path.join(DIR, file)).href);
   BEATS.forEach((b, i) => {
+    for (const c of b.sfx ?? []) {
+      if (typeof c.at !== 'number') continue;
+      const span = (LINES[i] ?? 0) > 0 ? LINES[i] + 1.5 : 4;
+      if (c.at < 0 || c.at > span) fail(`${id} beat ${i}: "${c.id}" at ${c.at}s is outside its beat (the scene's line there runs ${LINES[i] ?? 0}s)`);
+    }
     const said = b.text && b.speaker ? durOf(id, i) : 0;
     const wait = b.voiceAfter ?? 0;
     if (b.bed !== undefined && b.bed !== null) {
@@ -86,8 +111,14 @@ for (const [id, file] of Object.entries(LESSONS)) {
       if (t.bed) { fail(`${id} beat ${i}: "${c.id}" is a loop; a loop is a bed, never a cue`); continue; }
       if (!said) continue;
       if (c.at === 'lead' && t.audible > wait) fail(`${id} beat ${i}: "${c.id}" is heard for ${t.audible}s and the line comes in at ${wait}s — raise voiceAfter`);
+      // UNDER A LINE, ONLY FOLEY: the small real sound of what a hand or a foot is doing at
+      // that instant, cut quiet (FOLEY_LOUD) and short, and played no louder than
+      // FOLEY_GAIN. A crowd, a cheer, a bell is never under a voice.
       if (typeof c.at === 'number' && c.at < wait + said && c.at + t.audible > wait) {
-        fail(`${id} beat ${i}: "${c.id}" at ${c.at}s is heard over the line (${wait}–${(wait + said).toFixed(2)}s)`);
+        const cut = cutOf.get(c.id);
+        if (!cut?.foley) fail(`${id} beat ${i}: "${c.id}" at ${c.at}s is heard over the line (${wait}–${(wait + said).toFixed(2)}s), and only foley may sound under a voice`);
+        else if ((c.gain ?? 1) > FOLEY_GAIN) fail(`${id} beat ${i}: "${c.id}" is under the line at gain ${c.gain ?? 1}; foley under a voice plays at ${FOLEY_GAIN} or less`);
+        else if (t.audible > FOLEY_MAX_S) fail(`${id} beat ${i}: "${c.id}" is heard for ${t.audible}s under the line; foley under a voice is at most ${FOLEY_MAX_S}s`);
       }
       if (c.gain !== undefined && !(c.gain > 0 && c.gain <= 1)) fail(`${id} beat ${i}: "${c.id}" has gain ${c.gain}; a gain is 0–1`);
     }
@@ -99,4 +130,4 @@ if (errs.length) {
   for (const e of errs) console.log('  ' + e);
   process.exit(1);
 }
-console.log(`check:sfx — ${CUTS.length} clips from ${Object.keys(SOURCES).length} CC0 sources; ${cues} cues in ${lessons} lesson(s), none over a voice`);
+console.log(`check:sfx — ${CUTS.length} clips from ${Object.keys(SOURCES).length} CC0 sources; ${cues} cues in ${lessons} lesson(s); only quiet foley under a voice`);

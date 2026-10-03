@@ -44,6 +44,7 @@ export interface Econ1Beat extends BaseBeat {
 
 export const BEATS: Econ1Beat[] = [
   {
+    bed: 'market',
     act: 'enter', sale: 0, board: 0,
     speaker: 'plain',
     text: 'One ten-pound note. And I want everything on this table.',
@@ -51,6 +52,7 @@ export const BEATS: Econ1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'plate', at: 1.86, gain: 0.8 }],
     act: 'offer', sale: 0, board: 0,
     speaker: 'cap',
     text: 'Everyone does, mate. The pie is six pounds, and the book is eight.',
@@ -72,6 +74,7 @@ export const BEATS: Econ1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'paper', at: 2.37, gain: 0.8 }, { id: 'coin', at: 4.37, gain: 0.8 }],
     act: 'buy', th: true, sale: 1, board: 0,
     speaker: 'plain',
     text: 'Then I’ll take the book.',
@@ -88,6 +91,7 @@ export const BEATS: Econ1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'coin', at: 0.75, gain: 0.8 }, { id: 'coin', at: 2.95, gain: 0.8 }],
     act: 'settle', th: true, sale: 2, board: 0,
     speaker: 'tophat',
     text: 'Every choice has an opportunity cost. Spend an hour at this market, and you can’t spend that hour anywhere else.',
@@ -111,6 +115,7 @@ export const BEATS: Econ1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chalk', at: 0.02, gain: 0.8 }],
     act: 'rest', th: true, sale: 2, board: 2,
     quote: {
       id: 'lq-economics-foundations-1-1',

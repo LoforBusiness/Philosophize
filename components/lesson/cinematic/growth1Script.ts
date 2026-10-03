@@ -48,6 +48,8 @@ export interface Growth1Beat extends BaseBeat {
 
 export const BEATS: Growth1Beat[] = [
   {
+    bed: 'garden',
+    sfx: [{ id: 'mug', at: 2.56, gain: 0.8 }],
     act: 'plant',
     speaker: 'bun',
     text: 'New me! I’m growing the tallest sunflower on the street, starting today.',
@@ -62,6 +64,7 @@ export const BEATS: Growth1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'water', at: 2.78, gain: 0.8 }, { id: 'can', at: 6.08, gain: 0.8 }],
     act: 'flood',
     speaker: 'bun',
     text: 'No need to water it often. Here’s a whole month of water, all in one go!',
@@ -69,6 +72,7 @@ export const BEATS: Growth1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'pourcup', at: 1.42, gain: 0.8 }],
     act: 'cupful',
     speaker: 'plain',
     text: 'No, no, it’s fine, mine only gets a cupful each morning. I’m sure yours knows best.',
@@ -99,6 +103,7 @@ export const BEATS: Growth1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'shed', at: 2.19, gain: 0.8 }],
     act: 'forget', th: true, month: true,
     speaker: 'bun',
     text: 'But I always forget! The watering can lives in the shed, behind the bikes.',
@@ -106,6 +111,7 @@ export const BEATS: Growth1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'can', at: 0.48, gain: 0.8 }],
     act: 'easy', th: true, month: true,
     speaker: 'tophat',
     text: 'Then don’t try harder, make it easier. Put the can where you can’t miss it.',
@@ -122,6 +128,7 @@ export const BEATS: Growth1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'water', at: 0.86, gain: 0.8 }, { id: 'can', at: 3.62, gain: 0.8 }],
     act: 'daily', th: true, month: true, door: true,
     speaker: 'plain',
     text: 'A cupful a day. It’s almost as if the boring way works.',

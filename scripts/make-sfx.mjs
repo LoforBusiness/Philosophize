@@ -29,11 +29,28 @@ const run = (args) => {
   if (r.status !== 0) throw new Error(r.stderr);
 };
 
+/** Loudness every twentieth (or hundredth) of a second over a stretch of a file, in dB. */
+function levels(file, from, len, win = 0.05) {
+  const n = Math.round(44100 * win);
+  const r = spawnSync(FF, ['-hide_banner', ...(from !== undefined ? ['-ss', String(from), '-t', String(len)] : []), '-i', file, '-af',
+    `aresample=44100,asetnsamples=n=${n},astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.Overall.RMS_level`, '-f', 'null', '-'], { encoding: 'utf8' });
+  return [...(r.stderr || '').matchAll(/RMS_level=(-?[\d.]+|-inf)/g)].map((m) => (m[1] === '-inf' ? -200 : Number(m[1])));
+}
+
 for (const c of CUTS) {
   const s = SOURCES[c.src];
   const src = path.join(SRC_DIR, `${s.id}.mp3`);
   if (!fs.existsSync(src)) throw new Error(`missing source ${src}`);
   const out = path.join(OUT_DIR, `${c.id}.mp3`);
+  // THE HIT AT THE START (foley): a cue is timed to the instant the hand lands, so the
+  // clip must make its sound at its own first moment, not after the recording's lead-in.
+  // The cut starts 10ms before the first hundredth of a second within 24dB of its loudest.
+  if (c.onset) {
+    const lv = levels(src, c.from, c.len, 0.01);
+    const top = Math.max(...lv);
+    const k = lv.findIndex((v) => v >= top - 24);
+    c.from = Math.max(0, Math.round((c.from + Math.max(0, k * 0.01 - 0.01)) * 1000) / 1000);
+  }
   const pre = [c.filter, `loudnorm=I=${c.loud}:TP=-2:LRA=11`].filter(Boolean).join(',');
   if (c.bed) {
     // A LOOP WITH NO SEAM: the cut's last `loop` seconds are crossfaded into its first,
@@ -45,14 +62,14 @@ for (const c of CUTS) {
     run(['-ss', String(c.from), '-t', String(c.len), '-i', src, '-af', `${pre},aresample=44100`, '-ac', '2', tmp]);
     run(['-i', tmp, '-i', tmp, '-filter_complex',
       `[0:a]atrim=start=${x},asetpts=PTS-STARTPTS[body];[1:a]atrim=end=${x},asetpts=PTS-STARTPTS[head];[body][head]acrossfade=d=${x}:c1=tri:c2=tri[o]`,
-      '-map', '[o]', '-ar', '44100', '-ac', '2', '-b:a', '128k', out]);
+      '-map', '[o]', '-ar', '44100', '-ac', '2', '-b:a', `${c.kbps ?? 128}k`, out]);
     fs.unlinkSync(tmp);
   } else {
     const fades = [
       c.fadeIn ? `afade=t=in:st=0:d=${c.fadeIn}` : null,
       c.fadeOut ? `afade=t=out:st=${Math.max(0, c.len - c.fadeOut)}:d=${c.fadeOut}` : null,
     ].filter(Boolean);
-    run(['-ss', String(c.from), '-t', String(c.len), '-i', src, '-af', [pre, ...fades].join(','), '-ar', '44100', '-ac', '2', '-b:a', '160k', out]);
+    run(['-ss', String(c.from), '-t', String(c.len), '-i', src, '-af', [pre, ...fades].join(','), '-ar', '44100', '-ac', '2', '-b:a', `${c.kbps ?? 160}k`, out]);
   }
   // WHERE IT GOES QUIET: the end of the last twentieth of a second above −45 dB. A cue
   // that opens a beat must have gone quiet before the line comes in (check:sfx).
@@ -62,7 +79,7 @@ for (const c of CUTS) {
   let last = -1;
   lv.forEach((v, k) => { if (v > -45) last = k; });
   c.audible = Math.round((last + 1) * 0.05 * 100) / 100;
-  console.log(`  ${c.id.padEnd(8)} ← ${s.title} (Freesound ${s.id}, ${s.licence}) · heard for ${c.audible}s`);
+  console.log(`  ${c.id.padEnd(8)} ← ${s.title} (Freesound ${s.id}, ${s.licence}) · from ${c.from}s · heard for ${c.audible}s`);
 }
 
 const ids = CUTS.map((c) => c.id);

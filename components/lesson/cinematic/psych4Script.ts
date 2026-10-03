@@ -51,6 +51,7 @@ export interface Psych4Beat extends BaseBeat {
 
 export const BEATS: Psych4Beat[] = [
   {
+    bed: 'street',
     act: 'wait',
     speaker: 'bun',
     text: 'The bus stop is very quiet this morning. Everyone must be on holiday.',
@@ -65,6 +66,7 @@ export const BEATS: Psych4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'knock', at: 3.71, gain: 0.8 }],
     act: 'notice', pal: true, doc: true,
     speaker: 'tophat',
     text: 'Neither of you has read the notice on this post. The stop has been closed all week.',
@@ -102,6 +104,7 @@ export const BEATS: Psych4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'whoosh', at: 3.41, gain: 0.8 }],
     act: 'team', pal: true, doc: true,
     speaker: 'bun',
     text: 'So he copied me, and I felt sure because he came. That sounds like teamwork to me.',
@@ -109,6 +112,7 @@ export const BEATS: Psych4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'knock', at: 2.94, gain: 0.8 }, { id: 'knock', at: 3.72, gain: 0.8 }],
     act: 'wrong', pal: true, doc: true,
     speaker: 'tophat',
     text: 'No. When everybody copies everybody, nobody checks. A crowd can be wrong all together.',

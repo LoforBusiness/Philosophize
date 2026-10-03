@@ -44,6 +44,7 @@ export interface Hist1Beat extends BaseBeat {
 
 export const BEATS: Hist1Beat[] = [
   {
+    bed: 'street',
     act: 'find', board: 0,
     speaker: 'cap',
     text: 'My window! It was whole when I locked up, so it must have been the wind.',
@@ -58,6 +59,7 @@ export const BEATS: Hist1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'glass', at: 6.47, gain: 0.8 }],
     act: 'arrive', th: true, board: 0,
     speaker: 'tophat',
     text: 'Nobody here saw it break, and the past is gone. All it leaves behind is evidence, and that’s where history starts.',
@@ -88,6 +90,7 @@ export const BEATS: Hist1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'whoosh', at: 0.68, gain: 0.8 }],
     act: 'pay', th: true, board: 0,
     speaker: 'cap',
     text: 'No harm meant, I’m sure. Still, somebody ought to pay for the glass, and I hate to ask.',
@@ -111,6 +114,7 @@ export const BEATS: Hist1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'pin', at: 1.08, gain: 0.8 }, { id: 'pencil', at: 1.26, gain: 0.8 }],
     act: 'rule', th: true, board: 2,
     speaker: 'bun',
     text: 'We could make a rule: whoever kicks the ball pays for the window! Oh, no.',

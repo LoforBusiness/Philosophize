@@ -47,6 +47,7 @@ export interface Econ3Beat extends BaseBeat {
 
 export const BEATS: Econ3Beat[] = [
   {
+    bed: 'street',
     act: 'torn', ticket: 0, clock: 0,
     speaker: 'plain',
     text: 'The concert or the football. Both on Saturday afternoon, naturally.',
@@ -54,6 +55,7 @@ export const BEATS: Econ3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'tear', at: 0.32, gain: 0.8 }, { id: 'paper', at: 2.69, gain: 0.8 }],
     act: 'free', ticket: 0, clock: 0,
     speaker: 'cap',
     text: 'The football’s free this week, mate. You can’t beat free!',
@@ -91,6 +93,7 @@ export const BEATS: Econ3Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'clockchime', at: 4.03, gain: 0.8 }],
     act: 'time', th: true, ticket: 0, clock: 1,
     speaker: 'tophat',
     text: 'Yes. Your time is scarce too, so even a free afternoon has a price: everything else you could do with it.',
@@ -98,6 +101,7 @@ export const BEATS: Econ3Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'tear', at: 0.8, gain: 0.8 }, { id: 'paper', at: 2.41, gain: 0.8 }],
     act: 'twenty', th: true, ticket: 0, clock: 1,
     speaker: 'cap',
     text: 'The concert tickets are twenty pounds, if that helps at all.',
@@ -121,6 +125,7 @@ export const BEATS: Econ3Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'paper', at: 1.19, gain: 0.8 }, { id: 'paper', at: 3.46, gain: 0.8 }],
     act: 'buy', th: true, ticket: 1, clock: 1,
     speaker: 'plain',
     text: 'One concert ticket, please. I’ll try not to enjoy it too much.',

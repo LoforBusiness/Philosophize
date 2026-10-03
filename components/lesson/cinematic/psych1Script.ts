@@ -49,6 +49,7 @@ export interface Psych1Beat extends BaseBeat {
 
 export const BEATS: Psych1Beat[] = [
   {
+    bed: 'cafe',
     act: 'boast',
     speaker: 'plain',
     text: 'I can always tell cheap coffee from the good stuff. Always.',
@@ -56,6 +57,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cardflip', at: 2.15, gain: 0.8 }, { id: 'cardflip', at: 5.5, gain: 0.8 }],
     act: 'pour',
     speaker: 'bun',
     text: 'Perfect, two cups! This one’s from the bargain tin, and this one’s the gold label.',
@@ -63,6 +65,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cup', at: 2.08, gain: 0.8 }, { id: 'cup', at: 5.38, gain: 0.8 }],
     act: 'taste',
     speaker: 'plain',
     text: 'The gold one, of course, so smooth. The other tastes like a wet sock.',
@@ -70,6 +73,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'mug', at: 3.75, gain: 0.8 }],
     act: 'reveal',
     speaker: 'bun',
     text: 'Oh, that’s funny, I only made one pot. They’re both the same coffee.',
@@ -107,6 +111,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'cardflip', at: 5, gain: 0.8 }, { id: 'cardflip', at: 7.95, gain: 0.8 }],
     act: 'method', th: true, swap: true,
     speaker: 'tophat',
     text: 'The taster is still sure, so a psychologist doesn’t ask him. You swap the labels, pour again and count what he does.',
@@ -123,6 +128,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'cup', at: 2.38, gain: 0.8 }],
     act: 'again', th: true, swap: true,
     speaker: 'bun',
     text: 'The taster picked the gold one again, and that’s the bargain tin! Should I tell him?',

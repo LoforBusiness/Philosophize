@@ -52,6 +52,8 @@ export interface Growth4Beat extends BaseBeat {
 
 export const BEATS: Growth4Beat[] = [
   {
+    bed: 'room',
+    sfx: [{ id: 'wheel', at: 1.66, gain: 0.8 }, { id: 'clay', at: 1.84, gain: 0.8 }],
     act: 'throw', pot: 0,
     speaker: 'plain',
     text: 'Behold. My very first pot, and already a masterpiece.',
@@ -59,6 +61,7 @@ export const BEATS: Growth4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'clay', at: 1.26, gain: 0.8 }],
     act: 'slump', pot: 1,
     speaker: 'plain',
     text: 'My pot’s fallen over. That wheel must be broken.',
@@ -66,6 +69,7 @@ export const BEATS: Growth4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'drop', at: 1.79, gain: 0.8 }],
     act: 'help', pot: 1,
     speaker: 'cap',
     text: 'Your clay’s too wet, mate. Feel how soft the walls are.',
@@ -89,6 +93,7 @@ export const BEATS: Growth4Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'clay', at: 5.83, gain: 0.8 }],
     act: 'blame', pot: 0, coach: true,
     speaker: 'plain',
     text: 'Too much water. I’d have spotted that myself, eventually.',
@@ -96,6 +101,7 @@ export const BEATS: Growth4Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'bucket', at: 4.59, gain: 0.8 }],
     act: 'one', pot: 0, coach: true,
     speaker: 'tophat',
     text: 'Then change one thing and try again. Less water, same wheel, and please, less talking.',
@@ -103,6 +109,7 @@ export const BEATS: Growth4Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'wheel', at: 0.15, gain: 0.8 }, { id: 'clay', at: 0.3, gain: 0.8 }],
     act: 'again', pot: 2, coach: true,
     speaker: 'plain',
     text: 'My pot is standing. You may all applaud now.',

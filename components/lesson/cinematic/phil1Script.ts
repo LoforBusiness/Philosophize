@@ -44,6 +44,7 @@ export interface Phil1Beat extends BaseBeat {
 
 export const BEATS: Phil1Beat[] = [
   {
+    bed: 'street',
     act: 'enter',
     speaker: 'plain',
     text: 'One squeaky wheel. That’s all I asked you to fix.',
@@ -51,6 +52,7 @@ export const BEATS: Phil1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'chalk', at: 1.25, gain: 0.8 }, { id: 'paper', at: 4.24, gain: 0.8 }],
     act: 'parts',
     speaker: 'cap',
     text: 'Fixed it, and the frame was cracked, so I changed that and the saddle too. No charge, mate.',
@@ -95,6 +97,7 @@ export const BEATS: Phil1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'crate', at: 0.91, gain: 0.8 }, { id: 'freewheel', at: 1.14, gain: 0.8 }],
     act: 'reasonB', th: true,
     speaker: 'plain',
     text: 'And I’d say mine is in that crate, in pieces. But do go on.',
@@ -118,6 +121,7 @@ export const BEATS: Phil1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'crate', at: 0.93, gain: 0.8 }, { id: 'chalk', at: 2.39, gain: 0.8 }],
     act: 'live', th: true,
     speaker: 'tophat',
     text: 'You already live by answers like these: what’s fair, what’s real and what you owe. Philosophy is how you check them.',

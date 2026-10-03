@@ -51,6 +51,8 @@ export interface Econ2Beat extends BaseBeat {
 
 export const BEATS: Econ2Beat[] = [
   {
+    bed: 'street',
+    sfx: [{ id: 'whoosh', at: 0.99, gain: 0.8 }],
     act: 'sunny', rain: 0, tag: 0, rack: 8, van: 0,
     speaker: 'cap',
     text: 'Umbrellas, five pounds each, anyone? Well, the sunshine is lovely, at least.',
@@ -58,6 +60,7 @@ export const BEATS: Econ2Beat[] = [
     dur: 1.8,
   },
   {
+    bed: 'rain',
     act: 'pour', rain: 1, tag: 0, rack: 3, van: 0,
     speaker: 'bun',
     text: 'Oh, it’s pouring! I’ll take one, and so will everybody behind me.',
@@ -65,6 +68,7 @@ export const BEATS: Econ2Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'splash', at: 1.61, gain: 0.8 }],
     act: 'arrive', th: true, rain: 1, tag: 0, rack: 3, van: 0,
     speaker: 'tophat',
     text: 'The umbrellas haven’t changed, but how many people want one has. Economists call that demand.',
@@ -88,6 +92,7 @@ export const BEATS: Econ2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chalk', at: 4.6, gain: 0.8 }],
     act: 'raise', th: true, rain: 1, tag: 1, rack: 3, van: 0,
     speaker: 'cap',
     text: 'Three left, and a queue round the corner. I hate to do it, but they’re twelve pounds now.',
@@ -102,6 +107,7 @@ export const BEATS: Econ2Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'van', at: 0, gain: 0.8 }, { id: 'slidedoor', at: 1.96, gain: 0.8 }],
     act: 'van', th: true, rain: 1, tag: 1, rack: 3, van: 1,
     speaker: 'bun',
     text: 'Oh, look, a van full of umbrellas has just pulled up! Isn’t that lucky for him?',
@@ -118,6 +124,7 @@ export const BEATS: Econ2Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chalk', at: 1.2, gain: 0.8 }],
     act: 'settle', th: true, rain: 1, tag: 2, rack: 2, van: 1,
     speaker: 'cap',
     text: 'Six pounds, then, and everybody stays dry. Fair enough, I say.',
