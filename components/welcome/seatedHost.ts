@@ -22,7 +22,7 @@ import { VOICE_LINES } from './welcomeVoice';
 //   → T_SAT                lowers himself into it
 //   → T_CROSSED            lifts the near leg and lays it over the far knee
 //   → T_MONO_END           a touch to the monocle
-//   LINE_T[0] → …          talks: seven lines, a gesture each
+//   LINE_T[0] → …          talks: four lines, a gesture each (two on the last)
 //   T_TIP0 → T_END         lifts his hat
 //   T_END →                sits, and the end card arrives above him
 //
@@ -79,10 +79,10 @@ export const T_MONO_END = T_MONO0 + T_MONO;
 export const T_SPEAK0 = T_MONO_END + 0.35;
 /**
  * The silence AFTER each line before the next begins. These are the screen's pauses,
- * which is why each line was rendered on its own: a beat before "Whichever the case",
- * a longer one before Socrates, and the longest before the last line.
+ * which is why each line was rendered on its own: a breath after his name, a short one
+ * running "your choosing" into "Between…", and the longest before the last line.
  */
-const GAPS = [0.85, 0.8, 0.8, 1.0, 1.0, 1.15];
+const GAPS = [0.75, 0.6, 0.95];
 /** When each line starts, on the screen's clock. */
 export const LINE_T: number[] = (() => {
   const out: number[] = [];
@@ -218,23 +218,26 @@ function crossedHold(t: number): Stance {
 // 33 from the near shoulder (about (0, −26) seated), and more than 16 from the head
 // centre (about (−6, −49)), or the hand vanishes into the head.
 
-interface Gesture { x: number; y: number; tilt: number; neck: number; beat: number }
+interface Gesture {
+  x: number; y: number; tilt: number; neck: number; beat: number;
+  /** A second gesture the hand moves on to, from word `at` of the line. */
+  then?: { at: number; g: Gesture };
+}
+
+/** The hand sweeps out, toward the way on. */
+const SWEEP: Gesture = { x: 33, y: -17, tilt: -0.06, neck: 0.05, beat: 0 };
 
 const GESTURES: Gesture[] = [
-  // "So… you want to learn something new?" — an open hand, offered forward.
-  { x: 29, y: -21, tilt: -0.04, neck: 0.02, beat: 0 },
-  // "Or possibly… a well-distinguished individual" — the hand to his own chest.
+  // "Welcome. My name is Alfred." — the hand to his own chest.
   { x: 9, y: -30, tilt: 0.02, neck: -0.06, beat: 0 },
-  // "Whichever the case, you're here to learn." — a small chop on the beat.
-  { x: 27, y: -24, tilt: -0.05, neck: 0.03, beat: 1 },
-  // "And I have the perfect program for you" — presented, wide and high.
-  { x: 32, y: -30, tilt: -0.07, neck: -0.02, beat: 0 },
-  // "mental effort, and curiosity" — a finger to the temple.
-  { x: 13, y: -52, tilt: 0.0, neck: 0.04, beat: 0 },
-  // "As Socrates once said" — the raised forefinger.
-  { x: 21, y: -45, tilt: -0.02, neck: -0.05, beat: 0 },
-  // "Thus begins your journey." — the hand sweeps out, toward the way on.
-  { x: 33, y: -17, tilt: -0.06, neck: 0.05, beat: 0 },
+  // "And I will be walking you through any subject" — an open hand, offered forward.
+  { x: 29, y: -21, tilt: -0.04, neck: 0.02, beat: 0 },
+  // "Between philosophy, psychology, business…" — presented wide and high, a small
+  // chop on each name.
+  { x: 32, y: -30, tilt: -0.07, neck: -0.02, beat: 1 },
+  // "Turn on your mind to curiosity," — a finger to the temple; then "and begin this
+  // wonderful journey of learning." — the hand sweeps out.
+  { x: 13, y: -52, tilt: 0.0, neck: 0.04, beat: 0, then: { at: 6, g: SWEEP } },
 ];
 
 /** A little nod on each word he stresses, so the talking is in his head as well. */
@@ -263,7 +266,14 @@ function talking(t: number): Stance {
     const b = Math.min(LINE_END[i] + 0.55, (LINE_T[i + 1] ?? LINE_END[i] + 1) - 0.1);
     const e = env(t, a, b, 0.42, 0.5);
     if (e <= 0) continue;
-    const g = GESTURES[i] ?? GESTURES[0];
+    const g0 = GESTURES[i] ?? GESTURES[0];
+    // A line with a second gesture hands over to it smoothly, starting just before the
+    // word it belongs to, so the hand is on its way as the voice gets there.
+    const nx = g0.then;
+    const k = nx ? ease01(clamp01((t - (LINE_T[i] + VOICE_LINES[i].words[nx.at] - 0.25)) / 0.5)) : 0;
+    const g = nx
+      ? { x: lerp(g0.x, nx.g.x, k), y: lerp(g0.y, nx.g.y, k), tilt: lerp(g0.tilt, nx.g.tilt, k), neck: lerp(g0.neck, nx.g.neck, k), beat: k < 0.5 ? g0.beat : nx.g.beat }
+      : g0;
     // Speech life: the hand keeps turning a little while it is out.
     const drift = Math.sin((t - a) * 2.3) * 2.2;
     const chop = g.beat ? Math.max(0, Math.sin((t - a) * 7.5)) * -3 : 0;

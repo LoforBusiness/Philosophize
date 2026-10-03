@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, useWindowDimensions, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -488,10 +488,17 @@ function Page({ li, page, clock, onRows }: { li: number; page: number; clock: Sh
       onRows(out);
     }
   }, [words, onRows, li, from, L]);
+  // A ROW STARTS WHERE THE TABLE SAYS (L.rows), not where the wrap runs out of room: a
+  // wrap fills each row and leaves a word alone on the last ("Alfred."). A full-width,
+  // zero-height break is what moves the next word down, so the words are still siblings
+  // in one wrapping row and each one's measured y still says which row it is on.
   return (
     <View style={styles.words}>
       {words.map((w, i) => (
-        <Word key={i} text={w} t0={LINE_T[li] + L.words[from + i]} clock={clock} onY={(y) => report(i, y)} />
+        <Fragment key={i}>
+          {i > 0 && L.rows.includes(from + i) ? <View style={styles.rowBreak} /> : null}
+          <Word text={w} t0={LINE_T[li] + L.words[from + i]} clock={clock} onY={(y) => report(i, y)} />
+        </Fragment>
       ))}
     </View>
   );
@@ -587,6 +594,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   words: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  rowBreak: { width: '100%', height: 0 },
   word: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: BUB.font, lineHeight: BUB.lh, color: INK, marginHorizontal: 3 },
   notchWrap: { position: 'absolute', left: 0, top: BUB.bottom - 1.2, width: 0, height: 0 },
   notch: {

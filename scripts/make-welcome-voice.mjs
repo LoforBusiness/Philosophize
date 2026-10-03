@@ -2,11 +2,11 @@
 //
 //   FFMPEG=<path to an ffmpeg with libmp3lame> node scripts/make-welcome-voice.mjs
 //
-// The seated welcome (components/welcome/SeatedWelcome.tsx) has its host say seven
-// lines, read by the same Chirp 3 HD voice the lessons use (Algieba, en-GB). Each line
-// was rendered on its own through the character ledger, so the pauses between lines are
-// the SCREEN's to choose rather than the voice's, and each line could be given its own
-// pace — slower for the Socrates quotation and slower again for the last line.
+// The seated welcome (components/welcome/SeatedWelcome.tsx) has its host, Alfred, say
+// four lines, read by the same Chirp 3 HD voice the lessons use (Algieba, en-GB). Each
+// line was rendered on its own through the character ledger, so the pauses between lines
+// are the SCREEN's to choose rather than the voice's. They were rendered the lessons'
+// way (2026-10-03): the even pace's band, pauses set by punctuation, never stretched.
 //
 // What this does, and why each step is the lessons' own:
 //
@@ -22,8 +22,12 @@
 //     word timings), and writes components/welcome/welcomeVoice.ts.
 //
 // The WORDS live here, and only here. A `|` marks where the speech bubble turns to a
-// new page, which is how a long line fits a bubble of three rows. The words must be the
-// ones the take says; the punctuation is the delivery (an ellipsis is where he pauses).
+// new page, which is how a long line fits a bubble of three rows, and a `/` where a new
+// ROW starts. The rows are set by hand rather than left to the wrap, because a wrap fills
+// each row before starting the next and so leaves one word alone on the last row
+// ("Alfred.", "choosing."). Every row was measured against the real Playfair .ttf in the
+// bubble's 303 units of room. The words must be the ones the take says; the punctuation
+// is the delivery.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -37,15 +41,13 @@ const OUT_MP3 = path.join(DIR, 'welcome.mp3');
 const OUT_TS = path.join(ROOT, 'components', 'welcome', 'welcomeVoice.ts');
 const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 
-/** What he says, in order. `|` turns the bubble's page; it is not spoken. */
+/** What he says, in order. `|` turns the bubble's page and `/` starts a row; neither is spoken. */
 const LINES = [
-  { key: 'l1', text: 'So… you want to learn something new?' },
-  { key: 'l2', text: "Or possibly… you're already a well-distinguished individual, | getting back into it." },
-  { key: 'l3', text: "Whichever the case, you're here to learn." },
-  { key: 'l4', text: 'And I have the perfect program for you, | to achieve your goals in vast knowledge of the subject!' },
-  { key: 'l5', text: 'The only thing I ask of you… is mental effort, and curiosity.' },
-  { key: 'l6', text: 'As Socrates once said, | “The unexamined life is not worth living.”' },
-  { key: 'l7', text: 'Thus begins your journey.' },
+  { key: 'l1', text: 'Welcome. / My name is Alfred.' },
+  // Two rows a page at most: a third row lifts the bubble over the window's sill.
+  { key: 'l2', text: 'And I will be walking you | through any subject / of your choosing.' },
+  { key: 'l3', text: 'Between philosophy, / psychology, business, | science, history, and more.' },
+  { key: 'l4', text: 'Turn on your mind / to curiosity, | and begin this wonderful / journey of learning.' },
 ];
 
 // ── when each word starts ───────────────────────────────────────────────────
@@ -149,16 +151,22 @@ for (const l of LINES) {
   if (!fs.existsSync(file)) { console.log(`  MISSING ${path.relative(ROOT, file)}`); fails += 1; continue; }
   const w = parseWav(fs.readFileSync(file));
   if (!w.pcm || w.rate !== WAV_RATE) { console.log(`  ${l.key}: not a ${WAV_RATE} Hz mono LINEAR16 WAV`); fails += 1; continue; }
-  const spoken = l.text.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
+  const spoken = l.text.replace(/[|/]/g, ' ').replace(/\s+/g, ' ').trim();
   const faults = audioFaults(measureAudio(w.pcm, w.rate), spoken);
   if (faults.length) { for (const f of faults) console.log(`  ${f.kind} ${l.key}: ${f.say}`); fails += 1; continue; }
   const tokens = spoken.split(' ');
   // Page starts, as word indexes: the first word of every page.
+  // …and row starts, the first word of every hand-set row.
   const pages = [0];
+  const rows = [];
   let n = 0;
-  for (const part of l.text.split('|').slice(0, -1)) { n += part.trim().split(/\s+/).length; pages.push(n); }
+  for (const part of l.text.split(/\s*([|/])\s*/)) {
+    if (part === '|') pages.push(n);
+    else if (part === '/') rows.push(n);
+    else if (part.trim()) n += part.trim().split(/\s+/).length;
+  }
   const words = wordStarts(w.pcm, w.rate, tokens);
-  takes.push({ ...l, spoken, tokens, pages, words, pcm: w.pcm, start, at: Math.round((start / WAV_RATE) * 1000) / 1000, dur: w.pcm.length / WAV_RATE });
+  takes.push({ ...l, spoken, tokens, pages, rows, words, pcm: w.pcm, start, at: Math.round((start / WAV_RATE) * 1000) / 1000, dur: w.pcm.length / WAV_RATE });
   start += w.pcm.length + GAP_SAMPLES;
 }
 if (fails) { console.log(`\n${fails} problem(s); nothing was written.`); process.exit(1); }
@@ -173,16 +181,17 @@ fs.rmSync(tmp, { force: true });
 if (r.status !== 0 || !fs.existsSync(OUT_MP3)) { console.log(`  ffmpeg failed: ${r.error ? r.error.message : r.stderr}`); process.exit(1); }
 
 const q = (s) => JSON.stringify(s);
-const body = takes.map((t) => `  {\n    text: ${q(t.spoken)},\n    pages: [${t.pages.join(', ')}],\n    at: ${t.at},\n    dur: ${t.dur.toFixed(3)},\n    words: [${t.words.join(', ')}],\n  },`).join('\n');
+const body = takes.map((t) => `  {\n    text: ${q(t.spoken)},\n    pages: [${t.pages.join(', ')}],\n    rows: [${t.rows.join(', ')}],\n    at: ${t.at},\n    dur: ${t.dur.toFixed(3)},\n    words: [${t.words.join(', ')}],\n  },`).join('\n');
 fs.writeFileSync(OUT_TS, `// GENERATED by scripts/make-welcome-voice.mjs — do not edit by hand.
 //
-// The seated host's seven lines on the first screen, as they sit in
+// The seated host's lines on the first screen, as they sit in
 // assets/welcome/voice/welcome.mp3. Zero imports, so the timeline that reads this can
 // be stepped in plain Node.
 //
 //   text   what he says, as the speech bubble shows it
 //   pages  the index of the first word on each page of the bubble
-//   at     where the line starts in the MP3, seconds
+//   rows   the index of every word that starts a hand-set row (the bubble does not wrap)
+//   at    where the line starts in the MP3, seconds
 //   dur    how long the take runs, seconds
 //   words  when each word starts, seconds from the start of the line (estimated from
 //          the pauses in the take; Chirp 3 HD returns no word timings)
@@ -190,6 +199,7 @@ fs.writeFileSync(OUT_TS, `// GENERATED by scripts/make-welcome-voice.mjs — do 
 export interface VoiceLine {
   text: string;
   pages: number[];
+  rows: number[];
   at: number;
   dur: number;
   words: number[];

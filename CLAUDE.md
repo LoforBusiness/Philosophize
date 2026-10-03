@@ -7580,6 +7580,17 @@ freezes any instant on the web. Its first line was re-recorded on 2026-09-30 for
 seven subjects, and the onboarding questions after it weigh subjects (§23).
 Neither intro bumps `WELCOME_VERSION`.
 
+**Since 2026-10-03 he is ALFRED and says four lines** (the owner's words): "Welcome. My
+name is Alfred." · "And I will be walking you through any subject of your choosing." ·
+"Between philosophy, psychology, business, science, history, and more." · "Turn on your
+mind to curiosity, and begin this wonderful journey of learning." They were voiced the
+lessons' way (the even band, pauses set by punctuation, never stretched). **The bubble's
+rows are set by hand** — a `/` in `make-welcome-voice.mjs`'s LINES becomes `rows` in the
+table and a full-width zero-height break in `SeatedWelcome`'s Page — because a wrap fills
+each row and leaves one word alone on the last ("Alfred."). Every page is two rows at
+most: a third row lifts the bubble over the window's sill. The Socrates bust's halo is
+keyed to a line naming Socrates, so it no longer lights.
+
 ---
 
 ## 20. Forced Update Gate
