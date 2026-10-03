@@ -57,7 +57,7 @@ export const BEATS: Psych1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'cardflip', at: 2.15, gain: 0.8 }, { id: 'cardflip', at: 5.5, gain: 0.8 }],
+    sfx: [{ id: 'cardflip', at: 1.64, gain: 0.8 }, { id: 'cardflip', at: 5, gain: 0.8 }],
     act: 'pour',
     speaker: 'bun',
     text: 'Perfect, two cups! This one’s from the bargain tin, and this one’s the gold label.',

@@ -30,6 +30,8 @@ const ROOT = process.cwd();
 const FOLEY_LOUD = -27;
 const FOLEY_MAX_S = 3.5;
 const FOLEY_GAIN = 0.85;
+/** How far into a foley clip its hit may come (a pour or an engine builds a little). */
+const FOLEY_MAX_HIT = 0.15;
 const errs = [];
 const fail = (s) => errs.push(s);
 
@@ -40,8 +42,8 @@ for (const [key, s] of Object.entries(SOURCES)) {
   if (!fs.existsSync(path.join(ROOT, 'assets', 'sfx', 'src', `${s.id}.mp3`))) fail(`source ${key}: assets/sfx/src/${s.id}.mp3 is missing`);
 }
 const clipsSrc = fs.readFileSync(path.join(ROOT, 'lib', 'sfx', 'clips.ts'), 'utf8');
-const table = new Map([...clipsSrc.matchAll(/^\s{2}(\w+): \{ clip: require\('\.\.\/\.\.\/assets\/sfx\/(\w+)\.mp3'\), bed: (true|false), audible: ([\d.]+) \},$/gm)]
-  .map((m) => [m[1], { file: m[2], bed: m[3] === 'true', audible: Number(m[4]) }]));
+const table = new Map([...clipsSrc.matchAll(/^\s{2}(\w+): \{ clip: require\('\.\.\/\.\.\/assets\/sfx\/(\w+)\.mp3'\), bed: (true|false), audible: ([\d.]+), hit: ([\d.]+) \},$/gm)]
+  .map((m) => [m[1], { file: m[2], bed: m[3] === 'true', audible: Number(m[4]), hit: Number(m[5]) }]));
 for (const c of CUTS) {
   if (!SOURCES[c.src]) fail(`cut ${c.id} is cut from "${c.src}", which is not in SOURCES`);
   if (!fs.existsSync(path.join(ROOT, 'assets', 'sfx', `${c.id}.mp3`))) fail(`cut ${c.id}: assets/sfx/${c.id}.mp3 is missing — run make-sfx`);
@@ -69,6 +71,10 @@ let cues = 0;
 let lessons = 0;
 const cutOf = new Map(CUTS.map((c) => [c.id, c]));
 for (const c of CUTS) {
+  // A TIMED CUE LANDS ITS CLIP'S START ON THE ACTION (AT8), so the clip's hit has to be
+  // its start: a coin whose clink came 0.45s into the file was heard 0.45s after it fell.
+  const t = table.get(c.id);
+  if (c.foley && t && t.hit > FOLEY_MAX_HIT) fail(`cut ${c.id}: its hit comes ${t.hit}s into the clip; a foley clip starts on its hit (${FOLEY_MAX_HIT}s at most) — give it onset/onsetDb, or a window`);
   if (c.foley && c.bed) fail(`cut ${c.id} cannot be both foley and a bed`);
   if (c.foley && c.loud > FOLEY_LOUD) fail(`cut ${c.id} is foley and set to ${c.loud} LUFS; foley is ${FOLEY_LOUD} or quieter`);
 }

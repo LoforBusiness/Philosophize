@@ -12029,6 +12029,25 @@ good quality.**
 - **The clip's hit is its first moment.** A foley cut is made with `onset`, which starts
   it 10ms before the recording's first sound within 24dB of its loudest, so the sound
   lands on the frame the hand does.
+- **AND "ITS FIRST SOUND" WAS NOT ITS HIT, so 84 cues were late (2026-10-03).** *"when
+  the … stick man pulls out the bargain and gold sign, there is a little bit of a late
+  sound … sometimes happens with pouring water."* Measured clip by clip, a recording's
+  first sound within 24dB of its loudest is often the hand reaching or the room before
+  the event: the coin's clink came 0.45s into its clip, the cup-pour's 0.6s, the shed
+  door's 1.1s, the trolley's bump was not in its cut at all, and the Athens pour and
+  gasp opened on 0.6s and 0.8s of silence. Three fixes, each held:
+  - **a clip is cut AT ITS HIT** where noise comes first (`onsetDb`, how far under the
+    loudest the cut may start; `search` when the clip ends before a second, louder
+    event), and is levelled with ONE gain measured once — loudnorm's dynamic mode rode
+    the gain up through a short clip's lead-in. make-sfx writes each clip's `hit` into
+    `clips.ts`, and `check:sfx` fails a foley clip whose hit comes later than 0.15s in;
+  - **the player starts a clip at once**: every player is rewound ahead of time (when it
+    finishes or is hushed), where it used to wait on `seekTo(0)` before every play;
+  - **a timed cue is fired `SFX_LEAD_S` (0.06s) early**, to cover the hop to JS, the
+    native player starting and the phone's audio output. A sound that comes after its
+    action is noticed long before one a few frames early.
+  And a cue goes on the moment the eye takes as the action: the psychology signs sound as
+  they come UP from under the counter, not when they land half a second later.
 - **Under a voice, only FOLEY** — the small sound of what a hand is doing (`foley: true`
   in `sfxcuts.mjs`): levelled to −27 LUFS or quieter (the voices are about −18), played at
   0.85 or less, heard for 3.5s at most. Most actions happen while someone is talking, and

@@ -39,6 +39,8 @@ function playerOf(id: SfxId): AudioPlayer | null {
     p = createAudioPlayer(SFX[id].clip, { updateInterval: 250 });
     if (SFX[id].bed) p.loop = true;
     players.set(id, p);
+    // a new player sits at its first frame: ready to start the instant it is asked
+    if (!SFX[id].bed) ready.add(id);
     return p;
   } catch {
     return null;
@@ -79,9 +81,31 @@ function play(id: SfxId, gain = 1) {
   // a fade still running on this player (a hush) would pull the new cue down with it
   const old = ramps.get(p);
   if (old) { clearInterval(old); ramps.delete(p); }
+  // ON THE FRAME IT IS ASKED FOR (AT8). A player that is already rewound starts at once;
+  // waiting on `seekTo` first was a round trip to the native side on EVERY cue, and the
+  // sound landed that much after the action. So a clip is rewound AHEAD — once it has
+  // finished, or been hushed — and only one asked for again mid-play seeks first.
+  const turn = (gen.get(id) ?? 0) + 1;
+  gen.set(id, turn);
   try {
     p.volume = gain;
-    p.seekTo(0).then(() => p.play()).catch(() => {});
+    if (ready.delete(id)) p.play();
+    else p.seekTo(0).then(() => p.play()).catch(() => {});
+  } catch {}
+  setTimeout(() => rewind(id, turn), (SFX[id].audible + 0.25) * 1000);
+}
+
+/** Players stopped at their first frame, so the next `play` costs nothing. */
+const ready = new Set<SfxId>();
+/** Which play of a clip is current, so a rewind never cuts a newer one short. */
+const gen = new Map<SfxId, number>();
+function rewind(id: SfxId, turn?: number) {
+  if (turn !== undefined && gen.get(id) !== turn) return;
+  const p = players.get(id);
+  if (!p) return;
+  try {
+    p.pause();
+    p.seekTo(0).then(() => { if (turn === undefined || gen.get(id) === turn) ready.add(id); }).catch(() => {});
   } catch {}
 }
 
@@ -104,7 +128,7 @@ function hush() {
       if (k >= steps) {
         clearInterval(h);
         ramps.delete(p);
-        try { p.pause(); } catch {}
+        rewind(id, gen.get(id));
       }
     }, STEP_MS);
     ramps.set(p, h);
@@ -148,6 +172,8 @@ function release() {
     try { p.pause(); p.remove(); } catch {}
   }
   players.clear();
+  ready.clear();
+  gen.clear();
   bedId = null;
   ducked = false;
 }

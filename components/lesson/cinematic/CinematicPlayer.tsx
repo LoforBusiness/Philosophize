@@ -176,6 +176,15 @@ const PICK_SFX = {
   right: { id: 'seal', at: 0.29, gain: 0.8 },
   wrong: { id: 'knock', at: 0.06, gain: 0.7 },
 } as const satisfies Record<string, { id: SfxId; at: number; gain: number }>;
+/**
+ * HOW EARLY A TIMED SOUND IS STARTED, so it is HEARD on the frame its action happens.
+ * Between asking for a sound and hearing it are a hop from the UI thread to JS, the
+ * native player starting, and the phone's own audio output (tens of milliseconds on an
+ * Android phone). A sound that arrives after what it belongs to reads as late long
+ * before one that arrives a few frames early reads as early, so the lead covers most of
+ * that path and no more (AT8).
+ */
+const SFX_LEAD_S = 0.06;
 
 /**
  * Something laid out from the first frame and shown only once the lesson begins (AP19,
@@ -941,7 +950,7 @@ export default function CinematicPlayer({
     swishAt.value = g.map((x) => x.at);
     swishKind.value = g.map((x) => x.kind);
     swished.value = 0;
-    cueAt.value = (timedCues[i] ?? []).map((c) => c.at as number);
+    cueAt.value = (timedCues[i] ?? []).map((c) => Math.max(0, (c.at as number) - SFX_LEAD_S));
     cued.value = 0;
     // AN ANSWERED BEAT RETURNS WITH ITS CONTROL WHERE THE READER LEFT IT — in the
     // same statement that rewinds the clock, so the control and the scene that reads
@@ -1230,7 +1239,7 @@ export default function CinematicPlayer({
     if (sfxLive.current.on) {
       const p = isCorrect ? PICK_SFX.right : PICK_SFX.wrong;
       const at = i;
-      setTimeout(() => { if (sfxLive.current.on && sfxLive.current.beat === at) sfx.play(p.id, p.gain); }, p.at * 1000);
+      setTimeout(() => { if (sfxLive.current.on && sfxLive.current.beat === at) sfx.play(p.id, p.gain); }, Math.max(0, p.at - SFX_LEAD_S) * 1000);
     }
     if (graded) {
       setAsked((n) => n + 1);
