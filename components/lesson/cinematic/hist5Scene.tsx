@@ -8,7 +8,7 @@ import ObjectArt from './ObjectArt';
 import SetArt from './SetArt';
 import { BEATS } from './hist5Script';
 import {
-  WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
+  WALK, U, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -19,14 +19,14 @@ import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, klepsydraPot, clockBlock, ballotUrn, woodUrn, ballotDisc, bedsideLamp, roomPoster, pendant,
+  NATURAL, klepsydraPot, clockBlock, ballotUrn, woodUrn, ballotDisc, bedsideLamp,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import {
-  FLOOR, SKY, HILLS, CITY, ACROPOLIS, COLONNADE, ENTABLATURE, FLOOR_PAVING, DAIS, ARCHON_CHAIR, LEFT_STAND,
-  RIGHT_STAND, TIERS, BEDROOM, BED, BED_TOP, NIGHTSTAND, alarmClock, DOOR_SHUT, DOOR_FACE, DOOR_HINGE,
+  FLOOR, SKY, TIERS, BED, BED_TOP, NIGHTSTAND, alarmClock, DOOR_SHUT, DOOR_FACE, DOOR_HINGE,
   DOOR_LIGHT, DUVET, DUVET_RIGHT, type Part,
 } from './hist5Set';
+import PlateArt from './PlateArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // history-foundations-5, "On Trial in Athens" — A BEDROOM, AND THE LAW COURT IT OPENS
@@ -100,7 +100,7 @@ const ACTS = ['wake', 'room', 'door', 'open', 'what', 'charge', 'jury', 'straws'
 type Act = (typeof ACTS)[number];
 const A = Object.fromEntries(ACTS.map((a, i) => [a, i])) as Record<Act, number>;
 const ACT = BEATS.map((b) => A[(b.act ?? (b.summary ? 'summary' : 'ask')) as Act]);
-const SPAN = BEATS.map((_, n) => Math.max(VA[n] + lineOf(LINES, n), ACT[n] === A.sleep ? 10.5 : 0));
+const SPAN = BEATS.map((_, n) => Math.max(VA[n] + lineOf(LINES, n), ACT[n] === A.sleep ? 12 : 0));
 /** When a beat's line has been said and its after-sound starts (CinematicPlayer's TAIL_AFTER_S). */
 const TAIL = BEATS.map((_, n) => VA[n] + (LINES[n] || 0) + 0.3);
 const ASK2 = BEATS.findIndex((b) => b.fair);
@@ -171,25 +171,51 @@ const CAMS = BEATS.map((_, n) => {
 
 // ── the cap: where he walks, which way he faces, and how he is in bed ────────
 type Track = readonly (readonly number[])[];
-/** His mark as defendant, and where he sits on the bed's edge. */
+/** His mark as defendant. */
 const DOCK = 652;
-const EDGE = 272;
-/** Sitting up in bed, and lying in it: his pelvis, and the head on the pillow. */
-const SIT_X = 205;
-const LIE_X = 222;
-const LIE_Y = 432;
+/**
+ * Where his pelvis is in bed, and on the bed's edge: the same x, so getting in and
+ * out of bed never slides him along the mattress. Lying, his head reaches the pillow
+ * (x 168); sitting up, his feet reach x 249 under the duvet; on the edge, his feet are
+ * on the floor in front of the bed.
+ */
+const SIT_X = 216;
 const C_LEGS: Track[] = BEATS.map((_, n) => {
   const a = ACT[n];
-  if (a === A.door) return [[0.3, 372]];
+  if (a === A.door) return [[0.235, 372]];
   if (a === A.open) return [[0.18, 470], [0.32, DOCK]];
-  if (a === A.sleep) return [[0.02, EDGE]];
+  if (a === A.sleep) return [[0.02, SIT_X]];
   return [];
 });
+
+// ── in bed: three stances, all with the pelvis at SIT_X ─────────────────────
+// Lying is the sitting-up stance with the torso laid back flat (tilt ≈ π/2, which in
+// the rig is BACKWARD) and the chin tucked so the head rests on the pillow, not under
+// it. Sitting up is that torso rising while the legs stay flat under the duvet. On
+// the edge is `seated` at the mattress's own height, so swinging the legs off the bed
+// is only the knees bending down over it, and standing up is the rise from a chair.
+/** Sitting up in bed, legs straight out under the duvet, hands on the lap. */
+const BED_SIT: Stance = {
+  tilt: 0.06, neck: -0.04, bob: 3 - U.standH,
+  footL: { x: 33, y: 0 }, footR: { x: 35, y: 0 },
+  fistL: { x: 12, y: -3 }, fistR: { x: 15, y: -2 }, adv: 0,
+};
+/** Lying on his back, head on the pillow, hands resting on his chest. */
+const BED_LIE: Stance = {
+  ...BED_SIT, tilt: 1.5, neck: -0.55,
+  fistL: { x: -9, y: -6 }, fistR: { x: -5, y: -5 },
+};
+/** Where his hands push on the mattress beside his hips (sitting up, swinging round). */
+const PUSH_L = { x: -7, y: 2 };
+const PUSH_R = { x: -3, y: 3 };
+/** His hands on his knees as he rises from the edge, or sits down on it. */
+const KNEES_L = { x: 13, y: 3 };
+const KNEES_R = { x: 16, y: 4 };
 const C_TURN: Track[] = BEATS.map((_, n) => {
   const a = ACT[n];
   if (a === A.straws) return [[0, 1], [0.06, -1], [0.46, 1]];
   if (a === A.defend) return [[0, 1], [0.06, -1], [0.48, 1]];
-  if (a === A.sleep) return [[0, -1], [0.68, 1]];
+  if (a === A.sleep) return [[0, -1], [0.69, 1]];
   return [[0, 1]];
 });
 
@@ -273,8 +299,6 @@ const DISC_ART = ballotDisc(0, 0, 8, 8);
 const VOTE_DISC_ART = ballotDisc(0, 0, 6, 6);
 const LAMP_ART = bedsideLamp(324, 404, 24, 36);
 const CLOCK_ART = alarmClock(342, 422) as unknown as Part[];
-const POSTER_ART = roomPoster(272, 290, 40, 54);
-const PENDANT_ART = pendant(262, 250, 22, 40);
 
 // ── helpers, each a worklet declared before anything that calls it ───────────
 function keyAt(keys: readonly (readonly number[])[], f: number, c: number): number {
@@ -313,7 +337,24 @@ function handAt(s: Stance, x: number, g: number, kk: number, dir: number, which:
 /** A body leant (+ forward) and a head tipped (+ down). */
 function leanOf(s: Stance, tilt: number, neck: number): Stance {
   'worklet';
-  return { ...s, tilt: s.tilt + tilt, neck: s.neck + neck };
+  // The rig's tilt is NEGATIVE forward and its neck POSITIVE up, so both are flipped.
+  // The hands are pelvis-relative, so a lean that left them where they were would put
+  // them behind a torso that has moved forward (AR4). Arms hang from the shoulders, so
+  // the hands go where the shoulders go: by the chest's own displacement.
+  const t0 = s.tilt;
+  const t1 = s.tilt - tilt;
+  const dx = -U.spine * (Math.sin(t1) - Math.sin(t0));
+  const dy = -U.spine * (Math.cos(t1) - Math.cos(t0));
+  return {
+    ...s, tilt: t1, neck: s.neck - neck,
+    fistL: { x: s.fistL.x + dx, y: s.fistL.y + dy },
+    fistR: { x: s.fistR.x + dx, y: s.fistR.y + dy },
+  };
+}
+/** A point part of the way to another. */
+function lerpP(p: { x: number; y: number }, q: { x: number; y: number }, w: number) {
+  'worklet';
+  return { x: p.x + (q.x - p.x) * w, y: p.y + (q.y - p.y) * w };
 }
 /** Where a figure stands at time `b`, walking its legs in turn, starting where it is on screen. */
 function legsOf(src: number, legs: Track, b: number, L: number) {
@@ -375,7 +416,7 @@ function pelOf(w: Bundle) {
  * listener is never frozen; AR5: a stroke at most twice). The crowd's sounds move him
  * too, each in his own way and by his own amount.
  */
-function jurorOf(j: Juror, n: number, f: number, t: number, laugh: number, murmur: number, cheer: number, gasp: number, raise: number): Bundle {
+function jurorOf(j: Juror, n: number, f: number, t: number, laugh: number, murmur: number, cheer: number, gasp: number, raise: number, op = 1): Bundle {
   'worklet';
   let s = postureStill(4, t * 0.9 + j.ph * 3);
   const kk = j.k;
@@ -427,8 +468,13 @@ function jurorOf(j: Juror, n: number, f: number, t: number, laugh: number, murmu
     // each man's hand goes up with his vote at his own moment
     s = H(s, 1, 12, 92, raise * clamp01((raise - j.ph * 0.3) / 0.6));
   }
-  return pose(s, j.x, j.g, kk, j.dir, 1);
+  return pose(s, j.x, j.g, kk, j.dir, op);
 }
+/**
+ * Each juror while the camera cannot see him: one fixed pose, so it never updates a View,
+ * and transparent, so Android draws nothing for him at all.
+ */
+const FROZEN = JURORS.map((j) => jurorOf(j, 0, 0.5, 0, 0, 0, 0, 0, 0, 0));
 
 export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
   const heldP = useHeld();
@@ -452,13 +498,17 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     };
 
     // ── the cap ────────────────────────────────────────────────────────────
-    const wc = legsOf(carrySource(cv, 0, n, EDGE), C_LEGS[n], b, L);
+    const wc = legsOf(carrySource(cv, 0, n, SIT_X), C_LEGS[n], b, L);
     const xc = carry(cv, 0, n, wc.x, wc.x, 1);
     const dc = carry(cv, 1, n, 1, faceOf(carrySource(cv, 1, n, 1), C_TURN[n], b, L), 1);
-    // how far into bed he is: on the bed's edge, sitting up under the duvet, lying down
-    const edgeNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.2, 0.3) : a === A.sleep ? st(0.7, 0.76) : 0;
-    const inNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.06, 0.16) : a === A.sleep ? st(0.78, 0.84) : 0;
-    const lieNow = a === A.wake ? 1 - st(0.22, 0.4) : a >= A.rest ? 1 : a === A.sleep ? st(0.86, 0.97) : 0;
+    // How far into bed he is: edgeW 0 standing → 1 on the bed's edge; inW 0 legs over
+    // the edge → 1 legs on the bed; lie 0 sitting up → 1 lying down. The door beat gets
+    // him up (the duvet thrown off, the legs swung round, the rise) BEFORE he walks, so
+    // a reader who taps early never sees it hurried; the sleep beat is the same, read
+    // backwards, once he has walked home.
+    const edgeNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.14, 0.235) : a === A.sleep ? st(0.715, 0.795) : 0;
+    const inNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.05, 0.13) : a === A.sleep ? st(0.8, 0.86) : 0;
+    const lieNow = a === A.wake ? 1 - st(0.22, 0.46) : a >= A.rest ? 1 : a === A.sleep ? st(0.87, 0.96) : 0;
     const edgeW = carry(cv, 2, n, edgeNow, edgeNow, tr);
     const inW = carry(cv, 3, n, inNow, inNow, tr);
     const lie = carry(cv, 4, n, lieNow, lieNow, tr);
@@ -470,7 +520,7 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     };
     if (a === A.door) {
       // his hand on the handle as he calls through the door
-      const hw = st(0.62, 0.72);
+      const hw = st(0.56, 0.61);
       if (hw > 0) sc = reachHandTo(sc, { x: xc, groundY: FLOOR, k: K, dir: 1 }, 1, 398, 404, hw);
     }
     if (a === A.open) {
@@ -503,45 +553,64 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
       const nod = bp(0.3, 0.4, 0.55);
       sc = leanOf(sc, 0.08 * nod, 0.2 * nod);
     }
-    // on the bed's edge: seated, hands on his knees
-    let se = seated(33.7, t, 14);
-    se = handAt(se, EDGE, FLOOR, K, dc, 1, 20, 18, 1);
-    se = handAt(se, EDGE, FLOOR, K, dc, -1, 16, 16, 1);
-    // sitting up in bed, legs out under the duvet
-    let sb = postureStill(3, t);
-    sb = handAt(sb, SIT_X, BED_TOP, K, 1, 1, 16, 8, 1);
-    sb = handAt(sb, SIT_X, BED_TOP, K, 1, -1, 12, 8, 1);
+    // ── in bed, on its edge, and getting up ──────────────────────────────
+    // on the edge: seated at the mattress's own height, feet under the knees
+    const se: Stance = { ...seated(33.7, t, 12), footL: { x: 8, y: 0 }, footR: { x: 12, y: 0 } };
+    const bh = (s0: Stance, which: 1 | -1, ax: number, by: number, w0: number) => {
+      'worklet';
+      return handAt(s0, SIT_X, BED_TOP, K, 1, which, ax, by, w0);
+    };
+    const pushTo = (s0: Stance, w0: number) => {
+      'worklet';
+      return w0 <= 0.001 ? s0 : { ...s0, fistL: lerpP(s0.fistL, PUSH_L, w0), fistR: lerpP(s0.fistR, PUSH_R, w0) };
+    };
+    let sb: Stance = BED_SIT;
+    let sl: Stance = BED_LIE;
     if (a === A.wake) {
-      // a stretch and a yawn, then a lean to the clock: what time is it?
-      const yawn = bp(0.44, 0.56, 0.8);
-      sb = handAt(sb, SIT_X, BED_TOP, K, 1, 1, 12, 102, yawn);
-      sb = handAt(sb, SIT_X, BED_TOP, K, 1, -1, 4, 104, yawn);
-      sb = leanOf(sb, -0.08 * yawn, -0.28 * yawn);
-      sb = leanOf(sb, 0.22 * st(0.84, 0.96), 0.22 * st(0.84, 0.96));
-      // a stir before he sits up
-      sb = leanOf(sb, 0, 0.1 * bp(0.04, 0.1, 0.18));
+      // asleep; his head stirs on the pillow; he sits up (below), stretches and yawns,
+      // and leans to the clock: what time is it?
+      sl = leanOf(sl, 0, -0.16 * bp(0.04, 0.1, 0.18));
+      const yawn = bp(0.52, 0.64, 0.8);
+      sb = bh(sb, 1, 10, 80, yawn);
+      sb = bh(sb, -1, 4, 82, yawn);
+      sb = leanOf(sb, -0.06 * yawn, -0.3 * yawn);
+      sb = leanOf(sb, 0.2 * st(0.84, 0.95), 0.2 * st(0.84, 0.95));
     }
     if (a === A.room) {
-      sb = leanOf(sb, 0.22 * (1 - st(0, 0.12)), 0.22 * (1 - st(0, 0.12)));
-      // the lamp, the poster, his hands, and the door
-      sb = leanOf(sb, 0.12 * bp(0.04, 0.12, 0.22), 0.25 * bp(0.04, 0.12, 0.22));
-      sb = leanOf(sb, -0.1 * bp(0.22, 0.3, 0.4), -0.35 * bp(0.22, 0.3, 0.4));
-      const hands = bp(0.42, 0.5, 0.66);
-      sb = handAt(sb, SIT_X, BED_TOP, K, 1, 1, 18, 34, hands);
-      sb = handAt(sb, SIT_X, BED_TOP, K, 1, -1, 14, 36, hands);
+      sb = leanOf(sb, 0.2 * (1 - st(0, 0.1)), 0.2 * (1 - st(0, 0.1)));
+      // the lamp, the poster, his hands, and the door the crowd is behind
+      sb = leanOf(sb, 0.1 * bp(0.04, 0.12, 0.22), 0.3 * bp(0.04, 0.12, 0.22));
+      sb = leanOf(sb, -0.08 * bp(0.22, 0.3, 0.4), -0.4 * bp(0.22, 0.3, 0.4));
+      const hands = bp(0.42, 0.5, 0.64);
+      sb = bh(sb, 1, 22, 30, hands);
+      sb = bh(sb, -1, 18, 32, hands);
       sb = leanOf(sb, 0.08 * hands, 0.35 * hands);
-      sb = leanOf(sb, 0.14 * st(0.7, 0.86), -0.08 * st(0.7, 0.86));
+      sb = leanOf(sb, 0.16 * st(0.7, 0.86), -0.1 * st(0.7, 0.86));
     }
-    if (a === A.door) sb = leanOf(sb, 0.14, -0.08);
-    let s = mixStance(sc, se, edgeW);
-    s = mixStance(s, sb, inW);
-    s = mixStance(s, hHold(NOD, t), lie);
+    if (a === A.door) {
+      sb = leanOf(sb, 0.16 * (1 - st(0, 0.05)), -0.1 * (1 - st(0, 0.05)));
+      // the duvet thrown off toward the foot of the bed
+      sb = bh(sb, 1, 34, 14, bp(0, 0.03, 0.07));
+    }
+    // the duvet pulled up as he settles
+    if (a === A.sleep) sb = bh(sb, 1, 30, 10, bp(0.83, 0.86, 0.9));
+    // lying ↔ sitting up: the torso rises off the pillow, the legs stay where they are,
+    // and his hands push on the mattress through the middle of it
+    const sBed = pushTo(mixStance(sb, sl, lie), 0.9 * Math.sin(Math.PI * lie));
+    // legs on the bed ↔ over its edge: the knees bend down over the side; he leans back
+    // a little on his hands while they swing
+    const swing = Math.sin(Math.PI * inW);
+    const sEB = leanOf(pushTo(mixStance(se, sBed, inW), 0.8 * swing), -0.12 * swing, 0);
+    // standing ↔ on the edge: a rise from a chair: lean forward over the feet, hands on
+    // the knees, push up (and the same, read backwards, to sit down)
+    const rise = Math.sin(Math.PI * edgeW);
+    let s = leanOf(mixStance(sc, sEB, edgeW), 0.45 * rise, 0.15 * rise);
+    if (rise > 0.001) s = { ...s, fistL: lerpP(s.fistL, KNEES_L, 0.85 * rise), fistR: lerpP(s.fistR, KNEES_R, 0.85 * rise) };
     const prevC = carryFrom(heldC, n, s);
     const figC = keepHeld(heldC, wc.walking && edgeW < 0.01 ? mixKeepLegs(prevC, s, tr) : mixStance(prevC, s, tr));
-    const cx = lerp(lerp(lerp(xc, EDGE, edgeW), SIT_X, inW), LIE_X, lie);
-    const cg = lerp(lerp(FLOOR, BED_TOP, inW), LIE_Y + 34 * K, lie);
-    const capB = pose(figC, cx, cg, K, lerp(dc, 1, inW), 1);
-    const cpel = pelOf(capB);
+    const cx = lerp(xc, SIT_X, edgeW);
+    const cg = FLOOR + (BED_TOP - FLOOR) * inW * edgeW;
+    const capB = pose(figC, cx, cg, K, lerp(dc, 1, edgeW), 1);
 
     // ── the plain one ──────────────────────────────────────────────────────
     const w = legsOf(carrySource(cv, 5, n, MARK), P_LEGS[n], b, L);
@@ -600,16 +669,6 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     const figP = keepHeld(heldP, w.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
     const plain = pose(figP, xp, FLOOR, K, d, 1);
 
-    // ── the jury ───────────────────────────────────────────────────────────
-    const laugh = carry(cv, 9, n, 0, react(b, LAUGH_AT[n], 1.8), tr);
-    const murmur = carry(cv, 10, n, 0, react(b, MURMUR_AT[n], 1.6), tr);
-    const cheer = carry(cv, 11, n, 0, react(b, CHEER_AT[n], 2.6), tr);
-    const gasp = carry(cv, 12, n, 0, react(b, GASP_AT[n], 2.0), tr);
-    const raiseNow = a === A.vote ? st(0.58, 0.8) * (1 - clamp01((b - VOTES_AT[n] - 0.6) / 0.6)) : 0;
-    const raise = carry(cv, 13, n, raiseNow, raiseNow, tr);
-    const jur: Bundle[] = [];
-    for (let i = 0; i < JURORS.length; i += 1) jur.push(jurorOf(JURORS[i], n, f, t, laugh, murmur, cheer, gasp, raise));
-
     // ── the water clock, the votes, the door and the duvet ─────────────────
     const runs = n < POUR_N ? 0 : n === POUR_N ? clamp01((b - POUR_AT[n]) / 0.3)
       : n < DRIP_N ? 1 : n === DRIP_N ? 1 - clamp01((b - DRIP_AT[n]) / 0.6) : 0;
@@ -619,9 +678,9 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     const doorNow = a < A.open ? 0 : a === A.open ? st(0.02, 0.16) : a === A.sleep ? 1 - st(0.5, 0.58) : a > A.sleep ? 0 : 1;
     const door = carry(cv, 16, n, doorNow, doorNow, tr);
     // the duvet: over him lying down, over his legs sitting up, thrown to the foot of the bed
-    const duvNow = a === A.wake ? lerp(1, 0.77, st(0.22, 0.4)) : a === A.room ? 0.77
-      : a === A.door ? lerp(0.77, 0.3, st(0, 0.1)) : a === A.sleep ? lerp(0.3, lerp(0.77, 1, st(0.86, 0.97)), st(0.78, 0.84))
-        : a >= A.rest ? 1 : 0.3;
+    const duvNow = a === A.wake ? lerp(1, 0.77, st(0.24, 0.46)) : a === A.room ? 0.77
+      : a === A.door ? lerp(0.77, 0.25, st(0, 0.06)) : a === A.sleep ? lerp(lerp(0.25, 0.77, st(0.84, 0.89)), 1, st(0.9, 0.98))
+        : a >= A.rest ? 1 : 0.25;
     const duvet = carry(cv, 17, n, duvNow, duvNow, tr);
 
     // ── the camera ─────────────────────────────────────────────────────────
@@ -634,9 +693,26 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     const fy = carry(cv, 19, n, fyNow, fyNow, ctr);
     const z = Math.exp(carry(cv, 20, n, lzNow, lzNow, ctr));
 
+    // ── the jury ───────────────────────────────────────────────────────────
+    const laugh = carry(cv, 9, n, 0, react(b, LAUGH_AT[n], 1.8), tr);
+    const murmur = carry(cv, 10, n, 0, react(b, MURMUR_AT[n], 1.6), tr);
+    const cheer = carry(cv, 11, n, 0, react(b, CHEER_AT[n], 2.6), tr);
+    const gasp = carry(cv, 12, n, 0, react(b, GASP_AT[n], 2.0), tr);
+    const raiseNow = a === A.vote ? st(0.58, 0.8) * (1 - clamp01((b - VOTES_AT[n] - 0.6) / 0.6)) : 0;
+    const raise = carry(cv, 13, n, raiseNow, raiseNow, tr);
+    // A juror the camera cannot see is held in one fixed, transparent pose, which costs
+    // no update and no drawing; he is live again 60 units before he comes into view,
+    // so the change happens off the edge of the frame.
+    const vx0 = fx - CX / z - 60;
+    const vx1 = fx + (STAGE_W - CX) / z + 60;
+    const jur: Bundle[] = [];
+    for (let i = 0; i < JURORS.length; i += 1) {
+      const j = JURORS[i];
+      jur.push(j.x < vx0 || j.x > vx1 ? FROZEN[i] : jurorOf(j, n, f, t, laugh, murmur, cheer, gasp, raise));
+    }
+
     return {
       cap: capB, plain, jur, t,
-      lie: { x: cpel.x, y: cpel.y, r: -90 * lie },
       inBed: clamp01(inW + lie),
       held: { r: wristOf(plain, 'wrR'), l: wristOf(plain, 'wrL'), o: discs },
       water, fallen, door, duvet,
@@ -650,10 +726,6 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: c.x }, { translateY: c.y }, { scale: c.z }] };
   });
-  const lieT = useAnimatedStyle(() => {
-    const l = SCENE.value.lie;
-    return { transform: [{ translateX: l.x }, { translateY: l.y }, { rotate: `${l.r}deg` }, { translateX: -l.x }, { translateY: -l.y }] };
-  });
   const duvetBack = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.duvet }] }));
   const duvetFront = useAnimatedStyle(() => ({ opacity: SCENE.value.inBed > 0.5 ? 1 : 0, transform: [{ scaleX: SCENE.value.duvet }] }));
   const shutT = useAnimatedStyle(() => ({ opacity: SCENE.value.door < 0.08 ? 1 : 0 }));
@@ -666,17 +738,12 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
       <Animated.View style={[styles.world, worldT]} pointerEvents="none">
         {/* Athens beyond the hall */}
         <SetArt parts={SKY} tone={TONE} line={0} />
-        <SetArt parts={HILLS} tone={TONE} line={0} />
-        <SetArt parts={CITY} tone={TONE} line={0.5} />
-        <SetArt parts={ACROPOLIS} tone={TONE} line={0.6} />
-        {/* the hall */}
-        <SetArt parts={COLONNADE} tone={TONE} line={1.2} />
-        <SetArt parts={ENTABLATURE} tone={TONE} line={1.2} />
-        <SetArt parts={FLOOR_PAVING} tone={TONE} line={0} />
-        <SetArt parts={DAIS} tone={TONE} line={1} />
-        <SetArt parts={ARCHON_CHAIR} tone={TONE} line={0.8} />
-        <SetArt parts={LEFT_STAND} tone={TONE} line={1} />
-        <SetArt parts={RIGHT_STAND} tone={TONE} line={1} />
+        {/* the hills, the city and the Acropolis: one baked picture (plates.ts) */}
+        <PlateArt id="hist5-far" />
+        {/* the hall: the floor (the column shadows lie on it), then the colonnade, the
+            roof, the dais, the chair and the stands, each one baked picture */}
+        <PlateArt id="hist5-floor" />
+        <PlateArt id="hist5-mid" />
         {JURORS.map((j, i) => <JurorFig key={i} i={i} k={j.k} S={SCENE} />)}
         {/* the props */}
         <ObjectArt parts={URN_ART} tone={TONE} />
@@ -687,9 +754,8 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
         <ObjectArt parts={LOW_ART} tone={TONE} />
         <Votes S={SCENE} />
         {/* his room */}
-        <SetArt parts={BEDROOM} tone={TONE} line={1} />
-        <ObjectArt parts={POSTER_ART} tone={TONE} />
-        <ObjectArt parts={PENDANT_ART} tone={TONE} />
+        {/* the walls, the poster and the lamp: one baked picture */}
+        <PlateArt id="hist5-room" />
         <Animated.View style={[styles.world0, lightT]} pointerEvents="none">
           <SetArt parts={DOOR_LIGHT} tone={TONE} line={0} />
         </Animated.View>
@@ -711,10 +777,8 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
         <Stickman D={DP} k={K} role="second" wear={[]} />
         <Held S={SCENE} which="r" />
         <Held S={SCENE} which="l" />
-        <Animated.View style={[styles.pin, lieT]} pointerEvents="none">
-          {/* cast: cap */}
-          <Stickman D={DC} k={K} role="lead" wear={BY_ID.stroller.pieces} />
-        </Animated.View>
+        {/* cast: cap */}
+        <Stickman D={DC} k={K} role="lead" wear={BY_ID.stroller.pieces} />
         <Animated.View style={[styles.duvet, duvetFront]} pointerEvents="none">
           <SetArt parts={DUVET} tone={TONE} line={1} />
         </Animated.View>
@@ -779,7 +843,6 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%', overflow: 'hidden' },
   world: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   world0: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
-  pin: { position: 'absolute', left: 0, top: 0, width: 0, height: 0, transformOrigin: '0% 0%' },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   duvet: { position: 'absolute', left: 0, top: 0, width: DUVET_RIGHT, height: STAGE_H, transformOrigin: `${DUVET_RIGHT}px 0px` },
   door: { position: 'absolute', left: 0, top: 0, width: DOOR_HINGE, height: STAGE_H, transformOrigin: `${DOOR_HINGE}px 0px` },

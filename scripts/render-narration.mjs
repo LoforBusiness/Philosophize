@@ -49,7 +49,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
-import { PACES, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
+import { PACES, aimOf, AIM_TOLERANCE, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
 
 // ── ONE GO (2026-10-01) ─────────────────────────────────────────────────────
 // The owner: *"I don't want to have to keep going back and back to keep reiterating the
@@ -196,8 +196,13 @@ const learned = new Map();
  */
 async function renderAt(l, p) {
   const band = PACES[p];
+  // the aim for what this line says at p, set by how long its sentences are (AP21)
+  const mine = sentencesOf(l.text, l.pace ?? p).filter((s) => s.pace === p);
+  const syl = mine.length ? mine.reduce((a, s) => a + s.syllables, 0) / mine.length : 12;
+  const aim = aimOf(p, syl);
+  const near = (said) => said && Math.abs(said - aim) / aim <= AIM_TOLERANCE;
   const spr = SPEED_PER_RATE[`${l.voice.name}|${p}`];
-  const base = (spr ? band.aim / spr : l.voice.rate * band.factor) * l.nudge;
+  const base = (spr ? aim / spr : l.voice.rate * band.factor) * l.nudge;
   const lk = `${l.voice.name}|${p}`;
   let rate = base * (learned.get(lk) ?? 1);
   let best = null;
@@ -215,15 +220,16 @@ async function renderAt(l, p) {
     }
     const take = readTake(pcm, w.rate, l.text, l.pace);
     const { faults, rate: said, through } = faultsAt(take, l.text, p);
-    const score = faults.length + (said ? Math.abs(said - band.aim) / 10 : 0);
-    console.log(`    ${l.key} ${p} try ${t + 1} @${rate.toFixed(3)}: ${said ? said.toFixed(2) : '—'} syl/s (${band.min}–${band.max})${faults.length ? `  ${faults.join(', ')}` : ''}`);
+    const score = faults.length + (said ? Math.abs(said - aim) / 10 : 0);
+    console.log(`    ${l.key} ${p} try ${t + 1} @${rate.toFixed(3)}: ${said ? said.toFixed(2) : '—'} syl/s (aim ${aim.toFixed(2)}, band ${band.min}–${band.max})${faults.length ? `  ${faults.join(', ')}` : ''}`);
     if (!best || score < best.score) best = { pcm, rate: w.rate, take, score, faults };
     if (said && said <= band.max && said >= band.min) learned.set(lk, rate / base);
-    if (!faults.length) break;
+    // kept only once it is clean AND within AIM_TOLERANCE of its aim (AP21)
+    if (!faults.length && near(said)) break;
     for (const k of through) strong.add(k);
     // a different request every time: toward the band's aim if the speed is off, else a nudge
-    const off = said && (said > band.max || said < band.min);
-    rate = off ? rate * Math.min(1.15, Math.max(0.87, band.aim / said)) : rate * (t % 2 ? 0.985 : 1.015);
+    const off = said && !near(said);
+    rate = off ? rate * Math.min(1.15, Math.max(0.87, aim / said)) : rate * (t % 2 ? 0.985 : 1.015);
   }
   return best;
 }

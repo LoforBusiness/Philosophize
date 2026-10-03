@@ -78,11 +78,46 @@ export const PACE_REFERENCE = {
 };
 /** The slow band the owner rejected (2026-10-01): no band may reach down into it. */
 export const REJECTED_SLOW_TOP = 4.4;
+/**
+ * The three paces a sentence can be said at (LESSON_RULES AP17, AP21). A sentence's pace
+ * is chosen by what it DOES, not by the speaker (AP21's table):
+ *   · brisk   a reaction, banter, an aside, a quick reply, gloating, annoyance, excitement
+ *   · even    explaining, telling, asking, answering: most of what anybody says
+ *   · weighty a new term the first time, a definition, the claim the lesson turns on, a
+ *             name or number that must be caught, a quotation, something sincere. Scarce:
+ *             at most WEIGHTY_MAX sentences a lesson, or it is just a slower lesson.
+ * WEIGHTY sits inside the owner's limits (above REJECTED_SLOW_TOP, under the reference
+ * line) and is about 5% under even's aim — the smallest change in tempo a listener can
+ * hear (Quené 2007) — so it is heard as care, not as a slowed voice.
+ */
 export const PACES = {
   even: { aim: 4.75, min: 4.45, max: 5.1, factor: 1 },
   brisk: { aim: 5.1, min: 4.8, max: 5.4, factor: 1.07 },
+  weighty: { aim: 4.52, min: 4.45, max: 4.8, factor: 0.95 },
 };
 export const PACE_NAMES = Object.keys(PACES);
+/** At most this many sentences in one lesson are said `weighty` (AP21). */
+export const WEIGHTY_MAX = 3;
+
+/**
+ * Where a render aims a sentence of `syllables` said at `pace` (AP21). People say a long
+ * phrase faster than a short one and a short one slower, because the lengthened last
+ * syllable is a bigger share of it (Yuan, Liberman & Cieri 2006; Quené 2008). So a short
+ * sentence aims a little under its pace's aim and a long one a little over: 0.02 a second
+ * per syllable either side of 12, up to ±0.15, never within 0.05 of the band's edges.
+ */
+export function aimOf(pace, syllables) {
+  const band = PACES[pace] ?? PACES.even;
+  const shift = Math.max(-0.15, Math.min(0.15, (syllables - 12) * 0.02));
+  return Math.max(band.min + 0.05, Math.min(band.max - 0.05, band.aim + shift));
+}
+/**
+ * How close to its aim a new take must land before the render keeps it (AP21): within 4%,
+ * under the 5% a listener hears as a change of tempo. The band is what the CHECK holds (so
+ * nothing already voiced moves); this is what a RENDER aims for, so that from one line to
+ * the next a character never audibly speeds up or slows down unless the line asks him to.
+ */
+export const AIM_TOLERANCE = 0.04;
 
 /**
  * How long the voice rests at each mark, in seconds of silence: where the render sets it
@@ -97,7 +132,9 @@ export const PAUSES = {
   stop: { aim: 0.36, min: 0.28, max: 0.48 },
   exclaim: { aim: 0.36, min: 0.28, max: 0.48 },
   question: { aim: 0.42, min: 0.32, max: 0.55 },
-  ellipsis: { aim: 0.45, min: 0.32, max: 0.6 },
+  // a trailing-off or a hesitation: long enough to be heard as one (AP21); 0.7 and over
+  // reads as reluctance (Kendrick & Torreira 2015), which is a choice, not a default
+  ellipsis: { aim: 0.55, min: 0.32, max: 0.75 },
 };
 /** The marks that end a sentence: speed is chosen and measured between them. */
 export const SENTENCE_END = new Set(['stop', 'exclaim', 'question', 'ellipsis']);

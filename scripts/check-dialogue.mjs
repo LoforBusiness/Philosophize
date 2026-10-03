@@ -18,8 +18,10 @@
 //   AP13 at least two speakers, and nobody staged who never speaks
 //   AP14 every cast member has a trait and a character, and no two share one
 //   AS6  every cast member's trait is named in a group AS heading of LESSON_RULES
-//   AP17 every line states its pace, even or brisk (there is no slow), and takes its
-//        pauses from its punctuation
+//   AP17 every line states its pace, even, brisk or weighty (there is no slow), and takes
+//        its pauses from its punctuation
+//   AP21 at most WEIGHTY_MAX weighty sentences a lesson, and none past BREATH_MAX
+//        syllables with nowhere to breathe
 //   AP18 a scene poses its people with still hands (emoteStill, postureStill)
 //   AP20 said the way people talk: no written words (talkrules.BOOKISH), no line that
 //        narrates the scene back, and the teacher names an idea once a lesson
@@ -33,7 +35,9 @@ import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROOT, dialogueLessons, wiredLessons } from './lib/dialogue.mjs';
-import { paceFault, sentencesOf } from './lib/prosody.mjs';
+import { paceFault, sentencesOf, WEIGHTY_MAX } from './lib/prosody.mjs';
+/** Syllables a sentence may run with no breath mark in it (about 4.6 s at the even pace). AP21. */
+const BREATH_MAX = 22;
 import { bookish, NARRATES, NAMING, NAMING_MAX } from './lib/talkrules.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -134,7 +138,24 @@ for (const l of lessons) {
     // this says why, for anyone who reaches for it.
     if (paces.includes('slow')) fail('AP17', l.id, 'says a sentence slowly; a dialogue line is `even` (the idea included) or `brisk`');
     if (paces.length >= 6 && new Set(paces).size < 2) fail('AP17', l.id, 'says every sentence at one pace');
+    // AP21 — `weighty` is for the few sentences a reader must catch; spent on more, it is
+    // only a slower lesson
+    const weighty = paces.filter((p) => p === 'weighty').length;
+    if (weighty > WEIGHTY_MAX) fail('AP21', l.id, `says ${weighty} sentences weighty; at most ${WEIGHTY_MAX} a lesson, for the term, the claim and the name that must be caught`);
   }
+
+  // AP21 — A SENTENCE IS SAID IN A BREATH. People breathe every two seconds or so (breath
+  // groups average 1.9 s, 87% under 3 s), at a comma or a clause; a sentence that runs
+  // past BREATH_MAX syllables with no comma, dash, colon or semicolon in it has nowhere to
+  // breathe, and a voice reading it runs out of air audibly or runs it together.
+  beats.forEach((b, i) => {
+    if (!spoken(b)) return;
+    for (const s of sentencesOf(b.text, b.pace ?? 'even')) {
+      if (s.syllables <= BREATH_MAX) continue;
+      if (/[,;:—–]/.test(s.text.replace(/[.!?…"”’)]+$/, ''))) continue;
+      fail('AP21', l.id, `beat ${i}: "${s.text.slice(0, 50)}…" is ${s.syllables} syllables with nowhere to breathe; give it a comma where a person would`);
+    }
+  });
 
   // AP20 — SAID THE WAY PEOPLE TALK. The countable half (scripts/lib/talkrules.mjs): no
   // word a person writes and does not say, no line that narrates the scene back instead of

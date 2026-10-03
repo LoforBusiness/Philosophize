@@ -11421,6 +11421,88 @@ left, and a queue round the corner" is a man talking about his own stall, so the
 rule reads only the teacher's lines. The six caption lines were rewritten to talk to the
 people in the scene, and re-voiced with everything else on 2026-10-02.
 
+### AP21 · How fast a person says it: the research, and the rules a render follows
+
+> *"there's still so many times where maybe it's a little bit too slow or too fast. Or,
+> depending on what's being said, it doesn't sound correctly based on how fast the speech
+> is … do research on specific words and in general how fast people talk, and how fast
+> people talk depending on what they're saying … made into rules."* (2026-10-03)
+
+Researched before a rule changed, and it changes NO line already voiced: every rule here is
+either something a render aims for, or a check every shipped take already passes. Re-voicing
+a lesson is the only way a line meets it, and the owner decides when.
+
+**What the research says** (the sources a rule below rests on):
+
+| | finding | source |
+|---|---|---|
+| how fast | conversational English: 4.96 syllables a second of speech (pauses out), ±0.6 between people; 196 words a minute with pauses, 236 without | Jacewicz, Fox & Wei 2010 (192 speakers); Yuan, Liberman & Cieri 2006 (Switchboard) |
+| synthetic voices | listeners want a TTS voice a little SLOWER than a person; slowing it with more pauses sounds choppy, slowing the speech itself does not | Trouvain 2004; Uchanski et al. 1996 |
+| a change you hear | a change of tempo under about 5% is not heard as one | Quené 2007 |
+| within one speaker | a person's speed changes more from phrase to phrase than people differ from each other; a constant rate is what sounds read | Jacewicz 2010; Trouvain 2004 |
+| short and long | a short phrase is said slower per syllable (its lengthened last syllable is a bigger share of it), a long one faster | Yuan et al. 2006; Quené 2008 |
+| what matters | a new word, a name, a number, the word in focus are said 10–40% longer; repeated and predictable words shorter; asides faster and quieter | Cooper, Eady & Mueller 1985; Fowler & Housum 1987; Bell et al. 2009; Dehé 2014 |
+| feeling | anger and excitement a little faster, sadness slower with longer pauses | Murray & Arnott 1993 |
+| pauses | in conversation, a comma 0.15–0.3 s, a sentence's end 0.35–0.6 s (read aloud, 0.5–0.75 s); a reply comes about 0.2 s after the other speaker, and a gap of 0.7 s or more is heard as reluctance | Hunt 2023; Heldner & Edlund 2010; Roberts, Torreira & Levinson 2015; Kendrick & Torreira 2015 |
+| breath | breath groups average 1.9 s, 87% under 3 s, taken at commas and clauses | (reported in the speech-breathing literature) |
+
+So the BANDS stand: even 4.45–5.1, aim 4.75, is just under a person's 4.96, as a synthetic
+voice should be, and inside the owner's own limits (`PACE_REFERENCE`, `REJECTED_SLOW_TOP`,
+AP17). What the research says was WRONG is how a take was allowed to land anywhere inside
+them, and how one aim was used for every sentence. The rules:
+
+1. **A SENTENCE'S PACE IS CHOSEN BY WHAT IT DOES** (`pace`, per sentence), never by who says it:
+
+   | pace | for | band (syllables a second of speech) |
+   |---|---|---|
+   | `brisk` | a reaction, banter, an aside, a quick reply, gloating, annoyance, excitement, a run of familiar things | 4.8–5.4, aim 5.1 |
+   | `even` | explaining, telling, asking, answering: most of what anybody says | 4.45–5.1, aim 4.75 |
+   | `weighty` | the new term the first time, a definition, the claim the lesson turns on, a name or number that must be caught, a quotation, something sincere or sad | 4.45–4.8, aim 4.52 |
+
+   `weighty` is about 5% under even's aim — the smallest change a listener hears — so it is
+   heard as care, not as a slowed voice, and it never reaches the slow band the owner
+   rejected. **At most three sentences a lesson** (`WEIGHTY_MAX`): spent on more, it is just a
+   slower lesson. The same feeling gets the same pace all lesson for a character, so his
+   speed changes only when what he is doing does.
+2. **THE AIM FOLLOWS THE SENTENCE'S LENGTH** (`aimOf`). A short sentence aims a little under
+   its pace's aim and a long one a little over: 0.02 a second per syllable either side of
+   12, at most ±0.15. A sentence of fewer than eight syllables ("Ugh.", "Right.", "Oh, come
+   on.") is not held to a speed at all (`MIN_SYLLABLES`): its lengthened last syllable is
+   most of it, and a voice hurried to a syllable rate there sounds clipped.
+3. **A TAKE LANDS WITHIN 4% OF ITS AIM** (`AIM_TOLERANCE`), under the 5% a listener hears.
+   The band is what `check:narration` holds, so nothing voiced moves; the aim is what a
+   render keeps retaking toward (within its three tries), so from one tap to the next a
+   character does not audibly speed up or slow down unless his line asks him to. This is
+   the fault the owner kept hearing: two takes both inside the band, one at 4.5 and the next
+   at 5.05, are 12% apart.
+4. **NEVER SLOW A LINE WITH PAUSES.** A line that should land slower is given a slower pace;
+   extra pauses at a normal speed sound choppy. Pauses come from punctuation only (AP17),
+   at these lengths, which sit inside the research's conversational ranges:
+
+   | mark | rest (aim) | | mark | rest (aim) |
+   |---|---|---|---|---|
+   | comma | 0.16 s | | sentence end | 0.36 s |
+   | dash | 0.20 s | | question | 0.42 s |
+   | semicolon | 0.24 s | | ellipsis (trailing off, hesitating) | 0.55 s |
+   | colon | 0.26 s | | | |
+
+   A pause of 0.7 s or more is heard as reluctance: write it only when the character is
+   reluctant.
+5. **A SENTENCE IS SAID IN A BREATH.** One that runs past 22 syllables (about 4.6 s) needs a
+   comma, a dash or a colon where a person would breathe (`check:dialogue`, `BREATH_MAX`).
+6. **FEELING SETS THE PACE, AND THE PACE SAYS THE FEELING.** Annoyed, gloating, excited,
+   oblivious chatter: brisk. Explaining, reasoning, asking: even. Sincere, sad, hesitant,
+   the reveal: weighty, with an ellipsis or a comma before the words that matter. For the
+   cast (AS): the top hat explains even and snaps brisk when someone tries his patience; the
+   plain one needles and gloats brisk and is even only when he is caught out; the cap is
+   even and weighty when he means it; the bun is brisk and never weighty.
+
+`check:dialogue` holds the countable half (the weighty limit and the breath limit);
+`render-narration` aims by length and keeps a take only within 4% of its aim;
+`check:narration` holds each pace's band, and the bands' place inside the owner's limits.
+What no number can hold is whether a sentence was given the right pace for what it does.
+That is the author's, and the ear is the test (AP20.7).
+
 ## Group AQ · A word sits in its plate, and its plate on its thing
 
 ### AQ1 · A word fits the plate it is on, and the plate sits on its object
@@ -11618,6 +11700,44 @@ with them from the start rather than fixing it afterwards.
    so the FINAL review is done once the builders have stopped, on a quiet Metro: every beat
    of every lesson (`sheet-beats`), then close-ups of every hand act at several moments
    inside it.
+
+### AR8 · Lying in bed, and getting up, the way a body does
+
+> *"it's not like he's actually interacting with the objects correctly … He needs to
+> really look like he's just lying in bed. And when he gets up, it has to look like he
+> actually gets up in a really natural way."* (2026-10-03, `history-foundations-5`)
+
+The first version lay the standing figure down by ROTATING it 90° about the pelvis under
+the duvet, and sat him up by rotating it back and sliding him along the mattress to the
+edge: a plank tipping over, with the legs swinging through the bed. A body does none of
+that, and the rig can say what it does (`hist5Scene`, `BED_SIT` and `BED_LIE`):
+
+1. **The pelvis stays put.** In bed, on its edge and standing up beside it, his pelvis is at
+   ONE x: the place in bed is chosen so that lying, his head is on the pillow, and sitting
+   up, his feet are under the duvet. Nothing slides along the mattress.
+2. **Lying is sitting with the torso laid back.** The legs lie flat (feet on the mattress
+   at the height of the hips), the torso is tipped back flat (`tilt` ≈ π/2: in the rig,
+   positive tilt is BACKWARD), and the chin is tucked (`neck` −0.55) so the head rests ON
+   the pillow, since a head of radius 20 on a body line sinks into the mattress otherwise.
+   His hands rest on his chest under the duvet.
+3. **Sitting up is the torso rising**, legs unmoved, hands pushing on the mattress beside
+   the hips through the middle of the rise.
+4. **Getting out is the legs swinging over the near edge.** The edge stance is `seated` at
+   the mattress's own height, so going from legs-out to on-the-edge is the knees bending
+   down over the side, in front of the bed; he leans back a little on his hands while they
+   swing. The duvet is thrown off toward the foot FIRST.
+5. **Standing is a rise from a chair**: feet under the knees, a lean forward over them,
+   hands on the knees, push up (and the same backwards to sit down). Then he walks.
+6. **Each step waits for the one before.** The duvet, the swing, the rise and the walk run
+   in order on one beat, and the sound of the walk comes with the walk (a cue at a number
+   of seconds, AT6). A get-up that is spread across two beats is hurried into half a second
+   by a reader who taps early, so it lives on ONE beat, and the line waits for it.
+
+Two traps in the rig, both found here. `leanOf`-style helpers must say which way they lean:
+the rig's tilt is NEGATIVE forward and its neck POSITIVE up, so a helper that adds its
+arguments as written leans BACK when the author meant forward. And a lean must take the hands
+with it: they are pelvis-relative, so a torso leant forward leaves them behind the shoulders
+(AR4). They move by the chest's own displacement, because arms hang from the shoulders.
 
 ## Group AS · The cast: who each stickman is
 
@@ -11861,3 +11981,38 @@ good quality.**
   cannot drift apart.
 - **The setting decides.** Sound follows the Sound setting (`soundEffects`), and is
   silent on the web, as the voice is.
+
+### AT7 · A big set is baked: its still scenery is one picture
+
+> *"it is extremely laggy. The camera movement, the movement of different things … it needs
+> to be extremely smooth."* (2026-10-03)
+
+A staged scene draws a big place, and `SetArt` draws it from Views: every polygon is
+several triangles of two Views each, plus an outline. The Athenian court came to **2,799**
+of them, all under the scene's own camera transform, so every frame Android replayed every
+one (§17 rule 7 of CLAUDE.md: hundreds of Views under one transform is the bill an animated
+full-screen Svg is).
+
+1. **What never moves is a PLATE** (`plates.ts`): a box in world units, a resolution, and
+   the layers in paint order. `npm run make:plates` draws those layers through the REAL
+   components (`PlateLive`) in a browser, photographs them over black and over white, and
+   recovers the alpha exactly from the pair; the scene then draws one `<Image>` where the
+   layers stood (`PlateArt`). The court's hills, city and Acropolis, its floor, its
+   colonnade, roof, dais and stands, and the bedroom's walls are four pictures now.
+2. **The resolution is set by the closest shot that sees the plate**, in pixels per world
+   unit: a 1080-pixel phone shows the stage at about 2.7 a unit at zoom 1, so a plate seen
+   at zoom 1.25 wants about 3.4. Distance may be softer (the far plate is at 2.6). No side
+   over 4,000 pixels, the texture limit some phones have.
+3. **What moves, or what something moving passes between, stays live**: the sky, the door
+   and its light, the bed, the duvet, the props, the people. A plate is drawn in the slot its
+   layers had, so nothing changes order.
+4. **A figure the camera cannot see is held still and transparent**: one fixed pose (no
+   update) at opacity 0 (Android draws nothing for it), live again 60 units before it comes
+   into view.
+5. `npm run check:plates` re-derives each plate's stamp from its layers and the code that
+   draws them, and fails a plate that is stale or was never made; a plate with no picture
+   falls back to its live layers in the app, which is correct and slow.
+
+The court went from 2,799 elements to about 1,080, and the jurors off camera from 25 figures
+redrawn every frame to none.
+

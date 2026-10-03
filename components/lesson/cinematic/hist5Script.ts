@@ -75,8 +75,8 @@ export const BEATS: Hist5Beat[] = [
     dur: 2.0,
   },
   {
-    act: 'door', voiceAfter: 2.7,
-    sfx: [{ id: 'steps', at: 'lead', gain: 0.9 }],
+    act: 'door', voiceAfter: 5.0,
+    sfx: [{ id: 'steps', at: 2.25, gain: 0.9 }],
     speaker: 'cap',
     text: 'Hello? Is somebody out there? I’m coming out, alright?',
     pace: 'brisk',

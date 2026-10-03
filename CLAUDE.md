@@ -1159,7 +1159,7 @@ To add a new subject (AP15: one road each): an entry in `data/subjects.ts` whose
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-eight** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-nine** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1170,7 +1170,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-skin` · `check-objects` · `check-professor` · `check-subjects` · `check-dialogue` · `check-sfx` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-skin` · `check-objects` · `check-plates` · `check-professor` · `check-subjects` · `check-dialogue` · `check-sfx` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -8766,6 +8766,20 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   lines voiced for about 8,700 characters, and none was re-voiced for the rebuild.
   `validate-cinematic` counts H52 on the path a reader plays (up to 26 in a staged scene);
   `check:guide` accepts a back step that skips the branches not played.
+- **And it was laggy, and his bed looked fake (2026-10-03).** The court was 2,799 Views
+  under one moving camera; its still scenery is four baked PLATES now (`plates.ts`,
+  `npm run make:plates`, `check:plates`, LESSON_RULES AT7) and an off-camera juror is
+  frozen and transparent, so about 1,080 remain and only what is on camera updates. He
+  lay down as a rotated standing figure; now he lies, sits up, swings his legs over the
+  edge and rises the way a body does, with his pelvis at one place (AR8). The same pass
+  found the scene's `leanOf` leaning every figure BACKWARD where it meant forward.
+- **How fast a line is said has its research now (AP21, 2026-10-03).** Conversational
+  English runs about 4.96 syllables a second of speech, a synthetic voice is liked a little
+  slower, and a change under 5% is not heard. So the bands stand, and what changes is how a
+  render lands in them: a `weighty` pace for the few sentences that must be caught (at
+  most three a lesson), an aim set by the sentence's length, and a take kept only within
+  4% of its aim, so a character never audibly changes speed between taps. Nothing voiced
+  was re-rendered.
 
 ---
 

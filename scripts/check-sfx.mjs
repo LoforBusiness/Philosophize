@@ -15,7 +15,7 @@
 //      length, measured by make-sfx) before the line comes in at `voiceAfter`; a cue at
 //      a number of seconds lands wholly before the line or after it; a `tail` is after
 //      it by construction. The bed is never a cue and a cue is never the bed. A
-//      `voiceAfter` with no `lead` sound is a silence with nothing in it.
+//      `voiceAfter` with no sound starting inside the wait is a silence with nothing in it.
 //
 // What it cannot see — a reader tapping on while the crowd is still laughing — the
 // player handles: every effect is hushed when a beat changes (lib/sfx `hush`).
@@ -75,7 +75,10 @@ for (const [id, file] of Object.entries(LESSONS)) {
       if (!table.has(b.bed)) fail(`${id} beat ${i}: bed "${b.bed}" is not a clip`);
       else if (!table.get(b.bed).bed) fail(`${id} beat ${i}: "${b.bed}" is an effect, not a loop, and cannot be a bed`);
     }
-    if (wait > 0 && !(b.sfx ?? []).some((c) => c.at === 'lead')) fail(`${id} beat ${i}: the line waits ${wait}s for a sound that is not there (voiceAfter with no lead cue)`);
+    // a wait is filled by a sound that starts inside it: a `lead` cue, or one at a
+    // number of seconds (a scene can spend the start of a beat on action, as getting
+    // out of bed does, and its sound comes when the walk does)
+    if (wait > 0 && !(b.sfx ?? []).some((c) => c.at === 'lead' || (typeof c.at === 'number' && c.at < wait))) fail(`${id} beat ${i}: the line waits ${wait}s for a sound that is not there (voiceAfter with no cue inside the wait)`);
     for (const c of b.sfx ?? []) {
       cues += 1;
       const t = table.get(c.id);

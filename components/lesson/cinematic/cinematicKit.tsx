@@ -615,11 +615,13 @@ export interface BaseBeat {
    */
   markup?: string;
   /**
-   * How fast a DIALOGUE line is said, chosen from what it says (LESSON_RULES AP17):
-   * `even`, a medium pace, for an ordinary line and for the idea itself; `brisk` for a
-   * quick reaction, an interruption or a run of everyday examples. There is no slow: a
-   * slowed line drags (2026-10-01). One for the line, or one per sentence. A paced line
-   * takes its pauses from its punctuation, so it carries no `markup`.
+   * How fast a DIALOGUE line is said, chosen from what each sentence DOES (LESSON_RULES
+   * AP17, AP21): `even`, a medium pace, for explaining, telling, asking and answering;
+   * `brisk` for a reaction, banter, an aside, gloating or annoyance; `weighty` (at most
+   * three sentences a lesson) for the new term, the claim the lesson turns on, a name or
+   * number that must be caught, something sincere. There is no slow: a slowed line drags
+   * (2026-10-01). One for the line, or one per sentence. A paced line takes its pauses
+   * from its punctuation, so it carries no `markup`.
    */
   pace?: Pace | readonly Pace[];
   dur: number;
@@ -654,7 +656,7 @@ export interface SfxCue { id: SfxId; at: 'lead' | 'tail' | number; gain?: number
 export type SfxId = import('@/lib/sfx/clips').SfxId;
 
 /** A dialogue line's speed (AP17); scripts/lib/prosody.mjs holds each one's band. */
-export type Pace = 'even' | 'brisk';
+export type Pace = 'even' | 'brisk' | 'weighty';
 
 /** Beats that hold the reader until they answer, rather than until they tap. */
 export function gates(b: BaseBeat) { return Boolean(b.tap || b.mc || b.interact); }
