@@ -2,6 +2,7 @@ import type { Path } from '@/data/types';
 import first from './lessons/what-is-history';
 import second from './lessons/how-historians-know';
 import third from './lessons/why-did-it-happen';
+import fourth from './lessons/what-changed-and-what-stayed';
 
 const units: Path[] = [
   {
@@ -9,7 +10,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "How we know the past, and how a group decides.",
-    lessons: [first, second, third],
+    lessons: [first, second, third, fourth],
   },
 ];
 

@@ -275,6 +275,74 @@ export const NATURAL = {
   rotWood:    { base: '#4C3828', shade: '#33261B', label: '#FAFAF7', what: 'wood gone dark and soft with rot' },
   newWood:    { base: '#DEBC88', shade: '#BA9863', label: '#1A1A1A', what: 'a new plank of fresh-sawn pine' },
   barnBoard:  { base: '#8E3B2B', shade: '#6A2B1F', label: '#FAFAF7', what: 'a barn\'s weatherboards in faded red paint' },
+  // phil4 colours:
+  clockMaroon: { base: '#7A2632', shade: '#581B24', label: '#FAFAF7', what: 'a station pillar clock\'s cast iron, painted maroon' },
+  dialCream:  { base: '#F8F2E2', shade: '#EFE6CC', label: '#1A1A1A', what: 'a station clock\'s cream enamel dial (drawn as a laid-on plane, so in its shade)' },
+  screenCase: { base: '#4A4E52', shade: '#33373A', label: '#FAFAF7', what: 'a platform departure screen\'s grey steel casing and post' },
+  ledBlack:   { base: '#1C1F21', shade: '#121415', label: '#F2A33A', what: 'a departure screen\'s black display, behind its amber letters' },
+  ledAmber:   { base: '#F2A33A', shade: '#C9822A', label: '#1A1A1A', what: 'the amber LED letters of a departure screen' },
+  railBlue:   { base: '#24487A', shade: '#1A365C', label: '#FAFAF7', what: 'a platform sign in railway blue, white letters on it' },
+  benchGreen: { base: '#2E5A40', shade: '#21432F', label: '#FAFAF7', what: 'a platform bench\'s cast-iron ends, painted dark green' },
+  ticketOrange: { base: '#E9772D', shade: '#BF5C1D', label: '#1A1A1A', what: 'a railway ticket\'s orange bands' },
+  lampGlow:   { base: '#FFF2C4', shade: '#F6D47E', label: '#1A1A1A', what: 'a train\'s headlamp, lit, coming out of a dark tunnel' },
+  safetyLine: { base: '#F0C92E', shade: '#C9A41C', label: '#1A1A1A', what: 'the yellow safety line painted along a platform\'s edge' },
+  // psych4 colours:
+  shelterSteel: { base: '#5E656B', shade: '#464C51', label: '#FAFAF7', what: 'a bus shelter\'s grey powder-coated steel roof, posts and advert case' },
+  noticeYellow: { base: '#F2D31C', shade: '#CBAE12', label: '#1A1A1A', what: 'a bright yellow "bus stop closed" notice; a timetable\'s yellow rows' },
+  stopRed:    { base: '#D2392F', shade: '#B52E26', label: '#FAFAF7', what: 'the red band on a bus stop flag and across a closure notice' },
+  posterMint: { base: '#C4E8E0', shade: '#A8DACF', label: '#1A1A1A', what: 'a lit shampoo advert\'s pale mint ground' },
+  shampoo:    { base: '#E27FA2', shade: '#C9628A', label: '#1A1A1A', what: 'a pink shampoo bottle on an advert' },
+  // growth4 colours:
+  wetClay:    { base: '#93857A', shade: '#706458', label: '#1A1A1A', what: 'wet grey stoneware clay on the wheel, and the slip in its splash pan' },
+  wheelCream: { base: '#E9E7DF', shade: '#C6C3B8', label: '#1A1A1A', what: 'a potter wheel splash pan and body, in cream plastic' },
+  celadon:    { base: '#8FB8A2', shade: '#6F9883', label: '#1A1A1A', what: 'a pale green celadon glaze on a finished pot' },
+  tenmoku:    { base: '#4E3426', shade: '#36231A', label: '#FAFAF7', what: 'a dark brown-black tenmoku glaze on a finished pot' },
+  cobaltGlaze: { base: '#2F5590', shade: '#223F6C', label: '#FAFAF7', what: 'a deep cobalt-blue glaze on a finished pot' },
+  oatmeal:    { base: '#E2D6BC', shade: '#C2B497', label: '#1A1A1A', what: 'a speckled oatmeal glaze, cream, on a finished pot' },
+  // biz4 colours:
+  truckCream: { base: '#F1E8D4', shade: '#D3C6A8', label: '#1A1A1A', what: 'a food truck\'s cream-painted body' },
+  truckRed:   { base: '#B5392F', shade: '#8A2B23', label: '#FAFAF7', what: 'a food truck\'s red stripe and serving-hatch flap' },
+  steelInside: { base: '#D8DBDC', shade: '#BEC3C5', label: '#1A1A1A', what: 'a food truck\'s stainless-steel kitchen wall, seen through its hatch' },
+  truckGlow:  { base: '#F7E3B0', shade: '#EDD08A', label: '#1A1A1A', what: 'the warm light of the lamp inside a food truck, and a bakery\'s lit window' },
+  cashSteel:  { base: '#56708A', shade: '#405568', label: '#FAFAF7', what: 'a cash box in blue-grey enamelled steel' },
+  calcBody:   { base: '#3C4043', shade: '#2A2D30', label: '#FAFAF7', what: 'a pocket calculator\'s dark grey plastic' },
+  calcLcd:    { base: '#B9C4A6', shade: '#98A487', label: '#1A1A1A', what: 'a calculator\'s grey-green LCD display' },
+  asphalt:    { base: '#8D9090', shade: '#6F7272', label: '#1A1A1A', what: 'a road\'s grey asphalt' },
+  bakeryBlue: { base: '#A9C6D6', shade: '#86A6B8', label: '#1A1A1A', what: 'a bakery shop front and fascia painted pale blue' },
+  bakeryWall: { base: '#CDBFA6', shade: '#AE9F85', label: '#1A1A1A', what: 'an old stone building\'s front, warm grey' },
+  bulbLit:    { base: '#F6D36A', shade: '#E0B443', label: '#1A1A1A', what: 'a festoon bulb, lit warm' },
+  bulbOff:    { base: '#C9CCC8', shade: '#A7AAA6', label: '#1A1A1A', what: 'a festoon bulb, switched off' },
+  // econ4 colours:
+  tomato:     { base: '#D23A2A', shade: '#A32B1F', label: '#FAFAF7', what: 'a ripe tomato, red' },
+  cane:       { base: '#C8AC6E', shade: '#A58A50', label: '#1A1A1A', what: 'a bamboo garden cane' },
+  henRusset:  { base: '#A0522D', shade: '#7A3D20', label: '#FAFAF7', what: 'a brown hen\'s russet feathers' },
+  henWhite:   { base: '#F3EFE4', shade: '#D2CBB8', label: '#1A1A1A', what: 'a white hen\'s feathers' },
+  henBlack:   { base: '#33363B', shade: '#212327', label: '#FAFAF7', what: 'a black hen\'s feathers' },
+  henComb:    { base: '#C9302C', shade: '#9C2421', label: '#FAFAF7', what: 'a hen\'s red comb and wattles' },
+  henLeg:     { base: '#E3B341', shade: '#B98D2A', label: '#1A1A1A', what: 'a hen\'s yellow legs and beak' },
+  eggShell:   { base: '#D29A66', shade: '#AD7A4B', label: '#1A1A1A', what: 'a brown hen\'s egg' },
+  eggCarton:  { base: '#C9C4B6', shade: '#A6A193', label: '#1A1A1A', what: 'a grey moulded-pulp egg box' },
+  wicker:     { base: '#B8894C', shade: '#91693A', label: '#1A1A1A', what: 'a wicker garden basket' },
+  coopSage:   { base: '#8FA27E', shade: '#6F8160', label: '#1A1A1A', what: 'a garden hen house painted sage green' },
+  picket:     { base: '#F4F2EC', shade: '#CFCBC0', label: '#1A1A1A', what: 'a garden picket fence, painted white' },
+  hedge:      { base: '#9DBB72', shade: '#7E9C56', label: '#1A1A1A', what: 'a clipped privet hedge at the back of a garden' },
+  // sci4 colours:
+  swingBlue:  { base: '#33689F', shade: '#264F7A', label: '#FAFAF7', what: 'a playground swing frame\'s blue-painted steel tubes' },
+  swingChain: { base: '#8A8F94', shade: '#6B7075', label: '#1A1A1A', what: 'a swing\'s galvanised steel chains and their shackles' },
+  rubberMat:  { base: '#4A4D51', shade: '#36393C', label: '#FAFAF7', what: 'the dark rubber safety surface poured under a playground swing' },
+  // hist4 colours:
+  towerStone: { base: '#BDB29B', shade: '#958A74', label: '#1A1A1A', what: 'a clock tower\'s buff sandstone ashlar' },
+  dialWhite:  { base: '#F4F2EA', shade: '#D3CFC2', label: '#1A1A1A', what: 'a tower clock\'s white enamelled dial' },
+  belfry:     { base: '#3B3631', shade: '#28241F', label: '#FAFAF7', what: 'the dark inside a belfry\'s arched opening' },
+  bellBronze: { base: '#B07C34', shade: '#835A24', label: '#1A1A1A', what: 'a tower bell\'s bronze' },
+  granite:    { base: '#A2A39D', shade: '#7B7C76', label: '#1A1A1A', what: 'a grey granite horse trough' },
+  geranium:   { base: '#C9333B', shade: '#9A262D', label: '#FAFAF7', what: 'red geraniums planted in a trough' },
+  petunia:    { base: '#DA74A2', shade: '#B1557F', label: '#1A1A1A', what: 'pink petunias trailing over a planter\'s edge' },
+  fascia:     { base: '#2D73B3', shade: '#215789', label: '#FAFAF7', what: 'a phone shop\'s fascia sign, in bright blue' },
+  litGlass:   { base: '#DDEAF0', shade: '#B9CFD9', label: '#1A1A1A', what: 'a phone shop\'s plate glass, the bright inside showing' },
+  phoneBody:  { base: '#2A2D31', shade: '#1B1D20', label: '#FAFAF7', what: 'a smartphone\'s black body, on a display stand' },
+  phoneLit:   { base: '#4C97D9', shade: '#3474AD', label: '#1A1A1A', what: 'a display smartphone\'s lit screen' },
+  sepiaDark:  { base: '#6F5537', shade: '#523E28', label: '#FAFAF7', what: 'the dark tones in an old sepia photograph' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 
@@ -5591,6 +5659,1605 @@ export const weatherVane = (x: number, y: number, w: number, h: number) => fit(W
 
 // ── hist3: objects for this lesson go ABOVE this line ──
 
+// ─────────────────────────────────────────────────────────────────────────────
+// phil4 — A RAILWAY PLATFORM (philosophy-foundations-4, "How Do You Know?"). A
+// station's pillar clock that stopped last night, a departure screen on its post, the
+// platform's name sign on two posts, a slatted bench, a brick tunnel portal at the end
+// of the line, and a railway ticket. Each in its own colours (AR1).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const p4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function p4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/** A clock hand from the dial's centre (cx, cy), `deg` clockwise from twelve. */
+function p4Hand(role: Role, cx: number, cy: number, deg: number, len: number, tail: number, t: number): ObjPart {
+  const a = (deg * Math.PI) / 180;
+  const sx = Math.sin(a);
+  const sy = -Math.cos(a);
+  return oBar(role, cx - sx * tail, cy - sy * tail, cx + sx * len, cy + sy * len, t);
+}
+
+// ── THE STATION'S PILLAR CLOCK ───────────────────────────────────────────────
+//
+// REFERENCE (Commons, "Platform clock, Keighley station"; the clocks at Butterley and
+// Wellington): a round clock high on a cast-iron POST, the post standing on a square
+// PEDESTAL with a sunk panel and a moulded plinth, a ball FINIAL over the case; a
+// cream DIAL in a deep painted RIM, the hours marked by bars, the quarters heavier.
+// Its hands are drawn in, because this one STOPPED at a quarter past nine last night:
+// the hour hand a quarter of the way from nine to ten, the minute hand on the three,
+// and the red second hand stopped at forty. Real units, 40 × 150; the dial's centre
+// is CLOCK_DIAL.
+const STATION_CLOCK: ObjPart[] = p4In(40, 150, [
+  ...p4N('clockMaroon',
+    oEll('mass', 20, 4, 5, 5),                                     // the finial's ball
+    oRect('mass', 20, 8.5, 3.4, 5, 0, 0.6),                        // and its neck
+    oEll('mass', 20, 29, 38, 38),                                  // the case, round the dial
+    oRect('mass', 20, 50, 12, 5, 0, 1),                            // the collar under the case
+    oRect('mass', 20, 90, 7, 78),                                  // the post
+    oRect('mass', 20, 128.5, 13, 4, 0, 1),                         // its foot, flared
+    oRect('mass', 20, 138, 26, 18, 0, 1),                          // the pedestal
+    oRect('mass', 20, 147.5, 32, 5, 0, 1),                         // its plinth
+    oRect('face', 34.5, 138, 3, 18),                               // the pedestal's side, in shade
+    oRect('face', 24.2, 90, 1.6, 76),                              // the post's far side
+    oEll('dark', 21, 30, 33, 33),                                  // the rim's inner edge
+    oRect('dark', 18.5, 137.5, 16, 11, 0, 1),                      // the pedestal's sunk panel
+  ),
+  ...p4N('dialCream', oEll('dark', 20, 29, 30, 30)),               // the dial: a plane laid over the rim's
+                                                                   // inner edge, so it is painted after it
+  ...Array.from({ length: 12 }, (_, i) => p4Hand('line', 20, 29, i * 30, 13.6, i % 3 === 0 ? -9.8 : -11.4, i % 3 === 0 ? 2 : 1)),
+  p4Hand('line', 20, 29, 277.5, 7.2, 1.6, 1.9),                    // the hour hand, a quarter past nine
+  p4Hand('line', 20, 29, 90, 10.8, 1.8, 1.3),                      // the minute hand, on the three
+  ...p4N('clockRed', p4Hand('dark', 20, 29, 240, 12, 3, 0.7)),     // the second hand, stopped at forty
+  oEll('line', 20, 29, 2.2, 2.2),                                  // the boss the hands turn on
+  oBar('lit', 17.8, 54, 17.8, 124, 0.9),                           // the lamp down the post
+  oBar('lit', 8, 129.6, 32, 129.6, 0.8),                           // and along the pedestal's top
+  oBar('lit', 11, 142.6, 26, 142.6, 0.6),                          // the panel's lit lower lip
+]);
+export const stationClock = (x: number, y: number, w: number, h: number) => fit(STATION_CLOCK, x, y, w, h);
+/** The dial's centre and the case's radius, in the clock's own 40 × 150 units. */
+export const CLOCK_DIAL = { x: 20, y: 29, r: 19 } as const;
+
+// ── THE DEPARTURE SCREEN ON ITS POST ─────────────────────────────────────────
+//
+// REFERENCE (Commons, departure boards at Brighton and Glasgow Central): a BLACK
+// display in a grey steel CASING, its lines in AMBER letters, held up on a single
+// steel POST with a base plate bolted to the platform. The words are the scene's —
+// the display is DEP_SCREEN. Real units, 84 × 124.
+const DEPARTURE_SCREEN: ObjPart[] = p4In(84, 124, [
+  ...p4N('screenCase',
+    oRect('mass', 42, 82, 6, 86),                                  // the post
+    oRect('mass', 42, 121.5, 16, 5, 0, 1),                         // its base plate
+    oRect('mass', 42, 41, 12, 6, 0, 1),                            // the bracket the casing hangs on
+    oRect('mass', 42, 19, 84, 38, 0, 2),                           // the casing
+    oRect('face', 82.5, 19, 3, 36),                                // its end, in shade
+    oRect('face', 44.4, 82, 1.6, 84),                              // the post's far side
+  ),
+  ...p4N('ledBlack', oRect('dark', 41, 19, 76, 30, 0, 1)),         // the display
+  oBar('lit', 2.5, 1.2, 80, 1.2, 0.8),                             // the lamp along the casing's top
+  oBar('lit', 40.2, 46, 40.2, 118, 0.7),                           // and down the post
+]);
+export const departureScreen = (x: number, y: number, w: number, h: number) => fit(DEPARTURE_SCREEN, x, y, w, h);
+/** The display the words are on, in the screen's own 84 × 124 units. */
+export const DEP_SCREEN = { x: 41, y: 19, w: 76, h: 30 } as const;
+
+// ── THE PLATFORM SIGN ────────────────────────────────────────────────────────
+//
+// REFERENCE (Network Rail's platform signs, and the running-in boards in the Keighley
+// photograph): a long BOARD in the railway's colour, its words in white across it,
+// framed by a thin white rule, on TWO POSTS standing on the platform. The words are
+// the scene's — the board's face is PLATFORM_FACE. Real units, 76 × 104.
+const PLATFORM_SIGN: ObjPart[] = p4In(76, 104, [
+  ...p4N('iron',
+    oRect('mass', 10, 62, 4, 84),                                  // the posts
+    oRect('mass', 66, 62, 4, 84),
+    oRect('face', 11.4, 62, 1.2, 82),                              // their far sides
+    oRect('face', 67.4, 62, 1.2, 82),
+  ),
+  ...p4N('railBlue',
+    oRect('mass', 38, 11.5, 76, 23, 0, 1.6),                       // the board
+    oRect('face', 75, 11.5, 2, 21),                                // its end, in shade
+  ),
+  oRect('lit', 38, 2.6, 70, 0.8),                                  // the white rule round its face
+  oRect('lit', 38, 20.4, 70, 0.8),
+  oRect('lit', 3.4, 11.5, 0.8, 18.6),
+  oRect('lit', 72.6, 11.5, 0.8, 18.6),
+]);
+export const platformSign = (x: number, y: number, w: number, h: number) => fit(PLATFORM_SIGN, x, y, w, h);
+/** The board's face inside its white rule, in the sign's own 76 × 104 units. */
+export const PLATFORM_FACE = { x: 38, y: 11.5, w: 68, h: 17 } as const;
+
+// ── THE PLATFORM BENCH ───────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, the GWR benches at Hall Green, Castle Cary and Newton Abbot):
+// a bench of timber SLATS — two along the back, two in the seat — between cast-iron
+// ENDS painted dark green, each end one piece: a back post, a scrolled arm, a front
+// leg, a foot. Seen from the front, the slats run the length and the ends stand at
+// either side. Real units, 56 × 28; the seat is at about a third of a person's height.
+const PLATFORM_BENCH: ObjPart[] = p4In(56, 28, [
+  ...p4N('benchGreen',
+    oBar('mass', 5, 1.5, 5, 27, 3.2),                              // the ends: a back post …
+    oBar('mass', 51, 1.5, 51, 27, 3.2),
+    oBar('mass', 2.2, 13, 9.6, 13, 2.6),                           // … an arm …
+    oBar('mass', 46.4, 13, 53.8, 13, 2.6),
+    oEll('mass', 2.6, 13.6, 3.6, 3.6),                             // … scrolled at its end …
+    oEll('mass', 53.4, 13.6, 3.6, 3.6),
+    oRect('mass', 5, 26.8, 6, 2.4, 0, 0.8),                        // … and a foot
+    oRect('mass', 51, 26.8, 6, 2.4, 0, 0.8),
+  ),
+  ...p4N('wood',
+    oRect('mass', 28, 3.8, 48, 3.6, 0, 0.8),                       // the back slats
+    oRect('mass', 28, 8.6, 48, 3.6, 0, 0.8),
+    oRect('mass', 28, 17, 52, 3.6, 0, 0.8),                        // the seat slats
+    oRect('face', 28, 19.8, 52, 2),                                // the seat's front edge, in shade
+  ),
+  oBar('lit', 5, 2.6, 51, 2.6, 0.5),                               // the lamp along the top slat
+  oBar('lit', 3, 15.6, 53, 15.6, 0.5),                             // and the seat
+]);
+export const platformBench = (x: number, y: number, w: number, h: number) => fit(PLATFORM_BENCH, x, y, w, h);
+
+// ── THE TUNNEL AT THE END OF THE LINE ────────────────────────────────────────
+//
+// REFERENCE (Commons, brick tunnel portals at Redcliffe, Fernleigh and Driving Creek):
+// a brick WALL faced into the hillside with a stone COPING along its top, the grassy
+// BANK rising over it, and the MOUTH an arch whose ring of brick headers stands
+// proud of the wall; inside, nothing but dark. Real units, 64 × 72; the mouth's dark
+// is TUNNEL_MOUTH, where the scene puts a train's lamp.
+const TUNNEL_PORTAL: ObjPart[] = p4In(64, 72, [
+  ...p4N('meadow', oEll('mass', 32, 20, 64, 36)),                  // the bank over it
+  ...p4N('brick',
+    oRect('mass', 32, 47, 60, 50, 0, 1),                           // the portal's wall
+    oRect('face', 62, 47, 4, 48),                                  // its wing, turned from the lamp
+    ...[30, 38, 46, 54, 62].map((y) => oBar('dark', 3, y, 60, y, 0.6)), // the courses
+    oEll('dark', 30, 46, 36, 34),                                  // the ring of headers round the arch
+    oRect('dark', 30, 61, 36, 22),
+  ),
+  ...p4N('coping', oRect('mass', 32, 22, 64, 4.4, 0, 0.8)),        // the coping stone along its top
+  ...p4N('gloom',
+    oEll('dark', 30, 47, 28, 26),                                  // the mouth: an arch …
+    oRect('dark', 30, 61.5, 28, 21),                               // … running down to the rails
+  ),
+  oBar('lit', 1, 20.6, 63, 20.6, 0.8),                             // the lamp along the coping
+  oBar('line', 18, 71.2, 42, 71.2, 0.8),                           // the rails, going in
+]);
+export const tunnelPortal = (x: number, y: number, w: number, h: number) => fit(TUNNEL_PORTAL, x, y, w, h);
+/** The mouth's dark, in the portal's own 64 × 72 units. */
+export const TUNNEL_MOUTH = { x: 30, y: 56, w: 28, h: 30 } as const;
+
+// ── A RAILWAY TICKET ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons, "National Rail Ticket New Layout", and a machine-issued ticket
+// from Glasgow Queen Street): a card about one and a half times as long as it is tall,
+// a cream FIELD of print between two ORANGE BANDS across its top and foot, the
+// railway's double-arrow in a white disc on the foot band. Real units, 16 × 10; it is
+// held between the fingers by one end (TICKET_GRIP).
+const RAIL_TICKET: ObjPart[] = p4In(16, 10, [
+  ...p4N('paper', oRect('mass', 8, 5, 16, 10, 0, 1)),              // the card
+  ...p4N('ticketOrange',
+    oRect('mass', 8, 1.5, 16, 3, 0, 1),                            // the orange band across its top
+    oRect('mass', 8, 8.6, 16, 2.8, 0, 1),                          // and its foot
+  ),
+  oBar('line', 2.4, 4.4, 10.5, 4.4, 0.55),                         // the print
+  oBar('line', 2.4, 6, 8.5, 6, 0.55),
+  oEll('lit', 3, 8.6, 2.2, 2.2),                                   // the white disc on the foot band
+]);
+export const railTicket = (x: number, y: number, w: number, h: number) => fit(RAIL_TICKET, x, y, w, h);
+/** Where the ticket is held: by its near end, in its own 16 × 10 units. */
+export const TICKET_GRIP = { x: 1.5, y: 5 } as const;
+
+// ── phil4: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// psych4 — A BUS STOP ON A HIGH STREET (psychology-foundations-4, "Why We Follow the
+// Crowd"). Drawn against pictures fetched with `node scripts/get-reference.mjs`
+// (scratchpad/ref/p4-*): a glass shelter in grey steel with a flat roof slab, posts
+// at every bay and a timetable frame in a back panel at eye level (Oxgangs,
+// Edinburgh); a lit advert case at the shelter's end, a tall product bottle on a
+// pale ground (Princes Street); a stop pole with its flag held out to one side and a
+// yellow "bus stop closed" notice tied round it (Tower Bridge Approach; Merrill
+// Street); a café in a white-rendered terrace with a red awning over its window
+// (Hythe Road); and a takeaway cup with a card sleeve and a black lid.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const ps4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ps4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE SHELTER'S STEEL ──────────────────────────────────────────────────────
+//
+// REFERENCE (p4-shelterad-2, -4): a flat ROOF SLAB with a deeper fascia, square POSTS
+// at each bay, a rail under the roof and a rail a hand above the pavement, the glass
+// held between them. Seen face-on from the road. Real units, 240 × 134: four bays of
+// 60, posts 4 wide at 2 · 62 · 122 · 182 · 238.
+const SHELTER_POSTS = [2, 62, 122, 182, 238];
+const SHELTER_FRAME: ObjPart[] = ps4In(240, 134, [
+  ...ps4N('shelterSteel',
+    oRect('mass', 120, 6, 240, 12, 0, 1.5),                        // the roof slab
+    ...SHELTER_POSTS.map((x) => oRect('mass', x, 73, 4, 122)),      // the posts
+    oRect('mass', 120, 16.5, 236, 3),                               // the rail under the roof
+    oRect('mass', 120, 121.5, 236, 2.4),                            // and the low rail
+    ...SHELTER_POSTS.map((x) => oRect('face', x + 1.2, 74, 1.6, 120)), // each post's shaded side
+    oRect('dark', 120, 10.6, 236, 2.6),                             // the slab's underside
+  ),
+  oBar('lit', 3, 2.2, 237, 2.2, 0.9),                               // light along the fascia
+]);
+export const shelterFrame = (x: number, y: number, w: number, h: number) => fit(SHELTER_FRAME, x, y, w, h);
+
+// ── THE SHELTER'S GLASS ──────────────────────────────────────────────────────
+//
+// REFERENCE (p4-shelterad-2): toughened glass fills each bay between the rails, clear
+// enough to see the street through, with a long streak of light across each pane. The
+// scene draws it see-through; the first bay is the advert case, so three panes.
+const SHELTER_GLASS: ObjPart[] = ps4In(240, 134, [
+  ...[64, 124, 184].map((x) => ps4N('glass', oRect('mass', x + 28, 69, 56, 102))).flat(),
+  ...[64, 124, 184].map((x) => oBar('lit', x + 8, 108, x + 30, 36, 2)),
+  ...[64, 124, 184].map((x) => oBar('lit', x + 20, 112, x + 40, 46, 1)),
+]);
+export const shelterGlass = (x: number, y: number, w: number, h: number) => fit(SHELTER_GLASS, x, y, w, h);
+
+// ── THE ADVERT ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-shelterad-4): an advert at a shelter is a POSTER LIT FROM BEHIND in a
+// deep steel case, and what it sells is one big product on a plain pale ground. Here a
+// pink shampoo bottle with a flip cap, a few bubbles and the brand's band along the
+// foot. Real units, 56 × 104.
+const ADVERT_CASE: ObjPart[] = ps4In(56, 104, [
+  ...ps4N('shelterSteel', oRect('mass', 28, 52, 56, 104, 0, 1.5)),  // the case
+  ...ps4N('posterMint', oRect('dark', 28, 50, 46, 90)),             // the lit poster
+  ...ps4N('shampoo',
+    oRect('dark', 28, 58, 18, 40, 0, 5),                            // the bottle
+    oEll('dark', 28, 38, 18, 10),                                   // its shoulders
+    oRect('dark', 28, 88, 46, 6),                                   // the brand's band
+  ),
+  ...ps4N('porcelain', oRect('dark', 28, 30, 10, 7, 0, 1.5)),        // the flip cap
+  oRect('lit', 28, 60, 12, 10, 0, 1),                               // the bottle's label
+  oBar('lit', 22, 44, 22, 74, 1.4),                                 // light down its side
+  oEll('lit', 13, 24, 6, 6), oEll('lit', 42, 18, 4, 4), oEll('lit', 44, 40, 5, 5),  // bubbles
+  oEll('lit', 12, 46, 3, 3),
+  oBar('lit', 6, 98, 50, 98, 0.8),                                  // the case's lit sill
+]);
+export const advertCase = (x: number, y: number, w: number, h: number) => fit(ADVERT_CASE, x, y, w, h);
+
+// ── THE TIMETABLE ────────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-shelterad-2): a portrait frame in brushed steel, the sheet behind its
+// glass a dark header over rows of times printed in two columns on alternating yellow
+// and pale-blue bands. Real units, 38 × 48.
+const TIMETABLE: ObjPart[] = ps4In(38, 48, [
+  ...ps4N('silver', oRect('mass', 19, 24, 38, 48, 0, 1)),           // the frame
+  oRect('lit', 19, 24, 32, 42),                                     // the sheet
+  ...ps4N('bookBlue', oRect('dark', 19, 7, 32, 6)),                 // its header
+  ...[14, 21, 28, 35].flatMap((y, i) => [
+    ...ps4N(i % 2 ? 'skyPane' : 'noticeYellow', oRect('dark', 11.5, y, 15, 5)),
+    ...ps4N(i % 2 ? 'noticeYellow' : 'skyPane', oRect('dark', 26.5, y, 15, 5)),
+  ]),
+  ...[14, 21, 28, 35].flatMap((y) => [oBar('line', 6, y, 15, y, 0.6), oBar('line', 21, y, 30, y, 0.6)]),
+  oBar('line', 6, 41.5, 22, 41.5, 0.6),                             // the small print at its foot
+]);
+export const timetable = (x: number, y: number, w: number, h: number) => fit(TIMETABLE, x, y, w, h);
+
+// ── THE STOP POLE ────────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-stopclosed-2): a steel pole on a concrete foot, its FLAG held out to
+// one side at the top on two brackets — a white plate with a red band and the bus
+// pictogram. Real units, 40 × 148: the pole at x 4, the flag out to the right.
+const STOP_POLE: ObjPart[] = ps4In(40, 148, [
+  ...ps4N('silver',
+    oRect('mass', 4, 76, 4, 144),                                   // the pole
+    oRect('mass', 4, 2.5, 5.4, 4, 0, 1.2),                          // its cap
+    oRect('face', 5.3, 77, 1.4, 140),                               // its shaded side
+  ),
+  ...ps4N('stepStone', oRect('mass', 4, 145, 10, 6, 0, 1.5)),        // the concrete foot
+  ...ps4N('casing', oRect('mass', 23, 14, 32, 24, 0, 1.5)),          // the flag's white plate
+  oBar('line', 5, 6, 8, 6, 1.4), oBar('line', 5, 22, 8, 22, 1.4),   // its two brackets
+  ...ps4N('stopRed', oRect('dark', 23, 5, 30, 4)),                  // its red band
+  oRect('line', 23, 16, 18, 9, 0, 2),                               // the bus: its body,
+  oRect('lit', 19, 14.5, 4, 3), oRect('lit', 24, 14.5, 4, 3), oRect('lit', 29, 14.5, 3, 3), // windows
+  oEll('line', 18, 21, 4, 4), oEll('line', 28, 21, 4, 4),          // and its wheels
+]);
+export const stopPole = (x: number, y: number, w: number, h: number) => fit(STOP_POLE, x, y, w, h);
+
+// ── THE NOTICE ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-stopclosed-1, -2): a closure notice is a sheet of BRIGHT YELLOW with a
+// red band across its head, cable-tied round the pole. The word is drawn by the scene
+// on its yellow face. Real units, 44 × 28.
+const STOP_NOTICE: ObjPart[] = ps4In(44, 28, [
+  ...ps4N('noticeYellow', oRect('mass', 22, 14, 44, 28, 0, 1)),     // the sheet
+  ...ps4N('stopRed', oRect('dark', 22, 3.2, 42, 3.6)),              // its red band
+  oRect('line', 22, 0.8, 7, 1.6, 0, 0.6),                           // the cable ties
+  oRect('line', 22, 27.2, 7, 1.6, 0, 0.6),
+]);
+export const stopNotice = (x: number, y: number, w: number, h: number) => fit(STOP_NOTICE, x, y, w, h);
+
+// ── THE CAFÉ ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-cafe-1): a café in a terrace — a white-rendered front, a sash window
+// above, a red fascia over a RED AWNING that shades the shop window, and a red-painted
+// stall riser under the window. Its name is drawn by the scene on the fascia. Real
+// units, 70 × 170; the terrace runs on past the stage's edge.
+const CAFE_TERRACE: ObjPart[] = ps4In(70, 170, [
+  ...ps4N('whitewash', oRect('mass', 35, 85, 70, 170)),              // the rendered front
+  ...ps4N('houseGlass', oRect('dark', 30, 30, 26, 32)),              // the sash window upstairs
+  oBar('lit', 30, 14, 30, 46, 1.4), oBar('lit', 17, 30, 43, 30, 1.6), // its glazing bars
+  ...ps4N('awning',
+    oRect('dark', 35, 63, 70, 13),                                  // the fascia
+    oRect('mass', 35, 79, 70, 12),                                  // the awning
+    ...[5, 15, 25, 35, 45, 55, 65].map((x) => oEll('mass', x, 85, 10, 6)), // its scalloped edge
+    oRect('dark', 35, 159, 70, 22),                                 // the stall riser
+  ),
+  ...[10, 30, 50].map((x) => oRect('lit', x, 79, 6, 12)),           // the awning's stripes
+  ...ps4N('shopGlass', oRect('dark', 32, 120, 52, 50)),              // the shop window
+  oBar('lit', 32, 96, 32, 144, 1.4),                                // its mullion
+  oBar('lit', 12, 136, 24, 104, 1.6),                               // light on the glass
+  ...ps4N('whitewash', oRect('dark', 32, 147, 58, 3)),               // the sill
+]);
+export const cafeTerrace = (x: number, y: number, w: number, h: number) => fit(CAFE_TERRACE, x, y, w, h);
+
+// ── THE TAKEAWAY CUP ─────────────────────────────────────────────────────────
+//
+// REFERENCE (p4-cup-1): a paper cup that WIDENS to its rim, a black lid with a raised
+// sip dome, and a card sleeve round its middle where the hand holds it. Real units,
+// 10 × 14, held round its body at `TAKEAWAY_GRIP` (AR2: a cup with no handle).
+const TAKEAWAY_CUP: ObjPart[] = ps4In(10, 14, [
+  ...ps4N('paper', ...trapezoid('mass', 5, 8.6, 8.6, 6.4, 10.4)),    // the cup
+  ...ps4N('capBlack',
+    oRect('mass', 5, 3, 10, 2.2, 0, 0.8),                           // the lid's rim
+    oRect('mass', 5, 1.4, 7, 1.8, 0, 0.8),                          // and its dome
+  ),
+  ...ps4N('cardboard', ...trapezoid('dark', 5, 9, 7.9, 7, 4.6)),     // the sleeve
+  oBar('lit', 2.9, 5.6, 3.3, 12.6, 0.7),                            // light down its side
+]);
+export const takeawayCup = (x: number, y: number, w: number, h: number) => fit(TAKEAWAY_CUP, x, y, w, h);
+/** Where the cup is held: round its sleeve, in its own 10 × 14 units. */
+export const TAKEAWAY_GRIP = { x: 5, y: 9, w: 10, h: 14 } as const;
+
+// ── psych4: objects for this lesson go ABOVE this line ──
+
+// ── growth4 objects BEGIN ──
+// personal-growth-foundations-4, "How to Learn From a Mistake": A POTTERY STUDIO.
+// References looked at (scratchpad/ref/g4*): an electric potter's wheel (a cream splash
+// pan round a steel wheel head, the body on its stand), a potter throwing (wet grey
+// clay, throwing rings round the wall, the head a wide flat disc), a galvanised bucket
+// (a tapering drum, two raised ribs, a rolled rim, a wire bail on two ears), a pair of
+// top-loading kilns (a steel drum in bands under a lid, a red control box on its side,
+// a small-paned white window over them) and glazed stoneware (the glaze over the top,
+// the bare clay foot under it). Every drawing is in real units, laid out at 1:1.
+
+// ── POTTER'S WHEEL (its stand, body and splash pan) ─────────────────────────
+//
+// REFERENCE. An electric wheel is a cream plastic SPLASH PAN — a shallow tub with a
+// rolled rim — round the steel wheel head, over a squat motor BODY. This one stands on
+// steel legs, raised to a standing potter's hip. The pan's inside is grey with slip.
+// The wheel head is its own drawing (`wheelHead`), so it sits ON the slip, not under it.
+// Real units, 40 × 32: the rim at y 4.8, the ground at y 32.
+const POT_WHEEL: ObjPart[] = g3In(40, 32, [
+  ...g3('iron',
+    oBar('mass', 11, 20.4, 6, 31.2, 1.6), oBar('mass', 29, 20.4, 34, 31.2, 1.6),
+    oBar('face', 16, 20.4, 15, 31.2, 1.3), oBar('face', 24, 20.4, 25, 31.2, 1.3),
+    oEll('mass', 6, 31.4, 3.4, 1.2), oEll('mass', 34, 31.4, 3.4, 1.2),
+  ),
+  ...g3('wheelCream',
+    oRect('mass', 20, 16.6, 22, 8.4, 0, 1.6),                     // the motor body
+    oRect('face', 27.4, 16.6, 7, 8, 0, 1.2),                      // its side, from the lamp
+    ...trapezoid('mass', 20, 8.6, 37, 30, 7.6),                   // the splash pan's wall
+    oEll('mass', 20, 12.2, 30, 3.2),                              // its rounded foot
+    oEll('face', 22, 11.9, 25, 2.4),                              // the foot, out of the lamp
+    oEll('mass', 20, 4.8, 38.4, 4.4),                             // the rolled rim
+  ),
+  ...g3('wetClay', oEll('dark', 20, 4.8, 33.4, 2.6)),             // the slip inside the pan
+  oBar('lit', 4.6, 7, 7.4, 11, 0.8),                              // the lamp on the pan
+  oBar('lit', 11, 15, 11, 18.6, 0.7),                             // and on the body
+]);
+export const potWheel = (x: number, y: number, w: number, h: number) => fit(POT_WHEEL, x, y, w, h);
+/** The wheel head's seat on the pan, in the wheel's own 40 × 32 units. */
+export const WHEEL_SEAT = { x: 20, y: 4.4, of: { w: 40, h: 32 } } as const;
+
+// ── WHEEL HEAD ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. The head is a flat steel DISC, seen nearly edge-on: a thin band with its
+// top face showing as a sliver. Real units, 26 × 4; its top face at y 0.6.
+const WHEEL_HEAD: ObjPart[] = g3In(26, 4, [
+  ...g3('silver', oRect('mass', 13, 2.2, 26, 3.4, 0, 1), oRect('face', 13, 3.3, 25, 1.2, 0, 0.6)),
+  oBar('lit', 2.4, 1.1, 10, 1.1, 0.5),
+]);
+export const wheelHead = (x: number, y: number, w: number, h: number) => fit(WHEEL_HEAD, x, y, w, h);
+
+// ── THE POT ON THE WHEEL, IN TWO PIECES ──────────────────────────────────────
+//
+// REFERENCE. A thrown pot, wet, is a CYLINDER of grey clay with THROWING RINGS round
+// its wall and a lip at the top; a pot that has taken too much water SLUMPS — its upper
+// wall gives way and folds over the side. So it is drawn as two pieces: the lower wall
+// (`potLow`, 13 × 11, base at its foot) and the upper wall with the lip (`potTop`,
+// 14 × 10), which hinges at its lower corner on the side it falls to (POT_HINGE).
+const POT_LOW: ObjPart[] = g3In(13, 11, [
+  ...g3('wetClay', ...trapezoid('mass', 6.5, 5.5, 12.4, 13, 11)),
+  ...g3('wetClay', oRect('face', 10.9, 5.6, 2.8, 10.6)),
+  ...g3('wetClay', oBar('dark', 0.7, 3.4, 12.3, 3.4, 0.55), oBar('dark', 0.4, 7.6, 12.6, 7.6, 0.55)),
+  oBar('lit', 2.4, 1.6, 2.2, 9.4, 0.7),                           // wet: the lamp in a streak
+]);
+export const potLow = (x: number, y: number, w: number, h: number) => fit(POT_LOW, x, y, w, h);
+const POT_TOP: ObjPart[] = g3In(14, 10, [
+  ...g3('wetClay',
+    oRect('mass', 7, 6, 12.4, 8),                                 // the upper wall
+    oEll('mass', 7, 1.7, 14, 3.2),                                // the lip
+    oRect('face', 11.4, 6.2, 2.8, 7.6),
+  ),
+  ...g3('wetClay', oEll('dark', 7, 1.6, 10.4, 1.7)),              // the mouth
+  ...g3('wetClay', oBar('dark', 1, 5.8, 13, 5.8, 0.55)),          // a throwing ring
+  oBar('lit', 2.6, 3.6, 2.6, 8.8, 0.7),
+]);
+export const potTop = (x: number, y: number, w: number, h: number) => fit(POT_TOP, x, y, w, h);
+/** Where the upper wall hinges onto the lower one: its lower right corner, in its 14 × 10. */
+export const POT_HINGE = { x: 13.2, y: 10, of: { w: 14, h: 10 } } as const;
+
+// ── LUMP AND BALL OF CLAY ────────────────────────────────────────────────────
+//
+// REFERENCE. Clay centred on a wheel is a smooth DOME, wider than tall; a wedged ball
+// waiting to be thrown is round, a little flattened where it sits. Both wet grey.
+const CLAY_LUMP: ObjPart[] = g3In(17, 11, [
+  ...g3('wetClay', oEll('mass', 8.5, 6.4, 17, 10), oEll('face', 10.6, 8, 11, 5.4)),
+  oEll('lit', 5, 3.8, 4.4, 1.6, -14),
+]);
+export const clayLump = (x: number, y: number, w: number, h: number) => fit(CLAY_LUMP, x, y, w, h);
+const CLAY_BALL: ObjPart[] = g3In(10, 9, [
+  ...g3('wetClay', oEll('mass', 5, 4.6, 10, 8.8), oEll('face', 6.2, 5.6, 7, 6.2)),
+  oEll('lit', 3.4, 2.8, 2.6, 1.3, -14),
+]);
+export const clayBall = (x: number, y: number, w: number, h: number) => fit(CLAY_BALL, x, y, w, h);
+
+// ── WATER BUCKET ─────────────────────────────────────────────────────────────
+//
+// REFERENCE. A galvanised bucket is a DRUM that tapers to its foot, two raised RIBS
+// round it and a rolled RIM, carried by a wire BAIL hooked into two ears. Drawn about
+// the top of the bail (BUCKET_GRIP), which is where a hand carries it. Real units,
+// 16 × 23: the bail's crown at y 0.8, the rim at y 7.6, the foot at y 23.
+const WATER_BUCKET: ObjPart[] = g3In(16, 23, [
+  oBar('line', 1, 8.4, 2.2, 3.4, 0.7), oBar('line', 2.2, 3.4, 5.2, 0.9, 0.7),
+  oBar('line', 5.2, 0.9, 10.8, 0.9, 0.7), oBar('line', 10.8, 0.9, 13.8, 3.4, 0.7),
+  oBar('line', 13.8, 3.4, 15, 8.4, 0.7),                          // the wire bail
+  ...g3('silver',
+    ...trapezoid('mass', 8, 15.3, 16, 13, 15.4),                  // the drum
+    oEll('mass', 8, 7.6, 16.8, 2.8),                              // the rolled rim
+    oRect('face', 12.4, 15.6, 2.4, 14.2),
+  ),
+  ...g3('silver', oBar('dark', 0.8, 12, 15.2, 12, 0.7), oBar('dark', 1.6, 19.6, 14.4, 19.6, 0.7)), // the ribs
+  ...g3('water', oEll('dark', 8, 7.8, 14, 1.7)),                  // the water in it
+  oEll('line', 1, 8.6, 1.5, 1.5), oEll('line', 15, 8.6, 1.5, 1.5), // the ears
+  oBar('lit', 3.4, 10, 3.9, 21, 0.8),
+]);
+export const waterBucket = (x: number, y: number, w: number, h: number) => fit(WATER_BUCKET, x, y, w, h);
+/** Where a hand holds the bucket: the crown of its bail, in its own 16 × 23. */
+export const BUCKET_GRIP = { x: 8, y: 0.9, of: { w: 16, h: 23 } } as const;
+
+// ── TALL STOOL ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A wooden workshop stool: a thick square SEAT on four legs that SPLAY out
+// to the floor, the back pair seen between the front ones, a RUNG across low down.
+// Real units, 22 × 26: the seat's top at y 0.
+const TALL_STOOL: ObjPart[] = g3In(22, 26, [
+  ...g3('wood',
+    oBar('face', 7.5, 3, 7, 25.6, 1.3), oBar('face', 14.5, 3, 15, 25.6, 1.3), // the back legs
+    oBar('mass', 3.6, 3, 1.6, 25.6, 1.8), oBar('mass', 18.4, 3, 20.4, 25.6, 1.8),
+    oBar('mass', 2.6, 16, 19.4, 16, 1.2),                         // the rung
+    oRect('mass', 11, 1.6, 22, 3.2, 0, 0.8),                      // the seat
+    oRect('face', 11, 2.8, 21.4, 0.9),
+  ),
+  oBar('lit', 2, 0.8, 9, 0.8, 0.5),
+]);
+export const tallStool = (x: number, y: number, w: number, h: number) => fit(TALL_STOOL, x, y, w, h);
+
+// ── POT RACK ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A studio's open rack: two upright POSTS and three deep BOARDS across them,
+// dark with use, finished pots standing in a row on each. Real units, 70 × 96: the
+// boards' tops at y 16, 42 and 68, the floor at y 96.
+const POT_RACK: ObjPart[] = g3In(70, 96, [
+  ...g3('wood',
+    oRect('mass', 2, 48, 3.4, 96), oRect('mass', 68, 48, 3.4, 96),
+    ...[16, 42, 68].flatMap((y) => [oRect('mass', 35, y + 1.6, 70, 3.2), oRect('face', 35, y + 2.8, 69, 0.9)]),
+    oRect('mass', 35, 92.4, 70, 2.6),                            // the foot rail
+  ),
+  oBar('lit', 1, 2, 1, 94, 0.6),
+]);
+export const potRack = (x: number, y: number, w: number, h: number) => fit(POT_RACK, x, y, w, h);
+
+// ── FINISHED POTS: a vase, a bowl, a jug and a lidded jar ────────────────────
+//
+// REFERENCE. Glazed stoneware: the GLAZE runs over the top of the pot and stops above
+// a band of BARE CLAY at the foot, which is how a finished pot is told from a wet one.
+// Each takes its glaze's colour; the foot is the pale fired body ('clay').
+const glazedVaseParts = (glaze: NaturalKey): ObjPart[] => g3In(12, 18, [
+  ...g3('clay', oRect('mass', 6, 16.6, 7.4, 2.8, 0, 0.6)),
+  ...g3(glaze,
+    oEll('mass', 6, 10.8, 12, 10.6),                              // the belly
+    oRect('mass', 6, 4.4, 4.4, 5.6),                              // the neck
+    oEll('mass', 6, 1.7, 6.6, 2.4),                               // the lip
+    oEll('face', 7.8, 12, 7, 7.2),
+  ),
+  oEll('line', 6, 1.5, 3.6, 0.9),
+  oEll('lit', 3.4, 8.6, 1.8, 3.2, 12),
+]);
+export const glazedVase = (x: number, y: number, w: number, h: number, glaze: NaturalKey = 'celadon') => fit(glazedVaseParts(glaze), x, y, w, h);
+const glazedBowlParts = (glaze: NaturalKey): ObjPart[] => g3In(16, 8, [
+  ...g3('clay', oRect('mass', 8, 7.3, 6.2, 1.4, 0, 0.4)),
+  ...g3(glaze,
+    ...trapezoid('mass', 8, 3.8, 16, 9.4, 4.2),
+    oEll('mass', 8, 5.8, 9.4, 2.4),
+    oEll('mass', 8, 1.7, 16.2, 2.6),                              // the rim
+    oEll('face', 10, 4.6, 8, 3),
+  ),
+  ...g3(glaze, oEll('dark', 8, 1.7, 13.6, 1.5)),                  // looking into it
+  oBar('lit', 3, 3.2, 5, 5, 0.6),
+]);
+export const glazedBowl = (x: number, y: number, w: number, h: number, glaze: NaturalKey = 'cobaltGlaze') => fit(glazedBowlParts(glaze), x, y, w, h);
+const glazedJugParts = (glaze: NaturalKey): ObjPart[] => g3In(14, 16, [
+  oBar('line', 10.4, 4.4, 13.2, 6, 1.1), oBar('line', 13.2, 6, 12.8, 11, 1.1), oBar('line', 12.8, 11, 10.2, 12.2, 1.1), // the handle
+  ...g3('clay', oRect('mass', 6, 14.8, 8.4, 2.4, 0, 0.6)),
+  ...g3(glaze,
+    oEll('mass', 6, 9.4, 10.4, 10),                               // the body
+    oRect('mass', 6, 4, 7.4, 4.6),                                // the neck
+    oTri('mass', 1.6, 2.6, 3.2, 2.6, 'left'),                     // the spout
+    oEll('mass', 6, 1.9, 8, 2.2),
+    oEll('face', 7.8, 10.4, 6, 7),
+  ),
+  oEll('line', 6, 1.8, 5.4, 0.8),
+  oEll('lit', 3.6, 8, 1.6, 3, 10),
+]);
+export const glazedJug = (x: number, y: number, w: number, h: number, glaze: NaturalKey = 'oatmeal') => fit(glazedJugParts(glaze), x, y, w, h);
+const glazedJarParts = (glaze: NaturalKey): ObjPart[] => g3In(11, 15, [
+  ...g3('clay', oRect('mass', 5.5, 13.8, 9.4, 2.4, 0, 0.6)),
+  ...g3(glaze,
+    oRect('mass', 5.5, 8.2, 11, 9.6, 0, 2.2),                     // the body
+    oRect('mass', 5.5, 2.6, 9.4, 1.8, 0, 0.6),                    // the lid
+    oEll('mass', 5.5, 1, 2.6, 1.6),                               // its knob
+    oRect('face', 8.8, 8.4, 3.2, 9, 0, 1),
+  ),
+  oBar('line', 1, 3.6, 10, 3.6, 0.4),                             // the lid's seat
+  oBar('lit', 2.2, 5.4, 2.2, 11, 0.7),
+]);
+export const glazedJar = (x: number, y: number, w: number, h: number, glaze: NaturalKey = 'tenmoku') => fit(glazedJarParts(glaze), x, y, w, h);
+
+// ── SIDE TABLE ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A potter's side bench: a heavy wooden frame with a CANVAS top that clay
+// does not stick to, square legs, a stretcher low down. Real units, 52 × 26: the
+// canvas at y 0.
+const SIDE_TABLE: ObjPart[] = g3In(52, 26, [
+  ...g3('wood',
+    oBar('face', 8, 6, 8, 25.6, 2), oBar('face', 44, 6, 44, 25.6, 2), // the back legs
+    oBar('mass', 3, 6, 3, 25.6, 2.6), oBar('mass', 49, 6, 49, 25.6, 2.6),
+    oBar('mass', 3, 20, 49, 20, 1.4),                             // the stretcher
+    oRect('mass', 26, 5.6, 51, 3.4),                              // the apron
+  ),
+  ...g3('linen', oRect('mass', 26, 2, 52, 4, 0, 0.6), oRect('face', 26, 3.6, 52, 0.9)),
+  oBar('lit', 2, 0.8, 18, 0.8, 0.5),
+]);
+export const sideTable = (x: number, y: number, w: number, h: number) => fit(SIDE_TABLE, x, y, w, h);
+
+// ── WARE BOARD ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A ware board is a long wooden PLANK on two iron BRACKETS on the studio
+// wall, where wedged balls of clay wait to be thrown. Real units, 56 × 9: the plank's
+// top at y 0.
+const WARE_BOARD: ObjPart[] = g3In(56, 9, [
+  ...g3('iron',
+    oBar('mass', 7, 2.6, 7, 8.6, 1.1), oBar('mass', 7, 8.6, 12.4, 2.8, 0.9),
+    oBar('mass', 49, 2.6, 49, 8.6, 1.1), oBar('mass', 49, 8.6, 43.6, 2.8, 0.9),
+  ),
+  ...g3('wood', oRect('mass', 28, 1.3, 56, 2.6), oRect('face', 28, 2.3, 56, 0.7)),
+]);
+export const wareBoard = (x: number, y: number, w: number, h: number) => fit(WARE_BOARD, x, y, w, h);
+
+// ── TOP-LOADING KILN ─────────────────────────────────────────────────────────
+//
+// REFERENCE. An electric kiln is a steel DRUM of flat panels held in steel BANDS, a
+// heavy LID on top with a handle, a peephole in its side, a red CONTROL BOX bolted
+// to it, and a low iron STAND under it. Real units, 54 × 42: the lid at y 2.6, the
+// floor at y 42.
+const KILN: ObjPart[] = g3In(54, 42, [
+  ...g3('iron',
+    oBar('mass', 8, 37, 6, 41.6, 1.6), oBar('mass', 42, 37, 44, 41.6, 1.6),
+    oRect('mass', 25, 37.6, 44, 2.4),                             // the stand
+  ),
+  ...g3('silver',
+    oRect('mass', 25, 21.4, 46, 30.4, 0, 1.4),                    // the drum
+    oRect('face', 44.4, 21.4, 7.2, 29.6, 0, 1),
+    oRect('mass', 25, 4.4, 49, 4.2, 0, 1.2),                      // the lid
+  ),
+  ...g3('silver', oRect('dark', 25, 6, 48, 1)),                  // the lid's lower edge
+  ...g3('silver', oBar('dark', 9.5, 7, 9.5, 36.4, 0.5), oBar('dark', 25, 7, 25, 36.4, 0.5), oBar('dark', 40.5, 7, 40.5, 36.4, 0.5)),
+  ...g3('iron', oBar('mass', 2.4, 13, 47.6, 13, 1.2), oBar('mass', 2.4, 29, 47.6, 29, 1.2)), // the bands
+  oBar('line', 20, 1.2, 30, 1.2, 1.2), oBar('line', 20.6, 1.2, 20.6, 2.6, 0.8), oBar('line', 29.4, 1.2, 29.4, 2.6, 0.8), // the handle
+  oEll('line', 16, 21, 2.2, 2.2),                                  // the peephole
+  ...g3('signRed', oRect('mass', 50.2, 20, 7.2, 12.4, 0, 0.8), oRect('face', 52.6, 20, 2.4, 12)),
+  oEll('lit', 49.6, 17, 3, 3), oBar('line', 47.8, 23.6, 52, 23.6, 0.6),
+  oBar('lit', 4, 9, 4, 34, 0.8),
+]);
+export const topKiln = (x: number, y: number, w: number, h: number) => fit(KILN, x, y, w, h);
+
+// ── STUDIO WINDOW ────────────────────────────────────────────────────────────
+//
+// REFERENCE. The window over the kilns: a white-painted FRAME of small PANES, two
+// across and three down, on a deep SILL. Real units, 56 × 48.
+const STUDIO_WINDOW: ObjPart[] = g3In(56, 48, [
+  ...g3('plinthWhite', oRect('mass', 28, 23, 52, 46, 0, 0.8), oRect('mass', 28, 46.4, 58, 3.2, 0, 0.6), oRect('face', 28, 47.6, 58, 0.9)),
+  ...g3('skyPane', ...[0, 1].flatMap((c) => [0, 1, 2].map((r) => oRect('dark', 15.5 + c * 25, 9.4 + r * 13.4, 21, 11.4, 0, 0.4)))),
+  oBar('lit', 7, 5, 13, 5, 0.6), oBar('lit', 32, 5, 38, 5, 0.6),
+]);
+export const studioWindow = (x: number, y: number, w: number, h: number) => fit(STUDIO_WINDOW, x, y, w, h);
+
+// ── growth4: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// business-foundations-4 — A FOOD TRUCK AT CLOSING TIME. A step van with its serving
+// hatch propped open over a fold-down steel counter, a menu board above the hatch, a
+// small chalk board hung on its side, a blue-grey cash box, a spike of receipts and a
+// pocket calculator; across the road, a bakery with bread in its lit window. Drawn
+// against Commons photographs (scratchpad/ref/biz4-*): a St Louis taco truck in side
+// view (the hatch over a shelf on brackets, the cab with its raked windscreen, a
+// painted stripe along the body), an Austin truck's hatch with its flap propped up on
+// a strut and a chalk board beside it, a café's receipt spike (a steel rod on a round
+// weighted foot, slips pushed down over the point), and a Cornish bakery's shop front
+// (a pale-blue fascia over a big window and a glazed door).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const b4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function b4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE FOOD TRUCK ───────────────────────────────────────────────────────────
+//
+// REFERENCE (the St Louis taco truck). A step van in side view: a tall BOX body with
+// rounded top corners, a short CAB at its front with a raked windscreen over a stubby
+// bonnet, two wheels in arches, a painted STRIPE along the body, and in the box's side
+// the serving HATCH — a wide opening onto the kitchen, its FLAP propped up and out over
+// it on two struts (the Austin truck), a shelf under it. Drawn facing LEFT. Real units
+// 300 × 166: the box 56–300 × 6–158, the cab 12–60, the hatch 138–286 × 70–132, the flap
+// 133–291 × 58–70, the wheels on y 152. The shelf is its own object (`truckCounter`), so
+// the people inside can be drawn between the two.
+const FOOD_TRUCK: ObjPart[] = b4In(300, 166, [
+  ...b4N('truckCream',
+    oRect('mass', 178, 82, 244, 152, 0, 8),                  // the box body
+    oRect('mass', 36, 99, 48, 118, 0, 6),                    // the cab
+    oBar('mass', 17, 44, 8, 106, 9),                         // its raked front, roof to bonnet
+    oRect('mass', 10, 133, 16, 50, 0, 4),                    // the bonnet
+  ),
+  ...b4N('truckRed',
+    oRect('mass', 178, 144, 244, 8),                         // the painted stripe along the body
+    oRect('mass', 34, 144, 44, 8),                           // and along the cab
+  ),
+  ...b4N('silver', oRect('mass', 252, 3.5, 32, 7, 0, 2)),     // the extractor on the roof
+  ...b4N('tyre',
+    oEll('face', 38, 150, 32, 30), oEll('face', 268, 150, 32, 30),   // the wheel arches
+    oEll('mass', 38, 152, 24, 24), oEll('mass', 268, 152, 24, 24),   // the tyres
+  ),
+  ...b4N('silver',
+    oEll('dark', 38, 152, 11, 11), oEll('dark', 268, 152, 11, 11),   // their hubs
+    oRect('face', 9, 154, 18, 6, 0, 2),                              // the front bumper
+  ),
+  ...b4N('glass',
+    oBar('dark', 19, 50, 12, 100, 4),                        // the windscreen
+    oRect('dark', 38, 66, 26, 30, 0, 2),                     // the cab's side window
+  ),
+  ...b4N('steelInside', oRect('dark', 212, 101, 148, 62, 0, 1)),  // the kitchen, seen through the hatch
+  ...b4N('silver', oRect('dark', 212, 71.6, 148, 3.2)),      // its extractor hood
+  ...b4N('truckRed', oRect('face', 212, 64, 158, 12, 0, 1.5)),     // the flap, propped up: its underside
+  oBar('lit', 135, 58.7, 289, 58.7, 1.2),                    // the flap's front edge, catching the light
+  oBar('line', 133, 70, 291, 70, 0.8),                       // its hinge along the top of the hatch
+  oBar('line', 141, 72, 146, 60, 1.1),                       // the struts holding it up
+  oBar('line', 283, 72, 278, 60, 1.1),
+  oBar('line', 138, 70, 138, 132, 0.7), oBar('line', 286, 70, 286, 132, 0.7),   // the hatch's jambs
+  oBar('lit', 64, 9.5, 292, 9.5, 1.2),                       // the light along the roof
+  oBar('line', 58, 42, 58, 136, 0.9),                        // the cab door's seam
+  oRect('line', 50, 100, 5, 1.6, 0, 0.6),                    // and its handle
+  oBar('line', 291, 14, 291, 136, 0.8),                      // the back door's seam
+  ...b4N('truckRed', oRect('dark', 297, 120, 3, 10, 0, 1)),  // the tail light
+  oRect('lit', 4, 122, 4, 9, 0, 1.6),                        // the headlamp
+]);
+export const foodTruck = (x: number, y: number, w: number, h: number) => fit(FOOD_TRUCK, x, y, w, h);
+
+// ── THE HATCH'S COUNTER ──────────────────────────────────────────────────────
+//
+// REFERENCE (the same truck). Under the hatch a narrow stainless SHELF folds down on
+// two angled BRACKETS: the counter the food is handed over. Real units 160 × 20.
+const TRUCK_COUNTER: ObjPart[] = b4In(160, 20, [
+  ...b4N('silver',
+    oRect('mass', 80, 2.6, 160, 5.2, 0, 1),                  // the shelf
+    oBar('mass', 12, 5, 20, 17, 2),                          // its brackets, under it
+    oBar('mass', 148, 5, 140, 17, 2),
+  ),
+  oBar('lit', 2, 1.1, 158, 1.1, 0.9),                        // its lit front edge
+]);
+export const truckCounter = (x: number, y: number, w: number, h: number) => fit(TRUCK_COUNTER, x, y, w, h);
+
+// ── THE MENU BOARD ───────────────────────────────────────────────────────────
+//
+// REFERENCE (the Austin truck). A food truck's menu is a SLATE in a wooden frame
+// screwed to the van above or beside the hatch, chalked with a heading and the dishes
+// in columns, each with its price ranged right. Real units 108 × 32.
+const TRUCK_MENU: ObjPart[] = b4In(108, 32, [
+  ...b4N('wood', oRect('mass', 54, 16, 108, 32, 0, 2)),      // the frame
+  ...b4N('slate', oRect('dark', 54, 16, 100, 25, 0, 1)),     // the slate
+  oBar('lit', 38, 8.2, 70, 8.2, 2.4),                        // the heading, chalked large
+  ...[14.4, 19.8, 25.2].flatMap((y) => [
+    oBar('lit', 8, y, 38, y, 1.1), oBar('lit', 43, y, 49, y, 1.1),   // a dish and its price
+    oBar('lit', 59, y, 89, y, 1.1), oBar('lit', 94, y, 100, y, 1.1),
+  ]),
+  oEll('line', 2.4, 2.4, 1.6, 1.6), oEll('line', 105.6, 2.4, 1.6, 1.6),   // its screws
+]);
+export const truckMenu = (x: number, y: number, w: number, h: number) => fit(TRUCK_MENU, x, y, w, h);
+
+// ── THE CASH BOX ─────────────────────────────────────────────────────────────
+//
+// REFERENCE. A petty-cash box is a small box of ENAMELLED STEEL with a LOCK in the
+// middle of its front and a lid hinged along the back, which lifts to stand up behind
+// it and show its inside face. Three objects so the notes can sit between the back and
+// the front and the lid can swing: the back rim and its dark inside (22 × 4), the front
+// (22 × 14) and the lid (22 × 16).
+const CASH_BOX_BACK: ObjPart[] = b4In(22, 4, [
+  ...b4N('cashSteel', oRect('mass', 11, 2, 22, 4, 0, 1)),    // the back rim
+  ...b4N('tyre', oRect('dark', 11, 2.4, 19, 2.6, 0, 0.6)),   // and the dark inside
+  oBar('lit', 2, 0.6, 20, 0.6, 0.5),                         // its lit top edge
+]);
+export const cashBoxBack = (x: number, y: number, w: number, h: number) => fit(CASH_BOX_BACK, x, y, w, h);
+const CASH_BOX_FRONT: ObjPart[] = b4In(22, 14, [
+  ...b4N('cashSteel',
+    oRect('mass', 11, 7, 22, 14, 0, 1.5),                    // the front
+    oRect('face', 20.4, 7, 3.2, 14, 0, 1),                   // its end, turned from the lamp
+  ),
+  oBar('lit', 1.6, 1, 18.5, 1, 0.8),                         // the rim's lit edge
+  oRect('lit', 11, 6, 5, 5.6, 0, 1),                         // the lock's escutcheon
+  oEll('line', 11, 5.4, 1.5, 1.6), oBar('line', 11, 6, 11, 7.8, 0.8),   // and its keyhole
+]);
+export const cashBoxFront = (x: number, y: number, w: number, h: number) => fit(CASH_BOX_FRONT, x, y, w, h);
+const CASH_BOX_LID: ObjPart[] = b4In(22, 16, [
+  ...b4N('cashSteel', oRect('mass', 11, 8, 22, 16, 0, 1.5)), // the lid
+  ...b4N('cashSteel', oRect('dark', 11, 8.6, 17, 11.5, 0, 1)),   // its inside face, in shade
+  oBar('line', 7, 1.6, 15, 1.6, 1),                          // the handle folded flat along its edge
+]);
+export const cashBoxLid = (x: number, y: number, w: number, h: number) => fit(CASH_BOX_LID, x, y, w, h);
+
+// ── A BANKNOTE ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (the Bank of England's notes, as econ3 drew them): a note in its own
+// colour with a pale FIELD, a portrait in an oval and the value at one end. Stood on
+// end, so three of them fan in a hand. Real units 8 × 15.
+function b4NoteParts(k: NaturalKey): ObjPart[] {
+  return b4In(8, 15, [
+    ...b4N(k, oRect('mass', 4, 7.5, 8, 15, 0, 0.8)),         // the note
+    oRect('lit', 4, 7.5, 6, 12.6, 0, 0.5),                   // its field
+    ...b4N(k, oEll('dark', 4, 10, 4.4, 5.2)),                // the portrait's oval
+    ...b4N(k, oRect('dark', 4, 3.4, 4.4, 2, 0, 0.4)),        // and the value
+  ]);
+}
+export const b4Note = (x: number, y: number, w: number, h: number, k: NaturalKey = 'note20') => fit(b4NoteParts(k), x, y, w, h);
+
+// ── A RECEIPT ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (the café's spike). A till receipt is a narrow slip of white paper with
+// the shop's name printed across its head, the items and their prices in two columns,
+// a rule, the TOTAL in heavier print, and a foot TORN off the roll in a zig-zag. The
+// head is printed in the shop's own colour: the baker's, the petrol station's, the
+// council's. Real units 10 × 14.
+function receiptParts(head: NaturalKey): ObjPart[] {
+  return b4In(10, 14, [
+    ...b4N('paper',
+      oRect('mass', 5, 6.4, 10, 12.8, 0, 0.5),               // the slip
+      ...[1.25, 3.75, 6.25, 8.75].map((x) => oTri('mass', x, 13.3, 2.5, 1.4, 'down')),   // torn off the roll
+    ),
+    ...b4N(head, oRect('dark', 5, 2, 7.6, 2, 0, 0.4)),       // the shop's name, in its colour
+    oBar('line', 1.6, 5, 5.8, 5, 0.4), oBar('line', 7, 5, 8.4, 5, 0.4),     // the items, priced
+    oBar('line', 1.6, 6.8, 5, 6.8, 0.4), oBar('line', 7, 6.8, 8.4, 6.8, 0.4),
+    oBar('line', 1.6, 8.8, 8.4, 8.8, 0.25),                  // a rule
+    oBar('line', 1.6, 10.6, 4.4, 10.6, 0.8), oBar('line', 6.2, 10.6, 8.4, 10.6, 0.8),   // and the total
+  ]);
+}
+export const receiptSlip = (x: number, y: number, w: number, h: number, head: NaturalKey = 'crust') =>
+  fit(receiptParts(head), x, y, w, h);
+
+// ── THE RECEIPT SPIKE ────────────────────────────────────────────────────────
+//
+// REFERENCE (the café's spike). A bill spike is one steel ROD, pointed, standing up
+// out of a round weighted FOOT; slips are pushed down over the point and pile at its
+// base. Real units 12 × 30.
+const RECEIPT_SPIKE: ObjPart[] = b4In(12, 30, [
+  ...b4N('silver',
+    oBar('mass', 6, 3, 6, 27, 1.3),                          // the rod
+    oTri('mass', 6, 1.6, 1.3, 2.8, 'up'),                    // its point
+  ),
+  ...b4N('iron', oEll('mass', 6, 27.6, 12, 4.4)),            // its weighted foot
+  oBar('lit', 3, 26.8, 7, 26.8, 0.6),
+]);
+export const receiptSpike = (x: number, y: number, w: number, h: number) => fit(RECEIPT_SPIKE, x, y, w, h);
+
+// ── A POCKET CALCULATOR ──────────────────────────────────────────────────────
+//
+// REFERENCE. A pocket calculator is a dark plastic slab, its grey-green LCD across the
+// top and a grid of keys under it — four rows of three. Real units 9 × 13.
+const POCKET_CALC: ObjPart[] = b4In(9, 13, [
+  ...b4N('calcBody', oRect('mass', 4.5, 6.5, 9, 13, 0, 1.2)),   // the case
+  ...b4N('calcLcd', oRect('dark', 4.5, 2.9, 7, 2.9, 0, 0.4)),   // the display
+  ...[5.8, 7.6, 9.4, 11.2].flatMap((y) => [2.2, 4.5, 6.8].map((x) => oRect('lit', x, y, 1.5, 1.1, 0, 0.3))),   // the keys
+]);
+export const pocketCalc = (x: number, y: number, w: number, h: number) => fit(POCKET_CALC, x, y, w, h);
+
+// ── THE VAN'S LITTLE BOARD ───────────────────────────────────────────────────
+//
+// REFERENCE (the Austin truck's board beside its hatch). A small slate in a wooden
+// frame hung on the van's side from one nail on a cord, with a ledge under it for the
+// chalk. Its face is the scene's to write on. Real units 44 × 73: the cord to y 10,
+// the frame 10–70, the ledge 70–73.
+const VAN_BOARD: ObjPart[] = b4In(44, 73, [
+  oBar('line', 22, 1.2, 3, 10.5, 0.8), oBar('line', 22, 1.2, 41, 10.5, 0.8),   // the cord …
+  oEll('line', 22, 1.2, 2.4, 2.4),                           // … from its nail
+  ...b4N('wood',
+    oRect('mass', 22, 40, 44, 60, 0, 1.5),                   // the frame
+    oRect('mass', 22, 71.5, 42, 3, 0, 1),                    // the chalk ledge under it
+  ),
+  ...b4N('slate', oRect('dark', 22, 40, 38, 54, 0, 0.8)),    // the slate
+]);
+export const vanBoard = (x: number, y: number, w: number, h: number) => fit(VAN_BOARD, x, y, w, h);
+
+// ── THE BAKERY ACROSS THE ROAD ───────────────────────────────────────────────
+//
+// REFERENCE (the Cornish bakery). An old stone building with a sash window upstairs,
+// and at street level a shop front painted pale blue: a FASCIA board across the top
+// for the name, a big window with bread on its shelves, a glazed door to one side.
+// Seen across the road, so drawn smaller than the truck. Real units 90 × 148: the
+// fascia 53–67, the shop front 69–148, the window 5–55 × 79–129.
+const BAKERY_FRONT: ObjPart[] = b4In(90, 148, [
+  ...b4N('bakeryWall',
+    oRect('mass', 45, 74, 90, 148, 0, 1),                    // the stone front
+    oRect('face', 45, 2, 92, 4, 0, 1),                       // its cornice
+    oRect('face', 45, 146.5, 90, 3),                         // and its plinth
+  ),
+  ...b4N('sashWhite',
+    oRect('mass', 45, 25, 36, 28, 0, 1),                     // the sash window upstairs
+    oRect('mass', 45, 41, 42, 3, 0, 0.6),                    // and its sill
+  ),
+  ...b4N('houseGlass', oRect('dark', 45, 25, 30, 22, 0, 0.5)),
+  oBar('line', 45, 14, 45, 36, 0.8), oBar('line', 30, 25, 60, 25, 0.8),   // its glazing bars
+  ...b4N('bakeryBlue',
+    oRect('mass', 45, 60, 90, 14, 0, 1),                     // the fascia
+    oRect('mass', 45, 108.5, 90, 79, 0, 1),                  // the shop front
+  ),
+  oBar('lit', 1, 53.6, 89, 53.6, 0.8),                       // the fascia's lit top edge
+  oBar('line', 1, 67.6, 89, 67.6, 0.8),                      // and its shadow under
+  ...b4N('truckGlow', oRect('dark', 30, 104, 50, 50, 0, 0.6)),     // the window, lit inside
+  oBar('line', 30, 79, 30, 129, 0.9),                        // its mullion
+  oBar('line', 6, 100, 54, 100, 0.7), oBar('line', 6, 118, 54, 118, 0.7),   // the shelves in it
+  ...b4N('crust', ...[12, 22, 38, 48].flatMap((x) => [oEll('dark', x, 96.6, 9, 5), oEll('dark', x, 114.6, 9, 5)])),   // and the loaves
+  ...b4N('doorPaint', oRect('dark', 74, 108.5, 18, 77, 0, 0.6)),   // the door
+  ...b4N('truckGlow', oRect('dark', 74, 92, 10, 24, 0, 0.5)),      // its glass, lit
+  oEll('line', 68.5, 112, 1.6, 1.6),                         // and its handle
+]);
+export const bakeryFront = (x: number, y: number, w: number, h: number) => fit(BAKERY_FRONT, x, y, w, h);
+
+// ── THE ROAD ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE (both trucks, parked at the kerb). Grey asphalt with a broken white line
+// down its middle, and the far pavement's kerb beyond it. Real units 420 × 34, so its
+// ends run off the stage.
+const ROADWAY: ObjPart[] = b4In(420, 34, [
+  ...b4N('asphalt', oRect('mass', 210, 19, 420, 30)),        // the road
+  ...b4N('flagstone', oRect('mass', 210, 2, 420, 4)),        // the far kerb
+  ...[324, 358, 392].map((x) => oBar('lit', x, 18, x + 16, 18, 1.2)),   // the broken white line
+]);
+export const roadway = (x: number, y: number, w: number, h: number) => fit(ROADWAY, x, y, w, h);
+
+// ── biz4: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// economics-foundations-4 — TWO BACK GARDENS OVER A LOW PICKET FENCE. Her raised bed
+// of staked tomato plants, her one brown hen; over the fence his hen house on its legs
+// with its ramp and nest box, his hens; a box of eggs, a wicker basket of tomatoes, and
+// a slate hung on a fence post. Drawn against pictures fetched with
+// `node scripts/get-reference.mjs` (scratchpad/ref/econ4-*): a brown hen and a Brown
+// Leghorn hen, tomatoes ripening on a staked vine, a garden picket fence, an open egg
+// box of brown eggs, and two chicken arks. Each is authored in REAL STAGE UNITS.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const e4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function e4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE HEN ──────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Brown hen", "Brown Leghorn hen, Ohio"). A hen side-on is an EGG
+// on its side — full in the BREAST, the back sloping UP to a short TAIL cocked high
+// behind — on an upright NECK, a small head with a serrated red COMB along its crown, a
+// red WATTLE hanging under a short yellow BEAK, and yellow LEGS set under the middle of
+// the body. The folded wing is a darker oval on the flank. Real units 26 × 22, facing
+// right, the feet at `HEN_FOOT`; `HEN_BREAST` is where a hand goes under her to lift her.
+export const HEN_FOOT = { x: 13, y: 22, w: 26, h: 22 } as const;
+export const HEN_BREAST = { x: 18, y: 15 } as const;
+/** The hen's legs and toes alone, so a scene can tip her body about her hip (`HEN_HIP`) to peck. */
+const henLegParts = (): ObjPart[] => e4In(26, 22, e4N('henLeg',
+  oBar('mass', 11.6, 16.6, 11.2, 21.3, 1.15), oBar('mass', 14.6, 16.6, 15.4, 21.3, 1.15),
+  oBar('mass', 9.6, 21.4, 12.8, 21.4, 0.85), oBar('mass', 13.9, 21.4, 17.4, 21.4, 0.85),
+));
+export const HEN_HIP = { x: 13, y: 16 } as const;
+const henParts = (col: NaturalKey, legs = true): ObjPart[] => e4In(26, 22, [
+  ...e4N(col,
+    oTri('mass', 4.4, 7.4, 5.6, 10, 'up'),                                    // the tail, cocked up
+    oTri('mass', 7.2, 7, 6, 9.4, 'up'),
+    oEll('mass', 12.4, 13.2, 18.5, 10.6),                                     // the body
+    oEll('mass', 8, 11, 10, 7.4),                                             // the back, rising to the tail
+    oEll('mass', 17.8, 12.8, 9.6, 9.6),                                       // the full breast
+    oBar('mass', 18.4, 11.2, 20.8, 5.8, 5.4),                                 // the neck
+    oEll('mass', 21.2, 4.8, 6, 5.2),                                          // the head
+    oEll('face', 11.8, 16.4, 12.5, 3.4),                                      // the underside, in shade
+  ),
+  ...(legs ? e4N('henLeg',
+    oBar('mass', 11.6, 17.4, 11.2, 21.3, 1.15), oBar('mass', 14.6, 17.4, 15.4, 21.3, 1.15), // the legs
+    oBar('mass', 9.6, 21.4, 12.8, 21.4, 0.85), oBar('mass', 13.9, 21.4, 17.4, 21.4, 0.85),  // the toes
+  ) : []),
+  ...e4N('henLeg', oTri('mass', 24.4, 5.1, 2.8, 1.9, 'right')),               // the beak
+  ...e4N('henComb',
+    oEll('mass', 19.5, 2.2, 2.1, 2.4), oEll('mass', 21.2, 1.4, 2.3, 2.7), oEll('mass', 22.8, 2.1, 2, 2.3), // the comb
+    oEll('mass', 23.5, 7.8, 1.9, 2.9),                                        // the wattle
+  ),
+  ...e4N(col, oEll('dark', 11, 12.2, 10.5, 5.4)),                            // the folded wing
+  ...e4N(col, oBar('dark', 6.8, 11.2, 13.6, 14.2, 0.6), oBar('dark', 4.6, 4.6, 6.6, 11, 0.5)), // primaries, a tail feather
+  ...e4N('henComb', oEll('mass', 21.8, 5.6, 2.6, 2.4)),                    // the bare red face
+  oEll('line', 22.4, 4.5, 1, 1),                                            // the eye
+  oBar('lit', 12.6, 8.1, 18.2, 8.8, 0.6),                                   // the lamp along her back
+]);
+export const henBird = (x: number, y: number, w: number, h: number, col: NaturalKey = 'henRusset', part: 'all' | 'body' | 'legs' = 'all') =>
+  fit(part === 'legs' ? henLegParts() : henParts(col, part === 'all'), x, y, w, h);
+
+/** A hen's head and neck looking out of a window, facing left. Real 9 × 10, the neck's foot at (6, 10). */
+const henPeekParts = (col: NaturalKey): ObjPart[] => e4In(9, 10, [
+  ...e4N(col, oEll('mass', 5.4, 7.4, 4.4, 6), oEll('mass', 4.4, 4.2, 5.4, 4.8), oEll('mass', 6.2, 9, 5.6, 2)),
+  ...e4N('henLeg', oTri('mass', 1, 4.4, 2.6, 1.8, 'left')),
+  ...e4N('henComb', oEll('mass', 5.6, 1.5, 1.9, 2.2), oEll('mass', 4, 1, 2.1, 2.4), oEll('mass', 2.6, 1.7, 1.8, 2), oEll('mass', 2.2, 6.8, 1.7, 2.6)),
+  ...e4N('henComb', oEll('mass', 3.6, 5, 2.4, 2.2)),
+  oEll('line', 3.2, 3.8, 0.9, 0.9),
+]);
+export const henPeek = (x: number, y: number, w: number, h: number, col: NaturalKey = 'henBlack') => fit(henPeekParts(col), x, y, w, h);
+
+// ── THE TOMATO PLANT ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Several green unripe and red ripe tomatoes growing on the vine").
+// A staked tomato is a MAIN STEM climbing a CANE it is tied to, SIDE BRANCHES reaching
+// out and drooping at their ends under COMPOUND LEAVES — ragged clusters of serrated
+// leaflets, not one round leaf — and TRUSSES of fruit hanging off short stalks, ripe red
+// beside hard green. Real units 44 × 82, the soil at y 82, the cane at x 22. Variant
+// `pick` leaves out the two ripe tomatoes on its right (`TOMATO_PICK`), which a scene
+// draws as things a hand takes off it.
+export const TOMATO_PICK = [{ x: 34, y: 44 }, { x: 36.5, y: 57 }] as const;
+/** A compound leaf: a tip leaflet and pairs of narrow pointed leaflets fanning off it. */
+const leafCluster = (x: number, y: number, s = 1): ObjPart[] => [
+  oEll('mass', x, y, 9 * s, 3.4 * s, -12),
+  oEll('mass', x - 4.2 * s, y + 2 * s, 6.4 * s, 2.7 * s, 38),
+  oEll('mass', x + 4 * s, y + 1.6 * s, 6.4 * s, 2.7 * s, -48),
+  oEll('mass', x - 2.8 * s, y - 2.6 * s, 5.6 * s, 2.5 * s, -42),
+  oEll('mass', x + 3 * s, y - 2.6 * s, 5.6 * s, 2.5 * s, 34),
+  oEll('mass', x + 5.6 * s, y - 0.6 * s, 4 * s, 2.2 * s, 6),
+  oEll('mass', x - 5.6 * s, y - 0.2 * s, 4 * s, 2.2 * s, -8),
+];
+/** The same drawing seen from the other side, so two plants in a bed are not twins. */
+const e4Mirror = (parts: readonly ObjPart[]): ObjPart[] => parts.map((p) => {
+  if (p.k === 'bar') return { ...p, x1: 100 - p.x1, x2: 100 - p.x2 };
+  if (p.k === 'tri') return { ...p, x: 100 - p.x, rot: -p.rot, dir: p.dir === 'left' ? 'right' : p.dir === 'right' ? 'left' : p.dir };
+  return { ...p, x: 100 - p.x, rot: -p.rot } as ObjPart;
+});
+const fruit = (x: number, y: number, ripe: boolean): ObjPart[] => [
+  ...e4N(ripe ? 'tomato' : 'appleGreen', oEll('mass', x, y, 5.6, 5)),
+  ...e4N('leaf', oTri('mass', x, y - 2.6, 3.4, 1.6, 'down')),
+];
+const tomatoPlantParts = (pick: boolean): ObjPart[] => e4In(44, 82, [
+  ...e4N('cane', oBar('mass', 22, 1.5, 22, 82, 1.7)),
+  ...e4N('leaf',
+    oBar('mass', 23.6, 82, 22.6, 62, 1.7), oBar('mass', 22.6, 62, 24.2, 40, 1.5),
+    oBar('mass', 24.2, 40, 22.4, 18, 1.4), oBar('mass', 22.4, 18, 23.4, 4, 1.2),
+    oBar('mass', 23, 68, 9, 71, 1.1), oBar('mass', 23.4, 52, 37, 55, 1.1),
+    oBar('mass', 24, 40, 10, 42, 1), oBar('mass', 23.4, 28, 36, 30, 1), oBar('mass', 22.8, 17, 12, 17, 0.9),
+    ...leafCluster(7, 70), ...leafCluster(38, 55), ...leafCluster(9, 41), ...leafCluster(36, 29),
+    ...leafCluster(12, 16, 0.9), ...leafCluster(31, 10, 0.9), ...leafCluster(20, 4, 0.8),
+  ),
+  ...e4N('leaf', ...[[7, 72], [38, 57], [9, 43], [36, 31]].map(([x, y]) => oBar('dark', x - 3, y, x + 3, y - 1, 0.5))),
+  // the trusses: stalks, then the fruit hanging off them
+  oBar('line', 23, 46, 17, 50, 0.5), oBar('line', 23, 72, 16, 75, 0.5), oBar('line', 23.6, 24, 29, 27, 0.5),
+  ...fruit(16, 52, true), ...fruit(20.5, 55, false), ...fruit(15, 77, true), ...fruit(19.5, 78.5, true),
+  ...fruit(29.5, 29, false), ...fruit(33, 32, false),
+  ...(pick ? [] : TOMATO_PICK.flatMap((p) => fruit(p.x, p.y, true))),
+  // the twine tying the stem to the cane
+  ...e4N('cane', oBar('dark', 20.6, 34, 24.6, 35, 0.6), oBar('dark', 20.6, 58, 24.6, 59, 0.6)),
+  oEll('lit', 14.8, 50.6, 1.6, 1.1), oEll('lit', 13.8, 75.6, 1.6, 1.1),
+]);
+export const tomatoPlant = (x: number, y: number, w: number, h: number, pick = false, flip = false) =>
+  fit(flip ? e4Mirror(tomatoPlantParts(pick)) : tomatoPlantParts(pick), x, y, w, h);
+
+/** One ripe tomato with its green calyx. Real 6 × 6, its middle at (3, 3.4). */
+const TOMATO_FRUIT: ObjPart[] = e4In(6, 6, [
+  ...e4N('tomato', oEll('mass', 3, 3.5, 6, 5.2)),
+  ...e4N('leaf', oTri('mass', 3, 0.9, 3.8, 1.8, 'down')),
+  oEll('lit', 1.8, 2.6, 1.5, 1),
+]);
+export const tomatoFruit = (x: number, y: number, w: number, h: number) => fit(TOMATO_FRUIT, x, y, w, h);
+
+// ── THE RAISED BED ───────────────────────────────────────────────────────────
+//
+// REFERENCE (any allotment): a raised bed is two BOARDS on edge, one above the other,
+// nailed to square CORNER POSTS, the SOIL heaped just over the top board. Real 96 × 18,
+// its top board's top at y 0.
+const RAISED_BED: ObjPart[] = e4In(96, 18, [
+  ...e4N('soil', oEll('mass', 48, 1, 88, 4.4)),
+  ...e4N('wood',
+    oRect('mass', 48, 5, 92, 8.2, 0, 0.6), oRect('mass', 48, 13.6, 92, 8.4, 0, 0.6),
+    oRect('mass', 2.6, 9.2, 5.2, 17.6, 0, 0.6), oRect('mass', 93.4, 9.2, 5.2, 17.6, 0, 0.6),
+    oBar('dark', 6, 9.2, 90, 9.2, 0.8),
+    oBar('dark', 14, 5.6, 34, 5.2, 0.35), oBar('dark', 52, 13.4, 80, 13.9, 0.35), oBar('dark', 60, 4.8, 74, 5.2, 0.35),
+    oRect('dark', 93.4, 16.6, 5.2, 2), oRect('dark', 2.6, 16.6, 5.2, 2),
+  ),
+  oBar('lit', 6, 1.4, 90, 1.4, 0.5),
+]);
+export const raisedBed = (x: number, y: number, w: number, h: number) => fit(RAISED_BED, x, y, w, h);
+
+// ── THE HEN HOUSE ────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Chicken ark", "A-frame chicken coop, Portland OR"; and the
+// garden hen house every British pet-hen keeper buys): a small timber HOUSE on four
+// LEGS, a pitched ROOF in felt with BARGE BOARDS standing proud of it, its walls of
+// horizontal WEATHERBOARD, a POP-HOLE low in one end with a SLIDE DOOR in runners above
+// it and a RAMP down to the run, a little WINDOW, and a NEST BOX bolted to the side
+// under its own lid. Real 84 × 104: the roof's apex at (36, 1), the walls 8–64 × 24–66,
+// the pop-hole's sill at `COOP_SILL`, the window at `COOP_WINDOW`, the nest box's lid
+// top at `COOP_NEST_LID`.
+export const COOP_SILL = { x: 16, y: 64 } as const;
+export const COOP_WINDOW = { x: 42, y: 38, w: 14, h: 10 } as const;
+export const COOP_NEST_LID = { x: 72.5, y: 39.5 } as const;
+const HEN_HOUSE: ObjPart[] = e4In(84, 104, [
+  ...e4N('wood', oBar('mass', 14, 66, 14, 103.5, 3.2), oBar('mass', 58, 66, 58, 103.5, 3.2)),
+  ...e4N('coopSage',
+    oRect('mass', 36, 45, 56, 42),
+    oRect('face', 62, 45, 4, 42),
+    oRect('mass', 72, 52, 16, 20),
+    oRect('face', 78.6, 52, 2.8, 20),
+  ),
+  ...e4N('felt',
+    oTri('mass', 36, 13, 70, 24, 'up'),
+    oRect('mass', 72.5, 41, 19.4, 3, 0, 0.8),
+  ),
+  ...e4N('wood', oBar('mass', 0.8, 25.6, 36, 1.4, 2.3), oBar('mass', 36, 1.4, 71.2, 25.6, 2.3), oRect('mass', 36, 67.2, 60, 3, 0, 0.8)),
+  ...e4N('coopSage', ...[32, 40, 48, 56].map((y) => oBar('dark', 9, y, 60, y, 0.6))),
+  ...e4N('coopSage', oBar('dark', 66, 47, 78, 47, 0.5), oBar('dark', 66, 54, 78, 54, 0.5)),
+  ...e4N('gloom', oRect('dark', 16, 57.5, 9, 13, 0, 1.6)),
+  ...e4N('wood', oRect('dark', 16, 47.4, 11.4, 6, 0, 0.6), oBar('dark', 10, 44, 10, 64, 0.9), oBar('dark', 22, 44, 22, 64, 0.9)),
+  ...e4N('gloom', oRect('dark', COOP_WINDOW.x, COOP_WINDOW.y, COOP_WINDOW.w, COOP_WINDOW.h, 0, 1)),
+  ...e4N('wood', oBar('dark', 34.4, 43.8, 49.6, 43.8, 1)),
+  oBar('lit', 4, 24, 35, 3, 0.7),
+  oBar('lit', 9.5, 25.6, 9.5, 64, 0.5),
+]);
+export const henHouse = (x: number, y: number, w: number, h: number) => fit(HEN_HOUSE, x, y, w, h);
+
+/**
+ * The ramp from the pop-hole down to the run: one plank with CLEATS across it for the
+ * hens' feet. Drawn along its box's diagonal, from top right (the sill) to bottom left
+ * (the ground). Real 24 × 42.
+ */
+const COOP_RAMP: ObjPart[] = e4In(24, 42, [
+  ...e4N('wood', oBar('mass', 22, 2.2, 2, 39.8, 3)),
+  ...e4N('wood', ...[0.2, 0.4, 0.6, 0.8].map((u) => {
+    const x = 22 + (2 - 22) * u;
+    const y = 2.2 + 37.6 * u;
+    return oBar('dark', x - 1.4, y - 0.8, x + 1.4, y + 0.8, 0.9);
+  })),
+]);
+export const coopRamp = (x: number, y: number, w: number, h: number) => fit(COOP_RAMP, x, y, w, h);
+
+// ── THE PICKET FENCE ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: the picket fence at The Cock Inn, Henham; Blake Hall's gate and
+// picket fence). A garden picket fence is narrow upright PICKETS with POINTED tops,
+// evenly gapped, nailed to two horizontal RAILS that show between them, the ends on
+// square POSTS standing a little taller under a flat CAP, all painted white. Real
+// 250 × 30, its picket tips at y 0.
+const PICKET_X = Array.from({ length: 27 }, (_, k) => 9 + k * 9);
+const PICKET_FENCE: ObjPart[] = e4In(250, 30, [
+  ...e4N('picket',
+    oRect('mass', 125, 9.6, 246, 3.2, 0, 0.6), oRect('mass', 125, 23.6, 246, 3.2, 0, 0.6),
+    ...PICKET_X.flatMap((x) => [oRect('mass', x, 17.6, 5.2, 24.8), oRect('mass', x, 4.6, 3.7, 3.7, 45, 0.3)]),
+    oRect('mass', 2.4, 16, 4.8, 28), oRect('mass', 2.4, 1.6, 6, 2.2, 0, 0.6),
+    oRect('mass', 247.6, 16, 4.8, 28), oRect('mass', 247.6, 1.6, 6, 2.2, 0, 0.6),
+  ),
+  ...e4N('picket', ...PICKET_X.map((x) => oRect('dark', x + 1.8, 18, 1.4, 23.6))),
+  ...e4N('picket', oRect('dark', 125, 11, 246, 0.8), oRect('dark', 125, 25, 246, 0.8)),
+]);
+export const picketFence = (x: number, y: number, w: number, h: number) => fit(PICKET_FENCE, x, y, w, h);
+
+/** A fence post taller than the pickets, under a flat cap, with a nail near its top. Real 10 × 84. */
+const SLATE_POST: ObjPart[] = e4In(10, 84, [
+  ...e4N('picket', oRect('mass', 5, 43, 6, 82), oRect('mass', 5, 2, 9, 3, 0, 0.8), oRect('face', 7.2, 43, 1.6, 82)),
+  oEll('line', 5, 6, 1.4, 1.4),
+]);
+export const slatePost = (x: number, y: number, w: number, h: number) => fit(SLATE_POST, x, y, w, h);
+
+/**
+ * A writing slate in its wooden FRAME, hung from the post's nail by a STRING looped
+ * over it. Real 34 × 58, the nail at (17, 0), the slate's face `GARDEN_SLATE_FACE`.
+ */
+export const GARDEN_SLATE_FACE = { x: 17, y: 32.5, w: 29, h: 45 } as const;
+const GARDEN_SLATE: ObjPart[] = e4In(34, 58, [
+  oBar('line', 17, 0.4, 4, 8, 0.6), oBar('line', 17, 0.4, 30, 8, 0.6),
+  ...e4N('wood', oRect('mass', 17, 32.5, 34, 51, 0, 1.4), oRect('face', 17, 57.2, 32, 1.6)),
+  ...e4N('slate', oRect('mass', GARDEN_SLATE_FACE.x, GARDEN_SLATE_FACE.y, GARDEN_SLATE_FACE.w, GARDEN_SLATE_FACE.h, 0, 0.6)),
+  oBar('lit', 1.6, 8.2, 32.4, 8.2, 0.5),
+]);
+export const gardenSlate = (x: number, y: number, w: number, h: number) => fit(GARDEN_SLATE, x, y, w, h);
+
+// ── THE BOX OF EGGS ──────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Bio Eier unsortiert"). An egg box open is a grey moulded-pulp
+// TRAY of cups with the brown EGGS standing in them, their tops showing, and the LID
+// hinged up behind them. Real 16 × 13; held flat on the palm, so its grip is the tray's
+// bottom middle, (8, 13).
+const EGG_BOX: ObjPart[] = e4In(16, 13, [
+  ...e4N('eggCarton', oRect('mass', 8, 3.6, 15, 6.6, 0, 1.2)),
+  ...e4N('eggShell', oEll('mass', 3.6, 6.8, 4.6, 4.8), oEll('mass', 8, 6.5, 4.6, 5), oEll('mass', 12.4, 6.8, 4.6, 4.8)),
+  ...e4N('eggCarton', oRect('mass', 8, 10.4, 16, 5.2, 0, 1), oRect('face', 8, 12.4, 15, 1.2)),
+  ...e4N('eggCarton', oBar('dark', 5.8, 8.8, 5.8, 12.2, 0.6), oBar('dark', 10.2, 8.8, 10.2, 12.2, 0.6)),
+  oEll('lit', 2.8, 5.6, 1.4, 1), oEll('lit', 7.2, 5.2, 1.4, 1), oEll('lit', 11.6, 5.6, 1.4, 1),
+]);
+export const eggBox = (x: number, y: number, w: number, h: number) => fit(EGG_BOX, x, y, w, h);
+
+// ── THE BASKET ───────────────────────────────────────────────────────────────
+//
+// REFERENCE (a garden harvest basket): a woven wicker BODY, wider at the rim than the
+// foot, under a tall arched HANDLE, its WEAVE in rows round it. Two drawings, so the
+// tomatoes can lie between them: the back (the handle and the dark inside) and the
+// front (the body and its rim). Real 18 × 19, held by the top of the handle at (9, 0.8).
+const TRUG_BACK: ObjPart[] = e4In(18, 19, [
+  ...e4N('wicker',
+    oBar('mass', 2.6, 11.4, 3.4, 5, 1.6), oBar('mass', 3.4, 5, 6, 1.4, 1.6), oBar('mass', 6, 1.4, 12, 1.4, 1.6),
+    oBar('mass', 12, 1.4, 14.6, 5, 1.6), oBar('mass', 14.6, 5, 15.4, 11.4, 1.6),
+    oEll('dark', 9, 11.6, 15.4, 3.2),
+  ),
+]);
+const TRUG_FRONT: ObjPart[] = e4In(18, 19, [
+  ...e4N('wicker', ...trapezoid('mass', 9, 14.6, 18, 13, 8), oRect('mass', 9, 11, 18.6, 2, 0, 1)),
+  ...e4N('wicker', oBar('dark', 1.6, 14, 16.4, 14, 0.5), oBar('dark', 2.6, 16.6, 15.4, 16.6, 0.5),
+    ...[4, 7, 10, 13].map((x) => oBar('dark', x, 12, x + (x - 9) * 0.06, 18.4, 0.45))),
+  ...e4N('wicker', oRect('face', 9, 18.2, 12.6, 1.2)),
+  oBar('lit', 1.4, 10.4, 16.6, 10.4, 0.5),
+]);
+export const trugBack = (x: number, y: number, w: number, h: number) => fit(TRUG_BACK, x, y, w, h);
+export const trugFront = (x: number, y: number, w: number, h: number) => fit(TRUG_FRONT, x, y, w, h);
+
+
+// ── THE BACK HEDGE ───────────────────────────────────────────────────────────
+//
+// REFERENCE (any terrace of back gardens): the gardens end at a clipped privet HEDGE
+// taller than a person, its top rounded into soft BUMPS where it has grown out since
+// the last clip, darker LOW where the light does not reach in. Real 400 × 100, its
+// highest bump at y 0.
+const HEDGE_BUMPS = Array.from({ length: 17 }, (_, k) => 12 + k * 23.5);
+const GARDEN_HEDGE: ObjPart[] = e4In(400, 100, [
+  ...e4N('hedge',
+    oRect('mass', 200, 56, 400, 88),
+    ...HEDGE_BUMPS.map((x, k) => oEll('mass', x, 12 + (k % 3) * 1.6, 30, 22)),
+    oRect('face', 200, 94, 400, 12),
+    ...HEDGE_BUMPS.map((x, k) => oBar('dark', x - 6 + (k % 2) * 4, 36 + (k % 3) * 9, x + 2 + (k % 2) * 4, 34 + (k % 3) * 9, 1.2)),
+  ),
+  ...HEDGE_BUMPS.map((x) => oBar('lit', x - 8, 6.4, x - 2, 3.4, 0.9)),
+]);
+export const gardenHedge = (x: number, y: number, w: number, h: number) => fit(GARDEN_HEDGE, x, y, w, h);
+// ── econ4: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// science-foundations-4 — A PLAYGROUND SWING. Drawn against Commons photographs
+// (scratchpad/ref/sci4-*): a park swing set in blue-painted steel tube, an A-frame of two
+// splayed legs at each end under one top bar, the seats on galvanised chains (sci4-swing-2,
+// sci4-aframe-1, sci4-swing-1); and a hardboard clipboard with its steel clip and a sheet
+// of paper (sci4-clipboard-1, -2). The stopwatch and the pencil are the library's.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in one named real colour. */
+const s4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function sci4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── SWING FRAME ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. A playground swing frame, seen from the end, is an A: two steel tubes
+// splayed from an apex to the ground, the swing's direction of travel, so the seat swings
+// INSIDE the A. Turned a little, the second A shows behind and up, and the TOP BAR runs
+// back between the two apexes: that bar going away, with the chains hanging from it, is
+// what says swing rather than easel. Drawn in two halves so the seat can pass between
+// them: the far A and the top bar behind it, the near A in front. Real units, 142 × 138:
+// the near apex at (56, 16), the far apex at (86, 2), the near feet on the ground at 138
+// and the far feet at 124, further off. The chains hang from the bar at 35% and 65% of
+// its length (SWING_PIVOTS).
+const SWING_FRAME_BACK: ObjPart[] = sci4In(142, 138, [
+  ...s4N('swingBlue',
+    oBar('face', 86, 2, 30, 124, 3.4),                               // the far A's legs
+    oBar('face', 86, 2, 142, 124, 3.4),
+    oRect('face', 30, 124, 7, 2.2, 0, 0.8),                           // their foot plates
+    oRect('face', 140.5, 124, 7, 2.2, 0, 0.8),
+    oBar('mass', 56, 16, 86, 2, 4.6),                                 // the top bar, running back
+    oEll('mass', 86, 2.6, 5.2, 5.2),                                  // its far end cap
+  ),
+  ...s4N('swingChain',
+    oEll('mass', 66.5, 11.6, 3, 3),                                   // the two shackles on the bar
+    oEll('mass', 75.5, 7.4, 3, 3),
+  ),
+  oBar('lit', 59, 13.2, 84, 1.6, 0.8),                                // the lamp along the bar's top
+]);
+export const swingFrameBack = (x: number, y: number, w: number, h: number) => fit(SWING_FRAME_BACK, x, y, w, h);
+
+const SWING_FRAME_FRONT: ObjPart[] = sci4In(142, 138, [
+  ...s4N('swingBlue',
+    oBar('mass', 56, 16, 0, 138, 4),                                  // the near A's two legs
+    oBar('mass', 56, 16, 112, 138, 4),
+    oRect('face', 2, 137, 9, 2.4, 0, 0.8),                            // their foot plates, bolted down
+    oRect('face', 110, 137, 9, 2.4, 0, 0.8),
+    oEll('mass', 56, 16, 7.4, 7.4),                                   // the apex clamp
+  ),
+  oBar('lit', 53, 22, 4, 129, 0.8),                                   // the lamp down the left leg
+  oEll('line', 56, 16, 2, 2),                                         // the clamp's bolt
+]);
+export const swingFrameFront = (x: number, y: number, w: number, h: number) => fit(SWING_FRAME_FRONT, x, y, w, h);
+/** Where the two chains hang from the top bar, in the frame's own 142 × 138 units. */
+export const SWING_PIVOTS = { near: { x: 66.5, y: 11.6 }, far: { x: 75.5, y: 7.4 }, of: { w: 142, h: 138 } } as const;
+
+// ── SWING SEAT ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A park swing's seat is a STRAP of black rubber, hung by a steel clamp at each
+// end from its two chains; turned the way the frame is, the strap runs back along the top
+// bar's direction, so it is drawn slanting up and away with a clamp at either end. Drawn
+// about its middle, which hangs half-way between the two chains. Real units, 16 × 16, the
+// strap across the middle of it.
+const SWING_SEAT: ObjPart[] = sci4In(16, 16, [
+  ...s4N('tyre',
+    oBar('mass', 1.6, 10.6, 14.4, 5.4, 4),                            // the strap
+    oBar('face', 2.4, 11.4, 14.4, 6.6, 1.6),                          // its underside, out of the lamp
+  ),
+  ...s4N('swingChain',
+    oEll('mass', 3.5, 10.1, 2.6, 2.6),                                // the clamp on the near chain
+    oEll('mass', 12.5, 5.9, 2.6, 2.6),                                // and on the far one
+  ),
+  oBar('lit', 3.6, 9, 11, 5.8, 0.6),                                  // the lamp along its top
+]);
+export const swingSeat = (x: number, y: number, w: number, h: number) => fit(SWING_SEAT, x, y, w, h);
+
+// ── CLIPBOARD ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A clipboard is a board of brown HARDBOARD with rounded corners and a steel
+// CLIP across its top — a flat plate with a hooped lever over it, a hole through the hoop
+// — and a sheet of white PAPER held under the clip with a margin of board showing round
+// it. The clip at the top centre is the field mark: without it, it is a sheet of card.
+// Real units, 32 × 66 (drawn large on the stage so what is written on it can be read and
+// tapped): the board 2–66, the paper 8.6–64.6, tucked under the clip. What is written
+// on it is the scene's, because she writes it.
+const CLIPBOARD: ObjPart[] = sci4In(32, 66, [
+  ...s4N('hardboard',
+    oRect('mass', 16, 34, 32, 64, 0, 2.4),                          // the board
+    oRect('face', 30.8, 35, 2.4, 61, 0, 1),                         // its right edge, out of the lamp
+  ),
+  ...s4N('paper',
+    oRect('mass', 15.9, 36.6, 27.4, 56, 0, 0.5),                      // the sheet
+    oRect('dark', 16, 11.2, 13, 1.4),                                 // the clip's shadow on it
+  ),
+  ...s4N('silver',
+    oRect('mass', 16, 7.6, 15, 4.6, 0, 1.4),                          // the clip's plate
+    oEll('mass', 16, 3.4, 8.4, 6.4),                                  // its hooped lever
+    oRect('face', 16, 9.4, 15, 1.2),                                  // the plate's lower lip
+  ),
+  oEll('line', 16, 3.2, 3.2, 2.4),                                    // the hole through the hoop
+  oBar('lit', 3, 3.2, 10, 3.2, 0.7),                                  // the lamp along the board's top
+]);
+export const clipboard = (x: number, y: number, w: number, h: number) => fit(CLIPBOARD, x, y, w, h);
+/** The sheet on the clipboard, and where a hand grips the board's right edge, in its own 32 × 66. */
+export const CLIPBOARD_SHEET = { x0: 2.2, y0: 8.6, x1: 29.6, y1: 64.6, grip: { x: 30.6, y: 42 }, of: { w: 32, h: 66 } } as const;
+
+// ── sci4: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// history-foundations-4 — A TOWN SQUARE. A sandstone clock tower with a bell in its
+// belfry, an old brick building whose ground floor was a bakery and is now a phone
+// shop, a granite horse trough planted with flowers, a pair of Sheffield cycle stands,
+// and a hundred-year-old sepia photograph of the same square.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const h4N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function h4In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/** An arc of a tube, as short bars: centre (cx, cy), radius r, from angle a0 to a1. */
+function h4Arc(role: Role, cx: number, cy: number, r: number, a0: number, a1: number, t: number, n = 8): ObjPart[] {
+  const out: ObjPart[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const u0 = a0 + ((a1 - a0) * i) / n;
+    const u1 = a0 + ((a1 - a0) * (i + 1)) / n;
+    out.push(oBar(role, cx + Math.cos(u0) * r, cy + Math.sin(u0) * r, cx + Math.cos(u1) * r, cy + Math.sin(u1) * r, t));
+  }
+  return out;
+}
+
+// ── THE CLOCK TOWER ──────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Erastus Corning clock tower, Centerway Square, Corning, New
+// York"; the town hall tower in Ząbkowice Śląskie's market square). A market-square
+// clock tower is a SQUARE SHAFT of coursed stone on a wider PLINTH, the plinth carrying a
+// round-arched niche; a projecting STRING COURSE; a CLOCK STAGE with a white dial in a
+// dark bezel, the hands black; above it a BELFRY with a tall round-arched opening and the
+// bell hanging in its dark; a cornice; and a pyramid of slate on top, with a finial. Lit
+// from the top left: its right-hand face is in shade. 48 × 200; the bell is the scene's
+// (it swings), hung at (24, 30).
+export const TOWER_BELL_AT = { x: 24, y: 30, w: 48, h: 200 } as const;
+const CLOCK_TOWER: ObjPart[] = h4In(48, 200, [
+  ...h4N('felt',
+    oTri('mass', 24, 12, 40, 17, 'up'),
+  ),
+  oBar('line', 24, 0.5, 24, 5, 1.2),
+  oEll('line', 24, 4.4, 2.4, 2.4),
+  ...h4N('towerStone',
+    // the cornice under the slate, the belfry stage, its sill
+    oRect('mass', 24, 21.5, 44, 4, 0, 0.6),
+    oRect('mass', 24, 37, 34, 30),
+    oRect('face', 39, 37, 4, 30),
+    oRect('mass', 24, 53.5, 42, 3.5, 0, 0.6),
+    // the clock stage, a string course, the shaft, its shaded face
+    oRect('mass', 24, 72.5, 36, 35),
+    oRect('face', 40, 72.5, 4, 35),
+    oRect('mass', 24, 92, 44, 4.2, 0, 0.6),
+    oRect('mass', 24, 128, 36, 68),
+    oRect('face', 40.5, 128, 5, 68),
+    // the coursed ashlar: bed joints, and the vertical joints broken course by course
+    ...[103, 112, 121, 130, 139, 148, 157].map((y) => oBar('dark', 7, y, 41, y, 0.6)),
+    ...[98, 116, 134, 152].map((y) => oBar('dark', 16, y - 4, 16, y + 4, 0.6)),
+    ...[107, 125, 143, 160].map((y) => oBar('dark', 30, y - 4, 30, y + 2, 0.6)),
+    // the plinth and its cap moulding, the niche in it, the base course
+    oRect('mass', 24, 164, 48, 4.4, 0, 0.8),
+    oRect('mass', 24, 182, 44, 32),
+    oRect('face', 44, 182, 4, 32),
+    oRect('dark', 24, 189, 14, 18),
+    oEll('dark', 24, 180, 14, 12),
+    oRect('mass', 24, 198.5, 48, 3),
+    ...[172, 184].map((y) => oBar('dark', 3, y, 15, y, 0.6)),
+    ...[172, 184].map((y) => oBar('dark', 33, y, 45, y, 0.6)),
+  ),
+  // the belfry's arched opening, and the shaft's slit window, in their dark
+  ...h4N('belfry',
+    oRect('mass', 24, 41, 14, 18),
+    oEll('mass', 24, 32, 14, 12),
+    oRect('mass', 24, 122, 4, 12),
+    oEll('mass', 24, 116, 4, 4),
+  ),
+  // the dial: a dark bezel, the white face, twelve marks, the hands at ten past ten
+  ...h4N('felt', oEll('mass', 24, 72, 27, 27)),
+  ...h4N('dialWhite', oEll('mass', 24, 72, 22, 22)),
+  ...Array.from({ length: 12 }, (_, i) => {
+    const a = (i / 12) * Math.PI * 2;
+    const r0 = i % 3 === 0 ? 7.6 : 8.8;
+    return oBar('line', 24 + Math.sin(a) * r0, 72 - Math.cos(a) * r0, 24 + Math.sin(a) * 10.2, 72 - Math.cos(a) * 10.2, i % 3 === 0 ? 1.3 : 0.8);
+  }),
+  oBar('line', 24, 72, 24 + Math.sin(-Math.PI / 3) * 5.4, 72 - Math.cos(-Math.PI / 3) * 5.4, 1.5),
+  oBar('line', 24, 72, 24 + Math.sin((2 * Math.PI) / 12 * 2) * 8, 72 - Math.cos((2 * Math.PI) / 12 * 2) * 8, 1.1),
+  oEll('line', 24, 72, 2, 2),
+  // the lamp catches the upper-left edges
+  oBar('lit', 7, 96, 7, 160, 0.8),
+  oBar('lit', 8, 57, 8, 88, 0.8),
+  oBar('lit', 2, 162.4, 44, 162.4, 0.6),
+]);
+export const clockTower = (x: number, y: number, w: number, h: number) => fit(CLOCK_TOWER, x, y, w, h);
+
+// ── THE BELL ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE (any church or tower bell): a CANON to hang it by, a rounded SHOULDER, a
+// WAIST that flares to a thick LIP, and the clapper's ball showing under the mouth. In
+// bronze. 12 × 12, hung from the top centre, so the scene swings it about (0, 0) by
+// drawing it at towerBell(0, h / 2, w, h).
+const TOWER_BELL: ObjPart[] = h4In(12, 12, [
+  ...h4N('bellBronze',
+    oRect('mass', 6, 1.4, 3, 2.8, 0, 0.6),
+    oEll('mass', 6, 4.6, 7.4, 6),
+    ...trapezoid('mass', 6, 7.4, 7.2, 10.6, 5),
+    oEll('mass', 6, 10, 12, 2.8),
+    oRect('face', 9.4, 7.6, 1.6, 4.4),
+  ),
+  oEll('line', 6, 11.4, 2.4, 2.4),
+  oBar('lit', 3.6, 4.4, 3.1, 8.6, 0.7),
+]);
+export const towerBell = (x: number, y: number, w: number, h: number) => fit(TOWER_BELL, x, y, w, h);
+
+// ── THE PHONE SHOP, WHICH WAS A BAKERY ───────────────────────────────────────
+//
+// REFERENCE (Commons: "T Mobile shop London"; a mobile-phone shop's window display). An
+// old two-storey building in BRICK, a stone coping on its parapet, two white SASH
+// WINDOWS upstairs on stone sills, a stone band — and at street level a new shop front:
+// a bright plastic FASCIA sign, aluminium frames, plate glass to the floor with the white
+// inside showing, a glass DOOR with a bar handle, and the phones stood up on a display
+// shelf behind the glass, their screens lit. The ground floor has changed; the floor
+// above it has not. 100 × 194; the fascia is 2–98 × 99–113, where the scene letters it.
+export const SHOP_FASCIA = { x: 2, y: 99, w: 96, h: 14 } as const;
+const PHONE_SHOP: ObjPart[] = h4In(100, 194, [
+  ...h4N('brick',
+    oRect('mass', 50, 52, 96, 92),
+    oRect('face', 97, 52, 6, 92),
+    ...[14, 22, 30, 38, 46, 54, 62, 70, 78, 86].map((y) => oBar('dark', 3, y, 94, y, 0.5)),
+    oRect('mass', 3, 154, 6, 80),
+    oRect('mass', 97, 154, 6, 80),
+    oRect('face', 98.5, 154, 3, 80),
+    oRect('mass', 61, 192.5, 64, 3),
+  ),
+  ...h4N('coping',
+    oRect('mass', 50, 3, 100, 6, 0, 0.6),
+    oRect('mass', 27, 18, 28, 4),
+    oRect('mass', 73, 18, 28, 4),
+    oRect('mass', 27, 62, 28, 3),
+    oRect('mass', 73, 62, 28, 3),
+    oRect('mass', 50, 97, 100, 4),
+  ),
+  // the two sash windows upstairs, as they have always been
+  ...[27, 73].flatMap((x) => [
+    ...h4N('sashWhite', oRect('mass', x, 40, 22, 40)),
+    ...h4N('houseGlass', oRect('mass', x, 30.6, 17.6, 16.4), oRect('mass', x, 49.4, 17.6, 16.4)),
+    ...h4N('sashWhite', oRect('mass', x, 40, 22, 2.4), oRect('mass', x, 30.6, 1.2, 16.4), oRect('mass', x, 49.4, 1.2, 16.4)),
+  ]),
+  // the new shop front: the fascia, the frames, the glass, the door
+  ...h4N('fascia', oRect('mass', 50, 106, 96, 14, 0, 0.6), oRect('dark', 50, 112.2, 96, 1.6)),
+  ...h4N('litGlass', oRect('mass', 17, 156, 18, 74), oRect('mass', 61.5, 153.5, 63, 69)),
+  // the display shelf and the phones on it, screens lit
+  ...h4N('silver', oRect('mass', 61.5, 150.5, 60, 2)),
+  ...[38, 50, 73, 85].flatMap((x) => [
+    ...h4N('phoneBody', oRect('mass', x, 140, 7.4, 13.6, 0, 1.4), oRect('mass', x, 148, 3, 3)),
+    ...h4N('phoneLit', oRect('mass', x, 139.6, 5.6, 10.6, 0, 0.6)),
+  ]),
+  ...h4N('silver',
+    oRect('mass', 50, 117, 92, 3),
+    oRect('mass', 7.4, 156, 1.6, 75), oRect('mass', 26.6, 156, 1.6, 75), oRect('mass', 17, 193, 20, 1.6),
+    oRect('mass', 29.2, 154, 1.6, 72), oRect('mass', 93.8, 154, 1.6, 72), oRect('mass', 61.5, 154, 1.6, 72),
+    oRect('mass', 61.5, 189.6, 66, 1.8),
+    oBar('mass', 22.6, 142, 22.6, 168, 1.6),
+  ),
+  // light on the glass, and on the coping and the fascia's top edge
+  oBar('lit', 33, 186, 44, 122, 1),
+  oBar('lit', 66, 186, 77, 122, 1),
+  oBar('lit', 12, 186, 17, 124, 0.8),
+  oBar('lit', 3, 99.8, 96, 99.8, 0.6),
+  oBar('lit', 1, 0.8, 98, 0.8, 0.6),
+]);
+export const phoneShop = (x: number, y: number, w: number, h: number) => fit(PHONE_SHOP, x, y, w, h);
+
+// ── THE HORSE TROUGH, NOW A PLANTER ──────────────────────────────────────────
+//
+// REFERENCE (Commons: "Summit NJ horse trough"; the troughs the London cattle-trough
+// association put in every town square). A horse trough is one long BASIN of granite,
+// its RIM thick and a little proud of the body, the body narrowing to a FOOT on a low
+// PLINTH, and often a sunk PANEL on its long face. Planted, its top is a MOUND of foliage
+// with flowers held above it and petunias trailing over the rim. 56 × 48: flowers 0–17,
+// the rim at 16.
+const HORSE_TROUGH: ObjPart[] = h4In(56, 48, [
+  // the foliage mound behind the rim
+  ...h4N('leaf',
+    oEll('mass', 28, 13, 50, 10),
+    oEll('mass', 11, 10, 16, 11),
+    oEll('mass', 24, 7, 20, 12),
+    oEll('mass', 40, 8, 20, 12),
+    oEll('mass', 50, 12, 10, 8),
+    oEll('dark', 28, 15, 46, 3.4),
+  ),
+  // the geraniums, red, held above the leaves, and a few yellow ones
+  ...h4N('geranium', oEll('mass', 13, 5, 7, 6), oEll('mass', 30, 3.4, 8, 6.4), oEll('mass', 44, 5, 7, 6)),
+  ...h4N('petal', oEll('mass', 21.5, 8.6, 4.4, 4), oEll('mass', 37.5, 9.4, 4.4, 4), oEll('mass', 6, 11, 3.6, 3.4)),
+  // the granite trough: the rim, the basin, its foot and plinth, the panel
+  ...h4N('granite',
+    oRect('mass', 28, 29.5, 52, 21),
+    ...trapezoid('mass', 28, 41.4, 52, 44, 4),
+    oRect('mass', 28, 45.6, 56, 4.8, 0, 0.6),
+    oRect('face', 52, 30, 3, 22),
+    oRect('mass', 28, 18.5, 56, 5, 0, 1.2),
+    oRect('dark', 28, 30, 36, 11, 0, 1),
+    oBar('dark', 4, 39.2, 52, 39.2, 0.6),
+  ),
+  // petunias trailing over the front of the rim
+  ...h4N('petunia', oEll('mass', 8, 19.6, 6, 5), oEll('mass', 45, 20, 6.4, 5.4), oEll('mass', 26, 20.6, 4.4, 3.8)),
+  ...h4N('leaf', oEll('mass', 12, 21.4, 4, 3), oEll('mass', 40.4, 21.6, 4, 3)),
+  oBar('lit', 2, 16.6, 48, 16.6, 0.7),
+  oBar('lit', 11, 25.4, 11, 34.6, 0.5),
+]);
+export const horseTrough = (x: number, y: number, w: number, h: number) => fit(HORSE_TROUGH, x, y, w, h);
+
+// ── SHEFFIELD CYCLE STANDS ───────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Sheffield stands"; "Bicycle rack, Dalhousie University"). The
+// stand every British town square has: one steel TUBE bent into an upside-down U, its
+// two legs set into the paving, galvanised to a dull silver. A rack is a row of them,
+// about a bicycle's width apart. One stand is 26 × 34; the rack is two of them, 64 × 34.
+const STAND_PARTS = (cx: number): ObjPart[] => h4N('silver',
+  ...h4Arc('mass', cx, 12, 10, Math.PI, Math.PI * 2, 2.6),
+  oBar('mass', cx - 10, 12, cx - 10, 33.4, 2.6),
+  oBar('mass', cx + 10, 12, cx + 10, 33.4, 2.6),
+  oRect('face', cx + 10, 33.2, 4, 1.4),
+  oRect('face', cx - 10, 33.2, 4, 1.4),
+);
+const CYCLE_STAND: ObjPart[] = h4In(26, 34, [...STAND_PARTS(13), oBar('lit', 2.4, 13, 2.4, 31, 0.6)]);
+export const cycleStand = (x: number, y: number, w: number, h: number) => fit(CYCLE_STAND, x, y, w, h);
+const CYCLE_RACK: ObjPart[] = h4In(64, 34, [
+  ...STAND_PARTS(13), ...STAND_PARTS(51),
+  oBar('lit', 2.4, 13, 2.4, 31, 0.6), oBar('lit', 40.4, 13, 40.4, 31, 0.6),
+]);
+export const cycleRack = (x: number, y: number, w: number, h: number) => fit(CYCLE_RACK, x, y, w, h);
+
+// ── THE OLD PHOTOGRAPH ───────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Postcard of Town Square in Ljubljana 1910"). A print from about
+// 1920: brown and cream sepia, a white card border wider at the foot, and in it the
+// same square — the tower on the left with its clock, a shop with an awning on the
+// right, and a horse drinking at the trough between them. 20 × 14, held by its bottom
+// edge: a scene draws it at oldPhoto(0, -h / 2, w, h) so that edge is at (0, 0).
+const OLD_PHOTO: ObjPart[] = h4In(20, 14, [
+  ...h4N('paper', oRect('mass', 10, 7, 20, 14, 0, 0.6)),
+  ...h4N('sepia', oRect('mass', 10, 6.4, 17.4, 11), oRect('dark', 10, 10.6, 17.4, 2.6)),
+  ...h4N('sepiaDark',
+    oRect('mass', 5, 6.2, 2.6, 7.6), oTri('mass', 5, 1.7, 3.2, 1.8, 'up'),
+    oRect('mass', 15.8, 6.4, 5.6, 6.4), oTri('mass', 15.8, 8.2, 6.4, 1.4, 'down'),
+    oEll('mass', 10.2, 8, 3.6, 1.8),
+    oBar('mass', 11.6, 7.6, 12.6, 6.4, 0.8), oEll('mass', 12.9, 6.6, 1.5, 1),
+    oBar('mass', 9, 8.4, 9, 10.2, 0.5), oBar('mass', 11.4, 8.4, 11.4, 10.2, 0.5),
+    oRect('mass', 13.8, 9.6, 2.6, 1.2),
+  ),
+  oEll('lit', 5, 4.2, 1.2, 1.2),
+  oRect('lit', 15.8, 5, 2, 1.6),
+]);
+export const oldPhoto = (x: number, y: number, w: number, h: number) => fit(OLD_PHOTO, x, y, w, h);
+
+// ── hist4: objects for this lesson go ABOVE this line ──
+
 /** Every object, by name — what `sheet-lesson-objects` and `check:objects` walk. */
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
@@ -5640,5 +7307,21 @@ export const OBJECTS = {
   promRailing, parasolPole, parasolFurled, parasolCanopy, iceKiosk, queueStand, flipChart, iceCornet, sunCream, fairCloud,
   // hist3:
   footbridgeDeck, footbridgeRail, streamBed, cartHay, cartBody, brokenPlank, newPlank, reeds, barn, weatherVane,
+  // phil4:
+  stationClock, departureScreen, platformSign, platformBench, tunnelPortal, railTicket,
+  // psych4:
+  shelterFrame, shelterGlass, advertCase, timetable, stopPole, stopNotice, cafeTerrace, takeawayCup,
+  // growth4:
+  potWheel, wheelHead, potLow, potTop, clayLump, clayBall, waterBucket, tallStool, potRack, glazedVase, glazedBowl, glazedJug,
+  glazedJar, sideTable, wareBoard, topKiln, studioWindow,
+  // biz4:
+  foodTruck, truckCounter, truckMenu, cashBoxBack, cashBoxFront, cashBoxLid, b4Note, receiptSlip, receiptSpike, pocketCalc,
+  vanBoard, bakeryFront, roadway,
+  // econ4:
+  raisedBed, tomatoPlant, tomatoFruit, henBird, henPeek, henHouse, coopRamp, picketFence, slatePost, gardenSlate, eggBox, trugBack, trugFront, gardenHedge,
+  // sci4:
+  swingFrameBack, swingFrameFront, swingSeat, clipboard,
+  // hist4:
+  clockTower, towerBell, phoneShop, cycleRack, cycleStand, horseTrough, oldPhoto,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;

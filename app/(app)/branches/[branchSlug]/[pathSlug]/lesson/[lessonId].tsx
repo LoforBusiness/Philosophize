@@ -25,6 +25,13 @@ import { Biz3Lesson } from '@/components/lesson/cinematic/biz3Scene';
 import { Econ3Lesson } from '@/components/lesson/cinematic/econ3Scene';
 import { Sci3Lesson } from '@/components/lesson/cinematic/sci3Scene';
 import { Hist3Lesson } from '@/components/lesson/cinematic/hist3Scene';
+import { Phil4Lesson } from '@/components/lesson/cinematic/phil4Scene';
+import { Psych4Lesson } from '@/components/lesson/cinematic/psych4Scene';
+import { Growth4Lesson } from '@/components/lesson/cinematic/growth4Scene';
+import { Biz4Lesson } from '@/components/lesson/cinematic/biz4Scene';
+import { Econ4Lesson } from '@/components/lesson/cinematic/econ4Scene';
+import { Sci4Lesson } from '@/components/lesson/cinematic/sci4Scene';
+import { Hist4Lesson } from '@/components/lesson/cinematic/hist4Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -58,24 +65,31 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'economics-foundations-1': Econ1Lesson,
   'economics-foundations-2': Econ2Lesson,
   'economics-foundations-3': Econ3Lesson,
+  'economics-foundations-4': Econ4Lesson,
   'philosophy-foundations-1': Phil1Lesson,
   'philosophy-foundations-2': Phil2Lesson,
   'philosophy-foundations-3': Phil3Lesson,
+  'philosophy-foundations-4': Phil4Lesson,
   'psychology-foundations-1': Psych1Lesson,
   'psychology-foundations-2': Psych2Lesson,
   'psychology-foundations-3': Psych3Lesson,
+  'psychology-foundations-4': Psych4Lesson,
   'personal-growth-foundations-1': Growth1Lesson,
   'personal-growth-foundations-2': Growth2Lesson,
   'personal-growth-foundations-3': Growth3Lesson,
+  'personal-growth-foundations-4': Growth4Lesson,
   'business-foundations-1': Biz1Lesson,
   'business-foundations-2': Biz2Lesson,
   'business-foundations-3': Biz3Lesson,
+  'business-foundations-4': Biz4Lesson,
   'science-foundations-1': Sci1Lesson,
   'science-foundations-2': Sci2Lesson,
   'science-foundations-3': Sci3Lesson,
+  'science-foundations-4': Sci4Lesson,
   'history-foundations-1': Hist1Lesson,
   'history-foundations-2': Hist2Lesson,
   'history-foundations-3': Hist3Lesson,
+  'history-foundations-4': Hist4Lesson,
 };
 
 export default function LessonScreen() {

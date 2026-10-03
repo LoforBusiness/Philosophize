@@ -143,7 +143,7 @@ Philosophize/
 │   ├── lesson/                  # LessonReward, LessonLoader, lessonNav, exitLesson
 │   │   │                        #   (the card runner, cards/ and interactions/ went
 │   │   │                        #   with the narrated library on 2026-10-02)
-│   │   ├── cinematic/           # THE BIG ONE — 21 wired cinematic lessons (the dialogue lessons), the
+│   │   ├── cinematic/           # THE BIG ONE — 28 wired cinematic lessons (the dialogue lessons), the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   NarrationText + ThinkerPeek (the marked deck),
 │   │   │                        #   interact.ts (the figure and what is outside it),
@@ -192,7 +192,7 @@ Philosophize/
 │   ├── types.ts                 # ALL type definitions — the load-bearing file
 │   ├── index.ts                 # ALL_BRANCHES (7 roads) + RETIRED_BRANCHES (the deleted 6, as progress only: retiredBranches.ts), getLessonById, lessonAccess + tasteFor (the free lesson), lessonAccessibility,
 │   │                            #   branchCountsFromUnits, getLessonUnitInfo
-│   ├── branches/                # 7 ROADS, one a subject, each 1 unit · 3 dialogue lessons (21), + philosophy's 6 RETIRED branches (28 units · 246 lessons, §5, §23)
+│   ├── branches/                # 7 ROADS, one a subject, each 1 unit · 4 dialogue lessons (28), + philosophy's 6 RETIRED branches (28 units · 246 lessons, §5, §23)
 │   ├── subjects.ts              # the seven subjects, one list; roadOf() (§23)
 │   ├── lessonAdded.ts           # when each lesson landed — NEW on its sign for 12 days
 │   ├── unitReviews.ts           # every unit review's four questions (§17, AK)
@@ -264,11 +264,11 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 
 ## 5. Curriculum Data Model
 
-> **SINCE 2026-09-30 THE LIVE LIBRARY IS SEVEN ROADS OF THREE DIALOGUE LESSONS —
-> 21 in all (§23).** Everything below about 41 a branch, the takeover and the 246
+> **SINCE 2026-09-30 THE LIVE LIBRARY IS SEVEN ROADS OF DIALOGUE LESSONS — FOUR A
+> ROAD SINCE 2026-10-02, 28 in all (§23).** Everything below about 41 a branch, the takeover and the 246
 > describes philosophy's six old branches, whose lessons were DELETED on 2026-10-02
 > (§23); a reader's progress in them survives as counts (`data/retiredBranches.ts`). It
-> is kept as a finding. `check:cinematic` counts the 21 lessons, so `SOLID_FLOOR` is 21.
+> is kept as a finding. `check:cinematic` counts the 28 lessons, so `SOLID_FLOOR` is 28.
 
 ### Shape today
 
@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 21** (246 when the takeover finished, 267 with the seven roads, and 21 since the old library was deleted), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 28** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, and 28 with the fourth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -320,7 +320,7 @@ because every lesson id is in the `CINEMATIC` map — and was deleted on 2026-10
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 21, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 28, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -414,7 +414,7 @@ Every lesson MUST:
 - Have exactly one correct answer in every `MultipleChoiceInteraction`
 
 > `tsc` checks types only, so these are enforced by `npm run check:cards`
-> (`scripts/validate-lessons.mjs`) — 21/21 clean. Cinematic lessons have their own
+> (`scripts/validate-lessons.mjs`) — 28/28 clean. Cinematic lessons have their own
 > shape check, `npm run check:cinematic` (§17). `npm run check` runs tsc plus seventy
 > validators — see §11.
 
@@ -1141,7 +1141,7 @@ to one branch puts them back out. Add six, one per branch — and give each of t
 a scene, or `CARD_BUDGET` goes up and the build fails, which is the point of it.
 
 **Grep for the free id; do not assume it is the next number.** Every branch runs
-1…41 unbroken today (a live road's ids are `<subject>-foundations-1…3`), but that is recent: the ids used to carry *gaps* where lessons
+1…41 unbroken today (a live road's ids are `<subject>-foundations-1…4`), but that is recent: the ids used to carry *gaps* where lessons
 had been removed — ethics had no 9, aesthetics no 11 or 16, epistemology no 2, 13 or
 21 — and those six gaps were exactly the six lessons missing when the branches were
 levelled. So grep the branch's `id:` values, take a vacant number, and **append the
@@ -1179,7 +1179,7 @@ followed:
 > knocked over again on every tap. It loads each real scene in plain Node with React,
 > React Native and Reanimated stood in (a hook store, a once-per-frame derived value,
 > styles it can call; `rig`, `moves`, `camera`, `cinematicKit` and the scripts are the
-> real modules), plays all 21 lessons in a few seconds (267 until the old library was deleted), and fails on anything that
+> real modules), plays all 28 lessons in a few seconds (267 until the old library was deleted), and fails on anything that
 > jumps at a beat change and would still jump if that beat had changed nothing (C20c),
 > on a painted box only as tall as its padding, and on words that stay put while their
 > plate tips (S12). Its first run found 13 more lessons repeating something; all are
@@ -1190,7 +1190,7 @@ followed:
 > **AND SINCE 2026-10-01 IT HOLDS THE DIALOGUE LESSONS' HANDS AND WORDS.** Reading every
 > figure's pose bundle and every label each frame, it fails AR1 (an object in a stage
 > tone), AR4 (an arm thrown behind the body), AR5 (a stroke played more than twice) and
-> AQ1 (a word that does not fit its plate, or a plate off its object) — at zero in the 21
+> AQ1 (a word that does not fit its plate, or a plate off its object) — at zero in the 28
 > dialogue lessons. The retired narrated ones are counted, not failed.
 
 > **`check-rules` was the newest when it landed (2026-09-08), and it is not about a lesson at all — it is about
@@ -1235,7 +1235,7 @@ figures and 3 hand-built PEOPLE — it was 6 until four of the seven it reported
 turned out to be a bird, a hen, a zebra and a cow, which the rule was never about
 (Z6) — and `check-moves` 6 head-clearance defects plus
 3 acts that barely move across their own `u`, all of them cold. A budget
-line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 267 lesson files (21 live, 246 retired); `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
+line that still says the same number is not a pass, it is a debt.) `check:cards` enforces the card contract above (hook first, summary last, 4–10 cards, ≥1 question/dilemma, exactly one correct MC answer) across all 28 live lesson files (the 246 retired ones were deleted on 2026-10-02); `check:cinematic` enforces the cinematic shape rules (group H of the rule book) across every wired scene, and carries the two takeover ratchets from §5. Both are clean today, so anything they print is yours.
 
 > **`check-moves` was the last one on that list to actually run, and for a long
 > time it did not.** It existed, this section quoted its budget, and
@@ -1300,13 +1300,13 @@ they belong to, so the rule book has them and this file did not:
 
 **Phase 5 — shipped and iterating in public.** Live on Google Play, versionCode 22, as Ashmere — the gate is at 22 too, so there is one reachable runtime (§18, §20).
 
-- **Content (since 2026-09-30): seven roads, one per subject, each with three
-  dialogue lessons, 21 in all (§23).** Philosophy's old library — 6 branches · **28 units** · **246
+- **Content (since 2026-09-30): seven roads, one per subject, each with four
+  dialogue lessons since 2026-10-02, 28 in all (§23).** Philosophy's old library — 6 branches · **28 units** · **246
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 21 DIALOGUE lessons, three on each road** (§23, LESSON_RULES
-  groups AP–AS): three of the four-strong cast in one real place, every line voiced
+- **Lessons (live): 28 DIALOGUE lessons, four on each road** (§23, LESSON_RULES
+  groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
   The narrated-lesson layers stay off in them (AP8), and so do maxims and tappable
@@ -1419,8 +1419,8 @@ they belong to, so the rule book has them and this file did not:
 **Known gaps / tech debt:**
 > Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
 > are about philosophy's narrated library, deleted on 2026-10-02 (§23): kept as findings.
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 21, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 21 (the 21 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 28, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 28 (the 28 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -2154,7 +2154,7 @@ Lessons are the product. They must *look*, *feel*, and *teach* well enough that 
     offset. The manifest gives each line an `at`, and `lib/narration/real.ts` seeks
     there and pauses at the line's end, so a pause that lands late lands in the
     silence. 246 files came to 87.1 MB after the lecture rewrite (69.0 MB before, when the
-    lines were shorter), and a real Android export bundled 364 assets; today it is the 21 dialogue lessons' 21 files, 47 MB of narration on disk with their WAV masters (2026-10-02, after the old library was deleted).
+    lines were shorter), and a real Android export bundled 364 assets; today it is the 28 dialogue lessons' 28 files, 61 MB of narration on disk with their WAV masters (2026-10-02, after the old library was deleted and the fourth lessons were voiced).
     Decoded, every line sits exactly on its start, and the 710 lines already heard kept
     their word times to the hundredth. ffmpeg is not a dependency; point `FFMPEG` at
     any build with libmp3lame.
@@ -2655,7 +2655,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 21 of the 21 lessons are here now (the dialogue lessons; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 28 of the 28 lessons are here now (the dialogue lessons; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -2664,17 +2664,17 @@ same "Lesson not found." a retired id gets. (It used to fall through to the card
 runner, which made removing an entry a rollback; with the runner gone it is not one.)
 
 A cinematic lesson = a **script** (beats) + a **scene** component, played by
-`CinematicPlayer`. **Every one of the 21 is**, as every one of the old 246 was from 2026-09-21.
+`CinematicPlayer`. **Every one of the 28 is**, as every one of the old 246 was from 2026-09-21.
 
-> **SINCE 2026-09-30 EVERY LESSON A READER CAN OPEN IS A DIALOGUE LESSON** — 21 of
-> them, three on each of the seven roads (§23; LESSON_RULES AP, AQ, AR, AS). They
+> **SINCE 2026-09-30 EVERY LESSON A READER CAN OPEN IS A DIALOGUE LESSON** — 28 of
+> them, four on each of the seven roads (§23; LESSON_RULES AP, AQ, AR, AS). They
 > run on this same player: a `*Script.ts` whose beats carry a `speaker`, a
 > `*Scene.tsx` and a `CINEMATIC` entry. Most of what follows was learned on
 > philosophy's 246 narrated lessons, which were DELETED on 2026-10-02 (§23), and it stays as findings. Several layers do
 > not reach a dialogue lesson. The generators skip any script with a `speaker`
 > (`scripts/lib/dialogue.mjs`), so there are no thoughts, pen marks, costumes, chair,
 > wander or visitor. There are no maxims or tappable names, and no analogue
-> controls: all 21 ask both questions on the stage.
+> controls: all 28 ask both questions on the stage.
 
 > **TWO LESSONS USED TO CARRY THEIR OWN COPY OF THE PLAYER, AND THAT IS WHY THEY
 > LOOKED WRONG.** A reader opened the first lesson in Logic — *"the arguments are
@@ -3083,7 +3083,7 @@ the two-card deck, which is 5% of all questions and is meant to stay a minority
 rather than reach zero
 (*"I still want a couple every now and then for the old way"*). It got there by
 conversion rather than by writing new lessons: **127 lessons had no analogue
-control at all, and 11 of the retired 246 still have none**; the 21 dialogue
+control at all, and 11 of the retired 246 still have none**; the 28 dialogue
 lessons have none either and ask both their questions on the stage. A conversion is a SCRIPT-ONLY edit — the player renders whichever
 control the beat declares — so it costs a control block, a rewritten `prompt` and
 a rewritten `explain` (an explanation that says "the other card" names nothing
@@ -4214,7 +4214,7 @@ it beside `make:tours`.
 > **SINCE 2026-09-30 NONE OF THE LAYERS BELOW REACHES A LESSON A READER CAN OPEN.**
 > The costume rotation, the visitor and the nod (AA), the thoughts (AB), the pen (AE),
 > the wander (AF) and the lawn chair (AO) serve philosophy's 246 retired narrated
-> lessons (§23). The 21 live lessons are dialogue lessons (group AP). Every generator
+> lessons (§23). The 28 live lessons are dialogue lessons (group AP). Every generator
 > skips a script that gives a beat a `speaker` (`scripts/lib/dialogue.mjs`, AP8). Each
 > speaker always wears one costume from `cast.ts` (the pieces and AA6's seating still
 > apply). Their scenes pose with `emoteStill`/`postureStill` (AP18) and never call
@@ -5626,7 +5626,7 @@ and all three ways to lose the loader among them.
 
 Imprint's pipeline does not transfer and saying so is half the answer: seven
 illustrators and eight animators hand-key After Effects and export **Lottie JSON**
-per card, which is a full-screen canvas — §17 rule 7, and this app draws all 21
+per card, which is a full-screen canvas — §17 rule 7, and this app draws all 28
 scenes procedurally from Views for that exact reason. What transfers is the
 principle, that every card earns one visual event and the visual IS the
 explanation.
@@ -6013,7 +6013,7 @@ the allowance a build queues or is refused, never billed.
    note, `expo/fyi` eas-update-asset-limits), and nothing in this repo warned before
    it mattered: narration shipped a clip a line until 85 lessons had put 710 clips into
    an update of 809 assets. It ships one file a lesson now (LESSON_RULES AC15), and a
-   real Android export bundled 364 at build 22, and fewer since: the 246 retired lessons' voices were deleted on 2026-10-02, so 21 `lesson.mp3` ship today (`lib/narration/manifest.ts`), plus the drawn Quick Start, poster and profile PNGs. `eas update` prints the count as `Assets (N)`,
+   real Android export bundled 364 at build 22, and fewer since: the 246 retired lessons' voices were deleted on 2026-10-02, so 28 `lesson.mp3` ship today (four a road since 2026-10-02) (`lib/narration/manifest.ts`), plus the drawn Quick Start, poster and profile PNGs. `eas update` prints the count as `Assets (N)`,
    listing each asset twice. Anything that adds a file per something numerous is
    counted against this before it is built.
 
@@ -8352,7 +8352,7 @@ Consequences to remember:
 > a similar design … as how Brilliant does theirs."*
 
 **Ashmere teaches seven subjects now, and since 2026-09-30 each is ONE ROAD** with
-three dialogue lessons on it, 21 in all (see "One road per subject" at the end of this section). Spec
+four dialogue lessons on it, 28 in all (see "One road per subject" at the end of this section). Spec
 for the first step: `docs/superpowers/specs/2026-09-29-multi-subject-design.md`.
 
 > **THE BULLETS BELOW DESCRIBE 2026-09-29, AND FOUR OF THEM ARE HISTORY NOW**: the
@@ -8552,7 +8552,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **Every subject is live and is ONE road** (`data/subjects.ts`: `courses` holds one
   branch; `roadOf(subject)`). The roads are `data/branches/<subject slug>/` —
   philosophy, psychology, personal-growth, business, economics, science, history — each
-  one unit (`<slug>-foundations`) with, today, three lessons (`<slug>-foundations-1` to `-3`) and
+  one unit (`<slug>-foundations`) with, today, four lessons (`<slug>-foundations-1` to `-4`) and
   `more: true`, so the road ends at MORE COMING SOON. `ALL_BRANCHES` is these seven, in
   subject order. LESSON_RULES AP15; `check:subjects` holds it.
 - **A tap on a subject opens its road.** The subject page is deleted. Learn's grid and
@@ -8677,6 +8677,16 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   63 lines were voiced in one go for about 17,000 characters. All 21 lessons cast three
   of the four, with the top hat in every one. `SOLID_FLOOR` is 21 (267 until the old library was deleted the next day). The road they stand on — a signboard per stop, NEW for 12 days, a landmark per
   road — is in §17 ("The branch road"); the paper curtain from Home is in §19.
+- **And a fourth on every road (2026-10-02), 28 lessons in all.** How Do You Know?
+  (a station clock that stopped last night), Why We Follow the Crowd (a closed bus
+  stop), How to Learn From a Mistake (a pottery studio), What Is Profit? (a food truck at
+  closing time), Why Do People Trade? (two back gardens, tomatoes and hens), Why Measure
+  More Than Once? (a playground swing) and What Changed, and What Stayed? (a town square
+  and a hundred-year-old photograph). Scripts `phil4 … hist4`. The first lessons written
+  from group AS's personalities, and the first two-person lessons (phil4, sci4, AP13).
+  63 lines voiced in one go for about 17,000 characters; every object in its own colours
+  and every hand built the AR7 way. Brief:
+  `docs/superpowers/plans/2026-10-02-fourth-lessons-scene-brief.md`.
 - **The old library is deleted (2026-10-02).** Philosophy's 246 narrated lessons went
   with everything that was theirs alone: their data (`data/branches/<the six>`), their
   246 scenes and scripts, 26 per-lesson sets and three helpers only they used, their voices (587 MB of WAV masters and

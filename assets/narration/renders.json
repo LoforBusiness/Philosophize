@@ -129,6 +129,46 @@
     "wav": "2ccf24d3cada13ae76728eb38e234405b4a05dcf8c4e21524e8982a2f6ee75b8",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "business-foundations-4/beat-00": {
+    "text": "Three hundred pounds today. As I suspected, I’m a business genius.",
+    "wav": "eab493018b8e4a491860435a76e4c9e96f9d7f1e7e83250e0f3d8a85181e25a1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-4/beat-01": {
+    "text": "Brilliant day! Here are the receipts for the bread, the fuel and the pitch.",
+    "wav": "edaa1c7c471e138ad7c0e793b904bda2e9aac9aa1d95d0388aca745dbd7162c4",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-4/beat-02": {
+    "text": "The three hundred pounds is your revenue: all the money that came in. It isn’t what you keep.",
+    "wav": "54a4f472fc7bfdc41b4bc71763d478fda6e511ef2744d2954524be86e8ff027b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-4/beat-03": {
+    "text": "Costs are what you paid to make those sales. The bread, the fuel and the pitch came to two hundred and twenty pounds.",
+    "wav": "8d496d468cb9c570d8f5ad873ee7b2c6a87a63ccbac6e46935930481b68da08f",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-4/beat-05": {
+    "text": "Fine. So how much of my genius do I get to keep?",
+    "wav": "6383999c2dbbe192cee6af8714d6b76e1bd8499f5779dcfe85f1d97050088099",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-4/beat-06": {
+    "text": "Take the costs away from the revenue: three hundred, less two hundred and twenty, leaves eighty pounds. That’s your profit.",
+    "wav": "23fd0bb583472ac20e02cdb47163e6232076bca5f0d065e0a35780c073bcb7d5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-4/beat-07": {
+    "text": "Eighty pounds. Still a genius, just a slightly smaller one.",
+    "wav": "97299ca9912b7b8a29e83a24b6e25cdd1784fc7d99782ed45d4897f8ef6ab88a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-4/beat-08": {
+    "text": "The bakery across the road sells bread for less. If we buy it there, we’ll keep more.",
+    "wav": "68129b322769bef99ef225ba5f9fc79954a889f31747444bf833d0b31d1ea163",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "economics-foundations-1/beat-00": {
     "text": "One ten-pound note. And I want everything on this table.",
     "wav": "0721e98b99037db105b9710e80be5a2f03c1c114e6bbd7ac1255298d322e785f",
@@ -248,6 +288,46 @@
     "text": "One concert ticket, please. I’ll try not to enjoy it too much.",
     "wav": "3e251f654586dd831f273edd10df4a25b4127caaa31a32832fca1a1eb1f64bbb",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-4/beat-00": {
+    "text": "I’m growing tomatoes and keeping a hen this year. The hen is eating the tomatoes.",
+    "wav": "e979a5c4a76faeb5980dd3b1dd2f5a37096212131bfd11516ec6bcd73647c0ea",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-4/beat-01": {
+    "text": "I’ve more eggs than I can eat. Swap you a box for a few tomatoes?",
+    "wav": "36cfe5c75e563169c54961ca10fa914dd473398a7a75b2182dee1480edb683f3",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-4/beat-02": {
+    "text": "That swap is the whole idea of trade. Each of you makes what you’re good at, then you exchange.",
+    "wav": "ece0d0b2bda9acae71cb8c49ad34e98c4904ba25c1295be42d7d06c1d982a52e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-4/beat-03": {
+    "text": "Doing one job well is called specialising. She grows tomatoes, he keeps hens, and nobody does both badly.",
+    "wav": "9ca9628db3c01191f4ec20c0339437f444aca4b87b50402771998f7f7d81b808",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-4/beat-05": {
+    "text": "So I give him tomatoes, and he gives me eggs. And I don’t have to talk to the hen.",
+    "wav": "11bee7496fc037c93a2e78c9db61d93bcd502dbe0a43db625abcfff017e375c5",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-4/beat-06": {
+    "text": "You both end up with more than you’d make doing everything yourselves. Trade isn’t one side winning.",
+    "wav": "dbf92ea8bf80d41274e9d2698a27a2807b411f8e451673b119c7ca489bd79f8d",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-4/beat-07": {
+    "text": "Fresh tomatoes for my sandwiches. I couldn’t grow one of these if I tried.",
+    "wav": "d9e167224c0d1d60bc0e64ae9ac9658ac9a8e1a731362c3a26bc655c9c675c85",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-foundations-4/beat-09": {
+    "text": "Then my hen should live with his hens. She’ll be much happier there, I think.",
+    "wav": "52a103ba8937eb9a40b88aa94e61b099b3f7af2d3539a95c41114af2f7ef93c6",
+    "voice": "en-US-Chirp3-HD-Kore"
   },
   "history-foundations-1/beat-00": {
     "text": "My window! It was whole when I locked up, so it must have been the wind.",
@@ -373,6 +453,46 @@
     "text": "Then I’ll mend the plank myself, and go round by the ford until it’s done.",
     "wav": "93425a2de45d2ab8b11b6513c31bd7750a5c64d665505721c3785107640d1ea8",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-4/beat-00": {
+    "text": "I found a photo of this square from a hundred years ago. Everything’s different!",
+    "wav": "ef8072d5a553ee0b90309faa3ce3a939d64acc88229355e637c38227ed032309",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-4/beat-01": {
+    "text": "Naturally. I’d have improved it too, if they’d asked me.",
+    "wav": "8a765feef58a494d3e4d5fc9bce3b35ab3a448c511500f4be6621d14a23090f4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-4/beat-02": {
+    "text": "Not everything. The clock tower is in the photo, and it’s still standing.",
+    "wav": "7a2a6c7685d323984f5afb178910285c823b7f1bdd02257aa352431c10c15d8b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-4/beat-03": {
+    "text": "What alters over time is called change, and what stays the same is called continuity. Historians look for both.",
+    "wav": "8c33c04756a37e2cff4e7ab72436a1680a460b2ec4b54008e188ef27e2af50d4",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-4/beat-05": {
+    "text": "The horse trough is full of flowers now. Did the horses just leave?",
+    "wav": "e10430a4b9f816c7c9af7a2926ac69ad3a94187ee5869a5d35af5bc7c53d427d",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-4/beat-06": {
+    "text": "Cars replaced the horses, bit by bit, over about thirty years. Some changes take a lifetime.",
+    "wav": "3b0a9f1e22be419fc2ee49164ac9cd163e6e235e3af899c19d2eef7ac2d36e8d",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-4/beat-07": {
+    "text": "And the bakery became a phone shop in one afternoon. That one, I fully approve of.",
+    "wav": "166750a2436a9771c2d65c682d113dc3e89aaeba0da0d637fe4da538aaacb45d",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-4/beat-08": {
+    "text": "Of course you do. Some change is quick, some is slow, and some things barely change at all.",
+    "wav": "59803d15280515f83fe907f39bc06bd21212c01209b7a5d0aaf174d2d537ec6c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "personal-growth-foundations-1/beat-00": {
     "text": "New me! I’m growing the tallest sunflower on the street, starting today.",
@@ -509,6 +629,51 @@
     "wav": "0688bc4be8385ba0cba34283e85009738bed29468ed7b10dc018f5a3d1c3bc84",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "personal-growth-foundations-4/beat-00": {
+    "text": "Behold. My very first pot, and already a masterpiece.",
+    "wav": "80b488eaa4fcab9deacc53f162bc45e87aa37f09d933d37fe484cbc8bd32b0a5",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-4/beat-01": {
+    "text": "My pot’s fallen over. That wheel must be broken.",
+    "wav": "c2e12d56aece5131c40de2b0592dbe96d66af66954236a742a0517ec0778c1f6",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-4/beat-02": {
+    "text": "Your clay’s too wet, mate. Feel how soft the walls are.",
+    "wav": "bf5392e945a3c5c41dc7444b1ee10c0fd1e134754617b12fd5b6749fd2173bc9",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-4/beat-03": {
+    "text": "Blaming the wheel teaches you nothing. A mistake is information, if you look at what went wrong.",
+    "wav": "b1cc5f5dac5bf86feb6d98048781c3ee01c39e5e36a683dcd21468cfc849dd4a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-4/beat-05": {
+    "text": "Too much water. I’d have spotted that myself, eventually.",
+    "wav": "5d9fcb05848acb294f22aa6cfb8445474dbea55e9b439666cc4dd705e2e80574",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-4/beat-06": {
+    "text": "Then change one thing and try again. Less water, same wheel, and please, less talking.",
+    "wav": "89aa63f2af40e68d9f705cb3f47c5164495b3796ec2a99e1f0c243525d63274a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-4/beat-07": {
+    "text": "My pot is standing. You may all applaud now.",
+    "wav": "ae23e66595f59d37314272be53dfec7c2f2b18aeb05362bc4aee903fa6a5dc7e",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-foundations-4/beat-08": {
+    "text": "Every pot on that shelf fell over a few times first. Mine certainly did.",
+    "wav": "5e5ac2bfb616164bb143c6682a27a9cea5a468c642b1e699b2142f6bf6ea7d9e",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-4/beat-09": {
+    "text": "That’s how skill grows. Each mistake you learn from makes the next try a little better.",
+    "wav": "26a2e6b9d4beed3db9ac85a8a2839c0ccd0c762050ea6d2392bd4eac6655fc30",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
     "wav": "991e165d2f84f300097098d8a4e1f2ffb2b5fe6275bfd91251f7b1f325c6c233",
@@ -638,6 +803,46 @@
     "text": "Fine, the note goes in the box. Goodbye, twenty pounds, you were lovely!",
     "wav": "af440233efa86b117981427d62389984efb63e6132afd88ed8d449e4bfb5679b",
     "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-4/beat-00": {
+    "text": "Quarter past nine, and my train is at half past. I always know these things.",
+    "wav": "9bbf0ff4b9711bf282605f88a2bec49af0ca46201807a4e92c43ed0582d98335",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-4/beat-01": {
+    "text": "That clock stopped at quarter past nine last night. Its hands haven’t moved since.",
+    "wav": "c896736fe6ed89162deafdf01bc9f8a23df01ac81c69c5beb4431107264f2983",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-4/beat-02": {
+    "text": "And yet it’s quarter past nine, so I was right. Again.",
+    "wav": "f5ef09b1fe99a701afa6dd886a0e18bce1a274ea096b45bfa4207cadd03b676c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-4/beat-03": {
+    "text": "Being right isn’t the same as knowing. To know something, your belief must be true, and you need a good reason for it.",
+    "wav": "375502e46b29cf8e8ebb3b54abdaba680d205872fed3f30a56e34424aa420475",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-4/beat-05": {
+    "text": "A lucky guess can be true. Luck isn’t a reason, though, so a lucky guess isn’t knowledge.",
+    "wav": "50f6c947a9aa246446598fd97edcc1c62dfc36ecf0e67c18c6fec5c860e75bdb",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-4/beat-06": {
+    "text": "So I was right, and it doesn’t count. What a tragedy.",
+    "wav": "a35ff1fc77de1d04661e5f7d35f00e61d8bf0de0eef1696df516302a450431f1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-4/beat-07": {
+    "text": "It counts once you check. Go and read the board, please, while I’m still young.",
+    "wav": "8935e3e8c06d7249eedc7782ad0a120ffe40dc4d49f4618b7f5991b98c3d2bcd",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-4/beat-08": {
+    "text": "Half past nine, on time. Now I know it, and I’d like that written down somewhere.",
+    "wav": "173b16a2b79535a05a0218ab9022f85debaa0d7a71ff41d801868b7c057b0e8a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "psychology-foundations-1/beat-00": {
     "text": "I can always tell cheap coffee from the good stuff. Always.",
@@ -774,6 +979,51 @@
     "wav": "3b25296aa3f84e6a6f5e754a1fcba15d417f4a4e8daa9364c6d54ed568d53a26",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "psychology-foundations-4/beat-00": {
+    "text": "The bus stop is very quiet this morning. Everyone must be on holiday.",
+    "wav": "370be78ef7b72799725aa8c1361f40f2fd030eb54e9414420a09cf8460509280",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-4/beat-01": {
+    "text": "Oh good, someone’s waiting. This must be the right stop, then.",
+    "wav": "d4a911715aaf8c501b290c2faa274354616a416536634964465e13baf0e09fd0",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-4/beat-02": {
+    "text": "Neither of you has read the notice on this post. The stop has been closed all week.",
+    "wav": "a3d8bb797a221dad984e2b4a6405760165d20347187fcc76c11eb9ba61950583",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-4/beat-03": {
+    "text": "Oh, I’m sorry. I only stopped here because I saw her waiting.",
+    "wav": "7e74423d7be40086b74ddb495ccbc370506c9233febefcab122798a190a46d85",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-4/beat-04": {
+    "text": "When people are unsure what to do, they copy what others are doing. Psychologists call it social proof.",
+    "wav": "9b8abc5fc74f9175f8a8ccd3b9c6fe8dd77de13cbff21230e3904497b3e64116",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-4/beat-06": {
+    "text": "Copying is often sensible. A queue outside a café usually means the coffee is good.",
+    "wav": "1a84fc1f3fd3170bedb935d534c2fe69af8457be6c0db322be7fd2e2581f305b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-4/beat-07": {
+    "text": "So he copied me, and I felt sure because he came. That sounds like teamwork to me.",
+    "wav": "f2af8c76278ed11d50154c4d887ad7524267cf715e63fc88961af86414584fdb",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-4/beat-08": {
+    "text": "No. When everybody copies everybody, nobody checks. A crowd can be wrong all together.",
+    "wav": "5ae18b198215afbe74734321481573afd603b90d1357a629e94f390f3b52a948",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-4/beat-10": {
+    "text": "The new stop is round the corner. Come on, I’ll walk you both there.",
+    "wav": "cfb1bc79e569f10a13bf857d7d1e5f66ee93613b7b41c66077b1fb9227da6bac",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
     "wav": "b5e112d0972cf98c28dbbc68b2777086a746443518bb93655d937c72d6c270a6",
@@ -902,6 +1152,46 @@
   "science-foundations-3/beat-10": {
     "text": "Sun cream, then, and an ice cream anyway. Science is delicious!",
     "wav": "88e1e659ddd5d980e67038f8cd3f7d68800b94bd92514cd4b4fd2a6c0ce3e76d",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-4/beat-00": {
+    "text": "One swing took three seconds. That’s the experiment done, then!",
+    "wav": "1ec91c11cd61881a09f6a789339a462f224c9bed2741e3258849cdcddcae1784",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-4/beat-01": {
+    "text": "One measurement is a start, not an answer. Time it again, and again.",
+    "wav": "c2ce3cda23eae7ac2bf3ed718be8eb912f36e5813d0cfb599fa0114ddf0b0c0a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-4/beat-02": {
+    "text": "Two point eight, and now three point one. The swing keeps changing its mind!",
+    "wav": "1988237a92a85b31c5c3d78fc0a7b3ccc5c9186e5e2dff42c90a3da54e4e1ed5",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-4/beat-03": {
+    "text": "The swing is steady. Every measurement has a small error, and yours comes from your thumb on the button.",
+    "wav": "f8db6f2ef80b9eb497c2378aecc0172d2fedb160255e23c1a22baa14d8834df7",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-4/beat-05": {
+    "text": "So you measure several times and take the average. The small errors cancel each other out.",
+    "wav": "d8ff1d2aa8d769980a7744b716598212dd3313e32224a9fb61a6194f3fa0d6ea",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-4/beat-06": {
+    "text": "I got two seconds once, while a dog ran past. Shall I just rub that one out?",
+    "wav": "b9a6e2f6c960a5f2bf59b714d4fcfe2d81e7a0187551154f771d73f8acb0e5bd",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-4/beat-07": {
+    "text": "Don’t hide it. A result far from the others means something went wrong, so find out what and measure again.",
+    "wav": "6ec1250bba0889d264b757216f06d02df02c2163d1fa4dc47ed20a0b3e35e594",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-4/beat-09": {
+    "text": "The average of my three good ones is about three seconds. So I was right all along!",
+    "wav": "cd31db72de84ef24a9b4b18a9490ad4475ef2e651c9bc4af8a8ef4061097ef8f",
     "voice": "en-US-Chirp3-HD-Kore"
   }
 }
