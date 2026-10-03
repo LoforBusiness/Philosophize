@@ -2,11 +2,11 @@ import type { BaseBeat } from './cinematicKit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cinematic history-foundations-5, "On Trial in Athens" — the fifth lesson on the
-// History road, a DIALOGUE lesson (LESSON_RULES group AP) told in FIRST PERSON (group AT).
+// History road, a DIALOGUE lesson (LESSON_RULES group AP) staged as a SCENE (group AT).
 // Theme: AN ATHENIAN LAW COURT, A WATER CLOCK, AND FIVE HUNDRED JURORS.
 //
-// The reader IS the man in the cap (cast.ts: kind, Australian). He wakes in his own
-// bedroom, hears a crowd, opens the door and walks into a law court in ancient Athens,
+// The man in the cap (cast.ts: kind, Australian) wakes in his own bedroom, hears a
+// crowd, opens the door and walks out into a law court in ancient Athens,
 // where the plain one (vain, and harsher than anywhere else in the app on the owner's
 // word, 2026-10-03) is prosecuting him. The jurors watch, murmur, laugh and vote; they
 // never speak. Nobody narrates.
@@ -26,27 +26,28 @@ import type { BaseBeat } from './cinematicKit';
 
 export interface Hist5Beat extends BaseBeat {
   /**
-   * What happens across this beat (the scene choreographs it, all seen through his eyes):
-   * wake — black, then his eyelids flicker open on his bedroom ceiling and drop to the room ·
-   * room — he looks down at his hands, turns them over, and looks round the room to the door ·
-   * door — he walks to the door and puts his hand on the handle ·
-   * open — the door swings open onto sunlight: the court, the jurors on their benches, and the plain one centre stage, arms wide ·
-   * what — his hands come up, open, as he walks out into the court ·
+   * What happens across this beat (the scene choreographs it; the camera starts close on
+   * his room and pulls back to the whole hall once he is through the door):
+   * wake — he lies asleep, sits up in bed, stretches, and leans to his alarm clock ·
+   * room — he looks at his lamp, up at his poster, down at his hands, and toward the door ·
+   * door — he gets out of bed, walks to the door and puts his hand on the handle ·
+   * open — the door swings open onto sunlight; he steps out into the court and the camera pulls back: the jurors on their benches, and the plain one centre stage, arms up ·
+   * what — his hands come up, open; he looks down at himself ·
    * charge — the plain one paces in front of him, hands behind his back ·
-   * jury — the plain one sweeps a hand along the jurors; the view follows it along the benches ·
+   * jury — the plain one points along the jurors; the camera goes along the benches ·
    * straws — he looks along the benches himself, and back ·
    * why — the plain one walks right up to him and leans in ·
    * reply — his hand comes up, palm open, as he answers ·
-   * sour — the plain one straightens, sour, and turns away ·
-   * gloat — the plain one throws his head back and laughs, and points at him ·
+   * sour — the plain one straightens, sour, and walks back ·
+   * gloat — the plain one laughs, and points at him ·
    * clock — the plain one walks to the water clock and pulls its plug; water runs ·
-   * asks — he looks at the water clock, a hand toward it ·
-   * prove — the plain one turns back to him, arms folded ·
+   * asks — he points to the water clock ·
+   * prove — the plain one walks back to him and folds his arms ·
    * defend — he turns to the jurors, both hands open ·
-   * vote — the plain one holds up two bronze discs; the jurors file to the urns ·
-   * verdict — the plain one reads the count at the urn ·
-   * sleep — his eyelids close; black ·
-   * rest — black, under the quotation.
+   * vote — the plain one holds up two bronze discs; the jurors raise their hands and the votes fall into the urn ·
+   * verdict — the plain one reads the count at the urn, and the jury cheers or gasps ·
+   * sleep — he walks back through the door, which shuts behind him, sits on his bed and lies down ·
+   * rest — asleep, under the quotation.
    */
   act?: 'wake' | 'room' | 'door' | 'open' | 'what' | 'charge' | 'jury' | 'straws' | 'why' | 'reply' | 'sour' | 'gloat'
     | 'clock' | 'asks' | 'prove' | 'defend' | 'vote' | 'verdict' | 'sleep' | 'rest';

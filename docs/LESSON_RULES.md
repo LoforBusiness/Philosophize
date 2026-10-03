@@ -11738,7 +11738,7 @@ WRITTEN from the day it is made.
 
 ---
 
-## Group AT · A scene the reader is in: first person, said replies, branches and sound
+## Group AT · A staged scene: silent extras, said replies, branches and sound
 
 > **2026-10-03, `history-foundations-5` "On Trial in Athens", an experiment the owner
 > asked for by name:** *"a different feel of this lesson … more like a movie-like or a
@@ -11746,9 +11746,20 @@ WRITTEN from the day it is made.
 > hands move, and if the stick man looks down, can see his body."* The reader is the cap.
 > He wakes in his bedroom, opens the door, and is on trial in an Athenian law court, where
 > the plain one prosecutes him in front of a jury. Every rule of group AP still applies;
-> this group is what a lesson told from INSIDE it adds and changes.
+> this group is what a lesson told as a SCENE adds and changes.
+>
+> **The same day it went back to the side view.** *"I do not actually want the first person
+> view. I want the old view like the other lessons do. But I still want this whole scene to
+> play out."* The reader watches the cap again — asleep in his own bedroom, close up, then
+> through the door and out into a big Athenian hall as the camera pulls back. AT1 is kept as
+> what was tried; AT2–AT6 are what stayed.
 
-### AT1 · First person: the reader is one of the cast
+### AT1 · First person: the reader is one of the cast (tried, then withdrawn)
+
+> **Withdrawn 2026-10-03, the day it shipped.** The owner preferred the side view every
+> other lesson has. The machinery (`// AT1: first person:` in `check:dialogue` and
+> `validate-cinematic`) still reads the declaration, so the experiment can be run again; no
+> lesson uses it today.
 
 A first-person scene says so in one line at the top of its header,
 `// AT1: first person: <speaker>`, and that speaker is never a figure on the stage. What
@@ -11767,15 +11778,28 @@ from the middle, ending in a round hand), and his body and legs when he looks do
   is beside his words in the deck: the reader hears himself talk.
 - `check:dialogue` reads the declaration: the first-person speaker needs no figure.
 
-### AT2 · Silent extras, only in a scene the reader is inside
+### AT2 · Silent extras, only in a staged scene
 
-A first-person scene may seat people who never speak: a jury, a crowd, the public. In a
-place the reader stands inside, a court with nobody in it is what would read as wrong.
-Each is marked `{/* extra: <what> */}`, wears nothing (`wear={[]}`), and is ALIVE: on
-every beat each one listens — leans in, puts his chin in his hand, shifts a hand — at his
-own moment, so no two neighbours move together (N21, held by `check:replay`). Further away
-they are drawn browner, not ink (the room's own air). `check:dialogue` refuses an extra in
-any lesson that is not first person: AP13 still says a lesson casts only who it needs.
+A staged scene may seat people who never speak: a jury, a crowd, the public. In a court, a
+court with nobody in it is what would read as wrong. The scene says so in its header,
+`// AT2: silent extras: <who>`. Each extra is marked `{/* extra: <what> */}` and wears
+nothing (`wear={[]}`). `check:dialogue` refuses an extra anywhere else: AP13 still says a
+lesson casts only who it needs.
+
+- **Every extra does his OWN thing.** *"I do not want stick men to be doing the same
+  movements. I want them to be each doing their own thing."* Each one has an activity a
+  beat, picked so no two neighbours share it (chin in hand, arms folded, leaning in,
+  whispering, scratching his head, nodding off, counting on his fingers…), started at his
+  own moment. The crowd's sounds (a laugh, a murmur, a cheer, a gasp) move each man in his
+  own style and by his own amount, and some hardly at all. None is ever frozen (N21, held
+  by `check:replay`).
+- **Every extra can be told apart.** *"They're not a bunch of combined figures."* Solid-ink
+  figures that overlap fuse into one black mass, so the seats are spaced for it: 60 apart
+  on a bench, tiers 94 apart so a head sits below the bench behind it, each row offset
+  half a seat from the row in front. The first layout (44 apart, tiers 70) rendered as a
+  wall of heads and was respaced on sight.
+- **The cast stand clear of the crowd.** The leads work on the open floor in front of the
+  stands, and the presiding magistrate sits high enough that his feet clear their heads.
 
 ### AT3 · How mean the plain one may be, in a scene he is staging
 
@@ -11787,7 +11811,7 @@ kind whatever is said to him (AS4). A lesson that is not a staged scene keeps AS
 
 ### AT4 · An answer the reader gives is said out loud
 
-A graded beat in a first-person scene offers its two answers as two replies (`cards`,
+A graded beat in a staged scene offers its two answers as two replies (`cards`,
 short, in the cap's own words), and carries `go`: once the reader taps one, the player
 moves on by itself after that many seconds, to a beat on which the cap SAYS the reply he
 chose. The reader does not tap a card and then read an explanation: he answers, and the
@@ -11803,8 +11827,8 @@ for each score; the player skips the beats that do not apply, going forward and 
 
 - **Every path is the same length**, so a reader is not punished with a longer lesson for
   a wrong answer. `validate-cinematic` counts H52 on the path a reader plays (the
-  all-right one), not on the beats written, and a first-person scene may run to 26 of
-  them; the owner asked for the scene to be as long as it needs (2026-10-03).
+  all-right one), not on the beats written, and a staged scene (AT1 or AT2) may run to 26
+  of them; the owner asked for the scene to be as long as it needs (2026-10-03).
 - **A branch is a voiced beat like any other**, so every one is rendered and installed.
 - **The scene never reads the answers**: it draws the beat it is given. Which beat that is
   is the player's job, so the scene cannot get it wrong.

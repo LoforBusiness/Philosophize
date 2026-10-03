@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 29** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 29 with history's first-person fifth, and 28 with the fourth lessons), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 29** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 29 with history's staged fifth, and 28 with the fourth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -1305,7 +1305,7 @@ they belong to, so the rule book has them and this file did not:
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 29 DIALOGUE lessons, four on each road and a fifth on History's, told in first person** (§23, LESSON_RULES
+- **Lessons (live): 29 DIALOGUE lessons, four on each road and a fifth on History's, staged as a scene with a silent jury** (§23, LESSON_RULES
   groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
@@ -2655,7 +2655,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 29 of the 29 lessons are here now (the dialogue lessons, one of them first person; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 29 of the 29 lessons are here now (the dialogue lessons, one of them a staged scene; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8748,19 +8748,24 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   AF, AO and AA's rotation and visitor are marked removed and kept as findings. Proof
   that no dialogue lesson changed: `check:replay`'s settled-frame dump of all 21 is
   byte-identical before and after.
-- **History's fifth is a FIRST-PERSON scene (2026-10-03), an experiment.** "On Trial in
-  Athens" (`history-foundations-5`, scripts `hist5`): the reader IS the cap. His eyes open
-  in his own bedroom, he walks to the door, and opens it on an Athenian law court, where
-  the plain one prosecutes him in front of a silent jury. Everything is seen through his
-  eyes: the stage is his head (it turns, tips and walks), and his arms come up from the
-  foot of the frame. LESSON_RULES **group AT** is what it adds: first person (AT1), silent
-  extras only in such a scene (AT2), a harsher plain one, at the owner's choice (AT3),
-  answers SAID as replies (AT4, `go`), BRANCHES on the reader's answers (AT5, `when`: a
-  reply, a retort and a verdict for each), and SOUND EFFECTS (AT6). The court is a set
-  in one-point perspective drawn with `SetArt` polygons; its seam was raised to 1.6 so no
-  triangle edge shows across a wall. 26 lines voiced for about 8,700 characters.
-  `validate-cinematic` counts H52 on the path a reader plays (up to 26 in a first-person
-  scene); `check:guide` accepts a back step that skips the branches not played.
+- **History's fifth is a STAGED SCENE (2026-10-03).** "On Trial in Athens"
+  (`history-foundations-5`, scripts `hist5`, its set in `hist5Set.ts`): the cap wakes in
+  his own bedroom, close up, gets up, opens the door, and walks out into a big Athenian law
+  court as the camera pulls back, where the plain one prosecutes him before a silent jury of
+  twenty-four and a magistrate on his dais, under a Doric colonnade with the Acropolis in its
+  middle bay. It was first built in FIRST PERSON (the reader as the cap, his arms at the foot
+  of the frame), published that way as e92d61ae, and rebuilt in the side view the same day
+  at the owner's word: *"I want the old view like the other lessons do. But I still want this
+  whole scene to play out."* LESSON_RULES **group AT** is what a staged scene adds: AT1
+  (first person, kept as what was tried), silent extras that each do their own thing and are
+  spaced so no two fuse (AT2, `// AT2: silent extras` in the header), a harsher plain one at
+  the owner's choice (AT3), answers SAID as replies (AT4, `go`), BRANCHES on the reader's
+  answers (AT5, `when`: a reply, a retort and a verdict for each), and SOUND EFFECTS (AT6).
+  The scene carries its own camera (one world layer, carried across a tap like any track);
+  the set is `SetArt` polygons, whose seam was raised to 1.6 so no triangle edge shows. 26
+  lines voiced for about 8,700 characters, and none was re-voiced for the rebuild.
+  `validate-cinematic` counts H52 on the path a reader plays (up to 26 in a staged scene);
+  `check:guide` accepts a back step that skips the branches not played.
 
 ---
 

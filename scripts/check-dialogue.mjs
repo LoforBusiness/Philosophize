@@ -184,11 +184,12 @@ for (const l of lessons) {
   const onStage = new Set();
   // AT1 — A FIRST-PERSON LESSON: the reader IS one of the cast, so that speaker is never a
   // figure on the stage (the scene draws his arms, and his body when he looks down). The
-  // scene says so in one line, `// AT1: first person: <speaker>`, and only then may it
-  // also seat SILENT EXTRAS (AT2) — a jury, a crowd — marked {/* extra: <what> */} and
-  // wearing nothing, because in a scene the reader stands inside, a court with nobody in
-  // it is the thing that would read as wrong.
+  // scene says so in one line, `// AT1: first person: <speaker>`.
+  // AT2 — SILENT EXTRAS (a jury, a crowd) are allowed only in a STAGED scene, one that
+  // says so in its header (`// AT2: silent extras: ...`) or is first person. Each is
+  // marked {/* extra: <what> */} and wears nothing, because a costume belongs to the cast.
   const pov = scene.match(/^\/\/ AT1: first person: (\w+)/m)?.[1] ?? null;
+  const staged = !!pov || /^\/\/ AT2: silent extras/m.test(scene);
   if (pov && !SPEAKERS.includes(pov)) fail('AT1', l.id, `is told in first person by "${pov}", who is not in the cast`);
   if (pov) onStage.add(pov);
   for (const f of figures) {
@@ -196,7 +197,7 @@ for (const l of lessons) {
     const lineOf = scene.slice(0, f.index).split('\n').length;
     const extra = [...before.matchAll(/(cast|extra):\s*(\w+)/g)].pop();
     if (extra && extra[1] === 'extra') {
-      if (!pov) fail('AT2', l.id, `the <Stickman> at line ${lineOf} is a silent extra in a lesson that is not first person (AT1); cast only who speaks (AP13)`);
+      if (!staged) fail('AT2', l.id, `the <Stickman> at line ${lineOf} is a silent extra in a lesson that is not a staged scene (no \`// AT2: silent extras\` header); cast only who speaks (AP13)`);
       else if (!/\bwear=\{\[\]\}/.test(f[0])) fail('AT2', l.id, `the extra at line ${lineOf} must wear nothing (wear={[]}); a costume belongs to the cast`);
       continue;
     }

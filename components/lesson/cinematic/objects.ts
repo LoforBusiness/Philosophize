@@ -358,6 +358,12 @@ export const NATURAL = {
   lampShade:  { base: '#EDCC84', shade: '#C9A662', label: '#1A1A1A', what: 'a bedside lamp\'s warm fabric shade, lit' },
   posterRed:  { base: '#C24A3A', shade: '#963629', label: '#FAFAF7', what: 'a poster\'s red print' },
   posterTeal: { base: '#2E6E77', shade: '#215258', label: '#FAFAF7', what: 'a poster\'s teal print' },
+  // Athens, seen beyond the court (hist5Set.ts)
+  terracotta: { base: '#A85A3A', shade: '#84452C', label: '#FAFAF7', what: 'Greek terracotta roof tiles' },
+  oliveLeaf:  { base: '#8A9566', shade: '#6C764E', label: '#1A1A1A', what: 'an olive tree\'s silvery-green leaves' },
+  cypressGreen: { base: '#3F5B3B', shade: '#2E4430', label: '#FAFAF7', what: 'a cypress tree, dark green' },
+  atticRock:  { base: '#D2BE9E', shade: '#B09A78', label: '#1A1A1A', what: 'the Acropolis rock, pale limestone in the sun' },
+  atticHill:  { base: '#A7A887', shade: '#8A8B6B', label: '#1A1A1A', what: 'the dry hills round Athens, seen far off' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 

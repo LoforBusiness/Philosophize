@@ -28,7 +28,11 @@ const scenes = readdirSync(DIR).filter((f) => f.endsWith('Scene.tsx')).sort();
 function hasInteract(sceneFile) {
   const script = path.join(DIR, sceneFile.replace('Scene.tsx', 'Script.ts'));
   try {
-    return /^\s+interact:\s*\{/m.test(readFileSync(script, 'utf8'));
+    // Only a question answered ON THE STAGE needs its targets inside the shot; one
+    // answered on `cards` under the stage (AT4) has nothing for the camera to crop.
+    const src = readFileSync(script, 'utf8').replace(/\r\n/g, '\n');
+    const blocks = src.split(/^\s+interact:\s*\{/m).slice(1);
+    return blocks.some((b) => !/^\s+cards:/m.test(b.split(/^ {4}\},?$/m)[0]));
   } catch {
     return false;
   }
