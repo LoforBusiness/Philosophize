@@ -84,7 +84,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, philosophy-foundations-4); 0 for a beat with no voice.
  */
-const LINES = [3.51, 3.72, 2.87, 6.05, 0, 4.98, 3.09, 4.13, 4.41, 0, 0, 0];
+const LINES = [4.2, 4.29, 3.3, 7.11, 0, 5.55, 3.32, 4.28, 4.87, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // and, for the sulk, the arms of act 62 folded in front (FOLD_L, FOLD_R).
@@ -311,8 +311,9 @@ export default function Phil4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     if (A_GLANCE[n]) {
       // a glance up at the clock as he says the time, then two taps on his ticket
       sv = look(sv, -0.3 * hd(0.02, 0.1, 0.24, 0.34));
-      const tap = bp(0.82, 0.85, 0.88) + bp(0.9, 0.93, 0.96);
-      const go = st(0.78, 0.82) * (1 - st(0.96, 1));
+      // the second tap does not come back up: the hand goes on down from it (AR5)
+      const tap = bp(0.82, 0.85, 0.88) + st(0.9, 0.93);
+      const go = st(0.78, 0.82) * (1 - st(0.93, 0.99));
       sv = hand(sv, xV, dV, 1, tkX + 2 * dV, tkY - 6 + 5 * tap, go);
     }
     if (A_STOPPED[n]) sv = look(sv, -0.32 * hd(0.6, 0.68, 0.88, 0.98));        // up at "its hands"

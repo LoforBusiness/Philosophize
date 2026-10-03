@@ -155,6 +155,25 @@ for (const name of PLAYERS) {
   else ok('the guide: Got it, Don\'t show again, modal, Reduce Motion, its line on the tap rule\'s own split');
 }
 
+// AP19 — A LESSON TAKES A BREATH BEFORE IT BEGINS. The hold is the guide's own, armed by
+// the route before the player's first render, a second or so long, and a tap ends it.
+{
+  const st = strip(read(`${CIN}/lessonGuideState.ts`));
+  const host = strip(read(`${CIN}/LessonGuide.tsx`));
+  const pl = strip(read(`${CIN}/CinematicPlayer.tsx`));
+  const missing = [];
+  const ms = Number((st.match(/export const OPENING_MS = (\d+)/) ?? [])[1]);
+  if (!(ms >= 800 && ms <= 2000)) missing.push(`OPENING_MS is ${ms || 'missing'}: a breath is about a second, 800–2000 ms`);
+  if (!/GUIDE_HOLD\.value = isHeld\(/.test(st)) missing.push('the beat clock\'s hold does not include the opening breath (GUIDE_HOLD = isHeld)');
+  if (!/useState\(\(\) => \{[\s\S]*?setOpening\(true\)[\s\S]*?\}\)/.test(host)) missing.push('the guide host does not arm the breath in its state initialiser, before the player\'s first render');
+  if (!/setTimeout\(\(\) => setOpening\(false\), OPENING_MS\)/.test(host)) missing.push('the guide host never ends the breath after OPENING_MS');
+  if (!/useGuideStore\(isHeld\)/.test(pl)) missing.push('the player\'s voice is not held for the breath (useGuideStore(isHeld))');
+  if (!/getState\(\)\.opening\) \{ setOpening\(false\); return; \}/.test(pl)) missing.push('a tap during the breath does not start the lesson');
+  if (!/style=\{opening \? WAITING : null\}/.test(pl)) missing.push('the first line\'s words are drawn during the breath');
+  if (missing.length) bad('the opening breath (AP19) is not wired end to end', missing);
+  else ok(`the opening breath: ${ms} ms, held with the guide, armed by the route, the words wait, a tap starts it`);
+}
+
 console.log('\nBACK, FORWARD, THE Aa BUTTON AND THE LESSON GUIDE\n');
 for (const m of oks) console.log(`  ok    ${m}`);
 for (const [m, d] of failures) {

@@ -64,7 +64,7 @@ export const BEATS: Hist2Beat[] = [
   {
     act: 'arrive', th: true, note: 1, news: 0,
     speaker: 'tophat',
-    text: 'Two sources, and they disagree. A historian’s first question is when each one was made, and by whom.',
+    text: 'Your letter and her book disagree, then. A historian’s first question is when each one was made, and by whom.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

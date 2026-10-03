@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b2 (the pour and putting the can
  * back), b8 (fetching the can across the garden) and b10 (the cupful and the door).
  */
-const LINES = [4.2, 3.1, 6.61, 4.75, 5.97, 0, 6.52, 4.33, 5.98, 0, 5.4, 0, 0];
+const LINES = [4.58, 3.28, 6.61, 5.9, 6.19, 0, 6.65, 4.57, 5.98, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // kneeling beside a thing.
@@ -407,8 +407,11 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
       // the hat tipped once he has arrived, then a hand to her pot and to his
       const after = moveTr(440, 310, TR) / L;
       stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.03, after + 0.1, after + 0.2));
-      stt = hand(stt, xT, dT, 1, HER_POT, 470, bp(0.4, 0.46, 0.54));
-      stt = hand(stt, xT, dT, 1, HIS_POT, 468, bp(0.54, 0.6, 0.7));
+      // the pots wait for the hat to be done, and the hand goes from hers straight to
+      // his rather than dropping between them (AR5)
+      const p0 = Math.max(0.4, after + 0.22);
+      const across = st(p0 + 0.1, p0 + 0.18);
+      stt = hand(stt, xT, dT, 1, lerp(HER_POT, HIS_POT, across), lerp(470, 468, across), st(p0, p0 + 0.06) * (1 - st(p0 + 0.24, p0 + 0.32)));
     }
     // b6: an open hand up to the sunflower
     if (A_GROWN[n]) stt = hand(stt, xT, dT, 1, HIS_POT, 408, bp(0.44, 0.54, 0.95));

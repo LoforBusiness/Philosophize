@@ -60,7 +60,7 @@ export const BEATS: Econ1Beat[] = [
   {
     act: 'arrive', th: true, sale: 0, board: 0,
     speaker: 'tophat',
-    text: 'What you’re watching has a name. Economics is the study of how people choose, when they can’t have it all.',
+    text: 'You two are doing economics, you know. Economics is the study of how people choose, when they can’t have it all.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

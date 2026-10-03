@@ -11111,8 +11111,10 @@ named or that the build showed were load-bearing:
 
 **BEFORE A DIALOGUE LESSON IS CALLED DONE** — the order the 21 were actually built in:
 
-- [ ] The lines are written FROM the characters (group AS) and pass the prose checks
-      BEFORE a character is spent on voicing them (AP18's "voice a lesson once").
+- [ ] The lines are written FROM the characters (group AS), said the way people talk
+      (AP20 — read every line aloud, as that person, to the person in front of them), and
+      pass the prose checks BEFORE a character is spent on voicing them (AP18's "voice a
+      lesson once").
 - [ ] Voiced once through `render-narration`, at its AP17 pace; `check:narration` green.
 - [ ] One real place; every object drawn from a reference and in its own colours (AR1).
 - [ ] Every hand act built the AR7 way: turns as tracks, holds in the figure's frame,
@@ -11223,15 +11225,27 @@ audio, where they are exact (`scripts/lib/prosody.mjs`):
    voice does not sound weighty; it drags. The idea is carried by the pauses at its marks
    (point 3), which are exact, never by stretching the words.
 
-   **THE SPEED IS PERSONAL GROWTH 2's** (`PACE_REFERENCE`). The owner, 2026-10-01: *"the
-   speed of that entire lesson of all the narration voices all seems really nice … so that it
-   doesn't get too fast, but especially so it doesn't get too slow."* Measured, its ordinary
-   lines run 5.05–5.56 syllables a second (median 5.28) and its quick ones 5.84–6.04. The
-   bands are drawn round it: even 4.95–5.85 aiming 5.35, brisk 5.4–6.4 aiming 5.85. The
-   FLOOR is the one that matters and it never moves down; the ceiling leaves room for the
-   voice's own scatter, which is what lets a line be voiced in one go. `check:narration`
-   re-measures the reference and fails if a band stops describing it. (The bands were
-   4.5–5.2 and then 4.95–5.65 on the way here; both were heard as too slow.)
+   **THE SPEED IS SLOWER THAN PHILOSOPHY 4's "BEING RIGHT" LINE** (`PACE_REFERENCE`,
+   2026-10-02). The owner heard the fourth philosophy lesson and named both ends: *"the
+   first couple interactions between the two with the speech narration being way too fast
+   … Where the speech becomes better is when the top hat stick man says, being right isn't
+   the same as knowing … What he says there is at a much better speed … edit the rule so
+   that the narration speech is slower than the example."* Measured on the take he heard,
+   archived whole in `scripts/lib/pace-reference/` so no re-voice can move it: "Being right
+   isn't the same as knowing." runs **4.62** syllables a second of speech, the whole line
+   **5.47**, and the lines he called too fast **5.2 to 6.4**. The bands are: **even
+   4.45–5.1 aiming 4.75** (the sentence he named), **brisk 4.8–5.4 aiming 5.1**, both
+   ceilings under the whole line, and both floors above the slow band he rejected on
+   2026-10-01 (3.65–4.4). `check:narration` re-measures the archived take and fails if the
+   bands stop doing any of the three. Every dialogue line was re-voiced to these bands the
+   same day.
+
+   *The road here, kept so nobody walks it again blind:* 4.5–5.2 (AP16, 2026-09-30) was
+   heard as too slow; 4.95–5.65 and then personal growth 2's 4.95–5.85 / 5.4–6.4 (both
+   2026-10-01) were heard, a day later, as too fast. The owner's ear is the instrument and
+   it is consistent with ONE thing: the line he points at. So the rule is anchored to a
+   line he named, not to a number, and the next correction should be the same — name a
+   line, measure it, move the bands to it.
    Everything said at one pace in a line must sit in its band together,
    and any one sentence of eight syllables or more within 0.35 of it — people drift a
    little sentence to sentence, and a voice that never did is the flat read this exists to
@@ -11336,6 +11350,76 @@ changed AFTER they were voiced. So `render-narration`:
 A line that still misses is a pace question before it is a retake: a list or a quick aside
 is `brisk`, and a line that rushes its last sentence at every rate gives that sentence its
 own pace, so each comes from its own take.
+
+### AP19 · A lesson takes a breath before it begins
+
+> *"when lessons start, I want there to be a little delay before the words start speaking
+> and before the lesson actually starts. This is so the user doesn't become overwhelmed
+> and immediately the Lesson starts. Instead, I want a small delay before it starts."*
+> (2026-10-02)
+
+The lesson used to begin on the frame it appeared: the first line's letters rising and its
+voice talking while the reader was still taking in where they were. Now the place comes
+first. For `OPENING_MS` (1.3 seconds) after a lesson appears — after the guide, when the
+guide is showing — the stage is on screen and nothing has begun: the beat clock waits at
+its first frame, the voice waits, and the first line's words are laid out but not drawn,
+so nothing reflows when they arrive. Then the line, the voice and the scene start together.
+
+- **It is the guide's own hold** (`lessonGuideState.ts`): `GUIDE_HOLD` holds for either
+  reason, so the scene, the voice and the words cannot disagree about when the lesson
+  started.
+- **A tap during the breath starts the lesson**, and never skips the first line the
+  reader has not heard yet.
+- **It is armed by the lesson ROUTE** (`LessonGuideHost`), like the guide, for the same
+  reason: the browser harnesses render lessons directly, so the breath can never make a
+  sweep measure a stage that has not started. A unit review gets it too.
+- `check:guide` holds the length, the arming and the tap.
+
+### AP20 · Said the way people talk
+
+> *"sometimes the words chosen in the lessons kind of seem robotic, not as human-like and
+> not as conversational. I want you to either make a rule, edit a rule, or do whatever you
+> need so that the words that are created in lessons aren't robotic sounding and are very
+> natural sounding words."* (2026-10-02)
+
+Read against the corpus, the robotic lines were almost never a robotic WORD: groups AC and
+AD had already taken the written register out. What reads as a machine is the SHAPE of a
+line — somebody summing the scene up instead of saying something to somebody in it. Six
+of the first 28 lessons opened the teacher's first line that way ("Two pots, and two ideas
+of how change works." · "What you're watching has a name."). Screenwriters have a name
+for the wider fault — exposition that exists only for the audience, "As you know, Bob" —
+and the same fixes: talk TO the other person, about the thing in front of you, and let
+the information come out of what they are doing or arguing about.
+
+1. **SAY IT TO SOMEBODY ON THE STAGE.** Every line has a listener in the scene and is
+   said to them, in the second person when it is about them: *"You've each got your own
+   idea of how change works"*, not *"Two pots, and two ideas of how change works."* The
+   teacher may turn to the reader (AP4), and he still talks rather than captions.
+2. **ANSWER THE LINE BEFORE.** A line picks up what was just said or done — agrees,
+   objects, corrects, laughs — before it adds anything. A line that would make as much
+   sense with the previous one deleted is a lecture with a name on it.
+3. **REACT, THEN EXPLAIN.** A person meets a surprise with a reaction ("Oh, it's
+   pouring!", "Hang on.", "Right.") before a reason. Discourse markers — well, so, oh,
+   right, hang on — are how speech joins itself up; use them where a person would, and
+   never the same one to open most of somebody's lines.
+4. **ABOUT THE THING IN FRONT OF YOU.** "This clock", "your letter", "that pot" — never the
+   general case when the particular one is on the stage. The idea is stated in general
+   once, by the teacher, after the example has made it obvious.
+5. **NAME AN IDEA ONCE.** "X is called Y" is the teacher's, once a lesson, on the beat the
+   idea arrives; after that it is just used. A lesson that keeps naming things is a
+   glossary read aloud.
+6. **SPOKEN WORDS, NOT WRITTEN ONES.** So, not therefore; buy, not purchase; need, not
+   require; about, not approximately. Contractions are the spoken default (AC4).
+7. **READ IT ALOUD, AS THAT PERSON.** If it sounds like a textbook, a caption or a
+   presenter, rewrite it until it sounds like that character saying it to that other
+   character. The ear is the test; the checks only catch the countable half.
+
+`check:dialogue` holds the countable half (`scripts/lib/talkrules.mjs`): no written word
+from its list in any spoken line, no teacher line that narrates the scene back, and a
+naming formula on at most one beat a lesson, the teacher's. A stall-holder saying "Three
+left, and a queue round the corner" is a man talking about his own stall, so the caption
+rule reads only the teacher's lines. The six caption lines were rewritten to talk to the
+people in the scene, and re-voiced with everything else on 2026-10-02.
 
 ## Group AQ · A word sits in its plate, and its plate on its thing
 

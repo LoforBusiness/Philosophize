@@ -92,7 +92,7 @@ const FLOOR = 494;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, business-foundations-4). 0 for a beat with no voice.
  */
-const LINES = [3.52, 3.73, 5.09, 5.38, 0, 2.89, 6.29, 3.1, 4.35, 0, 0, 0];
+const LINES = [4.02, 4.12, 5.4, 6.36, 0, 3.44, 6.94, 3.61, 4.81, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // and arms folded (act 62).

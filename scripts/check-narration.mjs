@@ -38,9 +38,9 @@ import path from 'node:path';
 import {
   ROOT, ASSETS, MANIFEST, LESSONS, LESSON_CLIP, keyOf, requireOf, spoken, lessonLines, lineFaults, parseManifest,
   readRenders, weightOf, MAX_CLIP_RUN, MAX_CLIPS_IN_50MS, BURST_DBFS, PACE_MIN, PACE_MAX, MAX_PAUSE_S, MAX_EDGE_SILENCE_S,
-  RELEASE_S, GAP_S, beatsOf, parseWav,
+  RELEASE_S, GAP_S, beatsOf, parseWav, sha256hex, PACE_ALLOWANCE, PACE_ALLOWANCE_MAX,
 } from './lib/narration.mjs';
-import { PACES, PACE_REFERENCE, paceRates, readTake } from './lib/prosody.mjs';
+import { PACES, PACE_REFERENCE, REJECTED_SLOW_TOP, paceRates, readTake } from './lib/prosody.mjs';
 
 const manifestFile = process.env.NARRATION_MANIFEST ? path.resolve(ROOT, process.env.NARRATION_MANIFEST) : MANIFEST;
 const assets = process.env.NARRATION_ASSETS ? path.resolve(ROOT, process.env.NARRATION_ASSETS) : ASSETS;
@@ -227,30 +227,45 @@ for (const [title, kinds, fine] of GROUPS) {
   if (hits.length > 25) console.log(`          and ${hits.length - 25} more`);
 }
 
-// AP17 — THE SPEED IS PERSONAL GROWTH 2's. Its installed takes are re-measured and every
-// pace's band must still describe them, with the aim near what they do. A band moved,
-// or the reference re-voiced at another speed, fails here rather than drifting.
-if (!only || only === PACE_REFERENCE) {
-  const by = new Map();
-  beatsOf(LESSONS[PACE_REFERENCE]).forEach((b, i) => {
-    if (!spoken(b) || !b.speaker) return;
-    const f = path.join(assets, PACE_REFERENCE, `beat-${String(i).padStart(2, '0')}.wav`);
-    if (!fs.existsSync(f)) return;
-    const w = parseWav(fs.readFileSync(f));
-    for (const [p, r] of paceRates(readTake(w.pcm, w.rate, b.text, b.pace))) (by.get(p) ?? by.set(p, []).get(p)).push(r.rate);
-  });
+// AP17 — THE SPEED IS SLOWER THAN THE OWNER'S EXAMPLE (2026-10-02). The take he named,
+// archived whole so no re-voice can move it, is re-measured: the sentence he liked must
+// sit inside the even band near its aim, the whole line must be faster than every band's
+// ceiling ("slower than the example"), and no band may reach down into the slow band he
+// rejected the day before. A band moved, or the archive swapped, fails here.
+if (!only) {
+  const R = PACE_REFERENCE;
+  const f = path.join(ROOT, R.file);
   const off = [];
-  for (const [p, rs] of by) {
-    const s = [...rs].sort((a, b) => a - b);
-    const med = s.length % 2 ? s[s.length >> 1] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
-    const band = PACES[p];
-    if (!band || med < band.min || med > band.max || Math.abs(med - band.aim) > 0.15 || s[0] < band.min) {
-      off.push(`${p}: the reference runs ${s[0].toFixed(2)}–${s[s.length - 1].toFixed(2)} (median ${med.toFixed(2)}), the band is ${band?.min}–${band?.max} aiming ${band?.aim}`);
+  if (!fs.existsSync(f)) off.push(`the reference take ${R.file} is missing`);
+  else {
+    const buf = fs.readFileSync(f);
+    if (sha256hex(buf) !== R.sha256) off.push(`the reference take ${R.file} is not the one the owner heard (its hash changed)`);
+    const w = parseWav(buf);
+    const t = readTake(w.pcm, w.rate, R.text, 'even');
+    const liked = t.sentences.find((s) => s.text === R.liked) ?? t.sentences[0];
+    const whole = paceRates(t).get('even')?.rate ?? 0;
+    if (!liked?.rate || liked.rate < PACES.even.min || liked.rate > PACES.even.max || Math.abs(liked.rate - PACES.even.aim) > 0.2) {
+      off.push(`the sentence the owner liked runs ${liked?.rate?.toFixed(2)}, and the even band is ${PACES.even.min}–${PACES.even.max} aiming ${PACES.even.aim}`);
     }
+    if (Math.abs(whole - R.slowerThan) > 0.05) off.push(`the reference line measures ${whole.toFixed(2)}, not the ${R.slowerThan} the bands were set under`);
+    for (const [p, band] of Object.entries(PACES)) {
+      if (band.max >= R.slowerThan) off.push(`${p}'s ceiling ${band.max} is not slower than the example (${R.slowerThan})`);
+      if (band.min <= REJECTED_SLOW_TOP) off.push(`${p}'s floor ${band.min} reaches into the slow band the owner rejected (up to ${REJECTED_SLOW_TOP})`);
+    }
+    if (!off.length) ok('the speed is slower than the owner\'s example (AP17)', `"${R.liked}" ${liked.rate.toFixed(2)} in even ${PACES.even.min}–${PACES.even.max} · every ceiling under ${R.slowerThan}`);
   }
-  if (!by.size) bad(`the pace reference ${PACE_REFERENCE} has no takes to measure`);
-  else if (off.length) { bad(`the speed bands no longer describe ${PACE_REFERENCE} (AP17)`); for (const o of off) console.log(`          ${o}`); }
-  else ok(`the speed is ${PACE_REFERENCE}'s (AP17)`, [...by].map(([p, rs]) => { const q = [...rs].sort((x, y) => x - y); const m = q.length % 2 ? q[q.length >> 1] : (q[q.length / 2 - 1] + q[q.length / 2]) / 2; return `${p} ${m.toFixed(2)}`; }).join(' · '));
+  if (off.length) { bad('the speed bands no longer match the owner\'s example (AP17)'); for (const o of off) console.log(`          ${o}`); }
+}
+
+// The pinned speed allowance may only shrink, and every entry must still be an installed
+// take: a re-voiced line drops out of it, and its entry must go with it.
+if (!only) {
+  const pinned = Object.keys(PACE_ALLOWANCE);
+  const installed = new Set(Object.values(records).map((r) => r.wav));
+  const gone = pinned.filter((s) => !installed.has(s));
+  if (pinned.length > PACE_ALLOWANCE_MAX) bad(`the speed allowance holds ${pinned.length} takes, over its ${PACE_ALLOWANCE_MAX}: it may only shrink — retake the line instead`);
+  else if (gone.length) { bad(`${gone.length} speed allowance entr(ies) name a take no longer installed: delete them`); for (const s of gone) console.log(`          ${PACE_ALLOWANCE[s]}`); }
+  else ok('the speed allowance', `${pinned.length} pinned take(s), at most ${PACE_ALLOWANCE_MAX}`);
 }
 
 const f1 = (x) => x.toFixed(1), f3 = (x) => x.toFixed(3), f2 = (x) => x.toFixed(2);

@@ -87,7 +87,7 @@ const K = K_FIG * 0.76;
  * longer than the line and runs on after it — b5 (the picking, the walk and the two
  * hand-offs over the fence) and b9 (the hen picked up, handed over and set down).
  */
-const LINES = [4.48, 3.37, 4.97, 6.1, 0, 6.0, 4.85, 3.68, 0, 5.0, 0, 0];
+const LINES = [4.92, 4, 5.32, 6.87, 0, 6, 5.36, 4.05, 0, 5, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, nodding along, waiting.
 const TALK = 167;

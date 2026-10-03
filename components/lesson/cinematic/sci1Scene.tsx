@@ -94,7 +94,7 @@ const K = K_FIG * 0.76;
  * landing and bounces run to 2.6; b9's is 7.67s and the helper steps off the ladder
  * a little after it ends.
  */
-const LINES = [3.11, 4.53, 4.62, 0, 2.69, 4.5, 4.62, 4.58, 0, 8.35, 0, 0];
+const LINES = [3.39, 5.17, 4.57, 0, 2.41, 5.19, 5.76, 5.27, 0, 8.35, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen, arms folded.

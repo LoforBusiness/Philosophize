@@ -52,7 +52,7 @@ import {
 import { tapSide } from './tapNav';
 import EdgeFlash, { useEdgeFlash } from './EdgeFlash';
 import WordsToggle from './WordsToggle';
-import { useGuideStore, GUIDE_HOLD } from './lessonGuideState';
+import { useGuideStore, GUIDE_HOLD, isHeld, setOpening } from './lessonGuideState';
 
 /** A graded beat's answer, kept so going back onto it shows it as it was left. */
 interface Kept { id: string; ok: boolean; pos: number; pos2: number; sem: number }
@@ -160,6 +160,9 @@ export interface SceneApi {
   sound: boolean;
 }
 export type SceneComponent = ComponentType<SceneApi>;
+
+/** The first line during the opening breath (AP19): laid out, so nothing reflows, and not drawn. */
+const WAITING = { opacity: 0 } as const;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
@@ -357,8 +360,10 @@ export default function CinematicPlayer({
     if (narrated) narration.stop();
   }, [i, narrated]);
   // The lesson guide holds the voice as well as the clock: the first line is not
-  // spoken to a reader still reading the guide (lessonGuideState.ts).
-  const guideOpen = useGuideStore((s) => s.open);
+  // spoken to a reader still reading the guide (lessonGuideState.ts). So does the
+  // opening breath (AP19), the moment after the lesson appears and before it begins.
+  const guideOpen = useGuideStore(isHeld);
+  const opening = useGuideStore((s) => s.opening);
   useEffect(() => {
     if (!narrated) return;
     const line = narrated[shown];
@@ -1034,6 +1039,9 @@ export default function CinematicPlayer({
   // Where a tap on the lesson goes: the left third back, the rest forward.
   const { width: winW } = useWindowDimensions();
   const onBody = useCallback((e: GestureResponderEvent) => {
+    // A tap during the opening breath (AP19) STARTS the lesson; it never skips the
+    // first line the reader has not heard yet.
+    if (useGuideStore.getState().opening) { setOpening(false); return; }
     if (tapSide(e?.nativeEvent as never, winW) === 'back') { back(); return; }
     if (locked) return;
     flash('forward');
@@ -1389,12 +1397,15 @@ export default function CinematicPlayer({
             // the paragraph on screen stayed the one Fade had built before any of
             // it. Nothing throws and nothing logs. Measured, it is indistinguishable
             // from an onPress that was never wired.
-            revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}|${peek ?? ''}`}
+            revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}|${peek ?? ''}|${opening ? 1 : 0}`}
             duration={XFADE}
             render={() => (
               <>
                 {beat.cite ? <Text style={styles.cite}>{beat.cite.toUpperCase()}</Text> : null}
+                {/* The first line is not drawn during the opening breath (AP19): its
+                    place is kept, so nothing reflows when it arrives. */}
                 {beat.text ? (
+                  <View style={opening ? WAITING : null}>
                   <SpokenBy who={beat.speaker}>
                   <NarrationText
                     text={beat.text}
@@ -1409,6 +1420,7 @@ export default function CinematicPlayer({
                     }}
                   />
                   </SpokenBy>
+                  </View>
                 ) : null}
                 {/* The snapshot lives UNDER the paragraph rather than floating
                     over it: group S spends its whole length on words being

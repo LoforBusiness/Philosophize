@@ -79,7 +79,7 @@ const K = K_FIG * 0.76;
  * shopper's end, and then each hand-off with a pause after it (AR5: a trade is a
  * sequence of separate reaches, not a hand sawing the air).
  */
-const LINES = [3.61, 3.47, 5.68, 6.02, 6.6, 0, 6.38, 4.33, 0, 0, 0];
+const LINES = [4.55, 3.57, 7.29, 6.84, 6.6, 0, 6.82, 4.62, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, listening, nodding along,
 // leaning in to listen. EXPLAINING (259) is not used: its resting far hand sits at the

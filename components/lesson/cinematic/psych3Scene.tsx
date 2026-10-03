@@ -84,7 +84,7 @@ const K = K_FIG * 0.76;
  * longer and runs on after it — b1 (the walk round behind the plinth), b5 (the card),
  * b7 (the mug out of the case) and b10 (the stroll away).
  */
-const LINES = [5.47, 4.8, 5.6, 5.69, 0, 4.4, 5.49, 4.2, 4.84, 0, 5.2, 0, 0];
+const LINES = [6.17, 4.8, 6.36, 6.77, 0, 4.4, 6.08, 4.2, 5.52, 0, 5.2, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // waiting.
@@ -107,6 +107,7 @@ const A_AGAIN = is('again');
 const A_STICKER = is('sticker');
 const A_CHECK = is('check');
 const A_LEAVE = is('leave');
+const A_REST = is('rest');
 const Q1 = BEATS.map((b) => (b.told ? 1 : 0));
 const Q2 = BEATS.map((b) => (b.look ? 1 : 0));
 const COVER = BEATS.map((b) => b.cover ?? 0);
@@ -305,7 +306,9 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const back = carry(cv, 3, n, backNow, backNow, tr);
     let sv = bodyOf(wv, VIS_P, n, t, b);
     const cock = A_PLAIN[n] ? bp(0.64, 0.72, 0.94) : 0;
-    sv = { ...sv, tilt: sv.tilt - 0.34 * lean, neck: sv.neck - 0.2 * lean + 0.26 * cock };
+    // on the quote, by the door: one more look back over at the cup, as he said he would
+    const fond = A_REST[n] ? bp(0.1, 0.3, 0.75) : 0;
+    sv = { ...sv, tilt: sv.tilt - 0.34 * lean - 0.12 * fond, neck: sv.neck - 0.2 * lean + 0.26 * cock - 0.3 * fond };
     const pointV = A_PLAIN[n] ? bp(0.28, 0.36, 0.62) : 0;
     sv = hand(sv, xV, dV, 1, xV + 7 * dV, 470, back * (1 - pointV));
     sv = hand(sv, xV, dV, -1, xV + 5 * dV, 472, back);

@@ -95,7 +95,7 @@ const K = K_FIG * 0.76;
  * (the walk in), b5 (the pot cleared and a fresh ball set), b6 (the bucket carried
  * away) and b7 (the second throw).
  */
-const LINES = [4.6, 3.0, 3.2, 5.2, 0, 7.2, 5.6, 3.8, 4.2, 4.3, 0, 0, 0];
+const LINES = [4.6, 3.01, 3.2, 5.64, 0, 7.2, 5.6, 3.8, 4.58, 5.41, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, nodding along, waiting.
 const TALK = 167;

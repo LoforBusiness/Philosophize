@@ -88,7 +88,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, science-foundations-2), except b4 and b6, whose walks,
  * crouches and hand-offs run on a little after the line ends.
  */
-const LINES = [4.09, 4.53, 3.3, 4.88, 7, 0, 7.2, 5.31, 5.67, 0, 3.61, 0, 0];
+const LINES = [4.51, 4.91, 3.33, 5.07, 7, 0, 7.2, 4.25, 6.22, 0, 3.95, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting — alive — while the reader answers or reads the quotation (N21).
@@ -577,7 +577,9 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       stt = hand(stt, xT, GROUND, dT, 1, xT + 4 * dT, GROUND - 66, bp(0.02, 0.06, 0.12));
       stt = hand(stt, xT, GROUND, dT, 1, xT + 9 * dT, GROUND - 92, st(0.1, 0.16) * (1 - st(0.36, 0.44)));
       const weigh = bp(0.46, 0.52, 0.98);
-      const osc = Math.sin(Math.PI * 2 * 1.4 * Math.max(0, f - 0.5) * L / 2) * (1 - st(0.55, 0.88));
+      // one weighing, up and down and level, however long the line is (AR5): a swing
+      // timed in seconds would weigh more often the slower the line is said
+      const osc = Math.sin(Math.PI * 2 * clamp01((f - 0.5) / 0.38)) * (1 - st(0.55, 0.88));
       stt = hand(stt, xT, GROUND, dT, 1, xT + 19 * dT, 456 - 9 * osc, weigh);
       stt = hand(stt, xT, GROUND, dT, -1, xT + 6 * dT, 456 + 9 * osc, weigh);
     }

@@ -80,7 +80,7 @@ export const BEATS: Psych2Beat[] = [
   {
     act: 'arrive', th: true, spill: 1, sign: 0, screen: 0,
     speaker: 'tophat',
-    text: 'Two people, one bump, and two different memories. Neither of them is lying.',
+    text: 'You both saw the same bump, and you remember it differently. Neither of you is lying.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

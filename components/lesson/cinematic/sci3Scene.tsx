@@ -84,7 +84,7 @@ const K = K_FIG * 0.76;
  * parasol fetched, carried, planted and opened), b7 (the walk back and the sitting
  * down) and b10 (the sun cream and the cornet).
  */
-const LINES = [4.58, 3.9, 5.08, 5.66, 0, 4.56, 6.2, 3.7, 5.18, 0, 4.6, 0, 0];
+const LINES = [5.33, 3.9, 5.88, 6.11, 0, 4.78, 6.21, 3.9, 5.6, 0, 4.6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // and waiting — alive — while the reader answers or reads the quotation (N21).

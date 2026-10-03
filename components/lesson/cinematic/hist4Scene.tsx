@@ -90,7 +90,7 @@ const K = K_FIG * 0.76;
  * and b8 (the photograph handed over, walked back and held up). 0 for a beat with no
  * voice.
  */
-const LINES = [4.24, 3.21, 5.9, 5.56, 0, 3.28, 4.88, 4.92, 5.6, 0, 0, 0];
+const LINES = [4.58, 3.67, 5.9, 6.05, 0, 3.93, 5.99, 5.45, 5.6, 0, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, nodding along, waiting.
 const TALK = 167;

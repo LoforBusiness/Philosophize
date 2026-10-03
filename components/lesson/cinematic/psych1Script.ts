@@ -79,7 +79,7 @@ export const BEATS: Psych1Beat[] = [
   {
     act: 'arrive', th: true,
     speaker: 'tophat',
-    text: 'Same coffee, and a different taste. The change happened in his head, and that’s where psychology looks.',
+    text: 'It’s the same coffee, and it tasted different to him. The change happened in his head, and that’s where psychology looks.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

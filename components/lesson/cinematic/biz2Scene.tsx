@@ -93,7 +93,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, business-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [4.8, 4.72, 6.46, 6.4, 0, 4.99, 4.74, 4.81, 0, 4.42, 0, 0];
+const LINES = [5.23, 5.4, 6.87, 6.81, 0, 5.9, 5.27, 5.17, 0, 4.89, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in to listen, waiting for the answer.

@@ -65,7 +65,7 @@ export const BEATS: Phil2Beat[] = [
   {
     act: 'arrive', th: true, board: 0, cake: 1,
     speaker: 'tophat',
-    text: 'The customer has just made an argument. An argument is a set of reasons, given to support a conclusion.',
+    text: 'You’ve just made an argument, believe it or not. An argument is a set of reasons that support a conclusion.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

@@ -21,6 +21,8 @@
 //   AP17 every line states its pace, even or brisk (there is no slow), and takes its
 //        pauses from its punctuation
 //   AP18 a scene poses its people with still hands (emoteStill, postureStill)
+//   AP20 said the way people talk: no written words (talkrules.BOOKISH), no line that
+//        narrates the scene back, and the teacher names an idea once a lesson
 //
 // Which lessons are dialogue lessons comes from scripts/lib/dialogue.mjs, which reads
 // it out of the scripts. DIALOGUE_ROOT points the whole check at another tree, which is
@@ -32,6 +34,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ROOT, dialogueLessons, wiredLessons } from './lib/dialogue.mjs';
 import { paceFault, sentencesOf } from './lib/prosody.mjs';
+import { bookish, NARRATES, NAMING, NAMING_MAX } from './lib/talkrules.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ts = createRequire(path.join(REPO, 'package.json'))('typescript');
@@ -131,6 +134,23 @@ for (const l of lessons) {
     // this says why, for anyone who reaches for it.
     if (paces.includes('slow')) fail('AP17', l.id, 'says a sentence slowly; a dialogue line is `even` (the idea included) or `brisk`');
     if (paces.length >= 6 && new Set(paces).size < 2) fail('AP17', l.id, 'says every sentence at one pace');
+  }
+
+  // AP20 — SAID THE WAY PEOPLE TALK. The countable half (scripts/lib/talkrules.mjs): no
+  // word a person writes and does not say, no line that narrates the scene back instead of
+  // saying something to somebody in it, and the teacher names an idea once a lesson.
+  {
+    const naming = [];
+    beats.forEach((b, i) => {
+      if (!spoken(b)) return;
+      for (const h of bookish(b.text)) fail('AP20', l.id, `beat ${i} says "${h.say}", a written word: say ${h.fix}`);
+      // The TEACHER captioning the scene is the robotic line; a stall-holder saying "Three
+      // left, and a queue round the corner" is a man talking about his own stall.
+      if (b.speaker === 'tophat') for (const re of NARRATES) if (re.test(b.text)) fail('AP20', l.id, `beat ${i} narrates the scene back ("${b.text.slice(0, 50)}…"); say it TO somebody in it`);
+      if (NAMING.test(b.text)) naming.push({ i, who: b.speaker });
+    });
+    for (const n of naming) if (n.who !== 'tophat') fail('AP20', l.id, `beat ${n.i}: naming an idea ("is called …") is the teacher's line, not ${n.who}'s`);
+    if (naming.length > NAMING_MAX) fail('AP20', l.id, `names an idea on ${naming.length} beats (${naming.map((n) => n.i).join(', ')}); name it once, then use it`);
   }
 
   // AP18 — AN ARM MOVES ONLY WHEN THE SCENE MOVES IT. The living holds swing the hands

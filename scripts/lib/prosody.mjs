@@ -50,19 +50,37 @@
 
 /** Syllables a second of speech, pauses taken out. `factor` scales the voice's own rate for a first take. */
 /**
- * THE SPEED IS PERSONAL GROWTH 2's (owner, 2026-10-01): *"the speed of that entire lesson
- * of all the narration voices all seems really nice. I like that speed … so that it
- * doesn't get too fast, but especially so it doesn't get too slow."* Measured, its
- * ordinary lines run 5.05–5.56 syllables a second together (median 5.31) and its quick
- * ones 5.84–6.04. The bands are drawn around that: the FLOOR is where it was and never
- * moves down, and the ceiling has room for the voice's own scatter (about 8% at one
- * rate), which is what lets a line be voiced in one go. `check:narration` re-measures
- * the reference lesson and fails if a band ever stops describing it.
+ * THE SPEED IS SLOWER THAN PHILOSOPHY 4's "BEING RIGHT" LINE (owner, 2026-10-02).
+ *
+ * *"the first couple interactions between the two with the speech narration being way
+ * too fast … Where the speech becomes better is when the top hat stick man says, being
+ * right isn't the same as knowing … What he says there is at a much better speed …
+ * edit the rule so that the narration speech is slower than the example."* Measured on
+ * the take he heard (archived whole in `PACE_REFERENCE.file`, so a re-voice cannot move
+ * it): its first sentence, "Being right isn't the same as knowing.", runs 4.62 syllables
+ * a second of speech, and the whole line 5.47. The lines he called too fast ran 5.2 to
+ * 6.4. So:
+ *   · EVEN aims at that first sentence (4.75), and its ceiling (5.1) is under the line;
+ *   · BRISK is a touch quicker (5.1) and its ceiling (5.4) is still under the line;
+ *   · the floor (4.45) stays above the slow band he rejected on 2026-10-01 (3.65–4.4,
+ *     "the narration slows down so much where it sounds so bad").
+ * `check:narration` re-measures the archived take and fails if the bands stop doing all
+ * three. The bands before this were personal growth 2's (even 4.95–5.85, brisk 5.4–6.4).
  */
-export const PACE_REFERENCE = 'personal-growth-foundations-2';
+export const PACE_REFERENCE = {
+  file: 'scripts/lib/pace-reference/philosophy-foundations-4-beat-03.wav',
+  sha256: '375502e46b29cf8e8ebb3b54abdaba680d205872fed3f30a56e34424aa420475',
+  text: 'Being right isn’t the same as knowing. To know something, your belief must be true, and you need a good reason for it.',
+  /** The sentence the owner named as the speed he wants. */
+  liked: 'Being right isn’t the same as knowing.',
+  /** Under every band's ceiling: the whole line, which the owner asked to be slower than. */
+  slowerThan: 5.47,
+};
+/** The slow band the owner rejected (2026-10-01): no band may reach down into it. */
+export const REJECTED_SLOW_TOP = 4.4;
 export const PACES = {
-  even: { aim: 5.35, min: 4.95, max: 5.85, factor: 1 },
-  brisk: { aim: 5.85, min: 5.4, max: 6.4, factor: 1.08 },
+  even: { aim: 4.75, min: 4.45, max: 5.1, factor: 1 },
+  brisk: { aim: 5.1, min: 4.8, max: 5.4, factor: 1.07 },
 };
 export const PACE_NAMES = Object.keys(PACES);
 

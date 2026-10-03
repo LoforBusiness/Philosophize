@@ -61,7 +61,7 @@ import Svg, { Path } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import Button from '@/components/ui/Button';
 import { INK } from '@/components/shared/tone';
-import { useGuideStore, setGuideOpen } from './lessonGuideState';
+import { useGuideStore, setGuideOpen, setOpening, OPENING_MS } from './lessonGuideState';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { BACK_SHARE } from './tapNav';
 
@@ -411,10 +411,20 @@ export function LessonGuideHost({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(() => {
     const on = useUserDataStore.getState().settings.lessonGuide;
     setGuideOpen(on);
+    // The opening breath (AP19) is armed with the guide, before the player's first render.
+    setOpening(true);
     return on;
   });
+  // THE BREATH RUNS ONCE THE GUIDE IS GONE: the place is on screen for OPENING_MS before
+  // the first line begins, and a tap on the lesson can end it sooner (the player).
+  const guideUp = useGuideStore((s) => s.open);
+  useEffect(() => {
+    if (guideUp) return;
+    const t = setTimeout(() => setOpening(false), OPENING_MS);
+    return () => clearTimeout(t);
+  }, [guideUp]);
   // Leaving the lesson must never leave the next one held.
-  useEffect(() => () => setGuideOpen(false), []);
+  useEffect(() => () => { setGuideOpen(false); setOpening(false); }, []);
   const release = useCallback(() => setGuideOpen(false), []);
   const gone = useCallback(() => setMounted(false), []);
   const never = useCallback(() => setSetting('lessonGuide', false), [setSetting]);

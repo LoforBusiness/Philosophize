@@ -83,7 +83,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, business-foundations-3). 0 for a beat with no voice.
  */
-const LINES = [3.41, 3.92, 5.75, 5.58, 0, 4.04, 4.89, 2.4, 5.19, 0, 3.93, 0, 0];
+const LINES = [3.84, 4.5, 6.95, 6.16, 0, 4.21, 5.94, 2.63, 5.86, 0, 4.41, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along.
 const TALK = 167;
@@ -323,11 +323,13 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       // travels along the slate (AR5), not a stroke on the clock; the chalk back
       // The hand goes for the chalk AS he turns, held in front of his body (xC + dC·lx),
       // so it travels one way to it rather than swinging round and coming back.
-      const write = st(0.5, 0.72);
+      // he looks over the price before he puts the chalk back: a held beat, so reach,
+      // write and put back read as three movements and not one hand sawing (AR5)
+      const write = st(0.5, 0.66);
       const grab = { x: xC + dC * (xC - CHALK_AT.x), y: CHALK_AT.y };
       const k = via([grab, { x: SLATE.left + 5, y: SLATE.top + SLATE.h / 2 + 1 }, { x: SLATE.left + SLATE.w - 5, y: SLATE.top + SLATE.h / 2 - 1 }, CHALK_AT],
-        [st(0.46, 0.5), write, st(0.72, 0.76)]);
-      sc = hand(sc, xC, dC, -1, k.x, k.y, st(0.32, 0.42) * (1 - st(0.76, 0.82)));
+        [st(0.46, 0.5), write, st(0.86, 0.9)]);
+      sc = hand(sc, xC, dC, -1, k.x, k.y, st(0.32, 0.42) * (1 - st(0.9, 0.96)));
     }
     // b5: a hand over his mouth on "Oh dear"; then, turned to her, a hand opened to her
     if (A_DEAR[n]) {
@@ -441,11 +443,11 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const ribNow = A_RIBBON[n] ? st(0.18, 0.22) : A_TAG[n] ? 1 + st(0.82, 0.88) : n > TAG_N ? 2 : n > RIBBON_N ? 1 : 0;
     const rib = carry(cv, 7, n, ribNow, ribNow, tr);
     // chalk  0 on the tag's edge · 1 in the maker's left hand
-    const chalkNow = A_CHEAP[n] ? st(0.41, 0.43) * (1 - st(0.75, 0.77))
+    const chalkNow = A_CHEAP[n] ? st(0.41, 0.43) * (1 - st(0.89, 0.91))
       : A_TAG[n] ? st(0.34, 0.36) * (1 - st(0.67, 0.69)) : 0;
     const chalk = carry(cv, 8, n, chalkNow, chalkNow, tr);
     // the price on the tag: 50p chalked on b0, wiped on b10, then £4
-    const oldWNow = A_CHEAP[n] ? st(0.5, 0.72) : 1;
+    const oldWNow = A_CHEAP[n] ? st(0.5, 0.66) : 1;
     const oldONow = A_TAG[n] ? 1 - st(0.32, 0.42) : n > TAG_N ? 0 : 1;
     const freshNow = A_TAG[n] ? st(0.52, 0.64) : n > TAG_N ? 1 : 0;
     const sniffNow = A_SNIFF[n] ? bp(0.34, 0.44, 0.7) : 0;

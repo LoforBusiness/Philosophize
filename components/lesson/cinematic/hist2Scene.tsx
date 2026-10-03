@@ -89,7 +89,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, history-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [4.95, 4.75, 5.73, 7.48, 0, 5.1, 7.02, 0, 6.41, 3.41, 0, 0];
+const LINES = [5.38, 4.78, 6.83, 8.14, 0, 6.05, 7.55, 0, 6.79, 3.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // leaning in, and waiting for an answer; and, at the hatbox, a crouch.
@@ -413,8 +413,8 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       // to the letter: two sources
       const after = wh.arrive / L;
       sh = hand(sh, xH, dH, 1, xH + 5 * dH, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.12));
-      sh = hand(sh, xH, dH, 1, xH - 20, 446, bp(0.72, 0.77, 0.84));
-      sh = hand(sh, xH, dH, 1, xH + 20, 446, bp(0.88, 0.92, 0.99));
+      // from the book straight across to the letter, not dropped between them (AR5)
+      sh = hand(sh, xH, dH, 1, lerp(xH - 20, xH + 20, st(0.83, 0.89)), 446, st(0.72, 0.77) * (1 - st(0.93, 0.99)));
     }
     if (A_KINDS[n]) {
       // "primary": a hand open to the letter; "secondary": turned, a hand to the book

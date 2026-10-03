@@ -78,7 +78,7 @@ export const BEATS: Growth1Beat[] = [
   {
     act: 'arrive', th: true,
     speaker: 'tophat',
-    text: 'Two pots, and two ideas of how change works. Personal growth is the study of how people change, on purpose.',
+    text: 'You’ve each got your own idea of how change works. Personal growth is the study of how people change, on purpose.',
     pace: ['even', 'even'],
     dur: 2.1,
   },

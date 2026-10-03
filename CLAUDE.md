@@ -8626,7 +8626,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
 - **No slow speech, and no drifting arms (2026-10-01).** The owner: the slow lines
   *"sound so bad … I want more medium pace or faster pace"*, and the arms *"slowly moving
   back and forth … looks AI"*. `slow` is gone, and the same day the owner asked for
-  faster still, so the bands became even 4.95–5.65 and brisk 5.4–6.2 syllables a second (widened to growth2's, next bullet), with
+  faster still, so the bands became even 4.95–5.65 and brisk 5.4–6.2 syllables a second (widened to growth2's, then slowed on 2026-10-03, next bullets), with
   shorter pauses. The lines were first sped up after rendering (rubberband, then PSOLA) to
   save characters, and the owner heard "a fuzz, or two voices" though every measure said the
   sound was clean: **a take is never time-stretched** (AP17). All 118 were RE-RENDERED at
@@ -8635,12 +8635,35 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   at each pose's rest from the generated `ARM_REST` table; an arm moves only when the
   scene moves it (AP18, held by `check:dialogue`). The cast's default rates were raised
   so a first take lands near the new speeds.
-- **The speed is personal growth 2's, and a lesson is voiced once (AP17, 2026-10-01).**
-  The owner liked that lesson's speed exactly, so it is `PACE_REFERENCE` in prosody.mjs:
-  even 4.95–5.85 aiming 5.35, brisk 5.4–6.4 aiming 5.85, and `check:narration` re-measures
-  it and fails if a band stops describing it. To spend fewer characters, `render-narration`
-  refuses to start until the lesson's prose checks pass, aims each voice's first take from
-  its measured speed per unit of rate, and tries a line at most three times.
+- **The speed was personal growth 2's for a day, and a lesson is voiced once (AP17,
+  2026-10-01).** Bands even 4.95–5.85 and brisk 5.4–6.4. To spend fewer characters,
+  `render-narration` refuses to start until the lesson's prose checks pass, aims each
+  voice's first take from its measured speed per unit of rate, and tries a line at most
+  three times.
+- **AND THEN SLOWER THAN PHILOSOPHY 4's "BEING RIGHT" LINE (2026-10-03).** The owner
+  heard phil4's first three lines as *"way too fast"* and the top hat's *"Being right isn't
+  the same as knowing …"* as *"a much better speed"*, and asked for every line to be slower
+  than that one. The take is archived (`scripts/lib/pace-reference/`) and is
+  `PACE_REFERENCE`: its liked first sentence measures 4.62 syllables a second and the
+  whole line 5.47. So even is **4.45–5.1 aiming 4.75** and brisk **4.8–5.4 aiming 5.1**:
+  every ceiling under 5.47, every floor above 4.4, the top of the band the owner once
+  called too slow. `check:narration` re-measures the archived take and holds all of it.
+  All 28 lessons were re-voiced at the new bands, and each scene's `LINES` followed.
+- **A lesson takes a breath before it begins (AP19, 2026-10-03).** *"a little delay before
+  the words start speaking … so the user doesn't become overwhelmed."* For `OPENING_MS`
+  (1.3s) after the guide closes (or after the route mounts, if it never shows) the beat
+  clock is held through `GUIDE_HOLD` and the deck's words are hidden; a tap ends the wait
+  and starts the lesson. It lives in the lesson ROUTE (`LessonGuideHost`), so harnesses
+  never wait. `check:guide` holds it.
+- **And a line is said the way people talk (AP20, 2026-10-03).** *"the words … seem
+  robotic, not as human-like and not as conversational."* `scripts/lib/talkrules.mjs`
+  lists what a person writes and never says ("therefore", "purchase", "refers to", "in
+  other words"…), the teacher narrating the scene back ("Two pots, and two ideas…",
+  "What you're watching has a name."), and naming an idea more than once a lesson.
+  `check:dialogue` fails all three. The scan found no bookish words in the 28; it found six
+  teacher lines that captioned the scene instead of talking to the people in it, and those
+  six were rewritten (econ1, phil2, psych1, psych2, growth1, hist2). The judgement half —
+  answer the line before, react before you explain — is in LESSON_RULES AP20.
 - **A word sits in its plate (AQ1, 2026-10-01).** growth2's APPLE wrapped its E because
   its plate's width came from a data table no static check could read. `check:replay`
   runs every scene and measures every label against its font on every beat: two units of
