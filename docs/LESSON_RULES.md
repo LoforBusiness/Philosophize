@@ -11735,3 +11735,105 @@ two share one, and that every trait is named in an AS heading of this file. Less
 voiced before a character changed keep their voiced lines until they are rewritten —
 rewriting a line means voicing it again (AC14) — so a change here binds every lesson
 WRITTEN from the day it is made.
+
+---
+
+## Group AT · A scene the reader is in: first person, said replies, branches and sound
+
+> **2026-10-03, `history-foundations-5` "On Trial in Athens", an experiment the owner
+> asked for by name:** *"a different feel of this lesson … more like a movie-like or a
+> drama … first person. So the user is one of the stick men, and the user can see his
+> hands move, and if the stick man looks down, can see his body."* The reader is the cap.
+> He wakes in his bedroom, opens the door, and is on trial in an Athenian law court, where
+> the plain one prosecutes him in front of a jury. Every rule of group AP still applies;
+> this group is what a lesson told from INSIDE it adds and changes.
+
+### AT1 · First person: the reader is one of the cast
+
+A first-person scene says so in one line at the top of its header,
+`// AT1: first person: <speaker>`, and that speaker is never a figure on the stage. What
+the reader sees of himself is what anybody sees of themselves: two arms that come up from
+the foot of the frame when he uses them (an upper arm and a forearm, bent at the elbow away
+from the middle, ending in a round hand), and his body and legs when he looks down.
+
+- **The stage is his head.** It turns (yaw), tips (pitch) and walks, and the world moves
+  the other way. A walk is the room scaled about where he is walking to, with a bob of the
+  head a step at a time, driven by the distance walked (group AL's rule: nothing moves on
+  a clock).
+- **A doorway is a cut you walk through.** The next place is drawn behind the first and
+  seen through the hole in its wall, scaled with it, until the doorway fills the frame.
+- **His eyes open and close** as two curved lids, which is how the scene begins and ends.
+- **The cast member who is the reader still speaks** in his own voice (AP2), and his face
+  is beside his words in the deck: the reader hears himself talk.
+- `check:dialogue` reads the declaration: the first-person speaker needs no figure.
+
+### AT2 · Silent extras, only in a scene the reader is inside
+
+A first-person scene may seat people who never speak: a jury, a crowd, the public. In a
+place the reader stands inside, a court with nobody in it is what would read as wrong.
+Each is marked `{/* extra: <what> */}`, wears nothing (`wear={[]}`), and is ALIVE: on
+every beat each one listens — leans in, puts his chin in his hand, shifts a hand — at his
+own moment, so no two neighbours move together (N21, held by `check:replay`). Further away
+they are drawn browner, not ink (the room's own air). `check:dialogue` refuses an extra in
+any lesson that is not first person: AP13 still says a lesson casts only who it needs.
+
+### AT3 · How mean the plain one may be, in a scene he is staging
+
+In "On Trial in Athens" the owner chose **harsher** for the plain one, including about a
+wrong answer: he calls the defendant a turnip and a hopeless lump. That is the CHARACTER
+mocking the cap, inside a story, and it is licensed here and only here: it is comic, never
+cruel (AS1), it never names the reader's intelligence outside the story, and the cap stays
+kind whatever is said to him (AS4). A lesson that is not a staged scene keeps AS1's rule.
+
+### AT4 · An answer the reader gives is said out loud
+
+A graded beat in a first-person scene offers its two answers as two replies (`cards`,
+short, in the cap's own words), and carries `go`: once the reader taps one, the player
+moves on by itself after that many seconds, to a beat on which the cap SAYS the reply he
+chose. The reader does not tap a card and then read an explanation: he answers, and the
+story answers him. The explanation still shows under the cards while he waits.
+
+### AT5 · A branch: the story follows the reader's answers
+
+A beat with `when` plays only when the answers match: `{ q: 1, ok: true }` after the
+first graded beat was answered right, `{ score: 2 }` when both were. So a right and a wrong
+reply sit side by side in the script, then the plain one's answer to each, and a verdict
+for each score; the player skips the beats that do not apply, going forward and back
+(`nextOf`, `prevOf`). Rules for a branch:
+
+- **Every path is the same length**, so a reader is not punished with a longer lesson for
+  a wrong answer. `validate-cinematic` counts H52 on the path a reader plays (the
+  all-right one), not on the beats written, and a first-person scene may run to 26 of
+  them; the owner asked for the scene to be as long as it needs (2026-10-03).
+- **A branch is a voiced beat like any other**, so every one is rendered and installed.
+- **The scene never reads the answers**: it draws the beat it is given. Which beat that is
+  is the player's job, so the scene cannot get it wrong.
+- **Going back goes to the beat the reader PLAYED**, never merely `i − 1` (`check:guide`).
+
+### AT6 · Sound effects: free, real, and never over a voice
+
+A lesson may carry sound (`sfx` on a beat, a background `bed`), and the owner's three
+conditions, in their order, are: **completely free to use, never heard over a voice, and
+good quality.**
+
+- **Free.** Every clip is cut from a CC0 recording on Freesound (public domain: free for
+  commercial use, no credit owed), its page and licence recorded in
+  `scripts/lib/sfxcuts.mjs` and read off the sound's own page, never trusted from a
+  search filter. The downloaded source is kept in `assets/sfx/src/`. Nothing is
+  synthesised: real recordings or nothing.
+- **Made in one place.** `FFMPEG=<path> node scripts/make-sfx.mjs` (npm run make:sfx)
+  trims, fades and levels each cut to one loudness for its kind (a reaction a little under
+  the voices, a bed far under them), makes a bed a seamless loop by crossfading its tail
+  into its head, measures where each clip goes quiet, and writes `lib/sfx/clips.ts`.
+- **Never over a voice.** A `lead` cue opens a beat and the line waits for it
+  (`voiceAfter`) until it has gone quiet; a `tail` cue comes in after the line; a cue at a
+  number of seconds lands wholly before or after the line. The bed is held down while a
+  line is said. And because a reader can tap on while the crowd is still laughing, the
+  player HUSHES every effect when a beat changes. `npm run check:sfx` holds all of it, and
+  that a `voiceAfter` has a sound to wait for.
+- **The sound is the scene's.** A cue is what the picture does: the crowd laughs at a
+  gloat and the jurors rock back; the door creaks as it swings; the water runs while the
+  clock does. The scene reads its cue times from the script, so the picture and the sound
+  cannot drift apart.
+- **The setting decides.** Sound follows the Sound setting (`soundEffects`), and is
+  silent on the web, as the voice is.

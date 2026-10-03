@@ -13,6 +13,7 @@ import SketchIcon from '@/components/shared/SketchIcon';
 import { useUserDataStore } from '@/stores/userDataStore';
 import { narration } from '@/lib/narration';
 import { NARRATION } from '@/lib/narration/manifest';
+import { sfx, type SfxId } from '@/lib/sfx';
 import { useUIStore } from '@/stores/uiStore';
 import {
   shotAt, resolveMoves, containShot, NEUTRAL, tourStartShots, tourEndShots, tourAt, tourEnd, trackAt,
@@ -161,6 +162,11 @@ export interface SceneApi {
 }
 export type SceneComponent = ComponentType<SceneApi>;
 
+/** The bed's level under the lesson (AT6), before it is held down for a line. */
+const BED_GAIN = 0.55;
+/** How long after a line's last word a `tail` sound comes in (AT6). */
+const TAIL_AFTER_S = 0.3;
+
 /** The first line during the opening breath (AP19): laid out, so nothing reflows, and not drawn. */
 const WAITING = { opacity: 0 } as const;
 
@@ -306,6 +312,8 @@ export default function CinematicPlayer({
   // control where they set it — and locked, so it is scored once and going back can
   // never be used to change a score. The owner's choice over re-asking it.
   const kept = useRef<Record<number, Kept>>({});
+  /** The beat just answered on this visit (AT4), as against one that came back answered. */
+  const answeredHere = useRef(-1);
   const [correct, setCorrect] = useState(0);
   const [asked, setAsked] = useState(0);
   // How many outlined things the scene is currently offering, counted by the
@@ -367,9 +375,36 @@ export default function CinematicPlayer({
   useEffect(() => {
     if (!narrated) return;
     const line = narrated[shown];
-    if (narrationOn && !done && !guideOpen && line && beats[shown]?.text === line.text) narration.play(lesson.id, shown);
-    else narration.stop();
+    if (narrationOn && !done && !guideOpen && line && beats[shown]?.text === line.text) {
+      // A LINE THAT WAITS FOR ITS SOUND (AT6): `voiceAfter` gives a `lead` effect (a door,
+      // a crowd) its moment before anyone speaks, so the two never overlap.
+      const wait = beats[shown]?.voiceAfter ?? 0;
+      if (wait <= 0) { narration.play(lesson.id, shown); return; }
+      narration.stop();
+      const h = setTimeout(() => narration.play(lesson.id, shown), wait * 1000);
+      return () => clearTimeout(h);
+    }
+    narration.stop();
   }, [narrated, narrationOn, shown, done, guideOpen, lesson.id, beats]);
+
+  // ── SOUND EFFECTS AND THE BED (LESSON_RULES AT6) ─────────────────────────────
+  // Only a lesson whose script declares one has any of this. A cue never plays over a
+  // voice: `lead` is at the beat's start, before a line that waits for it; `tail` once
+  // the line has been said; a number is seconds into a beat with no line. The bed is a
+  // loop under everything, held down while a line is said. It follows `shown`, like the
+  // voice it must not cover.
+  const usesSfx = useMemo(() => beats.some((b) => !!b.sfx || b.bed !== undefined), [beats]);
+  const sfxOn = useUserDataStore((s) => s.settings.soundEffects !== false) && sounded && sfx.isSupported();
+  useEffect(() => {
+    if (!usesSfx) return;
+    const ids = new Set<SfxId>();
+    for (const b of beats) {
+      for (const c of b.sfx ?? []) ids.add(c.id);
+      if (b.bed) ids.add(b.bed);
+    }
+    sfx.prepare([...ids]);
+    return () => sfx.release();
+  }, [usesSfx, beats]);
 
   const clock = useSharedValue(0);
   // TWO BEAT CLOCKS, AND WHICH IS WHICH IS THE WHOLE OF K1.
@@ -981,7 +1016,63 @@ export default function CinematicPlayer({
   // E41 — whether this beat is answered on the stage. A beat whose question is
   // asked below the picture takes no pick from the scene and shows no ring on it.
   const stageLive = stageAnswered(beat);
-  const last = i === beats.length - 1;
+  // ── BRANCHES (LESSON_RULES AT5) ──────────────────────────────────────────────
+  // A beat with `when` plays only when the reader's answers match it: one reply to a
+  // right answer, another to a wrong one, a verdict that depends on both. Forward and
+  // back step over every beat that does not hold, so a branch is a path through the
+  // script rather than a second script. With no `when` anywhere — every other lesson —
+  // the next beat is i + 1 and the last is the last, exactly as before.
+  const graded = useMemo(() => beats.map((b, k) => (b.interact ? k : -1)).filter((k) => k >= 0), [beats]);
+  const plays = (k: number) => {
+    const w = beats[k]?.when;
+    if (!w) return true;
+    if ('q' in w) {
+      const a = kept.current[graded[w.q - 1]];
+      return !!a && a.ok === w.ok;
+    }
+    if (!graded.every((k2) => kept.current[k2])) return false;
+    return graded.reduce((n, k2) => n + (kept.current[k2]?.ok ? 1 : 0), 0) === w.score;
+  };
+  const nextOf = (k: number) => {
+    for (let j = k + 1; j < beats.length; j += 1) if (plays(j)) return j;
+    return -1;
+  };
+  const prevOf = (k: number) => {
+    for (let j = k - 1; j >= 0; j -= 1) if (plays(j)) return j;
+    return -1;
+  };
+  const last = nextOf(i) === -1;
+
+  // The cues and the bed for the beat on screen (see the note at `usesSfx`).
+  useEffect(() => {
+    if (!usesSfx) return;
+    // whatever the last beat was still sounding goes quiet before this one's line (AT6)
+    sfx.hush();
+    if (!sfxOn || done) { sfx.bed(null); return; }
+    let bedNow: SfxId | null = null;
+    for (let k = shown; k >= 0; k -= 1) {
+      const b = beats[k];
+      if (b.bed !== undefined && plays(k)) { bedNow = b.bed; break; }
+    }
+    sfx.bed(bedNow, BED_GAIN);
+    if (guideOpen) return;
+    const b = beats[shown];
+    const line = narrated?.[shown];
+    const said = narrationOn && line && b.text === line.text ? line.dur : 0;
+    const wait = b.voiceAfter ?? 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (const c of b.sfx ?? []) {
+      const at = c.at === 'lead' ? 0 : c.at === 'tail' ? wait + said + TAIL_AFTER_S : c.at;
+      timers.push(setTimeout(() => sfx.play(c.id, c.gain ?? 1), at * 1000));
+    }
+    // the bed comes down for the line and back up after it
+    if (said > 0) {
+      timers.push(setTimeout(() => sfx.duck(true), wait * 1000));
+      timers.push(setTimeout(() => sfx.duck(false), (wait + said) * 1000));
+    } else sfx.duck(false);
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usesSfx, sfxOn, shown, done, guideOpen, narrationOn]);
 
   // Move to beat k in either direction. A beat already answered comes back answered
   // (its control's position is restored in the render-time block above, where the
@@ -1019,8 +1110,11 @@ export default function CinematicPlayer({
     // "I don't want a sound every time a user clicks to the next section" is the
     // right call. Tapping forward is not an event, it is the medium.
     if (last) { setDone(true); return; }
-    goTo(i + 1);
+    goTo(nextOf(i));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locked, last, sounded, tourSkip, i, rt]);
+  const advanceRef = useRef(advance);
+  advanceRef.current = advance;
 
   // ── ONE BEAT BACK (tapNav.ts) ─────────────────────────────────────────────
   // The previous beat plays again from its start: every scene derives its "previous"
@@ -1031,9 +1125,10 @@ export default function CinematicPlayer({
   // and back has nothing to catch up with.
   const { flash, back: flashBack, fwd: flashFwd } = useEdgeFlash();
   const back = useCallback(() => {
-    if (i === 0) { flash('back', true); return; }
+    const k = prevOf(i);
+    if (k < 0) { flash('back', true); return; }
     flash('back');
-    goTo(i - 1);
+    goTo(k);
   }, [i, flash]);
 
   // Where a tap on the lesson goes: the left third back, the rest forward.
@@ -1053,6 +1148,7 @@ export default function CinematicPlayer({
     setPicked(id);
     setPickedOk(isCorrect);
     kept.current[i] = { id, ok: isCorrect, pos: dragPos.value, pos2: dragPos2.value, sem: pickPos.value };
+    answeredHere.current = i;
     if (graded) {
       setAsked((n) => n + 1);
       if (isCorrect) setCorrect((n) => n + 1);
@@ -1082,6 +1178,16 @@ export default function CinematicPlayer({
     // index. (The answer line he used to say here went with the thought bubble,
     // 2026-10-02.)
   }, [picked, sounded, i]);
+
+  // AN ANSWER THAT IS SAID (AT4): a graded beat with `go` moves on by itself once it is
+  // answered here — not when it comes back answered — so the reply the reader chose is
+  // spoken on the next beat without a second tap.
+  useEffect(() => {
+    const g = beat.go;
+    if (!g || picked === null || answeredHere.current !== i) return;
+    const h = setTimeout(() => { answeredHere.current = -1; advanceRef.current(); }, g * 1000);
+    return () => clearTimeout(h);
+  }, [picked, i, beat.go]);
 
   const onStage = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;

@@ -25,7 +25,7 @@ import { OBJECT_LINE } from './ObjectArt';
 export type SetPart = ObjPart | PolyPart;
 
 /** How far each triangle of a polygon's FILL is grown, so its pieces overlap and no seam shows. */
-const SEAM = 0.35;
+const SEAM = 1.6;
 
 function Tri({ t, fill }: { t: readonly number[]; fill: string }) {
   const b = triBox(t);

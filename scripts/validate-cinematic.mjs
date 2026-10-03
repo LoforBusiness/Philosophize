@@ -128,8 +128,21 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   // stage under the summary card, so it has no box and never needed one.
   beatCount.set(name, n - summaries.length);
 
+  // A LESSON WITH BRANCHES (LESSON_RULES AT5) is as long as the path a reader plays,
+  // not as long as its file: a reply beat for each answer and a verdict for each score
+  // sit side by side and only one of each plays. The path counted is the all-right one
+  // (every path is the same length, AT5). A first-person lesson (AT1) is a scene in a
+  // film rather than a lesson's worth of beats, and the owner asked for it to run as
+  // long as the scene needs (2026-10-03): its ceiling is 26.
+  const branched = beats.filter((b) => /^\s{4}act:.*\bwhen:/m.test(b) || /^\s{4}when:/m.test(b));
+  const played = branched.length
+    ? n - branched.filter((b) => !/when:\s*\{\s*q:\s*\d+,\s*ok:\s*true\s*\}|when:\s*\{\s*score:\s*2\s*\}/.test(b)).length
+    : n;
+  const firstPerson = fs.existsSync(path.join(DIR, `${name}Scene.tsx`))
+    && /^\/\/ AT1: first person/m.test(fs.readFileSync(path.join(DIR, `${name}Scene.tsx`), 'utf8'));
+  const ceiling = firstPerson ? 26 : 19;
   if (!LEGACY.has(name)) {
-    if (n < 7 || n > 19) errs.push(`${n} beats (H52 wants 7–19 since the segmenting split; 8 was the old house length)`);
+    if (played < 7 || played > ceiling) errs.push(`${played} beats played${played !== n ? ` (${n} written)` : ''} (H52 wants 7–${ceiling}${firstPerson ? ' for a first-person scene (AT1)' : ' since the segmenting split; 8 was the old house length'})`);
     if (quotes.length !== 1) errs.push(`${quotes.length} quote beats, want exactly 1 (H52)`);
     if (quotes.length === 1) {
       const q = quotes[0];
@@ -409,7 +422,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 28; // the 28 dialogue lessons (four a road since 2026-10-02); 267 until the retired 246 were deleted (2026-10-02)
+const SOLID_FLOOR = 29; // the 28 dialogue lessons (four a road since 2026-10-02) and history's first-person fifth (2026-10-03); 267 until the retired 246 were deleted (2026-10-02)
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //

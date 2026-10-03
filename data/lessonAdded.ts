@@ -44,6 +44,7 @@ export const LESSON_ADDED: Record<string, string> = {
   'history-foundations-2': '2026-09-30',
   'history-foundations-3': '2026-10-01',
   'history-foundations-4': '2026-10-02',
+  'history-foundations-5': '2026-10-03',
 };
 
 /** How long a lesson wears NEW, in days from the day it was added. */

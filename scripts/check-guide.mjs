@@ -75,7 +75,8 @@ const PLAYERS = ['CinematicPlayer'];
 const NEEDS = [
   ['routes the body press through tapSide', (s) => /onPress=\{onBody\}/.test(s) && /tapSide\(/.test(s)],
   ['never disables the body while a question is open', (s) => !/<Pressable\s+style=\{styles\.body\}[^>]*disabled=/.test(s)],
-  ['goes back a beat', (s) => /const back = useCallback/.test(s) && /goTo\(i - 1\)/.test(s)],
+  // a lesson with branches (AT5) goes back to the beat the reader PLAYED, not merely i - 1
+  ['goes back a beat', (s) => /const back = useCallback/.test(s) && (/goTo\(i - 1\)/.test(s) || /const k = prevOf\(i\);[\s\S]{0,120}goTo\(k\)/.test(s))],
   ['keeps each answer by beat', (s) => /kept\.current\[i\] =/.test(s) && /kept\.current\[k\]/.test(s)],
   ['holds its beat clock behind the guide', (s) => /if \(!GUIDE_HOLD\.value\)/.test(s)],
   ['holds its voice behind the guide', (s) => /!guideOpen && line/.test(s)],

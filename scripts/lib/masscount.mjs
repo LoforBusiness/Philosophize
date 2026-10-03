@@ -119,6 +119,9 @@ export function massFills(src) {
     used.set('SHADE', (used.get('SHADE') ?? 0) + 1);
     break;                                   // one object's worth, however many it draws
   }
+  // A SET (SetArt) is a whole place — its own ground, walls and sky — so it is the
+  // floor `floorStyle` would otherwise have been, as well as an object.
+  if (/<SetArt\b/.test(body)) used.set('RULE', (used.get('RULE') ?? 0) + 1);
   return { fills: [...used.values()].reduce((a, b) => a + b, 0), used, dead };
 }
 

@@ -182,10 +182,25 @@ for (const l of lessons) {
   const scene = fs.readFileSync(l.sceneFile, 'utf8');
   const figures = [...scene.matchAll(/<Stickman\b[\s\S]*?\/>/g)];
   const onStage = new Set();
+  // AT1 — A FIRST-PERSON LESSON: the reader IS one of the cast, so that speaker is never a
+  // figure on the stage (the scene draws his arms, and his body when he looks down). The
+  // scene says so in one line, `// AT1: first person: <speaker>`, and only then may it
+  // also seat SILENT EXTRAS (AT2) — a jury, a crowd — marked {/* extra: <what> */} and
+  // wearing nothing, because in a scene the reader stands inside, a court with nobody in
+  // it is the thing that would read as wrong.
+  const pov = scene.match(/^\/\/ AT1: first person: (\w+)/m)?.[1] ?? null;
+  if (pov && !SPEAKERS.includes(pov)) fail('AT1', l.id, `is told in first person by "${pov}", who is not in the cast`);
+  if (pov) onStage.add(pov);
   for (const f of figures) {
     const before = scene.slice(Math.max(0, f.index - 120), f.index);
-    const mark = [...before.matchAll(/cast:\s*(\w+)/g)].pop();
     const lineOf = scene.slice(0, f.index).split('\n').length;
+    const extra = [...before.matchAll(/(cast|extra):\s*(\w+)/g)].pop();
+    if (extra && extra[1] === 'extra') {
+      if (!pov) fail('AT2', l.id, `the <Stickman> at line ${lineOf} is a silent extra in a lesson that is not first person (AT1); cast only who speaks (AP13)`);
+      else if (!/\bwear=\{\[\]\}/.test(f[0])) fail('AT2', l.id, `the extra at line ${lineOf} must wear nothing (wear={[]}); a costume belongs to the cast`);
+      continue;
+    }
+    const mark = [...before.matchAll(/cast:\s*(\w+)/g)].pop();
     if (!mark) { fail('AP2', l.id, `the <Stickman> at line ${lineOf} has no {/* cast: <speaker> */} marker`); continue; }
     const who = mark[1];
     if (!SPEAKERS.includes(who)) { fail('AP2', l.id, `line ${lineOf} is marked "${who}", who is not in the cast`); continue; }

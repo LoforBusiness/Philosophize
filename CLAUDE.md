@@ -87,7 +87,7 @@ replacing the letterpress D.
 | Validation | Zod | 4.x | API boundary validation only |
 | Date math | date-fns | 4.x | Streak calculation |
 | Haptics | expo-haptics | ~56 | Live in the runners via `lib/feedback.ts` |
-| Sound | expo-audio | ~56 | Live since build 19. **Three sounds only**, all after a lesson's last beat so nothing plays over the narration: the lesson-complete hit, the day-streak stamp (since 2026-09-25) and the rank-up (`HEARD` in `lib/feedback.ts`, held by `check:sound`). Clips are GENERATED (`scripts/make-sounds.mjs` on the `scripts/lib/chime.mjs` kit) and were chosen by ear from a listening page |
+| Sound | expo-audio | ~56 | Live since build 19. **Three app sounds**, all after a lesson's last beat so nothing plays over the narration: the lesson-complete hit, the day-streak stamp (since 2026-09-25) and the rank-up (`HEARD` in `lib/feedback.ts`, held by `check:sound`). Clips are GENERATED (`scripts/make-sounds.mjs` on the `scripts/lib/chime.mjs` kit) and were chosen by ear from a listening page. **And since 2026-10-03 a lesson may carry SOUND EFFECTS** (`lib/sfx`, LESSON_RULES AT6): real CC0 recordings from Freesound, cut by `make:sfx`, never heard over a voice (`check:sfx`) |
 
 Every native-dependent module has a `stub.ts` + `index.web.ts` pair (`lib/ads`,
 `lib/purchases`, `lib/auth/social`) so the app still runs on web and in Expo Go,
@@ -143,7 +143,7 @@ Philosophize/
 │   ├── lesson/                  # LessonReward, LessonLoader, lessonNav, exitLesson
 │   │   │                        #   (the card runner, cards/ and interactions/ went
 │   │   │                        #   with the narrated library on 2026-10-02)
-│   │   ├── cinematic/           # THE BIG ONE — 28 wired cinematic lessons (the dialogue lessons), the
+│   │   ├── cinematic/           # THE BIG ONE — 29 wired cinematic lessons (the dialogue lessons), the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   NarrationText + ThinkerPeek (the marked deck),
 │   │   │                        #   interact.ts (the figure and what is outside it),
@@ -268,7 +268,7 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 > ROAD SINCE 2026-10-02, 28 in all (§23).** Everything below about 41 a branch, the takeover and the 246
 > describes philosophy's six old branches, whose lessons were DELETED on 2026-10-02
 > (§23); a reader's progress in them survives as counts (`data/retiredBranches.ts`). It
-> is kept as a finding. `check:cinematic` counts the 28 lessons, so `SOLID_FLOOR` is 28.
+> is kept as a finding. `check:cinematic` counts the 29 lessons, so `SOLID_FLOOR` is 29.
 
 ### Shape today
 
@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 28** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, and 28 with the fourth lessons), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 29** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 29 with history's first-person fifth, and 28 with the fourth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -320,7 +320,7 @@ because every lesson id is in the `CINEMATIC` map — and was deleted on 2026-10
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 28, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 29, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -1159,7 +1159,7 @@ To add a new subject (AP15: one road each): an entry in `data/subjects.ts` whose
 
 **To add a philosopher:** add the object to the right file in `data/extra-philosophers/*` (name, lifespan, era, oneLiner, bio, areas, branchSlugs, 4–6 quotes) and **exactly 3 facts** to the matching `*-facts.ts`. It flows into `ALL_PHILOSOPHERS` / `PHILOSOPHER_FACTS` automatically.
 
-**Validation:** `npm run check` is **sixty-seven** validators plus `tsc`, in this order —
+**Validation:** `npm run check` is **sixty-eight** validators plus `tsc`, in this order —
 `check-routes` runs FIRST, before even the typecheck, because a stray preview route
 makes every browser-derived result in the run suspect and would ship if a build
 followed:
@@ -1170,7 +1170,7 @@ followed:
 `check-answers` · `check-answers-shape` · `check-quotes` · `check-mentions` ·
 `check-names` · `check-focus` ·
 `check-poll` · `check-access` · `check-pass` · `check-trial-email` · `check-rest` · `check-launch` · `check-firstrun` ·
-`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-skin` · `check-objects` · `check-professor` · `check-subjects` · `check-dialogue` · `check-rules`.
+`check-host` · `check-ui` · `check-events` · `check-thinkers` · `check-words` · `check-splits` · `check-legible` · `check-plain` · `check-clear` · `check-rate` · `check-rotation` · `check-react` · `check-smooth` · `check-replay` · `check-turn` · `check-moves` · `check-life` · `check-idle` · `check-still` · `check-guide` · `check-review` · `check-skin` · `check-objects` · `check-professor` · `check-subjects` · `check-dialogue` · `check-sfx` · `check-rules`.
 
 > **`check-replay` RUNS the scenes, which no other check does.** `check-smooth`
 > replays the figure, and a prop's animation was invisible to every check unless it
@@ -1305,7 +1305,7 @@ they belong to, so the rule book has them and this file did not:
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 28 DIALOGUE lessons, four on each road** (§23, LESSON_RULES
+- **Lessons (live): 29 DIALOGUE lessons, four on each road and a fifth on History's, told in first person** (§23, LESSON_RULES
   groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
@@ -1419,8 +1419,8 @@ they belong to, so the rule book has them and this file did not:
 **Known gaps / tech debt:**
 > Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
 > are about philosophy's narrated library, deleted on 2026-10-02 (§23): kept as findings.
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 28, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 28 (the 28 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 29, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 29 (the 29 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -2655,7 +2655,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 28 of the 28 lessons are here now (the dialogue lessons; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 29 of the 29 lessons are here now (the dialogue lessons, one of them first person; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8737,6 +8737,19 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   AF, AO and AA's rotation and visitor are marked removed and kept as findings. Proof
   that no dialogue lesson changed: `check:replay`'s settled-frame dump of all 21 is
   byte-identical before and after.
+- **History's fifth is a FIRST-PERSON scene (2026-10-03), an experiment.** "On Trial in
+  Athens" (`history-foundations-5`, scripts `hist5`): the reader IS the cap. His eyes open
+  in his own bedroom, he walks to the door, and opens it on an Athenian law court, where
+  the plain one prosecutes him in front of a silent jury. Everything is seen through his
+  eyes: the stage is his head (it turns, tips and walks), and his arms come up from the
+  foot of the frame. LESSON_RULES **group AT** is what it adds: first person (AT1), silent
+  extras only in such a scene (AT2), a harsher plain one, at the owner's choice (AT3),
+  answers SAID as replies (AT4, `go`), BRANCHES on the reader's answers (AT5, `when`: a
+  reply, a retort and a verdict for each), and SOUND EFFECTS (AT6). The court is a set
+  in one-point perspective drawn with `SetArt` polygons; its seam was raised to 1.6 so no
+  triangle edge shows across a wall. 26 lines voiced for about 8,700 characters.
+  `validate-cinematic` counts H52 on the path a reader plays (up to 26 in a first-person
+  scene); `check:guide` accepts a back step that skips the branches not played.
 
 ---
 

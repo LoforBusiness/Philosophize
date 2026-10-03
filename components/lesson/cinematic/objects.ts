@@ -343,6 +343,21 @@ export const NATURAL = {
   phoneBody:  { base: '#2A2D31', shade: '#1B1D20', label: '#FAFAF7', what: 'a smartphone\'s black body, on a display stand' },
   phoneLit:   { base: '#4C97D9', shade: '#3474AD', label: '#1A1A1A', what: 'a display smartphone\'s lit screen' },
   sepiaDark:  { base: '#6F5537', shade: '#523E28', label: '#FAFAF7', what: 'the dark tones in an old sepia photograph' },
+  // hist5 colours: an Athenian stoa, its water clock and ballot urns; and a bedroom of today
+  stoaStone:  { base: '#E2D6BE', shade: '#BFB090', label: '#1A1A1A', what: 'a stoa\'s pale limestone columns, in the light' },
+  stoaShade:  { base: '#A69779', shade: '#857860', label: '#1A1A1A', what: 'a stoa\'s stone walls and steps, in shadow' },
+  stoaBeam:   { base: '#6A4428', shade: '#4C301B', label: '#FAFAF7', what: 'a stoa\'s dark timber ceiling beams' },
+  stoaFloor:  { base: '#E6DCC6', shade: '#C7BA9D', label: '#1A1A1A', what: 'a stoa\'s marble floor, in a bar of sunlight' },
+  floorShade: { base: '#B3A58A', shade: '#938770', label: '#1A1A1A', what: 'a stoa\'s marble floor in a column\'s shadow' },
+  skyGlow:    { base: '#F6EED6', shade: '#E1D3AE', label: '#1A1A1A', what: 'sunlight beyond the far end of a colonnade' },
+  clayPot:    { base: '#D9C4A2', shade: '#B39C78', label: '#1A1A1A', what: 'a water clock\'s cream terracotta bowl' },
+  potRim:     { base: '#2E2A2D', shade: '#1D1A1C', label: '#FAFAF7', what: 'the black-painted rim of a terracotta bowl' },
+  urnBronze:  { base: '#7C5229', shade: '#5A3B1C', label: '#FAFAF7', what: 'an Athenian ballot urn\'s dark bronze' },
+  bedWall:    { base: '#CCD5E3', shade: '#AAB5C8', label: '#1A1A1A', what: 'a bedroom wall painted pale blue-grey' },
+  duvet:      { base: '#4E6C98', shade: '#3A5276', label: '#FAFAF7', what: 'a navy-blue duvet cover' },
+  lampShade:  { base: '#EDCC84', shade: '#C9A662', label: '#1A1A1A', what: 'a bedside lamp\'s warm fabric shade, lit' },
+  posterRed:  { base: '#C24A3A', shade: '#963629', label: '#FAFAF7', what: 'a poster\'s red print' },
+  posterTeal: { base: '#2E6E77', shade: '#215258', label: '#FAFAF7', what: 'a poster\'s teal print' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 
@@ -7259,6 +7274,98 @@ export const oldPhoto = (x: number, y: number, w: number, h: number) => fit(OLD_
 // ── hist4: objects for this lesson go ABOVE this line ──
 
 /** Every object, by name — what `sheet-lesson-objects` and `check:objects` walk. */
+// ─────────────────────────────────────────────────────────────────────────────
+// history-foundations-5 — AN ATHENIAN LAW COURT, AND A BEDROOM OF TODAY.
+//
+// REFERENCES (npm run ref): the Agora Museum's clay KLEPSYDRA — a cream terracotta bowl
+// wider at the mouth than the foot, a black-painted rim, a loop handle each side, and a
+// little spout at the foot the water ran out of into a second bowl below; the Stoa of
+// Attalos — fluted limestone columns under a dark timber ceiling. The BALLOT URN is a
+// bronze jar with a neck and two side handles; the second urn, for the unused discs, is
+// wood. The bedroom pieces are a bedside lamp, a framed poster and a ceiling pendant.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The water clock's bowl: drawn 60 × 44, its mouth at the top, the spout low left. */
+const KLEPSYDRA: ObjPart[] = h4In(60, 44, [
+  ...h4N('clayPot',
+    oBar('mass', 6, 10, 3, 18, 3.4), oBar('mass', 3, 18, 10, 22, 3.4),
+    oBar('mass', 54, 10, 57, 18, 3.4), oBar('mass', 57, 18, 50, 22, 3.4),
+    ...trapezoid('mass', 30, 22, 46, 26, 34),
+    oRect('mass', 30, 41, 22, 5, 0, 1.2),
+    ...trapezoid('face', 42, 22, 12, 7, 34),
+    oRect('mass', 19, 41.6, 4, 4, 0, 1.4),
+  ),
+  ...h4N('potRim', oRect('mass', 30, 5.6, 48, 3.6, 0, 1.6)),
+  oBar('line', 14, 14, 46, 14, 0.5),
+]);
+export const klepsydraPot = (x: number, y: number, w: number, h: number) => fit(KLEPSYDRA, x, y, w, h);
+
+/** The stone block the upper bowl stands on: drawn 40 × 26. */
+const CLOCK_BLOCK: ObjPart[] = h4In(40, 26, [
+  ...h4N('stoaStone', oRect('mass', 20, 13, 40, 26, 0, 0.8)),
+  ...h4N('stoaShade', oRect('face', 34, 13, 12, 26, 0, 0.8)),
+  oBar('line', 2, 4, 38, 4, 0.5),
+]);
+export const clockBlock = (x: number, y: number, w: number, h: number) => fit(CLOCK_BLOCK, x, y, w, h);
+
+/** The bronze ballot urn: drawn 40 × 56 — a jar with a neck, a lip and two handles. */
+const BALLOT_URN: ObjPart[] = h4In(40, 56, [
+  ...h4N('urnBronze',
+    oBar('mass', 9, 16, 5, 24, 3), oBar('mass', 5, 24, 9, 30, 3),
+    oBar('mass', 31, 16, 35, 24, 3), oBar('mass', 35, 24, 31, 30, 3),
+    oEll('mass', 20, 33, 32, 34),
+    oRect('mass', 20, 13, 14, 12, 0, 1),
+    oRect('mass', 20, 6, 22, 4.4, 0, 1.6),
+    oRect('mass', 20, 52, 18, 6, 0, 1.4),
+    oEll('face', 27, 35, 12, 28),
+  ),
+  ...h4N('potRim', oEll('dark', 20, 5.2, 16, 2.2)),
+  oEll('lit', 12, 28, 3, 9),
+  oBar('line', 6, 42, 34, 42, 0.5),
+]);
+export const ballotUrn = (x: number, y: number, w: number, h: number) => fit(BALLOT_URN, x, y, w, h);
+
+/** The wooden urn for the unused discs: drawn 34 × 42, a staved tub with two bands. */
+const WOOD_URN: ObjPart[] = h4In(34, 42, [
+  ...h4N('wood', ...trapezoid('mass', 17, 22, 30, 24, 38), oRect('face', 25, 22, 7, 36)),
+  ...h4N('stoaBeam', oEll('dark', 17, 3.6, 26, 3)),
+  oBar('line', 4, 11, 30, 11, 1.2), oBar('line', 5, 33, 29, 33, 1.2),
+  oBar('line', 12, 4, 13, 40, 0.4), oBar('line', 21, 4, 21, 40, 0.4),
+]);
+export const woodUrn = (x: number, y: number, w: number, h: number) => fit(WOOD_URN, x, y, w, h);
+
+/** One bronze ballot disc with its axle, held side-on: drawn 10 × 10. */
+const BALLOT_DISC: ObjPart[] = h4In(10, 10, [
+  ...h4N('bellBronze', oEll('mass', 5, 5, 8, 8), oBar('mass', 5, 0.5, 5, 9.5, 1.6)),
+  oEll('lit', 3.6, 3.6, 1.6, 1.6),
+]);
+export const ballotDisc = (x: number, y: number, w: number, h: number) => fit(BALLOT_DISC, x, y, w, h);
+
+/** A bedside lamp: drawn 30 × 44 — a drum shade over a turned base. */
+const BEDSIDE_LAMP: ObjPart[] = h4In(30, 44, [
+  ...h4N('porcelain', oEll('mass', 15, 32, 14, 14), oRect('mass', 15, 41, 16, 4, 0, 1.2), oBar('mass', 15, 18, 15, 26, 2.4)),
+  ...h4N('lampShade', ...trapezoid('mass', 15, 10, 18, 28, 18)),
+  oEll('lit', 11, 30, 3, 5),
+]);
+export const bedsideLamp = (x: number, y: number, w: number, h: number) => fit(BEDSIDE_LAMP, x, y, w, h);
+
+/** A framed travel poster: drawn 40 × 54 — a sun over mountains, in two inks. */
+const ROOM_POSTER: ObjPart[] = h4In(40, 54, [
+  ...h4N('wood', oRect('mass', 20, 27, 40, 54, 0, 0.6)),
+  ...h4N('paper', oRect('mass', 20, 27, 34, 48)),
+  ...h4N('posterRed', oEll('mass', 26, 17, 10, 10)),
+  ...h4N('posterTeal', oTri('mass', 14, 36, 22, 22, 'up'), oTri('mass', 27, 38, 18, 18, 'up'), oRect('mass', 20, 46, 34, 6)),
+]);
+export const roomPoster = (x: number, y: number, w: number, h: number) => fit(ROOM_POSTER, x, y, w, h);
+
+/** The ceiling pendant over the bed: drawn 24 × 40 — a cord and a dome shade. */
+const PENDANT: ObjPart[] = h4In(24, 40, [
+  oBar('line', 12, 0, 12, 26, 1),
+  ...h4N('sashWhite', oEll('mass', 12, 31, 22, 14), oRect('mass', 12, 35, 22, 6)),
+  ...h4N('lampShade', oEll('dark', 12, 38, 16, 2.4)),
+]);
+export const pendant = (x: number, y: number, w: number, h: number) => fit(PENDANT, x, y, w, h);
+
 export const OBJECTS = {
   tree, ship, table, book, lamp, cup, crate, hammer, flute, bench, drum,
   door, shelf, flag, bridge, window, wheel, coin, leaf, plinth, column, cave,
@@ -7323,5 +7430,7 @@ export const OBJECTS = {
   swingFrameBack, swingFrameFront, swingSeat, clipboard,
   // hist4:
   clockTower, towerBell, phoneShop, cycleRack, cycleStand, horseTrough, oldPhoto,
+  // hist5:
+  klepsydraPot, clockBlock, ballotUrn, woodUrn, ballotDisc, bedsideLamp, roomPoster, pendant,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;

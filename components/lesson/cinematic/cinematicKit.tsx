@@ -623,7 +623,35 @@ export interface BaseBeat {
    */
   pace?: Pace | readonly Pace[];
   dur: number;
+  /**
+   * A BRANCH (LESSON_RULES AT5): this beat plays only when the reader's answers match.
+   * `q` is the graded question's number from 1, and `ok` whether it was answered
+   * right; `score` is how many of the lesson's graded questions were right. A beat
+   * without `when` always plays. The player steps over a beat whose `when` does not
+   * hold, forward and back, so a lesson can say one thing to a right answer and
+   * another to a wrong one with every line voiced and timed like any other.
+   */
+  when?: { q: number; ok: boolean } | { score: number };
+  /**
+   * Sounds on this beat (AT6), never over a voice: `lead` plays as the beat opens and
+   * the line waits `voiceAfter` seconds for it; `tail` plays once the line has been
+   * said; a number is seconds into a beat with no line.
+   */
+  sfx?: readonly SfxCue[];
+  /** The background loop under this beat and the ones after it; `null` stops it (AT6). */
+  bed?: SfxId | null;
+  /** How long the line waits after the beat opens, for a `lead` sound to land (AT6). */
+  voiceAfter?: number;
+  /**
+   * After a graded beat is answered, how many seconds before the lesson moves on by
+   * itself (AT4): the reply the reader chose is then SAID, rather than waiting for a tap.
+   */
+  go?: number;
 }
+
+/** One sound on a beat (AT6). Its file is in lib/sfx/clips.ts. */
+export interface SfxCue { id: SfxId; at: 'lead' | 'tail' | number; gain?: number }
+export type SfxId = import('@/lib/sfx/clips').SfxId;
 
 /** A dialogue line's speed (AP17); scripts/lib/prosody.mjs holds each one's band. */
 export type Pace = 'even' | 'brisk';

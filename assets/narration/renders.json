@@ -494,6 +494,136 @@
     "wav": "a8d6c04ff595d06f4bf656a4eefeb9ea93d7fc26d5efd9ba1ed9b784b41d76df",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
+  "history-foundations-5/beat-00": {
+    "text": "Ugh. What time is it? I don’t even remember falling asleep.",
+    "wav": "d6666c7db5eebb56b79d52ff166a1046ecae333b49115b135c7d7ffe4b480895",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-01": {
+    "text": "Wait. My lamp, my poster, my hands. So why can I hear a crowd outside?",
+    "wav": "71b98569a7602f1d3e941436eb8a2029f1e904a4c839d6682e90d20ef976b2fa",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-02": {
+    "text": "Hello? Is somebody out there? I’m coming out, alright?",
+    "wav": "929b1e43a89f362cde243d4cf7de34716554c6b0dea3d64b1b68634615d131b6",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-03": {
+    "text": "At last! Citizens of Athens, the defendant has finally woken up.",
+    "wav": "433a96c8d8316123e6b6d961d51ebc602fd7ecb5acac557c1d35413fe008b458",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-04": {
+    "text": "Defendant? Mate, I’ve just got out of bed. What am I supposed to have done?",
+    "wav": "9b7717e672c85a8d139cb94c28e84aa42e164abde13e6e66b64e9595653add75",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-05": {
+    "text": "You wandered into Athens uninvited, and you’re suspiciously nice to everyone. I’m prosecuting you myself.",
+    "wav": "e20fcf2a2675f3547407bbb09d04768b17a00a7eff5ce893472c8fb82f2b5595",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-06": {
+    "text": "Here, any citizen can bring a case. And look who’s judging you: five hundred ordinary men, picked by lottery this morning.",
+    "wav": "7cd6b0adf4e5b9c40e2b89f314b76d7f9aa05c96731e04868c605b1f493d2562",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-07": {
+    "text": "No judge at all? Just a crowd of strangers who drew straws?",
+    "wav": "46cc1f01d9339d445a083fb8b5777a5bd2cb9c18b9356517c6c95e50d9611577",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-08": {
+    "text": "Yes. Since you’re so curious, tell the court. Why a lottery?",
+    "wav": "3a864b7c54540f2bd3330585f6e5778d2fa2a719dc5f0e57d877988ba10fb1ce",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-10": {
+    "text": "If nobody knows who’s judging until this morning, nobody can bribe them. That’s clever.",
+    "wav": "21df5ba78a97d8109e8cea4771c8d711d8cfdb854d119aaab3d879ac2182c90e",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-11": {
+    "text": "So the cleverest people end up on the jury? That seems sensible to me.",
+    "wav": "24847b0e23c36d04c5369e06d6f8206475e3ceb1871fa0af0f0dbc623cd96220",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-12": {
+    "text": "Correct. How disappointing. I was looking forward to watching you fail.",
+    "wav": "6566fbf8aad571b9720e1f19a0b9e4d7f69d58ef94a56c4725aae170788d79b8",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-13": {
+    "text": "A lottery picks the clever ones? You absolute turnip, it’s so nobody can bribe them!",
+    "wav": "c91372d59938a4f5c545f8df347e31630cf36c64ca9342eba69d3919bf808f09",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-14": {
+    "text": "Now defend yourself. No lawyer will save you here: you speak for yourself, and this water clock times you.",
+    "wav": "8735edf77fd68b6e1500a26840509a11924c58a4203a57bfa25a4cb539c9bdb6",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-15": {
+    "text": "A clock made of water? And does it time you as well?",
+    "wav": "fb4a21bcf0a97b50d8ce25bf6aa875d7838440f79d01f749ca9950c6858b5d78",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-16": {
+    "text": "Sadly, yes. Now prove you were listening, if you can.",
+    "wav": "a66a55440504e198bc154008383a0e7eb1ca03acd25630f72a4d688f35fa50b7",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-18": {
+    "text": "Same water for both of us, so neither of us gets longer to talk. That’s fair.",
+    "wav": "2c8bdd1a9281488be72a7d9e00ee22da01d0b353e0512abbbef3d97d2ec348e1",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-19": {
+    "text": "So the jury can get home for dinner? Fair enough, they look hungry.",
+    "wav": "80101adcbb9f614006f837c4f04b7d8d9eb1fe3c2d45ff1fe30d2e4a245aa6de",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-20": {
+    "text": "Correct again. Do you practise being this annoying?",
+    "wav": "be8e181a4f9d5154093695a7a7d171e9120571fb87295ed3d96544a76b09a19a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-21": {
+    "text": "Dinner? It’s so the time is fair, you hopeless lump. Equal water, equal time.",
+    "wav": "eac077682287d8e40bbdbd9c37745627b420779c3e64855d2320ce31ab8c4ed4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-22": {
+    "text": "Look, I don’t know how I got here. But I’ve been polite all morning, and he’s been rude, so you decide.",
+    "wav": "5dc343cff8052abfcf30010c9f27af558a46ac7da77327c420ca3f1d55e28a47",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-5/beat-23": {
+    "text": "Jurors, your discs: hollow means guilty, solid means innocent. Into the bronze urn with them.",
+    "wav": "1f9e37d50b17c1fd64f02e595bda9e1dbe4dc2349ad8b9ac5e4a56833eb4db3f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-24": {
+    "text": "Three hundred solid discs: not guilty. I hate this city.",
+    "wav": "537b303e640fd448484b556db66433b16e5aeb06e1c769d36c34d7e7f7ce31a1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-25": {
+    "text": "Two hundred and fifty each way: a tie, and a tie means you go free. Ridiculous rule.",
+    "wav": "25614f7477abd2c4816f67235283c3a63d06302c6d0526b41db18720b2a0622f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-26": {
+    "text": "Three hundred hollow discs. Guilty! Oh, this is the best day of my life.",
+    "wav": "1a7c092917427b4372b6fca316965379b9219f8be47de5469143d9529d790b66",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "history-foundations-5/beat-27": {
+    "text": "Right. I’m going back to bed. Wake me up when it’s a normal day.",
+    "wav": "46495db42793b40f0341ee7ff2a0ac23dbaaa1d185d108f097c40cca89f7a543",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "personal-growth-foundations-1/beat-00": {
     "text": "New me! I’m growing the tallest sunflower on the street, starting today.",
     "wav": "84e4e298dea83bdaf93fb1ab234045a0324ba299b955515f743d86a1a23490c1",
