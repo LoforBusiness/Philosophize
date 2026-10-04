@@ -13,7 +13,7 @@ import { C, RADIUS, LIP } from '@/constants/design';
 import { ease01, pose, seg, type Bundle, type Stance } from './rig';
 import { gazeAt } from './moves';
 import { EMBER_INK } from '@/components/shared/tone';
-import { VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
+import { LipPlate, VerdictSeal, XpCoin, useQuestionAccent } from './QuestionParts';
 import type { ObjectName } from './objects';
 import type { Speaker } from './cast';
 
@@ -1502,17 +1502,51 @@ export function QuoteCard({
   );
 }
 
+/**
+ * WHAT YOU LEARNED — the last beat of a lesson, before the reward.
+ *
+ * It was the one page of a lesson still set in the old ink-on-paper deck: a title,
+ * three typed bullets and a grey italic line, under controls that are all struck in
+ * the lesson's branch colour (R18). "Outdated … all black and white … boring to
+ * read." So it is built from the same parts as the questions above it: the kicker
+ * chip, and each point a raised `LipPlate` on the branch's lip with a numbered coin,
+ * arriving one after another. The closing line sits cut INTO the page on the
+ * branch's wash with a rail, the way a granted row is cut into the certificate:
+ * a thing to take away, not a footnote. Colour stays in the edges, lips and coins,
+ * never a flood (§19); the words stay ink.
+ */
 export function SummaryCard({ s }: { s: SummaryBlock }) {
+  const accent = useQuestionAccent();
   return (
     <View style={styles.sumWrap}>
-      <Text style={styles.sumTitle}>{s.title}</Text>
-      {s.points.map((p) => (
-        <View key={p} style={styles.sumRow}>
-          <Text style={styles.sumDot}>•</Text>
-          <Text style={styles.sumPoint}>{p}</Text>
+      <Animated.View entering={FadeInDown.duration(320)} style={styles.kickRow}>
+        <View style={[styles.kicker, { backgroundColor: accent.base, borderBottomColor: accent.rim }]}>
+          <Text style={styles.kickerText}>WHAT YOU LEARNED</Text>
         </View>
+      </Animated.View>
+      <Animated.Text entering={FadeInDown.duration(320).delay(60)} style={styles.sumTitle}>
+        {s.title}
+      </Animated.Text>
+      {s.points.map((p, i) => (
+        <Animated.View key={p} entering={FadeInDown.duration(340).delay(160 + i * 120)}>
+          <LipPlate radius={12} style={styles.sumPlate} faceStyle={styles.sumFace}>
+            <View style={[styles.sumCoin, { backgroundColor: accent.base, borderBottomColor: accent.rim }]}>
+              <Text style={styles.sumNum}>{i + 1}</Text>
+            </View>
+            <Text style={styles.sumPoint}>{p}</Text>
+          </LipPlate>
+        </Animated.View>
       ))}
-      <Text style={styles.sumClose}>{s.closing}</Text>
+      <Animated.View
+        entering={FadeInDown.duration(340).delay(160 + s.points.length * 120 + 80)}
+        style={[styles.sumClose, { backgroundColor: accent.wash, borderTopColor: accent.edge }]}
+      >
+        <View style={[styles.sumRail, { backgroundColor: accent.base }]} />
+        <View style={styles.sumCloseBody}>
+          <Text style={[styles.sumCloseHead, { color: accent.text }]}>TAKE IT WITH YOU</Text>
+          <Text style={styles.sumCloseText}>{s.closing}</Text>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -1770,13 +1804,32 @@ export const styles = StyleSheet.create({
   quotePlate: { marginTop: 2 },
 
   sumWrap: { marginTop: 2 },
-  sumTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 22, color: INK, marginBottom: 12 },
-  sumRow: { flexDirection: 'row', gap: 10, marginBottom: 7 },
-  sumDot: { fontSize: 16, lineHeight: 21, color: INK },
-  sumPoint: { fontFamily: 'Inter_400Regular', fontSize: 14.5, color: INK, lineHeight: 21, flex: 1 },
+  sumTitle: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 24, lineHeight: 30, color: INK, marginBottom: 14 },
+  // A point is a raised plate, like an answer, and like an answer the colour is in
+  // its lip and its coin. The face is paper so the sentence reads as ink on paper.
+  sumPlate: { marginBottom: 10 },
+  sumFace: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 11, paddingLeft: 11, paddingRight: 14,
+  },
+  sumCoin: {
+    width: 26, height: 26, borderRadius: 13, borderBottomWidth: 2.5,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sumNum: { fontFamily: 'Inter_700Bold', fontSize: 13, color: PAPER, includeFontPadding: false },
+  sumPoint: { fontFamily: 'Inter_500Medium', fontSize: 14.5, color: INK, lineHeight: 20, flex: 1 },
+  // The closing line is cut into the page: the branch's wash, a dark hairline along
+  // the top where light does not reach into the cut, and a rail down the left.
   sumClose: {
+    flexDirection: 'row', marginTop: 6, borderRadius: 12, overflow: 'hidden',
+    borderTopWidth: 1.5,
+  },
+  sumRail: { width: 4 },
+  sumCloseBody: { flex: 1, paddingVertical: 11, paddingHorizontal: 13 },
+  sumCloseHead: { fontFamily: 'Inter_700Bold', fontSize: 9.5, letterSpacing: 1.4, marginBottom: 4 },
+  sumCloseText: {
     fontFamily: 'PlayfairDisplay_400Regular', fontStyle: 'italic',
-    fontSize: 16, color: SOFT, lineHeight: 24, marginTop: 12,
+    fontSize: 16, color: INK, lineHeight: 23,
   },
 
   tapLayer: { flex: 8, alignItems: 'center', justifyContent: 'center' },
