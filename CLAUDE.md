@@ -1124,6 +1124,12 @@ Both are required. Get them from your Supabase project → Settings → API.
    `FFMPEG=<path> node scripts/encode-narration.mjs` and
    `node scripts/make-narration.mjs`. Every lesson in the app speaks, and
    `check:narration` fails **UNVOICED** until this one does.
+10. Give it its sound (LESSON_RULES AT9): a `bed` for its place and a cue for each
+    thing the stage does that makes a sound, timed off the scene's own `LINES` (contact
+    for a thing set down, the start of a thing that runs, the moment a thing comes into
+    view). New clips come from `npm run find:sfx` (CC0 only) and `make:sfx`, cut so each
+    starts on its hit. `check:sfx` fails a lesson with no sound and a late-hitting clip;
+    only a phone can tell you a cue is a frame late.
 
 **Where a lesson lands changes what it means.** Units are contiguous slices of a
 branch in teaching order, and `lessonsByUnit` counts completions **by position**.
@@ -5706,6 +5712,13 @@ THREE WAYS.**
 - **Each road has its own landmark scenery** in `sceneArt.ts`, drawn from reference
   photographs: the Acropolis, a lake with willows, a switchback climb, a main
   street, a container port, an observatory, an aqueduct.
+
+**The masthead is a picture too (2026-10-03).** It was the subject's poster drawn live by
+`<SvgXml>`, and science's is 2,403 elements (business 2,406): parsed in JS and built as
+native views on the frame the road opens, which is what made tapping a subject lag. It is
+`MAST_POSTER` from `make:posters` now, the road lays its baked scenery from `ROAD_LAYERS`
+without building any path in JS, and at 4× CPU the worst frame on arrival went 1.15s →
+0.28s (science) and 1.48s → 0.37s (business). `check:subjects` fails a live poster there.
 
 A sign blends into TAP TO START as the figure arrives, and the road ends at a
 `ComingSoonBoard` (`Branch.more`). A journey from Home arrives behind the paper

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +18,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { BRANCH_ART, MAST_SCRIM, ArtCream, ArtSoft, ArtGold } from '@/constants/branchArt';
 import { C, TYPE, SPACE, RADIUS, LIP, BRANCH, type TypeKey, type BranchKey } from '@/constants/design';
 import { subjectOfBranch, SUBJECTS, COURSE_LINE } from '@/data/subjects';
-import Poster from '@/components/subjects/Poster';
+import { MAST_POSTER } from '@/components/subjects/posterArt';
 import type { PosterKey } from '@/components/subjects/posters';
 import { TINT, TINT_EDGE } from '@/components/shared/tone';
 import BranchWorld, { type WorldLesson } from '@/components/branch/BranchWorld';
@@ -132,7 +132,6 @@ export default function BranchDetailScreen() {
   // where they actually are rather than where they last looked.
   const [focusUnitId, setFocusUnitId] = useState<string | null>(null);
   // The masthead's measured box, which its poster is drawn for.
-  const [mastBox, setMastBox] = useState({ w: 0, h: 0 });
   // A subject opened from Home arrives behind the curtain; lift it once drawn.
   useCurtainLift();
   // See WORLD_FADE_MS: behind the curtain the world is built at once; risen from the
@@ -518,15 +517,17 @@ export default function BranchDetailScreen() {
             style={[styles.masthead, !mastArt && { backgroundColor: BRANCH[branch.slug as BranchKey] ?? C.ink }]}
             imageStyle={styles.mastImg}
             resizeMode="cover"
-            onLayout={(e) => {
-              const { width: w, height: h } = e.nativeEvent.layout;
-              if (Math.round(w) !== mastBox.w || Math.round(h) !== mastBox.h) setMastBox({ w: Math.round(w), h: Math.round(h) });
-            }}
           >
-            {built && posterKey && subject && mastBox.w > 0 ? (
-              <Animated.View style={[StyleSheet.absoluteFill, worldStyle]} pointerEvents="none">
-                <Poster art={posterKey} hue={subject.hue} width={mastBox.w} height={mastBox.h} style={[StyleSheet.absoluteFill, styles.mastPoster]} />
-              </Animated.View>
+            {/* A PICTURE, drawn by make:posters. It was live SVG: science's poster is
+                2,403 elements, parsed in JS and built as native views on the road's
+                first frame, which is what made opening a subject lag (2026-10-03). */}
+            {posterKey && MAST_POSTER[posterKey] ? (
+              <Image
+                source={MAST_POSTER[posterKey].source}
+                resizeMode="cover"
+                fadeDuration={0}
+                style={[StyleSheet.absoluteFill, styles.mastPoster]}
+              />
             ) : null}
             <LinearGradient colors={MAST_SCRIM} style={StyleSheet.absoluteFill} />
             <Text style={styles.mastKicker}>{kicker}</Text>

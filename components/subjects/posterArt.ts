@@ -7,6 +7,8 @@ import type { ImageSourcePropType } from 'react-native';
 export const CARD_POSTER_BOX = { w: 344, h: 195 } as const;
 /** The box the Learn pictures were drawn for: a 390dp phone's tile less its border. */
 export const TILE_POSTER_BOX = { w: 165, h: 118 } as const;
+/** The box the road mastheads were drawn for: a 390dp phone's masthead, laid with cover. */
+export const MAST_POSTER_BOX = { w: 358, h: 260 } as const;
 
 /** Each subject's Home-shelf poster, pre-drawn (see scripts/make-poster-art.mjs). */
 export const CARD_POSTER: Record<string, { source: ImageSourcePropType; stamp: string }> = {
@@ -28,4 +30,15 @@ export const TILE_POSTER: Record<string, { source: ImageSourcePropType; stamp: s
   'economics': { source: require('@/assets/images/posters/tile-economics.png'), stamp: '03771d4e86b1' },
   'science': { source: require('@/assets/images/posters/tile-science.png'), stamp: '6fd5af471b1c' },
   'history': { source: require('@/assets/images/posters/tile-history.png'), stamp: 'f72794c43a2b' },
+};
+
+/** Each subject's road masthead, pre-drawn: live SVG there was thousands of native views. */
+export const MAST_POSTER: Record<string, { source: ImageSourcePropType; stamp: string }> = {
+  'philosophy': { source: require('@/assets/images/posters/mast-philosophy.png'), stamp: '677bbba8987a' },
+  'psychology': { source: require('@/assets/images/posters/mast-psychology.png'), stamp: '904d6bbb966c' },
+  'personal-growth': { source: require('@/assets/images/posters/mast-personal-growth.png'), stamp: '5592d5e3f42d' },
+  'business': { source: require('@/assets/images/posters/mast-business.png'), stamp: '84c50250d371' },
+  'economics': { source: require('@/assets/images/posters/mast-economics.png'), stamp: 'b38cc7787769' },
+  'science': { source: require('@/assets/images/posters/mast-science.png'), stamp: '4da563d95ebc' },
+  'history': { source: require('@/assets/images/posters/mast-history.png'), stamp: '0e8d70e0cd63' },
 };

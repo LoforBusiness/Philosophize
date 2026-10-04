@@ -302,6 +302,22 @@ head('§10 · the Home shelf: pre-drawn posters, one card a swipe, flush picture
   }
   const tileSrc = noComments('components/subjects/SubjectTile.tsx');
   ok(/image=\{TILE_POSTER\[subject\.slug\]\?\.source\}/.test(tileSrc), 'a Learn tile paints its pre-drawn picture, not live SVG');
+  // The road's masthead is pre-drawn too. It was live SVG: science's poster is 2,403
+  // elements, parsed in JS and built as native views on the frame the road opens, and
+  // that is what made tapping a subject lag (2026-10-03).
+  const mbox = /MAST_POSTER_BOX = \{ w: (\d+), h: (\d+) \}/.exec(table);
+  const mstamps = Object.fromEntries([...table.matchAll(/'([a-z-]+)': \{ source: require\('@\/assets\/images\/posters\/mast-\1\.png'\), stamp: '([0-9a-f]+)' \}/g)].map((m) => [m[1], m[2]]));
+  ok(!!mbox, 'posterArt.ts states the box its road mastheads were drawn for');
+  if (mbox) {
+    const [W, H] = [Number(mbox[1]), Number(mbox[2])];
+    for (const s of S.SUBJECTS) {
+      const want = crypto.createHash('sha1').update(P.posterXml(s.slug, s.hue, W, H)).digest('hex').slice(0, 12);
+      ok(mstamps[s.slug] === want, `${s.slug}'s road masthead is drawn from its poster as it is now`, mstamps[s.slug] === want ? '' : 'stale — run npm run make:posters');
+      ok(fs.existsSync(`assets/images/posters/mast-${s.slug}.png`), `${s.slug}'s road masthead is on disk`);
+    }
+  }
+  const road = noComments('app/(app)/branches/[branchSlug]/index.tsx');
+  ok(/MAST_POSTER\[posterKey\]\.source/.test(road) && !/<Poster\b/.test(road), "the road's masthead paints its pre-drawn picture, not live SVG");
   const learn = noComments('app/(app)/branches/index.tsx');
   ok(!/\bwide\b/.test(learn) && /SUBJECTS\.length % 2/.test(learn), 'the Learn grid gives every subject one equal tile');
 

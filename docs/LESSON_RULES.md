@@ -11150,6 +11150,9 @@ named or that the build showed were load-bearing:
       `check:smooth`, `check:still`, `check:idle`, `check:turn` green.
 - [ ] Looked at on a quiet Metro: every beat (`sheet-beats`), and every hand act close up
       at several moments inside it (AR2, AR3, AR6 are judged by eye).
+- [ ] Heard (AT9): a `bed` for the place and its actions cued off the scene's own
+      timings, every clip starting on its hit; `check:sfx` green, then listened to on a
+      phone.
 - [ ] Must-boxes measured, spliced, `make:tours` and `make:gaze` re-run, `npm run check`
       green from a file, not through a pipe.
 
@@ -12063,6 +12066,57 @@ good quality.**
   arrival.
 - **A sound is not a stage change.** `muststamp` leaves `sfx` and `bed` out of a script's
   stamp unless the scene reads its own cue times (`.sfx`, as hist5 does).
+
+### AT9 · Sounding a new lesson: the checklist
+
+> *"If you need to create, edit, or do anything with the rules, so that sounds are really
+> nice when creating new lessons, and that the sound is at the correct timing."*
+> (2026-10-03)
+
+A new lesson is not done until it is heard (`check:sfx` fails a lesson with no sound). Do
+it AFTER the scene is built and the lines are voiced, because every cue is a time in the
+scene's own `LINES`, and it moves when they do.
+
+1. **A bed for the place.** One `bed` on beat 0 from the beds in `lib/sfx/clips.ts`
+   (cafe, room, attic, museum, street, station, supermarket, garden, park, market, rain,
+   beach, river, square, kitchen, court, muffled). If the place changes (the rain starts,
+   a door opens onto a court), give the beat where it changes its own `bed`. A bed is
+   room tone: nothing in it may be the lesson's action.
+2. **List what the stage DOES that makes a sound**, beat by beat, from the scene's own
+   code, never from the line. A thing set down, landing or struck; writing, pouring,
+   squeezing, tearing; a door, a lid, a bell, a coin. Leave out what makes no sound in life
+   or is not drawn: no footsteps on an ordinary walk, no hat tips, no gestures, no pointing.
+   Aim for **4–8 cues a lesson and at most 2 a beat**. A few sounds exactly on time beat
+   many that crowd the voice.
+3. **Time each one off the scene's code**, in seconds of the beat clock:
+   `fraction × LINES[n]`, reading the scene's wrappers to know whether a helper takes
+   fractions or seconds. WHICH moment, by what the eye takes as the event:
+   - a thing **set down, landing, struck**: the END of the stage that carries it there
+     (contact), or the peak of a `bump` that strikes;
+   - a thing **running** (writing, pouring, stirring, a wheel): the START of its stage;
+   - a thing that **comes into view** (pulled out from under a counter, out of a coat):
+     the moment it APPEARS, not where it ends up. The psychology signs were cued as they
+     landed, half a second after they came out, and read as late.
+4. **Use a clip that exists** (`lib/sfx/clips.ts`). If none fits, find one:
+   `npm run find:sfx -- <slot> "<short query>"` (public domain only, the licence read off the
+   sound's own page; run one search at a time). Copy the chosen file to
+   `assets/sfx/src/<id>.mp3`, add its `SOURCES` entry and a `CUTS` entry with
+   `foley: true, onset: true`, and add `onsetDb` (6–10) if the recording makes noise
+   before its hit, or `search` when the clip must end before a second, louder event. Then
+   `FFMPEG=<path> npm run make:sfx`, and read the line it prints: **`hit at` should be
+   0.00–0.05s**. `check:sfx` fails a foley clip whose hit is later than 0.15s, because a
+   cue lands the clip's START on the action, so a late hit is a late sound.
+5. **Write the cues** as one line at the top of the beat:
+   `sfx: [{ id: 'cup', at: 2.08, gain: 0.8 }],`. Foley under a voice is gain 0.85 or less;
+   a crowd, a cheer, a bell or a train is never under a voice (`lead`, `tail`, or a beat
+   with no line). Keep `sfx` and `bed` on lines of their own, so `muststamp` can leave
+   them out of the stage's stamp.
+6. **Check it**: `npm run check:sfx` (licences, hits, nothing over a voice, every cue
+   inside its beat), then **listen on a phone**. A browser plays no sound, and a sound
+   that is a frame or two late can only be heard.
+7. **When a lesson is re-voiced, re-time its cues.** Its `LINES` move, the scene's action
+   moves with them, and the cues do not. `check:sfx` catches one past the end of its
+   beat; only listening catches one inside it.
 
 ### AT7 · A big set is baked: its still scenery is one picture
 

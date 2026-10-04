@@ -73,3 +73,18 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/history-0-6.png'),
   ],
 };
+
+/**
+ * What the road needs to lay each baked picture: its parallax, its top and its height. The road
+ * reads these instead of calling sceneLayers, which builds every path of the scenery in
+ * JS — work a baked road throws away, on the frame the screen arrives (2026-10-03).
+ */
+export const ROAD_LAYERS: Record<string, { k: number; top: number; h: number }[]> = {
+  'philosophy:0': [{ k: 0.05, top: 83, h: 69 }, { k: 0.05, top: 191, h: 103 }, { k: 0.08, top: 253, h: 49 }, { k: 0.1, top: 146, h: 138 }, { k: 0.3, top: 252, h: 58 }, { k: 0.46, top: 174, h: 128 }, { k: 0.56, top: 282, h: 78 }],
+  'psychology:0': [{ k: 0.05, top: 174, h: 104 }, { k: 0.12, top: 248, h: 34 }, { k: 0.16, top: 236, h: 74 }, { k: 0.2, top: 260, h: 38 }, { k: 0.42, top: 168, h: 134 }, { k: 0.56, top: 282, h: 78 }],
+  'personal-growth:0': [{ k: 0.05, top: 52, h: 100 }, { k: 0.04, top: 191, h: 101 }, { k: 0.06, top: 211, h: 91 }, { k: 0.09, top: 66, h: 220 }, { k: 0.26, top: 274, h: 36 }, { k: 0.44, top: 157, h: 145 }, { k: 0.56, top: 284, h: 76 }],
+  'business:0': [{ k: 0.05, top: 172, h: 106 }, { k: 0.12, top: 136, h: 170 }, { k: 0.32, top: 170, h: 140 }, { k: 0.56, top: 282, h: 78 }],
+  'economics:0': [{ k: 0.05, top: 65, h: 87 }, { k: 0.05, top: 183, h: 87 }, { k: 0.1, top: 186, h: 124 }, { k: 0.18, top: 258, h: 36 }, { k: 0.22, top: 222, h: 72 }, { k: 0.4, top: 141, h: 161 }, { k: 0.56, top: 283, h: 77 }],
+  'science:0': [{ k: 0.05, top: 78, h: 74 }, { k: 0.05, top: 175, h: 105 }, { k: 0.1, top: 116, h: 194 }, { k: 0.12, top: 207, h: 85 }, { k: 0.3, top: 183, h: 119 }, { k: 0.56, top: 284, h: 76 }],
+  'history:0': [{ k: 0.05, top: 86, h: 66 }, { k: 0.05, top: 173, h: 115 }, { k: 0.06, top: 258, h: 52 }, { k: 0.09, top: 97, h: 183 }, { k: 0.26, top: 176, h: 122 }, { k: 0.46, top: 176, h: 126 }, { k: 0.56, top: 282, h: 78 }],
+};

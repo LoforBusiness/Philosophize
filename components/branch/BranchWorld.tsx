@@ -16,7 +16,7 @@ import {
 import { figureAt, hopAt, hopMs, hopTravel } from './walkFigure';
 import { sceneLayers, discFor, skyFor, earthFor, placeFromUnitId, TILE_W, type LayerArt } from './sceneArt';
 import RoadSign, { ComingSoonBoard } from './RoadSign';
-import { ROAD_ART } from './roadArt';
+import { ROAD_ART, ROAD_LAYERS } from './roadArt';
 import { BRANCH } from '@/constants/design';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -421,7 +421,12 @@ export default function BranchWorld({
 function SceneBack({ camX, place, unit, width }: {
   camX: SharedValue<number>; place: string; unit: number; width: number;
 }) {
-  const layers = useMemo(() => sceneLayers(place, unit), [place, unit]);
+  // A BAKED road lays its pictures from the table make:road-art wrote; sceneLayers builds
+  // every path of the scenery in JS, which only the live fallback needs (2026-10-03).
+  const layers = useMemo<StripLayer[]>(
+    () => ROAD_LAYERS[`${place}:${unit}`] ?? sceneLayers(place, unit),
+    [place, unit],
+  );
   const disc = useMemo(() => discFor(place, unit), [place, unit]);
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -439,7 +444,10 @@ function SceneBack({ camX, place, unit, width }: {
   );
 }
 
-function SceneStrip({ camX, layer, art }: { camX: SharedValue<number>; layer: LayerArt; art?: number }) {
+/** What a strip needs: where it sits and how it moves, and the drawing only when unbaked. */
+type StripLayer = Pick<LayerArt, 'k' | 'top' | 'h'> & Partial<LayerArt>;
+
+function SceneStrip({ camX, layer, art }: { camX: SharedValue<number>; layer: StripLayer; art?: number }) {
   const { d, tone, k, top, h, under, underTone } = layer;
   const st = useAnimatedStyle(() => {
     const t = camX.value * k;
