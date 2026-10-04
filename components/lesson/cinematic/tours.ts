@@ -47,8 +47,10 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'psychology-foundations-1': [[[31, 420, 257, 85, 1.08, 9]], [[148, 420, 152, 85, 0.67, 9]], [[160, 421, 212, 84, 0.55, 9]], null, [[0, 306, 400, 208, 1.2, 9]], null, null, null, null, null, null, null],
   'psychology-foundations-2': [[[107, 416, 188, 89, 1.2, 9]], [[106, 417, 136, 96, 0.55, 9]], null, [[0, 306, 400, 208, 1.2, 9]], null, null, null, [[22, 406, 264, 99, 0.83, 9]], null, null, null, [[34, 407, 255, 98, 0.88, 9]]],
   'psychology-foundations-3': [null, null, null, null, null, null, null, null, null, null, [[54, 406, 247, 99, 1.13, 9]], null],
+  'psychology-foundations-5': [null, null, null, null, null, null, null, null, null, null, null, [[0, 300, 400, 214, 0.79, 9]]],
   'science-foundations-1': [null, null, null, null, null, null, null, null, null, null, [[230, 406, 133, 99, 0.72, 9]]],
   'science-foundations-2': [null, [[0, 306, 400, 210, 1.16, 9]], [[9, 388, 203, 117, 1.2, 9]], [[0, 306, 400, 210, 1.2, 9]], null, null, null, null, null, null, null, null],
+  'science-foundations-5': [[[119, 373, 227, 123, 1.2, 9]], null, [[116, 374, 159, 122, 0.55, 9]], null, null, null, null, null, null, null, null, null],
 };
 
 export const TOUR_STAMP: Record<string, string> = {
@@ -71,6 +73,8 @@ export const TOUR_STAMP: Record<string, string> = {
   'psychology-foundations-1': 'f57c256f1344',
   'psychology-foundations-2': 'b0261c9ecb5e',
   'psychology-foundations-3': 'c0bac5f6df5e',
+  'psychology-foundations-5': 'f346d1aa8a9c',
   'science-foundations-1': 'f58d9a5b8ba1',
   'science-foundations-2': 'c4232e914411',
+  'science-foundations-5': '7463bec88372',
 };

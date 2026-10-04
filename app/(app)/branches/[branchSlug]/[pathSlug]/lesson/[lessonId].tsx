@@ -33,6 +33,12 @@ import { Econ4Lesson } from '@/components/lesson/cinematic/econ4Scene';
 import { Sci4Lesson } from '@/components/lesson/cinematic/sci4Scene';
 import { Hist4Lesson } from '@/components/lesson/cinematic/hist4Scene';
 import { Hist5Lesson } from '@/components/lesson/cinematic/hist5Scene';
+import { Phil5Lesson } from '@/components/lesson/cinematic/phil5Scene';
+import { Psych5Lesson } from '@/components/lesson/cinematic/psych5Scene';
+import { Growth5Lesson } from '@/components/lesson/cinematic/growth5Scene';
+import { Biz5Lesson } from '@/components/lesson/cinematic/biz5Scene';
+import { Econ5Lesson } from '@/components/lesson/cinematic/econ5Scene';
+import { Sci5Lesson } from '@/components/lesson/cinematic/sci5Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -67,26 +73,32 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'economics-foundations-2': Econ2Lesson,
   'economics-foundations-3': Econ3Lesson,
   'economics-foundations-4': Econ4Lesson,
+  'economics-foundations-5': Econ5Lesson,
   'philosophy-foundations-1': Phil1Lesson,
   'philosophy-foundations-2': Phil2Lesson,
   'philosophy-foundations-3': Phil3Lesson,
   'philosophy-foundations-4': Phil4Lesson,
+  'philosophy-foundations-5': Phil5Lesson,
   'psychology-foundations-1': Psych1Lesson,
   'psychology-foundations-2': Psych2Lesson,
   'psychology-foundations-3': Psych3Lesson,
   'psychology-foundations-4': Psych4Lesson,
+  'psychology-foundations-5': Psych5Lesson,
   'personal-growth-foundations-1': Growth1Lesson,
   'personal-growth-foundations-2': Growth2Lesson,
   'personal-growth-foundations-3': Growth3Lesson,
   'personal-growth-foundations-4': Growth4Lesson,
+  'personal-growth-foundations-5': Growth5Lesson,
   'business-foundations-1': Biz1Lesson,
   'business-foundations-2': Biz2Lesson,
   'business-foundations-3': Biz3Lesson,
   'business-foundations-4': Biz4Lesson,
+  'business-foundations-5': Biz5Lesson,
   'science-foundations-1': Sci1Lesson,
   'science-foundations-2': Sci2Lesson,
   'science-foundations-3': Sci3Lesson,
   'science-foundations-4': Sci4Lesson,
+  'science-foundations-5': Sci5Lesson,
   'history-foundations-1': Hist1Lesson,
   'history-foundations-2': Hist2Lesson,
   'history-foundations-3': Hist3Lesson,

@@ -84,6 +84,17 @@ export const SOURCES = {
   river: { id: 517419, by: 'Antonio_Lai', title: 'River', url: 'https://freesound.org/people/Antonio_Lai/sounds/517419/', licence: 'CC0 1.0' },
   square: { id: 119934, by: 'ftpalad', title: 'Town Square Ambience.aif', url: 'https://freesound.org/people/ftpalad/sounds/119934/', licence: 'CC0 1.0' },
   kitchen: { id: 473718, by: 'Joao_Janz', title: 'Kitchen Ambience At Night .wav', url: 'https://freesound.org/people/Joao_Janz/sounds/473718/', licence: 'CC0 1.0' },
+  // the fifth lessons (2026-10-03)
+  spacehum: { id: 686237, by: 'db3005', title: 'Space Station Drone', url: 'https://freesound.org/people/db3005/sounds/686237/', licence: 'CC0 1.0' },
+  crickets: { id: 175020, by: 'sengjinn', title: 'AMBIENCE NIGHT FIELD CRICKET 01.wav', url: 'https://freesound.org/people/sengjinn/sounds/175020/', licence: 'CC0 1.0' },
+  lake: { id: 326097, by: 'kvgarlic', title: 'LakeWavesOct25th2015.WAV', url: 'https://freesound.org/people/kvgarlic/sounds/326097/', licence: 'CC0 1.0' },
+  whistle2: { id: 538422, by: 'Rosa-Orenes256', title: 'Referee whistle sound.wav', url: 'https://freesound.org/people/Rosa-Orenes256/sounds/538422/', licence: 'CC0 1.0' },
+  teleport: { id: 172207, by: 'Leszek_Szary', title: 'teleport', url: 'https://freesound.org/people/Leszek_Szary/sounds/172207/', licence: 'CC0 1.0' },
+  boop: { id: 186669, by: 'fordps3', title: 'Computer Boop', url: 'https://freesound.org/people/fordps3/sounds/186669/', licence: 'CC0 1.0' },
+  burner: { id: 176724, by: 'qubodup', title: 'Fire Flame Burner', url: 'https://freesound.org/people/qubodup/sounds/176724/', licence: 'CC0 1.0' },
+  rat: { id: 288941, by: 'toefur', title: 'rat-squeak.wav', url: 'https://freesound.org/people/toefur/sounds/288941/', licence: 'CC0 1.0' },
+  sonar: { id: 539957, by: 'SamsterBirdies', title: 'Sonar Ping', url: 'https://freesound.org/people/SamsterBirdies/sounds/539957/', licence: 'CC0 1.0' },
+  oar: { id: 480840, by: 'craigsmith', title: 'R23-38-Oar Splash.wav', url: 'https://freesound.org/people/craigsmith/sounds/480840/', licence: 'CC0 1.0' },
 };
 
 /**
@@ -176,5 +187,15 @@ export const CUTS = [
   { id: 'river', src: 'river', from: 2, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
   { id: 'square', src: 'square', from: 2, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
   { id: 'kitchen', src: 'kitchen', from: 0.5, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'spacelab', src: 'spacehum', from: 5, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'night', src: 'crickets', from: 2, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'loch', src: 'lake', from: 5, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'whistle', src: 'whistle2', from: 0, len: 0.55, fadeOut: 0.1, loud: -27, foley: true, onset: true },
+  { id: 'teleport', src: 'teleport', from: 0, len: 0.75, fadeOut: 0.25, loud: -27, foley: true, onset: true },
+  { id: 'boop', src: 'boop', from: 0, len: 0.24, fadeOut: 0.06, loud: -29, foley: true, onset: true },
+  { id: 'burner', src: 'burner', from: 0, len: 2.5, fadeOut: 0.8, loud: -27, foley: true, onset: true, onsetDb: 10 },
+  { id: 'rat', src: 'rat', from: 0, len: 0.7, fadeOut: 0.2, loud: -29, foley: true, onset: true },
+  { id: 'sonar', src: 'sonar', from: 0, len: 1.6, fadeOut: 0.6, loud: -29, foley: true, onset: true },
+  { id: 'oar', src: 'oar', from: 0, search: 2.0, len: 1.2, fadeOut: 0.4, loud: -28, foley: true, onset: true, onsetDb: 10 },
 ];
 

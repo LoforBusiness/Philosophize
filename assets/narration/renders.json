@@ -169,6 +169,51 @@
     "wav": "1d69682220c99db8c1b38c286cf17c6524303d6f5acd51ae84e588f410c5ae59",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "business-foundations-5/beat-00": {
+    "text": "Twelve flights booked this month. That’s three thousand pounds of profit, and I’m a genius of the skies.",
+    "wav": "b8850bc265e8af3f31d79c72a497761d8b89a653c871676d4a843791775218c1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-5/beat-01": {
+    "text": "Morning! Here’s your gas for the week. That’s four hundred pounds, cash on delivery.",
+    "wav": "b9a2a3cdab069bb13914e8eb4adbad51e7ee086676f9613274639af20333f4cd",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-5/beat-02": {
+    "text": "Of course, one moment. Ah, there’s forty pounds and a button.",
+    "wav": "65e2add4d0e75703aa6817f32a1ff03e459d0b12d412102e2874c66671077719",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-5/beat-03": {
+    "text": "Your customers pay after they fly, and the gas is due before anybody does. You can’t pay a bill with profit on paper.",
+    "wav": "dff0bc490e3c432660551831acef529e6e3f139102aed4bd8600413bfdbbfbb9",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-5/beat-05": {
+    "text": "Tell you what, keep two cylinders on trust till Friday. You can pay me then.",
+    "wav": "5bc66255b76853e2cc92fe997f42a1a10afca21461951ac1c6677112d49a15f4",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-5/beat-06": {
+    "text": "Kind of him, and more than you deserve. From now on, take half the fare when people book, not after they land.",
+    "wav": "cef8690e6e31f7d636ef67fc7269b194349ffda9ab5ada38a4ed1d5a80a4fc20",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-5/beat-07": {
+    "text": "Half up front. A brilliant idea, and I’ll tell everyone it was mine.",
+    "wav": "0e4955477f5ce1e795426fa5999c9fe67d6b0128f09e3828e2e90161f576a9b2",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-5/beat-08": {
+    "text": "And keep some cash in this tin, for the weeks when people pay late.",
+    "wav": "d8fd551ad0c3419c22a2b87badeed1208911b40704fa8e22e1c7129387e2b4a4",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-5/beat-10": {
+    "text": "Up we go, and the gas is paid for. Mostly.",
+    "wav": "9c70268cdb161cf7bc5d6151bd45622b165b194e099bd0fbdfabf1523ac6ebb4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
   "economics-foundations-1/beat-00": {
     "text": "One ten-pound note. And I want everything on this table.",
     "wav": "2cb961cb2c0c70aab358f5fa03229615532e6a707a49c6f029110e59d7618164",
@@ -327,6 +372,51 @@
   "economics-foundations-4/beat-09": {
     "text": "Then my hen should live with his hens. She’ll be much happier there, I think.",
     "wav": "8dc1c9c17f12120287f4a48a919afd4119d42389b5993ca81cb05654b8e5cf93",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-5/beat-00": {
+    "text": "As mayor, I’ve solved the rat problem. One silver coin for every rat tail brought to me.",
+    "wav": "757a133a0910c5e4427ea1db4840570fcf9dc44abd5dc6ac227e518c1caeefec",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-5/beat-01": {
+    "text": "Fifty tails today! I’m the best rat catcher in town, and I’ve hardly left my cellar.",
+    "wav": "88665c32e361309913e3feaab46b659c7cc0533dfc464c6f3b86dfc93c5f260d",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-5/beat-02": {
+    "text": "You’ve solved nothing. There are more rats in this town than last month, and I think I know why.",
+    "wav": "ccc7d89e25fc89a996508d53154754b9878b7e54e3511a4dd39a0ef1388336db",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-5/beat-04": {
+    "text": "My rat farm! Two rats make twenty, and twenty make a basket of easy money.",
+    "wav": "e8058791c39ad58792729c8495ab523be12f12b5d13d603d26c3789b61f957be",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-5/beat-05": {
+    "text": "A reward that changes what people do is called an incentive. People chase the reward, not what you meant by it.",
+    "wav": "15fe78c827f2d1f8d33e89f6293020cf5a161f80d6c6bcd77594762b1f2c4d93",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-5/beat-06": {
+    "text": "You put a price on tails, so the town started making them. It’s supply rising with the price, like any market.",
+    "wav": "03c8ccf4f8348102520f29f50ff58eee39b0ec24ac40918688810a1fedfcb0ba",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-5/beat-07": {
+    "text": "So it’s the rats’ fault, for having so many babies. Clever little things.",
+    "wav": "fc78b896e24ff8ad0ed8efbb5b6c89299fb9e51afc230db04408e7effad55d55",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-5/beat-08": {
+    "text": "No. Pay for what you want, not for something that’s easy to make more of.",
+    "wav": "4f666b2b85b78372fdd98d24d7ab192d4807c1774ec92df7b3397d40e6b11bd9",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-5/beat-10": {
+    "text": "No rats, no coins? Then I’ll go back to growing cabbages.",
+    "wav": "0822de16227967742a82b6ad9cece2b0cbfdfbac2243c326e0c537595cba683a",
     "voice": "en-US-Chirp3-HD-Kore"
   },
   "history-foundations-1/beat-00": {
@@ -804,6 +894,51 @@
     "wav": "513d53e1b6d22e5b3f575d85b4d0c243a9967c8d9c4a721f8d570eb0a0e910cb",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
+  "personal-growth-foundations-5/beat-00": {
+    "text": "Ten thousand times across this rope, and I’ve never wobbled once.",
+    "wav": "7bd9a0967486778035ee733cbb275168a4b365bca331675abef2822226cfea4e",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-5/beat-01": {
+    "text": "That rope’s lying on the floor. You could cross it asleep, and you haven’t learned a thing in years.",
+    "wav": "ba3e463f3bd1b2b5d1e56d88c6779c2d50053b317ed12c30c93bcc761370758e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-5/beat-02": {
+    "text": "I’m skipping the boring bit. I’ll practise up on the high wire from day one!",
+    "wav": "9110090b06a17222a02d2facdc3383822bc548bf2737aa100d2364209654179a",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-5/beat-03": {
+    "text": "Down. Up there you’d be too scared to learn a thing, and you’d just cling on.",
+    "wav": "245a9fbf6c87f88c2d3f470b33dbc5702dbdeaa04b07e47f43b84d653aa73d9f",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-5/beat-04": {
+    "text": "You get better at the edge of what you can do. Hard enough that you wobble, safe enough that you can think.",
+    "wav": "ca2db303760e3838dd3b6888b52f2b31981e6967d13d91199944af6d0e61b15a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-5/beat-06": {
+    "text": "Whoa! I fell off four times, but I think I keep leaning to the left.",
+    "wav": "9b8581c90e793bf4e22c8ed318b9163ee11289b3ce72030f58a32af02cf2c0ed",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-5/beat-07": {
+    "text": "Good, that’s the one to fix. Practise just the lean, and get told the moment it goes wrong.",
+    "wav": "f1d7467b9fd43aa6ebf8e7e2e546d34aa2a9e11db07785b747cdc02dc66532c1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-5/beat-08": {
+    "text": "I’ll come up there too. If I can still wobble, I can still get better.",
+    "wav": "0d1c28b85ca856a5b7e34361623f5c9bb50593145f267c0b82e80d216d1a31a2",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-5/beat-10": {
+    "text": "Every time I lean, he blows the whistle. I hate the noise, and I’ve stopped leaning.",
+    "wav": "5e34d0d34d1e9c86294ab2668d14203c2df07b6ab75fd2d5fe99e37dd0018f75",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
     "wav": "d14c0415d0baad8351f71bde84b942c48a7e9ff9c870866d672707f023a4b675",
@@ -973,6 +1108,51 @@
     "text": "Half past nine, on time. Now I know it, and I’d like that written down somewhere.",
     "wav": "cb7f96ac4ebd23310197ef5ccf7e8c50ececc2328c4486a96f57dbf13bf6b14a",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-5/beat-00": {
+    "text": "The pod’s warmed up! It scans every atom of you, beams the plan to the Moon, and builds you there.",
+    "wav": "b2630225f68d44c508a71b75191b02c29116388d720662cf6a5fd07a947bcf9b",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-5/beat-01": {
+    "text": "The first man ever to teleport. They’ll put my face on a stamp.",
+    "wav": "c362a414be963dab006ed0421314de57644d8908c899d520359e38e55e347ad7",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-5/beat-02": {
+    "text": "Oh, and the pod breaks the old you down for parts. We can’t have two of you walking around.",
+    "wav": "22cafd9f544c793dc4d60b187b81d0d72709823f10ea9b0d86e3b79cdb504a2b",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-5/beat-03": {
+    "text": "Now he hesitates. Whether the man on the Moon is you depends on what makes you you.",
+    "wav": "96e47347df2835f4aafc8935caed57543b9f53c0e99e8f5566cc0ebef076e96e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-5/beat-04": {
+    "text": "If you’re your body, you end here and a copy wakes up. If you’re your memories, you travel to the Moon.",
+    "wav": "8f0936c50d6f0dcd0f6ce644f358dc4d3dc36a26f58548d8ad0f44258f5c4a81",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-5/beat-06": {
+    "text": "Fine. My memories are magnificent anyway. Beam them up.",
+    "wav": "0e79cb599315e3f43667f56b230c0d1ed8d60a11fa6074dcf121e58945eb19d2",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-5/beat-07": {
+    "text": "Oops, the recycler jammed. Now there’s one of him in here and one on the Moon!",
+    "wav": "aa603e44249a758dc1474d6972e7b637e64a22c9b6aca384589888864d5b1fc1",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-5/beat-08": {
+    "text": "I’m the real one. He’s a very handsome copy, but a copy.",
+    "wav": "d44893493e12963674a6767dd5595ae55f926477014bfa093ac43be2aae11e2d",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-5/beat-09": {
+    "text": "And he’d say the same, with the same memories. One person can’t be two people, so memories alone can’t settle who’s you.",
+    "wav": "c186fd9f08726d91812942e3aafff23294a8863920be6f156949c4dc5cf64fc8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
   },
   "psychology-foundations-1/beat-00": {
     "text": "I can always tell cheap coffee from the good stuff. Always.",
@@ -1154,6 +1334,51 @@
     "wav": "06f58ca197934ed4a956f17f7d10c2220f3b1580e69e61b40b4c4691ef1635cd",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "psychology-foundations-5/beat-00": {
+    "text": "At midnight a saucer lands on this hill and takes us away. They told me personally.",
+    "wav": "71c3585ecf17840fa374e9dd89630bae5a7128f857651832a3d434539cad04a5",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-5/beat-01": {
+    "text": "I sold my car to be here, and I baked them a lemon cake. I hope they like lemon.",
+    "wav": "9e11ca9e015d37a273d58156a22bd75ce9afef8f78ff4a9cd64d25ecb556e893",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-5/beat-02": {
+    "text": "I study how people think. I’m here to see what they do when midnight comes and nothing lands.",
+    "wav": "8872b7c32d40ac172e2bd1b27d84d18b8421d7098e789502263c07261e8fbd29",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-5/beat-04": {
+    "text": "Our faith was so strong, they called the whole thing off. I’ve saved the world, and you’re welcome.",
+    "wav": "e3829bc8c5b47d5f4adefa4f10c005d28664d370109f04467ba76aa536a1178c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-5/beat-05": {
+    "text": "Oh, thank goodness. Then I didn’t sell my car for nothing.",
+    "wav": "4aed929357386119a851e78fa5fa5de361d0bf8ffa2cdba357e85d27d900fd44",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-foundations-5/beat-06": {
+    "text": "Two thoughts are clashing in his head: the saucer was coming, and nothing came. That clash hurts, and it’s called cognitive dissonance.",
+    "wav": "d0c5f19c776341e746450e11d4cf9986ffb4bb9d4787f88cc6c25642978a353a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-5/beat-07": {
+    "text": "The easy way out isn’t to drop the belief. It’s to change the story, so the belief survives.",
+    "wav": "e73711b970c6f42462a9f634ea0cbe89dcbf58a8205cce2fbf35d1944064e9e6",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-5/beat-08": {
+    "text": "And the more a belief has cost you, the harder you’ll cling to it. He sold his car for this one.",
+    "wav": "2dae72fd7a454c278e0ef289cafb843061b670b36560fb46ab6d3dfc39b7fd61",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-5/beat-10": {
+    "text": "Right, new date, next Tuesday. I’ll need more posters, and a lot more followers.",
+    "wav": "66d0a7242e425cdbd076c9908ffc8287f5a1b12c187a7eac12c631855823fda1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
     "wav": "fe36d025ee89b93daa9ee656e4653cce3d243c2fd204cbe40a1265f914c47403",
@@ -1322,6 +1547,51 @@
   "science-foundations-4/beat-09": {
     "text": "The average of my three good ones is about three seconds. So I was right all along!",
     "wav": "a2f672bd027ee096628606b7040b233abd32c0661696c95aad658b3b9bda884e",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-5/beat-00": {
+    "text": "Tonight we finally get proof of the monster. Row us out to the middle!",
+    "wav": "7bb9f5fe19650823472577044f25330f03759048af07cd3dee9bc7c8f741cf00",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-5/beat-01": {
+    "text": "The sonar’s clear, and the camera’s caught nothing. Sorry, I’ve looked everywhere.",
+    "wav": "8642fafb366371f79a1e7f0cb3288a1a9feb5b8483495975e15ae5cc2ca32bce",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-5/beat-02": {
+    "text": "That’s because she hides whenever she’s watched. And she doesn’t show up on sonar.",
+    "wav": "73b91d23858145eff6c45776656d63ffed005c4bfbc7d7839b8f1a62fcb8fb9f",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-5/beat-03": {
+    "text": "So if she’s seen, she’s real, and if she isn’t seen, she’s still real. Nothing could ever count against her.",
+    "wav": "6496c7e3b7056787d09e6bd486f6f3485127c3656f0549b4854f4687b7d47b0c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-5/beat-04": {
+    "text": "A claim that can’t be wrong tells you nothing. Science needs claims that could fail a test, and that’s called falsifiability.",
+    "wav": "0f929332db66ec4b7d1af07472b34b07d21e3c1116626707312e0662ff00cae0",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-5/beat-06": {
+    "text": "Fine. She’s ten metres long, and she lives right here in this loch.",
+    "wav": "54d746a5fa108f07fb3c2f82c472f5b85fa2e1cfae6ae7f00f93cdf83a719d23",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-5/beat-07": {
+    "text": "Good. Now look hardest for the result that would prove you wrong, not the one that saves you.",
+    "wav": "d8b80b9a7455792a9b45b761a997d2ccc5043422ff8af8d2e0e8fdc0f2ea328d",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-5/beat-08": {
+    "text": "I’ll sweep the loch end to end, every night for a month. I’ve brought a flask.",
+    "wav": "69f67b66e095bec4f68b87dc5c237923b5365c45f7c7eef28045656f57383b0f",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-5/beat-10": {
+    "text": "A whole month of nothing. Maybe she’s moved to the next loch over.",
+    "wav": "90c64bccfc08ed14f674a7d2891892db238dfa5ef0cd10db1a9804b167b10e74",
     "voice": "en-US-Chirp3-HD-Kore"
   }
 }

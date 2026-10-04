@@ -11153,6 +11153,9 @@ named or that the build showed were load-bearing:
 - [ ] Heard (AT9): a `bed` for the place and its actions cued off the scene's own
       timings, every clip starting on its hit; `check:sfx` green, then listened to on a
       phone.
+- [ ] From a road's fifth lesson on (AU): it stands on an earlier idea and goes past it,
+      opens on a gap and a stake, happens somewhere a reader would want to be, asks two
+      questions that are two different small games, and ends its spoken lines on a button.
 - [ ] Must-boxes measured, spliced, `make:tours` and `make:gaze` re-run, `npm run check`
       green from a file, not through a pipe.
 
@@ -12152,3 +12155,93 @@ full-screen Svg is).
 The court went from 2,799 elements to about 1,080, and the jurors off camera from 25 figures
 redrawn every frame to none.
 
+
+---
+
+## Group AU · A road ramps up, and a lesson is a show
+
+> *"I want the foundations to ramp up. I don't want the user to keep learning very basic
+> things. I still want them to be taught properly, but I want the complexity and the
+> things shown then in lessons will become more complicated … Make sure that these
+> lessons are very entertaining. That is a very big thing … different ways that the user
+> can answer questions. Unique ways, fun ways. I also want unique situations, not just
+> everyday situations … exciting situations."* (2026-10-03, the fifth lessons)
+
+Researched before it was written: the curiosity gap (a felt, specific gap the reader can
+see the edges of motivates; a stated fact opens nothing); difficulty is desirable only
+AFTER success has been encoded, and a learner who meets a struggle with no picture of
+success disengages; self-determination theory's competence need (the reader must FEEL
+progress); Brilliant's "try before you are told" and its practice that mixes earlier
+ideas back in; and humour that rides on the content rather than beside it. Every lesson
+from the fifth on is built to these, on top of AP–AT.
+
+### AU1 · A road ramps up: each lesson stands on the ones before it
+
+A road's first lessons say what the subject is and give its basic tools (AP3). From the
+fifth lesson on, a lesson takes one of those tools and pushes it somewhere it does not
+reach on its own:
+
+- **Name the earlier idea's limit, then go past it.** The Ship of Theseus asked it of a
+  bicycle; the teleporter asks it of a person and breaks the easy answer. Supply and
+  demand explains why a rat-tail bounty makes rats. Profit is followed by the trap behind
+  it, cash. The new idea is harder, and it is still taught properly: three ideas, each
+  shown before it is named, the name given once (AP20.5).
+- **Never cite a lesson by number** ("as in lesson 2"): a road is re-ordered and grows.
+  Say the idea ("you learned what profit is"), or let the situation call it up.
+- **Success first, then struggle.** The first question applies the first new idea the
+  reader has just watched (or predicts from what the road has already taught), so it can
+  be won; the second turns the idea round or offers a tempting answer that fails for a
+  nameable reason (E-group), which is the struggle. A reader should finish a lesson
+  feeling the subject got harder and they kept up.
+
+### AU2 · A lesson opens on a gap and a stake
+
+The first two or three lines put a QUESTION in the reader's head and something at stake
+for somebody on the stage: the pod will break down the old you; the saucer is due at
+midnight; there's forty pounds in the tin and the gas is four hundred. Nobody explains
+anything until the reader wants it explained. A lesson may ask its first question BEFORE
+the teacher explains (a prediction: "what will he say next?"), when the road has already
+given the reader enough to make a real guess; its explanation then carries the surprise.
+
+### AU3 · An exciting place
+
+Not only cafés and gardens. A road mixes ordinary places with ones a reader would never
+stand in: a space lab, a hilltop at midnight, a big top, a balloon field at dawn, a
+medieval town hall, a loch at night, a court in Athens. The idea must still be one the
+reader meets in daily life — the closing line takes it home ("Next time a busy shop
+closes down…") — and the strange place is what makes it memorable. The place is drawn
+from references, in its own colours, with depth and something in it alive that is not a
+person (water, flame, stars, mist), and kept light enough to stay smooth (AT7).
+
+### AU4 · Every question is a small game, and no two in a road are the same game
+
+Still one tap on the stage (AP6), but the three targets are real things in the scene and
+the question FEELS like something done to them: follow him, call it before it happens,
+pick the rope, rummage the prop trunk, follow the money, pick the booking, look behind a
+door, seal a decree, catch a bottle, read the results, weigh the claims, read the luggage
+tags. A script names its game in capitals at the start of the question flag's doc
+comment. Rules:
+
+- **The scene answers in the game's own way**: the right door opens, the right scroll
+  takes the seal, the bottle lifts out of the water; a wrong pick has its own small
+  reaction, not the right one's. Every reaction is carried (AH4) and appears only once
+  the reader has picked.
+- **A tappable thing that moves, moves gently**: at most 4 stage units, on the clock, so a
+  tap never misses.
+- **Words go on the things, in their plates** (AQ1), never as a row of buttons laid over
+  the picture.
+
+### AU5 · Entertaining, by the words and the stage together
+
+- **Comedy rides on the idea.** The vain one teleports for a stamp with his face on it;
+  the prophet claims credit for saving the world; the bun runs a rat farm. Each joke is
+  the misconception or the mechanism, so laughing at it is understanding it (AS1).
+- **Something surprising happens in the middle**: the pod jams and there are two of him;
+  midnight passes and nothing lands; she falls into the net. A turn halfway through is
+  what makes the second question feel like a new problem.
+- **The last spoken line is a button** — a short line that lands the idea as a laugh
+  ("Maybe she's moved to the next loch over"), after the second question and before the
+  quotation.
+- **Still simple** (AP7): at most two movers at once, no silent extras outside a staged
+  scene (AT2), and no branches. A reader's answer is never voiced back (AT4, AT5 cost a
+  voiced line per answer, and the owner chose a normal lesson over that).

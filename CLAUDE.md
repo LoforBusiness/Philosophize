@@ -143,7 +143,7 @@ Philosophize/
 │   ├── lesson/                  # LessonReward, LessonLoader, lessonNav, exitLesson
 │   │   │                        #   (the card runner, cards/ and interactions/ went
 │   │   │                        #   with the narrated library on 2026-10-02)
-│   │   ├── cinematic/           # THE BIG ONE — 29 wired cinematic lessons (the dialogue lessons), the
+│   │   ├── cinematic/           # THE BIG ONE — 35 wired cinematic lessons (the dialogue lessons), the
 │   │   │                        #   shared rig.ts, Stickman.tsx, CinematicPlayer,
 │   │   │                        #   NarrationText + ThinkerPeek (the marked deck),
 │   │   │                        #   interact.ts (the figure and what is outside it),
@@ -268,7 +268,7 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 > ROAD SINCE 2026-10-02, 28 in all (§23).** Everything below about 41 a branch, the takeover and the 246
 > describes philosophy's six old branches, whose lessons were DELETED on 2026-10-02
 > (§23); a reader's progress in them survives as counts (`data/retiredBranches.ts`). It
-> is kept as a finding. `check:cinematic` counts the 29 lessons, so `SOLID_FLOOR` is 29.
+> is kept as a finding. `check:cinematic` counts the 35 lessons, so `SOLID_FLOOR` is 35.
 
 ### Shape today
 
@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 29** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 29 with history's staged fifth, and 28 with the fourth lessons), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 35** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 28 with the fourth lessons, 29 with history's staged fifth, and 35 with the other six fifth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -320,7 +320,7 @@ because every lesson id is in the `CINEMATIC` map — and was deleted on 2026-10
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 29, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 35, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -1130,6 +1130,10 @@ Both are required. Get them from your Supabase project → Settings → API.
     view). New clips come from `npm run find:sfx` (CC0 only) and `make:sfx`, cut so each
     starts on its hit. `check:sfx` fails a lesson with no sound and a late-hitting clip;
     only a phone can tell you a cue is a frame late.
+11. From a road’s fifth lesson on, build it to LESSON_RULES group AU: it stands on an
+    earlier idea on its road and goes past it, opens on a question and a stake, happens
+    somewhere out of the ordinary, asks its two questions as two different small games on
+    the stage (named in capitals in each flag’s doc comment), and never voices a reply.
 
 **Where a lesson lands changes what it means.** Units are contiguous slices of a
 branch in teaching order, and `lessonsByUnit` counts completions **by position**.
@@ -1311,7 +1315,7 @@ they belong to, so the rule book has them and this file did not:
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 29 DIALOGUE lessons, four on each road and a fifth on History's, staged as a scene with a silent jury** (§23, LESSON_RULES
+- **Lessons (live): 35 DIALOGUE lessons, five on each road (History's fifth is staged as a scene with a silent jury; the other six fifths, from 2026-10-03, are the first built to group AU: harder ideas in exciting places, each question a small game)** (§23, LESSON_RULES
   groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
@@ -1425,8 +1429,8 @@ they belong to, so the rule book has them and this file did not:
 **Known gaps / tech debt:**
 > Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
 > are about philosophy's narrated library, deleted on 2026-10-02 (§23): kept as findings.
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 29, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 29 (the 29 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 35, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 35 (the 35 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -2661,7 +2665,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 29 of the 29 lessons are here now (the dialogue lessons, one of them a staged scene; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 35 of the 35 lessons are here now (the dialogue lessons, one of them a staged scene; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8793,6 +8797,20 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   most three a lesson), an aim set by the sentence's length, and a take kept only within
   4% of its aim, so a character never audibly changes speed between taps. Nothing voiced
   was re-rendered.
+- **A fifth lesson on the other six roads (2026-10-03), 35 in all, and a road that ramps up
+  (LESSON_RULES group AU).** *“I want the foundations to ramp up … very entertaining … unique ways
+  … to answer questions … exciting situations.”* What Makes You You? (a space lab’s teleporter
+  jams and makes two of him), When the Saucer Doesn’t Come (a hilltop at midnight, cognitive
+  dissonance), Practise at the Edge (a circus big top, three ropes), Profit Isn’t Cash (a
+  balloon field at dawn), The Rat-Tail Reward (a medieval town breeds rats for a bounty) and
+  Could It Be Wrong? (a monster hunt on a loch at night). Scripts `phil5 … sci5`. Each takes an
+  earlier idea on its road somewhere it does not reach alone, and its two questions are two
+  different games on the stage (follow him, call it before it happens, pick the rope, look
+  behind a door, seal a decree, catch a bottle…), each answering right and wrong in its own
+  way. No branches: the owner chose a normal lesson over voicing replies. 54 lines voiced for
+  about 28,000 characters. Ten new CC0 sounds (a space-lab hum, crickets, a loch, a whistle, a
+  teleport, a boop, a burner, a rat, a sonar ping, an oar). Brief:
+  `docs/superpowers/plans/2026-10-03-fifth-lessons-scene-brief.md`.
 
 ---
 

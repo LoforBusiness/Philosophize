@@ -423,7 +423,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 29; // the 28 dialogue lessons (four a road since 2026-10-02) and history's first-person fifth (2026-10-03); 267 until the retired 246 were deleted (2026-10-02)
+const SOLID_FLOOR = 35; // the 35 dialogue lessons: five a road since 2026-10-03 (history's staged fifth first); 267 until the retired 246 were deleted (2026-10-02)
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //

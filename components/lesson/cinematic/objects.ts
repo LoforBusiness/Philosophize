@@ -364,6 +364,127 @@ export const NATURAL = {
   cypressGreen: { base: '#3F5B3B', shade: '#2E4430', label: '#FAFAF7', what: 'a cypress tree, dark green' },
   atticRock:  { base: '#D2BE9E', shade: '#B09A78', label: '#1A1A1A', what: 'the Acropolis rock, pale limestone in the sun' },
   atticHill:  { base: '#A7A887', shade: '#8A8B6B', label: '#1A1A1A', what: 'the dry hills round Athens, seen far off' },
+  // phil5 colours: an orbiting space lab, its teleporter pod and console, the Earth through a porthole and the Moon base on a screen
+  p5Wall:     { base: '#E6E9E7', shade: '#C6CBC8', label: '#1A1A1A', what: 'a space station module\'s off-white padded wall panels' },
+  p5Trim:     { base: '#A3ACB3', shade: '#7F8991', label: '#1A1A1A', what: 'a space lab\'s grey-blue trim, ceiling panel and hatch frame' },
+  p5Rail:     { base: '#2F6FB5', shade: '#245690', label: '#FAFAF7', what: 'a space station\'s blue handrails along its walls' },
+  p5Shell:    { base: '#F3F5F6', shade: '#CDD4D9', label: '#1A1A1A', what: 'a teleporter pod\'s white composite shell, pillars and pad' },
+  p5Inside:   { base: '#26324C', shade: '#19223A', label: '#FAFAF7', what: 'the dark navy of a hatch\'s opening and a machine\'s mouth' },
+  p5Chamber:  { base: '#D3EAF1', shade: '#AFD3DF', label: '#1A1A1A', what: 'the pale lit inside of a teleporter pod\'s chamber' },
+  p5Glow:     { base: '#86E4F0', shade: '#55C6D8', label: '#1A1A1A', what: 'a teleporter pod\'s cyan light ring and glowing floor plate' },
+  p5Hazard:   { base: '#F2C12E', shade: '#C99B1C', label: '#1A1A1A', what: 'the yellow of a recycling hatch\'s hazard stripes' },
+  p5Grinder:  { base: '#F07A2A', shade: '#C45A18', label: '#1A1A1A', what: 'the orange glow of the recycler working inside its hatch' },
+  p5Console:  { base: '#3E454C', shade: '#2B3036', label: '#FAFAF7', what: 'a lab control console\'s graphite body' },
+  p5Phosphor: { base: '#62D492', shade: '#3FA86A', label: '#1A1A1A', what: 'a console\'s green screen and its green button' },
+  p5Red:      { base: '#C23A30', shade: '#992C24', label: '#FAFAF7', what: 'a console\'s red button, and a screen\'s red LIVE light' },
+  p5Bezel:    { base: '#2E3236', shade: '#1F2225', label: '#FAFAF7', what: 'a wall monitor\'s black bezel, and a porthole\'s dark frame' },
+  p5Space:    { base: '#101B35', shade: '#0A1226', label: '#FAFAF7', what: 'the black-navy of space, seen through a window or on a screen' },
+  p5Sea:      { base: '#2E66AB', shade: '#234E86', label: '#FAFAF7', what: 'the Earth\'s blue oceans, seen from orbit' },
+  p5Land:     { base: '#7C9A4C', shade: '#5E7838', label: '#1A1A1A', what: 'the Earth\'s green-brown land, seen from orbit' },
+  p5Air:      { base: '#A4D3F2', shade: '#82B8DE', label: '#1A1A1A', what: 'the thin pale-blue glow of the Earth\'s atmosphere at its edge' },
+  p5Dust:     { base: '#ABA69D', shade: '#87827A', label: '#1A1A1A', what: 'the grey dust of the Moon\'s surface' },
+  p5Dome:     { base: '#EEF0F0', shade: '#C9CED0', label: '#1A1A1A', what: 'a Moon base\'s white habitat dome and module' },
+  p5Lamp:     { base: '#FFF5D6', shade: '#EEDCA6', label: '#1A1A1A', what: 'the warm light at the far end of a station corridor' },
+  // psych5 colours: a hilltop at midnight, under a moon — the sky, the hills, the lanterns, the luggage
+  ps5Sky:     { base: '#1D2846', shade: '#141C33', label: '#FAFAF7', what: 'a clear night sky at midnight, deep navy, overhead' },
+  ps5SkyMid:  { base: '#3C4F7C', shade: '#304168', label: '#FAFAF7', what: 'the night sky halfway down, lit by the moon' },
+  ps5SkyLow:  { base: '#7A8BB2', shade: '#6A7BA2', label: '#1A1A1A', what: 'the moonlit haze low over the horizon, where a town glows' },
+  ps5FarHill: { base: '#556894', shade: '#475985', label: '#FAFAF7', what: 'far hills at night, blue under the moon' },
+  ps5Grass:   { base: '#6A8C69', shade: '#58785A', label: '#1A1A1A', what: 'a grassy hilltop at night, green under the moon and the lanterns' },
+  ps5Strip:   { base: '#7C9C74', shade: '#6A8C69', label: '#1A1A1A', what: 'a strip of mown grass lit by lanterns at night' },
+  ps5Moon:    { base: '#F2EACB', shade: '#D9CDA2', label: '#1A1A1A', what: 'the moon, a pale cream crescent' },
+  ps5Star:    { base: '#FFF4D2', shade: '#E8D9A8', label: '#1A1A1A', what: 'a star, warm white' },
+  ps5Flame:   { base: '#FFB23E', shade: '#E58A1F', label: '#1A1A1A', what: 'a lantern\'s paraffin flame, amber' },
+  ps5Glow:    { base: '#FFD991', shade: '#F2C366', label: '#1A1A1A', what: 'lamplight — a lantern\'s glow, a far town\'s windows' },
+  ps5Lantern: { base: '#2E5266', shade: '#223D4C', label: '#FAFAF7', what: 'a hurricane lantern in blue-green enamelled tin' },
+  ps5Iron:    { base: '#2E3431', shade: '#1D2220', label: '#FAFAF7', what: 'a street clock\'s cast-iron post and case, painted black-green' },
+  ps5Gorse:   { base: '#3A5A2C', shade: '#2B4521', label: '#FAFAF7', what: 'a gorse bush\'s dark, spiny green' },
+  ps5GorseFlower: { base: '#F0C419', shade: '#C99D10', label: '#1A1A1A', what: 'gorse flowers, bright yellow' },
+  ps5Manila:  { base: '#E6D19C', shade: '#C8B277', label: '#1A1A1A', what: 'a manila luggage tag' },
+  ps5CaseTan: { base: '#9C5E2D', shade: '#7A4822', label: '#FAFAF7', what: 'a suitcase in tan leather' },
+  ps5CaseRed: { base: '#9B3328', shade: '#77261E', label: '#FAFAF7', what: 'a suitcase in oxblood-red leather' },
+  ps5CaseGreen: { base: '#355E4C', shade: '#27473A', label: '#FAFAF7', what: 'a suitcase in bottle-green canvas' },
+  ps5Sponge:  { base: '#E8C266', shade: '#C9A04A', label: '#1A1A1A', what: 'a lemon sponge cake\'s golden side' },
+  ps5Mist:    { base: '#C3CCE0', shade: '#A9B4CC', label: '#1A1A1A', what: 'night mist drifting over a valley, pale in the moonlight' },
+  ps5Card:    { base: '#F4F1E8', shade: '#D8D2C2', label: '#1A1A1A', what: 'a hand-painted placard on white card' },
+  // growth5 colours: a circus big top, its ring, three ropes, a safety net and a prop trunk
+  g5TentRed:   { base: '#B5303A', shade: '#8A232C', label: '#FAFAF7', what: 'a big top\'s red canvas stripe' },
+  g5TentCream: { base: '#F1E7D2', shade: '#D1C3A4', label: '#1A1A1A', what: 'a big top\'s cream canvas stripe' },
+  g5Stands:    { base: '#4A3F57', shade: '#352D40', label: '#FAFAF7', what: 'empty tiered seats in the shadow behind the ring' },
+  g5Curb:      { base: '#C9332B', shade: '#9C2620', label: '#FAFAF7', what: 'a circus ring\'s red padded curb' },
+  g5Gold:      { base: '#E5B53C', shade: '#BC8F25', label: '#1A1A1A', what: 'gold paint: a ring curb\'s cap, a prop\'s trim' },
+  g5Sawdust:   { base: '#D8BB84', shade: '#B89A60', label: '#1A1A1A', what: 'the sawdust floor of a circus ring' },
+  g5Hemp:      { base: '#C7A468', shade: '#9F7F48', label: '#1A1A1A', what: 'a manila hemp rope' },
+  g5Net:       { base: '#3B4656', shade: '#2A3240', label: '#FAFAF7', what: 'a safety net\'s dark cord mesh' },
+  g5Trunk:     { base: '#7D2836', shade: '#5C1C27', label: '#FAFAF7', what: 'a circus prop trunk\'s deep red paint' },
+  g5Lining:    { base: '#2F4E86', shade: '#233B66', label: '#FAFAF7', what: 'a prop trunk lid\'s blue lining' },
+  g5Block:     { base: '#2D5BA3', shade: '#21447B', label: '#FAFAF7', what: 'a circus mounting block\'s royal-blue paint' },
+  g5Bill:      { base: '#F2D06B', shade: '#D3AE47', label: '#1A1A1A', what: 'an old circus bill\'s yellow paper' },
+  g5Sequin:    { base: '#C22A4E', shade: '#931D3A', label: '#FAFAF7', what: 'ruby sequin slippers and their satin ribbons' },
+  g5Baton:     { base: '#F3EFE6', shade: '#D2CABA', label: '#1A1A1A', what: 'a ringmaster\'s white lacquered cane' },
+  // biz5 colours:
+  b5Red:      { base: '#C93A32', shade: '#9D2C26', label: '#FAFAF7', what: 'a hot-air balloon\'s red gores' },
+  b5Gold:     { base: '#F2B631', shade: '#C98F1F', label: '#1A1A1A', what: 'a hot-air balloon\'s yellow gores' },
+  b5Blue:     { base: '#2C64A8', shade: '#214C80', label: '#FAFAF7', what: 'a hot-air balloon\'s blue gores' },
+  b5Skirt:    { base: '#343B4C', shade: '#232836', label: '#FAFAF7', what: 'a hot-air balloon\'s dark scoop, round its mouth' },
+  b5Saddle:   { base: '#4A3022', shade: '#33211A', label: '#FAFAF7', what: 'a balloon basket\'s padded dark-brown leather rim and upright covers' },
+  b5Suede:    { base: '#ECE6D8', shade: '#CBC2AE', label: '#1A1A1A', what: 'the white suede band round a balloon basket\'s foot' },
+  b5Flame:    { base: '#F3962B', shade: '#DB711D', label: '#1A1A1A', what: 'a propane burner\'s flame, orange' },
+  b5FlameCore: { base: '#FFE38F', shade: '#F7C95A', label: '#1A1A1A', what: 'the bright yellow heart of a burner flame' },
+  b5Gas:      { base: '#C23B30', shade: '#962D25', label: '#FAFAF7', what: 'a propane gas cylinder\'s red paint' },
+  b5Truck:    { base: '#3576A8', shade: '#285A81', label: '#FAFAF7', what: 'a sack truck\'s blue steel frame' },
+  b5Hub:      { base: '#E08A3A', shade: '#B56C27', label: '#1A1A1A', what: 'a sack truck wheel\'s orange hub' },
+  b5Tin:      { base: '#2F4E78', shade: '#22395A', label: '#FAFAF7', what: 'a cash tin in navy enamelled steel' },
+  b5Button:   { base: '#7A5236', shade: '#5A3C27', label: '#FAFAF7', what: 'a brown coat button' },
+  b5Haze:     { base: '#A9BBB4', shade: '#8FA29A', label: '#1A1A1A', what: 'far hills at dawn, blue-green in the haze' },
+  b5High:     { base: '#CBD2E8', shade: '#B2BAD8', label: '#1A1A1A', what: 'the high sky at dawn, pale lilac-blue' },
+  b5Sun:      { base: '#F7AA57', shade: '#E88D3B', label: '#1A1A1A', what: 'the low sun at dawn, orange' },
+  b5Rose:     { base: '#E8BDBA', shade: '#D9A3A2', label: '#1A1A1A', what: 'the sky at dawn, between the lilac and the peach, rose' },
+  // econ5 colours: a medieval town hall at dusk, a cellar full of rats, a bakery and a well across the street
+  e5Stone:    { base: '#C9BA9B', shade: '#A69676', label: '#1A1A1A', what: 'a town hall\'s dressed limestone walls, warm in torchlight' },
+  e5Floor:    { base: '#8E8676', shade: '#6F685B', label: '#1A1A1A', what: 'a town hall\'s worn grey flagstone floor' },
+  e5Red:      { base: '#9E2B2F', shade: '#78201F', label: '#FAFAF7', what: 'a town\'s heraldic red — a hanging banner, a decree\'s ribbon' },
+  e5Flame:    { base: '#F7B538', shade: '#E07A24', label: '#1A1A1A', what: 'a torch\'s or a candle\'s flame' },
+  e5Tallow:   { base: '#EFE4C2', shade: '#D2C49C', label: '#1A1A1A', what: 'a tallow candle, creamy white' },
+  e5Wax:      { base: '#9C1F24', shade: '#741619', label: '#FAFAF7', what: 'red sealing wax, pressed with a seal' },
+  e5Parch:    { base: '#EDDDB3', shade: '#D3BF8E', label: '#1A1A1A', what: 'a decree\'s parchment, cream' },
+  e5Hessian:  { base: '#B99A68', shade: '#94794D', label: '#1A1A1A', what: 'a hessian sack, coarse tan cloth' },
+  e5Rat:      { base: '#7A6A5A', shade: '#5A4D41', label: '#FAFAF7', what: 'a brown rat\'s grey-brown fur' },
+  e5RatPink:  { base: '#E2A29C', shade: '#C27F79', label: '#1A1A1A', what: 'a rat\'s bare pink tail, ears, nose and paws' },
+  e5Cabbage:  { base: '#B5D08C', shade: '#8FB06A', label: '#1A1A1A', what: 'a savoy cabbage\'s pale green heart' },
+  e5Dusk:     { base: '#3C4775', shade: '#2C3459', label: '#FAFAF7', what: 'the sky at dusk, high up, deep blue' },
+  e5Glow:     { base: '#E8A266', shade: '#C9824B', label: '#1A1A1A', what: 'the last of the sunset, low over the rooftops' },
+  e5Cobble:   { base: '#746D61', shade: '#5E584E', label: '#FAFAF7', what: 'a street\'s worn cobbles' },
+  // sci5 colours: a Scottish loch at night and then at dawn, a rowing boat, a jetty, a storm lantern, bottles, a flask
+  s5Sky:      { base: '#3B5079', shade: '#2C3D63', label: '#FAFAF7', what: 'a Highland night sky, high up, moonlit navy' },
+  s5SkyLow:   { base: '#5A7299', shade: '#4E6890', label: '#FAFAF7', what: 'a moonlit night sky low over the hills, misty blue' },
+  s5Haze:     { base: '#7089AD', shade: '#627CA2', label: '#1A1A1A', what: 'the mist-lit sky just above a loch\'s far shore at night' },
+  s5Hill:     { base: '#56698A', shade: '#4A5C7C', label: '#FAFAF7', what: 'Highland hills across a loch at night, blue in the mist' },
+  s5HillNear: { base: '#4C5E7E', shade: '#405170', label: '#FAFAF7', what: 'the nearer hills on a loch\'s far shore at night' },
+  s5Far:      { base: '#5C7596', shade: '#506888', label: '#FAFAF7', what: 'a loch\'s far water at night, holding the sky\'s light' },
+  s5Deep:     { base: '#34506F', shade: '#28405A', label: '#FAFAF7', what: 'a loch\'s near water at night, dark peaty blue' },
+  s5Moon:     { base: '#EEF0E2', shade: '#D6D9C8', label: '#1A1A1A', what: 'the moon, pale, and its light on water' },
+  s5DawnHigh: { base: '#A9BCD6', shade: '#8FA5C4', label: '#1A1A1A', what: 'the sky high up at dawn, pale blue' },
+  s5DawnHill: { base: '#8E8AA6', shade: '#77738F', label: '#1A1A1A', what: 'Highland hills at dawn, lilac-grey' },
+  s5DawnLoch: { base: '#B7B2C8', shade: '#9C97B0', label: '#1A1A1A', what: 'a loch\'s far water at dawn, holding a pink-lilac sky' },
+  s5DawnDeep: { base: '#6B84A6', shade: '#5A7294', label: '#1A1A1A', what: 'a loch\'s near water at dawn, steel blue' },
+  s5Castle:   { base: '#3E4C66', shade: '#323E55', label: '#FAFAF7', what: 'a ruined castle tower on a far headland, in shadow' },
+  s5BoatWhite: { base: '#EDEAE0', shade: '#C9C4B5', label: '#1A1A1A', what: 'a rowing boat\'s white-painted clinker hull' },
+  s5BoatStripe: { base: '#2E4E6E', shade: '#223B54', label: '#FAFAF7', what: 'a rowing boat\'s navy-painted sheer strake' },
+  s5Antifoul: { base: '#A8402F', shade: '#80301F', label: '#FAFAF7', what: 'a boat\'s red antifouling paint below the waterline' },
+  s5Lantern:  { base: '#B8352B', shade: '#8C2820', label: '#FAFAF7', what: 'a hurricane lantern\'s red-painted tin' },
+  s5Flame:    { base: '#F7B23A', shade: '#E08E1E', label: '#1A1A1A', what: 'a paraffin flame, and the lamplight it throws' },
+  s5CamBlack: { base: '#2B2D30', shade: '#1C1D1F', label: '#FAFAF7', what: 'a camera body\'s black grip and a lens\'s black rings' },
+  s5Lens:     { base: '#ECEBE6', shade: '#C9C8C0', label: '#1A1A1A', what: 'a long telephoto lens\'s off-white barrel' },
+  s5Tartan:   { base: '#B22F2A', shade: '#86221E', label: '#FAFAF7', what: 'a vacuum flask\'s red tartan cover' },
+  s5TartanBar: { base: '#3D6B4C', shade: '#2F5A3E', label: '#FAFAF7', what: 'the dark green bars of a red tartan' },
+  s5SeaGlass: { base: '#8FBF99', shade: '#6E9C79', label: '#1A1A1A', what: 'a bottle\'s pale green glass' },
+  s5Amber:    { base: '#C08A52', shade: '#9A6A3B', label: '#1A1A1A', what: 'a bottle\'s amber-brown glass' },
+  s5BlueGlass: { base: '#93B9D3', shade: '#7298B2', label: '#1A1A1A', what: 'a bottle\'s pale blue glass' },
+  s5Screen:   { base: '#123527', shade: '#0B2219', label: '#FAFAF7', what: 'a fish-finder sonar\'s dark green screen' },
+  s5Trace:    { base: '#6EE59A', shade: '#4CC07A', label: '#1A1A1A', what: 'a sonar screen\'s bright green trace and sweep' },
+  s5Rope:     { base: '#BFA273', shade: '#9C8257', label: '#1A1A1A', what: 'a hemp mooring rope' },
+  s5Photo:    { base: '#6C727E', shade: '#555B66', label: '#FAFAF7', what: 'a dark, blurry night photograph of water' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 
@@ -7279,6 +7400,1568 @@ export const oldPhoto = (x: number, y: number, w: number, h: number) => fit(OLD_
 
 // ── hist4: objects for this lesson go ABOVE this line ──
 
+// ── phil5 OBJECTS BEGIN ──
+// ─────────────────────────────────────────────────────────────────────────────
+// philosophy-foundations-5 — AN ORBITING SPACE LAB, A TELEPORTER POD, THE MOON BASE.
+//
+// REFERENCES (npm run ref): the ISS's Destiny laboratory and Harmony node — off-white
+// padded wall panels, blue HANDRAILS, a square HATCH with rounded corners in a grey frame
+// with a latch; the Cupola — a ring of DARK window frames with the Earth's blue and white
+// below; a NASA lunar base concept — grey regolith under a black, starry sky, white
+// cylindrical habitat modules; a balance scale — a pillar on a stepped base, a beam on a
+// pivot and two pans hung on chains. The TELEPORTER POD is the lesson's own machine, built
+// the way the references build their kit: a white composite shell (a domed cap with a
+// light ring, two pillars, a base rim) round a dark lit interior, on a raised pad whose
+// front holds the RECYCLER hatch, yellow and black like every hatch that eats things.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+function ph5N(k: NaturalKey, ...ps: ObjPart[]): ObjPart[] {
+  return ps.map((p) => ({ ...p, nat: k }));
+}
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ph5In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+/** The pod's BACK: its domed cap and the dark lit chamber a figure stands in. 82 × 104. */
+const TELEPOD_BACK: ObjPart[] = ph5In(82, 104, [
+  ...ph5N('p5Shell',
+    oEll('mass', 41, 13, 80, 26),                                  // the domed cap
+    oRect('mass', 41, 19, 82, 10, 0, 2),                           // its skirt
+  ),
+  ...ph5N('p5Chamber', oRect('mass', 41, 64, 66, 80)),             // the chamber, lit pale inside
+  ...ph5N('p5Glow', oEll('dark', 41, 100, 60, 6)),                 // the glowing floor plate
+  ...ph5N('p5Glow', oBar('dark', 14, 34, 14, 94, 2.4), oBar('dark', 68, 34, 68, 94, 2.4)), // light strips down its sides
+  ...ph5N('p5Chamber', oRect('dark', 41, 28, 66, 6)),              // the shadow under the cap
+  oBar('lit', 22, 6, 34, 3, 0.9),                                  // the lamp on the dome
+]);
+export const telePodBack = (x: number, y: number, w: number, h: number) => fit(TELEPOD_BACK, x, y, w, h);
+
+/** The pod's FRONT, drawn over whoever is inside: two pillars, the rims, the glass's glints. 82 × 104. */
+const TELEPOD_FRONT: ObjPart[] = ph5In(82, 104, [
+  ...ph5N('p5Shell',
+    oRect('mass', 4.5, 63, 9, 82, 0, 2),                           // the pillars
+    oRect('mass', 77.5, 63, 9, 82, 0, 2),
+    oRect('mass', 41, 22, 82, 7, 0, 2),                            // the cap's rim
+    oRect('mass', 41, 101, 82, 6, 0, 2),                           // and the base's
+    oRect('face', 80.2, 63, 3.6, 80),                              // the right pillar, turned from the lamp
+  ),
+  ...ph5N('p5Inside', oRect('dark', 41, 22, 70, 3, 0, 1.5)),       // the ring light, unlit
+  oBar('lit', 13, 94, 20, 84, 1.1),                                // glints low on the glass, clear of
+  oBar('lit', 13, 86, 17, 80, 0.7),                                // whoever stands in it
+]);
+export const telePodFront = (x: number, y: number, w: number, h: number) => fit(TELEPOD_FRONT, x, y, w, h);
+
+/**
+ * The raised PAD the pod stands on, with its step at the left and, in its front, the
+ * RECYCLER's opening (its lid is `recycleLid`, which the scene swings). 128 × 34.
+ */
+const TELEPOD_PAD: ObjPart[] = ph5In(128, 34, [
+  ...ph5N('p5Shell',
+    oRect('mass', 10.5, 25.5, 21, 17, 0, 1.5),                     // the step
+    oRect('mass', 74.5, 17, 107, 34, 0, 2.5),                      // the pad
+    oRect('face', 126, 17, 4, 32, 0, 1.5),                         // its end, turned from the lamp
+  ),
+  ...ph5N('p5Inside', oRect('dark', 97, 17, 56, 28, 0, 2)),        // the recycler's mouth
+  ...ph5N('p5Grinder', oRect('dark', 97, 12, 50, 8, 0, 2)),        // and the glow of it working
+  ...[77, 85, 93, 101, 109, 117].map((x) => oTri('line', x, 19, 6, 6, 'up')), // its teeth
+  oBar('lit', 23, 1.4, 125, 1.4, 0.8),                             // the lamp along the pad's top
+  oBar('lit', 1.5, 18.4, 19.5, 18.4, 0.7),                         // and the step's
+  oEll('line', 27, 8, 1.6, 1.6), oEll('line', 27, 27, 1.6, 1.6),   // bolts
+  oEll('line', 60, 8, 1.6, 1.6), oEll('line', 60, 27, 1.6, 1.6),
+]);
+export const telePodPad = (x: number, y: number, w: number, h: number) => fit(TELEPOD_PAD, x, y, w, h);
+
+/** The recycler's LID: hazard-striped, a steel plate in its middle for its word. 56 × 28. */
+const RECYCLE_LID: ObjPart[] = ph5In(56, 28, [
+  ...ph5N('p5Hazard', oRect('mass', 28, 14, 56, 28, 0, 2)),
+  ...ph5N('p5Trim', oRect('mass', 28, 14, 50, 13, 0, 1)),         // the plate the word is on
+  ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => oBar('line', 2.5 + i * 6, 6.6, 6.5 + i * 6, 1.4, 2)),
+  ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => oBar('line', 2.5 + i * 6, 26.6, 6.5 + i * 6, 21.4, 2)),
+]);
+export const recycleLid = (x: number, y: number, w: number, h: number) => fit(RECYCLE_LID, x, y, w, h);
+/** The plate on the lid, in its own 56 × 28 units. */
+export const RECYCLE_PLATE = { x: 28, y: 14, w: 50, h: 13 } as const;
+
+/** The control CONSOLE: a graphite desk at the hip, a grey top, a dark front panel. 60 × 44. */
+const LAB_CONSOLE: ObjPart[] = ph5In(60, 44, [
+  ...ph5N('p5Console',
+    oRect('mass', 30, 24, 56, 40, 0, 2),                           // the body
+    oRect('face', 55.5, 24, 5, 38, 0, 1.5),                        // its end, turned from the lamp
+    oRect('dark', 28, 25, 42, 28, 0, 2),                           // the front panel, sunk
+  ),
+  ...ph5N('p5Trim', oRect('mass', 30, 2.5, 60, 5, 0, 1.5)),        // the desk top
+  ...ph5N('p5Phosphor', oEll('mass', 12, 15, 3, 3)),               // its status lights
+  ...ph5N('p5Red', oEll('mass', 18, 15, 3, 3)),
+  oBar('lit', 2, 1.2, 56, 1.2, 0.7),
+]);
+export const labConsole = (x: number, y: number, w: number, h: number) => fit(LAB_CONSOLE, x, y, w, h);
+
+/** The console's raised CONTROL PANEL: a green screen with a trace, a red and a green button. 30 × 16. */
+const CONSOLE_DESK: ObjPart[] = ph5In(30, 16, [
+  ...ph5N('p5Console', oRect('mass', 15, 9, 30, 14, 0, 2)),
+  ...ph5N('p5Phosphor', oRect('dark', 19, 8.5, 16, 9, 0, 1)),     // the screen
+  ...ph5N('p5Red', oEll('mass', 6, 6, 4, 4)),                      // the buttons, at the near end
+  ...ph5N('p5Phosphor', oEll('mass', 6, 12, 4, 4)),
+  oBar('lit', 12.5, 9, 15.5, 6.5, 0.6), oBar('lit', 15.5, 6.5, 18.5, 11, 0.6), // the trace on the screen
+  oBar('lit', 18.5, 11, 21.5, 7, 0.6), oBar('lit', 21.5, 7, 25, 9, 0.6),
+]);
+/** Where the two buttons are, in the panel's own 30 × 16 units. */
+export const DESK_BUTTONS = { x: 6, red: 6, green: 12 } as const;
+export const consoleDesk = (x: number, y: number, w: number, h: number) => fit(CONSOLE_DESK, x, y, w, h);
+
+/** The brass BALANCE's stand: a stepped base, a pillar, a finial over the pivot. 30 × 36. */
+const BALANCE_STAND: ObjPart[] = ph5In(30, 36, [
+  ...ph5N('brass',
+    oRect('mass', 15, 33.5, 30, 5, 0, 2),                          // the base
+    oRect('mass', 15, 29.5, 14, 4, 0, 1.2),                        // its step
+    oRect('mass', 15, 16, 3.6, 28),                                // the pillar
+    oEll('mass', 15, 2.5, 6, 6),                                   // the finial
+    oRect('face', 16.3, 16, 1.2, 26),                              // the pillar's far side
+  ),
+  oBar('lit', 2, 31.8, 26, 31.8, 0.6),
+]);
+export const balanceStand = (x: number, y: number, w: number, h: number) => fit(BALANCE_STAND, x, y, w, h);
+/** Where the beam turns, in the stand's own 30 × 36 units. */
+export const BALANCE_PIVOT = { x: 15, y: 3.4 } as const;
+
+/** The balance's BEAM, drawn about its pivot (its centre). 44 × 6. */
+const BALANCE_BEAM: ObjPart[] = ph5In(44, 6, [
+  ...ph5N('brass',
+    oRect('mass', 22, 3, 42, 3, 0, 1.5),
+    oEll('mass', 22, 3, 6, 6),                                     // the boss on the pivot
+    oEll('mass', 1.8, 3, 3.6, 3.6),                                // the ends the pans hang from
+    oEll('mass', 42.2, 3, 3.6, 3.6),
+  ),
+  oBar('lit', 4, 2.2, 40, 2.2, 0.5),
+]);
+export const balanceBeam = (x: number, y: number, w: number, h: number) => fit(BALANCE_BEAM, x, y, w, h);
+
+/** One PAN on its chains, drawn about the hook it hangs from (its top middle). 18 × 16. */
+const BALANCE_PAN: ObjPart[] = ph5In(18, 16, [
+  oBar('line', 9, 0.6, 1.6, 11, 0.6),                              // the chains
+  oBar('line', 9, 0.6, 16.4, 11, 0.6),
+  ...ph5N('brass',
+    ...trapezoid('mass', 9, 13.2, 18, 9, 5.6),                     // the dish
+    oEll('mass', 9, 0.9, 2.2, 2.2),                                // the hook
+    oEll('dark', 9, 10.6, 17, 2),                                  // the dish's rim
+  ),
+]);
+export const balancePan = (x: number, y: number, w: number, h: number) => fit(BALANCE_PAN, x, y, w, h);
+
+/** A PORTHOLE's frame, the Cupola's way: a dark ring, a grey lip, bolts. 88 × 88. */
+const PORTHOLE: ObjPart[] = ph5In(88, 88, [
+  ...ph5N('p5Bezel', oEll('mass', 44, 44, 88, 88)),
+  ...ph5N('p5Trim', oEll('dark', 44, 44, 76, 76)),
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map((k) => oEll('lit', 44 + 40.6 * Math.cos((k * Math.PI) / 4 + 0.39), 44 + 40.6 * Math.sin((k * Math.PI) / 4 + 0.39), 2.2, 2.2)),
+]);
+export const porthole = (x: number, y: number, w: number, h: number) => fit(PORTHOLE, x, y, w, h);
+
+/** A wall MONITOR: a black bezel, the display (the scene draws the Moon on it), a strip below. 124 × 96. */
+const LAB_MONITOR: ObjPart[] = ph5In(124, 96, [
+  ...ph5N('p5Bezel', oRect('mass', 62, 48, 124, 96, 0, 5)),
+  ...ph5N('p5Space', oRect('dark', 62, 41, 114, 74, 0, 2)),
+  oBar('lit', 5, 1.6, 119, 1.6, 0.7),
+]);
+export const labMonitor = (x: number, y: number, w: number, h: number) => fit(LAB_MONITOR, x, y, w, h);
+/** The display, and the strip under it, in the monitor's own 124 × 96 units. */
+export const MONITOR_DISPLAY = { x: 62, y: 41, w: 114, h: 74 } as const;
+export const MONITOR_STRIP = { x: 62, y: 87, w: 114, h: 14 } as const;
+
+/** A station HATCH in the wall, open onto a lit corridor: grey frame, latch, the tube beyond. 54 × 108. */
+const CORRIDOR_HATCH: ObjPart[] = ph5In(54, 108, [
+  ...ph5N('p5Trim', oRect('mass', 27, 54, 54, 108, 0, 12)),
+  ...ph5N('p5Rail', oRect('mass', 4, 54, 4, 18, 0, 1.5)),         // the latch handle
+  ...ph5N('p5Inside', oRect('dark', 27, 54, 40, 94, 0, 9)),        // the opening
+  ...ph5N('p5Wall', oRect('dark', 27, 54, 26, 70, 0, 6)),          // the corridor running away
+  ...ph5N('p5Lamp', oRect('dark', 27, 54, 12, 34, 0, 4)),          // its far end, lit
+  oBar('line', 15, 30, 15, 78, 0.8),                               // its handrails
+  oBar('line', 39, 30, 39, 78, 0.8),
+]);
+export const corridorHatch = (x: number, y: number, w: number, h: number) => fit(CORRIDOR_HATCH, x, y, w, h);
+
+/**
+ * The Moon base's DOME: a whole white sphere drawn about its middle, so the scene sets its
+ * lower half down behind the dust and a half-dome stands on the ground; a row of lit
+ * windows round its shoulder, an aerial on top. 36 × 36.
+ */
+const MOON_DOME: ObjPart[] = ph5In(36, 36, [
+  ...ph5N('p5Dome', oEll('mass', 18, 20, 34, 32), oRect('face', 18, 3, 1.6, 6), oEll('mass', 18, 1.6, 3, 3)),
+  ...ph5N('p5Glow', oRect('dark', 9, 13, 4, 3, 0, 1), oRect('dark', 15.5, 11.5, 4, 3, 0, 1), oRect('dark', 22, 11.5, 4, 3, 0, 1), oRect('dark', 28, 13, 4, 3, 0, 1)),
+  oBar('lit', 7, 10, 11, 6.5, 1),
+]);
+export const moonDome = (x: number, y: number, w: number, h: number) => fit(MOON_DOME, x, y, w, h);
+
+/** A Moon base MODULE: a white cylinder on its side, two bands round it. 30 × 12. */
+const MOON_MODULE: ObjPart[] = ph5In(30, 12, [
+  ...ph5N('p5Dome', oRect('mass', 15, 6, 30, 12, 0, 6)),
+  oBar('line', 9, 1, 9, 11, 0.6), oBar('line', 21, 1, 21, 11, 0.6),
+  oBar('lit', 3, 3, 27, 3, 0.6),
+]);
+export const moonModule = (x: number, y: number, w: number, h: number) => fit(MOON_MODULE, x, y, w, h);
+// ── phil5 OBJECTS END ──
+
+// ── phil5: objects for this lesson go ABOVE this line ──
+
+// ── psych5 OBJECTS START ──
+// ─────────────────────────────────────────────────────────────────────────────
+// psych5 — A HILLTOP AT MIDNIGHT (psychology-foundations-5, "When the Saucer Doesn't
+// Come"). Drawn against pictures fetched with `node scripts/get-reference.mjs`
+// (scratchpad/ref/ps5-*): a cast-iron street clock on a post, its round case on a
+// collar over a long post and a stepped base (Flatbush Avenue); a hurricane lantern
+// — a domed cap with a ring, a glass globe between two side tubes, a fuel tank and a
+// wire bail (Kerosene lamp, Commons); a slatted wooden fruit crate, corner posts and
+// three boards with gaps between (Wooden crate drawers); a leather suitcase with a
+// handle on its top edge, a lid seam, two latches and capped corners (Belber
+// suitcase; AM 2001.25.1142); a gorse bush, a dark spiny mound starred all over with
+// yellow (Bucksburn, Aberdeen); and a lemon drizzle cake, golden sponge with white
+// icing run over its edge (Gibberd Garden; Natural History Museum café).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const ps5N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ps5In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── THE FRUIT CRATE THE PROPHET STANDS ON ────────────────────────────────────
+//
+// REFERENCE (ps5-crate-1): a crate's front is three BOARDS laid across two square
+// CORNER POSTS, with dark gaps between the boards where the inside shows, and the
+// wood lighter along each board's top edge. Real units, 92 × 26.
+const PS5_CRATE: ObjPart[] = ps5In(92, 26, [
+  ...ps5N('wood',
+    oRect('mass', 46, 13, 92, 26, 0, 1.2),                          // the crate's front
+    oRect('face', 89, 13, 6, 26, 0, 1),                             // the right corner post, in shade
+  ),
+  ...ps5N('seedhead',
+    oRect('dark', 46, 9.6, 78, 2.2),                                // the gaps between the boards
+    oRect('dark', 46, 17.6, 78, 2.2),
+  ),
+  oBar('line', 7.6, 1.5, 7.6, 24.5, 0.5),                           // where the posts meet the boards
+  oBar('line', 84.4, 1.5, 84.4, 24.5, 0.5),
+  oBar('lit', 10, 1.8, 82, 1.8, 0.8),                               // light along each board's top
+  oBar('lit', 10, 11.4, 82, 11.4, 0.6),
+  oBar('lit', 10, 19.4, 82, 19.4, 0.6),
+  oBar('line', 30, 5.5, 44, 6.2, 0.35), oBar('line', 52, 14.6, 70, 14, 0.35), // grain
+  oBar('line', 20, 22.6, 36, 22.2, 0.35),
+]);
+export const ps5Crate = (x: number, y: number, w: number, h: number) => fit(PS5_CRATE, x, y, w, h);
+
+// ── A PACKED SUITCASE ────────────────────────────────────────────────────────
+//
+// REFERENCE (ps5-case-2, ps5-case2-1): wider than it is tall, a leather HANDLE on its
+// top edge between two metal LATCHES, a stitched LID SEAM a third of the way down,
+// darker leather CAPS on its corners and its right side in shade. Real units, 54 × 46:
+// the handle 0–7, the case 6–46. The scene hangs its tag from the handle.
+function ps5CaseParts(k: NaturalKey): ObjPart[] {
+  return ps5In(54, 46, [
+    ...ps5N(k,
+      oRect('mass', 27, 4.4, 18, 7.6, 0, 3.4),                      // the handle
+      oRect('mass', 27, 26, 54, 40, 0, 4),                          // the case
+      oRect('face', 51.4, 26, 5.2, 39, 0, 2),                       // its right side, in shade
+    ),
+    ...ps5N('ps5Sky', oRect('dark', 27, 5.4, 11, 3, 0, 1.4)),        // the gap under the handle
+    ...ps5N('coffee',
+      oRect('dark', 4.5, 10.5, 7, 7, 0, 2.5), oRect('dark', 47.5, 10.5, 6, 7, 0, 2.5), // the corner caps
+      oRect('dark', 4.5, 41.5, 7, 7, 0, 2.5), oRect('dark', 47.5, 41.5, 6, 7, 0, 2.5),
+    ),
+    oBar('line', 3, 17, 51, 17, 0.7),                               // the lid seam
+    ...ps5N('silver',
+      oRect('dark', 13, 17, 4.6, 4.4, 0, 0.8), oRect('dark', 41, 17, 4.6, 4.4, 0, 0.8), // the latches
+    ),
+    oBar('lit', 6, 7.4, 46, 7.4, 1),                                // light along the lid's top
+    oBar('lit', 3.4, 12, 3.4, 40, 0.8),                             // and down its lit end
+  ]);
+}
+const PS5_CASE_TAN = ps5CaseParts('ps5CaseTan');
+const PS5_CASE_RED = ps5CaseParts('ps5CaseRed');
+const PS5_CASE_GREEN = ps5CaseParts('ps5CaseGreen');
+export const ps5CaseTan = (x: number, y: number, w: number, h: number) => fit(PS5_CASE_TAN, x, y, w, h);
+export const ps5CaseRed = (x: number, y: number, w: number, h: number) => fit(PS5_CASE_RED, x, y, w, h);
+export const ps5CaseGreen = (x: number, y: number, w: number, h: number) => fit(PS5_CASE_GREEN, x, y, w, h);
+/** Where a case's tag hangs from: the middle of its handle, in its own 54 × 46 units. */
+export const PS5_CASE_HANDLE = { x: 27, y: 6.4, w: 54, h: 46 } as const;
+
+// ── A LANTERN ON A SHEPHERD'S HOOK ───────────────────────────────────────────
+//
+// REFERENCE (ps5-lantern-3): a hurricane lantern is a DOMED CAP with a ring on top,
+// a GLASS GLOBE held between two SIDE TUBES, a round fuel TANK under it, and a wire
+// BAIL to carry it by. Here it hangs by its bail from an iron pole bent over into a
+// hook. The flame and its glow are the scene's, at `PS5_GLOBE`. Real units, 34 × 88.
+const PS5_LANTERN: ObjPart[] = ps5In(34, 88, [
+  ...ps5N('ps5Iron',
+    oBar('mass', 6, 87, 6, 5, 2.4),                                 // the pole
+    oBar('mass', 6, 5, 18, 3, 2.2),                                 // bent over
+    oBar('mass', 18, 3, 24, 7, 2),                                  // into the hook
+  ),
+  ...ps5N('ps5Lantern',
+    oEll('mass', 24, 18, 15, 5),                                    // the domed cap
+    oRect('mass', 24, 21.4, 9, 3, 0, 1),                            // the chimney collar
+    oBar('mass', 16.6, 22, 16.6, 41, 1.8),                          // the side tubes
+    oBar('mass', 31.4, 22, 31.4, 41, 1.8),
+    oRect('mass', 24, 43.2, 17, 6, 0, 2),                           // the fuel tank
+  ),
+  ...ps5N('ps5Glow', oEll('dark', 24, 31.6, 12, 15)),                // the globe, lit from inside
+  oBar('line', 24, 8, 16.6, 21, 0.6),                               // the wire bail, from the hook
+  oBar('line', 24, 8, 31.4, 21, 0.6),
+  oEll('line', 24, 14.6, 3, 2.4),                                   // the ring on the cap
+  oBar('lit', 20.4, 26, 20.4, 36, 0.9),                             // a glint down the glass
+  oBar('lit', 4.8, 12, 4.8, 84, 0.6),                               // light down the pole
+]);
+export const ps5Lantern = (x: number, y: number, w: number, h: number) => fit(PS5_LANTERN, x, y, w, h);
+/** The middle of the lantern's globe, where its flame burns, in its own 34 × 88 units. */
+export const PS5_GLOBE = { x: 24, y: 32, w: 34, h: 88 } as const;
+
+// ── THE STREET CLOCK ON ITS POST ─────────────────────────────────────────────
+//
+// REFERENCE (ps5-clock-1): a cast-iron street clock — a CREST over a round CASE, a
+// cream DIAL in a deep rim with the hours marked, a COLLAR under the case, a long
+// POST with a ring a third of the way down, and a stepped BASE. Its hands are the
+// scene's, because they move. Real units, 44 × 170; the dial's centre is PS5_DIAL.
+const PS5_CLOCK: ObjPart[] = ps5In(44, 170, [
+  ...ps5N('ps5Iron',
+    oTri('mass', 22, 6, 12, 9, 'up'),                               // the crest
+    oEll('mass', 22, 11.4, 7, 5),                                   // its scroll
+    oEll('mass', 22, 31, 40, 40),                                   // the case round the dial
+    oRect('mass', 22, 54, 14, 7, 0, 1.4),                           // the collar under it
+    oRect('mass', 22, 110, 7, 106),                                 // the post
+    oRect('mass', 22, 96, 11, 4, 0, 1),                             // the ring on the post
+    oRect('mass', 22, 160, 15, 10, 0, 1.2),                         // the base
+    oRect('mass', 22, 167, 22, 6, 0, 1.2),                          // its foot
+    oRect('face', 24.8, 110, 1.6, 104),                             // the post's far side
+    oRect('face', 27.6, 160, 2.4, 10),                              // the base's side
+    oEll('dark', 22.6, 31.6, 34, 34),                               // the rim's inner edge
+  ),
+  ...ps5N('dialCream', oEll('dark', 22, 31, 29, 29)),               // the dial
+  ...Array.from({ length: 12 }, (_, i) => {
+    const a = (i * Math.PI) / 6;
+    const r0 = i % 3 === 0 ? 10 : 11.4;
+    return oBar('line', 22 + Math.sin(a) * r0, 31 - Math.cos(a) * r0, 22 + Math.sin(a) * 13.4, 31 - Math.cos(a) * 13.4, i % 3 === 0 ? 1.5 : 0.8);
+  }),
+  oBar('lit', 20.4, 60, 20.4, 152, 0.8),                            // light down the post
+  oBar('lit', 8, 18, 12, 13, 1),                                    // and on the case's lit shoulder
+]);
+export const ps5Clock = (x: number, y: number, w: number, h: number) => fit(PS5_CLOCK, x, y, w, h);
+/** The dial's centre and radius, in the clock's own 44 × 170 units. */
+export const PS5_DIAL = { x: 22, y: 31, r: 14.5, w: 44, h: 170 } as const;
+
+// ── THE GORSE BUSH ───────────────────────────────────────────────────────────
+//
+// REFERENCE (ps5-gorse-3, -1): gorse is a dense, dark, SPINY mound, wider than it is
+// tall, its top broken into rounded clumps, and starred all over the upper side with
+// small YELLOW flowers in clusters. Real units, 84 × 58.
+const PS5_GORSE_FLOWERS: [number, number][] = [
+  [10, 30], [14, 25], [19, 21], [24, 17], [28, 22], [33, 12], [38, 15], [42, 10],
+  [47, 13], [52, 9], [57, 14], [61, 11], [66, 17], [70, 22], [74, 26], [78, 31],
+  [22, 29], [36, 24], [49, 21], [63, 25], [44, 30], [30, 33], [56, 31], [72, 34],
+];
+const PS5_GORSE: ObjPart[] = ps5In(84, 58, [
+  ...ps5N('ps5Gorse',
+    oEll('mass', 42, 40, 84, 36),                                   // the mound
+    oEll('mass', 18, 30, 32, 28),                                   // its clumps
+    oEll('mass', 34, 19, 30, 26),
+    oEll('mass', 54, 16, 32, 26),
+    oEll('mass', 71, 26, 26, 26),
+    oEll('face', 46, 48, 74, 18),                                   // its shaded underside
+  ),
+  ...PS5_GORSE_FLOWERS.map(([x, y], i) => ps5N('ps5GorseFlower', oEll('dark', x, y, i % 3 ? 3.4 : 4.4, i % 3 ? 3 : 3.8))[0]),
+  oBar('line', 6, 26, 2, 22, 0.6), oBar('line', 20, 15, 18, 10, 0.6), // spines out of its edge
+  oBar('line', 40, 6, 41, 1.5, 0.6), oBar('line', 62, 6, 65, 2, 0.6),
+  oBar('line', 80, 20, 84, 16, 0.6), oBar('line', 30, 8, 27, 4, 0.6),
+]);
+export const ps5Gorse = (x: number, y: number, w: number, h: number) => fit(PS5_GORSE, x, y, w, h);
+
+// ── THE LEMON CAKE ───────────────────────────────────────────────────────────
+//
+// REFERENCE (ps5-cake-2): a lemon drizzle cake is a GOLDEN sponge with white ICING
+// poured over its top and run down its sides in drips, a few slices of LEMON on top;
+// here a round one on a white plate. Real units, 22 × 14, held by its plate at
+// `PS5_CAKE_GRIP` (AR2: a cake is carried on its plate).
+const PS5_CAKE: ObjPart[] = ps5In(22, 14, [
+  ...ps5N('porcelain', oEll('mass', 11, 12.6, 22, 3)),              // the plate
+  ...ps5N('ps5Sponge',
+    oRect('mass', 11, 8, 18, 8),                                    // the sponge's side
+    oEll('mass', 11, 11.6, 18, 3),                                  // its round foot
+  ),
+  ...ps5N('frosting', oEll('mass', 11, 4.2, 18, 4.4)),              // the iced top
+  oRect('lit', 4, 6.6, 2, 3.2, 0, 1), oRect('lit', 8.4, 7, 2, 4.2, 0, 1), // the icing run down
+  oRect('lit', 13.6, 6.6, 2, 3, 0, 1), oRect('lit', 17.6, 7, 1.8, 3.8, 0, 0.9),
+  ...ps5N('lemon', oEll('dark', 8, 3.6, 4.4, 1.8), oEll('dark', 13.6, 3.4, 4.4, 1.8)), // lemon slices
+]);
+export const ps5Cake = (x: number, y: number, w: number, h: number) => fit(PS5_CAKE, x, y, w, h);
+/** Where the cake is held: under the middle of its plate, in its own 22 × 14 units. */
+export const PS5_CAKE_GRIP = { x: 11, y: 14, w: 22, h: 14 } as const;
+// ── psych5 OBJECTS END ──
+
+// ── psych5: objects for this lesson go ABOVE this line ──
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE BIG TOP, for Personal Growth lesson 5 (2026-10-03). Drawn against pictures
+// fetched with `node scripts/get-reference.mjs` (scratchpad/ref/growth5-*): the Great
+// Moscow Circus's low wire at Alstonville (a wire between two chrome stands with disc
+// tops and splayed feet, over a ring with a red padded curb and a gold cap), the Circus
+// Juventas big top from inside (striped canvas, rigging masts up to the roof, a lamp
+// hung over the ring), a referee's whistle (a flat mouthpiece on a round barrel, a ring
+// at its end for the cord), gold sequin slippers with their ribbon bow.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── RING CURB ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A circus ring is fenced by a low PADDED CURB in segments, red, with a
+// rounded GOLD CAP along its top that riders step over. Real units 400 × 22: the cap's
+// top at y 0, the floor at y 22.
+const G5_RING_CURB: ObjPart[] = g3In(400, 22, [
+  ...g3('g5Curb', oRect('mass', 200, 12.5, 400, 19, 0, 1.5), oRect('face', 200, 19.6, 400, 4.8, 0, 1)),
+  ...g3('g5Gold', oRect('mass', 200, 3.2, 400, 6.4, 0, 3)),
+  ...[34, 100, 166, 232, 298, 364].map((x) => oBar('line', x, 7, x, 21, 0.8)),
+  oBar('lit', 4, 1.6, 396, 1.6, 0.9),
+]);
+export const g5RingCurb = (x: number, y: number, w: number, h: number) => fit(G5_RING_CURB, x, y, w, h);
+
+// ── RIGGING MAST ─────────────────────────────────────────────────────────────
+//
+// REFERENCE. A high wire is strung between two MASTS: a chrome pole on a steel foot
+// plate, braced under a small wooden PEDESTAL BOARD at the top where the walker stands
+// before stepping out. Real units 48 × 250: the board's top at y 0, the floor at y 250.
+const G5_MAST: ObjPart[] = g3In(48, 250, [
+  ...g3('silver', oBar('mass', 24, 7, 24, 246, 3.6), oBar('mass', 23, 34, 7, 7.5, 1.6), oBar('mass', 25, 34, 41, 7.5, 1.6)),
+  ...g3('iron', oRect('mass', 24, 247, 22, 6, 0, 1.2)),
+  ...g3('wood', oRect('mass', 24, 3.5, 48, 7, 0, 1), oRect('face', 24, 6.4, 48, 1.4)),
+  oBar('lit', 23, 12, 23, 238, 0.8),
+]);
+export const g5Mast = (x: number, y: number, w: number, h: number) => fit(G5_MAST, x, y, w, h);
+
+// ── RIGGING LADDER ───────────────────────────────────────────────────────────
+//
+// REFERENCE. The ladder up to a pedestal is straight and narrow — two rails a forearm
+// apart, a rung a short step apart all the way up. Real units 16 × 238, laid in the
+// middle of a 238-square box so the drawing keeps its proportions at any size (AM5).
+const G5_LADDER: ObjPart[] = g3In(238, 238, [
+  ...g3('wood',
+    oBar('mass', 113, 0.5, 113, 237.5, 2.4), oBar('mass', 125, 0.5, 125, 237.5, 2.4),
+    ...Array.from({ length: 16 }, (_, k) => oBar('mass', 113, 10 + k * 14.4, 125, 10 + k * 14.4, 1.8)),
+  ),
+  oBar('lit', 112.4, 4, 112.4, 234, 0.6),
+]);
+export const g5Ladder = (x: number, y: number, w: number, h: number) => fit(G5_LADDER, x, y, w, h);
+
+// ── LOW-WIRE STAND ───────────────────────────────────────────────────────────
+//
+// REFERENCE. The low wire's end stand: a chrome post with a DISC on top where the line
+// is made fast, on splayed iron FEET. Real units 14 × 30: the disc at y 2, the floor 30.
+const G5_STAND: ObjPart[] = g3In(14, 30, [
+  ...g3('silver', oBar('mass', 7, 3, 7, 27, 2.2), oEll('mass', 7, 2.4, 11, 3.2)),
+  ...g3('iron', oBar('mass', 7, 25.5, 1.4, 29.4, 1.6), oBar('mass', 7, 25.5, 12.6, 29.4, 1.6)),
+  oBar('lit', 6.4, 6, 6.4, 24, 0.5),
+]);
+export const g5Stand = (x: number, y: number, w: number, h: number) => fit(G5_STAND, x, y, w, h);
+
+// ── MOUNTING BLOCK ───────────────────────────────────────────────────────────
+//
+// REFERENCE. At the other end of a practice line is a painted MOUNTING BLOCK: two treads,
+// gold nosing, a stencilled star, and the line's post at its top corner, so a walker
+// steps up, up, and out. Real units 32 × 32: the post's top at y 0, the floor at y 32.
+const G5_BLOCK: ObjPart[] = g3In(32, 32, [
+  ...g3('g5Block', oRect('mass', 15, 25, 30, 14, 0, 1), oRect('mass', 22, 18, 16, 28, 0, 1), oRect('face', 28.6, 18, 2.8, 28, 0, 0.6)),
+  ...g3('g5Gold', oRect('mass', 15, 18.9, 30, 1.8, 0, 0.6), oRect('mass', 22, 4.9, 16, 1.8, 0, 0.6)),
+  ...g3('silver', oBar('mass', 30, 1.5, 30, 6, 2), oEll('mass', 30, 1.2, 6.4, 2.4)),
+  ...g3('g5Gold', oTri('dark', 7, 24.4, 7, 6.2, 'up'), oTri('dark', 7, 26.4, 7, 6.2, 'down')),
+  oBar('lit', 1.4, 20.5, 1.4, 30.5, 0.5),
+]);
+export const g5Block = (x: number, y: number, w: number, h: number) => fit(G5_BLOCK, x, y, w, h);
+
+// ── PROP TRUNK ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. A touring prop trunk is a painted plywood box held together by wooden
+// BATTENS top and bottom, brass CORNER CAPS, a brass HASP in the middle of the lid's
+// edge, a HANDLE on each end, and the show's star stencilled on the front. Real units
+// 80 × 44: the front, its top edge at y 0. The lid is drawn on its own: shut, a rounded
+// band across the top; open, its blue-lined inside standing up behind the box.
+const G5_TRUNK: ObjPart[] = g3In(80, 44, [
+  ...g3('g5Trunk', oRect('mass', 40, 22, 80, 44, 0, 2), oRect('face', 74.5, 22, 11, 44, 0, 1.6)),
+  ...g3('wood', oRect('mass', 40, 6.5, 80, 4), oRect('mass', 40, 37.5, 80, 4)),
+  ...g3('brass',
+    oRect('mass', 4.5, 4.5, 9, 9, 0, 1.5), oRect('mass', 75.5, 4.5, 9, 9, 0, 1.5),
+    oRect('mass', 4.5, 39.5, 9, 9, 0, 1.5), oRect('mass', 75.5, 39.5, 9, 9, 0, 1.5),
+    oRect('mass', 40, 7, 8, 10, 0, 1.2),
+  ),
+  ...g3('brass', oTri('dark', 24, 21, 10, 9, 'up'), oTri('dark', 24, 24, 10, 9, 'down'),
+    oTri('dark', 56, 21, 10, 9, 'up'), oTri('dark', 56, 24, 10, 9, 'down')),
+  oEll('line', 40, 8.6, 1.6, 2.4),
+  oBar('line', 77, 18, 77, 27, 1.2),
+  oBar('lit', 3.2, 12, 3.2, 33, 0.8),
+]);
+export const g5Trunk = (x: number, y: number, w: number, h: number) => fit(G5_TRUNK, x, y, w, h);
+const G5_LID_OPEN: ObjPart[] = g3In(80, 40, [
+  ...g3('g5Trunk', oRect('mass', 40, 20, 80, 40, 0, 2.4)),
+  ...g3('brass', oRect('mass', 4.5, 4.5, 9, 9, 0, 1.5), oRect('mass', 75.5, 4.5, 9, 9, 0, 1.5)),
+  ...g3('g5Lining', oRect('dark', 40, 23, 68, 30, 0, 1)),
+  ...[22, 40, 58].map((x) => oBar('lit', x, 10, x, 36, 0.5)),
+]);
+export const g5LidOpen = (x: number, y: number, w: number, h: number) => fit(G5_LID_OPEN, x, y, w, h);
+const G5_LID_SHUT: ObjPart[] = g3In(84, 9, [
+  ...g3('g5Trunk', oRect('mass', 42, 4.5, 84, 9, 0, 3.5), oRect('face', 42, 7.6, 82, 2.6, 0, 1)),
+  ...g3('brass', oRect('mass', 5, 4.5, 8, 9, 0, 1.5), oRect('mass', 79, 4.5, 8, 9, 0, 1.5), oRect('mass', 42, 6, 8, 6, 0, 1)),
+  oBar('lit', 10, 1.6, 74, 1.6, 0.7),
+]);
+export const g5LidShut = (x: number, y: number, w: number, h: number) => fit(G5_LID_SHUT, x, y, w, h);
+
+// ── ROLLED POSTER, AND THE BILL ON IT ────────────────────────────────────────
+//
+// REFERENCE. A circus bill comes ROLLED: a long yellow paper tube with a band round it,
+// and when it is unrolled a red title band, a star, and the artiste — a tiny figure,
+// arms out, on a line. Real units: the tube 10 × 100, the bill 26 × 34.
+const G5_POSTER_ROLL: ObjPart[] = g3In(10, 100, [
+  ...g3('g5Bill', oRect('mass', 5, 52, 8, 96, 0, 3.5), oRect('face', 7.6, 52, 2.8, 94, 0, 1.2), oEll('mass', 5, 4.4, 8, 3.4)),
+  oEll('line', 5, 4.4, 4.6, 1.8),
+  oBar('line', 1.4, 62, 8.6, 62, 1),
+  oBar('lit', 2.6, 10, 2.6, 92, 0.8),
+]);
+export const g5PosterRoll = (x: number, y: number, w: number, h: number) => fit(G5_POSTER_ROLL, x, y, w, h);
+const G5_POSTER_BILL: ObjPart[] = g3In(26, 34, [
+  ...g3('g5Bill', oRect('mass', 13, 17, 26, 34, 0, 0.8)),
+  ...g3('posterRed', oRect('mass', 13, 5, 22, 6, 0, 0.6)),
+  ...g3('posterRed', oTri('dark', 13, 12.2, 5, 4.4, 'up'), oTri('dark', 13, 13.6, 5, 4.4, 'down')),
+  oBar('line', 3, 29, 23, 29, 0.7),                              // the wire
+  oEll('line', 13, 18.6, 3.4, 3.4),                              // the walker: a head,
+  oBar('line', 13, 20, 13, 25, 1.1),                             // a body,
+  oBar('line', 7, 21.6, 19, 21.6, 0.9),                          // arms out,
+  oBar('line', 13, 25, 11.4, 29, 0.9), oBar('line', 13, 25, 14.6, 29, 0.9),
+]);
+export const g5PosterBill = (x: number, y: number, w: number, h: number) => fit(G5_POSTER_BILL, x, y, w, h);
+
+// ── SEQUIN SLIPPERS ──────────────────────────────────────────────────────────
+//
+// REFERENCE. A walker's soft slippers, covered in SEQUINS that catch the light in
+// discs, with a satin bow at the instep; hung up, a pair dangles toe-down by its
+// ribbons. Real units 26 × 32: the ribbons' knot at y 1.
+const G5_SHOES: ObjPart[] = g3In(26, 32, [
+  ...g3('g5Sequin',
+    oBar('mass', 13, 1.5, 8, 13, 1.2), oBar('mass', 13, 1.5, 18.4, 15, 1.2),
+    oEll('mass', 8, 21, 7, 16, -8), oEll('mass', 18.4, 23, 7, 16, 8),
+    oEll('face', 9.6, 22.6, 3.6, 12, -8), oEll('face', 20, 24.6, 3.6, 12, 8),
+  ),
+  oEll('line', 7.4, 15.4, 4.2, 2.4, -8), oEll('line', 17.8, 17.4, 4.2, 2.4, 8),
+  ...[[6.4, 20], [8, 25], [17, 22], [18.6, 27.4]].map(([x, y]) => oEll('lit', x, y, 1.6, 1.6)),
+  oEll('lit', 13, 1.8, 2.4, 2),
+]);
+export const g5Shoes = (x: number, y: number, w: number, h: number) => fit(G5_SHOES, x, y, w, h);
+
+// ── REFEREE'S WHISTLE ────────────────────────────────────────────────────────
+//
+// REFERENCE. A metal whistle: a flat MOUTHPIECE tube running into a round BARREL with
+// the slot cut in its top, and a RING at the barrel's end for the cord. Held by the
+// barrel, between the fingers (AR2). Real units 16 × 9; the grip is G5_WHISTLE_GRIP.
+const G5_WHISTLE: ObjPart[] = g3In(16, 9, [
+  ...g3('silver', oEll('mass', 11, 5, 9, 8), oRect('mass', 4, 3.6, 8, 3.6, 0, 0.8), oEll('face', 12.6, 6, 5, 5.4)),
+  oRect('line', 8.4, 2, 2.6, 1.6),
+  oEll('line', 14.4, 2.6, 2, 2),
+  oEll('lit', 9, 3.4, 1.8, 1.4),
+]);
+export const g5Whistle = (x: number, y: number, w: number, h: number) => fit(G5_WHISTLE, x, y, w, h);
+/** Where the whistle is held: its barrel, in its own 16 × 9 units. The mouthpiece's end is at x 0. */
+export const G5_WHISTLE_GRIP = { x: 11, y: 5, w: 16, h: 9 } as const;
+
+// ── RINGMASTER'S CANE ────────────────────────────────────────────────────────
+//
+// REFERENCE. A ringmaster's cane is a straight WHITE lacquered stick with a gold KNOB for
+// the hand and a gold FERRULE at the tip — white so it reads against his black coat.
+// Held at the knob (AR2), hanging tip-down. Real units 4 × 28, in the middle of a
+// 28-square box so it keeps its proportions (AM5); the grip is G5_CANE_GRIP.
+const G5_CANE: ObjPart[] = g3In(28, 28, [
+  ...g3('g5Baton', oBar('mass', 14, 3, 14, 26.6, 2.2)),
+  ...g3('g5Gold', oEll('mass', 14, 1.8, 4, 4), oBar('mass', 14, 25.8, 14, 27.6, 2.4)),
+  oEll('lit', 13.2, 1.1, 1.3, 1.3),
+]);
+export const g5Cane = (x: number, y: number, w: number, h: number) => fit(G5_CANE, x, y, w, h);
+/** Where the cane is held: under its knob, in its own 28-square box. */
+export const G5_CANE_GRIP = { x: 14, y: 3, w: 28, h: 28 } as const;
+
+// ── ROPE COIL ────────────────────────────────────────────────────────────────
+//
+// REFERENCE. The end of a rope laid on a floor is FLAKED into a flat coil: rings of rope
+// lying on each other, the hole in the middle showing. Real units 16 × 7.
+const G5_COIL: ObjPart[] = g3In(16, 7, [
+  ...g3('g5Hemp', oEll('mass', 8, 4.2, 16, 5.6), oEll('face', 9, 5.2, 13, 2.8)),
+  ...g3('g5Hemp', oEll('dark', 8, 3.6, 10, 3)),
+  ...g3('g5Hemp', oEll('mass', 8, 3.4, 6, 1.6)),
+]);
+export const g5Coil = (x: number, y: number, w: number, h: number) => fit(G5_COIL, x, y, w, h);
+
+// ── STAGE LAMP ───────────────────────────────────────────────────────────────
+//
+// REFERENCE. Over the ring hangs a FOLLOWSPOT: a black can on a yoke, its round lens
+// pointing down at the sawdust. Real units 18 × 16: the yoke's top at y 0.
+const G5_LAMP: ObjPart[] = g3In(18, 16, [
+  ...g3('iron', oBar('mass', 9, 0.5, 9, 4.5, 1.6), oRect('mass', 9, 8.4, 11, 9, 0, 2), oRect('face', 12.6, 8.4, 3.8, 9, 0, 1)),
+  ...g3('bulbLit', oEll('mass', 9, 13.4, 12, 4)),
+  oEll('lit', 7, 13, 4, 1.4),
+]);
+export const g5Lamp = (x: number, y: number, w: number, h: number) => fit(G5_LAMP, x, y, w, h);
+
+// ── growth5: objects for this lesson go ABOVE this line ──
+
+// ═══ biz5 BEGIN ═══
+// biz5 — A BALLOON FIELD AT DAWN (business-foundations-5, "Profit Isn't Cash").
+// Every drawing below is authored in REAL stage units (`b5In`) so a scene can lay it
+// 1:1, and each part carries the colour the thing really is (AR1).
+const b5N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function b5In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── A HOT-AIR BALLOON'S ENVELOPE, ONE BAND OF GORES AT A TIME ───────────────
+//
+// REFERENCE (Commons: "Cappadocia Balloon Inflating", "Leon hot air balloon festival
+// 2010"). An envelope is an inverted teardrop: a sphere on top and, below its widest
+// point, a CONE whose sides run TANGENT to the sphere down to a narrow mouth, about a
+// quarter of the width across. It is sewn from vertical GORES, and seen side-on the
+// gores at the edge are foreshortened — the bands get NARROWER toward the outline.
+//
+// So the envelope is drawn as nested bands, each the same sphere-and-cone squeezed
+// sideways by `f` (about the cosine of a gore's angle from the viewer: 1, 0.9, 0.7,
+// 0.38), each in its own colour. A scene lays them as separate drawings, the inner ones
+// with a thin outline, and those outlines are the seams (the load tapes) between gores.
+//
+// The cone is TANGENT, not guessed: from a mouth 44 wide at y 152 to a sphere 170 × 132
+// centred at y 66, the tangent points fall at y 106.3, ±67.3 — so the union has no
+// kink where the cone meets the sphere. Real units 170 × 152; the mouth is the bottom.
+export const B5_ENV = { w: 170, h: 152 } as const;
+function b5BandParts(f: number, k: NaturalKey): ObjPart[] {
+  return b5In(B5_ENV.w, B5_ENV.h, b5N(k,
+    oEll('mass', 85, 66, 170 * f, 132),
+    ...trapezoid('mass', 85, 129.15, 134.6 * f, 44 * f, 45.7),
+  ));
+}
+export const b5Envelope = (x: number, y: number, w: number, h: number, f = 1, k: NaturalKey = 'b5Red') =>
+  fit(b5BandParts(f, k), x, y, w, h);
+
+// ── THE SCOOP AND ITS CABLES ────────────────────────────────────────────────
+//
+// REFERENCE (the same, and "Top.view.of.basket.bath.arp", a basket laid on its side
+// with its burner frame). Below the mouth hangs a short dark SKIRT of fabric, and from
+// it steel cables run down to the corners of the burner frame. Real units 70 × 52:
+// the skirt is the top 12, the cables the rest, ending on the frame's two corners.
+const B5_SKIRT: ObjPart[] = b5In(70, 52, [
+  ...b5N('b5Skirt', ...trapezoid('mass', 35, 6, 38, 33, 12)),
+  ...b5N('b5Skirt', oEll('dark', 35, 11, 28, 2.2)),            // the mouth, open, in shadow
+  oBar('line', 17.5, 11.5, 2, 51.5, 0.9),                       // the cables, to the frame's
+  oBar('line', 52.5, 11.5, 68, 51.5, 0.9),                      // two corners
+  oBar('line', 26, 12, 22, 51.5, 0.7),                          // and the two behind them
+  oBar('line', 44, 12, 48, 51.5, 0.7),
+]);
+export const b5Skirt = (x: number, y: number, w: number, h: number) => fit(B5_SKIRT, x, y, w, h);
+
+// ── THE BASKET ──────────────────────────────────────────────────────────────
+//
+// REFERENCE ("Basket with burner (1)"). Woven rattan, tan, in horizontal ROWS of weave;
+// a fat padded RIM in dark leather along the top; a band of white SUEDE round the foot
+// with rope handles looped over it; and square STEP HOLES in the side, each with a grey
+// bar across, which is how people climb in. A big passenger basket is about three metres
+// long and waist-high, which at this figure's scale is 150 × 32.
+const B5_BASKET: ObjPart[] = b5In(150, 32, [
+  ...b5N('wicker',
+    oRect('mass', 75, 17, 150, 30, 0, 3),                        // the woven body
+    oRect('face', 144.5, 18, 11, 26, 0, 2),                      // its end, turned from the lamp
+    oBar('dark', 4, 11.5, 139, 11.5, 1.1),                       // the rows of weave
+    oBar('dark', 4, 17, 139, 17, 1.1),
+    oBar('dark', 4, 22.5, 139, 22.5, 1.1),
+  ),
+  ...b5N('b5Suede', oRect('mass', 75, 28.6, 149, 6.4, 0, 2.4)),  // the suede band at the foot
+  ...b5N('b5Saddle', oRect('mass', 75, 3.4, 150, 6.8, 0, 3.2)),  // the padded leather rim
+  ...b5N('felt', oRect('dark', 20, 15.5, 10, 7, 0, 1)),          // a step hole
+  ...b5N('castor', oBar('dark', 16.4, 18.2, 23.6, 18.2, 1.6)),   // and its bar
+  ...[24, 62, 100].flatMap((x) => [                              // rope handles over the suede
+    oBar('line', x, 26.4, x + 4, 29.4, 0.8), oBar('line', x + 4, 29.4, x + 8, 26.4, 0.8),
+  ]),
+]);
+export const b5Basket = (x: number, y: number, w: number, h: number) => fit(B5_BASKET, x, y, w, h);
+/**
+ * The basket's FAR side, seen over the near rim from a little above: its padded back
+ * rim, and the shaded wicker of the inside wall below it. Real units 150 × 14, drawn
+ * behind the near wall so the basket reads as a box with an inside, not a slab.
+ */
+const B5_BASKET_BACK: ObjPart[] = b5In(150, 14, [
+  ...b5N('b5Saddle', oRect('mass', 75, 3, 140, 5.6, 0, 2.6)),   // the far rim
+  ...b5N('wicker', oRect('face', 75, 9.5, 136, 9, 0, 1)),        // the inside of the far wall
+  ...b5N('wicker', oBar('dark', 9, 10, 141, 10, 0.9)),           // a row of its weave
+]);
+export const b5BasketBack = (x: number, y: number, w: number, h: number) => fit(B5_BASKET_BACK, x, y, w, h);
+
+// ── THE BURNER AND ITS FRAME ────────────────────────────────────────────────
+//
+// REFERENCE (the same). Padded UPRIGHTS lean in from the basket's corners to a
+// stainless FRAME over the middle; on the frame sits the BURNER, a drum of coiled steel
+// tube, and under the frame hangs the blast valve's lever, which the pilot pulls.
+// Real units 150 × 76: the rim is the bottom edge, the frame bar at y 20.
+const B5_FRAME: ObjPart[] = b5In(150, 76, [
+  ...b5N('b5Saddle',
+    oBar('face', 18, 66, 46, 20, 2.6),                            // the far uprights, behind
+    oBar('face', 132, 66, 104, 20, 2.6),
+  ),
+  ...b5N('b5Saddle',
+    oBar('mass', 6, 75, 44, 20, 3.6),                             // the near uprights
+    oBar('mass', 144, 75, 106, 20, 3.6),
+  ),
+  ...b5N('silver',
+    oBar('mass', 42, 20, 108, 20, 3),                             // the frame
+    oRect('mass', 75, 10.5, 30, 17, 0, 3),                        // the burner's coil drum
+    oRect('mass', 75, 2.2, 14, 4, 0, 1.2),                        // its jet cap
+    oBar('dark', 62, 6.5, 88, 6.5, 1.1),                          // the coils
+    oBar('dark', 62, 10.5, 88, 10.5, 1.1),
+    oBar('dark', 62, 14.5, 88, 14.5, 1.1),
+  ),
+  oBar('line', 68, 21.5, 63, 40, 1.4),                            // the blast valve's lever
+]);
+export const b5Frame = (x: number, y: number, w: number, h: number) => fit(B5_FRAME, x, y, w, h);
+
+// ── A PROPANE CYLINDER ──────────────────────────────────────────────────────
+//
+// REFERENCE (the delivered kind: a tall steel bottle in red paint). A straight body with
+// a DOMED shoulder, a steel GUARD COLLAR on top with a hand-hole in it (which is where it
+// is lifted), the valve inside the collar, a paper label and a foot ring. Real units
+// 12 × 40.
+const b5CylParts = (k: NaturalKey): ObjPart[] => b5In(12, 40, [
+  ...b5N(k,
+    oRect('mass', 6, 23, 12, 34, 0, 3),                           // the body
+    oEll('mass', 6, 8.5, 12, 8),                                  // the domed shoulder
+    oRect('face', 10.3, 24, 3.4, 30, 0, 1.4),                     // its side, from the lamp
+    oRect('dark', 6, 38.8, 12, 2.4, 0, 0.8),                      // the foot ring
+  ),
+  ...b5N('silver',
+    oRect('mass', 6, 3.2, 8, 6.4, 0, 1.5),                        // the guard collar
+    oRect('dark', 6, 3, 4.4, 2.6, 0, 1),                          // its hand-hole
+  ),
+  oRect('lit', 5.4, 22, 8, 6, 0, 0.6),                            // the label
+]);
+/** `k` the cylinder's paint: the delivered ones red, the balloon's own in bare steel. */
+export const b5Cylinder = (x: number, y: number, w: number, h: number, k: NaturalKey = 'b5Gas') => fit(b5CylParts(k), x, y, w, h);
+
+// ── A SACK TRUCK ────────────────────────────────────────────────────────────
+//
+// REFERENCE ("Hand-truck"). Two steel rails in one piece with the handle, rubber GRIPS
+// at the top, a flat NOSE PLATE at the foot that the load stands on, and two pneumatic
+// WHEELS behind the rails with coloured hubs. Side-on, upright, the nose to the left.
+// Real units 26 × 52; the axle at (20, 44.5).
+const B5_TRUCK: ObjPart[] = b5In(26, 52, [
+  ...b5N('b5Truck',
+    oBar('mass', 16.5, 6, 14.6, 49, 2.6),                         // the rail
+    oBar('mass', 14.6, 50.4, 1.2, 50.4, 2.2),                     // the nose plate
+    oBar('mass', 15, 33, 20, 43, 1.6),                            // the axle strut
+  ),
+  ...b5N('tyre', oBar('mass', 16.6, 6.5, 19.6, 1.4, 3)),         // the grip
+  ...b5N('tyre', oEll('mass', 20, 44.5, 13, 13)),                // the wheel
+  ...b5N('b5Hub', oEll('mass', 20, 44.5, 6, 6)),                 // its hub
+  oEll('line', 20, 44.5, 1.8, 1.8),
+]);
+export const b5Trolley = (x: number, y: number, w: number, h: number) => fit(B5_TRUCK, x, y, w, h);
+/** The axle and the grip, in the truck's own units. */
+export const B5_AXLE = { x: 20, y: 44.5 } as const;
+export const B5_GRIP = { x: 18.2, y: 3.6 } as const;
+
+// ── A CHALKBOARD ON AN EASEL ────────────────────────────────────────────────
+//
+// REFERENCE (a sign easel, as at a field's gate). Two front legs splay from an apex and
+// a third leg props it from behind; the board, a slate in a wooden frame, rests on a
+// TRAY across the legs, which is also where the chalk lies. Real units 88 × 96.
+const B5_EASEL: ObjPart[] = b5In(88, 96, [
+  ...b5N('oak',
+    oBar('face', 46, 6, 46, 93, 3),                               // the back leg
+    oBar('mass', 38, 2, 8, 95, 3.4),                              // the front legs
+    oBar('mass', 50, 2, 80, 95, 3.4),
+    oRect('mass', 44, 37, 80, 60, 0, 2),                          // the board's frame
+  ),
+  ...b5N('slate', oRect('mass', 44, 37, 74, 54, 0, 1)),          // the slate
+  ...b5N('oak', oRect('mass', 44, 69.5, 86, 5, 0, 1.5)),         // the tray
+]);
+export const b5Easel = (x: number, y: number, w: number, h: number) => fit(B5_EASEL, x, y, w, h);
+
+// ── A CASH TIN, AND ITS LID ─────────────────────────────────────────────────
+//
+// REFERENCE (a cash box: enamelled steel, wider than tall, a KEYHOLE in a bright
+// escutcheon, a lid hinged at the back with a folding bail HANDLE). Real units 24 × 14,
+// the lid 24 × 12, drawn about its hinge so a scene can stand it up.
+const B5_TIN: ObjPart[] = b5In(24, 14, [
+  ...b5N('b5Tin',
+    oRect('mass', 12, 8.6, 24, 10.8, 0, 1.6),                     // the box's front
+    oRect('mass', 12, 3.4, 23, 4, 0, 1.2),                        // its top edges
+    oRect('face', 22.6, 8.8, 2.8, 9.6, 0, 1),                     // its end, from the lamp
+  ),
+  ...b5N('felt', oRect('dark', 12, 3.2, 20, 2.2, 0, 0.8)),       // the dark well inside
+  oBar('lit', 1.6, 4.9, 22.4, 4.9, 0.8),                          // the lit front rim
+  oRect('lit', 12, 9.2, 5, 5.2, 0, 1),                            // the escutcheon
+  oEll('line', 12, 8.5, 1.6, 1.6), oBar('line', 12, 9, 12, 10.8, 0.9), // and its keyhole
+]);
+export const b5Tin = (x: number, y: number, w: number, h: number) => fit(B5_TIN, x, y, w, h);
+const B5_TIN_LID: ObjPart[] = b5In(24, 12, [
+  ...b5N('b5Tin', oRect('mass', 12, 7.6, 24, 8.8, 0, 1.4)),      // the lid
+  ...b5N('felt', oRect('dark', 12, 8, 19, 5.2, 0, 1)),           // its underside, in shadow
+  oBar('line', 7.5, 3.6, 7.5, 1, 0.9), oBar('line', 7.5, 1, 16.5, 1, 0.9), oBar('line', 16.5, 1, 16.5, 3.6, 0.9),
+]);
+export const b5TinLid = (x: number, y: number, w: number, h: number) => fit(B5_TIN_LID, x, y, w, h);
+
+// ── AN UMBRELLA: ITS CANOPY, AND ITS SHAFT AND CROOK ────────────────────────
+//
+// REFERENCE (a gentleman's umbrella, open, in navy). Side-on the open canopy is a shallow
+// DOME, rounded at the top, whose lower edge is SCALLOPED where the cloth sags between
+// the rib tips; a ferrule pokes through at the apex. The shaft runs down to a wooden
+// CROOK. Drawn in two pieces so a scene can furl the canopy round the shaft.
+// Canopy real units 46 × 18 (apex at the top centre); shaft 10 × 50 (apex at the top).
+const B5_CANOPY: ObjPart[] = b5In(46, 18, [
+  ...b5N('umbNavy',
+    oTri('mass', 23, 11, 46, 14, 'up'),                           // the dome's flanks
+    oEll('mass', 23, 7, 30, 12),                                  // rounded over the top
+    oEll('mass', 5.75, 16.4, 11.5, 3), oEll('mass', 17.25, 16.4, 11.5, 3),
+    oEll('mass', 28.75, 16.4, 11.5, 3), oEll('mass', 40.25, 16.4, 11.5, 3),
+    oBar('dark', 23, 3, 11.5, 16, 0.7),                           // two ribs
+    oBar('dark', 23, 3, 34.5, 16, 0.7),
+  ),
+  oBar('line', 23, 0.4, 23, 2.4, 1),                              // the ferrule
+]);
+export const b5Canopy = (x: number, y: number, w: number, h: number) => fit(B5_CANOPY, x, y, w, h);
+// (Authored in a 50-square, the shaft down its middle, so a bar keeps its weight in any box.)
+const B5_UMB_SHAFT: ObjPart[] = b5In(50, 50, [
+  ...b5N('silver', oBar('mass', 25, 0.8, 25, 43, 1.4)),          // the shaft
+  ...b5N('wood',
+    oBar('mass', 25, 42, 25, 46.8, 2.4),                          // the crook, curling up
+    oBar('mass', 25, 46.8, 26.8, 48.8, 2.4),
+    oBar('mass', 26.8, 48.8, 28.8, 48.2, 2.4),
+    oBar('mass', 28.8, 48.2, 29, 45.8, 2.4),
+  ),
+]);
+export const b5UmbShaft = (x: number, y: number, w: number, h: number) => fit(B5_UMB_SHAFT, x, y, w, h);
+/** Where the hand holds the shaft, in its own units: just above the crook. */
+export const B5_UMB_GRIP = { x: 25, y: 43.4 } as const;
+
+// ── A COAT BUTTON ───────────────────────────────────────────────────────────
+// REFERENCE: a round button with a raised rim and FOUR holes. Real units 6 × 6.
+const B5_BUTTON: ObjPart[] = b5In(6, 6, [
+  ...b5N('b5Button', oEll('mass', 3, 3, 6, 6), oEll('dark', 3, 3, 4, 4)),
+  oEll('line', 2.3, 2.3, 0.9, 0.9), oEll('line', 3.7, 2.3, 0.9, 0.9),
+  oEll('line', 2.3, 3.7, 0.9, 0.9), oEll('line', 3.7, 3.7, 0.9, 0.9),
+]);
+export const b5Button = (x: number, y: number, w: number, h: number) => fit(B5_BUTTON, x, y, w, h);
+
+// ── biz5: objects for this lesson go ABOVE this line ──
+
+// ── econ5 objects (begin) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// economics-foundations-5 — A MEDIEVAL TOWN HALL AT DUSK, AND A CELLAR FULL OF RATS.
+//
+// Drawn against pictures fetched with `npm run ref` (scratchpad/ref/econ5-*): a brown rat
+// side-on and close up (Rattus norvegicus — a long low body, a blunt pointed snout, small
+// round pink-lined ears, a bead eye, and a bare pinkish tail as long as the body); a
+// trapdoor in a floor, its lid standing up on its back hinge over the dark hole; a Russian
+// money cover's red wax seal (an uneven blob with a raised ring and an emblem in it);
+// Lavenham's half-timbered houses (cream plaster between close-set dark studs, a tiled
+// roof, a brick chimney); a village well; a savoy cabbage. Each is authored in REAL STAGE
+// UNITS and laid into its box by `fit`, like econ4's.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const e5N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function e5In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/**
+ * The same for a LONG thing (a rat, a tail): authored in its real ax × ay and centred in a
+ * square of its longer side, so a stroke's weight scales the same way along and across it
+ * at any box — a scene asks for it in a square, the thing's middle at the square's middle.
+ */
+function e5Sq(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const S = Math.max(ax, ay);
+  const ox = (S - ax) / 2;
+  const oy = (S - ay) / 2;
+  return e5In(S, S, parts.map((p) => (p.k === 'bar'
+    ? { ...p, x1: p.x1 + ox, y1: p.y1 + oy, x2: p.x2 + ox, y2: p.y2 + oy }
+    : { ...p, x: p.x + ox, y: p.y + oy }) as ObjPart));
+}
+
+// ── THE RATS ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Brown rat (Rattus norvegicus) Drenthe"). Side-on a brown rat is
+// LONG AND LOW — a body twice as long as it is deep, the haunch the highest point — with
+// a head that tapers to a blunt snout, a small ROUND ear set high and back, a black bead
+// eye, pink feet, and a bare scaly TAIL as long again as the body, thick at the root.
+// Real 38 × 13, running LEFT, its feet on y 12.6; `stride` swaps the legs.
+const ratRunParts = (stride: number): ObjPart[] => {
+  const f = stride ? 1 : -1;
+  return e5Sq(38, 13, [
+    ...e5N('e5RatPink',
+      oBar('mass', 21, 7.8, 27, 9.6, 1.6), oBar('mass', 27, 9.6, 32.6, 9.7, 1.15), oBar('mass', 32.6, 9.7, 37.2, 8.3, 0.75),
+      oBar('mass', 7.4 + f * 1.8, 11.4, 6.6 + f * 3, 12.5, 1), oBar('mass', 18.6 - f * 2.4, 11.6, 18.2 - f * 3.6, 12.6, 1.2),
+    ),
+    ...e5N('e5Rat',
+      oEll('mass', 14, 6.8, 16, 8.4),
+      oEll('mass', 19.4, 6.8, 10, 8.6),
+      oEll('mass', 6.4, 6.6, 8.8, 6.8, -10),
+      oEll('mass', 2.8, 7.8, 5.6, 3.8, -8),
+      oEll('mass', 8.4, 3, 3.8, 4),
+      oBar('mass', 7.6, 9, 7.4 + f * 1.8, 11.6, 1.5),
+      oBar('mass', 19, 9.4, 18.6 - f * 2.4, 11.8, 1.9),
+      oEll('face', 14.4, 9.8, 14, 2.6),
+    ),
+    ...e5N('e5RatPink', oEll('mass', 0.9, 8, 1.8, 1.6), oEll('dark', 8.4, 3.2, 2, 2.3)),
+    oEll('line', 5.4, 5.8, 1.4, 1.4),
+    oBar('line', 3.4, 7.6, 0.4, 6.2, 0.3), oBar('line', 3.4, 8.1, 0.4, 9.4, 0.3),
+    oBar('lit', 9.4, 3.6, 18, 2.9, 0.7),
+  ]);
+};
+export const ratRun = (x: number, y: number, w: number, h: number, stride = 0) => fit(ratRunParts(stride), x, y, w, h);
+
+/**
+ * A rat looking up out of a hole, face on: two round ears with pink insides, a head
+ * narrowing to the muzzle, a pink nose, bead eyes, whiskers, and its two pink front paws
+ * on the rim. Real 16 × 13.
+ */
+const RAT_PEEK: ObjPart[] = e5In(16, 13, [
+  ...e5N('e5Rat',
+    oEll('mass', 3.4, 3.2, 5, 5), oEll('mass', 12.6, 3.2, 5, 5),
+    oEll('mass', 8, 7, 11, 9),
+    oEll('mass', 8, 9.8, 6.4, 4.2),
+    oEll('face', 10.8, 8.6, 5, 6.6),
+  ),
+  ...e5N('e5RatPink',
+    oEll('mass', 4, 12, 3.6, 1.8), oEll('mass', 12, 12, 3.6, 1.8),
+    oEll('dark', 3.4, 3.4, 2.8, 3), oEll('dark', 12.6, 3.4, 2.8, 3),
+    oEll('mass', 8, 11, 2.4, 1.7),
+  ),
+  oEll('line', 5.7, 6.8, 1.6, 1.8), oEll('line', 10.3, 6.8, 1.6, 1.8),
+  oBar('line', 6, 10.6, 1.2, 10, 0.3),
+  oBar('line', 10, 10.6, 14.8, 10, 0.3),
+  oEll('lit', 6, 4.6, 2.2, 1.2),
+]);
+export const ratPeek = (x: number, y: number, w: number, h: number) => fit(RAT_PEEK, x, y, w, h);
+
+/** One rat's tail, held up by its root: real 5 × 22, the root at (2.4, 0.8). */
+const RAT_TAIL: ObjPart[] = e5Sq(5, 22, e5N('e5RatPink',
+  oBar('mass', 2.4, 1, 2.8, 8, 1.6), oBar('mass', 2.8, 8, 1.8, 14, 1.2),
+  oBar('mass', 1.8, 14, 2.6, 19, 0.9), oBar('mass', 2.6, 19, 4, 21.2, 0.6),
+  oBar('dark', 1.8, 4.2, 3.4, 4.4, 0.4), oBar('dark', 1.6, 10.2, 3, 10.6, 0.35), oBar('dark', 1.6, 16, 2.8, 16.4, 0.3),
+));
+export const ratTail = (x: number, y: number, w: number, h: number) => fit(RAT_TAIL, x, y, w, h);
+
+// ── THE CATCHER'S BASKET, THE MAYOR'S SACK, A COIN ──────────────────────────
+//
+// A wicker basket with an arched handle (econ4's trug, taller), the day's tails poking
+// up out of it and hanging over its rim: real 20 × 18, held by the top of its handle at
+// (10, 2). A hessian sack of silver coins, gathered and tied at the neck with its mouth
+// pulled open on the coins: real 22 × 24, held by the neck at (11, 5).
+const TAIL_BASKET: ObjPart[] = e5In(20, 18, [
+  ...e5N('wicker',
+    // the handle, a round hoop of cane (six short bars round a semicircle)
+    oBar('mass', 3, 9, 3.94, 5.5, 1.3), oBar('mass', 3.94, 5.5, 6.5, 2.94, 1.3), oBar('mass', 6.5, 2.94, 10, 2, 1.3),
+    oBar('mass', 10, 2, 13.5, 2.94, 1.3), oBar('mass', 13.5, 2.94, 16.06, 5.5, 1.3), oBar('mass', 16.06, 5.5, 17, 9, 1.3),
+    oRect('mass', 10, 13.4, 17, 9.2, 0, 1.6),
+    oRect('mass', 10, 9, 19.6, 2.2, 0, 1),
+    oRect('face', 15.4, 13.6, 4, 8.4),
+    oBar('dark', 3, 12, 17, 12, 0.5), oBar('dark', 3.6, 15, 16.4, 15, 0.5),
+    oBar('dark', 7, 10.4, 7.4, 17.4, 0.4), oBar('dark', 12.4, 10.4, 12, 17.4, 0.4),
+  ),
+  ...e5N('e5RatPink',
+    oBar('mass', 6.2, 8.4, 5.2, 4.8, 0.9), oBar('mass', 5.2, 4.8, 6.6, 3.2, 0.7),
+    oBar('mass', 13.6, 8.4, 14.8, 5, 0.9), oBar('mass', 14.8, 5, 13.4, 3.6, 0.7),
+
+  ),
+]);
+export const tailBasket = (x: number, y: number, w: number, h: number) => fit(TAIL_BASKET, x, y, w, h);
+
+const COIN_SACK: ObjPart[] = e5In(22, 24, [
+  ...e5N('e5Hessian',
+    oEll('mass', 11, 16.6, 21.4, 14.6),
+    oRect('mass', 11, 10, 12, 6, 0, 2),
+    oRect('mass', 11, 6, 8.4, 3.4, 0, 1.2),
+    oEll('mass', 11, 3.6, 13, 3.6),
+    oEll('face', 16.2, 18, 8.4, 10.6),
+    oBar('dark', 6.4, 14, 8, 21, 0.5), oBar('dark', 13.4, 12.8, 12.6, 21, 0.5),
+  ),
+  ...e5N('silver', oEll('mass', 8.2, 2.9, 4.2, 2.4), oEll('mass', 12.8, 2.5, 4.2, 2.4), oEll('mass', 10.6, 1.6, 4, 2.2)),
+  oBar('line', 6.6, 7.2, 15.4, 7.2, 0.8),
+  oEll('lit', 6.6, 13.6, 3.2, 4.4),
+]);
+export const coinSack = (x: number, y: number, w: number, h: number) => fit(COIN_SACK, x, y, w, h);
+
+/** A silver penny: real 6 × 6. */
+const SILVER_COIN: ObjPart[] = e5In(6, 6, [
+  ...e5N('silver', oEll('mass', 3, 3, 6, 6), oEll('dark', 3, 3, 3.8, 3.8)),
+  oEll('lit', 2.1, 2.1, 1.6, 1.1),
+]);
+export const silverCoin = (x: number, y: number, w: number, h: number) => fit(SILVER_COIN, x, y, w, h);
+
+// ── THE ECONOMIST'S LANTERN, THE MAYOR'S CANDLE AND SEAL ────────────────────
+//
+// A brass hand lantern: a ring to carry it by, a cap, glass panes between four posts with
+// the flame inside, a base. Real 12 × 20, held by the ring's top at (6, 0.8). A brass
+// candlestick with its tallow candle (the flame is the scene's, so it can flicker): real
+// 10 × 26. The mayor's seal: a brass matrix on a turned wooden handle, held by the knob
+// at (4, 0.8): real 8 × 15. And the wax a seal leaves: an uneven blob of red with a raised
+// ring and a little tower in relief, real 12 × 12.
+const HAND_LANTERN: ObjPart[] = e5In(12, 20, [
+  ...e5N('brass',
+    oBar('mass', 4.2, 3.4, 6, 0.9, 0.9), oBar('mass', 6, 0.9, 7.8, 3.4, 0.9),
+    oRect('mass', 6, 4.6, 9.6, 2.6, 0, 1.2),
+    oRect('mass', 6, 18, 11, 2.6, 0, 0.8),
+  ),
+  ...e5N('lampGlow', oRect('mass', 6, 11.4, 8.4, 10.4), oRect('face', 8.9, 11.4, 2.6, 10.4)),
+  ...e5N('e5Flame', oEll('mass', 6, 12.2, 3.2, 5.4)),
+  ...e5N('brass', oBar('mass', 1.6, 5.8, 1.6, 16.8, 1.2), oBar('mass', 10.4, 5.8, 10.4, 16.8, 1.2)),
+  oEll('lit', 5.7, 12.6, 1.2, 2.4),
+]);
+export const handLantern = (x: number, y: number, w: number, h: number) => fit(HAND_LANTERN, x, y, w, h);
+
+const CANDLESTICK: ObjPart[] = e5In(10, 26, [
+  ...e5N('brass', oEll('mass', 5, 24.4, 10, 3), oBar('mass', 5, 24, 5, 18.6, 2.2), oEll('mass', 5, 18, 7.6, 2.4), oEll('face', 7.2, 24.8, 4, 2)),
+  ...e5N('e5Tallow', oRect('mass', 5, 11.4, 4.4, 12.4, 0, 0.6), oRect('face', 6.5, 11.4, 1.4, 12.4), oEll('mass', 3.2, 8, 1.4, 3)),
+  oBar('line', 5, 5.2, 5, 3.4, 0.5),
+]);
+export const candlestick = (x: number, y: number, w: number, h: number) => fit(CANDLESTICK, x, y, w, h);
+
+const SEAL_MATRIX: ObjPart[] = e5In(8, 15, [
+  ...e5N('wood', oEll('mass', 4, 2.4, 5, 4.4), oBar('mass', 4, 4, 4, 10, 2.4)),
+  ...e5N('brass', oRect('mass', 4, 10.6, 6, 1.6, 0, 0.6), oRect('mass', 4, 13, 8, 3.4, 0, 1), oRect('face', 6.4, 13, 3.2, 3.4)),
+  oEll('lit', 3, 1.8, 1.4, 1.2),
+]);
+export const sealMatrix = (x: number, y: number, w: number, h: number) => fit(SEAL_MATRIX, x, y, w, h);
+
+const WAX_SEAL: ObjPart[] = e5In(12, 12, [
+  ...e5N('e5Wax',
+    oEll('mass', 6, 6.2, 10.6, 10), oEll('mass', 2.2, 7.4, 3.6, 3.4), oEll('mass', 9.8, 4.6, 3.4, 3.6), oEll('mass', 7.2, 10.4, 3.6, 2.8),
+    oEll('dark', 6, 6.2, 7, 7),
+  ),
+  // the tower the town's seal is cut with, pressed into the wax
+  oRect('line', 6, 6.9, 2.6, 3.2), oRect('line', 5, 4.9, 0.9, 1.2), oRect('line', 7, 4.9, 0.9, 1.2),
+  oBar('lit', 3.2, 3.8, 5.4, 2.4, 0.6),
+]);
+export const waxSeal = (x: number, y: number, w: number, h: number) => fit(WAX_SEAL, x, y, w, h);
+
+/** A sealed decree's ribbon and seal, pinned to the foot of a proclamation: real 16 × 18. */
+const DECREE_SEAL: ObjPart[] = e5In(16, 18, [
+  ...e5N('e5Red', oBar('mass', 7, 5, 4.4, 16.6, 2.2), oBar('mass', 9, 5, 11.6, 16.6, 2.2)),
+  ...e5N('e5Wax', oEll('mass', 8, 6.4, 11, 10.2), oEll('dark', 8, 6.4, 6.6, 6.6)),
+  oRect('line', 8, 6.8, 2.4, 3),
+  oBar('lit', 4.6, 3.6, 6.8, 2.2, 0.6),
+]);
+export const decreeSeal = (x: number, y: number, w: number, h: number) => fit(DECREE_SEAL, x, y, w, h);
+
+// ── THE DRAFT DECREES ────────────────────────────────────────────────────────
+//
+// A scroll ROLLED, lying on the table's edge: parchment wound round, a wooden knob at
+// each end, a red ribbon round the middle — real 48 × 6. And the ROLLER it hangs from
+// once it is let fall over the edge — a turned rod with a knob each end, real 52 × 5.
+const ROLLED_DRAFT: ObjPart[] = e5In(48, 6, [
+  ...e5N('e5Parch', oRect('mass', 24, 3, 41, 5.2, 0, 2.4), oRect('face', 24, 4.7, 41, 1.6)),
+  ...e5N('wood', oEll('mass', 2.2, 3, 4.2, 5.8), oEll('mass', 45.8, 3, 4.2, 5.8)),
+  ...e5N('e5Red', oRect('mass', 24, 3, 2.6, 6)),
+  oBar('line', 6, 1.4, 6, 4.6, 0.3), oBar('line', 42, 1.4, 42, 4.6, 0.3),
+]);
+export const rolledDraft = (x: number, y: number, w: number, h: number) => fit(ROLLED_DRAFT, x, y, w, h);
+
+const DRAFT_ROLLER: ObjPart[] = e5In(52, 5, [
+  ...e5N('wood', oRect('mass', 26, 2.5, 46, 3.2, 0, 1.4), oEll('mass', 2.6, 2.5, 5, 5), oEll('mass', 49.4, 2.5, 5, 5), oRect('face', 26, 3.6, 46, 1)),
+  oBar('lit', 6, 1.6, 46, 1.6, 0.5),
+]);
+export const draftRoller = (x: number, y: number, w: number, h: number) => fit(DRAFT_ROLLER, x, y, w, h);
+
+// ── CABBAGES AND THEIR CRATE ─────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Savoy cabbage, Bijuesca"): a savoy is a pale, crinkled HEART cupped
+// in darker wrapper leaves that open out round its foot, ribbed from the stalk. Real
+// 14 × 13. Its crate: a slatted box of fresh pine with corner posts, real 36 × 22.
+const CABBAGE_HEAD: ObjPart[] = e5In(14, 13, [
+  ...e5N('leaf', oEll('mass', 3.8, 8.8, 7, 7.4), oEll('mass', 10.2, 8.8, 7, 7.4)),
+  ...e5N('e5Cabbage', oEll('mass', 7, 6.4, 10.6, 9.6), oEll('face', 9.6, 7.8, 5.2, 6.8)),
+  ...e5N('e5Cabbage', oBar('dark', 7, 11, 5.4, 3.2, 0.45), oBar('dark', 7, 11, 9.2, 3.4, 0.45)),
+
+  oEll('lit', 5, 3.6, 2.6, 1.6),
+]);
+export const cabbageHead = (x: number, y: number, w: number, h: number) => fit(CABBAGE_HEAD, x, y, w, h);
+
+const VEG_CRATE: ObjPart[] = e5In(36, 22, [
+  ...e5N('newWood', oRect('mass', 18, 11, 36, 22, 0, 0.6), oRect('face', 33.4, 11, 5.2, 22)),
+  ...e5N('wood', oRect('mass', 2.4, 11, 4.8, 22), oRect('mass', 28.6, 11, 4.4, 22)),
+  ...e5N('newWood', oBar('dark', 5, 7.4, 26.4, 7.4, 0.9), oBar('dark', 5, 14.6, 26.4, 14.6, 0.9)),
+  oBar('lit', 1, 1, 30, 1, 0.6),
+]);
+export const vegCrate = (x: number, y: number, w: number, h: number) => fit(VEG_CRATE, x, y, w, h);
+
+// ── THE HALL ─────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Hôtel de ville de Bruxelles, Salle Gothique", and the timber roofs
+// of English guildhalls): a great hall's walls of DRESSED STONE under a dark oak TIE BEAM
+// that rests on carved stone CORBELS; a town's BANNER hanging from a rod, red with a
+// golden tower; iron TORCH SCONCES on the wall; the mayor's table up on a stone DAIS with
+// boards laid on top. The tie beam: real 400 × 30, its corbels at x 52 and 348.
+const HALL_BEAM: ObjPart[] = e5In(400, 30, [
+  ...e5N('stoaBeam', oRect('mass', 200, 7, 400, 12), oRect('face', 200, 12.4, 400, 3)),
+  ...e5N('e5Stone',
+    oRect('mass', 52, 18.6, 16, 9, 0, 1), oEll('mass', 52, 24, 12, 8),
+    oRect('mass', 348, 18.6, 16, 9, 0, 1), oEll('mass', 348, 24, 12, 8),
+  ),
+  ...e5N('stoaBeam', oBar('dark', 20, 5.6, 120, 5, 0.6), oBar('dark', 160, 8.4, 290, 8, 0.6), oBar('dark', 312, 5.4, 392, 5.8, 0.6)),
+  ...e5N('e5Stone', oBar('dark', 46, 26, 58, 26, 0.6), oBar('dark', 342, 26, 354, 26, 0.6)),
+  oEll('line', 52, 7, 2.2, 2.2), oEll('line', 348, 7, 2.2, 2.2),
+  oBar('lit', 4, 2, 396, 2, 0.8),
+]);
+export const hallBeam = (x: number, y: number, w: number, h: number) => fit(HALL_BEAM, x, y, w, h);
+
+/** The town's banner: red with a golden tower, a swallowtail foot, on a rod. Real 44 × 84. */
+const TOWN_BANNER: ObjPart[] = e5In(44, 84, [
+  ...e5N('e5Red',
+    oRect('mass', 22, 36, 34, 62),
+    oTri('mass', 13.5, 72, 17, 10, 'down'), oTri('mass', 30.5, 72, 17, 10, 'down'),
+    oRect('face', 36, 38, 6, 66),
+  ),
+  ...e5N('brass',
+    oRect('mass', 22, 41, 12, 16), oRect('mass', 22, 32.6, 15, 2.6),
+    oRect('mass', 16.6, 30, 3, 3.4), oRect('mass', 22, 30, 3, 3.4), oRect('mass', 27.4, 30, 3, 3.4),
+    oRect('mass', 22, 61, 34, 2.4),
+  ),
+  oRect('line', 22, 46, 3.6, 6.4, 0, 1.6), oRect('line', 18.6, 38.6, 1.6, 2.6), oRect('line', 25.4, 38.6, 1.6, 2.6),
+  ...e5N('wood', oBar('mass', 2, 4, 42, 4, 2.6)),
+  ...e5N('brass', oEll('mass', 1.8, 4, 3.6, 3.6), oEll('mass', 42.2, 4, 3.6, 3.6)),
+  oBar('line', 8, 3, 12, 0.4, 0.5), oBar('line', 36, 3, 32, 0.4, 0.5),
+]);
+export const townBanner = (x: number, y: number, w: number, h: number) => fit(TOWN_BANNER, x, y, w, h);
+
+/**
+ * An iron torch sconce: a backplate nailed to the wall, an arm out to a ring, a torch in
+ * the ring with its pitch-soaked head at (10.6, 7) (the flame is the scene's). Real 16 × 42.
+ */
+const WALL_TORCH: ObjPart[] = e5In(16, 42, [
+  ...e5N('iron', oRect('mass', 3, 30, 4.4, 14, 0, 1), oBar('mass', 4, 28, 10, 22, 1.6)),
+  ...e5N('stoaBeam', oBar('mass', 9.6, 36, 10.6, 9, 2.6)),
+  ...e5N('felt', oEll('mass', 10.6, 7.6, 6.2, 5.6)),
+  ...e5N('iron', oRect('mass', 10, 21.8, 6.4, 2, 0, 0.8)),
+  oEll('line', 3, 26, 1.2, 1.2), oEll('line', 3, 34, 1.2, 1.2),
+  oBar('lit', 1.6, 24, 1.6, 36, 0.5),
+]);
+export const wallTorch = (x: number, y: number, w: number, h: number) => fit(WALL_TORCH, x, y, w, h);
+
+/** The mayor's dais: boards laid on a stone step, real 168 × 22. */
+const MAYOR_DAIS: ObjPart[] = e5In(168, 22, [
+  ...e5N('coping', oRect('mass', 84, 13, 168, 18, 0, 0.6), oRect('face', 165.6, 13, 4.8, 18)),
+  ...e5N('oak', oRect('mass', 84, 2.4, 168, 4.8, 0, 0.8)),
+  ...e5N('coping',
+    oBar('dark', 2, 13.2, 163, 13.2, 0.6),
+    oBar('dark', 34, 5, 34, 13.2, 0.6), oBar('dark', 78, 5, 78, 13.2, 0.6), oBar('dark', 122, 5, 122, 13.2, 0.6),
+    oBar('dark', 56, 13.2, 56, 21.6, 0.6), oBar('dark', 100, 13.2, 100, 21.6, 0.6), oBar('dark', 144, 13.2, 144, 21.6, 0.6),
+  ),
+  ...e5N('oak', oBar('dark', 50, 0.8, 50, 4.4, 0.4), oBar('dark', 112, 0.8, 112, 4.4, 0.4)),
+  oBar('lit', 2, 5.8, 160, 5.8, 0.6),
+]);
+export const mayorDais = (x: number, y: number, w: number, h: number) => fit(MAYOR_DAIS, x, y, w, h);
+
+/**
+ * The mayor's heavy oak table: a thick top, an apron with a moulding, turned front legs
+ * and a stretcher low between them. Real 154 × 30, its top's top at y 0.
+ */
+const MAYOR_TABLE: ObjPart[] = e5In(154, 30, [
+  ...e5N('wood',
+    oRect('mass', 77, 3, 154, 6, 0, 1),
+    oRect('mass', 77, 9.4, 140, 7),
+    oBar('mass', 9, 12, 9, 29.6, 4.6), oBar('mass', 145, 12, 145, 29.6, 4.6),
+    oEll('mass', 9, 20, 7, 5), oEll('mass', 145, 20, 7, 5),
+    oBar('mass', 9, 26, 145, 26, 2.4),
+    oRect('face', 77, 5.4, 154, 1.4),
+    oBar('dark', 20, 9.6, 134, 9.6, 0.6),
+  ),
+  oBar('lit', 3, 1.2, 150, 1.2, 0.6),
+]);
+export const mayorTable = (x: number, y: number, w: number, h: number) => fit(MAYOR_TABLE, x, y, w, h);
+
+/**
+ * The great doorway's arch, in dressed stone paler than the walls: nine voussoirs round a
+ * semicircle (inner radius 50, centre (64, 64)), a keystone, and a jamb each side down to
+ * the floor. Real 128 × 128 — the opening is x 14–114, y 14 to the foot.
+ */
+const ARCH_STONES: ObjPart[] = (() => {
+  const ps: ObjPart[] = [];
+  for (let k = 0; k < 9; k += 1) {
+    const a = (Math.PI * (k + 0.5)) / 9;
+    const deg = (-a * 180) / Math.PI;
+    ps.push(oRect('mass', 64 + 57 * Math.cos(a), 64 - 57 * Math.sin(a), k === 4 ? 16 : 14, 21, deg, 0.6));
+  }
+  ps.push(oRect('mass', 7, 96, 14, 64), oRect('mass', 121, 96, 14, 64), oRect('face', 117, 96, 6, 64));
+  const joints: ObjPart[] = [];
+  for (let k = 1; k < 9; k += 1) {
+    const a = (Math.PI * k) / 9;
+    joints.push(oBar('dark', 64 + 50.6 * Math.cos(a), 64 - 50.6 * Math.sin(a), 64 + 63.4 * Math.cos(a), 64 - 63.4 * Math.sin(a), 0.7));
+  }
+  return e5In(128, 128, [
+    ...e5N('stoaStone', ...ps),
+    ...e5N('stoaStone', ...joints, oBar('dark', 0.6, 86, 13.4, 86, 0.7), oBar('dark', 0.6, 106, 13.4, 106, 0.7),
+      oBar('dark', 114.6, 86, 127.4, 86, 0.7), oBar('dark', 114.6, 106, 127.4, 106, 0.7)),
+  ]);
+})();
+export const stoneArch = (x: number, y: number, w: number, h: number) => fit(ARCH_STONES, x, y, w, h);
+
+// ── ACROSS THE STREET ────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Lavenham — Medieval Half-Timbered Houses"): a jettied house of
+// cream plaster between close-set dark oak STUDS, a sill beam and a rail, a clay-tiled
+// ROOF in courses, a brick CHIMNEY; here a bakery, its arched door on the left and its
+// lit shop window on the right with loaves on the sill. Real 100 × 104: the roof's ridge
+// at y 32, the eaves at 50, the door's opening x 12–40 from y 60 to the foot.
+const BAKE_HOUSE: ObjPart[] = e5In(100, 104, [
+  ...e5N('brick', oRect('mass', 30, 28, 9, 16), oRect('dark', 33, 28, 3, 16)),
+  ...e5N('brick', oRect('mass', 30, 20.6, 11.4, 2.6, 0, 0.6)),
+  ...e5N('terracotta', oRect('mass', 50, 41, 104, 18), oRect('face', 50, 48.6, 104, 3)),
+  ...e5N('stucco', oRect('mass', 50, 77, 100, 54), oRect('face', 50, 51.6, 100, 3.4)),
+  ...e5N('terracotta', oBar('dark', 0, 36, 100, 36, 0.6), oBar('dark', 0, 41.4, 100, 41.4, 0.6), oBar('dark', 0, 46, 100, 46, 0.6)),
+  ...e5N('brick', oBar('dark', 26, 24, 34, 24, 0.4), oBar('dark', 26, 28.4, 34, 28.4, 0.4), oBar('dark', 26, 32.6, 34, 32.6, 0.4)),
+  ...e5N('roofBoard',
+    oBar('dark', 0, 54.4, 100, 54.4, 2.4), oBar('dark', 0, 102.4, 100, 102.4, 2.6), oBar('dark', 42, 74, 100, 74, 1.8),
+    oBar('dark', 3, 55, 3, 102, 2.2), oBar('dark', 46, 55, 46, 102, 2.2), oBar('dark', 56, 55, 56, 74, 1.8),
+    oBar('dark', 68, 55, 68, 74, 1.8), oBar('dark', 80, 55, 80, 74, 1.8), oBar('dark', 92, 55, 92, 74, 1.8),
+    oBar('dark', 96.4, 74, 96.4, 102, 2.2), oBar('dark', 50, 74, 62, 55, 1.4),
+  ),
+  ...e5N('gloom', oRect('mass', 26, 83, 30, 40), oEll('mass', 26, 64, 30, 12)),
+  ...e5N('truckGlow', oRect('mass', 74, 87, 32, 18), oRect('face', 74, 94.6, 32, 2.6)),
+  ...e5N('crust', oEll('mass', 66, 93.4, 9, 4.6), oEll('mass', 76, 93.2, 9, 5), oEll('mass', 85, 93.6, 7, 4)),
+  ...e5N('wood', oRect('mass', 74, 97.6, 36, 2.6, 0, 0.6)),
+  oBar('line', 74, 78, 74, 92, 0.6), oBar('line', 58, 85, 90, 85, 0.6),
+]);
+export const bakeHouse = (x: number, y: number, w: number, h: number) => fit(BAKE_HOUSE, x, y, w, h);
+
+/** The bakery's door: planked, arched, two iron strap hinges and a ring. Real 28 × 42. */
+const BAKE_DOOR: ObjPart[] = e5In(28, 42, [
+  ...e5N('wood', oRect('mass', 14, 26.5, 28, 31), oEll('mass', 14, 12.4, 28, 24), oRect('face', 24.6, 26.5, 6.8, 31)),
+  ...e5N('wood', oBar('dark', 7, 4, 7, 41.4, 0.6), oBar('dark', 14, 1.2, 14, 41.4, 0.6), oBar('dark', 21, 4, 21, 41.4, 0.6)),
+  oBar('line', 2, 15, 22, 15, 1.4), oBar('line', 2, 33, 22, 33, 1.4),
+  oEll('line', 22.4, 25, 2.6, 2.6), oEll('lit', 22.4, 25, 1.2, 1.2),
+]);
+export const bakeDoor = (x: number, y: number, w: number, h: number) => fit(BAKE_DOOR, x, y, w, h);
+
+/**
+ * REFERENCE (Commons: "Village well, Ford"; and every storybook well): a round DRUM of
+ * stone with a capping course, two timber POSTS carrying a WINDLASS with its crank, a
+ * little tiled ROOF over it, and a wooden bucket wound up under the roof. Real 48 × 64;
+ * the capping's top at y 44.8, where the scene sets the lid (`wellLid`).
+ */
+const TOWN_WELL: ObjPart[] = e5In(48, 64, [
+  ...e5N('wood', oBar('mass', 6, 8, 6, 46, 3.2), oBar('mass', 42, 8, 42, 46, 3.2), oBar('mass', 6, 22, 42, 22, 2.4), oBar('mass', 42, 22, 46.4, 27, 1.4)),
+  ...e5N('terracotta', oRect('mass', 24, 5, 48, 8, 0, 1), oRect('face', 24, 8.2, 48, 1.8)),
+  ...e5N('terracotta', oBar('dark', 2, 3.4, 46, 3.4, 0.6)),
+  ...e5N('wood', ...trapezoid('mass', 24, 31, 8, 6, 6)),
+  ...e5N('stepStone', oRect('mass', 24, 55.4, 44, 17.2, 0, 1.6), oRect('mass', 24, 46.6, 47, 3.6, 0, 1.2), oRect('face', 41, 55.4, 6, 17.2)),
+  ...e5N('stepStone',
+    oBar('dark', 3, 52, 44, 52, 0.6), oBar('dark', 3, 58.4, 44, 58.4, 0.6),
+    oBar('dark', 14, 48.4, 14, 52, 0.6), oBar('dark', 30, 48.4, 30, 52, 0.6), oBar('dark', 22, 52, 22, 58.4, 0.6), oBar('dark', 38, 52, 38, 58.4, 0.6),
+    oBar('dark', 12, 58.4, 12, 63.6, 0.6), oBar('dark', 30, 58.4, 30, 63.6, 0.6),
+  ),
+  oBar('line', 24, 22, 24, 28, 0.5), oBar('line', 20.2, 30.2, 27.8, 30.2, 0.6),
+  oEll('line', 24, 22, 6, 3.2), oEll('lit', 24, 21.6, 3.4, 1.2),
+]);
+export const townWell = (x: number, y: number, w: number, h: number) => fit(TOWN_WELL, x, y, w, h);
+
+/** The well's lid: weathered planks with a batten and an iron ring. Real 46 × 6. */
+const WELL_LID: ObjPart[] = e5In(46, 6, [
+  ...e5N('oldWood', oRect('mass', 23, 3.4, 46, 4.4, 0, 1), oRect('face', 23, 5, 46, 1.4)),
+  ...e5N('oldWood', oBar('dark', 12, 1.4, 12, 5.4, 0.5), oBar('dark', 23, 1.4, 23, 5.4, 0.5), oBar('dark', 34, 1.4, 34, 5.4, 0.5)),
+  oEll('line', 23, 1.2, 4.4, 2.4), oEll('lit', 23, 1.3, 2.2, 0.9),
+]);
+export const wellLid = (x: number, y: number, w: number, h: number) => fit(WELL_LID, x, y, w, h);
+
+// ── THE CELLAR HATCH ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Trapdoor"): a square of planks let into the floor, hinged along
+// its FAR edge, so it opens by its NEAR edge and stands up on the hinge, showing its
+// underside — battens and a brace across the planks — over a dark hole with a ladder
+// going down. Seen from where the reader stands the lid lying shut is foreshortened: real
+// 50 × 15, narrower at the far edge (46), a ring at its near edge; standing up it shows
+// its true height, real 50 × 34. The hole under it is the same 50 × 15.
+const HATCH_TOP: ObjPart[] = e5In(50, 15, [
+  ...e5N('oak', ...trapezoid('mass', 25, 7.5, 46, 50, 15)),
+  ...e5N('oak', oBar('dark', 12.6, 0.6, 11.8, 14.4, 0.5), oBar('dark', 25, 0.6, 25, 14.4, 0.5), oBar('dark', 37.4, 0.6, 38.2, 14.4, 0.5)),
+  oBar('line', 4, 4, 46, 4, 1.3), oBar('line', 2.6, 11, 47.4, 11, 1.3),
+  oEll('line', 42, 13.2, 4.8, 2.6), ...e5N('oak', oEll('dark', 42, 13.2, 2.8, 1.1)),
+  oBar('lit', 3, 1, 47, 1, 0.5),
+]);
+export const hatchTop = (x: number, y: number, w: number, h: number) => fit(HATCH_TOP, x, y, w, h);
+
+const HATCH_UNDER: ObjPart[] = e5In(50, 34, [
+  ...e5N('wood', oRect('mass', 25, 17, 50, 34, 0, 0.6), oRect('face', 46.6, 17, 6.8, 34)),
+  ...e5N('wood', oBar('dark', 12.5, 1, 12.5, 33, 0.5), oBar('dark', 25, 1, 25, 33, 0.5), oBar('dark', 37.5, 1, 37.5, 33, 0.5)),
+  ...e5N('oak', oBar('mass', 4, 7.4, 44, 7.4, 3.4), oBar('mass', 4, 26.6, 44, 26.6, 3.4), oBar('mass', 7, 25, 41, 9, 2.8)),
+  oBar('line', 2.4, 3.2, 2.4, 31, 1.2),
+  oBar('lit', 2, 1.4, 44, 1.4, 0.5),
+]);
+export const hatchUnder = (x: number, y: number, w: number, h: number) => fit(HATCH_UNDER, x, y, w, h);
+
+const CELLAR_HOLE: ObjPart[] = e5In(50, 15, [
+  ...e5N('gloom', ...trapezoid('mass', 25, 7.5, 46, 50, 15)),
+  ...e5N('e5Stone', oRect('face', 25, 2.4, 45, 4.6)),
+  ...e5N('wood', oBar('dark', 18.4, 4, 17.4, 15, 1.2), oBar('dark', 31.6, 4, 32.6, 15, 1.2), oBar('dark', 17.8, 8.6, 32.2, 8.6, 0.9), oBar('dark', 17.4, 12.8, 32.6, 12.8, 0.9)),
+]);
+export const cellarHole = (x: number, y: number, w: number, h: number) => fit(CELLAR_HOLE, x, y, w, h);
+
+// ── econ5: objects for this lesson go ABOVE this line ──
+
+// ── sci5 BEGIN ──
+// ─────────────────────────────────────────────────────────────────────────────
+// science-foundations-5 — A SCOTTISH LOCH AT NIGHT. Drawn against Commons photographs
+// (scratchpad/ref/sci5-*): a clinker rowing boat, white-painted with a varnished gunwale,
+// its sheer rising to a raked stem and its stern cut square (sci5-rowboat2-1, -2); a small
+// wooden jetty on a loch, planked deck on round piles, a mooring post at its end
+// (sci5-jetty-1); a hurricane lantern — wire bail, vented top, side guard tubes, glass
+// globe, fuel tank (sci5-lantern-2); a camera with a long white telephoto lens and black
+// rings (sci5-camera-2); a vacuum flask whose cap is its own cup (sci5-flask-2); green
+// glass bottles (sci5-bottle2-1). The far shore is Loch Ness from the water (sci5-loch-1).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in one named real colour. */
+const s5N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function sci5In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── ROWING BOAT ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. A loch rowing boat, side on, is SHALLOW: its depth is a fifth of its length.
+// The sheer (the line of the gunwale) dips amidships and rises at both ends, most at the
+// raked stem; the stern is a square transom. Clinker planks overlap, so the side carries
+// two or three lap lines that follow the sheer and sweep up into the bow. Painted white
+// above the waterline with a dark top strake under a varnished gunwale rail, and red
+// antifouling below. Drawn in two halves so the people sit INSIDE it: the far gunwale
+// and the varnished inside behind them, the near side in front. Real units, 176 × 34:
+// the near gunwale at y 7 amidships, the waterline at 24, the keel at 33.
+const S5_BOAT_BACK: ObjPart[] = sci5In(176, 34, [
+  ...s5N('wood',
+    oRect('face', 88, 6.4, 160, 8, 0, 2),                             // the varnished inside, in shade
+    oBar('mass', 8, 2.8, 88, 3.4, 2.4),                               // the far gunwale rail
+    oBar('mass', 88, 3.4, 168, 1.2, 2.4),
+  ),
+]);
+export const s5BoatBack = (x: number, y: number, w: number, h: number) => fit(S5_BOAT_BACK, x, y, w, h);
+
+const S5_BOAT_FRONT: ObjPart[] = sci5In(176, 34, [
+  ...s5N('s5BoatWhite',
+    oRect('mass', 82, 17, 152, 20, 0, 2),                             // the topsides
+    oEll('mass', 84, 22, 160, 22),                                    // the round of the bilge
+    oTri('mass', 162, 14, 24, 22, 'right'),                          // the bow, pointed
+  ),
+  ...s5N('s5Antifoul', oEll('face', 84, 29.5, 150, 7)),               // below the waterline
+  ...s5N('s5BoatStripe',
+    oBar('mass', 5, 6.6, 62, 8.8, 3),                                 // the dark top strake, along the sheer
+    oBar('mass', 62, 8.8, 124, 8.8, 3),
+    oBar('mass', 124, 8.8, 168, 4.4, 3),
+  ),
+  ...s5N('wood',
+    oBar('mass', 4, 5, 62, 7.2, 1.7),                                 // the varnished gunwale rail
+    oBar('mass', 62, 7.2, 124, 7.2, 1.7),
+    oBar('mass', 124, 7.2, 170, 2.6, 1.7),
+    oBar('mass', 168.5, 3, 173.5, 1.8, 1.8),                          // the stem head
+  ),
+  ...s5N('brass', oRect('mass', 86, 5.4, 3.4, 3.4, 0, 1)),            // the rowlock
+  oBar('line', 7, 15, 130, 15.4, 0.6),                                // the clinker laps, sweeping up
+  oBar('line', 130, 15.4, 164, 11, 0.6),                              // into the bow
+  oBar('line', 7, 20.6, 136, 21, 0.6),
+  oBar('line', 136, 21, 160, 18, 0.6),
+  oBar('lit', 14, 11.4, 120, 11.6, 0.8),                              // the lamp along the topsides
+]);
+export const s5BoatFront = (x: number, y: number, w: number, h: number) => fit(S5_BOAT_FRONT, x, y, w, h);
+/** The boat's measures, in its own 176 × 34: gunwale, waterline, the rowlock's x. */
+export const S5_BOAT = { gunwale: 7, waterline: 24, keel: 33, rowlock: 86, of: { w: 176, h: 34 } } as const;
+
+// ── JETTY ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A small loch jetty is a planked deck on round timber piles driven into the
+// bed, cross-braced under the deck, with a taller post at the end to tie a boat to and a
+// rope round it. Weathered silver-grey. Real units, 138 × 96: the post from 0, the deck's
+// top at 14, the piles down to 96.
+const S5_JETTY: ObjPart[] = sci5In(138, 96, [
+  ...s5N('oldWood',
+    oRect('face', 20, 58, 5, 76),                                     // the piles
+    oRect('face', 64, 58, 5, 76),
+    oRect('face', 108, 58, 5, 76),
+    oBar('mass', 20, 24, 64, 50, 2.2),                                // the cross braces
+    oBar('mass', 64, 24, 108, 50, 2.2),
+    oRect('mass', 64, 17, 128, 6, 0, 1),                              // the deck
+    oRect('mass', 131, 40, 7, 80, 0, 1.6),                            // the mooring post
+  ),
+  ...s5N('s5Rope', oEll('mass', 131, 10, 10, 4.4), oEll('mass', 131, 13.4, 10, 4.4)),
+  oBar('line', 12, 15, 12, 20, 0.5),                                  // the plank ends
+  oBar('line', 34, 15, 34, 20, 0.5),
+  oBar('line', 56, 15, 56, 20, 0.5),
+  oBar('line', 78, 15, 78, 20, 0.5),
+  oBar('line', 100, 15, 100, 20, 0.5),
+  oBar('lit', 2, 14.6, 122, 14.6, 0.7),                               // the lamp along the deck's edge
+]);
+export const s5Jetty = (x: number, y: number, w: number, h: number) => fit(S5_JETTY, x, y, w, h);
+
+// ── HURRICANE LANTERN ────────────────────────────────────────────────────────
+//
+// REFERENCE. A wire BAIL over a vented top cap; two side TUBES running down to the fuel
+// tank, which is also the base; a glass GLOBE between them with a guard wire round it.
+// The bail is the field mark — it is how it is carried, hanging. Real units 18 × 32,
+// drawn hanging from the top of its bail at (9, 1); the flame sits at the globe's middle.
+const S5_LANTERN: ObjPart[] = sci5In(18, 32, [
+  ...s5N('s5Lantern',
+    oBar('mass', 2.5, 11, 2.5, 27, 1.8),                              // the side tubes
+    oBar('mass', 15.5, 11, 15.5, 27, 1.8),
+    oEll('mass', 9, 9.6, 15, 4.4),                                    // the top cap
+    oRect('mass', 9, 12, 8, 3, 0, 1),
+    oEll('mass', 9, 28, 17, 7),                                       // the tank, its base
+    oRect('face', 9, 30.4, 16, 3, 0, 1.2),
+  ),
+  ...s5N('glass', oEll('mass', 9, 19.5, 10, 12)),                     // the globe
+  oBar('line', 9, 1, 2.6, 9, 0.8),                                    // the wire bail
+  oBar('line', 9, 1, 15.4, 9, 0.8),
+  oBar('line', 4, 19.5, 14, 19.5, 0.5),                               // the guard wire
+  oBar('lit', 6.4, 16, 6.4, 22, 0.9),
+]);
+export const s5Lantern = (x: number, y: number, w: number, h: number) => fit(S5_LANTERN, x, y, w, h);
+/** Where the lantern hangs from (the top of its bail) and where its flame burns, in its 18 × 32. */
+export const S5_LANTERN_AT = { grip: { x: 9, y: 1 }, flame: { x: 9, y: 19.5 }, of: { w: 18, h: 32 } } as const;
+
+// ── CAMERA ───────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A camera body with its prism hump and grip, and a long telephoto lens in
+// off-white with black rubber rings and a wide hood at the front (sci5-camera-2): the
+// pale lens is what reads at night. Real units 40 × 16, held at the body (7, 9).
+const S5_CAMERA: ObjPart[] = sci5In(40, 16, [
+  ...s5N('s5CamBlack',
+    oRect('mass', 7, 9.5, 13, 11, 0, 2),                              // the body
+    oRect('mass', 6.5, 3.6, 6, 3.4, 0, 1),                            // the prism hump
+  ),
+  ...s5N('s5Lens',
+    oRect('mass', 24, 9, 24, 9, 0, 2),                                // the lens barrel
+    oRect('mass', 36.5, 9, 6, 12.5, 0, 2),                            // its hood
+  ),
+  ...s5N('s5CamBlack',
+    oRect('dark', 19, 9, 2.4, 9.4),                                   // the rubber rings
+    oRect('dark', 29, 9, 2, 9.4),
+  ),
+  oEll('line', 39.4, 9, 1.4, 9),                                      // the front glass, edge on
+  oBar('lit', 14, 5.6, 33, 5.6, 0.7),
+]);
+export const s5Camera = (x: number, y: number, w: number, h: number) => fit(S5_CAMERA, x, y, w, h);
+export const S5_CAMERA_GRIP = { x: 7, y: 9, of: { w: 40, h: 16 } } as const;
+
+// ── VACUUM FLASK AND ITS CUP ─────────────────────────────────────────────────
+//
+// REFERENCE. A tall flask whose cap unscrews to be its own cup (sci5-flask-2), in a red
+// tartan cover — red with dark green bars both ways. Real units 12 × 32 for the flask,
+// held round its middle (6, 19); its stopper's top at (6, 1.5). The cup, 10 × 8, held
+// round its body (5, 4.5).
+const S5_FLASK: ObjPart[] = sci5In(12, 32, [
+  ...s5N('s5Tartan', oRect('mass', 6, 19.5, 11, 25, 0, 2.6)),         // the body, in its cover
+  ...s5N('s5TartanBar',
+    oRect('dark', 6, 13, 11, 1.8),                                    // the tartan's bars across
+    oRect('dark', 6, 20.5, 11, 1.8),
+    oRect('dark', 6, 28, 11, 1.8),
+    oRect('dark', 3.4, 19.5, 1.5, 24),                                // and down
+    oRect('dark', 8.6, 19.5, 1.5, 24),
+  ),
+  ...s5N('silver', oRect('mass', 6, 5.6, 9.4, 3.2, 0, 1)),            // the shoulder
+  ...s5N('s5CamBlack', oRect('mass', 6, 2.6, 6, 3, 0, 0.8)),          // the stopper
+  oBar('lit', 2.4, 9, 2.4, 30, 0.7),
+]);
+export const s5Flask = (x: number, y: number, w: number, h: number) => fit(S5_FLASK, x, y, w, h);
+export const S5_FLASK_AT = { grip: { x: 6, y: 19 }, top: { x: 6, y: 1.5 }, of: { w: 12, h: 32 } } as const;
+
+const S5_FLASK_CUP: ObjPart[] = sci5In(10, 8, [
+  ...s5N('silver', ...trapezoid('mass', 5, 4.4, 9.4, 7.4, 6.6)),     // the cup, wider at its rim
+  ...s5N('silver', oRect('face', 5, 7.2, 7.4, 1.4, 0, 0.5)),
+  oEll('lit', 5, 1.2, 9.4, 1.8),                                      // the rim
+  oBar('lit', 2.4, 3, 2.8, 6.4, 0.6),
+]);
+export const s5FlaskCup = (x: number, y: number, w: number, h: number) => fit(S5_FLASK_CUP, x, y, w, h);
+export const S5_CUP_AT = { grip: { x: 5, y: 4.5 }, of: { w: 10, h: 8 } } as const;
+
+// ── BOTTLE, ADRIFT ───────────────────────────────────────────────────────────
+//
+// REFERENCE. A wine bottle lying on its side: a long straight BODY with rounded ends, a
+// SHOULDER that swells and narrows, a NECK with a lip ring at its mouth, and a CORK
+// standing proud (sci5-bottle2-1). Glass shows its colour on the body and a long highlight
+// along the top. Real units 100 × 30, the neck to the right; a rolled message lies along
+// the inside of the body (S5_BOTTLE_SCROLL), which the scene writes on.
+const s5BottleParts = (k: NaturalKey): ObjPart[] => sci5In(100, 30, [
+  ...s5N(k,
+    oRect('mass', 39, 15, 74, 28, 0, 10),                             // the body
+    oEll('mass', 77, 15, 16, 22),                                     // the shoulder
+    oRect('mass', 88, 15, 12, 10, 0, 2),                              // the neck
+    oRect('face', 93.6, 15, 3, 12, 0, 1),                             // the lip ring
+    oRect('dark', 39, 26.4, 64, 3.2, 0, 1.6),                         // the glass's underside, in shade
+  ),
+  ...s5N('cork', oRect('mass', 97.3, 15, 5, 8, 0, 1.2)),              // the cork
+  oBar('lit', 10, 4.2, 64, 4.2, 1.1),                                 // the long highlight
+  oBar('lit', 79, 8.6, 86, 9.8, 0.7),
+]);
+export const s5Bottle = (x: number, y: number, w: number, h: number, k: NaturalKey = 's5SeaGlass') => fit(s5BottleParts(k), x, y, w, h);
+/** The rolled message inside the body, in the bottle's own 100 × 30. */
+export const S5_BOTTLE_SCROLL = { x0: 6, y0: 4.6, x1: 72, y1: 25.6, of: { w: 100, h: 30 } } as const;
+
+// ── SONAR ────────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A fish-finder: a small black case with a dark screen set in it, a row of
+// buttons under the screen, on a short swivel stalk and a bracket clamped to the gunwale.
+// Its back is a plain ribbed case with the transducer cable coming out. Real units 24 × 24;
+// the screen 2.5–21.5 × 2–15, which the scene draws on.
+const S5_SONAR: ObjPart[] = sci5In(24, 24, [
+  ...s5N('s5CamBlack',
+    oRect('mass', 12, 9, 24, 18, 0, 2.6),                             // the case
+    oRect('mass', 12, 20, 4, 4),                                      // the swivel stalk
+    oRect('face', 12, 22.6, 12, 2.4, 0, 0.8),                         // the bracket
+  ),
+  ...s5N('s5Screen', oRect('dark', 12, 8.5, 19, 13, 0, 1)),           // the screen, set in
+  oEll('lit', 7, 16.4, 1.6, 1.6),                                     // the buttons
+  oEll('lit', 12, 16.4, 1.6, 1.6),
+  oEll('lit', 17, 16.4, 1.6, 1.6),
+]);
+export const s5Sonar = (x: number, y: number, w: number, h: number) => fit(S5_SONAR, x, y, w, h);
+const S5_SONAR_BACK: ObjPart[] = sci5In(24, 24, [
+  ...s5N('s5CamBlack',
+    oRect('mass', 12, 9, 24, 18, 0, 2.6),
+    oRect('mass', 12, 20, 4, 4),
+    oRect('face', 12, 22.6, 12, 2.4, 0, 0.8),
+    oRect('dark', 12, 5, 18, 1.4),                                    // the ribs on its back
+    oRect('dark', 12, 8.5, 18, 1.4),
+    oRect('dark', 12, 12, 18, 1.4),
+  ),
+  oBar('line', 18, 16, 23, 22, 0.9),                                  // the cable
+]);
+export const s5SonarBack = (x: number, y: number, w: number, h: number) => fit(S5_SONAR_BACK, x, y, w, h);
+export const S5_SONAR_SCREEN = { x0: 2.5, y0: 2, x1: 21.5, y1: 15, of: { w: 24, h: 24 } } as const;
+
+// ── sci5: objects for this lesson go ABOVE this line ──
+
 /** Every object, by name — what `sheet-lesson-objects` and `check:objects` walk. */
 // ─────────────────────────────────────────────────────────────────────────────
 // history-foundations-5 — AN ATHENIAN LAW COURT, AND A BEDROOM OF TODAY.
@@ -7438,5 +9121,18 @@ export const OBJECTS = {
   clockTower, towerBell, phoneShop, cycleRack, cycleStand, horseTrough, oldPhoto,
   // hist5:
   klepsydraPot, clockBlock, ballotUrn, woodUrn, ballotDisc, bedsideLamp, roomPoster, pendant,
+  // phil5:
+  telePodBack, telePodFront, telePodPad, recycleLid, labConsole, consoleDesk, balanceStand, balanceBeam, balancePan, porthole, labMonitor, corridorHatch, moonDome, moonModule,
+  // psych5:
+  ps5Crate, ps5CaseTan, ps5CaseRed, ps5CaseGreen, ps5Lantern, ps5Clock, ps5Gorse, ps5Cake,
+  // growth5:
+  g5RingCurb, g5Mast, g5Ladder, g5Stand, g5Block, g5Trunk, g5LidOpen, g5LidShut, g5PosterRoll, g5PosterBill, g5Shoes,
+  g5Whistle, g5Cane, g5Coil, g5Lamp,
+  // biz5:
+  b5Envelope, b5Skirt, b5Basket, b5BasketBack, b5Frame, b5Cylinder, b5Trolley, b5Easel, b5Tin, b5TinLid, b5Canopy, b5UmbShaft, b5Button,
+  // econ5:
+  ratRun, ratPeek, ratTail, tailBasket, coinSack, silverCoin, handLantern, candlestick, sealMatrix, waxSeal, decreeSeal, rolledDraft, draftRoller, cabbageHead, vegCrate, hallBeam, townBanner, wallTorch, mayorDais, mayorTable, stoneArch, bakeHouse, bakeDoor, townWell, wellLid, hatchTop, hatchUnder, cellarHole,
+  // sci5:
+  s5BoatBack, s5BoatFront, s5Jetty, s5Lantern, s5Camera, s5Flask, s5FlaskCup, s5Bottle, s5Sonar, s5SonarBack,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;
