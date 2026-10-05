@@ -4,6 +4,7 @@ import second from './lessons/how-habits-work';
 import third from './lessons/how-to-set-a-goal-that-works';
 import fourth from './lessons/how-to-learn-from-a-mistake';
 import fifth from './lessons/practise-at-the-edge';
+import sixth from './lessons/why-cramming-fades';
 
 const units: Path[] = [
   {
@@ -11,7 +12,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "How people actually change: a little, and often.",
-    lessons: [first, second, third, fourth, fifth],
+    lessons: [first, second, third, fourth, fifth, sixth],
   },
 ];
 

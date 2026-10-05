@@ -485,6 +485,195 @@ export const NATURAL = {
   s5Trace:    { base: '#6EE59A', shade: '#4CC07A', label: '#1A1A1A', what: 'a sonar screen\'s bright green trace and sweep' },
   s5Rope:     { base: '#BFA273', shade: '#9C8257', label: '#1A1A1A', what: 'a hemp mooring rope' },
   s5Photo:    { base: '#6C727E', shade: '#555B66', label: '#FAFAF7', what: 'a dark, blurry night photograph of water' },
+  // phil6 colours:
+  ph6Night:   { base: '#232B55', shade: '#181E40', label: '#FAFAF7', what: 'a night sky over a fairground, deep navy overhead' },
+  ph6Dusk:    { base: '#4C4180', shade: '#3D336A', label: '#FAFAF7', what: 'the night sky lower down, indigo, warmed by the fair' },
+  ph6Haze:    { base: '#C9AFCB', shade: '#B397B7', label: '#1A1A1A', what: 'the pink-lilac glow a fairground\'s lights throw on the night air' },
+  ph6Turf:    { base: '#97A27C', shade: '#808C66', label: '#1A1A1A', what: 'trodden fairground grass, lit by the stalls\' lamps' },
+  ph6Lacquer: { base: '#9C2D2B', shade: '#74201F', label: '#FAFAF7', what: 'a fortune machine\'s red lacquered cabinet' },
+  ph6Walnut:  { base: '#5E3B25', shade: '#45291A', label: '#FAFAF7', what: 'a cabinet\'s dark walnut plinth' },
+  ph6Velvet:  { base: '#33418A', shade: '#26326C', label: '#FAFAF7', what: 'the royal-blue velvet lining a fortune machine\'s glass case' },
+  ph6Satin:   { base: '#E8C150', shade: '#C69C33', label: '#1A1A1A', what: 'an automaton\'s gold satin turban and shirt' },
+  ph6Robe:    { base: '#6E3797', shade: '#542878', label: '#FAFAF7', what: 'an automaton\'s purple velvet waistcoat' },
+  ph6Skin:    { base: '#C48D5E', shade: '#A06E44', label: '#1A1A1A', what: 'an automaton\'s painted wooden face and hands' },
+  ph6Beard:   { base: '#2C2521', shade: '#1D1815', label: '#FAFAF7', what: 'an automaton\'s black moustache and pointed beard' },
+  ph6Ball:    { base: '#DCD5F6', shade: '#B6ABE6', label: '#1A1A1A', what: 'a crystal ball, lit lilac from inside' },
+  ph6CardRed: { base: '#B5352F', shade: '#8E2723', label: '#FAFAF7', what: 'a printed fortune card\'s red border and red back' },
+  ph6Fudge:   { base: '#BC8656', shade: '#97683D', label: '#1A1A1A', what: 'squares of vanilla fudge' },
+  ph6Mint:    { base: '#F4F7F2', shade: '#D5DED4', label: '#1A1A1A', what: 'a white mint humbug' },
+  ph6MintStripe: { base: '#3E9C65', shade: '#2E7C4E', label: '#1A1A1A', what: 'a mint humbug\'s green stripes' },
+  ph6Toffee:  { base: '#E2A33A', shade: '#BB8024', label: '#1A1A1A', what: 'toffees twisted in gold wrappers' },
+  ph6Ivory:   { base: '#F3EEE0', shade: '#D4CDB9', label: '#1A1A1A', what: 'a pair of ivory dice' },
+  ph6Glow:    { base: '#F8E3A8', shade: '#ECCC80', label: '#1A1A1A', what: 'the warm lit inside of a carousel at night' },
+  ph6Canopy:  { base: '#CF3F38', shade: '#B5342E', label: '#FAFAF7', what: 'a carousel canopy\'s and a stall awning\'s red stripes' },
+  ph6Cream:   { base: '#F4E8CB', shade: '#DFCDA5', label: '#1A1A1A', what: 'a carousel\'s and an awning\'s cream stripes and rounding boards' },
+  ph6Horse:   { base: '#F5F0E7', shade: '#D9D0C1', label: '#1A1A1A', what: 'a painted white carousel galloper' },
+  ph6Saddle:  { base: '#3263AD', shade: '#264E8A', label: '#FAFAF7', what: 'a carousel horse\'s blue painted saddle' },
+  ph6Bulb:    { base: '#FFF2BE', shade: '#FFDF80', label: '#1A1A1A', what: 'a lit festoon bulb, warm white' },
+  ph6FlagRed: { base: '#C93A31', shade: '#B0322A', label: '#FAFAF7', what: 'a red bunting flag' },
+  ph6FlagYellow: { base: '#F7CD48', shade: '#E2B42E', label: '#1A1A1A', what: 'a yellow bunting flag' },
+  ph6FlagBlue: { base: '#386BBA', shade: '#2E5C9F', label: '#FAFAF7', what: 'a blue bunting flag' },
+  ph6FlagGreen: { base: '#4FAA68', shade: '#3C8F54', label: '#1A1A1A', what: 'a green bunting flag' },
+  ph6Heart:   { base: '#C9303A', shade: '#B22B33', label: '#FAFAF7', what: 'a red heart printed on a card' },
+  ph6Puff:    { base: '#E6EEF4', shade: '#BBCBDA', label: '#1A1A1A', what: 'the white puff of a sneeze' },
+  // psych6 colours: a neon arcade on a seaside pier at night, claw machines, plush bears, phones
+  py6Sky:     { base: '#161D3D', shade: '#10162F', label: '#FAFAF7', what: 'the night sky over the sea, high up, deep navy' },
+  py6SkyLow:  { base: '#26315E', shade: '#1E2850', label: '#FAFAF7', what: 'the night sky low over the sea, lit by the town' },
+  py6Haze:    { base: '#3D3F72', shade: '#333566', label: '#FAFAF7', what: 'the purple glow on the horizon over a lit pier' },
+  py6Sea:     { base: '#1C3156', shade: '#152645', label: '#FAFAF7', what: 'the sea at night, near, dark blue' },
+  py6SeaFar:  { base: '#2A4572', shade: '#223B63', label: '#FAFAF7', what: 'the sea at night, far out, holding the sky' },
+  py6Moon:    { base: '#F3EFD8', shade: '#DAD4B6', label: '#1A1A1A', what: 'the full moon, and its path on the water' },
+  py6Deck:    { base: '#7C5839', shade: '#5E422A', label: '#FAFAF7', what: 'a pier\'s wooden deck boards under arcade light' },
+  py6Rail:    { base: '#E6E2D6', shade: '#BCB6A6', label: '#1A1A1A', what: 'a pier\'s railings, painted white' },
+  py6Fascia:  { base: '#2E2046', shade: '#221735', label: '#FAFAF7', what: 'an arcade\'s painted fascia board, deep purple' },
+  py6Neon:    { base: '#FF5AA8', shade: '#E03C8A', label: '#1A1A1A', what: 'a pink neon tube, lit' },
+  py6NeonCyan: { base: '#4BE4F0', shade: '#25C2D0', label: '#1A1A1A', what: 'a cyan neon tube, lit' },
+  py6NeonGold: { base: '#FFE260', shade: '#F2C83A', label: '#1A1A1A', what: 'a yellow neon tube, and a warm bulb' },
+  py6Topper:  { base: '#1B1E3B', shade: '#14162E', label: '#FFE260', what: 'a claw machine\'s topper sign, its dark face' },
+  py6CabPink: { base: '#C8337E', shade: '#9E2462', label: '#FAFAF7', what: 'a claw machine\'s cabinet, magenta' },
+  py6CabRed:  { base: '#CF3A2E', shade: '#A22B21', label: '#FAFAF7', what: 'a claw machine\'s cabinet, red' },
+  py6CabTeal: { base: '#22948F', shade: '#19726E', label: '#1A1A1A', what: 'a claw machine\'s cabinet, teal' },
+  py6InPink:  { base: '#FBDDEA', shade: '#F5C2D8', label: '#1A1A1A', what: 'a claw machine\'s lit inside, pink' },
+  py6InGold:  { base: '#FCEBB8', shade: '#F7DC94', label: '#1A1A1A', what: 'a claw machine\'s lit inside, warm yellow' },
+  py6InMint:  { base: '#D3F1EC', shade: '#B6E6DE', label: '#1A1A1A', what: 'a claw machine\'s lit inside, mint' },
+  py6Panel:   { base: '#363A44', shade: '#262930', label: '#FAFAF7', what: 'a claw machine\'s black control panel, its coin door' },
+  py6Flap:    { base: '#5B6A80', shade: '#3F4B5D', label: '#FAFAF7', what: 'a prize chute\'s smoked perspex flap' },
+  py6Bear:    { base: '#8256BA', shade: '#653F96', label: '#FAFAF7', what: 'a purple plush teddy bear' },
+  py6BearGreen: { base: '#62B25A', shade: '#4A8E43', label: '#1A1A1A', what: 'a green plush teddy bear' },
+  py6Muzzle:  { base: '#EFE3CF', shade: '#D8C8AE', label: '#1A1A1A', what: 'a plush bear\'s pale muzzle and paw pads' },
+  py6PlushPink: { base: '#F38DB9', shade: '#D96E9D', label: '#1A1A1A', what: 'a pink plush toy in a heap of prizes' },
+  py6PlushBlue: { base: '#72A9DE', shade: '#5589BD', label: '#1A1A1A', what: 'a blue plush toy in a heap of prizes' },
+  py6PlushYellow: { base: '#F4D452', shade: '#D6B33A', label: '#1A1A1A', what: 'a yellow plush toy in a heap of prizes' },
+  py6Acrylic: { base: '#D7E4EC', shade: '#B4C6D2', label: '#1A1A1A', what: 'a clear acrylic display stand, catching the light' },
+  py6Kiosk:   { base: '#2F6DA6', shade: '#235482', label: '#FAFAF7', what: 'a phone kiosk\'s blue-painted stand' },
+  py6ScreenOff: { base: '#2A3140', shade: '#1D232F', label: '#FAFAF7', what: 'a phone\'s screen, asleep' },
+  py6Screen:  { base: '#F3F6FA', shade: '#DCE4EE', label: '#1A1A1A', what: 'a phone\'s lit screen, an app open on it' },
+  py6Duster:  { base: '#F1C232', shade: '#CF9F1E', label: '#1A1A1A', what: 'a yellow polishing duster' },
+  // growth6 colours: a lighthouse lamp room, its lens, a Morse desk, a calm evening and a storm at sea
+  gr6Glass:    { base: '#B4D3CA', shade: '#8AAFA4', label: '#1A1A1A', what: 'a lighthouse lens\'s pale green glass prisms' },
+  gr6GlassHi:  { base: '#E6F2EE', shade: '#D2E7E0', label: '#1A1A1A', what: 'the bright ring of a lens\'s bullseye catching the lamp' },
+  gr6Iron:     { base: '#63917A', shade: '#4A735E', label: '#1A1A1A', what: 'a lens pedestal\'s green-painted cast iron' },
+  gr6Frame:    { base: '#2A3A35', shade: '#1D2925', label: '#FAFAF7', what: 'a lantern\'s dark-painted glazing bars' },
+  gr6Ceiling:  { base: '#6A2E28', shade: '#4E211D', label: '#FAFAF7', what: 'the red-painted iron underside of a lantern roof' },
+  gr6Wall:     { base: '#E9E3D4', shade: '#CDC5B1', label: '#1A1A1A', what: 'a lamp room\'s cream-painted iron wall panels' },
+  gr6Dado:     { base: '#355E4D', shade: '#27473A', label: '#FAFAF7', what: 'a lamp room\'s green-painted lower panels' },
+  gr6Mahogany: { base: '#7C4027', shade: '#5B2E1C', label: '#FAFAF7', what: 'polished mahogany: a barometer case, a key\'s base' },
+  gr6Ebonite:  { base: '#2A2B2E', shade: '#1B1C1E', label: '#FAFAF7', what: 'a Morse key\'s black ebonite knob' },
+  gr6Dial:     { base: '#EFE6CB', shade: '#D2C6A3', label: '#1A1A1A', what: 'a barometer\'s silvered dial, an old paper page' },
+  gr6ShipWhite: { base: '#ECE9DF', shade: '#C9C4B4', label: '#1A1A1A', what: 'a fishing boat\'s white-painted hull and wheelhouse' },
+  gr6ShipRed:  { base: '#A3372B', shade: '#7C2920', label: '#FAFAF7', what: 'a fishing boat\'s red antifouling below the waterline' },
+  gr6ShipWin:  { base: '#33404B', shade: '#242E36', label: '#FAFAF7', what: 'a wheelhouse\'s dark windows' },
+  gr6SkyTop:   { base: '#2E4A7C', shade: '#243B63', label: '#FAFAF7', what: 'an evening sky high up, deep blue' },
+  gr6SkyMid:   { base: '#84648D', shade: '#6C5476', label: '#FAFAF7', what: 'an evening sky\'s dusky violet band' },
+  gr6SkyLow:   { base: '#F2A86C', shade: '#E08F52', label: '#1A1A1A', what: 'an evening sky low over the sea, peach' },
+  gr6Sun:      { base: '#FFD27C', shade: '#F5B455', label: '#1A1A1A', what: 'a setting sun, and its glitter on the water' },
+  gr6Sea:      { base: '#357298', shade: '#2A5B7A', label: '#FAFAF7', what: 'a calm evening sea' },
+  gr6StormSky: { base: '#3B4759', shade: '#2F3A4A', label: '#FAFAF7', what: 'a storm sky at night' },
+  gr6StormLow: { base: '#58687C', shade: '#4A596C', label: '#FAFAF7', what: 'a storm sky low over the horizon' },
+  gr6StormSea: { base: '#4A5F72', shade: '#3D5063', label: '#FAFAF7', what: 'a dark sea in a storm' },
+  gr6Foam:     { base: '#DCE7EC', shade: '#B8C9D1', label: '#1A1A1A', what: 'white foam on a breaking wave, rain' },
+  gr6Signal:   { base: '#FFE9A6', shade: '#F7CF63', label: '#1A1A1A', what: 'a ship\'s signal lamp, lit' },
+  gr6Green:    { base: '#7FE3A2', shade: '#55C47F', label: '#1A1A1A', what: 'a ship\'s green running light' },
+  // biz6 colours: a haunted castle attraction on opening night — moonlit stone, a torchlit gateway, a purple ticket booth
+  bz6Sky:       { base: '#25294A', shade: '#1C2039', label: '#FAFAF7', what: 'a night sky high up, deep blue-violet' },
+  bz6SkyLow:    { base: '#3D3F68', shade: '#33355A', label: '#FAFAF7', what: 'a night sky low down, lit by the moon' },
+  bz6Moon:      { base: '#F4EBC6', shade: '#E2D6A8', label: '#1A1A1A', what: 'a full moon, pale cream' },
+  bz6Keep:      { base: '#2E3150', shade: '#252842', label: '#FAFAF7', what: 'a castle keep against the night sky, in shadow' },
+  bz6KeepLit:   { base: '#F2B451', shade: '#D9953A', label: '#1A1A1A', what: 'a castle window lit from inside by torchlight' },
+  bz6Stone:     { base: '#9C98AC', shade: '#7E7A90', label: '#1A1A1A', what: 'a gatehouse\'s dressed stone in moonlight, lilac-grey' },
+  bz6StoneFar:  { base: '#5E5B78', shade: '#4C4A65', label: '#FAFAF7', what: 'castle stone set back in the shadow' },
+  bz6Passage:   { base: '#C9783E', shade: '#A55F2F', label: '#1A1A1A', what: 'a gateway passage lit orange by torches inside' },
+  bz6Iron:      { base: '#2F3138', shade: '#202227', label: '#FAFAF7', what: 'black wrought iron — a gate, a turnstile, a bracket' },
+  bz6Booth:     { base: '#5B3474', shade: '#46275A', label: '#FAFAF7', what: 'a ticket booth painted spooky purple' },
+  bz6Lime:      { base: '#9BD14A', shade: '#78AD32', label: '#1A1A1A', what: 'a ticket booth\'s lime-green trim and sign' },
+  bz6Roof:      { base: '#3B3550', shade: '#2C273E', label: '#FAFAF7', what: 'a booth\'s dark slate-shingled roof' },
+  bz6BoothIn:   { base: '#EDC98A', shade: '#D6AE6C', label: '#1A1A1A', what: 'the inside of a ticket booth, warm under its lamp' },
+  bz6PopRed:    { base: '#D33A30', shade: '#BF3229', label: '#FAFAF7', what: 'a popcorn tub\'s red stripes' },
+  bz6PopWhite:  { base: '#F6F1E6', shade: '#DCD3C2', label: '#1A1A1A', what: 'a popcorn tub\'s white card' },
+  bz6Kernel:    { base: '#F7E3A2', shade: '#E6C877', label: '#1A1A1A', what: 'buttered popcorn, puffed and pale gold' },
+  bz6Glow:      { base: '#8EF06A', shade: '#62CF46', label: '#1A1A1A', what: 'a snapped glow stick, bright green' },
+  bz6CounterRed: { base: '#7D2229', shade: '#5E191F', label: '#FAFAF7', what: 'a mechanical counter\'s oxblood-painted iron case' },
+  bz6Pumpkin:   { base: '#E8812C', shade: '#C2661E', label: '#1A1A1A', what: 'a carved pumpkin\'s orange skin' },
+  bz6Carve:     { base: '#FFD36B', shade: '#FFC94F', label: '#1A1A1A', what: 'candlelight through a jack-o\'-lantern\'s carved face' },
+  bz6Bat:       { base: '#26222E', shade: '#17151C', label: '#FAFAF7', what: 'a bat\'s dark wings against the moon' },
+  bz6Fog:       { base: '#B9BCD6', shade: '#A2A6C4', label: '#1A1A1A', what: 'ground fog drifting in the moonlight' },
+  bz6Web:       { base: '#E3E5EE', shade: '#C8CBD8', label: '#1A1A1A', what: 'a cobweb\'s silvery threads' },
+  bz6LampGlass: { base: '#FBCB62', shade: '#F0B043', label: '#1A1A1A', what: 'a wall lantern\'s glass, glowing with its flame' },
+  bz6Chalk:     { base: '#F2A7B8', shade: '#DE8C9F', label: '#1A1A1A', what: 'pink chalk on a blackboard' },
+  // econ6 colours: a pirate island at golden hour — sky, sea, sand, a palm, a wreck, a chest of gold, a coconut stall
+  ec6SkyHigh: { base: '#9AB4D2', shade: '#8199B8', label: '#1A1A1A', what: 'the high sky at golden hour, a soft warm blue' },
+  ec6SkyMid:  { base: '#F3C894', shade: '#E4B07B', label: '#1A1A1A', what: 'the sky at golden hour, peach, halfway down' },
+  ec6SkyLow:  { base: '#F8DC8E', shade: '#EFC66C', label: '#1A1A1A', what: 'the sky at golden hour, gold just over the sea' },
+  ec6Sun:     { base: '#FFF2C4', shade: '#F9CC5E', label: '#1A1A1A', what: 'a low sun at golden hour, pale gold' },
+  ec6Sea:     { base: '#387496', shade: '#2B5E7C', label: '#FAFAF7', what: 'a tropical sea in the evening, deep blue' },
+  ec6SeaFar:  { base: '#86A9B2', shade: '#6F939D', label: '#1A1A1A', what: 'the sea near the horizon, silvered by a low sun' },
+  ec6Glint:   { base: '#FFE6A0', shade: '#F5CF6E', label: '#1A1A1A', what: 'the sun\'s glitter on the water' },
+  ec6Foam:    { base: '#F6F3E8', shade: '#DCD8C8', label: '#1A1A1A', what: 'the white foam of a wave on the sand' },
+  ec6WetSand: { base: '#CDB283', shade: '#B0966A', label: '#1A1A1A', what: 'wet sand where the waves run up' },
+  ec6Trunk:   { base: '#80664A', shade: '#624E38', label: '#FAFAF7', what: 'a coconut palm\'s ringed grey-brown trunk' },
+  ec6Frond:   { base: '#4C7A32', shade: '#375C23', label: '#FAFAF7', what: 'a coconut palm\'s fronds, deep green against the sky' },
+  ec6Coco:    { base: '#7DA845', shade: '#5B8130', label: '#1A1A1A', what: 'a young drinking coconut\'s green husk' },
+  ec6CocoTop: { base: '#F1E9CF', shade: '#D8CCA4', label: '#1A1A1A', what: 'a drinking coconut\'s trimmed top, the white husk' },
+  ec6CocoRipe: { base: '#8F6236', shade: '#6C4A28', label: '#FAFAF7', what: 'ripe coconuts hanging in the palm\'s crown, brown' },
+  ec6Rock:    { base: '#5F5A54', shade: '#45413C', label: '#FAFAF7', what: 'dark wet rock on the shore' },
+  ec6Hull:    { base: '#6E4C31', shade: '#513723', label: '#FAFAF7', what: 'a wrecked ship\'s old dark timbers' },
+  ec6Sail:    { base: '#E6D9BA', shade: '#C9B892', label: '#1A1A1A', what: 'a torn old canvas sail' },
+  ec6Gold:    { base: '#E6B83E', shade: '#B88A22', label: '#1A1A1A', what: 'gold — doubloons, a heap of treasure' },
+  ec6Ruby:    { base: '#B3243A', shade: '#86182A', label: '#FAFAF7', what: 'a ruby among the treasure' },
+  ec6Chest:   { base: '#8A4E2B', shade: '#673A20', label: '#FAFAF7', what: 'a treasure chest\'s reddish-brown planks' },
+  ec6Iron:    { base: '#4C4F52', shade: '#34373A', label: '#FAFAF7', what: 'a chest\'s black iron straps and hinges' },
+  ec6Stall:   { base: '#357398', shade: '#295B79', label: '#FAFAF7', what: 'a coconut stall\'s front, painted sea blue' },
+  ec6Crate:   { base: '#C7A06A', shade: '#A27D4B', label: '#1A1A1A', what: 'a pine cargo crate, weathered' },
+  ec6Fish:    { base: '#D8695E', shade: '#B24E45', label: '#1A1A1A', what: 'a red snapper\'s pink-red scales' },
+  ec6ShipHull: { base: '#5A3F2C', shade: '#422E20', label: '#FAFAF7', what: 'a far ship\'s dark hull, against the sunset' },
+  ec6Smoke:   { base: '#D8D6D0', shade: '#B9B6AE', label: '#1A1A1A', what: 'a puff of cannon smoke' },
+  // sci6 colours: below decks on a ship of 1747 — whitewashed planking, dark timbers, canvas hammocks, a tin lantern, bottles, a sea chest
+  sc6Lime:      { base: '#E9E3D0', shade: '#CDC4AA', label: '#1A1A1A', what: 'a ship\'s whitewashed inside planking, below decks' },
+  sc6Timber:    { base: '#5E4532', shade: '#47331F', label: '#FAFAF7', what: 'a ship\'s dark oak beams, frames and knees' },
+  sc6Deck:      { base: '#B08A5C', shade: '#8F6F47', label: '#1A1A1A', what: 'a ship\'s scrubbed oak deck planks' },
+  sc6Canvas:    { base: '#E2D5B3', shade: '#C3B48D', label: '#1A1A1A', what: 'a sailor\'s hammock canvas, unbleached' },
+  sc6Blanket:   { base: '#5E6B7A', shade: '#4A5562', label: '#FAFAF7', what: 'a sailor\'s grey-blue wool blanket' },
+  sc6Tin:       { base: '#47423C', shade: '#302C28', label: '#FAFAF7', what: 'a ship\'s lantern\'s dark pierced tin' },
+  sc6Glow:      { base: '#FFD27A', shade: '#F2B24A', label: '#1A1A1A', what: 'candlelight through a lantern\'s horn panes, amber' },
+  sc6Pine:      { base: '#B5804F', shade: '#8F6338', label: '#1A1A1A', what: 'a mast\'s varnished pine' },
+  sc6ChestBlue: { base: '#3F6672', shade: '#2F4F59', label: '#FAFAF7', what: 'a surgeon\'s sea chest, painted blue-green' },
+  sc6Bottle:    { base: '#3F6B45', shade: '#2E5234', label: '#FAFAF7', what: 'a dark green glass bottle of the 1740s' },
+  sc6Brine:     { base: '#7DB5AF', shade: '#5E9690', label: '#1A1A1A', what: 'seawater seen through glass' },
+  sc6Stone:     { base: '#A98759', shade: '#86693F', label: '#1A1A1A', what: 'a brown salt-glazed stoneware bottle' },
+  sc6Glaze:     { base: '#E3D3AE', shade: '#C6B486', label: '#1A1A1A', what: 'a stoneware bottle\'s cream-glazed shoulder' },
+  sc6Wicker:    { base: '#C29A5B', shade: '#9E7A41', label: '#1A1A1A', what: 'a wicker basket' },
+  sc6Leather:   { base: '#7A3B26', shade: '#5C2B1B', label: '#FAFAF7', what: 'a ledger\'s brown calf binding' },
+  sc6PhialBlue: { base: '#3E6EA8', shade: '#2F5684', label: '#FAFAF7', what: 'a cobalt-blue glass medicine bottle' },
+  sc6PhialClear: { base: '#BFD6CA', shade: '#9DB8AB', label: '#1A1A1A', what: 'a plain pale-green glass medicine bottle' },
+  sc6PhialBrown: { base: '#7A4521', shade: '#5B3218', label: '#FAFAF7', what: 'a dark amber glass medicine bottle' },
+  sc6SeaDusk:   { base: '#4B7486', shade: '#3B5E6E', label: '#FAFAF7', what: 'the open sea at dusk, seen through a gun port' },
+  sc6SkyDusk:   { base: '#B4C1C9', shade: '#97A6B0', label: '#1A1A1A', what: 'a grey evening sky at sea' },
+  sc6SeaDay:    { base: '#2F7399', shade: '#245C7C', label: '#FAFAF7', what: 'the open sea on a bright morning' },
+  sc6SkyDay:    { base: '#CDE6F2', shade: '#AFD2E4', label: '#1A1A1A', what: 'a clear morning sky at sea' },
+  sc6Sun:       { base: '#FFE9A8', shade: '#F5D47E', label: '#1A1A1A', what: 'morning sunlight falling through a port' },
+  // hist6 colours:
+  hi6Wall:      { base: '#D3A16F', shade: '#B4824F', label: '#1A1A1A', what: 'Abu Simbel\'s sandstone wall, warm in torchlight' },
+  hi6Recess:    { base: '#E3B988', shade: '#D3A16F', label: '#1A1A1A', what: 'the sunk ground of a carving, the wall seen through a wheel' },
+  hi6Carve:     { base: '#E9C596', shade: '#C99C69', label: '#1A1A1A', what: 'a carved figure in the sandstone, catching the light' },
+  hi6Panel:     { base: '#DEB27F', shade: '#BE8F5E', label: '#1A1A1A', what: 'a smoothed panel of sandstone carved with signs' },
+  hi6Inset:     { base: '#EBC79B', shade: '#DEB27F', label: '#1A1A1A', what: 'the panel seen through the loop of a carved sign' },
+  hi6Glyph:     { base: '#C08E5C', shade: '#6F4728', label: '#1A1A1A', what: 'a hieroglyph cut into sandstone, its shadow dark' },
+  hi6Skin:      { base: '#B4572F', shade: '#8C4022', label: '#FAFAF7', what: 'the red ochre paint of a pharaoh\'s skin' },
+  hi6Blue:      { base: '#3667A7', shade: '#274E86', label: '#FAFAF7', what: 'Egyptian blue paint — a khepresh crown, a cartouche' },
+  hi6Gold:      { base: '#D9A93C', shade: '#B0852A', label: '#1A1A1A', what: 'gilding on a chariot, a collar, a flail' },
+  hi6Linen:     { base: '#F0E6CF', shade: '#CFC2A3', label: '#1A1A1A', what: 'white linen, a white crown painted on stone' },
+  hi6Plume:     { base: '#B53B2E', shade: '#8C2C22', label: '#FAFAF7', what: 'red paint — a horse\'s plume, a sun disc' },
+  hi6Green:     { base: '#3F7F62', shade: '#2E604A', label: '#FAFAF7', what: 'the green blocks of a painted temple frieze' },
+  hi6Ceiling:   { base: '#22304F', shade: '#172138', label: '#FAFAF7', what: 'a temple ceiling painted night blue' },
+  hi6Star:      { base: '#E9C55C', shade: '#C9A33F', label: '#1A1A1A', what: 'the yellow stars painted on a temple ceiling' },
+  hi6Floor:     { base: '#B7895B', shade: '#946B44', label: '#1A1A1A', what: 'a sandstone floor in a torch-lit hall' },
+  hi6Clay:      { base: '#C67C45', shade: '#9E5F33', label: '#1A1A1A', what: 'a Hittite clay tablet, orange-buff' },
+  hi6Treaty:    { base: '#CDA290', shade: '#A97F6D', label: '#1A1A1A', what: 'the Kadesh treaty tablet\'s pink-buff clay' },
+  hi6Wrap:      { base: '#6A4A30', shade: '#4C3522', label: '#FAFAF7', what: 'a torch head\'s pitch-soaked cloth' },
+  hi6Flame:     { base: '#FAC54A', shade: '#EB862B', label: '#1A1A1A', what: 'a torch flame, and the light it throws' },
+  hi6Bristle:   { base: '#3E3229', shade: '#2B221C', label: '#FAFAF7', what: 'an archaeologist\'s soft brush, its dark bristles' },
+  hi6Sand:      { base: '#E2C79A', shade: '#C6A979', label: '#1A1A1A', what: 'sieved sand in a finds tray' },
+  hi6Sky:       { base: '#A9D3EE', shade: '#72AAD6', label: '#1A1A1A', what: 'a postcard\'s printed blue sky' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 
@@ -8962,6 +9151,1986 @@ export const S5_SONAR_SCREEN = { x0: 2.5, y0: 2, x1: 21.5, y1: 15, of: { w: 24, 
 
 // ── sci5: objects for this lesson go ABOVE this line ──
 
+// ── phil6 OBJECTS BEGIN ──
+// ─────────────────────────────────────────────────────────────────────────────
+// philosophy-foundations-6 — A VICTORIAN FAIRGROUND AT NIGHT: THE MECHANICAL ORACLE.
+//
+// REFERENCES (npm run ref): Zoltar fortune machines on the Santa Monica pier and in an
+// arcade — a tall wooden cabinet, a GLASS CASE on top holding a turbaned bust with a
+// crystal ball before it, a CREST with the machine's name over the glass, gilt-studded
+// pillars and mouldings, and a lower cabinet carrying the coin plate and the card slot;
+// an old penny fortune machine's lacquered box; steam GALLOPERS at Beamish — white
+// painted horses with open mouths, ears up, a carved saddle and a twisted brass pole
+// through each; carousels at night (Paris, Columbia) — a striped tent roof, rounding
+// boards ringed with bulbs, a scalloped valance, and an inside so lit it glows; apothecary
+// sweet jars with a rim and a glint down the glass; humbugs, striped. The fair's own
+// colours: lacquer red, gilt, royal-blue velvet, a lit cream, striped canopy red.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+function ph6N(k: NaturalKey, ...ps: ObjPart[]): ObjPart[] {
+  return ps.map((p) => ({ ...p, nat: k }));
+}
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ph6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+/**
+ * THE MECHANICAL ORACLE's cabinet, the Zoltar way, without the figure in its glass: a
+ * gilt finial over an arched pediment, a cornice and a crest panel (the scene sets the
+ * name plate on it), the glass case lined in blue velvet under red swags and a gold
+ * fringe, gilt pillars either side, a waist moulding, the lower cabinet with a sunk
+ * panel, its coin plate and its card slot, the crank's boss on its side, a walnut plinth
+ * on brass feet. 88 × 160.
+ */
+const PH6_CABINET: ObjPart[] = ph6In(88, 160, [
+  ...ph6N('brass',
+    oEll('mass', 44, 4.5, 7, 7),                                      // the finial
+    oRect('mass', 44, 9.5, 2.4, 5),                                   // its stem
+  ),
+  ...ph6N('ph6Lacquer', oEll('mass', 44, 20, 64, 28)),                // the arched pediment
+  ...ph6N('ph6Lacquer',
+    oRect('mass', 44, 19.5, 88, 4, 0, 1),                             // the cornice
+    oRect('mass', 44, 28.5, 82, 16, 0, 1),                            // the crest panel
+    oRect('mass', 44, 68, 80, 62, 0, 1.5),                            // the glass case's frame
+    oRect('mass', 44, 124, 80, 42, 0, 1.5),                           // the lower cabinet
+    oRect('face', 82, 124, 4, 40),                                    // its side, turned from the lamp
+  ),
+  ...ph6N('brass',
+    oRect('mass', 3.5, 68, 5, 62, 0, 1),                              // gilt pillars either side of the glass
+    oRect('mass', 84.5, 68, 5, 62, 0, 1),
+    oRect('face', 85.6, 68, 2.8, 60),
+    oRect('mass', 44, 101, 88, 4, 0, 1),                              // the waist moulding
+    oEll('mass', 86.5, 110, 6, 6),                                    // the crank's boss, on the side
+  ),
+  ...ph6N('ph6Walnut', oRect('mass', 44, 152.5, 88, 15, 0, 2)),       // the plinth
+  ...ph6N('brass', oEll('dark', 44, 21, 52, 20)),                     // the pediment's gilt fan
+  ...ph6N('brass', oRect('dark', 44, 28.5, 72, 14, 0, 1)),            // the crest's gilt frame
+  ...ph6N('ph6Velvet', oRect('dark', 44, 68, 70, 56, 0, 1)),          // the velvet inside the glass
+  ...ph6N('ph6Lacquer', oEll('dark', 20, 41.5, 26, 9), oEll('dark', 44, 40.5, 26, 9), oEll('dark', 68, 41.5, 26, 9)), // red swags
+  ...ph6N('brass', oBar('dark', 10, 46, 78, 46, 1.2)),                // and their gold fringe
+  ...ph6N('ph6Lacquer', oRect('dark', 42, 124, 66, 32, 0, 2)),        // the sunk front panel
+  ...ph6N('brass', oBar('dark', 12, 110.5, 72, 110.5, 0.9), oBar('dark', 12, 137.5, 72, 137.5, 0.9)), // its gilt lining
+  ...ph6N('brass', oRect('dark', 22, 118, 13, 13, 0, 1.5)),           // the coin plate
+  oRect('line', 22, 118, 1.4, 7, 0, 0.7),                             // its slot
+  ...ph6N('brass', oRect('dark', 62, 121, 26, 7, 0, 1.5)),            // the card slot's plate
+  oRect('line', 62, 121, 20, 1.8, 0, 0.9),                            // the card slot
+  ...ph6N('brass', oRect('dark', 9, 157.5, 10, 4, 0, 1), oRect('dark', 79, 157.5, 10, 4, 0, 1)), // brass feet
+  oBar('lit', 3, 17.9, 85, 17.9, 0.7),                                // the lamp along the cornice
+  oBar('lit', 6, 99.4, 82, 99.4, 0.6),                                // and the moulding
+]);
+export const ph6Cabinet = (x: number, y: number, w: number, h: number) => fit(PH6_CABINET, x, y, w, h);
+/** Where things are on the cabinet, in its own 88 × 160 units. */
+export const PH6_CAB = {
+  crest: { x: 44, y: 28.5, w: 66, h: 12 },
+  slot: { x: 62, y: 121 },
+  boss: { x: 86.5, y: 110 },
+  case: { x: 44, y: 68, w: 70, h: 56 },
+} as const;
+
+/**
+ * The ORACLE himself, from the waist up: a gold satin shirt under a purple waistcoat, a
+ * gilt collar and brooch, his painted hands held either side of the crystal ball. 56 × 24.
+ */
+const PH6_ORACLE: ObjPart[] = ph6In(56, 24, [
+  ...ph6N('ph6Satin', ...trapezoid('mass', 28, 14, 36, 54, 20)),      // shoulders sloping out
+  ...ph6N('ph6Skin', oEll('mass', 15, 16, 8, 6, -15), oEll('mass', 41, 16, 8, 6, 15)), // his hands
+  ...ph6N('ph6Robe', ...trapezoid('dark', 14, 15, 9, 15, 18), ...trapezoid('dark', 42, 15, 9, 15, 18)), // the waistcoat
+  ...ph6N('brass', oEll('dark', 28, 6, 13, 5), oEll('dark', 28, 11, 3.4, 3.4)), // collar and brooch
+]);
+export const ph6Oracle = (x: number, y: number, w: number, h: number) => fit(PH6_ORACLE, x, y, w, h);
+
+/**
+ * The Oracle's HEAD, drawn about his neck (bottom middle) so the scene can nod it: a
+ * gold turban with a ruby, a painted face, a black moustache and a pointed beard. 22 × 28.
+ */
+const PH6_HEAD: ObjPart[] = ph6In(22, 28, [
+  ...ph6N('ph6Skin', oRect('mass', 11, 25, 6, 6, 0, 2)),              // the neck
+  ...ph6N('ph6Skin', oEll('mass', 11, 17, 14, 16)),                   // the face
+  ...ph6N('ph6Satin', oEll('mass', 11, 8.5, 21, 12), oEll('mass', 11, 5, 11, 8)), // the turban, and its crown
+  ...ph6N('ph6Beard', oEll('mass', 8, 20.6, 6.5, 2.6, -14), oEll('mass', 14, 20.6, 6.5, 2.6, 14)), // the moustache
+  ...ph6N('ph6Beard', ...trapezoid('mass', 11, 25, 5, 1.4, 6)),       // the pointed beard
+  ...ph6N('ph6Satin', oBar('dark', 3.5, 10.5, 18.5, 6.5, 1.1), oBar('dark', 4.5, 13, 17.5, 9.5, 0.9)), // the turban's folds
+  ...ph6N('ph6Heart', oEll('dark', 11, 8.2, 4, 5)),                   // the ruby
+  oEll('line', 8.4, 16.2, 1.7, 1.7), oEll('line', 13.6, 16.2, 1.7, 1.7), // eyes
+]);
+export const ph6OracleHead = (x: number, y: number, w: number, h: number) => fit(PH6_HEAD, x, y, w, h);
+
+/** The CRYSTAL BALL on its brass stand. 20 × 26. */
+const PH6_BALL: ObjPart[] = ph6In(20, 26, [
+  ...ph6N('brass', ...trapezoid('mass', 10, 22.5, 9, 15, 7)),         // the stand
+  ...ph6N('brass', oRect('mass', 10, 18.6, 11, 2.4, 0, 1)),           // its cup
+  ...ph6N('ph6Ball', oEll('mass', 10, 9.5, 17, 17)),                  // the ball
+  ...ph6N('ph6Ball', oEll('dark', 11.5, 12, 9, 6)),                   // the mist inside it
+  oEll('lit', 6.4, 5.8, 4, 2.6, -30),                                 // its highlight
+]);
+export const ph6Ball = (x: number, y: number, w: number, h: number) => fit(PH6_BALL, x, y, w, h);
+
+/** The brass CARD TRAY under the slot, with its lip. 30 × 8. */
+const PH6_TRAY: ObjPart[] = ph6In(30, 8, [
+  ...ph6N('brass', ...trapezoid('mass', 15, 5.2, 30, 22, 5.6)),
+  ...ph6N('brass', oRect('mass', 15, 2, 30, 2.2, 0, 1)),
+  oBar('lit', 2, 1.4, 28, 1.4, 0.6),
+]);
+export const ph6Tray = (x: number, y: number, w: number, h: number) => fit(PH6_TRAY, x, y, w, h);
+
+/** A printed fortune CARD's face: a red border round a white face with red corner dots; the scene prints it. 52 × 30. */
+const PH6_CARD_FACE: ObjPart[] = ph6In(52, 30, [
+  ...ph6N('ph6CardRed', oRect('mass', 26, 15, 52, 30, 0, 2.5)),
+  oRect('lit', 26, 15, 47, 25, 0, 1.5),
+  ...ph6N('ph6CardRed', oEll('dark', 5, 5, 2.2, 2.2), oEll('dark', 47, 5, 2.2, 2.2), oEll('dark', 5, 25, 2.2, 2.2), oEll('dark', 47, 25, 2.2, 2.2)),
+]);
+export const ph6CardFace = (x: number, y: number, w: number, h: number) => fit(PH6_CARD_FACE, x, y, w, h);
+/** The card's red BACK, with a gilt frame and a lozenge. 52 × 30. */
+const PH6_CARD_BACK: ObjPart[] = ph6In(52, 30, [
+  ...ph6N('ph6CardRed', oRect('mass', 26, 15, 52, 30, 0, 2.5)),
+  ...ph6N('brass', oRect('dark', 26, 15, 46, 24, 0, 1.5)),
+  ...ph6N('ph6CardRed', oRect('dark', 26, 15, 42, 20, 0, 1)),
+  ...ph6N('brass', oRect('dark', 26, 15, 9, 9, 45, 1), oRect('dark', 13, 15, 5, 5, 45, 0.6), oRect('dark', 39, 15, 5, 5, 45, 0.6)),
+]);
+export const ph6CardBack = (x: number, y: number, w: number, h: number) => fit(PH6_CARD_BACK, x, y, w, h);
+
+/** A FORTUNE card for the fan: a red border, a white face, a picture up top, a rule, room for words below. 47 × 58. */
+function ph6Fortune(pic: ObjPart[]): ObjPart[] {
+  return ph6In(47, 58, [
+    ...ph6N('ph6CardRed', oRect('mass', 23.5, 29, 47, 58, 0, 3)),
+    oRect('lit', 23.5, 29, 42, 53, 0, 2),
+    ...ph6N('ph6CardRed', oBar('dark', 7, 32, 40, 32, 0.8)),
+    ...pic,
+  ]);
+}
+/** LOVES FUDGE: a heart, and a square of fudge beside it. */
+const PH6_FORT_LOVES = ph6Fortune([
+  ...ph6N('ph6Heart', oEll('dark', 15.5, 12.5, 9, 9), oEll('dark', 22.5, 12.5, 9, 9), oTri('dark', 19, 20.2, 16, 10, 'down')),
+  ...ph6N('ph6Fudge', oRect('dark', 32.5, 19.5, 9, 9, 0, 1.4)),
+  oBar('lit', 29.6, 16.6, 34.6, 16.6, 0.6),
+]);
+export const ph6FortuneLoves = (x: number, y: number, w: number, h: number) => fit(PH6_FORT_LOVES, x, y, w, h);
+/** ACHOO!: the puff of a sneeze, and what flies out of it. */
+const PH6_FORT_SNEEZE = ph6Fortune([
+  ...ph6N('ph6Puff', oEll('dark', 17, 18, 15, 11), oEll('dark', 25, 13.5, 15, 12), oEll('dark', 31, 20, 13, 10)),
+  oBar('line', 14, 17.5, 21, 15.5, 0.7), oBar('line', 24, 20.5, 31, 18.5, 0.7),
+  oEll('line', 9, 9, 2, 2), oEll('line', 37, 8.5, 1.7, 1.7), oEll('line', 40, 25, 1.8, 1.8), oEll('line', 8, 25, 1.6, 1.6),
+]);
+export const ph6FortuneSneeze = (x: number, y: number, w: number, h: number) => fit(PH6_FORT_SNEEZE, x, y, w, h);
+/** PAID A BULLY: a clenched fist, and the coins it took. */
+const PH6_FORT_BULLY = ph6Fortune([
+  ...ph6N('ph6Skin', oRect('dark', 18, 17, 16, 13, 0, 4), oRect('dark', 11.5, 20, 6, 9, -20, 2.5)),
+  oBar('line', 15, 11.5, 15, 16, 0.6), oBar('line', 19, 11.5, 19, 16, 0.6), oBar('line', 23, 11.5, 23, 16, 0.6),
+  ...ph6N('brass', oEll('dark', 34, 13, 9, 9), oEll('dark', 36, 22, 9, 9)),
+  oEll('line', 34, 13, 3, 3), oEll('line', 36, 22, 3, 3),
+]);
+export const ph6FortuneBully = (x: number, y: number, w: number, h: number) => fit(PH6_FORT_BULLY, x, y, w, h);
+
+/** The machine's BRASS HAND that holds the fan up, drawn about its cuff (bottom middle). 22 × 16. */
+const PH6_HAND: ObjPart[] = ph6In(22, 16, [
+  ...ph6N('brass',
+    oRect('mass', 11, 13.4, 6, 5, 0, 1.5),                            // the cuff
+    oEll('mass', 11, 9.4, 13, 8),                                     // the palm
+    oEll('mass', 5.2, 5.6, 3.6, 6, -22), oEll('mass', 9, 4, 3.6, 6.6, -7), // the fingers, spread
+    oEll('mass', 13, 4, 3.6, 6.6, 7), oEll('mass', 16.8, 5.6, 3.6, 6, 22),
+  ),
+  oBar('lit', 6.5, 8.5, 10, 6.5, 0.6),
+]);
+export const ph6BrassHand = (x: number, y: number, w: number, h: number) => fit(PH6_HAND, x, y, w, h);
+
+/** The SWEET STALL's counter: a wooden top over a cream-painted front lined in red and gilt. 162 × 40. */
+const PH6_COUNTER: ObjPart[] = ph6In(162, 40, [
+  ...ph6N('ph6Cream', oRect('mass', 81, 22.5, 154, 35, 0, 1.5), oRect('face', 156, 22.5, 4, 33)),
+  ...ph6N('wood', oRect('mass', 81, 3, 162, 6, 0, 1.5)),
+  ...ph6N('ph6Canopy', oBar('dark', 7, 10, 153, 10, 1.4), oBar('dark', 7, 35.5, 153, 35.5, 1.4)),
+  ...ph6N('brass', oBar('dark', 7, 13, 153, 13, 0.8), oBar('dark', 7, 32.5, 153, 32.5, 0.8)),
+  ...ph6N('ph6Canopy', oRect('dark', 81, 23, 22, 10, 45, 1)),
+  oBar('lit', 2, 0.9, 160, 0.9, 0.7),
+]);
+export const ph6Counter = (x: number, y: number, w: number, h: number) => fit(PH6_COUNTER, x, y, w, h);
+
+/** The stall's striped AWNING: red and cream stripes, each ending in a scallop, on two brass poles down to the counter. 176 × 110. */
+const PH6_AWNING: ObjPart[] = ph6In(176, 110, [
+  ...ph6N('brass', oBar('mass', 4, 10, 4, 110, 2.4), oBar('mass', 172, 10, 172, 110, 2.4)),
+  ...[0, 1, 2, 3, 4, 5].flatMap((k) => ph6N(k % 2 ? 'ph6Cream' : 'ph6Canopy',
+    oRect('mass', 14.67 + k * 29.33, 6, 29.33, 12), oEll('mass', 14.67 + k * 29.33, 12, 29.33, 12))),
+  oBar('lit', 1, 1, 175, 1, 0.7),
+]);
+export const ph6Awning = (x: number, y: number, w: number, h: number) => fit(PH6_AWNING, x, y, w, h);
+
+/** A glass SWEET JAR on a counter: a rimmed neck, round shoulders, a glint down its side; filled by the caller. 26 × 30. */
+function ph6Jar(fill: ObjPart[]): ObjPart[] {
+  return ph6In(26, 30, [
+    ...ph6N('glass', oRect('mass', 13, 17.5, 26, 25, 0, 5), oRect('mass', 13, 3.4, 20, 5, 0, 1.6)),
+    ...fill,
+    oBar('lit', 4, 10, 4, 25, 1.2),
+    oBar('lit', 6, 2.2, 20, 2.2, 0.6),
+  ]);
+}
+const PH6_JAR_FUDGE = ph6Jar(ph6N('ph6Fudge',
+  oRect('dark', 7, 26, 7, 6, 0, 1), oRect('dark', 14, 26, 7, 6, 0, 1), oRect('dark', 21, 26, 6, 6, 0, 1),
+  oRect('dark', 9.5, 19.5, 7, 6, 0, 1), oRect('dark', 17, 19.5, 7, 6, 0, 1),
+  oRect('dark', 13, 13, 7, 6, 0, 1),
+));
+export const ph6JarFudge = (x: number, y: number, w: number, h: number) => fit(PH6_JAR_FUDGE, x, y, w, h);
+const PH6_JAR_MINT = ph6Jar([
+  ...ph6N('ph6MintStripe', oEll('dark', 7.5, 26, 8, 7), oEll('dark', 18, 26, 8, 7), oEll('dark', 12.5, 20, 8, 7), oEll('dark', 20.5, 19, 7, 6), oEll('dark', 8, 14, 7, 6)),
+  oBar('lit', 4.5, 27.6, 10.5, 24.4, 1.1), oBar('lit', 15, 27.6, 21, 24.4, 1.1), oBar('lit', 9.5, 21.6, 15.5, 18.4, 1.1),
+  oBar('lit', 18, 20.4, 23, 17.6, 1), oBar('lit', 5.5, 15.4, 10.5, 12.6, 1),
+]);
+export const ph6JarMint = (x: number, y: number, w: number, h: number) => fit(PH6_JAR_MINT, x, y, w, h);
+const PH6_JAR_TOFFEE = ph6Jar([
+  ...ph6N('ph6Toffee', oEll('dark', 8, 26, 9, 5.5), oEll('dark', 18.5, 26.5, 9, 5.5), oEll('dark', 13, 21, 9, 5.5, -12), oEll('dark', 20, 18, 8, 5, 20), oEll('dark', 8, 16.5, 8, 5, -20)),
+  oBar('lit', 6, 24.6, 9, 24.6, 0.6), oBar('lit', 11.5, 19.8, 14.5, 19.2, 0.6),
+]);
+export const ph6JarToffee = (x: number, y: number, w: number, h: number) => fit(PH6_JAR_TOFFEE, x, y, w, h);
+
+/** One square of FUDGE, held between finger and thumb. 7 × 6. */
+const PH6_FUDGE_BIT: ObjPart[] = ph6In(7, 6, [
+  ...ph6N('ph6Fudge', oRect('mass', 3.5, 3, 7, 6, 0, 1), oRect('face', 6.2, 3.4, 1.6, 5)),
+  oBar('lit', 1, 1.1, 5, 1.1, 0.5),
+]);
+export const ph6FudgeBit = (x: number, y: number, w: number, h: number) => fit(PH6_FUDGE_BIT, x, y, w, h);
+/** One MINT HUMBUG, white with green stripes. 7 × 6. */
+const PH6_MINT_BIT: ObjPart[] = ph6In(7, 6, [
+  ...ph6N('ph6Mint', oEll('mass', 3.5, 3, 7, 6)),
+  ...ph6N('ph6MintStripe', oBar('dark', 1.4, 4.4, 3.6, 0.8, 1.2), oBar('dark', 3.6, 5.2, 5.8, 1.6, 1.2)),
+]);
+export const ph6MintBit = (x: number, y: number, w: number, h: number) => fit(PH6_MINT_BIT, x, y, w, h);
+
+/** An ivory DIE, its top edge catching the lamp, showing `pips` (each a point in its 10-square). */
+function ph6Die(pips: readonly (readonly [number, number])[]): ObjPart[] {
+  return ph6In(10, 10, [
+    ...ph6N('ph6Ivory', oRect('mass', 5, 5, 10, 10, 0, 2.2), oRect('face', 9.2, 5.6, 1.6, 8)),
+    ...pips.map(([x, y]) => oEll('line', x, y, 1.9, 1.9)),
+    oBar('lit', 1.6, 1.2, 7.6, 1.2, 0.6),
+  ]);
+}
+const PH6_DIE5 = ph6Die([[2.8, 2.8], [7.2, 2.8], [5, 5], [2.8, 7.2], [7.2, 7.2]]);
+const PH6_DIE2 = ph6Die([[2.8, 2.8], [7.2, 7.2]]);
+const PH6_DIE6 = ph6Die([[2.8, 2.6], [7.2, 2.6], [2.8, 5], [7.2, 5], [2.8, 7.4], [7.2, 7.4]]);
+const PH6_DIE3 = ph6Die([[2.6, 2.6], [5, 5], [7.4, 7.4]]);
+export const ph6DieFive = (x: number, y: number, w: number, h: number) => fit(PH6_DIE5, x, y, w, h);
+export const ph6DieTwo = (x: number, y: number, w: number, h: number) => fit(PH6_DIE2, x, y, w, h);
+export const ph6DieSix = (x: number, y: number, w: number, h: number) => fit(PH6_DIE6, x, y, w, h);
+export const ph6DieThree = (x: number, y: number, w: number, h: number) => fit(PH6_DIE3, x, y, w, h);
+
+/**
+ * The CAROUSEL behind the stall, lit from inside: a pennant on a striped tent roof, the
+ * rounding boards with their red panels, a scalloped valance, the glowing inside round a
+ * mirrored centre column, the turning platform on its red skirt. Its horses and their
+ * poles are the scene's, because they turn. 184 × 216.
+ */
+const PH6_CAROUSEL: ObjPart[] = ph6In(184, 216, [
+  ...ph6N('brass', oRect('mass', 92, 10, 2, 18)),                       // the pennant's pole
+  ...ph6N('ph6FlagRed', oTri('mass', 98, 4.5, 11, 7, 'right')),          // and its pennant
+  ...ph6N('ph6Cream', ...trapezoid('mass', 92, 37, 18, 172, 38)),        // the tent roof
+  ...ph6N('ph6Canopy',
+    oBar('mass', 92, 20, 16, 55, 9), oBar('mass', 92, 20, 54, 56, 10), oBar('mass', 92, 20, 92, 56, 10),
+    oBar('mass', 92, 20, 130, 56, 10), oBar('mass', 92, 20, 168, 55, 9),
+  ),
+  ...ph6N('ph6Glow', oRect('mass', 92, 141, 172, 120)),                 // the lit inside
+  ...ph6N('ph6Cream', oRect('mass', 92, 66, 184, 20, 0, 1.5)),           // the rounding boards
+  ...[0, 1, 2, 3, 4, 5, 6].flatMap((k) => ph6N(k % 2 ? 'ph6Cream' : 'ph6Canopy', oEll('mass', 13.1 + k * 26.3, 79, 26.3, 11))), // the valance
+  ...ph6N('brass', oRect('mass', 92, 141, 26, 118, 0, 2)),               // the centre column
+  ...ph6N('wood', oRect('mass', 92, 205, 184, 12, 0, 2)),                // the platform
+  ...ph6N('ph6Canopy', oRect('mass', 92, 213.5, 176, 5, 0, 1)),          // its skirt
+  ...ph6N('ph6Glow', oRect('dark', 92, 87.5, 172, 9)),                   // shadow under the valance
+  ...[0, 1, 2, 3].flatMap((k) => ph6N('ph6Canopy', oRect('dark', 23 + k * 46, 66, 30, 12, 0, 2))), // the boards' red panels
+  ...ph6N('brass', oBar('dark', 2, 74.5, 182, 74.5, 1)),                 // their gilt edge
+  ...ph6N('ph6Velvet', oRect('dark', 92, 113, 16, 24, 0, 2), oRect('dark', 92, 165, 16, 24, 0, 2)), // the column's mirrors
+  oBar('lit', 4, 199.6, 180, 199.6, 0.7),
+]);
+export const ph6Carousel = (x: number, y: number, w: number, h: number) => fit(PH6_CAROUSEL, x, y, w, h);
+
+/**
+ * A GALLOPER, the Beamish way, drawn about the pole through its saddle: a white body in
+ * full stretch, the neck up, a long head with an open mouth and ears up, the forelegs
+ * tucked and the hind legs flung back, a carved tail, a blue saddle and a red bridle. 34 × 30.
+ */
+const PH6_HORSE: ObjPart[] = ph6In(34, 30, [
+  ...ph6N('ph6Horse',
+    oEll('mass', 16, 15, 22, 10),                                     // the body
+    oBar('mass', 23, 13, 28, 5, 6),                                   // the neck
+    oEll('mass', 30.5, 6, 9, 5, 28),                                  // the head
+    oEll('mass', 27.4, 1.6, 2.6, 5, -12),                             // an ear
+    oBar('mass', 23, 18, 29, 22, 2.6), oBar('mass', 29, 22, 26, 26.5, 2.2), // a foreleg, tucked
+    oBar('mass', 10, 18, 3, 24, 2.6), oBar('mass', 13, 19, 8, 26, 2.4),     // the hind legs, flung back
+  ),
+  ...ph6N('ph6Canopy', oBar('dark', 6, 12, 1, 18, 2.4)),             // the carved tail
+  ...ph6N('ph6Saddle', oRect('dark', 15.5, 10.6, 9, 4.4, 0, 1.5)),   // the saddle
+  ...ph6N('ph6Canopy', oBar('dark', 27.5, 6, 32.5, 9, 0.9)),         // the bridle
+  oEll('line', 30, 4.4, 1.2, 1.2),                                    // the eye
+]);
+export const ph6Horse = (x: number, y: number, w: number, h: number) => fit(PH6_HORSE, x, y, w, h);
+
+/** A brass RAIL round the carousel: two rails on three posts with ball finials. 64 × 30. */
+const PH6_RAIL: ObjPart[] = ph6In(64, 30, [
+  ...ph6N('brass',
+    oBar('mass', 2, 3.5, 62, 3.5, 2.6), oBar('mass', 2, 16, 62, 16, 2),
+    oBar('mass', 6, 2, 6, 30, 2.4), oBar('mass', 32, 2, 32, 30, 2.4), oBar('mass', 58, 2, 58, 30, 2.4),
+    oEll('mass', 6, 1.6, 4.6, 4.6), oEll('mass', 32, 1.6, 4.6, 4.6), oEll('mass', 58, 1.6, 4.6, 4.6),
+  ),
+  oBar('lit', 4, 2.4, 60, 2.4, 0.6),
+]);
+export const ph6Rail = (x: number, y: number, w: number, h: number) => fit(PH6_RAIL, x, y, w, h);
+
+// ── phil6 OBJECTS END ──
+
+// ── phil6: objects for this lesson go ABOVE this line ──
+
+// ── psych6 OBJECTS START ──
+// ─────────────────────────────────────────────────────────────────────────────
+// psych6 — A NEON ARCADE ON A SEASIDE PIER AT NIGHT (psychology-foundations-6, "Why One
+// More Go?"). Drawn against pictures fetched with `node scripts/get-reference.mjs`
+// (scratchpad/ref/py6-*): a pier arcade's claw cranes in a row (Clacton Pier, claw
+// crane; "Toy Taxi" crane game; Claw crane in Ustroń) — a lit TOPPER sign over a glass
+// box, the claw hanging from a gantry under its roof, a heap of plush on the floor of the
+// box, a clear perspex prize chute in one front corner, a control panel ledge at waist
+// height with a ball-top joystick, and a base cabinet with a smoked prize flap; a teddy
+// bear (Old Teddy Bear) — a round head with two round ears and a pale muzzle, a pear
+// body, stubby arms, legs with pale paw pads; and smartphones on a shop's acrylic display
+// shelves (Wan Chai shop window display), each a black slab with its screen lit.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const py6N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function py6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── A CLAW MACHINE ───────────────────────────────────────────────────────────
+//
+// REFERENCE (py6-claw-3, py6-claw-4, py6-grab-3): a tall cabinet in one bright paint, a
+// TOPPER box wider than the body with its sign's dark face set in it (the scene writes
+// the words and strings the bulbs round its rim), a CAP over a glass box framed by two
+// thin POSTS, the lit inside of the box, a dark control-panel LEDGE that juts out at
+// waist height, and a BASE cabinet with a smoked perspex PRIZE FLAP under the chute in
+// its right front corner. Real units, 70 × 120: the topper 0–26, the glass 32–82, the
+// ledge 82.5–89.5, the base 89–119. The inside the scene draws on is `PY6_CAB.glass`.
+function py6CabParts(k: NaturalKey, ki: NaturalKey): ObjPart[] {
+  return py6In(70, 120, [
+    ...py6N(k,
+      oRect('mass', 35, 13, 70, 26, 0, 3.5),                          // the topper box
+      oRect('mass', 35, 29, 64, 6, 0, 1),                             // the cap over the glass
+      oRect('mass', 7, 57, 4, 52),                                    // the left post
+      oRect('mass', 63, 57, 4, 52),                                   // the right post
+      oRect('mass', 35, 104, 60, 30, 0, 1.6),                         // the base cabinet
+      oRect('face', 62.4, 104, 5.2, 30, 0, 1),                        // its right end, in shade
+    ),
+    ...py6N('py6Panel',
+      oRect('mass', 35, 86, 68, 7, 0, 1.4),                           // the control-panel ledge
+      oRect('mass', 12, 119.4, 7, 1.6, 0, 0.6),                       // the feet
+      oRect('mass', 58, 119.4, 7, 1.6, 0, 0.6),
+    ),
+    ...py6N('py6Topper', oRect('dark', 35, 13, 62, 19, 0, 1.6)),     // the sign's face
+    ...py6N(ki, oRect('dark', 35, 57.3, 47.4, 46)),                   // the lit inside of the box
+    ...py6N('py6Flap', oRect('dark', 50, 105, 18, 16, 0, 1.6)),      // the prize flap, under the chute
+    ...py6N(k, oRect('dark', 20, 104, 22, 16, 0, 2)),                 // a recessed panel on the base
+    oBar('line', 64, 84.4, 64, 87.6, 1),                              // the coin slot, on the ledge
+    oBar('line', 41.5, 104, 58.5, 104, 0.5),                          // the flap's hinge
+    oBar('lit', 6.5, 27, 63.5, 27, 0.8),                              // light along the cap's top
+    oBar('lit', 5.8, 34, 5.8, 80, 0.7),                               // and down the left post
+    oBar('lit', 3, 83.2, 67, 83.2, 0.6),                              // and the ledge's front edge
+    oBar('lit', 8, 90.6, 60, 90.6, 0.7),                              // and the base's top
+    oBar('lit', 44, 99, 47, 110, 0.6),                                // a glint on the flap
+  ]);
+}
+const PY6_CAB_PINK = py6CabParts('py6CabPink', 'py6InPink');
+const PY6_CAB_RED = py6CabParts('py6CabRed', 'py6InGold');
+const PY6_CAB_TEAL = py6CabParts('py6CabTeal', 'py6InMint');
+export const py6CabPink = (x: number, y: number, w: number, h: number) => fit(PY6_CAB_PINK, x, y, w, h);
+export const py6CabRed = (x: number, y: number, w: number, h: number) => fit(PY6_CAB_RED, x, y, w, h);
+export const py6CabTeal = (x: number, y: number, w: number, h: number) => fit(PY6_CAB_TEAL, x, y, w, h);
+/**
+ * Where things are on a cabinet, in its own 70 × 120 units: the sign's face, the inside
+ * of the glass box, the joystick's base on the ledge, the coin slot, the chute (inside,
+ * over the flap) and the prize flap.
+ */
+export const PY6_CAB = {
+  w: 70, h: 120,
+  sign: { x0: 4, y0: 3.5, x1: 66, y1: 22.5 },
+  glass: { x0: 11.3, y0: 34.3, x1: 58.7, y1: 80.3 },
+  stick: { x: 52, y: 82.5 },
+  slot: { x: 64, y: 86 },
+  chute: { x0: 46, x1: 58.7, y0: 64 },
+  flap: { x: 50, y: 105 },
+} as const;
+
+// ── A HEAP OF PLUSH ON THE FLOOR OF THE BOX ─────────────────────────────────
+//
+// REFERENCE (py6-claw-1, py6-grab-4): the prizes lie heaped and squashed together, round
+// heads and ears showing, a few colours side by side, filling the floor of the glass box
+// edge to edge. Real units, 48 × 14; it sits on the box's floor.
+const PY6_PILE: ObjPart[] = py6In(48, 14, [
+  ...py6N('py6PlushPink', oEll('mass', 6, 9.5, 12, 10), oEll('mass', 2.6, 4.2, 3.6, 3.6), oEll('mass', 9.2, 4, 3.6, 3.6)),
+  ...py6N('py6PlushBlue', oEll('mass', 17, 10, 13, 9)),
+  ...py6N('py6PlushYellow', oEll('mass', 27.5, 9, 12, 11), oBar('mass', 24.6, 4.5, 23.8, 0.8, 2.4), oBar('mass', 30, 4.5, 31.2, 0.8, 2.4)),
+  ...py6N('py6PlushPink', oEll('mass', 38, 10.5, 11, 8)),
+  ...py6N('py6PlushBlue', oEll('mass', 45, 9.5, 8, 10)),
+  ...py6N('py6Muzzle', oEll('mass', 6, 10.6, 4.2, 3), oEll('mass', 27.5, 10.2, 4.2, 3)),
+  oEll('line', 4.6, 8.2, 1, 1), oEll('line', 7.4, 8.2, 1, 1),             // two faces looking out
+  oEll('line', 26.1, 7.8, 1, 1), oEll('line', 28.9, 7.8, 1, 1),
+  oBar('lit', 13, 6.6, 19, 6, 0.7), oBar('lit', 35, 7.4, 39, 7, 0.6),     // the light on their tops
+]);
+export const py6Pile = (x: number, y: number, w: number, h: number) => fit(PY6_PILE, x, y, w, h);
+
+// ── A PLUSH TEDDY BEAR ───────────────────────────────────────────────────────
+//
+// REFERENCE (py6-bear-2): a ROUND HEAD as wide as the body with two round EARS set high
+// on it, a pale MUZZLE with a dark nose, two bead eyes; a pear-shaped BODY; stubby ARMS
+// angled down and out; short LEGS sat forward with pale PADS on their soles. Real units,
+// 20 × 24; held by its middle (`PY6_BEAR_GRIP`), grabbed by the claw round its head.
+function py6BearParts(k: NaturalKey): ObjPart[] {
+  return py6In(20, 24, [
+    ...py6N(k,
+      oEll('mass', 10, 16.6, 12.4, 12),                               // the body
+      oBar('mass', 5.4, 13.6, 2.6, 18.4, 3.6),                        // the arms
+      oBar('mass', 14.6, 13.6, 17.4, 18.4, 3.6),
+      oEll('mass', 6, 21.6, 6, 5),                                    // the legs
+      oEll('mass', 14, 21.6, 6, 5),
+      oEll('mass', 4.4, 2.9, 5, 5),                                   // the ears
+      oEll('mass', 15.6, 2.9, 5, 5),
+      oEll('mass', 10, 7.6, 13, 11.6),                                // the head
+    ),
+    ...py6N('py6Muzzle',
+      oEll('mass', 4.4, 2.9, 2.4, 2.4), oEll('mass', 15.6, 2.9, 2.4, 2.4), // inside the ears
+      oEll('mass', 10, 10.2, 6, 4.4),                                 // the muzzle
+      oEll('mass', 10, 17.4, 6, 6),                                   // the tummy
+      oEll('mass', 6, 22.6, 3.4, 2.6), oEll('mass', 14, 22.6, 3.4, 2.6), // the paw pads
+    ),
+    oEll('line', 10, 9.1, 2.4, 1.6),                                  // the nose
+    oEll('line', 7.2, 6.6, 1.5, 1.5),                                 // the eyes
+    oEll('line', 12.8, 6.6, 1.5, 1.5),
+    oBar('lit', 6, 3.6, 9, 2.6, 0.6),                                 // the light on its crown
+  ]);
+}
+const PY6_BEAR_PURPLE = py6BearParts('py6Bear');
+const PY6_BEAR_GREEN = py6BearParts('py6BearGreen');
+export const py6BearPurple = (x: number, y: number, w: number, h: number) => fit(PY6_BEAR_PURPLE, x, y, w, h);
+export const py6BearGreen = (x: number, y: number, w: number, h: number) => fit(PY6_BEAR_GREEN, x, y, w, h);
+/** Where a bear is held (its middle) and where the claw takes it (round its head), in its 20 × 24. */
+export const PY6_BEAR_GRIP = { x: 10, y: 15, w: 20, h: 24 } as const;
+export const PY6_BEAR_HEAD = { x: 10, y: 3, w: 20, h: 24 } as const;
+
+// ── A SMARTPHONE, IN A HAND ──────────────────────────────────────────────────
+//
+// REFERENCE (py6-phone-1): a black slab with rounded corners, its screen lit nearly
+// edge to edge, held upright by its lower half with the screen to whoever looks.
+// Real units, 8 × 15; held by its bottom (`PY6_PHONE_GRIP`).
+const PY6_PHONE: ObjPart[] = py6In(8, 15, [
+  ...py6N('phoneBody', oRect('mass', 4, 7.5, 8, 15, 0, 1.6)),
+  ...py6N('py6Screen', oRect('dark', 4, 7.3, 6.4, 12.4, 0, 0.8)),
+  ...py6N('py6Bear', oRect('dark', 4, 5.2, 5, 3, 0, 0.5)),            // a post on the feed
+  oBar('line', 1.8, 9.4, 6.2, 9.4, 0.5),                              // and its lines
+  oBar('line', 1.8, 11, 5, 11, 0.5),
+]);
+export const py6Phone = (x: number, y: number, w: number, h: number) => fit(PY6_PHONE, x, y, w, h);
+export const PY6_PHONE_GRIP = { x: 4, y: 12.5, w: 8, h: 15 } as const;
+
+// ── A DISPLAY PHONE, LYING ON ITS SIDE ON A SHELF ───────────────────────────
+//
+// REFERENCE (py6-phone2-1): a shop's demo phones stand on clear shelves with their
+// screens on. Real units, 74 × 34: the screen 8–71 × 3–31, which the scene lights and
+// draws an app on (`PY6_HANDSET_SCREEN`).
+function py6HandsetParts(k: NaturalKey): ObjPart[] {
+  return py6In(74, 34, [
+    ...py6N(k, oRect('mass', 37, 17, 74, 34, 0, 5)),                  // the case
+    ...py6N('phoneBody', oRect('dark', 39.5, 17, 66, 31, 0, 3.4)),    // the phone's black face in it
+    ...py6N('py6ScreenOff', oRect('dark', 39.5, 17, 63, 28, 0, 2.4)),
+    oEll('line', 4.4, 17, 2, 2),                                      // the camera
+    oBar('lit', 6, 2.2, 68, 2.2, 0.7),                                // light along its top edge
+  ]);
+}
+const PY6_HANDSET = py6HandsetParts('phoneBody');
+const PY6_HANDSET_PINK = py6HandsetParts('py6PlushPink');
+const PY6_HANDSET_BLUE = py6HandsetParts('py6PlushBlue');
+const PY6_HANDSET_GOLD = py6HandsetParts('py6PlushYellow');
+export const py6Handset = (x: number, y: number, w: number, h: number) => fit(PY6_HANDSET, x, y, w, h);
+export const py6HandsetPink = (x: number, y: number, w: number, h: number) => fit(PY6_HANDSET_PINK, x, y, w, h);
+export const py6HandsetBlue = (x: number, y: number, w: number, h: number) => fit(PY6_HANDSET_BLUE, x, y, w, h);
+export const py6HandsetGold = (x: number, y: number, w: number, h: number) => fit(PY6_HANDSET_GOLD, x, y, w, h);
+export const PY6_HANDSET_SCREEN = { x0: 8, y0: 3, x1: 71, y1: 31, w: 74, h: 34 } as const;
+
+// ── THE PHONE KIOSK'S DISPLAY STAND ─────────────────────────────────────────
+//
+// REFERENCE (py6-phone2-1, py6-phone2-3): clear acrylic SHELVES between two clear
+// UPRIGHTS, a painted PLINTH under them and a lit HEADER board over them carrying the
+// kiosk's name. Real units, 84 × 152: the header 0–16, shelves at 54–57 and 96–99, the
+// plinth 138–152. Three phones stand on it (`PY6_STAND_SHELVES`).
+const PY6_STAND: ObjPart[] = py6In(84, 152, [
+  ...py6N('py6Acrylic',
+    oRect('mass', 5, 77, 4, 122),                                     // the uprights
+    oRect('mass', 79, 77, 4, 122),
+    oRect('mass', 42, 55.5, 82, 3, 0, 1),                             // the shelves
+    oRect('mass', 42, 97.5, 82, 3, 0, 1),
+  ),
+  ...py6N('py6Kiosk',
+    oRect('mass', 42, 8, 84, 16, 0, 3),                               // the header board
+    oRect('mass', 42, 145, 84, 14, 0, 2),                             // the plinth
+    oRect('face', 81, 145, 6, 14, 0, 1.4),
+  ),
+  ...py6N('py6Topper', oRect('dark', 42, 8, 76, 11, 0, 1.6)),        // the header's lit face
+  oBar('lit', 4, 140.2, 78, 140.2, 0.8),                              // light along the plinth
+  oBar('lit', 3.8, 18, 3.8, 136, 0.6),                                // and down the near upright
+]);
+export const py6Stand = (x: number, y: number, w: number, h: number) => fit(PY6_STAND, x, y, w, h);
+/** The stand's header face and where each phone's bottom rests, in its own 84 × 152. */
+export const PY6_STAND_SHELVES = { w: 84, h: 152, header: { x0: 4, y0: 2.5, x1: 80, y1: 13.5 }, rests: [54, 96, 138] } as const;
+
+// ── A YELLOW DUSTER ──────────────────────────────────────────────────────────
+//
+// A square of soft yellow cloth, bunched where it is held (`PY6_DUSTER_GRIP`), with a
+// stitched hem. Real units, 12 × 10.
+const PY6_DUSTER: ObjPart[] = py6In(12, 10, [
+  ...py6N('py6Duster', oRect('mass', 6.6, 5.6, 8.6, 6.4, -6, 1.6), oEll('mass', 3.6, 3, 4, 3.6)),
+  oBar('line', 3.4, 7.8, 9.8, 7.1, 0.45),                             // the stitched hem
+  oBar('lit', 4.8, 3.6, 9, 3, 0.5),
+]);
+export const py6Duster = (x: number, y: number, w: number, h: number) => fit(PY6_DUSTER, x, y, w, h);
+export const PY6_DUSTER_GRIP = { x: 3, y: 2.4, w: 12, h: 10 } as const;
+// ── psych6 OBJECTS END ──
+
+// ── psych6: objects for this lesson go ABOVE this line ──
+
+// ── LIGHTHOUSE LENS (growth6) ───────────────────────────────────────────────
+//
+// REFERENCE (Point Reyes and Elizabeth Donkin first-order lenses, photographed). A
+// Fresnel lens is a BEEHIVE of glass: a stack of prism rings narrowing to a brass cap
+// at the top and again at the foot, and a fat central drum with the BULLSEYE — rings
+// of glass round a bright centre where the lamp is. Brass frame bars run up it. Real
+// units 76 × 120: the cap at y 0, the foot ring at y 120.
+const GR6_LENS: ObjPart[] = g3In(76, 120, [
+  ...g3('brass', oEll('mass', 38, 4, 18, 8), oRect('mass', 38, 9, 34, 4, 0, 1.5)),
+  ...g3('gr6Glass',
+    oRect('mass', 38, 14, 42, 6, 0, 2), oRect('mass', 38, 20, 52, 6, 0, 2), oRect('mass', 38, 26, 60, 6, 0, 2),
+    oRect('mass', 38, 32, 66, 6, 0, 2), oRect('mass', 38, 38, 70, 6, 0, 2),
+  ),
+  ...g3('brass', oRect('mass', 38, 42.5, 74, 3, 0, 1)),
+  ...g3('gr6Glass', oRect('mass', 38, 61, 76, 34, 0, 3)),
+  ...g3('brass', oRect('mass', 38, 79.5, 74, 3, 0, 1)),
+  ...g3('gr6Glass',
+    oRect('mass', 38, 84, 70, 6, 0, 2), oRect('mass', 38, 90, 64, 6, 0, 2), oRect('mass', 38, 96, 56, 6, 0, 2),
+    oRect('mass', 38, 102, 46, 6, 0, 2), oRect('mass', 38, 108, 34, 6, 0, 2),
+  ),
+  ...g3('brass', oRect('mass', 38, 114, 40, 5, 0, 1.5), oRect('face', 38, 118, 44, 4, 0, 1)),
+  // the prisms' edges, catching the light: one rule between each pair of rings
+  ...g3('gr6Glass', ...([[17, 46], [23, 56], [29, 63], [35, 68], [87, 67], [93, 60], [99, 51], [105, 40]] as const)
+    .map(([y, w]) => oBar('dark', 38 - w / 2, y, 38 + w / 2, y, 0.6))),
+  // the bullseye: rings of glass round the lamp
+  ...g3('gr6Glass', oEll('dark', 38, 61, 30, 30)),
+  ...g3('gr6GlassHi', oEll('dark', 38, 61, 24, 24)),
+  ...g3('gr6Glass', oEll('dark', 38, 61, 17, 17)),
+  ...g3('gr6GlassHi', oEll('dark', 38, 61, 10, 10)),
+  oEll('lit', 38, 61, 4.5, 4.5),
+  oBar('lit', 5, 47, 5, 75, 1.2),
+]);
+export const gr6Lens = (x: number, y: number, w: number, h: number) => fit(GR6_LENS, x, y, w, h);
+/** Where the bullseye's centre is, in the lens's own 76 × 120. */
+export const GR6_LENS_EYE = { x: 38, y: 61, w: 76, h: 120 } as const;
+
+// ── LENS PEDESTAL ────────────────────────────────────────────────────────────
+//
+// REFERENCE (Portland Bill's lantern room). The lens stands on a cast-iron PEDESTAL
+// painted green: a wide stepped base, a fluted column, a capital spreading to the round
+// table the lens sits on, and the clockwork's winding hub on its side. Real units
+// 46 × 50: the table at y 0, the floor at y 50.
+const GR6_PEDESTAL: ObjPart[] = g3In(46, 50, [
+  ...g3('gr6Iron',
+    oRect('mass', 23, 2.5, 46, 5, 0, 1.5), oRect('mass', 23, 8, 30, 6, 0, 1), oRect('mass', 23, 28, 20, 34, 0, 1),
+    oRect('mass', 23, 44, 36, 6, 0, 1), oRect('mass', 23, 48, 44, 4, 0, 1),
+    oRect('face', 30.5, 28, 5, 34, 0, 0.8),
+  ),
+  ...g3('gr6Iron', oBar('dark', 17, 14, 17, 41, 1), oBar('dark', 21.5, 14, 21.5, 41, 1)),
+  ...g3('brass', oEll('mass', 35, 24, 6, 6)),
+  oEll('line', 35, 24, 2, 2),
+  oBar('lit', 14.6, 13, 14.6, 42, 0.7),
+]);
+export const gr6Pedestal = (x: number, y: number, w: number, h: number) => fit(GR6_PEDESTAL, x, y, w, h);
+/** The winding hub on the pedestal's side, in its own 46 × 50. */
+export const GR6_HUB = { x: 35, y: 24, w: 46, h: 50 } as const;
+
+// ── KEEPER'S DESK ────────────────────────────────────────────────────────────
+//
+// REFERENCE. A plain writing desk side-on: a top with a moulded lip, a frieze holding
+// two DRAWERS with round knobs, and four square legs, the far pair hidden. Real units
+// 132 × 36: the top at y 0, the floor at y 36.
+const GR6_DESK: ObjPart[] = g3In(132, 36, [
+  ...g3('wood',
+    oRect('mass', 66, 2.4, 132, 4.8, 0, 1), oRect('face', 66, 5.6, 128, 1.8),
+    oRect('mass', 66, 12, 122, 11, 0, 0.6),
+    oRect('mass', 8, 24, 5, 24), oRect('mass', 124, 24, 5, 24),
+    oRect('face', 9.6, 24, 1.8, 24), oRect('face', 125.6, 24, 1.8, 24),
+  ),
+  ...g3('wood', oRect('dark', 36, 12, 50, 7, 0, 0.6), oRect('dark', 96, 12, 50, 7, 0, 0.6)),
+  ...g3('brass', oEll('dark', 36, 12, 3, 3), oEll('dark', 96, 12, 3, 3)),
+  oBar('lit', 2, 1.4, 130, 1.4, 0.6),
+]);
+export const gr6Desk = (x: number, y: number, w: number, h: number) => fit(GR6_DESK, x, y, w, h);
+
+// ── MORSE KEY ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (a CNAM telegraph key, photographed). A straight key is a polished wooden
+// BASE with a moulded edge, a brass LEVER rocking on a pivot block in the middle, a black
+// ebonite KNOB on a brass collar at the operator's end, and brass binding posts at the
+// far end. Drawn in two: the base (32 × 8, its top at y 0) and the lever with its knob
+// (32 × 10, the pivot at x 14, y 7), which the scene rocks when it is pressed.
+const GR6_KEY_BASE: ObjPart[] = g3In(32, 8, [
+  ...g3('gr6Mahogany', oRect('mass', 16, 4.8, 32, 6.4, 0, 1), oRect('face', 16, 7.2, 30, 1.6)),
+  ...g3('brass',
+    oRect('mass', 14, 1.4, 7, 2.6, 0, 0.8),
+    oRect('mass', 3, 1.4, 2.6, 2.6, 0, 0.6), oRect('mass', 8, 1.4, 2.6, 2.6, 0, 0.6),
+  ),
+  oBar('lit', 1.4, 2.4, 30.6, 2.4, 0.5),
+]);
+export const gr6KeyBase = (x: number, y: number, w: number, h: number) => fit(GR6_KEY_BASE, x, y, w, h);
+const GR6_KEY_LEVER: ObjPart[] = g3In(32, 10, [
+  ...g3('brass', oBar('mass', 6, 6.8, 26, 6.8, 1.8), oEll('mass', 14, 7, 4, 4), oRect('mass', 26.5, 5.6, 3, 3, 0, 0.6)),
+  ...g3('gr6Ebonite', oEll('mass', 26.5, 2.4, 7.4, 4)),
+  oEll('lit', 25, 1.6, 2.4, 1),
+]);
+export const gr6KeyLever = (x: number, y: number, w: number, h: number) => fit(GR6_KEY_LEVER, x, y, w, h);
+/** The lever's pivot, in its own 32 × 10. */
+export const GR6_KEY_PIVOT = { x: 14, y: 7, w: 32, h: 10 } as const;
+
+// ── BRASS TOKEN ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. A brass token is a thick coin with a raised RIM and a stamped centre; one
+// kept for show stands on its edge in a little wooden STAND. Real units 14 × 17: the
+// coin above, the stand's foot on y 17. The loose coin is drawn on its own, 12 × 12.
+const GR6_TOKEN: ObjPart[] = g3In(14, 17, [
+  ...g3('wood', oRect('mass', 7, 15, 12, 4, 0, 1)),
+  ...g3('brass', oEll('mass', 7, 7, 13, 13)),
+  ...g3('brass', oEll('dark', 7, 7, 9.4, 9.4)),
+  ...g3('gr6Sun', oTri('dark', 7, 6.2, 5, 4.4, 'up'), oTri('dark', 7, 7.8, 5, 4.4, 'down')),
+  oEll('lit', 4.4, 4.2, 2.4, 1.6),
+]);
+export const gr6Token = (x: number, y: number, w: number, h: number) => fit(GR6_TOKEN, x, y, w, h);
+const GR6_COIN: ObjPart[] = g3In(12, 12, [
+  ...g3('brass', oEll('mass', 6, 6, 12, 12)),
+  ...g3('brass', oEll('dark', 6, 6, 8.4, 8.4)),
+  ...g3('gr6Sun', oTri('dark', 6, 5.3, 4.4, 3.8, 'up'), oTri('dark', 6, 6.7, 4.4, 3.8, 'down')),
+  oEll('lit', 3.6, 3.4, 2.2, 1.4),
+]);
+export const gr6Coin = (x: number, y: number, w: number, h: number) => fit(GR6_COIN, x, y, w, h);
+
+// ── BANJO BAROMETER ──────────────────────────────────────────────────────────
+//
+// REFERENCE (Barnasconi, Leeds, c. 1810). A wheel barometer is a mahogany case shaped
+// like a BANJO: a broken pediment on top, a narrow neck holding the thermometer, then a
+// big round head with a brass BEZEL round a silvered dial (RAIN, CHANGE, FAIR, STORMY
+// round its rim), and a small round foot. Real units 22 × 62; the dial's centre is
+// GR6_BARO_DIAL. Its needle is the scene's, because it swings when the storm comes.
+const GR6_BAROMETER: ObjPart[] = g3In(22, 62, [
+  ...g3('gr6Mahogany',
+    oEll('mass', 11, 2.2, 5, 4.4), oRect('mass', 11, 5.6, 18, 3.6, 0, 1), oRect('mass', 11, 10.5, 14, 8, 0, 1), oRect('mass', 11, 24, 8, 22, 0, 1),
+    oEll('mass', 11, 45, 22, 22), oEll('mass', 11, 58.5, 9, 7),
+  ),
+  ...g3('gr6Dial', oRect('dark', 11, 23, 3.4, 16, 0, 1.2)),
+  oBar('line', 11, 17, 11, 30, 0.6), oEll('line', 11, 30.4, 1.8, 1.8),
+  ...g3('brass', oEll('dark', 11, 45, 18.6, 18.6)),
+  ...g3('gr6GlassHi', oEll('dark', 11, 45, 15.4, 15.4)),
+  oBar('line', 4.2, 41, 5.6, 42, 0.5), oBar('line', 11, 38.2, 11, 39.8, 0.5), oBar('line', 17.8, 41, 16.4, 42, 0.5),
+  oEll('line', 11, 45, 1.6, 1.6),
+]);
+export const gr6Barometer = (x: number, y: number, w: number, h: number) => fit(GR6_BAROMETER, x, y, w, h);
+export const GR6_BARO_DIAL = { x: 11, y: 45, w: 22, h: 62 } as const;
+
+// ── FISHING BOAT AT SEA ──────────────────────────────────────────────────────
+//
+// REFERENCE (trawlers in Salmon Harbor). A small fishing boat side-on: a white HULL with
+// its sheer rising to the bow, red antifouling below the waterline, a white WHEELHOUSE
+// aft with a band of dark windows, and a MAST forward with a boom slung off it. Real
+// units 40 × 24: the masthead at y 0, the waterline at y 21. The masthead lamp is the
+// scene's, because it signals.
+const GR6_BOAT: ObjPart[] = g3In(40, 24, [
+  ...g3('gr6ShipWhite', oRect('mass', 21, 17, 34, 7, 0, 1.5), oTri('mass', 4.2, 15.5, 7, 7, 'left'), oRect('mass', 28.5, 10.5, 11, 8, 0, 1)),
+  ...g3('gr6ShipRed', oRect('mass', 21, 21.6, 32, 3.6, 0, 1.2)),
+  ...g3('gr6ShipWin', oRect('dark', 28.5, 9.4, 9, 2.4, 0, 0.5)),
+  ...g3('gr6ShipWhite', oRect('dark', 21, 19.2, 32, 1.2)),
+  oBar('line', 13, 13.6, 13, 0.6, 1),
+  oBar('line', 13, 3, 4, 12, 0.6),
+  oBar('line', 13, 1.5, 33, 7, 0.4),
+]);
+export const gr6Boat = (x: number, y: number, w: number, h: number) => fit(GR6_BOAT, x, y, w, h);
+/** The masthead, where the signal lamp hangs, in the boat's own 40 × 24. */
+export const GR6_MASTHEAD = { x: 13, y: 1, w: 40, h: 24 } as const;
+
+// ── HANGING CALENDAR ─────────────────────────────────────────────────────────
+//
+// REFERENCE. A hanging month calendar: a sheet on a hook, a coloured HEADER at the top
+// (where the plan's name goes), and under it the days in a grid of SEVEN columns. The
+// grid of seven is the field mark. Real units 44 × 64: the hook at y 0; the header 4–25;
+// five weeks of 7.4 from y 26.4. The plan's marks are the scene's, because they answer.
+const GR6_CAL: ObjPart[] = g3In(44, 64, [
+  ...g3('paper', oRect('mass', 22, 34.5, 44, 59, 0, 1)),
+  ...g3('calRed', oRect('mass', 22, 14.5, 44, 21, 0, 1)),
+  ...g3('paper', ...[1, 2, 3, 4, 5, 6].map((c) => oBar('dark', 1 + c * 6, 26.6, 1 + c * 6, 63, 0.45))),
+  ...g3('paper', ...[1, 2, 3, 4].map((r) => oBar('dark', 1, 26.4 + r * 7.4, 43, 26.4 + r * 7.4, 0.45))),
+  oEll('line', 22, 2.2, 3.4, 3.4),
+  oBar('line', 22, 3.6, 22, 4.8, 0.8),
+]);
+export const gr6Calendar = (x: number, y: number, w: number, h: number) => fit(GR6_CAL, x, y, w, h);
+/** Where day `d` (1–35) sits on the calendar, in its own 44 × 64: the centre of its square. */
+export const gr6CalDay = (d: number) => ({ x: 1 + ((d - 1) % 7) * 6 + 3, y: 26.4 + Math.floor((d - 1) / 7) * 7.4 + 3.7 });
+
+// ── MORSE NOTES ──────────────────────────────────────────────────────────────
+//
+// REFERENCE. A crib sheet of the code: a sheet of paper, each LINE a letter and its
+// dots and dashes. Real units 18 × 24. The sheet is drawn here and its INK separately,
+// because the ink drains off it.
+const GR6_NOTES: ObjPart[] = g3In(18, 24, [
+  ...g3('paper', oRect('mass', 9, 12, 18, 24, 0, 0.8)),
+  ...g3('paper', oRect('dark', 17.2, 12, 1.4, 22)),
+  ...g3('paper', oBar('dark', 1.5, 1.6, 15.5, 1.6, 0.5)),
+]);
+export const gr6Notes = (x: number, y: number, w: number, h: number) => fit(GR6_NOTES, x, y, w, h);
+const GR6_NOTES_INK: ObjPart[] = g3In(18, 24, [
+  // A ·–   B –···   E ·   O –––   S ···
+  oEll('line', 3, 4, 1.6, 1.6), oBar('line', 5, 4, 9, 4, 1),
+  oBar('line', 3, 8.5, 7, 8.5, 1), oEll('line', 9, 8.5, 1.6, 1.6), oEll('line', 11.5, 8.5, 1.6, 1.6), oEll('line', 14, 8.5, 1.6, 1.6),
+  oEll('line', 3, 13, 1.6, 1.6),
+  oBar('line', 3, 17.5, 6, 17.5, 1), oBar('line', 7.5, 17.5, 10.5, 17.5, 1), oBar('line', 12, 17.5, 15, 17.5, 1),
+  oEll('line', 3, 21.5, 1.6, 1.6), oEll('line', 5.5, 21.5, 1.6, 1.6), oEll('line', 8, 21.5, 1.6, 1.6),
+]);
+export const gr6NotesInk = (x: number, y: number, w: number, h: number) => fit(GR6_NOTES_INK, x, y, w, h);
+
+// ── PENCIL ───────────────────────────────────────────────────────────────────
+//
+// REFERENCE. A pencil: a yellow hexagonal shaft, a cone of bare wood, the dark lead at
+// its point. Real units 18 × 3.6, point at x 0; held near its end (AR2), GR6_PENCIL_GRIP.
+const GR6_PENCIL: ObjPart[] = g3In(18, 3.6, [
+  ...g3('lemon', oRect('mass', 10.6, 1.8, 14.8, 3.6, 0, 0.6), oRect('face', 10.6, 2.9, 14.8, 1.2)),
+  ...g3('beech', oEll('mass', 3.2, 1.8, 6, 3.2)),
+  oEll('line', 0.9, 1.8, 1.6, 1.2),
+]);
+export const gr6Pencil = (x: number, y: number, w: number, h: number) => fit(GR6_PENCIL, x, y, w, h);
+export const GR6_PENCIL_GRIP = { x: 13, y: 1.8, w: 18, h: 3.6 } as const;
+
+// ── growth6: objects for this lesson go ABOVE this line ──
+
+// ═══ biz6 BEGIN ═══
+// biz6 — A HAUNTED CASTLE ATTRACTION ON OPENING NIGHT (business-foundations-6, "When Do You
+// Break Even?"). Every drawing is authored in REAL stage units (`bz6In`) so the scene lays
+// it 1:1, and each part carries the colour the thing really is (AR1).
+const bz6N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function bz6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/** A drawing turned to face the other way, in its own real units (`w` wide). */
+function bz6Mirror(w: number, parts: readonly ObjPart[]): ObjPart[] {
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: w - p.x1, x2: w - p.x2 };
+    if (p.k === 'tri') return { ...p, x: w - p.x, rot: -p.rot, dir: p.dir === 'left' ? 'right' : p.dir === 'right' ? 'left' : p.dir };
+    return { ...p, x: w - p.x, rot: -p.rot } as ObjPart;
+  });
+}
+
+// ── THE TICKET BOOTH ────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Fantasyland ticket booth, Disneyland, 1960s"). A fairground ticket
+// booth is a small kiosk: a solid LOWER PANEL to the hip with a painted emblem on it, a
+// wooden LEDGE across its top where the money and tickets change hands, a glazed WINDOW
+// band above it, a scalloped VALANCE hanging under the eaves, and a peaked ROOF with a sign
+// and a finial. Here it is painted for a haunted castle — purple and lime, a moon and a bat.
+// Drawn in two layers so the seller stands INSIDE it: the back (posts, the lamplit inside,
+// the valance and the roof) behind him, the front (the ledge and the lower panel) before
+// him. Back real units 112 × 148, the ledge's top at y 110; front 116 × 38.
+const BZ6_BOOTH_BACK: ObjPart[] = bz6In(112, 148, [
+  ...bz6N('bz6Booth', oRect('mass', 5, 94, 10, 108, 0, 1.5), oRect('mass', 107, 94, 10, 108, 0, 1.5)), // the corner posts
+  ...bz6N('bz6BoothIn', oRect('mass', 56, 81, 94, 62)),                // the inside, warm under its lamp
+  ...bz6N('bz6Roof', oTri('mass', 56, 28, 104, 30, 'up')),             // the peaked roof
+  ...bz6N('bz6Booth', oRect('mass', 56, 43.5, 116, 5, 0, 1.5)),        // the eave board
+  ...bz6N('bz6Lime', oRect('mass', 56, 48.5, 108, 5)),                 // the valance's band
+  ...Array.from({ length: 5 }, (_, k): ObjPart => ({                   // and its scallops
+    ...oTri('mass', 10.8 + 21.6 * k, 54.5, 21.6, 8, 'down'), nat: k % 2 ? 'bz6Lime' : 'bz6Booth',
+  })),
+  ...bz6N('bz6Iron', oBar('mass', 56, 3, 56, 13, 2)),                  // the finial
+  ...bz6N('bz6Lime', oEll('mass', 56, 4, 5, 5)),
+]);
+export const bz6BoothBack = (x: number, y: number, w: number, h: number) => fit(BZ6_BOOTH_BACK, x, y, w, h);
+const BZ6_BOOTH_FRONT: ObjPart[] = bz6In(116, 38, [
+  ...bz6N('bz6Booth', oRect('mass', 58, 22, 108, 32, 0, 1)),           // the lower panel
+  ...bz6N('bz6Booth', oRect('face', 58, 35.6, 108, 5, 0, 1)),          // its kick plate, in shade
+  ...bz6N('bz6Lime', oRect('mass', 58, 9, 108, 3)),                    // the trim under the ledge
+  ...bz6N('oak', oRect('mass', 58, 3, 116, 6, 0, 1.2)),            // the ledge
+  ...bz6N('bz6Moon', oEll('dark', 58, 22.5, 15, 15)),                  // the painted moon
+  oTri('line', 53.2, 21.8, 7.5, 4.4, 'left'),                          // and a bat across it
+  oTri('line', 62.8, 21.8, 7.5, 4.4, 'right'),
+  oEll('line', 58, 22.4, 2.8, 4.4),
+]);
+export const bz6BoothFront = (x: number, y: number, w: number, h: number) => fit(BZ6_BOOTH_FRONT, x, y, w, h);
+
+// ── THE TURNSTILE ───────────────────────────────────────────────────────────
+//
+// REFERENCE ("Interior of Piggly Wiggly store … entrance turnstile", 1917). An old turnstile
+// is a short iron POST on a foot plate with a HUB at hip height, and from the hub the ARMS
+// turn flat, in a horizontal plane (the scene draws and turns them). This one is a pay
+// turnstile: a COIN BOX rides on top of the hub with a slot in its lid, and a brass CLICK
+// LEVER with a red knob sticks out toward the booth, for the seller to count a guest in by
+// hand. Real units 46 × 56; the hub's centre at (26, 11).
+const BZ6_TURNSTILE: ObjPart[] = bz6In(46, 56, [
+  ...bz6N('bz6Iron', oRect('mass', 26, 33, 8, 38, 0, 1.5)),            // the post
+  ...bz6N('bz6Iron', oRect('mass', 26, 53.5, 22, 5, 0, 1.5)),          // the foot plate
+  ...bz6N('g5Gold', oRect('mass', 26, 16, 10, 3, 0, 1)),               // the collar
+  ...bz6N('g5Gold', oRect('mass', 26, 11, 13, 6, 0, 2.5)),             // the hub, brass
+  ...bz6N('bz6CounterRed', oRect('mass', 26, 4.5, 15, 9, 0, 1.5)),     // the coin box
+  oBar('line', 22, 1.6, 30, 1.6, 1.1),                                 // its slot
+  ...bz6N('g5Gold', oBar('mass', 21, 9.5, 4.5, 3.5, 1.8)),             // the click lever
+  ...bz6N('bz6PopRed', oEll('mass', 3.5, 3, 5, 5)),                    // and its red knob
+]);
+export const bz6Turnstile = (x: number, y: number, w: number, h: number) => fit(BZ6_TURNSTILE, x, y, w, h);
+export const BZ6_HUB = { x: 26, y: 11 } as const;
+export const BZ6_SLOT = { x: 26, y: 1.6 } as const;
+export const BZ6_KNOB = { x: 3.5, y: 3 } as const;
+
+// ── A POPCORN TUB ───────────────────────────────────────────────────────────
+//
+// REFERENCE (a carnival popcorn box: white card with red STRIPES that run down the
+// tapering sides, a rolled RIM, and the popcorn heaped ABOVE the rim in puffy lumps). Real
+// units 20 × 28, the foot at the bottom.
+const BZ6_POPCORN: ObjPart[] = bz6In(20, 28, [
+  ...bz6N('bz6Kernel', oEll('mass', 5.6, 8, 9, 8), oEll('mass', 10.5, 5, 10, 9), oEll('mass', 15, 7.6, 9, 8)),
+  ...bz6N('bz6PopWhite', ...trapezoid('mass', 10, 18.5, 18, 13, 19)),  // the tub, tapering
+  ...bz6N('bz6PopRed',
+    oBar('dark', 4.2, 10.5, 5.6, 27, 2.6),                              // its stripes
+    oBar('dark', 10, 10.5, 10, 27, 2.6),
+    oBar('dark', 15.8, 10.5, 14.4, 27, 2.6),
+  ),
+  ...bz6N('bz6PopWhite', oRect('mass', 10, 10, 19, 2.6, 0, 1.2)),       // the rolled rim
+]);
+export const bz6Popcorn = (x: number, y: number, w: number, h: number) => fit(BZ6_POPCORN, x, y, w, h);
+
+// ── A GLOW STICK IN A TIN CUP ───────────────────────────────────────────────
+//
+// REFERENCE ("Green glowstick on black background"). A glow stick is a thin translucent
+// TUBE, rounded at both ends, lit evenly along its length in a hard bright green with a
+// paler core. It stands here in a little tin CUP on the ledge. Real units 12 × 34.
+const BZ6_GLOW: ObjPart[] = bz6In(12, 34, [
+  ...bz6N('bz6Glow', oBar('mass', 6, 4, 6.4, 25, 3.6)),                // the stick
+  oBar('lit', 5.4, 6.5, 5.7, 22, 1),                                   // its bright core
+  ...bz6N('silver', ...trapezoid('mass', 6, 28.5, 11, 9, 11)),         // the tin cup
+  ...bz6N('silver', oRect('face', 9.4, 29, 2.6, 9, 0, 0.8)),           // its side, from the lamp
+  oBar('line', 1, 23.3, 11, 23.3, 0.7),                                // its rim
+]);
+export const bz6Glow = (x: number, y: number, w: number, h: number) => fit(BZ6_GLOW, x, y, w, h);
+
+// ── A BARREL ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (a wine cask stood on end). STAVES that bulge a little at the middle, two iron
+// HOOPS, and a round head seen from a little above. Real units 20 × 32.
+const BZ6_BARREL: ObjPart[] = bz6In(20, 32, [
+  ...bz6N('bark', oRect('mass', 10, 17, 20, 30, 0, 6)),             // the bulging body
+  ...bz6N('bark', oRect('face', 16.6, 17.5, 6, 27, 0, 3)),          // its side, from the lamp
+  ...bz6N('bark', oBar('dark', 5, 5, 4.5, 29, 0.6), oBar('dark', 10, 5, 10, 30.5, 0.6), oBar('dark', 15, 5, 15.5, 29, 0.6)),
+  ...bz6N('bz6Iron', oBar('mass', 0.6, 9, 19.4, 9, 2), oBar('mass', 0.6, 25, 19.4, 25, 2)), // the hoops
+  ...bz6N('oak', oEll('mass', 10, 2.6, 18, 5)),                       // the head, lit
+]);
+export const bz6Barrel = (x: number, y: number, w: number, h: number) => fit(BZ6_BARREL, x, y, w, h);
+
+// ── A WALL LANTERN ──────────────────────────────────────────────────────────
+//
+// REFERENCE ("Exterior wall lantern in the Castle of Onet-le-Château"). An iron WALL PLATE,
+// an ARM standing out from it with a BRACE under it, and the lantern standing ON the end of
+// the arm: a tapering GLASS body in an iron frame, a pyramid CAP and a finial, a squat
+// BASE. Real units 22 × 33, the wall on the left; `bz6LanternR` faces the other way.
+const BZ6_LANTERN_PARTS: ObjPart[] = [
+  ...bz6N('bz6Iron',
+    oRect('mass', 1.5, 25, 3, 15, 0, 0.8),                             // the wall plate
+    oBar('mass', 2, 27, 17, 27, 1.6),                                  // the arm
+    oTri('mass', 16, 5.5, 13, 6, 'up'),                                // the pyramid cap
+    oRect('mass', 16, 24, 9, 3, 0, 1),                                 // the base
+  ),
+  ...bz6N('bz6LampGlass', oRect('mass', 16, 15.5, 10, 14, 0, 1)),      // the glass, glowing
+  oBar('line', 16, 9, 16, 22, 0.6),                                    // the frame's corner
+  oBar('line', 15.4, 0.8, 15.4, 3, 0.9),                               // the finial
+];
+const BZ6_LANTERN: ObjPart[] = bz6In(22, 33, BZ6_LANTERN_PARTS);
+const BZ6_LANTERN_R: ObjPart[] = bz6In(22, 33, bz6Mirror(22, BZ6_LANTERN_PARTS));
+export const bz6Lantern = (x: number, y: number, w: number, h: number) => fit(BZ6_LANTERN, x, y, w, h);
+export const bz6LanternR = (x: number, y: number, w: number, h: number) => fit(BZ6_LANTERN_R, x, y, w, h);
+/** The glass's middle, where the flame burns, in the lantern's own units (wall on the left). */
+export const BZ6_LAMP_FLAME = { x: 16, y: 16 } as const;
+
+// ── A WALL TORCH, AND ITS BRACKET ───────────────────────────────────────────
+//
+// REFERENCE (a castle's iron torch sconce). An iron PLATE on the wall with a RING standing
+// out from it, and the torch held in the ring: a wooden SHAFT with an iron CUP of pitch at
+// the top. In a haunted castle the torch is also a lever: pull it down and a wall turns.
+// The torch is drawn about its pivot, the ring, at (6, 18); the plate is separate and
+// stays put. Real units 12 × 30 and 6 × 14.
+const BZ6_TORCH: ObjPart[] = bz6In(12, 30, [
+  ...bz6N('bark', oBar('mass', 6, 27, 6, 7, 2.6)),                   // the shaft
+  ...bz6N('bz6Iron', oRect('mass', 6, 18, 7.5, 2.6, 0, 1)),            // the ring that holds it
+  ...bz6N('bz6Iron', ...trapezoid('mass', 6, 5, 8, 5, 5)),             // the cup of pitch
+  oBar('line', 2.4, 3, 9.6, 3, 0.8),                                   // its rolled lip
+]);
+export const bz6Torch = (x: number, y: number, w: number, h: number) => fit(BZ6_TORCH, x, y, w, h);
+export const BZ6_TORCH_PIVOT = { x: 6, y: 18 } as const;
+const BZ6_TORCH_PLATE: ObjPart[] = bz6In(6, 14, [
+  ...bz6N('bz6Iron', oRect('mass', 3, 7, 5, 14, 0, 1)),
+  oEll('lit', 3, 2.5, 1.4, 1.4), oEll('lit', 3, 11.5, 1.4, 1.4),       // its rivets
+  ...bz6N('bz6Iron', oRect('face', 4.6, 7, 1.6, 12, 0, 0.5)),
+]);
+export const bz6TorchPlate = (x: number, y: number, w: number, h: number) => fit(BZ6_TORCH_PLATE, x, y, w, h);
+
+// ── A BRASS BELL ────────────────────────────────────────────────────────────
+// REFERENCE (a counter's ring bell on a bracket). A flared brass BODY, a rolled LIP, the
+// CLAPPER under it. Real units 10 × 13, drawn about its hanger at the top (5, 0).
+const BZ6_BELL: ObjPart[] = bz6In(10, 13, [
+  oBar('line', 5, 0.4, 5, 3, 0.9),                                     // the hanger
+  ...bz6N('g5Gold', oEll('mass', 5, 7, 7, 9)),                         // the body
+  ...bz6N('g5Gold', oRect('mass', 5, 10.3, 10, 2.2, 0, 1)),            // the lip
+  ...bz6N('g5Gold', oRect('face', 7.2, 7.4, 2, 4.6, 0, 1)),            // its side, from the lamp
+  oEll('line', 5, 12, 2.2, 2.2),                                       // the clapper
+]);
+export const bz6Bell = (x: number, y: number, w: number, h: number) => fit(BZ6_BELL, x, y, w, h);
+
+// ── THE BIG MECHANICAL COUNTER ──────────────────────────────────────────────
+//
+// REFERENCE ("Mechanical Tally Counter"; "Technics RS-M270x mechanical counter"). A counter
+// is a row of DRUMS, each printed 0–9 in white on black, seen through WINDOWS in a case;
+// the drums roll, and the next number shows creeping in above the one in the window. This
+// one is built big, to hang over a gate where every guest sees it: an oxblood iron CASE
+// with gilt edging and four corner RIVETS, the drums behind a dark recessed STRIP (the
+// scene draws the drums). Real units 146 × 40; the strip spans 29–117 × 15.5–37.5.
+const BZ6_COUNTER: ObjPart[] = bz6In(146, 40, [
+  ...bz6N('g5Gold', oRect('mass', 73, 20, 146, 40, 0, 5)),             // the gilt edging
+  ...bz6N('bz6CounterRed', oRect('mass', 73, 20, 140, 34, 0, 4)),      // the case
+  ...bz6N('bz6Iron', oRect('dark', 73, 26.5, 88, 22, 0, 2)),           // the recessed strip
+  oEll('lit', 6, 6, 2.2, 2.2), oEll('lit', 140, 6, 2.2, 2.2),          // the rivets
+  oEll('lit', 6, 34, 2.2, 2.2), oEll('lit', 140, 34, 2.2, 2.2),
+]);
+export const bz6Counter = (x: number, y: number, w: number, h: number) => fit(BZ6_COUNTER, x, y, w, h);
+
+// ── A CHALKBOARD (THE BACK OF A SECRET PANEL) ───────────────────────────────
+// REFERENCE (a schoolroom slate in an oak frame, with a chalk TRAY along its foot). Real
+// units 60 × 82: the slate spans 4–56 × 4–70, the tray's top at 74.
+const BZ6_BOARD: ObjPart[] = bz6In(60, 82, [
+  ...bz6N('oak', oRect('mass', 30, 38, 60, 76, 0, 2)),                 // the frame
+  ...bz6N('slate', oRect('mass', 30, 37, 52, 66, 0, 1)),               // the slate
+  ...bz6N('oak', oRect('mass', 30, 77, 58, 5, 0, 1.5)),                // the tray
+]);
+export const bz6Board = (x: number, y: number, w: number, h: number) => fit(BZ6_BOARD, x, y, w, h);
+
+// ── A JACK-O'-LANTERN ───────────────────────────────────────────────────────
+// REFERENCE (a carved pumpkin: a squat orange body of RIBBED lobes, a short green STEM,
+// triangle eyes and a grin with the candlelight showing through). Real units 20 × 16.
+const BZ6_PUMPKIN: ObjPart[] = bz6In(20, 16, [
+  ...bz6N('bz6Pumpkin', oEll('mass', 5.5, 10, 10, 11), oEll('mass', 14.5, 10, 10, 11), oEll('mass', 10, 10, 12, 12)),
+  ...bz6N('marketCanvas', oBar('mass', 10, 4.6, 11.4, 1.2, 1.8)),      // the stem
+  ...bz6N('bz6Carve', oTri('dark', 7.4, 8.6, 3, 2.6, 'up'), oTri('dark', 12.6, 8.6, 3, 2.6, 'up')), // the eyes
+  ...bz6N('bz6Carve', oRect('dark', 10, 12, 7, 2, 0, 1)),              // the grin
+]);
+export const bz6Pumpkin = (x: number, y: number, w: number, h: number) => fit(BZ6_PUMPKIN, x, y, w, h);
+// ═══ biz6 END ═══
+
+// ── biz6: objects for this lesson go ABOVE this line ──
+
+// ── econ6 objects (begin) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// economics-foundations-6 — A PIRATE ISLAND BEACH AT GOLDEN HOUR.
+//
+// Drawn against pictures fetched with `npm run ref` (scratchpad/ref/ec6*): coconut palms
+// on a Thai beach and one against a Fijian sunset (a tall ringed trunk that LEANS and
+// curves, a crown of long arching fronds whose leaflets hang down in a comb, ripe
+// coconuts bunched under the crown); a nineteenth-century domed chest (a curved lid over a
+// box, iron straps and corner bands, a lock plate in the middle) and a heap of Whydah
+// coins; Kota Kinabalu's drinking-coconut stall (young GREEN coconuts with their tops
+// trimmed to a white cone, heaped on a counter); beached wrecks at Terschelling and
+// Squirrel Cove (a tipped hull of dark planks, the bow gone to ribs); a timber jetty on
+// posts; a wicker basket with a hooped handle; a red snapper. Each is authored in REAL
+// STAGE UNITS and laid into its box by `fit`, like econ5's.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const ec6N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function ec6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/**
+ * The same for a LONG thing (a cannon's barrel): authored in its real ax × ay and centred
+ * in a square of its longer side, so a stroke's weight scales the same along and across.
+ */
+function ec6Sq(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const S = Math.max(ax, ay);
+  return ec6In(S, S, ec6Move((S - ax) / 2, (S - ay) / 2, parts));
+}
+/** Move parts by (dx, dy), in real units. */
+function ec6Move(dx: number, dy: number, parts: readonly ObjPart[]): ObjPart[] {
+  return parts.map((p) => (p.k === 'bar'
+    ? { ...p, x1: p.x1 + dx, y1: p.y1 + dy, x2: p.x2 + dx, y2: p.y2 + dy }
+    : { ...p, x: p.x + dx, y: p.y + dy }) as ObjPart);
+}
+/** A short stroke from (x, y), `len` long at `deg` degrees (0 is right, 90 is down). */
+function ec6Ray(role: Role, x: number, y: number, len: number, deg: number, t: number): ObjPart {
+  const r = (deg * Math.PI) / 180;
+  return oBar(role, x, y, x + Math.cos(r) * len, y + Math.sin(r) * len, t);
+}
+
+// ── THE TREASURE CHEST ───────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "19th-century chests"): a box with a DOMED lid as wide as itself,
+// the dome a quarter of the height; iron bands round the top and foot and two straps
+// down the front; a lock plate in the middle under the lid's edge. Seen three-quarter,
+// its right end shows as a narrower face in shade. Real 52 × 24 (front 44, end 8). The
+// lid is drawn apart in two states — shut (the dome) and flung open (its inside, standing
+// up behind the box) — so the scene can turn one into the other about the hinge.
+const EC6_CHEST: ObjPart[] = ec6In(52, 24, [
+  ...ec6N('ec6Chest', oRect('mass', 22, 12.5, 44, 23, 0, 0.8), oRect('face', 48, 12.4, 8, 21.6, 0, 0.6)),
+  ...ec6N('ec6Iron',
+    oRect('mass', 22, 2.2, 44, 2.6), oRect('mass', 48, 2.4, 8, 2.4),
+    oRect('mass', 22, 22.8, 44, 2.4), oRect('mass', 48, 22.6, 8, 2.2),
+    oRect('mass', 7.5, 12.5, 3.2, 23), oRect('mass', 36.5, 12.5, 3.2, 23), oRect('mass', 1.4, 12.5, 2.4, 23),
+  ),
+  ...ec6N('ec6Gold', oRect('mass', 22, 8.4, 6.6, 7.6, 0, 1.4)),
+  ...ec6N('ec6Chest',
+    oBar('dark', 10.4, 10, 18.2, 10, 0.6), oBar('dark', 25.8, 10, 33.6, 10, 0.6), oBar('dark', 38.6, 10, 42.6, 10, 0.6),
+    oBar('dark', 10.4, 16.4, 33.6, 16.4, 0.6), oBar('dark', 3.4, 16.4, 5.4, 16.4, 0.6), oBar('dark', 38.6, 16.4, 42.6, 16.4, 0.6),
+  ),
+  oEll('line', 22, 7.8, 1.6, 1.8), oBar('line', 22, 8.4, 22, 10.2, 0.8),
+  oEll('line', 48, 11.4, 4.2, 4.4), ...ec6N('ec6Chest', oEll('dark', 48, 11.4, 2.4, 2.6)),
+  oEll('lit', 7.5, 5.4, 1, 1), oEll('lit', 36.5, 5.4, 1, 1), oEll('lit', 7.5, 19.6, 1, 1), oEll('lit', 36.5, 19.6, 1, 1),
+]);
+export const ec6Chest = (x: number, y: number, w: number, h: number) => fit(EC6_CHEST, x, y, w, h);
+
+/** The lid, shut: the dome over the box. Real 52 × 12; its lower half tucks behind the box. */
+const EC6_LID: ObjPart[] = ec6In(52, 23, [
+  ...ec6N('ec6Chest', oEll('mass', 22, 12, 44, 22), oEll('face', 48, 12.4, 8, 20)),
+  ...ec6N('ec6Iron', oRect('mass', 7.5, 8.4, 3.2, 8), oRect('mass', 36.5, 8.4, 3.2, 8), oRect('mass', 22, 11, 44, 2.4), oRect('mass', 48, 11, 8, 2.2)),
+  ...ec6N('ec6Chest', oBar('dark', 12, 5.6, 32, 5.6, 0.6)),
+  oBar('lit', 13, 2.6, 30, 2.6, 0.7),
+]);
+export const ec6Lid = (x: number, y: number, w: number, h: number) => fit(EC6_LID, x, y, w, h);
+
+/** The lid flung open: its inside, standing up on the hinge behind the box. Real 52 × 14. */
+const EC6_LID_IN: ObjPart[] = ec6In(52, 14, [
+  ...ec6N('ec6Chest', oRect('face', 22, 7.6, 44, 13, 0, 1), oRect('face', 48, 7.6, 8, 12, 0, 0.8)),
+  ...ec6N('ec6Iron', oRect('mass', 22, 1.5, 44.4, 2.8, 0, 1.2), oRect('mass', 48, 2, 8, 2.4)),
+  ...ec6N('ec6Iron', oBar('dark', 7.5, 3, 7.5, 13.6, 3), oBar('dark', 36.5, 3, 36.5, 13.6, 3)),
+  ...ec6N('ec6Hull', oBar('dark', 10.4, 7.8, 33.6, 7.8, 0.6)),
+]);
+export const ec6LidIn = (x: number, y: number, w: number, h: number) => fit(EC6_LID_IN, x, y, w, h);
+
+/**
+ * The gold in the chest's mouth: a heap of doubloons proud of the rim (REFERENCE, the
+ * Whydah coins: a mound of flat discs lying every way, edges catching the light), with a
+ * ruby and a string of pearls. Real 44 × 12; its foot tucks behind the box's front.
+ */
+const EC6_HEAP: ObjPart[] = ec6In(44, 20, [
+  ...ec6N('ec6Gold', oEll('mass', 22, 12, 42, 16), oEll('mass', 12, 8.6, 14, 8), oEll('mass', 29, 7, 18, 10), oEll('mass', 38, 9.6, 10, 6)),
+  ...ec6N('ec6Ruby', oEll('mass', 17, 6.4, 3.8, 3.6)),
+  ...ec6N('ec6Gold',
+    oEll('dark', 7, 9.6, 5, 2), oEll('dark', 22, 9, 5, 2), oEll('dark', 30, 4.4, 5, 2.2), oEll('dark', 36, 8.6, 4.4, 2),
+    oEll('dark', 13, 5.6, 4.4, 2), oEll('dark', 26, 10.6, 5, 2),
+  ),
+  oEll('lit', 27, 5.8, 1.6, 1.6), oEll('lit', 30.4, 6.6, 1.6, 1.6), oEll('lit', 33.8, 7.8, 1.6, 1.6), oEll('lit', 16.4, 5.6, 1.2, 0.8),
+  oEll('lit', 10, 7.4, 2, 0.7), oEll('lit', 37, 7.2, 1.6, 0.6),
+]);
+export const ec6Heap = (x: number, y: number, w: number, h: number) => fit(EC6_HEAP, x, y, w, h);
+
+/** A gold doubloon, face on. Real 6 × 6. */
+const EC6_COIN: ObjPart[] = ec6In(6, 6, [
+  ...ec6N('ec6Gold', oEll('mass', 3, 3, 6, 6), oEll('dark', 3, 3, 3.8, 3.8)),
+  oEll('lit', 2, 1.9, 1.4, 0.9),
+]);
+export const ec6Coin = (x: number, y: number, w: number, h: number) => fit(EC6_COIN, x, y, w, h);
+
+// ── THE COCONUTS ─────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Coconut Drink Stall KK"): a drinking coconut is a YOUNG green one
+// with its top trimmed down to a white cone, so a heap of them reads as green balls each
+// wearing a pale cap. The shade on each is its lower right (a body plane, so it is drawn
+// in turn and a nut in front covers the one behind). Real 12 × 13.
+const ec6Nut = (dx: number, dy: number): ObjPart[] => ec6Move(dx, dy, [
+  ...ec6N('ec6Coco', oEll('mass', 6, 8, 12, 10), oEll('face', 7.6, 9.6, 7.4, 6)),
+  ...ec6N('ec6CocoTop', oEll('mass', 6, 3.2, 6.4, 4.4)),
+]);
+const EC6_NUT: ObjPart[] = ec6In(12, 13, [...ec6Nut(0, 0), oEll('lit', 3.4, 6.6, 1.8, 1), ...ec6N('ec6CocoTop', oEll('dark', 6, 2.2, 3, 1.2))]);
+export const ec6Coconut = (x: number, y: number, w: number, h: number) => fit(EC6_NUT, x, y, w, h);
+
+/**
+ * Eleven of the twelve, heaped on the counter: five, four, and two on top (the twelfth
+ * sits on top too, drawn apart so it can be taken). Drawn from the back row forward, so
+ * each nut's shaded lower right is covered by the nuts in front of it. Real 62 × 31.
+ */
+const EC6_NUTS: ObjPart[] = ec6In(62, 31, [
+  ...ec6Nut(25, 0), ...ec6Nut(37, 0),
+  ...ec6Nut(7, 9), ...ec6Nut(19, 9), ...ec6Nut(31, 9), ...ec6Nut(43, 9),
+  ...ec6Nut(1, 18), ...ec6Nut(13, 18), ...ec6Nut(25, 18), ...ec6Nut(37, 18), ...ec6Nut(49, 18),
+]);
+export const ec6Nuts = (x: number, y: number, w: number, h: number) => fit(EC6_NUTS, x, y, w, h);
+
+// ── THE STALL ────────────────────────────────────────────────────────────────
+//
+// A counter knocked up from planks and painted sea blue, a top board of plain wood, and
+// the seller's chalk SLATE in a wooden frame fixed along its front (the words on it are
+// the scene's, in Views). Real 156 × 36; the right end recedes in shade.
+const EC6_STALL: ObjPart[] = ec6In(156, 36, [
+  ...ec6N('ec6Stall', oRect('mass', 73, 19.4, 146, 30), oRect('face', 150, 19, 8, 29)),
+  ...ec6N('wood', oRect('mass', 75, 2.2, 152, 4.4, 0, 1), oRect('mass', 4, 35, 6, 2.4), oRect('mass', 142, 35, 6, 2.4), oRect('mass', 151, 34.6, 4, 2.2)),
+  ...ec6N('wood', oRect('mass', 73, 19.8, 140, 26, 0, 1)),
+  ...ec6N('slate', oRect('mass', 73, 19.8, 135, 21.4, 0, 0.6)),
+  ...ec6N('ec6Stall', oBar('dark', 152, 8, 152, 31, 0.5)),
+  oBar('lit', 4, 0.9, 146, 0.9, 0.6),
+]);
+export const ec6Stall = (x: number, y: number, w: number, h: number) => fit(EC6_STALL, x, y, w, h);
+
+// ── THE COCONUT PALM ─────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Sunset with coconut palm tree, Fiji"; "Koh Mak … palm trees"): the
+// trunk is TALL, thin for its height, a little swollen at the foot and ringed all the way
+// up; it LEANS and bows toward the light. The crown is a spray of long fronds, each an
+// arching midrib with its leaflets hanging below it like the teeth of a comb, and the
+// coconuts bunch under the crown where the fronds spring. Real 60 × 214: the foot at
+// (10, 212), the crown at (52, 6).
+const ec6Bow = (u: number) => {
+  const v = 1 - u;
+  return { x: v * v * 10 + 2 * v * u * 6 + u * u * 52, y: v * v * 209 + 2 * v * u * 96 + u * u * 6 };
+};
+const EC6_TRUNK: ObjPart[] = ec6In(60, 214, [
+  ...ec6N('ec6Trunk', ...trapezoid('mass', 10, 207, 9, 16, 10)),
+  ...ec6N('ec6Trunk', ...[0, 1, 2, 3, 4, 5].map((k) => {
+    const p = ec6Bow(k / 6);
+    const q = ec6Bow((k + 1) / 6);
+    return oBar('mass', p.x, p.y, q.x, q.y, 9.4 - k * 0.7);
+  })),
+  ...ec6N('ec6Trunk', ...[0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8].map((u) => {
+    const p = ec6Bow(u);
+    const q = ec6Bow(u + 0.01);
+    const len = Math.hypot(q.x - p.x, q.y - p.y);
+    const nx = -(q.y - p.y) / len;
+    const ny = (q.x - p.x) / len;
+    const h = (9 - u * 4.2) / 2;
+    return oBar('dark', p.x - nx * h, p.y - ny * h, p.x + nx * h * 0.4, p.y + ny * h * 0.4, 0.9);
+  })),
+]);
+export const ec6Trunk = (x: number, y: number, w: number, h: number) => fit(EC6_TRUNK, x, y, w, h);
+
+/**
+ * One frond, springing from the crown at its LEFT end and arching out to the right: a
+ * midrib that rises and then droops, and a comb of leaflets hanging from it, longest at
+ * the middle. Real 74 × 34, the crown at (2, 8). The scene turns and mirrors it.
+ */
+const EC6_FROND: ObjPart[] = ec6In(74, 38, ec6Move(0, 4, [
+  ...ec6N('ec6Frond', oBar('mass', 2, 8, 22, 3.6, 2.8), oBar('mass', 22, 3.6, 44, 5, 2.2), oBar('mass', 44, 5, 62, 13, 1.6), oBar('mass', 62, 13, 72, 22, 1)),
+  ...ec6N('ec6Frond', ...[
+    [11, 6.2, 14, 70], [20, 4.6, 18, 75], [29, 4.2, 20, 78], [38, 5, 19, 79], [47, 6.6, 17, 76], [56, 10, 14, 72], [64, 14.6, 10, 66],
+  ].map(([x, y, len, deg]) => ec6Ray('dark', x, y, len, deg, 1.8))),
+  ...ec6N('ec6Frond', ...[[22, 4.2, 8, -56], [38, 4.4, 8, -44]].map(([x, y, len, deg]) => ec6Ray('dark', x, y, len, deg, 1.5))),
+]));
+export const ec6Frond = (x: number, y: number, w: number, h: number) => fit(EC6_FROND, x, y, w, h);
+
+/** Ripe coconuts bunched under the crown. Real 20 × 12. */
+const EC6_BUNCH: ObjPart[] = ec6In(20, 12, [
+  ...ec6N('ec6CocoRipe', oEll('mass', 5, 5, 8, 8), oEll('mass', 14, 4.6, 8, 8), oEll('mass', 9.6, 8, 8, 8), oEll('face', 11.4, 9.6, 4.4, 3.6)),
+  oEll('lit', 3.6, 3.4, 1.6, 1), oEll('lit', 12.6, 3, 1.6, 1),
+]);
+export const ec6Bunch = (x: number, y: number, w: number, h: number) => fit(EC6_BUNCH, x, y, w, h);
+
+// ── THE WRECK ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Shipwreck terschelling", "Shipwreck on Squirrel Cove Beach"): a hull
+// lying TIPPED among rocks, dark wet planks running its length, the bow end broken open
+// so its ribs stand up bare like a comb, and here the stump of a mast with a spar still
+// across it and a rag of sail. Real 120 × 70; the rocks along the foot.
+const EC6_WRECK: ObjPart[] = ec6In(120, 70, [
+  // the bow is gone to its ribs: bare frames curving up off the keel, sea between them
+  ...ec6N('ec6Hull',
+    oBar('mass', 13, 52, 6, 31, 2.6), oBar('mass', 21, 51, 16, 28, 2.6), oBar('mass', 29, 50, 26, 26, 2.6), oBar('mass', 37, 49, 36, 25, 2.6),
+    oBar('mass', 8, 53, 66, 50, 4),
+  ),
+  // the stern half still planked, tipped and settled on the rocks, its cabin standing up
+  ...ec6N('ec6Hull', oEll('mass', 78, 46, 78, 24, -10), oRect('mass', 80, 37, 70, 12, -10, 2), oRect('mass', 108, 27, 18, 18, -10, 1.6)),
+  // the mast snapped off short and leaning, a broken spar across it and a rag of sail
+  ...ec6N('ec6Hull', oBar('mass', 82, 33, 73, 9, 3.4), oBar('mass', 73, 9, 71.4, 5.6, 1.8), oBar('mass', 64, 17, 86, 13.4, 1.6)),
+  ...ec6N('ec6Sail', oTri('mass', 72, 21, 13, 12, 'down')),
+  ...ec6N('ec6Rock', oEll('mass', 18, 62, 36, 16), oEll('mass', 54, 64, 50, 13), oEll('mass', 96, 61, 42, 18), oEll('face', 102, 64, 26, 10)),
+  ...ec6N('ec6Hull', oBar('dark', 52, 44, 112, 33, 0.8), oBar('dark', 50, 50, 114, 39, 0.8), oBar('dark', 56, 55, 108, 46, 0.8)),
+  ...ec6N('gloom', oEll('dark', 47, 46, 9, 8, -10)),
+  ...ec6N('ec6Hull', oRect('dark', 108, 26, 8, 6, -10, 1)),
+  ...ec6N('ec6Sail', oBar('dark', 70, 16, 74, 26, 0.6)),
+  ...ec6N('leaf', oEll('dark', 30, 56.6, 18, 3), oEll('dark', 74, 57.6, 22, 3)),
+  ...ec6N('ec6Rock', oEll('dark', 16, 66, 30, 6), oEll('dark', 56, 67, 34, 5)),
+]);
+export const ec6Wreck = (x: number, y: number, w: number, h: number) => fit(EC6_WRECK, x, y, w, h);
+
+// ── THE JETTY ────────────────────────────────────────────────────────────────
+//
+// REFERENCE (Commons: "Shorncliffe Jetty"; "Wooden pier"): a plank deck on a row of round
+// posts standing in the water, braced, the deck's edge a darker strip below it. Real
+// 170 × 32, the deck's top at y 0.6.
+const EC6_JETTY: ObjPart[] = ec6In(170, 32, [
+  ...ec6N('oldWood', ...[8, 48, 88, 128, 164].map((x) => oBar('mass', x, 4, x, 32, 4.2))),
+  ...ec6N('oldWood', oRect('mass', 85, 3, 170, 5), oRect('face', 85, 6.5, 170, 2.2)),
+  ...ec6N('oldWood', oBar('dark', 10, 10, 46, 24, 1.2), oBar('dark', 50, 10, 86, 24, 1.2), oBar('dark', 90, 10, 126, 24, 1.2), oBar('dark', 130, 10, 162, 24, 1.2)),
+  ...ec6N('oldWood', ...[28, 68, 108, 148].map((x) => oBar('dark', x, 1.2, x, 5, 0.5))),
+  oBar('lit', 1, 1, 169, 1, 0.6),
+]);
+export const ec6Jetty = (x: number, y: number, w: number, h: number) => fit(EC6_JETTY, x, y, w, h);
+
+// ── THE CARGO ────────────────────────────────────────────────────────────────
+//
+// A pine crate of slats, battens at its corners and a brace across, its lid a separate
+// board so it can pop. Real 46 × 38 (front 42, end 4); the lid 46 × 5.
+const EC6_CRATE: ObjPart[] = ec6In(46, 38, [
+  ...ec6N('ec6Crate', oRect('mass', 21, 19.4, 42, 37, 0, 0.6), oRect('face', 44, 19, 4, 35)),
+  ...ec6N('ec6Crate', oBar('dark', 3, 2, 3, 37, 2.6), oBar('dark', 39, 2, 39, 37, 2.6), oBar('dark', 4, 34, 38, 4, 2.2)),
+  ...ec6N('ec6Crate', oBar('dark', 4.6, 13, 37.4, 13, 0.5), oBar('dark', 4.6, 25.6, 37.4, 25.6, 0.5)),
+]);
+export const ec6Crate = (x: number, y: number, w: number, h: number) => fit(EC6_CRATE, x, y, w, h);
+const EC6_CRATE_LID: ObjPart[] = ec6In(46, 5, [
+  ...ec6N('ec6Crate', oRect('mass', 21.5, 2.5, 45, 4.4, 0, 0.6), oRect('face', 44.5, 3, 3, 4)),
+  oBar('lit', 1.4, 1, 41.6, 1, 0.5),
+]);
+export const ec6CrateLid = (x: number, y: number, w: number, h: number) => fit(EC6_CRATE_LID, x, y, w, h);
+
+/** A red snapper (REFERENCE, Lutjanus campechanus): deep body, spiny dorsal fin, forked tail. Real 22 × 10. */
+const EC6_FISH: ObjPart[] = ec6In(22, 10, [
+  ...ec6N('ec6Fish', oEll('mass', 9.4, 5.2, 16, 8), oTri('mass', 18.6, 5.2, 6, 8, 'left'), oTri('mass', 9, 1.2, 9, 3, 'up'), oEll('face', 10, 7.4, 12, 3.2)),
+  oEll('line', 4, 4.2, 1.8, 1.8), oEll('lit', 3.8, 4, 0.7, 0.7),
+  ...ec6N('ec6Fish', oBar('dark', 6.6, 2.8, 6.2, 7.4, 0.6)),
+]);
+export const ec6Fish = (x: number, y: number, w: number, h: number) => fit(EC6_FISH, x, y, w, h);
+
+/** A cannon's barrel poking from its crate: a tapering iron tube with a muzzle ring. Real 26 × 9, centred in a 26-square. */
+const EC6_CANNON: ObjPart[] = ec6Sq(26, 9, [
+  ...ec6N('ec6Iron', oBar('mass', 5, 4.5, 21.6, 4.5, 6.4), oEll('mass', 3.4, 4.5, 6.4, 8.4), oRect('mass', 23.4, 4.5, 3.6, 7.6, 0, 0.8)),
+  ...ec6N('ec6Iron', oEll('dark', 24.4, 4.5, 1.6, 4.2), oBar('dark', 9, 1.6, 9, 7.4, 0.6)),
+  oBar('lit', 6, 2.6, 20, 2.6, 0.6),
+]);
+export const ec6Cannon = (x: number, y: number, w: number, h: number) => fit(EC6_CANNON, x, y, w, h);
+
+/** A ship far out, sails set: two masts, square sails, a dark hull, a pennant. Real 40 × 34. */
+const EC6_SHIP: ObjPart[] = ec6In(40, 34, [
+  ...ec6N('ec6Sail', oRect('mass', 14, 13, 12, 14, 0, 1.4), oRect('mass', 28, 11.4, 13, 17, 0, 1.4), oTri('mass', 37, 18, 7, 12, 'right')),
+  ...ec6N('ec6ShipHull', ...trapezoid('mass', 20, 28.6, 38, 28, 6.4), oRect('mass', 8, 23.6, 9, 4.4)),
+  ...ec6N('ec6Ruby', oTri('mass', 30.6, 1.6, 5, 2.6, 'right')),
+  oBar('line', 14, 4, 14, 26, 0.8), oBar('line', 28, 1.4, 28, 26, 0.8),
+  ...ec6N('ec6Sail', oBar('dark', 9, 13, 19, 13, 0.6), oBar('dark', 22.4, 11, 33.6, 11, 0.6)),
+]);
+export const ec6Ship = (x: number, y: number, w: number, h: number) => fit(EC6_SHIP, x, y, w, h);
+
+/**
+ * A wicker basket with a hooped handle (REFERENCE, "Eggs in basket": a round body wider
+ * at the rim, a rolled rim, a high hoop). Drawn about its GRIP, the top of the hoop, at
+ * (9, 1.4). Real 18 × 18.
+ */
+const EC6_BASKET: ObjPart[] = ec6In(18, 18, [
+  ...ec6N('wicker', oBar('mass', 2.6, 9, 4.4, 2.4, 1.4), oBar('mass', 4.4, 2.4, 13.6, 2.4, 1.4), oBar('mass', 13.6, 2.4, 15.4, 9, 1.4)),
+  ...ec6N('wicker', ...trapezoid('mass', 9, 13.4, 16, 11.4, 8.4), oRect('mass', 9, 9.4, 17.4, 2.6, 0, 1.2)),
+  ...ec6N('wicker', oBar('dark', 3.6, 12.4, 14.4, 12.4, 0.5), oBar('dark', 4.4, 15, 13.6, 15, 0.5), oBar('dark', 9, 10.8, 9, 17.4, 0.5), oBar('dark', 6, 10.8, 6.6, 17.4, 0.5), oBar('dark', 12, 10.8, 11.4, 17.4, 0.5)),
+]);
+export const ec6Basket = (x: number, y: number, w: number, h: number) => fit(EC6_BASKET, x, y, w, h);
+// ── econ6 objects (end) ──
+
+// ── econ6: objects for this lesson go ABOVE this line ──
+
+// ── sci6 objects (begin) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// science-foundations-6 — BELOW DECKS ON A SHIP OF 1747, the sick bay. Drawn against
+// Commons pictures (scratchpad/ref/sc6-*): sailors' hammocks slung from the beams, each
+// a canvas sling sagging between two fans of clew lines gathered at a ring on its hook,
+// a man's head showing at one end (sc6hammock-3); Robert Thom's "James Lind — Conqueror
+// of Scurvy": whitewashed planking, dark beams and knees, square tin lanterns with glowing
+// panes and a pyramid cap, a basket of oranges and lemons (sc6lind-1); the Vasa's lower
+// gun deck, its round mast standing through the deck in a collar (sc6gundeck-1); an
+// onion bottle of about 1700, a squat green globe on a short neck (sc6onion-3); glass
+// medicine bottles with corks, tall, with a shoulder (sc6med-2); a log book (sc6chest2-1).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in one named real colour. */
+const sc6N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function sc6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+
+// ── A HAMMOCK, SLUNG FROM THE BEAMS ─────────────────────────────────────────
+//
+// REFERENCE (sc6hammock-3). A ship's hammock seen along its length is a canvas sling
+// that sags between its two ends; each end is gathered into a fan of thin clew lines
+// that meet at a ring on a hook in the beam above. A man asleep in it is a long lump
+// under his blanket, the canvas closing up round him so it reads as a cocoon. Real units
+// 44 × 60: the hooks at the top, the ends of the canvas at 36, the sag at 52.
+function sc6Clews(x0: number, y0: number, ends: [number, number][]): ObjPart[] {
+  return [oEll('line', x0, y0, 2.6, 2.6), ...ends.map(([x, y]) => oBar('line', x0, y0 + 1, x, y, 0.45))];
+}
+const SC6_HAMMOCK_FULL: ObjPart[] = sc6In(44, 60, [
+  ...sc6Clews(3, 1.6, [[5, 34], [7.4, 37], [9.6, 39]]),
+  ...sc6Clews(41, 1.6, [[39, 34], [36.6, 37], [34.4, 39]]),
+  ...sc6N('sc6Blanket', oEll('mass', 22, 41, 24, 11)),                // the sleeper, under his blanket
+  ...sc6N('sc6Canvas',
+    oEll('mass', 11.4, 42.4, 17, 10, 28),                             // the sling sags to the middle and
+    oEll('mass', 32.6, 42.4, 17, 10, -28),                            // rises to both ends: a banana
+    oEll('mass', 22, 48.4, 22, 11),                                   // closing round him
+    oEll('mass', 5.2, 38, 6.4, 7.6),                                  // the ends, gathered
+    oEll('mass', 38.8, 38, 6.4, 7.6),
+    oEll('face', 24, 51, 16, 5),                                      // its under-side, in shade
+  ),
+  oBar('lit', 11, 45.2, 33, 45.2, 0.6),                               // the lamp along its rim
+]);
+export const sc6HammockFull = (x: number, y: number, w: number, h: number) => fit(SC6_HAMMOCK_FULL, x, y, w, h);
+
+/** The same hammock with nobody in it: the canvas hangs limp and lower, its blanket folded in it. */
+const SC6_HAMMOCK_EMPTY: ObjPart[] = sc6In(44, 60, [
+  ...sc6Clews(3, 1.6, [[5, 38], [7.4, 41], [9.6, 43]]),
+  ...sc6Clews(41, 1.6, [[39, 38], [36.6, 41], [34.4, 43]]),
+  ...sc6N('sc6Canvas',
+    oEll('mass', 11.4, 46.4, 17, 6, 30),
+    oEll('mass', 32.6, 46.4, 17, 6, -30),
+    oEll('mass', 22, 51, 18, 6),
+    oEll('mass', 5.2, 42, 6, 7),
+    oEll('mass', 38.8, 42, 6, 7),
+    oEll('face', 23, 52.4, 12, 2.6),
+  ),
+  ...sc6N('sc6Blanket', oRect('dark', 20, 47.4, 12, 2.6, 0, 1)),      // the blanket, folded in it
+]);
+export const sc6HammockEmpty = (x: number, y: number, w: number, h: number) => fit(SC6_HAMMOCK_EMPTY, x, y, w, h);
+
+// ── THE SICK MAN'S HAMMOCK, SLUNG LOW ───────────────────────────────────────
+//
+// The sick were slung low, at a cot's height, so the surgeon could reach them. Drawn
+// behind the man who lies in it: the two fans of clews from their hooks under the beam,
+// the far side of the canvas behind his body and its near rim below it, and a pillow at
+// the head end (the right). Real units 104 × 186: the hooks at 0, the canvas's ends at
+// 160, the bed he lies on at 172, the sag at 182.
+const SC6_COT: ObjPart[] = sc6In(104, 186, [
+  ...sc6Clews(3, 1.6, [[6, 160], [9, 164], [12, 167]]),
+  ...sc6Clews(101, 1.6, [[98, 160], [95, 164], [92, 167]]),
+  ...sc6N('sc6Canvas',
+    oEll('mass', 52, 170, 98, 24),                                    // the sling
+    oEll('mass', 5.6, 162, 8, 11),                                    // the ends, gathered
+    oEll('mass', 98.4, 162, 8, 11),
+    oEll('face', 52, 166, 82, 10),                                    // its far side, inside, in shade
+    oEll('face', 56, 178, 70, 6),                                     // its under-side
+  ),
+  ...sc6N('paper', oEll('mass', 88, 164, 16, 7)),                     // the pillow, at the head end
+  oBar('lit', 12, 173, 92, 173, 0.7),                                 // the near rim, catching the lamp
+]);
+export const sc6Cot = (x: number, y: number, w: number, h: number) => fit(SC6_COT, x, y, w, h);
+/** The cot's measures, in its own 104 × 186: the bed he lies on and the hooks. */
+export const SC6_COT_AT = { bed: 172, end: 160, of: { w: 104, h: 186 } } as const;
+
+/** His blanket, over him while he lies sick; thrown off to the foot when he gets up. Real 60 × 12. */
+const SC6_BLANKET: ObjPart[] = sc6In(60, 12, [
+  ...sc6N('sc6Blanket',
+    oEll('mass', 30, 6, 60, 11),
+    oEll('face', 34, 8.4, 46, 4.6),
+  ),
+  oBar('lit', 8, 3, 50, 3, 0.6),
+  oBar('line', 14, 2, 14, 10, 0.5),                                   // the woven stripe at its end
+]);
+export const sc6Blanket = (x: number, y: number, w: number, h: number) => fit(SC6_BLANKET, x, y, w, h);
+
+// ── A SHIP'S LANTERN ─────────────────────────────────────────────────────────
+//
+// REFERENCE (sc6lind-1). A square lantern of dark pierced tin: a ring at the top, a
+// pyramid cap, a band, glowing panes of horn between the corner posts, and a base. Real
+// 16 × 30, hung by its ring.
+const SC6_LANTERN: ObjPart[] = sc6In(16, 30, [
+  oEll('line', 8, 1.6, 3.2, 3.2),
+  ...sc6N('sc6Tin',
+    oTri('mass', 8, 7.4, 14, 7, 'up'),                                // the pyramid cap
+    oRect('mass', 8, 11.6, 15, 2.4, 0, 0.6),                          // its band
+    oRect('mass', 8, 19.4, 13.6, 14),                                 // the frame
+    oRect('mass', 8, 27.6, 15, 3.2, 0, 0.8),                          // the base
+    oRect('face', 13.2, 19.4, 3.2, 13.6),                             // the side turned from the lamp
+  ),
+  ...sc6N('sc6Glow',
+    oRect('dark', 4.9, 19.4, 3.6, 11), oRect('dark', 9.9, 19.4, 3.6, 11),  // the horn panes, lit from inside
+  ),
+  oBar('line', 2, 8.6, 14, 8.6, 0.4),                                 // the cap's vents
+]);
+export const sc6Lantern = (x: number, y: number, w: number, h: number) => fit(SC6_LANTERN, x, y, w, h);
+
+// ── THE MAST, STANDING THROUGH THE DECK ─────────────────────────────────────
+//
+// REFERENCE (sc6gundeck-1). Below decks the mast is a great round column of pine that
+// comes down through the deck above and goes on down through the deck below, wedged in
+// a wooden collar (the partners) at each, and bound with iron hoops. Real 34 × 230.
+const SC6_MAST: ObjPart[] = sc6In(34, 230, [
+  ...sc6N('sc6Pine',
+    oRect('mass', 17, 115, 20, 230, 0, 1.4),
+    oRect('face', 23.4, 115, 7, 228),                                 // the round of it, turned from the lamp
+  ),
+  ...sc6N('sc6Timber',
+    oRect('mass', 17, 4.4, 34, 8.8, 0, 1.4),                          // the partners, at the deckhead
+    oRect('mass', 17, 223, 32, 14, 0, 2.4),                           // and on the deck
+  ),
+  ...sc6N('iron',
+    oRect('dark', 17, 40, 20, 3), oRect('dark', 17, 47, 20, 3),       // iron hoops
+    oRect('dark', 17, 176, 20, 3), oRect('dark', 17, 183, 20, 3),
+  ),
+  oBar('lit', 10, 14, 10, 212, 1.2),                                  // the lamp down its rounded face
+]);
+export const sc6Mast = (x: number, y: number, w: number, h: number) => fit(SC6_MAST, x, y, w, h);
+
+// ── THE SURGEON'S SEA CHEST ─────────────────────────────────────────────────
+//
+// A long sea chest, painted, its lid a separate board, rope beckets at the ends for
+// carrying, iron corners and a hasp. Real 144 × 28: the lid's top at 0, the foot at 28.
+const SC6_CHEST: ObjPart[] = sc6In(144, 28, [
+  ...sc6N('sc6ChestBlue',
+    oRect('mass', 72, 16.4, 140, 23.2, 0, 1.2),
+    oRect('face', 72, 25.4, 140, 5),                                  // the plinth, in shade
+  ),
+  ...sc6N('sc6Timber', oRect('mass', 72, 3, 144, 6, 0, 1.2)),         // the lid
+  ...sc6N('iron',
+    oRect('dark', 5, 9, 6, 4), oRect('dark', 139, 9, 6, 4),           // iron corners
+    oRect('dark', 72, 8.4, 5, 6, 0, 0.8),                             // the hasp
+  ),
+  ...sc6N('s5Rope', oEll('mass', 3, 15, 5, 9), oEll('mass', 141, 15, 5, 9)), // rope beckets
+  oBar('line', 48, 7, 48, 23, 0.5), oBar('line', 96, 7, 96, 23, 0.5),       // its panels
+  oBar('lit', 3, 1.4, 141, 1.4, 0.7),                                 // the lamp along the lid
+]);
+export const sc6Chest = (x: number, y: number, w: number, h: number) => fit(SC6_CHEST, x, y, w, h);
+
+/** A small shelf on the planking under the port, on two brackets. Real 48 × 10. */
+const SC6_SHELF: ObjPart[] = sc6In(48, 10, [
+  ...sc6N('sc6Timber',
+    oRect('mass', 24, 2, 48, 4, 0, 0.6),
+    oBar('mass', 8, 3, 8, 9.2, 1.6), oBar('mass', 40, 3, 40, 9.2, 1.6),   // the brackets' uprights
+    oBar('mass', 8, 9, 14, 3.4, 1.2), oBar('mass', 40, 9, 34, 3.4, 1.2),  // and their braces
+  ),
+  oBar('lit', 1, 0.6, 47, 0.6, 0.5),
+]);
+export const sc6Shelf = (x: number, y: number, w: number, h: number) => fit(SC6_SHELF, x, y, w, h);
+
+// ── BOTTLES ──────────────────────────────────────────────────────────────────
+//
+// THE CAPTAIN'S TONIC (sc6onion-3): an onion bottle, a squat green globe on a short neck
+// with a string rim and a cork, seawater showing in it. Real 18 × 28, held by its neck.
+function onionParts(glass: NaturalKey, fill: NaturalKey | null): ObjPart[] {
+  return sc6In(18, 28, [
+    ...sc6N(glass,
+      oEll('mass', 9, 19.6, 18, 16.4),
+      oRect('mass', 9, 8.4, 6, 10, 0, 1.2),
+      oRect('mass', 9, 3.4, 8.2, 2.4, 0, 1),                          // the string rim
+      oEll('face', 12.6, 21, 8, 11),
+    ),
+    ...(fill ? sc6N(fill, oEll('dark', 8.6, 22.6, 13.4, 8.6)) : []),  // what is in it
+    ...sc6N('cork', oRect('mass', 9, 1.2, 4.6, 2.4, 0, 0.6)),
+    oEll('lit', 5, 16, 2.4, 5),
+  ]);
+}
+const SC6_TONIC = onionParts('sc6Bottle', 'sc6Brine');
+export const sc6Tonic = (x: number, y: number, w: number, h: number) => fit(SC6_TONIC, x, y, w, h);
+/** Where the hand holds it: the neck, in its own 18 × 28. */
+export const SC6_TONIC_GRIP = { x: 9, y: 9, of: { w: 18, h: 28 } } as const;
+const SC6_ONION_BROWN = onionParts('sc6PhialBrown', null);
+export const sc6OnionBrown = (x: number, y: number, w: number, h: number) => fit(SC6_ONION_BROWN, x, y, w, h);
+
+/** The seawater for the trial, in a square green case bottle. Real 10 × 24. */
+const SC6_CASE: ObjPart[] = sc6In(10, 24, [
+  ...sc6N('sc6Bottle',
+    oRect('mass', 5, 15.4, 10, 17, 0, 1.2),
+    oRect('mass', 5, 5.4, 4.4, 6, 0, 0.8),
+    ...trapezoid('mass', 5, 7.6, 4.4, 10, 2.6),                       // the shoulder
+    oRect('face', 8.4, 15.4, 3, 16),
+  ),
+  ...sc6N('sc6Brine', oRect('dark', 4.4, 18.4, 6.4, 9.6, 0, 0.8)),
+  ...sc6N('cork', oRect('mass', 5, 1.8, 3.4, 3, 0, 0.6)),
+  oBar('lit', 2.6, 9.6, 2.6, 21.6, 0.8),
+]);
+export const sc6CaseBottle = (x: number, y: number, w: number, h: number) => fit(SC6_CASE, x, y, w, h);
+
+/** The vinegar, in a brown stoneware bottle with a cream-glazed shoulder. Real 10 × 24. */
+const SC6_VINEGAR: ObjPart[] = sc6In(10, 24, [
+  ...sc6N('sc6Stone',
+    oRect('mass', 5, 16.4, 10, 15, 0, 2),
+    oRect('face', 8.3, 16.4, 3.2, 14),
+  ),
+  ...sc6N('sc6Glaze',
+    oEll('mass', 5, 9.6, 10, 7),                                      // the glazed shoulder
+    oRect('mass', 5, 4.6, 4, 5.4, 0, 0.8),                            // the neck
+  ),
+  ...sc6N('cork', oRect('mass', 5, 1.6, 3.2, 2.6, 0, 0.6)),
+  oBar('line', 0.6, 12.4, 9.4, 12.4, 0.5),                           // where the glaze stops
+  oBar('lit', 2.4, 14, 2.4, 22, 0.8),
+]);
+export const sc6Vinegar = (x: number, y: number, w: number, h: number) => fit(SC6_VINEGAR, x, y, w, h);
+
+/**
+ * A MEDICINE BOTTLE (sc6med-2): tall, round-shouldered, a short neck with a lip and a
+ * cork. Real 16 × 40. The colour is the bottle's own glass.
+ */
+function phialParts(glass: NaturalKey): ObjPart[] {
+  return sc6In(16, 40, [
+    ...sc6N(glass,
+      oRect('mass', 8, 26.6, 16, 26.8, 0, 2.6),
+      oEll('mass', 8, 13.6, 16, 8),                                   // the shoulder
+      oRect('mass', 8, 7.6, 6, 7.4, 0, 0.8),                          // the neck
+      oRect('mass', 8, 3.8, 8, 2.2, 0, 0.8),                          // the lip
+      oRect('face', 12.6, 27, 4.4, 25),
+    ),
+    ...sc6N('cork', oRect('mass', 8, 1.4, 5, 2.8, 0, 0.6)),
+    oBar('lit', 3.6, 16, 3.6, 36, 1.3),
+  ]);
+}
+const SC6_PHIALS = {
+  blue: phialParts('sc6PhialBlue'),
+  clear: phialParts('sc6PhialClear'),
+  brown: phialParts('sc6PhialBrown'),
+};
+export const sc6Phial = (x: number, y: number, w: number, h: number, glass: keyof typeof SC6_PHIALS = 'clear') => fit(SC6_PHIALS[glass], x, y, w, h);
+
+// ── A BASKET OF ORANGES AND LEMONS (sc6lind-1) ──────────────────────────────
+//
+// A round wicker basket with a high arched handle, heaped with oranges and lemons. Real
+// 32 × 28, held by the top of its handle.
+const SC6_BASKET: ObjPart[] = sc6In(32, 28, [
+  ...sc6N('sc6Wicker',
+    oBar('mass', 5.6, 15, 8.4, 6, 1.8), oBar('mass', 8.4, 6, 16, 1.6, 1.8),
+    oBar('mass', 16, 1.6, 23.6, 6, 1.8), oBar('mass', 23.6, 6, 26.4, 15, 1.8),
+  ),
+  ...sc6N('orange', oEll('mass', 10.6, 14.6, 8, 8), oEll('mass', 22.4, 15, 7.6, 7.6)),
+  ...sc6N('lemon', oEll('mass', 16.4, 13.4, 8.6, 6.4, -12)),
+  ...sc6N('sc6Wicker',
+    ...trapezoid('mass', 16, 21.8, 31, 24, 12.4),
+    oRect('face', 25.6, 22, 5, 11.4),
+  ),
+  oBar('line', 1.4, 19.4, 30.6, 19.4, 0.5), oBar('line', 3.4, 23.6, 28.6, 23.6, 0.5),   // the weave
+  oEll('lit', 9, 13, 2, 1.6), oEll('lit', 20.6, 13.4, 2, 1.6),
+]);
+export const sc6Basket = (x: number, y: number, w: number, h: number) => fit(SC6_BASKET, x, y, w, h);
+/** Where the hand holds it: the top of the handle, in its own 32 × 28. */
+export const SC6_BASKET_GRIP = { x: 16, y: 1.6, of: { w: 32, h: 28 } } as const;
+
+/** One orange, with its leaf. Real 8 × 8. */
+const SC6_ORANGE: ObjPart[] = sc6In(8, 8, [
+  ...sc6N('orange', oEll('mass', 4, 4.6, 7.6, 6.8), oEll('face', 5, 5.6, 4.6, 3.6)),
+  ...sc6N('leaf', oEll('mass', 5.4, 1.3, 3.2, 1.6)),
+  oEll('lit', 2.6, 3.4, 1.8, 1.4),
+]);
+export const sc6Orange = (x: number, y: number, w: number, h: number) => fit(SC6_ORANGE, x, y, w, h);
+
+// ── THE SURGEON'S LEDGER (sc6chest2-1) ──────────────────────────────────────
+//
+// Closed, it is a calf-bound book lying on its side on the shelf, the page block showing
+// at its fore-edge. Open, two ruled pages in a brown binding, each page one column. Real
+// 20 × 6 closed, 36 × 24 open.
+const SC6_LEDGER_SHUT: ObjPart[] = sc6In(20, 6, [
+  ...sc6N('sc6Leather', oRect('mass', 10, 3, 20, 6, 0, 0.8), oRect('face', 10, 5.2, 20, 1.6)),
+  ...sc6N('paper', oRect('mass', 10.6, 3, 17, 2.2)),
+  oBar('line', 1.4, 0.8, 1.4, 5.2, 0.6),
+]);
+export const sc6LedgerShut = (x: number, y: number, w: number, h: number) => fit(SC6_LEDGER_SHUT, x, y, w, h);
+const SC6_LEDGER_OPEN: ObjPart[] = sc6In(36, 24, [
+  ...sc6N('sc6Leather', oRect('mass', 18, 12.6, 36, 22.6, 0, 1.2)),
+  ...sc6N('paper',
+    oRect('mass', 9.6, 11.4, 16.4, 20, 0, 0.8),
+    oRect('mass', 26.4, 11.4, 16.4, 20, 0, 0.8),
+    oRect('face', 18, 11.4, 2, 20),                                   // the gutter
+  ),
+  oBar('line', 3, 5.4, 16.6, 5.4, 0.5), oBar('line', 19.6, 5.4, 33, 5.4, 0.5),   // the column heads
+  oBar('line', 3, 9, 16.6, 9, 0.2), oBar('line', 3, 12.6, 16.6, 12.6, 0.2), oBar('line', 3, 16.2, 16.6, 16.2, 0.2),
+  oBar('line', 19.6, 9, 33, 9, 0.2), oBar('line', 19.6, 12.6, 33, 12.6, 0.2), oBar('line', 19.6, 16.2, 33, 16.2, 0.2),
+]);
+export const sc6LedgerOpen = (x: number, y: number, w: number, h: number) => fit(SC6_LEDGER_OPEN, x, y, w, h);
+// ── sci6 objects (end) ──
+
+// ── sci6: objects for this lesson go ABOVE this line ──
+
+// ── hist6 objects (begin) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// history-foundations-6 — A TORCH-LIT HALL AT ABU SIMBEL, A CARVING OF KADESH, A DIG TRAY.
+//
+// Drawn against pictures fetched with `npm run ref` (scratchpad/ref/hi6-*): the Great
+// Temple's Kadesh relief (Ramesses in his chariot facing right, the six-spoked wheel under
+// the car's open side, a quiver slung across it, the horse prancing with a tall plume, the
+// enemy small and tumbling under the hooves, columns of hieroglyphs between ruled lines and
+// a cartouche, the stone warm orange in the light); the king smiting (the blue khepresh
+// crown, a broad collar, a kilt with a pleated apron); the great hall's Osiride pillars (a
+// mummiform king with crossed arms holding crook and flail, a tall white crown, carved out
+// of the front of a square pier); the Kadesh treaty in Istanbul (pink-buff clay, rounded
+// corners, close rows of cuneiform, cracked across); a Hittite tablet (orange clay, ruled
+// rows of wedges); an archaeologist's soft brush. Each is authored in REAL STAGE UNITS and
+// laid into its box by `fit`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Parts in a named real colour (AP11). */
+const hi6N = (k: NaturalKey, ...ps: ObjPart[]): ObjPart[] => ps.map((p) => ({ ...p, nat: k }));
+/** Author in real units (an ax × ay box) and hand it to `fit` as the 100-square. */
+function hi6In(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const sx = 100 / ax;
+  const sy = 100 / ay;
+  const s = 100 / Math.min(ax, ay);
+  return parts.map((p) => {
+    if (p.k === 'bar') return { ...p, x1: p.x1 * sx, y1: p.y1 * sy, x2: p.x2 * sx, y2: p.y2 * sy, t: p.t * s };
+    return { ...p, x: p.x * sx, y: p.y * sy, w: p.w * sx, h: p.h * sy, ...(p.k === 'rect' ? { rad: p.rad * s } : null) } as ObjPart;
+  });
+}
+/**
+ * The same for a LONG thing (a torch, a brush, a trestle): authored in its real ax × ay
+ * and centred in a square of its longer side, so a stroke's weight scales the same way
+ * along and across it at any box. A scene asks for it in a square, its middle there.
+ */
+function hi6Sq(ax: number, ay: number, parts: readonly ObjPart[]): ObjPart[] {
+  const S = Math.max(ax, ay);
+  const ox = (S - ax) / 2;
+  const oy = (S - ay) / 2;
+  return hi6In(S, S, parts.map((p) => (p.k === 'bar'
+    ? { ...p, x1: p.x1 + ox, y1: p.y1 + oy, x2: p.x2 + ox, y2: p.y2 + oy }
+    : { ...p, x: p.x + ox, y: p.y + oy }) as ObjPart));
+}
+
+// ── THE KING, IN HIS CHARIOT ─────────────────────────────────────────────────
+//
+// REFERENCE: the relief draws him FAR larger than anyone near him, striding on the car's
+// floor, shoulders square to us and the rest in profile: a red-ochre body, a white kilt with
+// a pleated apron falling to a point, a broad collar, the blue khepresh crown rounded at the
+// back with a gold cobra at the brow. He shoots: the bow arm straight out to a tall bow, the
+// drawing hand back at the chin. Real 84 × 120, his feet on y 118 (the car's floor).
+const HI6_KING: ObjPart[] = hi6In(84, 120, [
+  ...hi6N('hi6Skin',
+    oBar('mass', 31, 116, 34, 82, 5.4), oBar('mass', 45, 116, 41, 82, 5.4),       // the legs, striding
+    oEll('mass', 29, 117.4, 8, 3), oEll('mass', 47.5, 117.4, 8, 3),               // the feet
+    ...trapezoid('mass', 37, 54, 27, 13, 36),                                     // the torso
+    oBar('mass', 38, 37, 40, 28, 6.4),                                            // the neck
+    oEll('mass', 41, 20, 14, 16),                                                 // the head
+    oEll('mass', 47.4, 22.4, 4.4, 4.6),                                           // the nose and lips
+    oBar('mass', 47, 38, 62, 37, 4.6), oBar('mass', 62, 37, 74, 36, 4.2), oEll('mass', 75, 36, 5, 5),   // the bow arm
+    oBar('mass', 29, 38, 17, 33, 4.6), oBar('mass', 17, 33, 42, 30, 4.2), oEll('mass', 43, 30, 5, 5),   // the drawing arm
+  ),
+  ...hi6N('hi6Linen', ...trapezoid('mass', 38, 82, 14, 25, 20), oTri('face', 43.5, 91, 9, 15, 'down')),
+  ...hi6N('hi6Blue', oEll('mass', 37.5, 12.5, 18, 16), oEll('mass', 31, 15.5, 11, 12)),         // the khepresh crown
+  ...hi6N('wood',                                                                                 // the bow
+    oBar('mass', 74, 2, 79, 12, 2.2), oBar('mass', 79, 12, 81, 26, 2.2), oBar('mass', 81, 26, 81, 46, 2.2),
+    oBar('mass', 81, 46, 79, 60, 2.2), oBar('mass', 79, 60, 74, 70, 2.2),
+  ),
+  ...hi6N('hi6Blue', oEll('dark', 38, 39.5, 23, 7)),                                    // the broad collar
+  ...hi6N('hi6Gold',
+    oEll('dark', 38, 38.6, 16, 3.6),
+    oRect('dark', 37, 72.5, 15, 3, 0, 1),                                                // the belt
+    oBar('dark', 45.5, 9.5, 48.5, 6.5, 1.8),                                             // the cobra at the brow
+    oEll('dark', 33, 10.5, 2.6, 2.6),                                                     // a disc on the crown
+    oBar('dark', 42, 30, 84, 30, 1.1),                                                   // the arrow
+  ),
+  ...hi6N('hi6Linen', oBar('dark', 41, 75, 42, 92, 0.7)),                                           // the apron's pleat
+  oBar('line', 74, 2, 43, 30, 0.45), oBar('line', 43, 30, 74, 70, 0.45),                    // the bowstring, drawn
+  oEll('line', 44.6, 18.6, 3, 1.6),                                                        // the eye
+  oBar('line', 42, 26, 44, 34, 0.6),                                                       // the false beard
+]);
+export const hi6King = (x: number, y: number, w: number, h: number) => fit(HI6_KING, x, y, w, h);
+
+/**
+ * The chariot's wheel: six spokes, a hub, a gilded rim, and the wall seen through it (so
+ * the wheel is drawn first and the car's side panel over its top). Real 40 × 40.
+ */
+const HI6_WHEEL: ObjPart[] = hi6In(40, 40, [
+  ...hi6N('hi6Gold', oEll('mass', 20, 20, 40, 40)),
+  ...hi6N('hi6Recess', oEll('dark', 20, 20, 31, 31)),
+  ...hi6N('hi6Gold',
+    oBar('dark', 20, 5, 20, 35, 2.2), oBar('dark', 7, 12.5, 33, 27.5, 2.2), oBar('dark', 7, 27.5, 33, 12.5, 2.2),
+    oEll('dark', 20, 20, 8, 8),
+  ),
+  oEll('line', 20, 20, 3, 3),
+]);
+export const hi6Wheel = (x: number, y: number, w: number, h: number) => fit(HI6_WHEEL, x, y, w, h);
+
+/**
+ * The car: an open side panel, gilded, curving up at the front, a red-leather facing, the
+ * quiver slung across it and the pole running out to the yoke. Real 52 × 32, its floor on
+ * y 30.
+ */
+const HI6_CAR: ObjPart[] = hi6In(52, 32, [
+  ...hi6N('hi6Gold',
+    oRect('mass', 24, 19, 40, 22, 0, 2),                                                 // the side panel
+    oEll('mass', 37, 13, 16, 16),                                                        // its curved front
+    oBar('mass', 44, 29, 52, 23, 3),                                                     // the pole
+    oRect('face', 25, 30.2, 42, 2.4, 0, 1),                                              // the floor's edge
+  ),
+  ...hi6N('hi6Plume', oRect('dark', 24, 21, 30, 13, 0, 2)),                             // the red leather facing
+  ...hi6N('hi6Blue', oBar('dark', 9, 28, 30, 6, 6)),                                     // the quiver
+  ...hi6N('hi6Gold', oEll('dark', 30, 6, 7, 7), oBar('dark', 6, 21, 42, 21, 1)),
+  oEll('lit', 10, 12, 6, 1.6),
+]);
+export const hi6Car = (x: number, y: number, w: number, h: number) => fit(HI6_CAR, x, y, w, h);
+
+// ── THE HORSE ────────────────────────────────────────────────────────────────
+//
+// REFERENCE: the relief's horse PRANCES — hind legs planted, forelegs lifted and folded at
+// the knee, neck arched high, head tucked down toward the chest, a tall red plume on the
+// poll, a saddle-pad and a breast strap. Uncoloured stone, like the carving round it. Real
+// 112 × 140, its hooves on y 139.
+const HI6_HORSE: ObjPart[] = hi6In(112, 140, [
+  ...hi6N('hi6Carve',
+    oBar('mass', 8, 72, 3, 106, 4.6),                                                  // the tail
+    oBar('mass', 16, 92, 12, 116, 6.2), oBar('mass', 12, 116, 18, 137, 4.2),   // a hind leg
+    oBar('mass', 28, 94, 30, 116, 6.2), oBar('mass', 30, 116, 36, 137, 4.2),   // the other
+    oEll('mass', 46, 76, 64, 28, -14),                                                   // the body
+    oEll('mass', 20, 82, 24, 26),                                                        // the rump
+    oEll('mass', 72, 66, 26, 28),                                                        // the chest
+    oBar('mass', 74, 76, 92, 84, 6), oBar('mass', 92, 84, 88, 100, 4.4),         // a foreleg, lifted
+    oBar('mass', 66, 80, 80, 96, 6), oBar('mass', 80, 96, 93, 104, 4.4),       // the other
+    oBar('mass', 74, 62, 88, 30, 16),                                                    // the neck, arched high
+    oBar('mass', 88, 26, 101, 43, 11), oEll('mass', 102, 46, 11, 9),                    // the head, tucked
+    oTri('mass', 85, 17, 5, 9, 'up'),                                                    // the ear
+    oEll('face', 60, 88, 30, 7, -10),                                                    // the belly in shade
+  ),
+  ...hi6N('hi6Plume', oEll('mass', 84, 9, 7, 16), oRect('dark', 50, 65, 16, 7, -14, 1.5)),   // the plume; the saddle-pad
+  ...hi6N('hi6Blue', oEll('mass', 90, 11, 5, 12)),
+  ...hi6N('hi6Carve', oBar('dark', 70, 56, 83, 25, 3)),                                // the mane
+  ...hi6N('hi6Gold',
+    oBar('dark', 54, 62, 58, 86, 2), oBar('dark', 66, 74, 80, 52, 2.2),                 // the girth, the breast strap
+    oBar('dark', 89, 28, 100, 43, 1.2), oBar('dark', 92, 38, 103, 44, 1),              // the bridle
+  ),
+  oEll('line', 94, 31, 2.6, 2.6),                                                       // the eye
+  oEll('lit', 40, 68, 22, 4, -14),
+]);
+export const hi6Horse = (x: number, y: number, w: number, h: number) => fit(HI6_HORSE, x, y, w, h);
+
+// ── THE ENEMY, SMALL ─────────────────────────────────────────────────────────
+//
+// REFERENCE: under the hooves the Hittites are drawn tiny and tumbling — falling backward,
+// trampled flat, down on one knee behind a shield, running. Long hair. Real 16 × 14 each.
+const hi6FoeParts = (pose: number): ObjPart[] => hi6In(16, 14, pose === 1 ? [
+  ...hi6N('hi6Carve',
+    oBar('mass', 4, 10.5, 11, 10.5, 2.6), oBar('mass', 11, 10.5, 15.5, 9, 1.6), oBar('mass', 11, 10.8, 15.2, 12.8, 1.6),
+    oBar('mass', 6, 10, 5, 5, 1.2), oBar('mass', 8, 10, 10, 5.5, 1.2), oEll('mass', 2.6, 10.4, 4.2, 4.2),
+  ),
+  ...hi6N('hi6Glyph', oBar('dark', 1.4, 9, 0.8, 12.6, 1.2)),
+] : pose === 2 ? [
+  ...hi6N('hi6Carve',
+    oBar('mass', 7, 5.5, 7, 9.5, 2.6), oBar('mass', 7, 9.5, 3.6, 12, 1.8), oBar('mass', 3.6, 12, 7.6, 13, 1.6),
+    oBar('mass', 7, 9.5, 10, 13, 1.6), oEll('mass', 7.4, 3, 4.2, 4.4),
+  ),
+  ...hi6N('hi6Plume', oEll('mass', 11, 8, 5, 6.4)),                                     // the shield
+  ...hi6N('hi6Glyph', oBar('dark', 5.8, 2.2, 5.4, 6, 1.2)),
+] : pose === 3 ? [
+  ...hi6N('hi6Carve',
+    oBar('mass', 9, 5.5, 7.4, 9.5, 2.6), oBar('mass', 7.4, 9.5, 3.4, 13, 1.6), oBar('mass', 7.4, 9.5, 11.4, 13, 1.6),
+    oBar('mass', 8.6, 6.4, 4, 6, 1.2), oBar('mass', 8.6, 6.4, 13, 4, 1.2), oEll('mass', 10.4, 3, 4.2, 4.4),
+  ),
+  ...hi6N('hi6Glyph', oBar('dark', 12, 2, 12.8, 5.6, 1.2)),
+] : [
+  ...hi6N('hi6Carve',
+    oBar('mass', 5, 6, 9, 10.5, 2.6), oBar('mass', 9, 10.5, 14.5, 9, 1.6), oBar('mass', 9, 10.5, 13, 13.2, 1.6),
+    oBar('mass', 6, 7, 1.6, 9.4, 1.2), oBar('mass', 6, 7, 9.6, 3, 1.2), oEll('mass', 4, 4, 4.2, 4.4),
+  ),
+  ...hi6N('hi6Glyph', oBar('dark', 2.6, 2.8, 1.8, 6.2, 1.2)),
+]);
+export const hi6Foe = (x: number, y: number, w: number, h: number, pose = 0) => fit(hi6FoeParts(pose), x, y, w, h);
+
+
+// ── THE INSCRIPTION ──────────────────────────────────────────────────────────
+//
+// REFERENCE: columns of signs between ruled lines, read top to bottom, under the king's name
+// in a cartouche (an oval loop with a bar at its foot). The signs are the commonest ones:
+// an owl, water ripples, a reed leaf, a loaf, the ankh, an eye, a quail chick, a mouth, a sun
+// disc painted red; the cartouche field painted blue. Real 68 × 146.
+const hi6Sign = (kind: string, x: number, y: number): ObjPart[] => {
+  switch (kind) {
+    case 'owl': return hi6N('hi6Glyph', oEll('dark', x, y + 1, 7, 9), oEll('dark', x + 1.6, y - 4.6, 5.4, 4.4), oTri('dark', x - 2.6, y + 5.6, 3, 3, 'down'));
+    case 'water': return hi6N('hi6Glyph', oBar('dark', x - 6, y - 1.4, x + 6, y - 1.4, 1.4), oBar('dark', x - 6, y + 1.8, x + 6, y + 1.8, 1.4));
+    case 'reed': return hi6N('hi6Glyph', oBar('dark', x, y - 6, x, y + 6, 1.6), oEll('dark', x + 2.2, y - 3.4, 3.4, 7, 20));
+    case 'loaf': return hi6N('hi6Glyph', oEll('dark', x, y + 1.6, 10, 5.4), oRect('dark', x, y + 3.6, 10, 1.6));
+    case 'ankh': return [
+      ...hi6N('hi6Glyph', oEll('dark', x, y - 3.6, 5.4, 6)),
+      ...hi6N('hi6Inset', oEll('dark', x, y - 3.8, 2.4, 3.2)),
+      ...hi6N('hi6Glyph', oBar('dark', x - 4, y, x + 4, y, 1.6), oBar('dark', x, y - 0.6, x, y + 6.4, 1.6)),
+    ];
+    case 'eye': return [
+      ...hi6N('hi6Glyph', oEll('dark', x, y, 10, 4.6), oBar('dark', x - 1, y + 2, x - 3, y + 5.6, 1)),
+      oEll('line', x + 0.6, y, 2.6, 2.6),
+    ];
+    case 'chick': return hi6N('hi6Glyph', oEll('dark', x, y + 0.6, 6.4, 7), oEll('dark', x + 2.4, y - 3.6, 4, 3.8), oBar('dark', x - 1, y + 4, x - 1.6, y + 6.6, 0.9), oBar('dark', x + 1.4, y + 4, x + 2, y + 6.6, 0.9));
+    case 'mouth': return hi6N('hi6Glyph', oEll('dark', x, y, 10, 4.2));
+    case 'sun': return hi6N('hi6Plume', oEll('dark', x, y, 7.4, 7.4));
+    default: return hi6N('hi6Blue', oEll('dark', x, y, 6, 6));
+  }
+};
+const HI6_GLYPHS: ObjPart[] = hi6In(68, 146, [
+  ...hi6N('hi6Panel', oRect('mass', 33, 73, 66, 146, 0, 1), oRect('face', 66.5, 73, 3, 146)),
+  oBar('line', 22.7, 46, 22.7, 143, 0.7), oBar('line', 45.3, 46, 45.3, 143, 0.7), oBar('line', 2, 44, 64, 44, 0.7),
+  // the cartouche: an ink loop, its field painted blue, the king's name in gold and red
+  oRect('line', 34, 22, 22, 38, 0, 10),
+  ...hi6N('hi6Blue', oRect('dark', 34, 22, 18.6, 34.6, 0, 8.6)),
+  ...hi6N('hi6Plume', oEll('dark', 34, 11, 7, 7)),
+  ...hi6N('hi6Gold', oEll('dark', 34, 20.4, 5.2, 6), oBar('dark', 30.4, 24.6, 37.6, 24.6, 1.6), oBar('dark', 34, 23.6, 34, 32, 1.6)),
+  ...hi6N('hi6Blue', oEll('dark', 34, 20.2, 2.2, 2.8)),
+  oBar('line', 28, 42.4, 40, 42.4, 1.6),
+  // a falcon beside it, and a reed
+  ...hi6N('hi6Glyph', oEll('dark', 11, 27, 8, 11), oEll('dark', 13.4, 19, 5, 5), oTri('dark', 9.4, 35.4, 5, 5, 'down')),
+  ...hi6Sign('reed', 56.7, 26),
+  // the three columns
+  ...hi6Sign('owl', 11.3, 60), ...hi6Sign('water', 11.3, 82), ...hi6Sign('reed', 11.3, 104), ...hi6Sign('ankh', 11.3, 127),
+  ...hi6Sign('eye', 34, 60), ...hi6Sign('ankh', 34, 82), ...hi6Sign('chick', 34, 104), ...hi6Sign('sun', 34, 127),
+  ...hi6Sign('reed', 56.7, 60), ...hi6Sign('loaf', 56.7, 82), ...hi6Sign('owl', 56.7, 104), ...hi6Sign('mouth', 56.7, 127),
+]);
+export const hi6Glyphs = (x: number, y: number, w: number, h: number) => fit(HI6_GLYPHS, x, y, w, h);
+
+// ── THE OSIRIDE PILLAR ───────────────────────────────────────────────────────
+//
+// REFERENCE: the great hall's square piers each carry a standing king as Osiris, carved
+// from the pier's front: wrapped like a mummy, arms crossed on the chest holding the crook
+// and the flail, a long false beard, a tall white crown; hieroglyphs on the pier's side.
+// Real 76 × 214.
+const HI6_OSIRIS: ObjPart[] = hi6In(76, 214, [
+  ...hi6N('hi6Wall', oRect('mass', 37, 107, 70, 214, 0, 1), oRect('face', 71, 107, 6, 214)),   // the pier
+  ...hi6N('hi6Panel', oRect('mass', 37, 207, 54, 13, 0, 1.5)),                                    // the base
+  ...hi6N('hi6Carve',
+    ...trapezoid('mass', 37, 130, 38, 26, 136),                                                   // the wrapped body
+    oEll('mass', 37, 67, 40, 14),                                                                 // the shoulders
+    oEll('mass', 37, 199, 28, 7),                                                                 // the feet
+    oEll('mass', 37, 51, 18, 20),                                                                 // the head
+  ),
+  ...hi6N('hi6Linen', ...trapezoid('mass', 37, 31, 11, 19, 22), oEll('mass', 37, 17, 12, 13)),   // the white crown
+  ...hi6N('hi6Carve',
+    oBar('dark', 37, 61, 37, 71, 4.4),                                                            // the false beard
+    oBar('dark', 21, 85, 50, 99, 7), oBar('dark', 53, 85, 24, 99, 7),                              // the crossed arms
+    oBar('dark', 26, 150, 48, 150, 0.8), oBar('dark', 27, 172, 47, 172, 0.8),
+  ),
+  ...hi6N('hi6Blue', oEll('dark', 37, 67, 30, 8), oBar('dark', 22, 79, 29, 108, 2.6), oBar('dark', 22, 79, 18, 75, 2.4)),  // collar; crook
+  ...hi6N('hi6Gold', oEll('dark', 37, 66.4, 20, 3.4), oBar('dark', 52, 80, 46, 106, 2.4),
+    oBar('dark', 52, 80, 59, 95, 1.3), oBar('dark', 52, 80, 62, 92, 1.3)),                        // the flail
+  oEll('line', 33.5, 49, 3.6, 1.6), oEll('line', 40.5, 49, 3.6, 1.6),
+]);
+export const hi6Osiris = (x: number, y: number, w: number, h: number) => fit(HI6_OSIRIS, x, y, w, h);
+
+// ── TORCHES ──────────────────────────────────────────────────────────────────
+//
+// A wall torch in an iron bracket (a plate on the wall, an arm, a ring the shaft goes
+// through) and a hand torch (a wooden shaft with a head of pitch-soaked cloth bound round
+// it). The flames are the scene's, so they can flicker. Wall: real 16 × 36, its flame at
+// (10, 1). Hand: real 7 × 30 in a 30-square (hi6Sq), held at (3.5, 23), its flame at (3.5, 0).
+const HI6_WALL_TORCH: ObjPart[] = hi6In(16, 36, [
+  ...hi6N('iron', oRect('mass', 3, 27, 5, 10, 0, 1), oBar('mass', 4, 25, 10, 19, 2.2)),
+  ...hi6N('wood', oBar('mass', 10, 33, 10, 10, 3)),
+  ...hi6N('iron', oEll('mass', 10, 18, 9, 4)),
+  ...hi6N('hi6Wrap', oRect('mass', 10, 7, 6, 10, 0, 1.6), oBar('dark', 7, 5, 13, 6.6, 0.8), oBar('dark', 7, 8.6, 13, 10.2, 0.8)),
+  ...hi6N('hi6Flame', oEll('dark', 10, 2.6, 5, 2.4)),
+]);
+export const hi6WallTorch = (x: number, y: number, w: number, h: number) => fit(HI6_WALL_TORCH, x, y, w, h);
+const HI6_TORCH: ObjPart[] = hi6Sq(7, 30, [
+  ...hi6N('wood', oBar('mass', 3.5, 29, 3.5, 9, 2.6)),
+  ...hi6N('hi6Wrap', oRect('mass', 3.5, 6, 5.8, 10, 0, 1.8), oBar('dark', 0.9, 4, 6.1, 5.6, 0.8), oBar('dark', 0.9, 7.6, 6.1, 9.2, 0.8)),
+  ...hi6N('hi6Flame', oEll('dark', 3.5, 1.8, 4.4, 2.2)),
+]);
+export const hi6Torch = (x: number, y: number, w: number, h: number) => fit(HI6_TORCH, x, y, w, h);
+export const HI6_TORCH_AT = { grip: { x: 3.5, y: 23 }, flame: { x: 3.5, y: 0 }, of: { w: 7, h: 30 } } as const;
+
+// ── THE ARCHAEOLOGIST'S THINGS ───────────────────────────────────────────────
+//
+// A Hittite tablet: orange clay with rounded corners, rows of wedges, a crack; held by its
+// bottom edge (AR2), real 16 × 12, the grip at (7.4, 11.9). A soft brush: dark bristles, a
+// steel ferrule, a wooden handle, real 4 × 16 in a 16-square, held at (2, 12.5).
+const HI6_TABLET: ObjPart[] = hi6In(16, 12, [
+  ...hi6N('hi6Clay', oRect('mass', 7.4, 6.2, 14.6, 11.4, 0, 2.6), oRect('face', 15, 6.4, 2, 10.4, 0, 0.8)),
+  ...[3, 5.4, 7.8, 10.2].flatMap((y) => hi6N('hi6Clay', oBar('dark', 2.2, y, 6.6, y, 0.75), oBar('dark', 7.6, y, 12.6, y, 0.75))),
+  oBar('line', 9.6, 0.9, 8.4, 5, 0.4), oBar('line', 8.4, 5, 10.4, 8.2, 0.4),
+  oEll('lit', 3.2, 2.2, 2.4, 0.9),
+]);
+export const hi6Tablet = (x: number, y: number, w: number, h: number) => fit(HI6_TABLET, x, y, w, h);
+export const HI6_TABLET_GRIP = { x: 7.4, y: 11.9, of: { w: 16, h: 12 } } as const;
+const HI6_BRUSH: ObjPart[] = hi6Sq(4, 16, [
+  ...hi6N('hi6Bristle', oRect('mass', 2, 2.6, 3.6, 5, 0, 1.2)),
+  ...hi6N('silver', oRect('mass', 2, 5.9, 2.8, 1.6, 0, 0.4)),
+  ...hi6N('wood', oBar('mass', 2, 7, 2, 15.4, 1.8)),
+  oBar('lit', 1.4, 9, 1.4, 14, 0.4),
+]);
+export const hi6Brush = (x: number, y: number, w: number, h: number) => fit(HI6_BRUSH, x, y, w, h);
+
+// ── THE FINDS TRAY ON ITS TRESTLE ────────────────────────────────────────────
+//
+// A shallow wooden finds tray, sand in it, on two A-frame trestles with a brace between.
+// The finds stand in the sand at the tray's back, so the tray is drawn in two: its back and
+// its sand behind them, its front board in front. Trestle real 194 × 24 in a 194-square; back 194 × 12;
+// front 194 × 14.
+const HI6_TRESTLE: ObjPart[] = hi6Sq(194, 24, hi6N('wood',
+  oBar('mass', 10, 1, 3, 23.4, 3), oBar('mass', 10, 1, 17, 23.4, 3),
+  oBar('mass', 184, 1, 177, 23.4, 3), oBar('mass', 184, 1, 191, 23.4, 3),
+  oBar('mass', 10, 12, 184, 12, 2.2),
+  oBar('face', 12, 13.4, 182, 13.4, 1),
+));
+export const hi6Trestle = (x: number, y: number, w: number, h: number) => fit(HI6_TRESTLE, x, y, w, h);
+const HI6_TRAY_BACK: ObjPart[] = hi6In(194, 12, [
+  ...hi6N('oak', oRect('mass', 97, 3, 194, 5, 0, 1)),
+  ...hi6N('hi6Sand', oRect('mass', 97, 8.6, 190, 6.4, 0, 0.6), oBar('dark', 20, 9.6, 60, 9.6, 0.6), oBar('dark', 120, 10.2, 170, 10.2, 0.6)),
+]);
+export const hi6TrayBack = (x: number, y: number, w: number, h: number) => fit(HI6_TRAY_BACK, x, y, w, h);
+const HI6_TRAY_FRONT: ObjPart[] = hi6In(194, 14, [
+  ...hi6N('oak', oRect('mass', 96, 7, 192, 14, 0, 1.4), oRect('face', 192.4, 7, 3.2, 14, 0, 0.6),
+    oBar('dark', 4, 4.4, 188, 4.4, 0.5), oBar('dark', 4, 10.6, 188, 10.6, 0.5)),
+  oBar('lit', 2, 1, 188, 1, 0.6),
+]);
+export const hi6TrayFront = (x: number, y: number, w: number, h: number) => fit(HI6_TRAY_FRONT, x, y, w, h);
+
+// ── THE THREE FINDS ──────────────────────────────────────────────────────────
+//
+// ANOTHER CARVING OF RAMESSES: a broken block of the same sandstone, his crowned head and
+// shoulder in relief, a column of signs; real 44 × 36. THE TREATY: the Istanbul tablet's
+// pink-buff clay, its rounded shoulders, close rows of cuneiform and the cracks across it;
+// real 40 × 36. A GIFT-SHOP POSTCARD: a white-bordered card printed with the temple's front
+// — four seated colossi in a cliff of sandstone under a blue sky; real 34 × 26. And the
+// chip that breaks off the carving. Each stands in the sand on its lowest edge.
+const HI6_FRAGMENT: ObjPart[] = hi6In(44, 36, [
+  ...hi6N('hi6Panel',
+    oRect('mass', 21, 22, 38, 28, 0, 1),
+    oRect('mass', 14, 6.6, 20, 4, 0, 0.6), oTri('mass', 30, 6.8, 12, 4.4, 'up'),
+    oRect('face', 41.6, 22.6, 5, 26.6, 0, 0.6),
+  ),
+  ...hi6N('hi6Blue', oEll('dark', 19.6, 15, 11, 10)),
+  ...hi6N('hi6Skin', oEll('dark', 23, 20, 8, 10), oRect('dark', 23, 31, 20, 6, 0, 2)),
+  ...hi6N('hi6Gold', oEll('dark', 22, 27, 14, 3)),
+  oEll('line', 25, 18.6, 2, 1.2),
+  ...hi6Sign('reed', 6.4, 16), ...hi6Sign('water', 6.4, 28),
+]);
+export const hi6Fragment = (x: number, y: number, w: number, h: number) => fit(HI6_FRAGMENT, x, y, w, h);
+const HI6_TREATY: ObjPart[] = hi6In(40, 36, [
+  ...hi6N('hi6Treaty', oRect('mass', 19, 19, 36, 32, 0, 5), oRect('face', 37.6, 19.6, 3.6, 29, 0, 1)),
+  ...[8, 12.5, 17, 21.5, 26, 30.5].flatMap((y) => hi6N('hi6Treaty', oBar('dark', 5, y, 33, y, 0.8))),
+  oBar('line', 12, 3.4, 16, 14, 0.6), oBar('line', 16, 14, 10, 24, 0.6), oBar('line', 25, 34.6, 27, 22, 0.6),
+  oEll('lit', 9, 5.6, 7, 1.6),
+]);
+export const hi6Treaty = (x: number, y: number, w: number, h: number) => fit(HI6_TREATY, x, y, w, h);
+const HI6_POSTCARD: ObjPart[] = hi6In(34, 26, [
+  ...hi6N('paper', oRect('mass', 17, 13, 34, 26, 0, 1.2), oRect('face', 33, 13.4, 2, 24, 0, 0.6)),
+  ...hi6N('hi6Sky', oRect('dark', 16.4, 10.4, 29, 16.8, 0, 0.6)),
+  ...hi6N('hi6Star', oEll('dark', 26, 6, 4.2, 4.2)),
+  ...hi6N('hi6Recess', oRect('dark', 16.4, 18.6, 29, 8.4, 0, 0.6)),
+  ...[7, 13, 20, 26].flatMap((x) => hi6N('hi6Glyph', oRect('dark', x, 19.4, 4.6, 6.8, 0, 1), oEll('dark', x, 15, 3.4, 3.6))),
+  oRect('line', 16.6, 20.8, 2.2, 4, 0, 0.4),
+]);
+export const hi6Postcard = (x: number, y: number, w: number, h: number) => fit(HI6_POSTCARD, x, y, w, h);
+const HI6_CHIP: ObjPart[] = hi6In(8, 6, hi6N('hi6Panel',
+  oTri('mass', 4, 2, 8, 4, 'up'), oRect('mass', 3.6, 4.4, 7, 3, 0, 0.4), oRect('face', 7.2, 4.6, 1.6, 2.8),
+));
+export const hi6Chip = (x: number, y: number, w: number, h: number) => fit(HI6_CHIP, x, y, w, h);
+
+// ── hist6: objects for this lesson go ABOVE this line ──
+
 /** Every object, by name — what `sheet-lesson-objects` and `check:objects` walk. */
 // ─────────────────────────────────────────────────────────────────────────────
 // history-foundations-5 — AN ATHENIAN LAW COURT, AND A BEDROOM OF TODAY.
@@ -9134,5 +11303,25 @@ export const OBJECTS = {
   ratRun, ratPeek, ratTail, tailBasket, coinSack, silverCoin, handLantern, candlestick, sealMatrix, waxSeal, decreeSeal, rolledDraft, draftRoller, cabbageHead, vegCrate, hallBeam, townBanner, wallTorch, mayorDais, mayorTable, stoneArch, bakeHouse, bakeDoor, townWell, wellLid, hatchTop, hatchUnder, cellarHole,
   // sci5:
   s5BoatBack, s5BoatFront, s5Jetty, s5Lantern, s5Camera, s5Flask, s5FlaskCup, s5Bottle, s5Sonar, s5SonarBack,
+  // phil6:
+  ph6Cabinet, ph6Oracle, ph6OracleHead, ph6Ball, ph6Tray, ph6CardFace, ph6CardBack, ph6FortuneLoves, ph6FortuneSneeze, ph6FortuneBully,
+  ph6BrassHand, ph6Counter, ph6Awning, ph6JarFudge, ph6JarMint, ph6JarToffee, ph6FudgeBit, ph6MintBit, ph6DieFive, ph6DieTwo, ph6DieSix, ph6DieThree,
+  ph6Carousel, ph6Horse, ph6Rail,
+  // psych6:
+  py6CabPink, py6CabRed, py6CabTeal, py6Pile, py6BearPurple, py6BearGreen, py6Phone, py6Handset, py6HandsetPink, py6HandsetBlue, py6HandsetGold,
+  py6Stand, py6Duster,
+  // growth6:
+  gr6Lens, gr6Pedestal, gr6Desk, gr6KeyBase, gr6KeyLever, gr6Token, gr6Coin, gr6Barometer, gr6Boat, gr6Calendar,
+  gr6Notes, gr6Pencil,
+  // biz6:
+  bz6BoothBack, bz6BoothFront, bz6Turnstile, bz6Popcorn, bz6Glow, bz6Barrel, bz6Lantern, bz6LanternR, bz6Torch, bz6TorchPlate,
+  bz6Bell, bz6Counter, bz6Board, bz6Pumpkin,
+  // econ6:
+  ec6Chest, ec6Lid, ec6LidIn, ec6Heap, ec6Coin, ec6Coconut, ec6Nuts, ec6Stall, ec6Trunk, ec6Frond, ec6Bunch, ec6Wreck, ec6Jetty, ec6Crate, ec6CrateLid, ec6Fish, ec6Cannon, ec6Ship, ec6Basket,
+  // sci6:
+  sc6HammockFull, sc6HammockEmpty, sc6Cot, sc6Blanket, sc6Lantern, sc6Mast, sc6Chest, sc6Shelf, sc6Tonic, sc6OnionBrown,
+  sc6CaseBottle, sc6Vinegar, sc6Phial, sc6Basket, sc6Orange, sc6LedgerShut, sc6LedgerOpen,
+  // hist6:
+  hi6King, hi6Wheel, hi6Car, hi6Horse, hi6Foe, hi6Glyphs, hi6Osiris, hi6WallTorch, hi6Torch, hi6Tablet, hi6Brush, hi6Trestle, hi6TrayBack, hi6TrayFront, hi6Fragment, hi6Treaty, hi6Postcard, hi6Chip,
 } as const;
 export type ObjectName = keyof typeof OBJECTS;

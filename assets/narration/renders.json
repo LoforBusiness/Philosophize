@@ -214,6 +214,51 @@
     "wav": "9c70268cdb161cf7bc5d6151bd45622b165b194e099bd0fbdfabf1523ac6ebb4",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
+  "business-foundations-6/beat-00": {
+    "text": "Welcome to Castle Fright! It’s opening night, and I’ve spent a fortune on cobwebs.",
+    "wav": "d72d4dce468940b9f837e515ad2402a5185e518378f667f1f85d92beef674ede",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-6/beat-01": {
+    "text": "Fifteen pounds a ticket, and every guest gets popcorn and a glow stick. Those cost us five pounds each.",
+    "wav": "e8bcdd38ecbb9c9f48d5d18b509f48194b6a3a9079d4b1f8b842c58271b6b4bb",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-6/beat-02": {
+    "text": "The castle, the actors and the lights cost a thousand pounds a night, however many people come.",
+    "wav": "3b022678cb764b5c9787d254bc530b8d57870d99825b4828058e9f1919ef2c76",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-6/beat-03": {
+    "text": "Costs that stay the same are fixed costs. Costs that grow with every guest are variable costs.",
+    "wav": "00775c5ff8c953fd72e1262df8e4d3aebd80a080e38d825bd4a2b4ad062f677a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-6/beat-05": {
+    "text": "So every ticket makes me ten pounds. I’m rich already!",
+    "wav": "0e61a6cff1ae234442ba33f0342c592fac4987a8b67554e0b1982622c1215bc7",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-foundations-6/beat-06": {
+    "text": "No. Each ticket leaves ten pounds after its own costs, and those tens pay off the thousand first.",
+    "wav": "1df2c4080ecba7d2350e811645317f30364c6b2c8d9c483402bc00aadc094605",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-6/beat-07": {
+    "text": "So the first guests pay for the castle, and only the later ones make any money?",
+    "wav": "4e825534bd6feca95842648848d237281212fa790d52dede93e6e699f9112a1a",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-foundations-6/beat-08": {
+    "text": "Right. The point where sales just cover every cost is the break-even point.",
+    "wav": "7c1570cd19617b9fae716c0cc170fdf854a1079d75c64776affa8d531fefca20",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-foundations-6/beat-10": {
+    "text": "Guest one hundred and one! Finally, a scream that pays.",
+    "wav": "3fdece3bd87a4cad88979a059ecf0232f933b82ad295e81f872d7df58216d884",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
   "economics-foundations-1/beat-00": {
     "text": "One ten-pound note. And I want everything on this table.",
     "wav": "2cb961cb2c0c70aab358f5fa03229615532e6a707a49c6f029110e59d7618164",
@@ -418,6 +463,46 @@
     "text": "No rats, no coins? Then I’ll go back to growing cabbages.",
     "wav": "0822de16227967742a82b6ad9cece2b0cbfdfbac2243c326e0c537595cba683a",
     "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-6/beat-00": {
+    "text": "Treasure! I’ve shared it with every pirate on the island. I’m the most generous captain alive.",
+    "wav": "3202739e0a895340d6bdafebf6a8ae2343e49cb3c57dfcb1d24245e02baf08a3",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-6/beat-01": {
+    "text": "Everyone’s waving gold at my coconuts, and I’ve only got twelve. So I’ve doubled my price.",
+    "wav": "05702efbbd17492824519bfdb67743dee2ad5ec1cd93ef278e5dc2155e26a046",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-6/beat-02": {
+    "text": "The coconuts didn’t get any better. There’s just more gold chasing the same twelve coconuts.",
+    "wav": "5bc59440055af31367817b8265a28fb07b47a19c0c3c0cc81ac2771d029b1424",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-6/beat-04": {
+    "text": "When prices rise across the board like that, it’s called inflation. Your gold buys less than it did.",
+    "wav": "53469d8d684f63f287a1ca38067aefb3577ad447f570514b4982908d80638b2c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-6/beat-05": {
+    "text": "So my treasure made everyone poorer? Impossible. I’m a hero.",
+    "wav": "33b3d4449f8c94ce058ef6977fce943446fd83812c0dcd32ff9723b813b2c9ae",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-foundations-6/beat-06": {
+    "text": "Not poorer in gold. Poorer in what gold can buy, and money is only worth the things you can get with it.",
+    "wav": "43bb86642fc3970a7eaa5bd6e4182b3df8e553c90b699ca56de00429465c8f8b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-foundations-6/beat-07": {
+    "text": "So how do I get my old prices back? I liked being a one-coin coconut lady.",
+    "wav": "7e363cc8a685c1414f3b211d8262bb10743a4d355976a91509dfa127d86ec035",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "economics-foundations-6/beat-09": {
+    "text": "Then I’m burying the rest of it again, for the good of the economy.",
+    "wav": "831985a7fc285bc02cf548b9e5bad3f9509490ce6e86f9951f922f18c4a52059",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
   "history-foundations-1/beat-00": {
     "text": "My window! It was whole when I locked up, so it must have been the wind.",
@@ -714,6 +799,51 @@
     "wav": "46495db42793b40f0341ee7ff2a0ac23dbaaa1d185d108f097c40cca89f7a543",
     "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
+  "history-foundations-6/beat-00": {
+    "text": "Look at him! Ramesses, alone in his chariot, beating the whole Hittite army.",
+    "wav": "7c7d7d2142970a61a47fc29d244c5ca295944bdf171b9179c40c6f841594b6db",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-6/beat-01": {
+    "text": "Funny thing. This tablet from the Hittite capital says the Hittites won.",
+    "wav": "34e04d78a8b279a2a168d08f6c8817ff5610b0aef9b9828a6da2c86ee823c3b3",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-6/beat-02": {
+    "text": "Then the tablet’s wrong. It’s made of mud.",
+    "wav": "604d7e3dbe0b78fb99b42a080d3c5d4e4b3581479d47c1dee8876538f4120d81",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-6/beat-03": {
+    "text": "Every source was made by someone, for a reason. Ramesses had this carved on his own temple, for everyone to see.",
+    "wav": "4ac101e9930205a8fc517df2f75ca340b57da2361c31768ba76faff5195104f3",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-6/beat-05": {
+    "text": "And the Hittite king wanted to look good too. So you check one side’s story against the other’s.",
+    "wav": "167b70b584a5728a7ad782fd2bf67e6f98d2b0e8efb7dfc5dc46e81dba9872b8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-6/beat-06": {
+    "text": "So both kings claim the win? My brothers do that after a game of cards.",
+    "wav": "164970c95282f2be5fd589c6bf123795a6f520eab5f8ea32f9f2995c42edcb94",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "history-foundations-6/beat-07": {
+    "text": "Where the two sides agree, you can trust it more. The battle had no clear winner, and years later the kings signed a peace treaty.",
+    "wav": "c6bcd719273b52010f398e20636129457f90e95037a09c508bd1687a77d5371a",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "history-foundations-6/beat-08": {
+    "text": "So he drew himself ten times bigger than everyone. I think that’s lovely.",
+    "wav": "8824be9fa340827adb96ca117e0beb5a42ddc24bbcb6bd8237f0ccf41aeba0cc",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "history-foundations-6/beat-10": {
+    "text": "Mud tablets, one. Giant carvings, nil.",
+    "wav": "97fd8a79ab84211f94c3a52eddf0f9b333cf49eb5925a51c7a8356c2ad85a6ae",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "personal-growth-foundations-1/beat-00": {
     "text": "New me! I’m growing the tallest sunflower on the street, starting today.",
     "wav": "84e4e298dea83bdaf93fb1ab234045a0324ba299b955515f743d86a1a23490c1",
@@ -939,6 +1069,46 @@
     "wav": "5e34d0d34d1e9c86294ab2668d14203c2df07b6ab75fd2d5fe99e37dd0018f75",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "personal-growth-foundations-6/beat-00": {
+    "text": "I learned the whole Morse alphabet last night, in one go. Ask me anything!",
+    "wav": "0c353034e25f6ddef50b3f2cd8fdcc9448b50ac9aa678d46c0ecb8b9f4acc6a1",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-6/beat-01": {
+    "text": "I’ve been doing ten minutes a day, all week. I’m still slow, mind.",
+    "wav": "fc1e247395ef502387f8260157fed3ed94adb0043c078b8dca7ff4408c02ad43",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-6/beat-03": {
+    "text": "There’s a ship signalling out there. Read it to me, both of you, and be quick.",
+    "wav": "5653608789b34c5086a2260197abeb676cabf2d2cc6adf3bf4511ad8e67345e6",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-6/beat-04": {
+    "text": "Dot, dash, dot? I’ve forgotten nearly all of it!",
+    "wav": "3cace1bf784e599d8f77b155067b04e581eda6497dbcea1fea696ac2d4717555",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "personal-growth-foundations-6/beat-05": {
+    "text": "Three short, three long, three short. That’s S O S, they need help!",
+    "wav": "eccf0d5a2dcf03613e85037e4a641948aaaffcfc367a1fa741a0e3a1dfef06a1",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-foundations-6/beat-06": {
+    "text": "Cramming fills your head for a night, then most of it drains away. Practice spread out over days is what stays.",
+    "wav": "66b84cbb0f1a18a84a0fbfabf1f0489b22f8d2cf9c84cb059fa57678a9b89d9b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-6/beat-07": {
+    "text": "And each time you nearly forget and then remember, the memory gets stronger. So let the gaps grow.",
+    "wav": "1a0b77734205dccc0e895afd1c143d08d8612abb39d364981dfa8021fc68eba9",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-foundations-6/beat-09": {
+    "text": "Fine, ten minutes a day. Starting tomorrow, I promise.",
+    "wav": "48b35fadea8f9e1462bbb8036ca0900e08a113dd4198ee02a5abe62cb3aee712",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
     "wav": "d14c0415d0baad8351f71bde84b942c48a7e9ff9c870866d672707f023a4b675",
@@ -1153,6 +1323,51 @@
     "text": "And he’d say the same, with the same memories. One person can’t be two people, so memories alone can’t settle who’s you.",
     "wav": "c186fd9f08726d91812942e3aafff23294a8863920be6f156949c4dc5cf64fc8",
     "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-6/beat-00": {
+    "text": "Step up! The oracle prints your choice before you’ve even made it.",
+    "wav": "0b4d816bbb7eb2fae505c2356f4608954114d501962ffd4b2bf99f614aab0407",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-6/beat-01": {
+    "text": "Nobody predicts me, I’m a mystery even to myself. Fudge!",
+    "wav": "6c7f435daa44c6eaa1c5b54fbc1ce7c9fa908ba1827fab91a3c154dc0fab1aef",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-6/beat-02": {
+    "text": "The card says fudge! It always knows.",
+    "wav": "b4829305a6b83ee851ee2d36322145366f8e2286b74a37bf2010ffbde4349407",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-6/beat-03": {
+    "text": "Of course it does. You love fudge, you skipped lunch, and you hate being told what to do.",
+    "wav": "3203642c438d8aeb00efaa00e25fe842dc1a959f50bec4eee0f019c8ba34dde7",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-6/beat-04": {
+    "text": "If every choice is caused by what came before it, could you ever have picked differently? That’s the puzzle of free will.",
+    "wav": "eef74878e8a32c0c36092e4532006b15f4d265a39283b4e4acc70f3e917bd181",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-6/beat-06": {
+    "text": "Then I’ll take the mint instead, just to spite it.",
+    "wav": "f495dbbb5eb61ba2e1bc828f9ad567ec06c50a0bd875e2a296ab0f779beb4994",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-6/beat-07": {
+    "text": "Oh, there’s a second card! It says, he’ll take the mint, just to spite me.",
+    "wav": "77f9a26b59b4d1f6a931f77149847d8d8abcc18534ba2601c7ee13365e1add9d",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-foundations-6/beat-08": {
+    "text": "Here’s one answer. You’re free when you act on your own wants and nobody forces you, even if those wants have causes.",
+    "wav": "a7452c36d82a60e9745a903e01f326208faf46a2fbec6973e686f5cf63fce2d9",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-6/beat-10": {
+    "text": "Then I’m free too. I’m freely choosing to eat all the toffee.",
+    "wav": "f696c0c908184a3d15f173e71361e5c864ad69d9877096c7b946803179bcc65a",
+    "voice": "en-US-Chirp3-HD-Kore"
   },
   "psychology-foundations-1/beat-00": {
     "text": "I can always tell cheap coffee from the good stuff. Always.",
@@ -1379,6 +1594,46 @@
     "wav": "66d0a7242e425cdbd076c9908ffc8287f5a1b12c187a7eac12c631855823fda1",
     "voice": "en-GB-Chirp3-HD-Sadachbia"
   },
+  "psychology-foundations-6/beat-00": {
+    "text": "So close! Again, I’ll win the purple bear this time.",
+    "wav": "c9d99a840b1565ff54b7fd1bedad22d446c56d079164ec3c6b8f8d3b5cc2ffcd",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-6/beat-01": {
+    "text": "My finest machine. It lets you win just often enough to keep the coins coming.",
+    "wav": "1aea4dfb0882d4f68474dcf3eb56e5ea26196382886274c841781361617c4e55",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-6/beat-02": {
+    "text": "That’s no accident. When a reward comes matters as much as the reward itself.",
+    "wav": "88cac725f5655dc413e277cb732d9483da259f5554c78168e257f3d4a6298885",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-6/beat-04": {
+    "text": "A reward makes you more likely to do a thing again, and psychologists call that reinforcement. It works best when you can’t tell when it’s coming.",
+    "wav": "83c2ec0e4378b044da9990b41f1fbd59f6725d49576c67c70b2c5f128a3d1980",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-6/beat-05": {
+    "text": "I won! Now I just need the green one.",
+    "wav": "7cf6703c1692ed8565d461135020de59c8374838d5d44bd5fe6bf923d2a0afef",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "psychology-foundations-6/beat-06": {
+    "text": "Of course you do, nobody walks out after a win. I designed it that way, beautifully.",
+    "wav": "abeefef693b77b6a3f6dd67261f1649a14db104d3e52f4affedab1b1bc0a95cd",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-foundations-6/beat-07": {
+    "text": "Your phone does the same thing. Pull the screen down, and sometimes there’s something new.",
+    "wav": "d27d00f1cade916ee75ad402a531a0c490450f0fb9fcf88d8de308cec098bb7c",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-foundations-6/beat-09": {
+    "text": "So my phone’s a claw machine I carry around. Right, I’m going home, straight after one more go.",
+    "wav": "ff311152e4c1f0e18ea0c0f99229f63ab41d1032c4340679b0cc84fdda8d10e4",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
     "wav": "fe36d025ee89b93daa9ee656e4653cce3d243c2fd204cbe40a1265f914c47403",
@@ -1593,5 +1848,50 @@
     "text": "A whole month of nothing. Maybe she’s moved to the next loch over.",
     "wav": "90c64bccfc08ed14f674a7d2891892db238dfa5ef0cd10db1a9804b167b10e74",
     "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "science-foundations-6/beat-00": {
+    "text": "My gums are sore and my old cuts have opened up again. Half the crew’s the same.",
+    "wav": "5165c6377362859b9d3c2ba98c92eef16ea207b5a2aa0874dd868a70423ebed2",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-6/beat-01": {
+    "text": "My own seawater tonic will fix them. I’ve never tested it, because I’ve never needed to.",
+    "wav": "aa4b3aa3a59bad3aa912095de361d4a050b77c3497d844c7bf4478812c89284b",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-foundations-6/beat-02": {
+    "text": "Then we’ll test it. Twelve sick men, all on the same food, in pairs, and each pair gets a different remedy.",
+    "wav": "af2c9de27ea945e85ae4f947450f81fdde067f0890f621c55abfe9e52564b774",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-6/beat-03": {
+    "text": "Two get your seawater, two get vinegar, two get oranges and lemons, and so on.",
+    "wav": "bcae0418295c99e23d88f7306107e4d7af4ddb8bd5c23504e91593eaa2762d3b",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-6/beat-05": {
+    "text": "Six days of oranges and lemons, and I’m back on deck dancing!",
+    "wav": "661a09b83b7fceabba2eba34e7156eeeca19053132d2640e278a59b988ed7489",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-foundations-6/beat-06": {
+    "text": "Lucky. My seawater men are just as sick, so they weren’t trying hard enough.",
+    "wav": "f30331eb4675b00e7c359849f9ddfef189dd2a39b6b14db73bb0b9d10b6c6d73",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-foundations-6/beat-07": {
+    "text": "Comparing groups treated differently is how you know it was the lemons, not luck or the weather.",
+    "wav": "2d75eff2b0271e7b70fe2a37eb8313e06ea00de32b5c94674f37e69febd4f4ce",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-6/beat-08": {
+    "text": "But a man who’s sure his medicine works can feel better from hope alone. That could fool us too.",
+    "wav": "e1f1d30e94fdd4e8169b037af3aa2b714b4fd48c467c00d626e3a74b0c3bbe85",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-foundations-6/beat-10": {
+    "text": "Then I’ll write miracle cure on mine. Problem solved.",
+    "wav": "fc3de8f009b05fe4715e22d8b390eb906e924beae34ed205167f6dd6b75c1255",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
   }
 }

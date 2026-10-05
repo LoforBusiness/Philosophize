@@ -95,6 +95,15 @@ export const SOURCES = {
   rat: { id: 288941, by: 'toefur', title: 'rat-squeak.wav', url: 'https://freesound.org/people/toefur/sounds/288941/', licence: 'CC0 1.0' },
   sonar: { id: 539957, by: 'SamsterBirdies', title: 'Sonar Ping', url: 'https://freesound.org/people/SamsterBirdies/sounds/539957/', licence: 'CC0 1.0' },
   oar: { id: 480840, by: 'craigsmith', title: 'R23-38-Oar Splash.wav', url: 'https://freesound.org/people/craigsmith/sounds/480840/', licence: 'CC0 1.0' },
+  // the sixth lessons (2026-10-04)
+  fair: { id: 126661, by: 'alienistcog', title: '2011-carnival-merry-go-round.aiff', url: 'https://freesound.org/people/alienistcog/sounds/126661/', licence: 'CC0 1.0' },
+  arcadeamb: { id: 447416, by: 'Yarmonics', title: 'Arcade ambience in a amusement arcade in Great Yarmouth.m4a', url: 'https://freesound.org/people/Yarmonics/sounds/447416/', licence: 'CC0 1.0' },
+  wind: { id: 459981, by: 'florianreichelt', title: 'Strong Wind', url: 'https://freesound.org/people/florianreichelt/sounds/459981/', licence: 'CC0 1.0' },
+  hull: { id: 397620, by: 'laft2k', title: 'Wood Creaking.wav', url: 'https://freesound.org/people/laft2k/sounds/397620/', licence: 'CC0 1.0' },
+  turnstile: { id: 419380, by: '14GSionJ', title: '04 - Turnstile', url: 'https://freesound.org/people/14GSionJ/sounds/419380/', licence: 'CC0 1.0' },
+  coinup: { id: 58919, by: 'electrosnail', title: 'coin-up.aif', url: 'https://freesound.org/people/electrosnail/sounds/58919/', licence: 'CC0 1.0' },
+  windup: { id: 445966, by: 'Breviceps', title: 'Wind-up sound', url: 'https://freesound.org/people/Breviceps/sounds/445966/', licence: 'CC0 1.0' },
+  thunder: { id: 193170, by: 'netaj', title: 'thunder', url: 'https://freesound.org/people/netaj/sounds/193170/', licence: 'CC0 1.0' },
 };
 
 /**
@@ -197,5 +206,13 @@ export const CUTS = [
   { id: 'rat', src: 'rat', from: 0, len: 0.7, fadeOut: 0.2, loud: -29, foley: true, onset: true },
   { id: 'sonar', src: 'sonar', from: 0, len: 1.6, fadeOut: 0.6, loud: -29, foley: true, onset: true },
   { id: 'oar', src: 'oar', from: 0, search: 2.0, len: 1.2, fadeOut: 0.4, loud: -28, foley: true, onset: true, onsetDb: 10 },
+  { id: 'fair', src: 'fair', from: 5, len: 30, loop: 2.5, loud: -33, bed: true, kbps: 96 },
+  { id: 'arcade', src: 'arcadeamb', from: 3, len: 30, loop: 2.5, loud: -33, bed: true, kbps: 96 },
+  { id: 'storm', src: 'wind', from: 3, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'ship', src: 'hull', from: 5, len: 30, loop: 2.5, loud: -33, bed: true, kbps: 96 },
+  { id: 'turnstile', src: 'turnstile', from: 0, len: 0.9, fadeOut: 0.25, loud: -28, foley: true, onset: true },
+  { id: 'coinslot', src: 'coinup', from: 0, len: 0.85, fadeOut: 0.25, loud: -28, foley: true, onset: true },
+  { id: 'crank', src: 'windup', from: 0, len: 0.75, fadeOut: 0.2, loud: -28, foley: true, onset: true },
+  { id: 'thunder', src: 'thunder', from: 0, len: 5.0, fadeOut: 1.5, loud: -26, onset: true },
 ];
 

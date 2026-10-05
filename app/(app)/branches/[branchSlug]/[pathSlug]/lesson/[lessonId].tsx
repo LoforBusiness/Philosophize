@@ -39,6 +39,13 @@ import { Growth5Lesson } from '@/components/lesson/cinematic/growth5Scene';
 import { Biz5Lesson } from '@/components/lesson/cinematic/biz5Scene';
 import { Econ5Lesson } from '@/components/lesson/cinematic/econ5Scene';
 import { Sci5Lesson } from '@/components/lesson/cinematic/sci5Scene';
+import { Phil6Lesson } from '@/components/lesson/cinematic/phil6Scene';
+import { Psych6Lesson } from '@/components/lesson/cinematic/psych6Scene';
+import { Growth6Lesson } from '@/components/lesson/cinematic/growth6Scene';
+import { Biz6Lesson } from '@/components/lesson/cinematic/biz6Scene';
+import { Econ6Lesson } from '@/components/lesson/cinematic/econ6Scene';
+import { Sci6Lesson } from '@/components/lesson/cinematic/sci6Scene';
+import { Hist6Lesson } from '@/components/lesson/cinematic/hist6Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -74,36 +81,43 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'economics-foundations-3': Econ3Lesson,
   'economics-foundations-4': Econ4Lesson,
   'economics-foundations-5': Econ5Lesson,
+  'economics-foundations-6': Econ6Lesson,
   'philosophy-foundations-1': Phil1Lesson,
   'philosophy-foundations-2': Phil2Lesson,
   'philosophy-foundations-3': Phil3Lesson,
   'philosophy-foundations-4': Phil4Lesson,
   'philosophy-foundations-5': Phil5Lesson,
+  'philosophy-foundations-6': Phil6Lesson,
   'psychology-foundations-1': Psych1Lesson,
   'psychology-foundations-2': Psych2Lesson,
   'psychology-foundations-3': Psych3Lesson,
   'psychology-foundations-4': Psych4Lesson,
   'psychology-foundations-5': Psych5Lesson,
+  'psychology-foundations-6': Psych6Lesson,
   'personal-growth-foundations-1': Growth1Lesson,
   'personal-growth-foundations-2': Growth2Lesson,
   'personal-growth-foundations-3': Growth3Lesson,
   'personal-growth-foundations-4': Growth4Lesson,
   'personal-growth-foundations-5': Growth5Lesson,
+  'personal-growth-foundations-6': Growth6Lesson,
   'business-foundations-1': Biz1Lesson,
   'business-foundations-2': Biz2Lesson,
   'business-foundations-3': Biz3Lesson,
   'business-foundations-4': Biz4Lesson,
   'business-foundations-5': Biz5Lesson,
+  'business-foundations-6': Biz6Lesson,
   'science-foundations-1': Sci1Lesson,
   'science-foundations-2': Sci2Lesson,
   'science-foundations-3': Sci3Lesson,
   'science-foundations-4': Sci4Lesson,
   'science-foundations-5': Sci5Lesson,
+  'science-foundations-6': Sci6Lesson,
   'history-foundations-1': Hist1Lesson,
   'history-foundations-2': Hist2Lesson,
   'history-foundations-3': Hist3Lesson,
   'history-foundations-4': Hist4Lesson,
   'history-foundations-5': Hist5Lesson,
+  'history-foundations-6': Hist6Lesson,
 };
 
 export default function LessonScreen() {
