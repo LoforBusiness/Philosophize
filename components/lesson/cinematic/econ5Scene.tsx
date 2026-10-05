@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './econ5Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -24,7 +25,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, ratRun, ratPeek, ratTail, tailBasket, coinSack, silverCoin, handLantern, candlestick, sealMatrix,
+  NATURAL, ratTail, tailBasket, coinSack, silverCoin, handLantern, candlestick, sealMatrix,
   waxSeal, decreeSeal, rolledDraft, draftRoller, cabbageHead, vegCrate, hallBeam, townBanner, wallTorch,
   mayorDais, mayorTable, stoneArch, bakeHouse, bakeDoor, townWell, wellLid, hatchTop, hatchUnder, cellarHole,
 } from './objects';
@@ -265,8 +266,6 @@ const CANDLE_ART = candlestick(22, TOP - 13, 10, 26);
 const HOLE_ART = cellarHole(25, 7.5, 50, 15);
 const LID_TOP_ART = hatchTop(25, 7.5, 50, 15);
 const LID_UNDER_ART = hatchUnder(25, 17, 50, 34);
-const RAT_PEEK_ART = ratPeek(0, -7, 17, 14);
-const RAT_RUN_ART = [ratRun(0, -4.8, 30, 30, 0), ratRun(0, -4.8, 30, 30, 1)];
 const ROLL_ART = rolledDraft(0, 0, 48, 6);
 const ROLLER_ART = draftRoller(0, 0, 50, 5);
 const DOOR_ART = bakeDoor(0, 0, 28, 42);
@@ -931,7 +930,7 @@ function PeekRat({ S, x, r }: { S: SharedValue<any>; x: number; r: number }) {
   });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={RAT_PEEK_ART} tone={TONE} />
+      <LessonPicture name="econ5-rat-peek" />
     </Animated.View>
   );
 }
@@ -949,8 +948,8 @@ function RunningRat({ S }: { S: SharedValue<any> }) {
   });
   return (
     <>
-      <Animated.View style={[styles.rider, a]} pointerEvents="none"><ObjectArt parts={RAT_RUN_ART[0]} tone={TONE} /></Animated.View>
-      <Animated.View style={[styles.rider, c]} pointerEvents="none"><ObjectArt parts={RAT_RUN_ART[1]} tone={TONE} /></Animated.View>
+      <Animated.View style={[styles.rider, a]} pointerEvents="none"><LessonPicture name="econ5-rat-a" /></Animated.View>
+      <Animated.View style={[styles.rider, c]} pointerEvents="none"><LessonPicture name="econ5-rat-b" /></Animated.View>
     </>
   );
 }

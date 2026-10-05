@@ -10714,6 +10714,42 @@ The band is his full height now. **That means fewer visitors — 32 lessons to 2
 that is the right trade**, for the same reason AA8 already refuses forty: a second
 figure standing in the middle of the question is worse than no second figure.
 
+### AM13 · A thing that cannot be built from boxes is DRAWN, against a reference, and baked
+
+> *"in the new history lesson, in the background where there's the king stomping over
+> people … the design just looks like a lot of shapes that are meant to look like the
+> objects. But the shapes don't really look that professional … if there's a horse or if
+> there's a chariot or if there's a mummy. These designs and any other designs need to be
+> very professional looking … I want more reference taken for objects."* (2026-10-04)
+
+`objects.ts` builds a thing from ellipses, rounded boxes, bars and triangles. That is
+right for a cup, a crate, a sign or a coin, whose real shape IS those shapes. It is wrong
+for anything whose shape is a CURVE that no stack of primitives follows: an animal, a
+carved figure, a ship's hull, a sagging hammock, a person in a relief. Stacked, those read
+as "a lot of shapes that are meant to look like" the thing, which is exactly what the
+owner saw. So:
+
+1. **Draw it as curves** in `scripts/lib/lessonart/<lesson or props>.mjs`: SVG paths, flat
+   fills lit from the top left with a shaded side and one dark outline (the house look),
+   or a carved-relief treatment for a carving (a raised face, a groove outline, a lit lip
+   and a shadow side).
+2. **From a reference you looked at**, fetched with `npm run ref` and Read: take the
+   proportions and the construction (a flying gallop, a six-spoked wheel at the back of the
+   cab, a hammock's fan of cords to a ring on a hook). Name the reference in a comment.
+   Nothing is traced or shipped; every curve is drawn.
+3. **Bake it**: list it in `scripts/lib/lessonart/index.mjs` with its own `view` and the
+   scene `box` it sits at, and `npm run make:lesson-art` renders it to
+   `assets/lesson-art/<name>.png` and writes `lessonArt.ts`. A scene draws it with
+   `<LessonPicture name=… />`. A picture that replaces a shape-built object takes that
+   object's box exactly, so nothing on the stage moves, and it is one View where the shapes
+   were dozens (AT7). `check:lesson-art` fails a drawing edited and not baked.
+4. **Look at it** at the size it is used, beside the cast. A drawing judged only big passes
+   a defect a phone shows.
+
+Things that move as one piece (a galloping carousel horse, a rat running, a boat on the
+swell) are pictures too; the scene moves the picture. Something whose PARTS move
+independently stays parts, or is a picture per part.
+
 ---
 
 ## Group AN · A choice has a name

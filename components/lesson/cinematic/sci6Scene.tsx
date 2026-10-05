@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './sci6Script';
 import {
   WALK, U, clamp01, ease01, lerp, mixStance, moveTr, pose, seated, travelStance, mixKeepLegs,
@@ -24,7 +25,7 @@ import { reachHandTo, headStage } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, sc6HammockFull, sc6HammockEmpty, sc6Cot, sc6Blanket, sc6Lantern, sc6Mast, sc6Chest, sc6Shelf,
+  NATURAL, sc6Cot, sc6Blanket, sc6Lantern, sc6Mast, sc6Chest, sc6Shelf,
   sc6Tonic, sc6OnionBrown, sc6CaseBottle, sc6Vinegar, sc6Phial, sc6Basket, sc6Orange, sc6LedgerShut,
   sc6LedgerOpen, SC6_TONIC_GRIP, SC6_BASKET_GRIP, SC6_COT_AT,
 } from './objects';
@@ -209,8 +210,6 @@ const LANTERN_ART = sc6Lantern(0, 30 / 2 - 1.6, 16, 30);
 const MAST_ART = sc6Mast(40, 393, 34, 230);
 const CHEST_ART = sc6Chest(192, 466, 144, 28);
 const SHELF_ART = sc6Shelf(SHELF.x, SHELF.y + 5, 48, 10);
-const FULL_ART = sc6HammockFull(0, 62 / 2, 46, 62);
-const EMPTY_ART = sc6HammockEmpty(0, 62 / 2, 46, 62);
 const TONIC_ART = sc6Tonic(0, TONIC.h / 2 - TONIC_GRIP_Y, TONIC.w, TONIC.h);
 const SEA_ART = sc6CaseBottle(0, BOT.h / 2 - BOT.grip, BOT.w, BOT.h);
 const VIN_ART = sc6Vinegar(0, BOT.h / 2 - BOT.grip, BOT.w, BOT.h);
@@ -840,11 +839,11 @@ function Sling({ S, x, k }: { S: SharedValue<any>; x: number; k: number }) {
   return (
     <Animated.View style={[styles.rider, styles.slingPivot, st]} pointerEvents="none">
       <Animated.View style={[styles.rider, fullO]}>
-        <ObjectArt parts={FULL_ART} tone={TONE} />
+        <LessonPicture name="sci6-hammock-full" />
       </Animated.View>
       {full ? null : (
         <Animated.View style={[styles.rider, emptyO]}>
-          <ObjectArt parts={EMPTY_ART} tone={TONE} />
+          <LessonPicture name="sci6-hammock-empty" />
         </Animated.View>
       )}
     </Animated.View>

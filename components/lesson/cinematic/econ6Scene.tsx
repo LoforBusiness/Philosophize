@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './econ6Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -26,7 +27,7 @@ import { useLinger } from './useLinger';
 import { lineOf } from './pace';
 import {
   NATURAL, ec6Chest, ec6Lid, ec6LidIn, ec6Heap, ec6Coin, ec6Coconut, ec6Nuts, ec6Stall, ec6Trunk, ec6Frond,
-  ec6Bunch, ec6Wreck, ec6Jetty, ec6Crate, ec6CrateLid, ec6Fish, ec6Cannon, ec6Ship, ec6Basket,
+  ec6Bunch, ec6Jetty, ec6Crate, ec6CrateLid, ec6Fish, ec6Cannon, ec6Basket,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -215,7 +216,6 @@ const BUNCH_ART = ec6Bunch(180, 306, 20, 12);
 // ── the far layer ────────────────────────────────────────────────────────────
 const HORIZON = 352;
 const SHORE = 446;
-const WRECK_ART = ec6Wreck(56, 372, 120, 70);
 const JETTY_ART = ec6Jetty(314, 428, 172, 32);
 const DECK = 412;
 const SUN_X = 116;
@@ -236,7 +236,6 @@ const FISH_ART = ec6Fish(0, 0, 22, 10);
 const CANNON_ART = ec6Cannon(0, 0, 26, 26);
 /** The tags a word sits on are plates in the stage's own tone (AR1, T7). */
 const STONE = TONE.STONE;
-const SHIP_ART = ec6Ship(0, 0, 40, 34);
 /** The front face of a crate is the left 49 of its 54: the tag is centred on that. */
 const FRONT_DX = -2.4;
 
@@ -623,7 +622,7 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     <View style={styles.scene}>
       <Sky S={SCENE} />
       <Sea S={SCENE} />
-      <ObjectArt parts={WRECK_ART} tone={TONE} />
+      <LessonPicture name="econ6-wreck" />
       <RockFoam S={SCENE} />
       {i >= Q2_N - 1 ? <Ship S={SCENE} /> : null}
       <ObjectArt parts={JETTY_ART} tone={TONE} />
@@ -928,7 +927,7 @@ function Ship({ S }: { S: SharedValue<any> }) {
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={SHIP_ART} tone={TONE} />
+      <LessonPicture name="econ6-ship" />
     </Animated.View>
   );
 }

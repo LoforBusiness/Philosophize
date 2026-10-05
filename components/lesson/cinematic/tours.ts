@@ -35,12 +35,11 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'business-foundations-6': [[[40, 282, 295, 223, 0.74, 9]], [[21, 278, 315, 227, 0.57, 9]], null, [[35, 280, 302, 225, 0.56, 9]], null, [[14, 278, 331, 227, 0.72, 9]], null, null, [[0, 252, 400, 262, 0.75, 9]], null, null, null],
   'economics-foundations-1': [[[67, 416, 259, 89, 1.07, 9]], null, [[15, 405, 304, 100, 0.87, 9]], [[0, 306, 400, 208, 0.88, 9]], [[22, 406, 273, 99, 1.01, 9]], null, [[25, 407, 239, 98, 1.17, 9]], [[0, 306, 400, 208, 1.17, 9]], null, null],
   'economics-foundations-4': [null, [[93, 417, 135, 88, 0.73, 9]], [[93, 407, 296, 98, 0.84, 9]], null, null, [[80, 406, 317, 99, 0.83, 9]], [[141, 406, 249, 99, 0.84, 9]], null, null, null, null],
-  'economics-foundations-6': [null, null, [[0, 250, 400, 274, 0.71, 9]], null, null, null, null, null, null, null, null],
   'history-foundations-1': [null, null, [[0, 306, 400, 208, 1.2, 9]], null, null, null, null, null, null, null, null],
   'history-foundations-2': [null, null, [[0, 405, 284, 100, 0.79, 9]], null, null, null, [[92, 406, 218, 99, 0.55, 9]], null, null, [[93, 406, 193, 99, 0.55, 9]], null],
   'history-foundations-3': [null, [[44, 416, 293, 89, 0.92, 9]], null, null, null, [[12, 405, 319, 100, 0.82, 9]], [[9, 405, 331, 113, 0.59, 9]], null, null, null, null, [[36, 406, 332, 99, 0.77, 9]]],
   'history-foundations-4': [null, null, [[14, 405, 294, 100, 0.83, 9]], null, null, null, null, null, null, null, [[64, 330, 310, 175, 0.79, 9]]],
-  'history-foundations-6': [null, null, null, null, null, null, null, null, null, null, [[7, 300, 338, 205, 0.75, 9]], [[10, 299, 311, 206, 0.63, 9]]],
+  'history-foundations-6': [null, null, null, null, null, null, null, null, null, null, [[8, 299, 337, 206, 0.76, 9]], [[9, 298, 311, 207, 0.62, 9]]],
   'personal-growth-foundations-1': [null, null, null, null, null, null, null, null, null, null, [[43, 406, 246, 99, 1.13, 9]], null],
   'personal-growth-foundations-2': [null, null, null, null, null, null, null, null, null, null, [[0, 362, 265, 143, 1, 9]], [[0, 306, 400, 208, 1, 9]]],
   'personal-growth-foundations-3': [[[16, 419, 266, 86, 1.04, 9]], null, [[16, 405, 293, 100, 0.83, 9]], [[16, 406, 273, 99, 0.63, 9]], null, null, null, null, null, null, null, null],
@@ -55,6 +54,7 @@ export const TOURS: Record<string, readonly (readonly TourStation[] | null)[]> =
   'science-foundations-1': [null, null, null, null, null, null, null, null, null, null, [[230, 406, 133, 99, 0.72, 9]]],
   'science-foundations-2': [null, [[0, 306, 400, 210, 1.16, 9]], [[9, 388, 203, 117, 1.2, 9]], [[0, 306, 400, 210, 1.2, 9]], null, null, null, null, null, null, null, null],
   'science-foundations-5': [[[119, 373, 227, 123, 1.2, 9]], null, [[116, 374, 159, 122, 0.55, 9]], null, null, null, null, null, null, null, null, null],
+  'science-foundations-6': [[[70, 298, 216, 207, 0.69, 9]], null, [[71, 298, 325, 207, 0.62, 9]], null, null, [[71, 299, 280, 206, 0.69, 9]], null, null, null, null, null, null],
 };
 
 export const TOUR_STAMP: Record<string, string> = {
@@ -65,12 +65,11 @@ export const TOUR_STAMP: Record<string, string> = {
   'business-foundations-6': '50989b100c4c',
   'economics-foundations-1': 'd7f34f5cdad9',
   'economics-foundations-4': '6734156dbf83',
-  'economics-foundations-6': 'fde884168af3',
   'history-foundations-1': 'ce1f84921b35',
   'history-foundations-2': '9d6abacb2af7',
   'history-foundations-3': '9f7208948fd9',
   'history-foundations-4': '8bb70a0024a1',
-  'history-foundations-6': '0b6fc8a51f04',
+  'history-foundations-6': '53a8aa8a6c31',
   'personal-growth-foundations-1': 'dee84286185a',
   'personal-growth-foundations-2': '73f92fc9c1de',
   'personal-growth-foundations-3': '698dd7100bce',
@@ -85,4 +84,5 @@ export const TOUR_STAMP: Record<string, string> = {
   'science-foundations-1': 'f58d9a5b8ba1',
   'science-foundations-2': 'c4232e914411',
   'science-foundations-5': '7463bec88372',
+  'science-foundations-6': '8e0bcbbe153f',
 };

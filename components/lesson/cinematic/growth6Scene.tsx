@@ -7,6 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import SetArt, { type SetPart } from './SetArt';
 import { oPoly } from './setShapes';
 import { BEATS } from './growth6Script';
@@ -25,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, gr6Lens, gr6Pedestal, gr6Desk, gr6KeyBase, gr6KeyLever, gr6Token, gr6Coin, gr6Barometer, gr6Boat,
+  NATURAL, gr6Lens, gr6Pedestal, gr6Desk, gr6KeyBase, gr6KeyLever, gr6Token, gr6Coin, gr6Barometer,
   gr6Calendar, gr6CalDay, gr6Notes, gr6NotesInk, gr6Pencil, GR6_PENCIL_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -200,7 +201,6 @@ const KEY_BASE_ART = gr6KeyBase(240, 460, 32, 8);
 const LEVER_ART = gr6KeyLever(240 - KEY_PIVOT.x, 453 - KEY_PIVOT.y, 32, 10);
 const BARO_ART = gr6Barometer(104, 321, 22, 62);
 const BARO_DIAL = { x: 104, y: 335 };
-const BOAT_ART = gr6Boat(0, -11, 56, 31);
 const CAL_ART = gr6Calendar(0, CAL_H / 2, CAL_W, CAL_H);
 /** The lantern roof's ribs, converging on the vent far above. */
 const RIBS: SetPart[] = Array.from({ length: 6 }, (_, k) => {
@@ -694,7 +694,7 @@ function Storm({ S, clock }: { S: SV; clock: SharedValue<number> }) {
       <View style={[styles.band, { top: HORIZON - WIN_TOP + 16, height: WIN_BOT - HORIZON - 16, backgroundColor: N.gr6StormSea.shade }]} />
       <Animated.View style={[styles.band, styles.flash, flash]} />
       <Animated.View style={[styles.rider, boat]}>
-        <ObjectArt parts={BOAT_ART} tone={TONE} />
+        <LessonPicture name="growth6-boat" />
       </Animated.View>
       <Animated.View style={[styles.capRow, { top: HORIZON - WIN_TOP + 8 }, caps1]}>
         {CAPS.map((k) => <View key={k} style={[styles.whitecap, { left: k * 64 + 8, width: 16 }]} />)}

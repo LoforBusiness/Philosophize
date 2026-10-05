@@ -7,6 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './phil6Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -26,7 +27,7 @@ import {
   NATURAL, ph6Cabinet, ph6Oracle, ph6OracleHead, ph6Ball, ph6Tray, ph6CardFace, ph6CardBack,
   ph6FortuneLoves, ph6FortuneSneeze, ph6FortuneBully, ph6BrassHand, ph6Counter, ph6Awning, ph6JarFudge,
   ph6JarMint, ph6JarToffee, ph6FudgeBit, ph6MintBit, ph6DieFive, ph6DieTwo,
-  ph6Carousel, ph6Horse, ph6Rail, PH6_CAB,
+  ph6Carousel, ph6Rail, PH6_CAB,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -273,7 +274,6 @@ const MINT_ART = ph6MintBit(0, 0, 7, 6);
 const DIE_A = ph6DieFive(0, 0, DICE.s, DICE.s);
 const DIE_B = ph6DieTwo(0, 0, DICE.s, DICE.s);
 const CAROUSEL_ART = ph6Carousel(318, 352, 184, 216);
-const HORSE_ART = ph6Horse(0, 0, 34, 30);
 const RAIL_ART = ph6Rail(372, 485, 64, 30);
 
 /** The price tags hanging over the three jars. */
@@ -679,7 +679,7 @@ function Galloper({ S, k }: { S: SharedValue<any>; k: number }) {
   return (
     <Animated.View style={[styles.rider, along]} pointerEvents="none">
       <View style={styles.pole} />
-      <Animated.View style={[styles.rider, up]}><ObjectArt parts={HORSE_ART} tone={TONE} /></Animated.View>
+      <Animated.View style={[styles.rider, up]}><LessonPicture name="phil6-horse" /></Animated.View>
     </Animated.View>
   );
 }

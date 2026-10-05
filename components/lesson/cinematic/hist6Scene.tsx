@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Animated, {
   useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
 } from 'react-native-reanimated';
@@ -25,11 +25,12 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, bodyOf as bodyParts, handLantern, hi6King, hi6Wheel, hi6Car, hi6Horse, hi6Foe, hi6Glyphs, hi6Osiris,
+  NATURAL, tint, bodyOf as bodyParts, handLantern, hi6Osiris,
   hi6WallTorch, hi6Torch, hi6Tablet, hi6Brush, hi6Trestle, hi6TrayBack, hi6TrayFront, hi6Fragment, hi6Treaty,
   hi6Postcard, hi6Chip,
 } from './objects';
 import { BY_ID } from './wardrobe';
+import { LESSON_ART } from './lessonArt';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // history-foundations-6, "Who Really Won?" — INSIDE THE GREAT TEMPLE AT ABU SIMBEL, BY
@@ -176,12 +177,12 @@ const C_P = [KNEEL, KNEEL, KNEEL, NOD, NOD, NOD, TALK, NOD, NOD, NOD, TALK, NOD,
 const H_P = [NOD, NOD, NOD, EXPLAIN, WAIT, EXPLAIN, NOD, EXPLAIN, NOD, WAIT, NOD, NOD, WAIT];
 
 // ── the carving ──────────────────────────────────────────────────────────────
-const WHEEL_ART = hi6Wheel(84, 397, 40, 40);
-const KING_ART = hi6King(94, 332, 84, 120);
-const CAR_ART = hi6Car(92, 376, 52, 32);
-const HORSE_ART = hi6Horse(178, 348, 112, 140);
-const FOE_ART = [hi6Foe(150, 412, 14, 12, 1), hi6Foe(203, 410, 14, 12, 0), hi6Foe(224, 410, 14, 12, 3)];
-const GLYPHS_ART = hi6Glyphs(270, 345, 68, 146);
+// The Kadesh carving is one carved-relief picture (scripts/lib/lessonart/hist6Carving.mjs,
+// npm run make:lesson-art), drawn against photographs of the real relief at Abu Simbel:
+// the king in his chariot, the horse in the flying gallop, enemies under its hooves.
+const CARVING = LESSON_ART['hist6-carving'];
+/** The king alone in gold leaf, for the copy that lifts off the wall (Q1). */
+const KING_GOLD = LESSON_ART['hist6-king-gold'];
 const OSIRIS_ART = hi6Osiris(362, 369, 76, 214);
 const TORCHES = [{ x: 12, y: 330 }, { x: 314, y: 330 }];
 const WALL_TORCH_ART = TORCHES.map((p) => hi6WallTorch(p.x, p.y, 16, 36));
@@ -191,9 +192,8 @@ const WALL_FLAME = TORCHES.map((p) => ({ x: p.x + 2, y: p.y - 17 }));
 const KING_FEET = { x: 90, y: 390 };
 const TRUE_SIZE = { x: 166, y: 418, s: 0.11 };
 /** A gold copy of the king's outline: his body only, no detail, so it reads as a shape lifted off the wall. */
-const GHOST_ART = tint(bodyParts(hi6King(4, -58, 84, 120)), 'hi6Gold');
 /** The flake of stone that breaks off the horse's chest (Q1, the horse, wrong). */
-const FLAKE_FROM = { x: 196, y: 352 };
+const FLAKE_FROM = { x: 212, y: 344 }; // the horse's chest in the carving
 const FLAKE_ART = hi6Chip(0, 0, 12, 9);
 
 // ── the tray and its finds ───────────────────────────────────────────────────
@@ -716,12 +716,7 @@ function Carving({ S, i, picked }: { S: SharedValue<any>; i: number; picked: str
   const shadow = useAnimatedStyle(() => ({ opacity: S.value.shade }));
   return (
     <>
-      <ObjectArt parts={WHEEL_ART} tone={TONE} line={1.1} />
-      <ObjectArt parts={KING_ART} tone={TONE} line={1.1} />
-      <ObjectArt parts={CAR_ART} tone={TONE} line={1.1} />
-      <ObjectArt parts={HORSE_ART} tone={TONE} line={1.1} />
-      {FOE_ART.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} line={0.8} />)}
-      <ObjectArt parts={GLYPHS_ART} tone={TONE} line={1.1} />
+      <Image source={CARVING.source} fadeDuration={0} style={{ position: 'absolute', left: CARVING.x, top: CARVING.y, width: CARVING.w, height: CARVING.h }} />
       {/* the light comes up on the king only from b3 to b5, so it is mounted only then */}
       {i >= REASON_N - 1 && i <= Q1_N + 2 ? (
         <Animated.View style={[styles.kingGlow, glow]} pointerEvents="none">
@@ -754,7 +749,11 @@ function Ghost({ S }: { S: SharedValue<any> }) {
   });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={GHOST_ART} tone={TONE} line={1.1} />
+      <Image
+        source={KING_GOLD.source}
+        fadeDuration={0}
+        style={{ position: 'absolute', left: KING_GOLD.x - KING_FEET.x, top: KING_GOLD.y - KING_FEET.y, width: KING_GOLD.w, height: KING_GOLD.h }}
+      />
     </Animated.View>
   );
 }
@@ -950,7 +949,7 @@ const styles = StyleSheet.create({
   flags: { position: 'absolute', left: 0, top: 476, width: 400, height: 90, backgroundColor: FLAGS.base, borderTopWidth: 1.2, borderTopColor: INK },
   flagRow: { position: 'absolute', left: 0, width: 400, height: 1, backgroundColor: FLAGS.shade },
   flagRay: { position: 'absolute', height: 1, backgroundColor: FLAGS.shade },
-  kingGlow: { position: 'absolute', left: 32, top: 268, width: 120, height: 150 },
+  kingGlow: { position: 'absolute', left: 40, top: 262, width: 120, height: 150 },
   signShadow: { position: 'absolute', left: 236, top: 272, width: 68, height: 146, borderRadius: 1, backgroundColor: INK },
   dust: { position: 'absolute', left: -5, top: -3, width: 10, height: 6, borderRadius: 3, backgroundColor: NATURAL.hi6Carve.shade },
   scar: { position: 'absolute', left: FLAKE_FROM.x - 6, top: FLAKE_FROM.y - 4, width: 12, height: 9, borderRadius: 3, backgroundColor: NATURAL.hi6Recess.base, borderWidth: 0.6, borderColor: NATURAL.hi6Carve.shade },
