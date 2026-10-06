@@ -7,6 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import SetArt, { type SetPart } from './SetArt';
 import { oPoly } from './setShapes';
 import { BEATS } from './growth5Script';
@@ -18,7 +19,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo, lipsAt } from './interact';
@@ -469,10 +470,10 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     // lights and shudders, and she flinches back
     const onQ1 = n === Q1_AT && qa >= 0;
     const ripe = ease01(clamp01(q / 0.3));
-    const glowF = carry(cv, 15, n, 0, onQ1 && qa === 0 ? ripe * (1 - 0.55 * ease01(clamp01((q - 0.45) / 0.4))) : 0, tr);
+    const glowF = carry(cv, 15, n, 0, onQ1 && qa === 0 ? ripe : 0, tr);
     const greyF = carry(cv, 16, n, 0, onQ1 && qa === 0 ? ease01(clamp01((q - 0.4) / 0.5)) : 0, tr);
-    const glowM = carry(cv, 17, n, 0, onQ1 && qa === 1 ? ripe : 0, tr);
-    const glowH = carry(cv, 18, n, 0, onQ1 && qa === 2 ? ripe * (1 - 0.5 * ease01(clamp01((q - 0.5) / 0.4))) : 0, tr);
+    const glowM = carry(cv, 17, n, 0, onQ1 && qa === 1 ? Math.sin(q * 30) * (1 - q) : 0, tr);
+    const glowH = carry(cv, 18, n, 0, 0, tr);
     const shake = onQ1 && qa === 2 ? 4 * Math.sin(q * 38) * (1 - q) : 0;
     const boing = carry(cv, 19, n, 0, onQ1 && qa === 1 ? Math.sin(Math.PI * clamp01(q / 0.7)) : 0, tr);
     const rToe = carry(cv, 20, n, 0, onQ1 && qa === 1 ? ease01(clamp01((q - 0.15) / 0.45)) : 0, tr);
@@ -759,30 +760,24 @@ function Beam({ clock }: { clock: SharedValue<number> }) {
 
 function Wire({ S }: { S: SharedValue<any> }) {
   const hum = useAnimatedStyle(() => ({ transform: [{ translateY: S.value.shake + 0.8 * Math.sin(S.value.t * 1.1) }] }));
-  const glow = useAnimatedStyle(() => ({ opacity: S.value.glow.h }));
   return (
     <Animated.View style={[styles.rider, hum]} pointerEvents="none">
-      <Animated.View style={[styles.wireGlow, glow]} />
       <View style={styles.wire} />
     </Animated.View>
   );
 }
 function MiddleRope({ S }: { S: SharedValue<any> }) {
-  const glow = useAnimatedStyle(() => ({ opacity: S.value.glow.m }));
-  return (
-    <>
-      <Animated.View style={[styles.ropeGlow, glow]} pointerEvents="none" />
-      <View style={styles.rope} pointerEvents="none" />
-    </>
-  );
+  // chosen: the rope is plucked and hums, a damped spring (not a glow)
+  const pluck = useAnimatedStyle(() => ({ transform: [{ translateY: 3.2 * S.value.glow.m }] }));
+  return <Animated.View style={[styles.rope, pluck]} pointerEvents="none" />;
 }
 function FloorRope({ S }: { S: SharedValue<any> }) {
-  const glow = useAnimatedStyle(() => ({ opacity: S.value.glow.f }));
+  // chosen: the rope goes limp, sags flat and greys
+  const limp = useAnimatedStyle(() => ({ transform: [{ translateY: 0.8 * S.value.glow.f }, { scaleY: 1 - 0.3 * S.value.glow.f }] }));
   const grey = useAnimatedStyle(() => ({ opacity: 0.9 * S.value.glow.grey }));
   return (
     <>
-      <Animated.View style={[styles.floorGlow, glow]} pointerEvents="none" />
-      <View style={styles.floorRope} pointerEvents="none" />
+      <Animated.View style={[styles.floorRope, limp]} pointerEvents="none" />
       <Animated.View style={[styles.floorRope, styles.floorGrey, grey]} pointerEvents="none" />
     </>
   );
@@ -794,15 +789,7 @@ function Net({ S }: { S: SharedValue<any> }) {
   }));
   return (
     <Animated.View style={[styles.rider, sag]} pointerEvents="none">
-      <View style={styles.netClip}>
-        <View style={styles.netBowl} />
-        <View style={styles.netInner} />
-        {NET_STRANDS.map((x) => {
-          const r = (x - (NET_X0 + NET_X1) / 2) / ((NET_X1 - NET_X0) / 2);
-          return <View key={x} style={[styles.strand, { left: x - NET_X0 - 0.4, height: 8.6 * Math.sqrt(Math.max(0, 1 - r * r)) }]} />;
-        })}
-      </View>
-      <View style={styles.netCord} />
+      <LessonPicture name="growth5-net" />
     </Animated.View>
   );
 }
@@ -1048,8 +1035,8 @@ const styles = StyleSheet.create({
   shine: { position: 'absolute', left: -12, top: -12, width: 24, height: 24, borderRadius: 12, backgroundColor: N.bulbLit.base },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 2,
+    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: Math.min(PLATE_RADIUS, 4), borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 2, boxShadow: `0 2px 0 ${lipOf(TONE)}`,
   },
   plateTop: { top: 3 },
   plateBottom: { bottom: 1 },

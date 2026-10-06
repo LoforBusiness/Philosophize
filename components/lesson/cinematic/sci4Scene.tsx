@@ -1,6 +1,9 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -23,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, swingFrameBack, swingFrameFront, swingSeat, clipboard, stopwatch, pencil,
+  NATURAL, swingFrameBack, swingFrameFront, clipboard, stopwatch, pencil,
   SWING_PIVOTS, CLIPBOARD_SHEET, WATCH_DIAL,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -117,6 +120,10 @@ const AGAIN_N = A_AGAIN.indexOf(1);
 const ERROR_N = A_ERROR.indexOf(1);
 const CHECK_N = A_CHECK.indexOf(1);
 const DONE_N = A_DONE.indexOf(1);
+const Q2_N = Q2.indexOf(1);
+/** The answers each question offers, in the order its reaction indexes them. */
+const Q1_IDS = ['swing', 'watch', 'board'];
+const Q2_IDS = ['three', 'twoeight', 'two'];
 
 /** What each is doing with the body: talking while he speaks, nodding while the other does. */
 const TH_P = [NOD, EXPLAIN, NOD, EXPLAIN, WAIT, EXPLAIN, NOD, EXPLAIN, WAIT, NOD, WAIT, LISTEN];
@@ -194,7 +201,6 @@ const PEN_CLIP = { x: 19, y: 7.6 };
 const FRONT_ART = swingFrameFront(FRAME.x0 + FRAME.w / 2, FRAME.y0 + FRAME.h / 2, FRAME.w, FRAME.h);
 const BACK_ART = swingFrameBack(FRAME.x0 + FRAME.w / 2, FRAME.y0 + FRAME.h / 2, FRAME.w, FRAME.h);
 // The things that move are drawn about the point they are held or hung by.
-const SEAT_ART = swingSeat(0, 0, 16, 16);
 const BOARD_ART = clipboard(BOARD.w / 2 - GRIP.x, BOARD.h / 2 - GRIP.y, BOARD.w, BOARD.h);
 const WATCH_ART = stopwatch(0, WATCH.h / 2, WATCH.w, WATCH.h);
 const PEN_ART = pencil(PEN.l / 2 - PEN.grip, 0, PEN.l, PEN.t);
@@ -218,6 +224,45 @@ function sm(b: number, a: number, z: number): number {
   const c = u < 0 ? 0 : u > 1 ? 1 : u;
   return c * c * (3 - 2 * c);
 }
+// ── answers: the tapped thing reacts first, the right one half a second after ────
+/** How far one thing's answer reaction has gone, 0 → 1, over 0.9 s of a 1.8 s driver. */
+function phaseOf(ans: number, who: number, k: number): number {
+  'worklet';
+  if (who < 0) return 0;
+  const start = who === k ? 0 : 0.5;
+  const u = (ans * 1.8 - start) / 0.9;
+  return u < 0 ? 0 : u > 1 ? 1 : u;
+}
+/**
+ * A POP: a short squash, a spring up past full size and a settle — the right thing
+ * answering "yes" with its whole body. 1 at rest at both ends.
+ */
+function popOf(u: number): number {
+  'worklet';
+  if (u <= 0 || u >= 1) return 1;
+  const squash = u < 0.12 ? -0.12 * Math.sin((u / 0.12) * Math.PI) : 0;
+  return 1 + squash + 0.55 * Math.exp(-4.2 * u) * Math.sin(Math.PI * 2 * 1.15 * Math.max(0, u - 0.08));
+}
+/** A RATTLE: a wrong thing shaking its head, dying away. 0 at both ends. */
+function rattleOf(u: number): number {
+  'worklet';
+  if (u <= 0 || u >= 1) return 0;
+  return Math.exp(-3.6 * u) * Math.sin(Math.PI * 2 * 3.5 * u);
+}
+/** The answer, latched: once a thing is picked, the scene keeps what it did. */
+function useAnswer(picked: string | null, live: boolean, ids: string[]) {
+  const ans = useSharedValue(0);
+  const who = useSharedValue(-1);
+  useEffect(() => {
+    if (!live || picked === null) return;
+    const k = ids.indexOf(picked);
+    if (k < 0 || who.value >= 0) return;
+    who.value = k;
+    ans.value = withTiming(1, { duration: 1800, easing: Easing.linear });
+  }, [picked, live]);
+  return { ans, who };
+}
+
 /** The same, unswept: one speed, for a pencil going along a row. */
 function lin(b: number, a: number, z: number): number {
   'worklet';
@@ -348,6 +393,9 @@ export default function Sci4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldB = useHeld();
   const cv = useCarry(17);
   const on = useLinger(i);
+  // the answers: each question's tapped thing answers with its body (a pop, a rattle)
+  const a1 = useAnswer(picked, Q1[i] === 1, Q1_IDS);
+  const a2 = useAnswer(picked, Q2[i] === 1, Q2_IDS);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -450,7 +498,9 @@ export default function Sci4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // ── the swing: free, or in his hand ─────────────────────────────────────
     const wTR = wristOf(th, 'wrR');
     const thHeld = Math.atan2(wTR.x - PN.x, wTR.y - PN.y);
-    const theta = carry(cv, 0, n, thFree, lerp(thFree, thHeld, hold), trq);
+    // Q1, wrong: the empty swing rattles on its chains — it was never the thing at fault
+    const thetaHit = 0.1 * rattleOf(phaseOf(a1.ans.value, a1.who.value, 0));
+    const theta = carry(cv, 0, n, thFree, lerp(thFree, thHeld, hold), trq) + thetaHit;
 
     // ── the student ─────────────────────────────────────────────────────────
     let sb = hLive(BN_P[n], t, b);
@@ -567,9 +617,17 @@ export default function Sci4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     return {
       th, bn, t,
       theta,
-      board: { x: wBL.x, y: wBL.y, o: 1 },
+      // Q1, wrong: the clipboard rocks in her hand about her grip
+      board: { x: wBL.x, y: wBL.y, o: 1, r: 6 * rattleOf(phaseOf(a1.ans.value, a1.who.value, 2)) },
       lift,
-      watch: { x: wBR.x, y: wBR.y + lerp(PALM_DY, HANG_DY, hangV), o: 1 },
+      // Q1, right: the stopwatch pops up in her palm
+      watch: { x: wBR.x, y: wBR.y + lerp(PALM_DY, HANG_DY, hangV), o: 1, s: popOf(phaseOf(a1.ans.value, a1.who.value, 1)) },
+      // Q2: the tapped time answers — the wrong one shakes its head, the right one pops and
+      // her pencil rings it; the ring stays on the sheet from then on
+      row0: 2.6 * rattleOf(phaseOf(a2.ans.value, a2.who.value, 0)),
+      row1: 2.6 * rattleOf(phaseOf(a2.ans.value, a2.who.value, 1)),
+      row3: popOf(phaseOf(a2.ans.value, a2.who.value, 2)),
+      ring: (n >= Q2_N ? 1 : 0) * clamp01(phaseOf(a2.ans.value, a2.who.value, 2) * 2.2),
       sweep: carry(cv, 5, n, secs, secs, trq) * 12,
       pencil: { x: lerp(clipAt.x, wBR.x, penV), y: lerp(clipAt.y, wBR.y, penV), o: 1, r: rotV },
       rev0: carry(cv, 6, n, rev[0], rev[0], tr),
@@ -588,7 +646,7 @@ export default function Sci4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   return (
     <View style={styles.scene}>
       <View style={styles.sky} pointerEvents="none" />
-      <Hedge />
+      <LessonPicture name="sci4-park" />
       <View style={styles.grass} pointerEvents="none" />
       <View style={styles.floor} pointerEvents="none" />
       <View style={styles.mat} pointerEvents="none" />
@@ -610,15 +668,19 @@ export default function Sci4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
 
 // ── riders: a thing drawn about the point it is held or hung by ──────────────
 
-type At = { x: number; y: number; o: number; r?: number };
-function Rider({ at, art, children }: { at: SharedValue<At>; art: ReturnType<typeof clipboard>; children?: ReactNode }) {
+type At = { x: number; y: number; o: number; r?: number; s?: number };
+function Rider({ at, art, pic, children }: { at: SharedValue<At>; art?: ReturnType<typeof clipboard>; pic?: string; children?: ReactNode }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
-    transform: [{ translateX: at.value.x }, { translateY: at.value.y }, { rotate: `${at.value.r ?? 0}deg` }],
+    transform: [
+      { translateX: at.value.x }, { translateY: at.value.y },
+      { rotate: `${at.value.r ?? 0}deg` }, { scale: at.value.s ?? 1 },
+    ],
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      {art ? <ObjectArt parts={art} tone={TONE} /> : null}
+      {pic ? <LessonPicture name={pic} /> : null}
       {children}
     </Animated.View>
   );
@@ -642,11 +704,16 @@ function InHand({ S }: { S: SharedValue<any> }) {
 // ── the clipboard and what she has written on it ────────────────────────────
 // Each time appears left to right as the pencil goes along it: a clip that widens over
 // a line of fixed width, so the figures never re-wrap as they appear.
-function Written({ S, k, x, y, w, glyph, label }: { S: SharedValue<any>; k: string; x: number; y: number; w: number; glyph: number; label: string }) {
+function Written({ S, k, x, y, w, glyph, label, shake, pop }: {
+  S: SharedValue<any>; k: string; x: number; y: number; w: number; glyph: number; label: string; shake?: string; pop?: string;
+}) {
   const st = useAnimatedStyle(() => {
     const u = S.value[k];
     const side = TEXT_PAD;
-    return { width: u > 0 ? Math.min(w, side + (glyph + 2) * u) : 0 };
+    return {
+      width: u > 0 ? Math.min(w, side + (glyph + 2) * u) : 0,
+      transform: [{ translateX: shake ? S.value[shake] : 0 }, { scale: pop ? S.value[pop] : 1 }],
+    };
   });
   return (
     <Animated.View style={[styles.cellClip, { left: -GRIP.x + x, top: -GRIP.y + y }, st]}>
@@ -661,11 +728,28 @@ function Board({ S }: { S: SharedValue<any> }) {
   return (
     <Rider at={at} art={BOARD_ART}>
       {TIMES.map((label, r) => (
-        <Written key={label} S={S} k={'rev' + r} x={LINE_X} y={LINES_Y[r]} w={LINE_W} glyph={GLYPH_W} label={label} />
+        <Written
+          key={label} S={S} k={'rev' + r} x={LINE_X} y={LINES_Y[r]} w={LINE_W} glyph={GLYPH_W} label={label}
+          shake={r < 2 ? 'row' + r : undefined} pop={r === 3 ? 'row3' : undefined}
+        />
       ))}
+      <Ring S={S} />
       <Written S={S} k="rev4" x={LINE_X} y={LINES_Y[4]} w={LINE_W} glyph={AVG_W} label="≈3.0" />
     </Rider>
   );
+}
+
+/**
+ * Her pencil's ring round the time to check: an oval drawn on round the row as the answer
+ * lands (it opens from small to full, which reads as the stroke going round), and left there.
+ */
+function Ring({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const u = S.value.ring;
+    return { opacity: u > 0 ? 1 : 0, transform: [{ scaleX: 0.55 + 0.45 * u }, { scaleY: 0.4 + 0.6 * u }, { rotate: `${-4 + 4 * u}deg` }] };
+  });
+  // the pencil ring round the answer is a deliberate mark over a word (check:readable)
+  return <Animated.View nativeID="strike-ring" style={[styles.ring, { left: -GRIP.x + LINE_X - 5.2, top: -GRIP.y + LINES_Y[3] - 2 }, st]} pointerEvents="none" />;
 }
 
 // ── the swing: two chains and the seat between them ────────────────────────
@@ -684,26 +768,14 @@ function Swing({ S }: { S: SharedValue<any> }) {
   return (
     <>
       <Animated.View style={[styles.chain, { left: PF.x - 0.9, top: PF.y }, farSt]} pointerEvents="none" />
-      <Rider at={seat} art={SEAT_ART} />
+      <Rider at={seat} pic="sci4-seat" />
       <Animated.View style={[styles.chain, { left: PN.x - 0.9, top: PN.y }, nearSt]} pointerEvents="none" />
     </>
   );
 }
 
-// ── the hedge along the far side of the park ────────────────────────────────
+// ── the park behind it: sci4-park, a baked picture (scripts/lib/lessonart/lessons/sci4.mjs)
 const HORIZON = 446;
-const HEDGE_TOP = 430;
-const BUSHES = [[-6, 34], [30, 30], [62, 36], [100, 28], [134, 34], [170, 30], [206, 36], [244, 30], [280, 34], [318, 28], [352, 36], [390, 32]];
-function Hedge() {
-  return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {BUSHES.map(([x, w]) => (
-        <View key={x} style={[styles.bush, { left: x, width: w, top: HEDGE_TOP - (w - 26) / 2 }]} />
-      ))}
-      <View style={styles.hedge} />
-    </View>
-  );
-}
 
 // ── the two questions ────────────────────────────────────────────────────────
 
@@ -758,7 +830,7 @@ function OutlierTargets({ picked, onPick, live, S }: { picked: string | null; on
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={2}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: BX + LINE_X, top: BY0 + LINES_Y[q.r], width: LINE_W, height: LINE_H }}
+          style={{ position: 'absolute', left: BX + LINE_X - 1, top: BY0 + LINES_Y[q.r], width: 31, height: LINE_H }} /* wide enough that the pip sits right of the figures */
         >
           <View style={styles.clear} />
         </Target>
@@ -770,8 +842,6 @@ function OutlierTargets({ picked, onPick, live, S }: { picked: string | null; on
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   sky: { position: 'absolute', left: 0, right: 0, top: 250, height: HORIZON - 250, backgroundColor: NATURAL.clearSky.base },
-  bush: { position: 'absolute', height: 26, borderRadius: 13, backgroundColor: NATURAL.leaf.base },
-  hedge: { position: 'absolute', left: 0, right: 0, top: HEDGE_TOP + 10, height: HORIZON - HEDGE_TOP - 10, backgroundColor: NATURAL.leaf.shade },
   grass: { position: 'absolute', left: 0, right: 0, top: HORIZON, height: GROUND - HORIZON, backgroundColor: NATURAL.meadow.base },
   floor: floorStyle(TONE, GROUND),
   mat: {
@@ -791,8 +861,15 @@ const styles = StyleSheet.create({
   cellClip: { position: 'absolute', height: LINE_H, overflow: 'hidden' },
   /** The line at its full width, so the reveal's clip never re-wraps the figures. */
   cellLine: { height: LINE_H, paddingLeft: TEXT_PAD, alignItems: 'flex-start' },
+  // AQ2: the Text spans its whole line (alignSelf stretch), so the slack to the right of
+  // the figures holds Caveat's ink, which reaches past its last advance
   cellText: {
     fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: LINE_H, color: INK, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'left',
+  },
+  ring: {
+    position: 'absolute', width: LINE_W + 8, height: LINE_H + 3, borderRadius: (LINE_H + 3) / 2,
+    borderWidth: 1.1, borderColor: NATURAL.clockRed.base,
   },
   clear: { flexGrow: 1 },
 });

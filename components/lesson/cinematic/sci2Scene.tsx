@@ -1,11 +1,13 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './sci2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,7 +24,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, parkSteps, grassBank, parkLawn, parkTree, paperPlane, tapeCase, STEP_TREADS, STEP_RISERS, STEP_WIDTHS,
+  NATURAL, parkSteps, grassBank, parkLawn, parkTree, tapeCase, STEP_TREADS, STEP_RISERS, STEP_WIDTHS,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -163,8 +165,6 @@ const STEPS_ART = parkSteps(STEPS.x, STEPS.y, STEPS.w, STEPS.h);
 const LAWN_ART = parkLawn(200, 509, 400, 18);
 const CASE_ART = tapeCase(0, 0, CASE.w, CASE.h);
 // The planes are drawn about their middle, nose to the right, and carried by a rider.
-const HERS_ART = paperPlane(0, 0, 24, 9, 'pointy', 'pinkPaper');
-const HIS_ART = paperPlane(0, 0, 24, 9, 'blunt', 'paper');
 
 // ── who stands where, which way, doing what ──────────────────────────────────
 /** Her place on the steps, at the line beside him, and at the step chalking the tally. */
@@ -365,6 +365,24 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldT = useHeld();
   const cv = useCarry(29);
   const on = useLinger(i);
+  // The answer, felt on the stage. RIGHT: the steps take a heavy thud (a squash and a
+  // settle) and the chalked row stamps down. WRONG: both planes are knocked and rock, hop
+  // and settle. Both run on the UI thread and ease out; nothing glows.
+  const thud = useSharedValue(0);
+  const jolt = useSharedValue(0);
+  useEffect(() => {
+    if (picked === null) {
+      thud.value = 0;
+      jolt.value = 0;
+    } else if (picked === 'steps' || picked === 'ten') {
+      thud.value = withSequence(withTiming(1, { duration: 80 }), withSpring(0, { damping: 6, stiffness: 220 }));
+    } else {
+      jolt.value = withSequence(
+        withTiming(1, { duration: 80 }), withTiming(-1, { duration: 120 }), withTiming(0.6, { duration: 110 }),
+        withTiming(-0.35, { duration: 100 }), withTiming(0, { duration: 110 }),
+      );
+    }
+  }, [picked, thud, jolt]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -690,8 +708,10 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <View style={styles.floor} pointerEvents="none" />
       <ObjectArt parts={TREE_ART} tone={TONE} />
       <ObjectArt parts={BANK_ART} tone={TONE} />
-      <ObjectArt parts={STEPS_ART} tone={TONE} />
-      <Rows S={SCENE} />
+      <Thud v={thud}>
+        <ObjectArt parts={STEPS_ART} tone={TONE} />
+      </Thud>
+      <Rows S={SCENE} thud={thud} />
       <Tally S={SCENE} />
       <ObjectArt parts={LAWN_ART} tone={TONE} />
       <View style={styles.chalkLine} pointerEvents="none" />
@@ -699,12 +719,12 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <Gust S={SCENE} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
-      <Plane S={SCENE} k="hp" art={HERS_ART} />
+      <Plane S={SCENE} k="hp" name="sci2-hers" jolt={jolt} />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="second" wear={BY_ID.stroller.pieces} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="crowd" wear={BY_ID.magistrate.pieces} />
-      <Plane S={SCENE} k="mp" art={HIS_ART} />
+      <Plane S={SCENE} k="mp" name="sci2-his" jolt={jolt} />
       <Chalk S={SCENE} />
       {on(Q1) ? <UnfairTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <NextTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
@@ -714,17 +734,32 @@ export default function Sci2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
 
 // ── the planes, the tape, the chalk ──────────────────────────────────────────
 
-function Plane({ S, k, art }: { S: SharedValue<any>; k: 'hp' | 'mp'; art: ReturnType<typeof paperPlane> }) {
+function Plane({ S, k, name, jolt }: { S: SharedValue<any>; k: 'hp' | 'mp'; name: string; jolt: SharedValue<number> }) {
   const st = useAnimatedStyle(() => {
     const v = S.value[k];
+    const j = jolt.value;
     return {
       opacity: v.o,
-      transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${v.r}deg` }, { scaleX: v.sx }],
+      transform: [
+        { translateX: v.x }, { translateY: v.y - 5 * Math.abs(j) }, { rotate: `${v.r + 16 * j}deg` }, { scaleX: v.sx },
+      ],
     };
   });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      <LessonPicture name={name} />
+    </Animated.View>
+  );
+}
+
+/** The squash and settle the steps take on a right answer: heavy, down at the foot. */
+function Thud({ v, children }: { v: SharedValue<number>; children: React.ReactNode }) {
+  const st = useAnimatedStyle(() => ({
+    transform: [{ scaleY: 1 - 0.07 * v.value }, { scaleX: 1 + 0.025 * v.value }],
+  }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${STEPS.x}px ${S_TOP + STEPS.h}px` }, st]} pointerEvents="none">
+      {children}
     </Animated.View>
   );
 }
@@ -812,8 +847,11 @@ const ROWS: Row[] = [
 const rowBox = (k: number) => ({ left: RISER_L[k] + 4, top: RISER[k] + 0.5, width: RISER_R[k] - RISER_L[k] - 8, height: RISER_H - 1 });
 
 /** After the question, the right row stays chalked on its riser. */
-function Rows({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: clamp01(S.value.rows - 1) }));
+function Rows({ S, thud }: { S: SharedValue<any>; thud: SharedValue<number> }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: clamp01(S.value.rows - 1),
+    transform: [{ scale: 1 + 0.22 * thud.value }],
+  }));
   return (
     <Animated.View style={[styles.keptRow, rowBox(2), st]} pointerEvents="none">
       <View style={styles.rowPlate}>

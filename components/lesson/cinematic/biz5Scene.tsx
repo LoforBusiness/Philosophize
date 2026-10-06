@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './biz5Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -18,15 +19,15 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf, pillStyle } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, coin, b4Note, b5Envelope, b5Skirt, b5Basket, b5BasketBack, b5Frame, b5Cylinder, b5Trolley, b5Easel, b5Tin,
-  b5TinLid, b5Canopy, b5UmbShaft, b5Button, B5_ENV, B5_AXLE, B5_GRIP, B5_UMB_GRIP,
+  NATURAL, tint, coin, b4Note, b5Trolley, b5Tin,
+  b5TinLid, b5Canopy, b5UmbShaft, b5Button, B5_AXLE, B5_GRIP, B5_UMB_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -174,7 +175,6 @@ const CP_P = [LISTEN, TALK, NOD, NOD, NOD, TALK, NOD, NOD, NOD, NOD, NOD, NOD, L
 const TH_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, NOD, NOD, EXPLAIN, NOD, EXPLAIN, NOD, NOD, NOD, LISTEN];
 
 // ── the board on its easel ──────────────────────────────────────────────────
-const EASEL_ART = b5Easel(86, 452, 88, 96);
 const SLATE = { left: 49, top: 414, w: 74, h: 54 };
 /** The chalk lies on the tray at the board's right-hand end. */
 const CHALK_AT = { x: 118, y: 470 };
@@ -205,29 +205,12 @@ const WRITE = [
 const MASK_PAD = 3;
 
 // ── the balloon ─────────────────────────────────────────────────────────────
-/** 0.83 of the drawing's real units: 141 × 126, the mouth at the bottom, the crown at 222. */
-const ENV_W = B5_ENV.w * 0.83;
-const ENV_H = B5_ENV.h * 0.83;
-/** The gore bands, outside in, and their colours: red, gold, blue, red. */
-const BANDS = [
-  { f: 1, k: 'b5Red' as const },
-  { f: 0.9, k: 'b5Gold' as const },
-  { f: 0.7, k: 'b5Blue' as const },
-  { f: 0.38, k: 'b5Red' as const },
-].map((b) => b5Envelope(0, -12 - ENV_H / 2, ENV_W, ENV_H, b.f, b.k));
-/** The scoop and its cables hang from the pivot, which is the throat above the scoop. */
-const SKIRT_ART = b5Skirt(0, 14, 70, 52);
 /** Lying (half-filled, on the field behind the owner) and standing over the basket. */
 const LIE = { x: 192, y: 394, rot: -90, s: 0.42 };
 const STAND = { x: 251, y: 360 };
 
 // ── the basket and its burner, drawn from the middle of the basket's foot ───
 const BASKET_X = 251;
-const BASKET_ART = b5Basket(0, -16, 150, 32);
-const FRAME_ART = b5Frame(0, -70, 150, 76);
-const BACK_ART = b5BasketBack(0, -31, 150, 14);
-/** The balloon's own two cylinders, in bare steel, standing in the basket's corners. */
-const OWN_CYL_ART = [...b5Cylinder(-62, -20, 12, 40, 'silver'), ...b5Cylinder(60, -20, 12, 40, 'silver')];
 /** The burner's drum top (the flame's foot) and the lever's grip. */
 const FLAME_FOOT = { x: 0, y: -107 };
 const LEVER = { x: -12, y: -68 };
@@ -239,8 +222,6 @@ const TRUCK_ART = b5Trolley(13 - B5_AXLE.x, 26 - B5_AXLE.y, 26, 52);
 const PARK_AXLE = 344;
 const AXLE_Y = GROUND - (52 - B5_AXLE.y);
 const GRIP_REL = { x: B5_GRIP.x - B5_AXLE.x, y: B5_GRIP.y - B5_AXLE.y };
-/** Each cylinder is drawn about its collar's hand-hole, where it is lifted. */
-const CYL_ART = b5Cylinder(0, 17, 12, 40);
 /** On the truck's nose, relative to the axle (B a little behind A), and stood on the grass. */
 const ON_TRUCK = [{ x: -12, y: -32.2 }, { x: -16, y: -33.2 }];
 const ON_GRASS = [{ x: 322, y: GROUND - 37 }, { x: 309, y: GROUND - 37 }];
@@ -674,7 +655,7 @@ export default function Biz5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <Flame S={SCENE} />
       <Envelope S={SCENE} />
       <BasketFrame S={SCENE} />
-      <ObjectArt parts={EASEL_ART} tone={TONE} />
+      <LessonPicture name="biz5-easel" />
       <Slate S={SCENE} />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="lead" wear={[]} />
@@ -720,8 +701,6 @@ function FarBalloon({ clock, x, y, s, k1, k2, ph }: {
 function Sky({ clock }: { clock: SharedValue<number> }) {
   // the sun climbs a few units over the lesson, and never comes back down (on the clock)
   const sun = useAnimatedStyle(() => ({ transform: [{ translateY: -Math.min(clock.value * 0.06, 9) }] }));
-  const mist1 = useAnimatedStyle(() => ({ transform: [{ translateX: 14 * Math.sin(clock.value * 0.07) }] }));
-  const mist2 = useAnimatedStyle(() => ({ transform: [{ translateX: 12 * Math.sin(clock.value * 0.055 + 2) }] }));
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <View style={[styles.band, { top: 0, height: 286, backgroundColor: NATURAL.b5High.base }]} />
@@ -744,8 +723,7 @@ function Sky({ clock }: { clock: SharedValue<number> }) {
       <View style={[styles.field, { backgroundColor: NATURAL.meadow.base }]} />
       <View style={[styles.mow, { top: 446 }]} />
       <View style={[styles.mow, { top: 470, height: 8 }]} />
-      <Animated.View style={[styles.mist, { left: 10, top: 434, width: 170 }, mist1]} />
-      <Animated.View style={[styles.mist, { left: 220, top: 442, width: 150 }, mist2]} />
+      <View style={[pillStyle(3.4), { transform: [{ translateX: 146 }, { translateY: 438 }] }]} pointerEvents="none" />
     </View>
   );
 }
@@ -761,8 +739,8 @@ function Envelope({ S }: { S: SharedValue<any> }) {
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={SKIRT_ART} tone={TONE} />
-      {BANDS.map((parts, k) => <ObjectArt key={k} parts={parts} tone={TONE} line={k === 0 ? 2.2 : 0.8} />)}
+      <LessonPicture name="biz5-skirt" />
+      <LessonPicture name="biz5-envelope" />
     </Animated.View>
   );
 }
@@ -792,9 +770,10 @@ function BasketFrame({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.basket.x }, { translateY: S.value.basket.y }] }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={BACK_ART} tone={TONE} />
-      <ObjectArt parts={FRAME_ART} tone={TONE} />
-      <ObjectArt parts={OWN_CYL_ART} tone={TONE} />
+      <LessonPicture name="biz5-basket-back" />
+      <LessonPicture name="biz5-frame" />
+      <LessonPicture name="biz5-cyl-steel-l" />
+      <LessonPicture name="biz5-cyl-steel-r" />
     </Animated.View>
   );
 }
@@ -809,7 +788,7 @@ function Basket({ S }: { S: SharedValue<any> }) {
     <>
       <Animated.View style={[styles.basketShadow, sh]} pointerEvents="none" />
       <Animated.View style={[styles.rider, st]} pointerEvents="none">
-        <ObjectArt parts={BASKET_ART} tone={TONE} />
+        <LessonPicture name="biz5-basket" />
       </Animated.View>
     </>
   );
@@ -823,7 +802,7 @@ function Cyl({ at }: { at: { readonly value: { x: number; y: number; r: number }
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={CYL_ART} tone={TONE} />
+      <LessonPicture name="biz5-cyl-red" />
     </Animated.View>
   );
 }
@@ -1014,7 +993,7 @@ function BookingCard({ q, mine }: { q: typeof BOOK_Q[number]; mine: boolean }) {
   const ok = q.correct;
   const card = useAnimatedStyle(() => (ok
     ? { transform: [{ scaleX: Math.max(0.04, Math.abs(Math.cos(Math.PI * u.value))) }] }
-    : { opacity: 1 - 0.25 * u.value, transform: [{ translateY: 3 * u.value }, { rotate: `${-22 * u.value}deg` }] }));
+    : { opacity: 1 - 0.25 * u.value, transform: [{ translateX: 3 * Math.sin(u.value * 22) * (1 - u.value) }, { translateY: 3 * u.value }, { rotate: `${-22 * u.value}deg` }] }));
   const front = useAnimatedStyle(() => ({ opacity: ok && u.value > 0.5 ? 0 : 1 }));
   const back = useAnimatedStyle(() => ({ opacity: ok && u.value > 0.5 ? 1 : 0 }));
   return (
@@ -1083,7 +1062,7 @@ const styles = StyleSheet.create({
   rowIn: {
     position: 'absolute', left: 0, top: MASK_PAD, width: ROWS.w, height: ROWS.h, alignItems: 'center', justifyContent: 'center',
   },
-  chalkText: { fontFamily: 'Caveat_700Bold', fontSize: 10.5, lineHeight: 11, color: PAPER_LIT, includeFontPadding: false },
+  chalkText: { alignSelf: 'stretch', textAlign: 'center', fontFamily: 'Caveat_700Bold', fontSize: 10.5, lineHeight: 11, color: PAPER_LIT, includeFontPadding: false },
   chalk: {
     position: 'absolute', left: -2.6, top: -0.9, width: 5.2, height: 1.8, borderRadius: 0.6,
     backgroundColor: PAPER_LIT, borderWidth: 0.5, borderColor: INK,
@@ -1096,20 +1075,20 @@ const styles = StyleSheet.create({
   },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: PLATE_RADIUS / 2, borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: lipOf(TONE),
   },
   nameText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: INK, includeFontPadding: false },
   card: {
     position: 'absolute', left: (48 - CARD_W) / 2, top: 4, width: CARD_W, height: CARD_H, transformOrigin: '50% 100%',
   },
   cardFace: {
-    position: 'absolute', left: 0, top: 0, width: CARD_W, height: CARD_H, borderRadius: 2, borderWidth: 1,
-    borderColor: INK, backgroundColor: NATURAL.paper.base, alignItems: 'center', paddingTop: 2,
+    position: 'absolute', left: 0, top: 0, width: CARD_W, height: CARD_H, borderRadius: 5, borderWidth: 1,
+    borderColor: INK, backgroundColor: PLATE_FACE, alignItems: 'center', paddingTop: 3, boxShadow: lipOf(TONE),
   },
   cardBack: { justifyContent: 'center', paddingTop: 0 },
   cardAmount: { fontFamily: 'Inter_700Bold', fontSize: 10.5, lineHeight: 12, color: INK, includeFontPadding: false },
-  cardWhen: { fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 11, color: INK, includeFontPadding: false },
+  cardWhen: { alignSelf: 'stretch', textAlign: 'center', fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 11, color: INK, includeFontPadding: false },
   stamp: {
     width: 32, height: 18, borderRadius: 4, borderWidth: 1.6, borderColor: NATURAL.b5Red.base,
     alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-10deg' }],
@@ -1118,7 +1097,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 9.5, lineHeight: 11, letterSpacing: 0.6, color: NATURAL.b5Red.base, includeFontPadding: false,
   },
   clip: {
-    position: 'absolute', left: 18, top: 40, width: 12, height: 6, borderRadius: 1.2, borderWidth: 1,
+    position: 'absolute', left: 18, top: 43, width: 12, height: 5, borderRadius: 1.2, borderWidth: 1,
     borderColor: INK, backgroundColor: NATURAL.silver.base,
   },
 });

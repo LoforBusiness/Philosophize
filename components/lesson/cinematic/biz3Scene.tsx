@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, type SharedValue } from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -15,7 +17,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
@@ -172,7 +174,6 @@ const NEXT_ART = fairGazebo(478, GAZ.y, GAZ.w, GAZ.h, 'gazeboSage');
 const CLOTH_ART = fairCloth(198, 489, 196, 24);
 const WAX_STILL = waxBlock(0, 0, 14, 8);
 const JAR_ART = emptyJar(0, 0, CANDLE_W, CANDLE_H);
-const JAR2_ART = emptyJar(JAR2_AT.x, JAR2_AT.y, CANDLE_W, CANDLE_H);
 const RISER_ART = tint(crate(171, 470, 42, 14), 'wood');
 const SHELF_CANDLES = [
   candleJar(157, 457, CANDLE_W, CANDLE_H, 'waxLavender'),
@@ -500,10 +501,9 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <Bunting />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="lead" wear={BY_ID.stroller.pieces} />
-      <ObjectArt parts={CLOTH_ART} tone={TONE} />
-      <ObjectArt parts={RISER_ART} tone={TONE} />
-      {SHELF_CANDLES.map((art, k) => <ObjectArt key={k} parts={art} tone={TONE} />)}
-      <ObjectArt parts={JAR2_ART} tone={TONE} />
+      <LessonPicture name="biz3-cloth" />
+      <LessonPicture name="biz3-shelf" />
+      <View style={styles.rider} pointerEvents="none"><LessonPicture name="biz3-jar" /></View>
       <ObjectArt parts={TAG_ART} tone={TONE} />
       <ObjectArt parts={SPOOL_ART} tone={TONE} />
       <Price S={SCENE} />
@@ -559,14 +559,14 @@ function Price({ S }: { S: SharedValue<any> }) {
 // ── riders: a thing drawn about the point it is held by ─────────────────────
 
 type At = { x: number; y: number; o: number; r?: number };
-function Rider({ at, art, line }: { at: { readonly value: At }; art: ReturnType<typeof candleJar>; line?: number }) {
+function Rider({ at, art, line, pic }: { at: { readonly value: At }; art?: ReturnType<typeof candleJar>; line?: number; pic?: string }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [{ translateX: at.value.x }, { translateY: at.value.y }, { rotate: `${at.value.r ?? 0}deg` }],
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} line={line} />
+      {pic ? <LessonPicture name={pic} /> : <ObjectArt parts={art!} tone={TONE} line={line} />}
     </Animated.View>
   );
 }
@@ -581,7 +581,7 @@ function Wares({ S }: { S: SharedValue<any> }) {
   return (
     <>
       <Rider at={waxP} art={WAX_STILL} />
-      <Rider at={jarP} art={JAR_ART} />
+      <Rider at={jarP} pic="biz3-jar" />
       <Animated.View style={[styles.chalk, chalkSt]} pointerEvents="none" />
     </>
   );
@@ -594,7 +594,7 @@ function Held({ S, clock }: { S: SharedValue<any>; clock: SharedValue<number> })
   const ribP = useDerivedValue<At>(() => S.value.ribbon);
   return (
     <>
-      <Rider at={candleP} art={CANDLE_ART} />
+      <Rider at={candleP} pic="biz3-candle" />
       <Rider at={bowP} art={BOW_ART} />
       <Rider at={ribP} art={LENGTH_ART} />
       {WISPS.map((dx, k) => <Wisp key={k} S={S} dx={dx} k={k} clock={clock} />)}
@@ -629,6 +629,34 @@ function Wisp({ S, dx, k, clock }: { S: SharedValue<any>; dx: number; k: number;
  * price is their name.
  */
 type Q = { id: string; label: string; pw: number; left: number; top: number; w: number; h: number; correct: boolean };
+/**
+ * A physical reply to a pick: the right one hops up, squashes and settles (a thing set
+ * down with weight); a wrong one shakes sideways and sags. Nothing glows.
+ */
+function useReply(ok: boolean | null) {
+  const y = useSharedValue(0);
+  const x = useSharedValue(0);
+  const sc = useSharedValue(1);
+  const rot = useSharedValue(0);
+  useEffect(() => {
+    if (ok === true) {
+      y.value = withSequence(withTiming(-7, { duration: 140 }), withTiming(0, { duration: 120 }), withSpring(0, { damping: 6, stiffness: 260 }));
+      sc.value = withSequence(withTiming(1.12, { duration: 140 }), withTiming(0.9, { duration: 120 }), withSpring(1, { damping: 7, stiffness: 240 }));
+    } else if (ok === false) {
+      x.value = withSequence(withTiming(-3, { duration: 55 }), withTiming(3, { duration: 85 }), withTiming(-2.4, { duration: 80 }), withTiming(1.6, { duration: 70 }), withTiming(0, { duration: 60 }));
+      rot.value = withSequence(withTiming(-5, { duration: 80 }), withTiming(4, { duration: 120 }), withSpring(0, { damping: 8, stiffness: 160 }));
+      y.value = withSequence(withTiming(2, { duration: 160 }), withSpring(1, { damping: 10 }));
+    }
+  }, [ok, y, x, sc, rot]);
+  return useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value }, { translateY: y.value }, { scale: sc.value }, { rotate: `${rot.value}deg` }],
+  }));
+}
+function Reply({ ok, children }: { ok: boolean | null; children: React.ReactNode }) {
+  const st = useReply(ok);
+  return <Animated.View style={[styles.place, st]}>{children}</Animated.View>;
+}
+
 /** Q1: the empty jar, her shopping bag and the bunting. The jar is part of the cost. */
 const COST_Q: Q[] = [
   { id: 'jar', label: 'JAR', pw: 30, left: 112, top: 459, w: 32, h: 34, correct: true },
@@ -646,11 +674,11 @@ function CostTargets({ picked, onPick, live, S }: { picked: string | null; onPic
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
-          <View style={styles.place}>
+          <Reply ok={picked === q.id ? q.correct : null}>
             <View style={[styles.namePlate, { left: (q.w - q.pw) / 2, width: q.pw }]}>
               <Text style={styles.nameText}>{q.label}</Text>
             </View>
-          </View>
+          </Reply>
         </Target>
       ))}
     </Animated.View>
@@ -670,24 +698,24 @@ const PRICE_Q = [
   { id: 'four-pounds', label: '£4', x: 198, correct: true },
   { id: 'twenty-pounds', label: '£20', x: 246, correct: false },
 ];
-const PRICE_ART = PRICE_Q.map((q) => priceTag(q.x, TAG2.top + TAG2.h / 2, TAG2.w, TAG2.h));
+const TAG_REL = priceTag(TAG2.w / 2, TAG2.h / 2, TAG2.w, TAG2.h);
 function PriceTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
-      {PRICE_ART.map((art, k) => <ObjectArt key={k} parts={art} tone={TONE} />)}
       {PRICE_Q.map((q) => (
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: q.x - TAG2.w / 2, top: TAG2.top, width: TAG2.w, height: TAG2.h }}
         >
-          <View style={styles.place}>
+          <Reply ok={picked === q.id ? q.correct : null}>
+            <ObjectArt parts={TAG_REL} tone={TONE} />
             <View style={styles.tagFace}>
               <Text style={styles.tagText}>{q.label}</Text>
             </View>
-          </View>
+          </Reply>
         </Target>
       ))}
     </Animated.View>
@@ -720,6 +748,7 @@ const styles = StyleSheet.create({
   },
   chalkText: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: PAPER_LIT, includeFontPadding: false,
+    width: SLATE.w, textAlign: 'center',
   },
   chalk: {
     position: 'absolute', left: -2.6, top: -0.9, width: 5.2, height: 1.8, borderRadius: 0.6,
@@ -728,8 +757,8 @@ const styles = StyleSheet.create({
   wisp: { position: 'absolute', left: -0.7, top: -4, width: 1.4, height: 7, borderRadius: 0.7, backgroundColor: RULE },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: Math.min(PLATE_RADIUS, 4), borderWidth: 1,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: lipOf(TONE),
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
@@ -740,6 +769,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 12, color: PAPER_LIT, includeFontPadding: false,
+    width: FACE2.w, textAlign: 'center',
   },
 });
 

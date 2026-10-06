@@ -25,12 +25,12 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, bodyOf as bodyParts, handLantern, hi6Osiris,
-  hi6WallTorch, hi6Torch, hi6Tablet, hi6Brush, hi6Trestle, hi6TrayBack, hi6TrayFront, hi6Fragment, hi6Treaty,
-  hi6Postcard, hi6Chip,
+  NATURAL, tint, bodyOf as bodyParts, handLantern,
+  hi6WallTorch, hi6Torch, hi6Tablet, hi6Brush, hi6Trestle, hi6TrayBack, hi6TrayFront, hi6Chip,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { LESSON_ART } from './lessonArt';
+import LessonPicture from './LessonPicture';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // history-foundations-6, "Who Really Won?" — INSIDE THE GREAT TEMPLE AT ABU SIMBEL, BY
@@ -183,7 +183,6 @@ const H_P = [NOD, NOD, NOD, EXPLAIN, WAIT, EXPLAIN, NOD, EXPLAIN, NOD, WAIT, NOD
 const CARVING = LESSON_ART['hist6-carving'];
 /** The king alone in gold leaf, for the copy that lifts off the wall (Q1). */
 const KING_GOLD = LESSON_ART['hist6-king-gold'];
-const OSIRIS_ART = hi6Osiris(362, 369, 76, 214);
 const TORCHES = [{ x: 12, y: 330 }, { x: 314, y: 330 }];
 const WALL_TORCH_ART = TORCHES.map((p) => hi6WallTorch(p.x, p.y, 16, 36));
 /** Where each wall torch's flame sits: the top of its wrapped head. */
@@ -203,9 +202,9 @@ const TRAY_FRONT_ART = hi6TrayFront(301, 467, 194, 14);
 /** The sand's surface, where a find stands. */
 const SAND = 463;
 const FINDS = [
-  { id: 'carving', x: 254, label: 'CARVING', art: hi6Fragment(0, -18, 44, 36) },
-  { id: 'treaty', x: 311, label: 'TREATY', art: hi6Treaty(0, -18, 40, 36) },
-  { id: 'postcard', x: 368, label: 'POSTCARD', art: hi6Postcard(0, -14, 37, 28) },
+  { id: 'carving', x: 254, label: 'CARVING' },
+  { id: 'treaty', x: 311, label: 'TREATY' },
+  { id: 'postcard', x: 368, label: 'POSTCARD' },
 ];
 /** The right find (the beat's `explain` names it): the treaty, found in both capitals. */
 const RIGHT_FIND = 1;
@@ -592,7 +591,7 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   return (
     <View style={styles.scene}>
       <Hall S={SCENE} />
-      <ObjectArt parts={OSIRIS_ART} tone={TONE} line={1.4} />
+      <LessonPicture name="hist6-osiride" />
       <Carving S={SCENE} i={i} picked={picked} />
       {WALL_TORCH_ART.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} line={1.2} />)}
       {WALL_FLAME.map((f, k) => <Flame key={k} S={SCENE} x={f.x} y={f.y} s={1} ph={k * 2.1} />)}
@@ -817,13 +816,13 @@ function Finds({ S }: { S: SharedValue<any> }) {
         <View style={[styles.pool, { left: -12, top: -10, width: 24, height: 20, borderRadius: 12, opacity: 0.2 }]} />
       </Animated.View>
       <Animated.View style={[styles.rider, carving]} pointerEvents="none">
-        <ObjectArt parts={FINDS[0].art} tone={TONE} line={1.2} />
+        <LessonPicture name="hist6-fragment" />
       </Animated.View>
       <Animated.View style={[styles.rider, treaty]} pointerEvents="none">
-        <ObjectArt parts={FINDS[1].art} tone={TONE} line={1.2} />
+        <LessonPicture name="hist6-treaty" />
       </Animated.View>
       <Animated.View style={[styles.rider, card]} pointerEvents="none">
-        <ObjectArt parts={FINDS[2].art} tone={TONE} line={1.2} />
+        <LessonPicture name="hist6-postcard" />
       </Animated.View>
     </>
   );

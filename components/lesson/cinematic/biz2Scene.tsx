@@ -1,5 +1,9 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, Easing, type SharedValue,
+} from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -15,14 +19,14 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, notepad, mug, deckOven, ovenDoor, macaronTray, macaron, rollTray, rollTrayRaw, sausageRoll, cakeStand,
+  NATURAL, notepad, mug, deckOven, ovenDoor, macaron, rollTray, rollTrayRaw, sausageRoll,
   teapot, teacup, recipeBook, crystalBall, wallShelf, dawnWindow, bakeryCounter, OVEN_MOUTH, MACARON_GAP,
   TEAPOT_GRIP, TEAPOT_SPOUT, type NaturalKey,
 } from './objects';
@@ -204,7 +208,6 @@ const SHELF_ART = wallShelf(320, 406, 110, 12);
 const BOOK_ART = recipeBook(BOOK_AT.x, BOOK_AT.y, 18, 24);
 const BALL_ART = crystalBall(BALL_AT.x, BALL_AT.y, 18, 24);
 const COUNTER_ART = bakeryCounter(265, 489, 230, 24);
-const MAC_ART = macaronTray(MAC.x, MAC.y, MAC.w, MAC.h);
 // In the door's own box, so it can drop open about its foot.
 const DOOR_ART = ovenDoor(MOUTH.w / 2, MOUTH.h / 2, MOUTH.w, MOUTH.h);
 const WIN_ROLLS_ART = rollTrayRaw(MOUTH.w / 2, MOUTH.h / 2 + 4, TRAY_W, TRAY_H);
@@ -212,7 +215,6 @@ const WIN_ROLLS_ART = rollTrayRaw(MOUTH.w / 2, MOUTH.h / 2 + 4, TRAY_W, TRAY_H);
 const HOT_ART = rollTray(0, 0, TRAY_W, TRAY_H);
 const ONE_MAC_ART = macaron(0, 0, 7, 6);
 const ROLL_ART = sausageRoll(0, 0, 14, 7);
-const CAKE_ART = cakeStand(0, 0, 26, 28);
 const POT_ART = teapot(0, 0, POT.w, POT.h);
 const CUP_ART = teacup(0, 0, 12, 8);
 const MUG_ART = mug(0, 0, 15, 15);
@@ -518,15 +520,17 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <ObjectArt parts={WINDOW_ART} tone={TONE} />
       <ShopBoard />
       <ObjectArt parts={SHELF_ART} tone={TONE} />
-      <ObjectArt parts={BOOK_ART} tone={TONE} />
-      <ObjectArt parts={BALL_ART} tone={TONE} />
-      <ObjectArt parts={OVEN_ART} tone={TONE} />
-      <Oven S={SCENE} DK={DK} />
+      <Reactor id="recipe-book" correct={false} picked={picked}><ObjectArt parts={BOOK_ART} tone={TONE} /></Reactor>
+      <Reactor id="crystal-ball" correct={false} picked={picked}><ObjectArt parts={BALL_ART} tone={TONE} /></Reactor>
+      <Reactor id="rolls" correct picked={picked}>
+        <ObjectArt parts={OVEN_ART} tone={TONE} />
+        <Oven S={SCENE} DK={DK} />
+      </Reactor>
       {/* cast: bun */}
       <Stickman D={DK} k={K} role="lead" wear={BY_ID.bun.pieces} />
-      <UnderCounter S={SCENE} DK={DK} DP={DP} clock={clock} />
+      <UnderCounter S={SCENE} DK={DK} DP={DP} clock={clock} picked={picked} />
       <ObjectArt parts={COUNTER_ART} tone={TONE} />
-      <OnCounter S={SCENE} DK={DK} DP={DP} clock={clock} />
+      <OnCounter S={SCENE} DK={DK} DP={DP} clock={clock} picked={picked} />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -536,6 +540,28 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       {on(Q2) ? <LearnTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
   );
+}
+
+// ── a physical answer: the thing tapped reacts on the stage ──────────────────
+// The RIGHT thing hops and settles (a pop on a spring); a WRONG pick shakes its head from
+// side to side, and the right one still hops, so the reader sees which it was. Pure
+// transform on a wrapper: nothing is re-measured.
+function Reactor({ id, correct, picked, children }: { id: string; correct: boolean; picked: string | null; children: ReactNode }) {
+  const hop = useSharedValue(0);
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    if (picked === null) return;
+    if (correct) {
+      hop.value = withSequence(withTiming(-6, { duration: 130, easing: Easing.out(Easing.quad) }), withSpring(0, { damping: 6, stiffness: 260, mass: 0.7 }));
+    } else if (picked === id) {
+      shake.value = withSequence(
+        withTiming(-3.2, { duration: 55 }), withTiming(3.2, { duration: 90 }), withTiming(-2.4, { duration: 90 }),
+        withTiming(1.6, { duration: 80 }), withTiming(0, { duration: 70 }),
+      );
+    }
+  }, [picked]);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }, { translateY: hop.value }] }));
+  return <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">{children}</Animated.View>;
 }
 
 // ── the shop's name, painted on a board over the counter ─────────────────────
@@ -600,10 +626,13 @@ function Oven({ S, DK }: { S: SharedValue<any>; DK: SharedValue<Bundle> }) {
 
 // ── what comes up from under the counter (drawn behind its front) ───────────
 
-function UnderCounter({ S, DK, DP, clock }: {
-  S: SharedValue<any>; DK: SharedValue<Bundle>; DP: SharedValue<Bundle>; clock: SharedValue<number>;
+function UnderCounter({ S, DK, DP, clock, picked }: {
+  S: SharedValue<any>; DK: SharedValue<Bundle>; DP: SharedValue<Bundle>; clock: SharedValue<number>; picked: string | null;
 }) {
-  const cakeP = useDerivedValue<Pt>(() => ({ x: CAKE_AT.x, y: lerp(BELOW, CAKE_AT.y, S.value.cake), o: S.value.cake > 0.01 ? 1 : 0 }));
+  const cakeSt = useAnimatedStyle(() => ({
+    opacity: S.value.cake > 0.01 ? 1 : 0,
+    transform: [{ translateX: CAKE_AT.x }, { translateY: lerp(BELOW, CAKE_AT.y, S.value.cake) }],
+  }));
   // The cup and saucer ride on a flat palm, the saucer on the hand (AR2), level.
   const cupP = useDerivedValue<Pt>(() => {
     const u = S.value.cup;
@@ -637,7 +666,9 @@ function UnderCounter({ S, DK, DP, clock }: {
   });
   return (
     <View style={styles.under} pointerEvents="none">
-      <Rider at={cakeP} art={CAKE_ART} />
+      <Reactor id="cake" correct={false} picked={picked}>
+        <Animated.View style={[styles.rider, cakeSt]} pointerEvents="none"><LessonPicture name="biz2-cake" /></Animated.View>
+      </Reactor>
       <Rider at={cupP} art={CUP_ART} line={1} />
       <Rider at={mugP} art={MUG_ART} line={1.2} />
       <SteamFrom at={cupSteam} clock={clock} />
@@ -648,8 +679,8 @@ function UnderCounter({ S, DK, DP, clock }: {
 
 // ── what stands on the counter, and the things in people's hands ─────────────
 
-function OnCounter({ S, DK, DP, clock }: {
-  S: SharedValue<any>; DK: SharedValue<Bundle>; DP: SharedValue<Bundle>; clock: SharedValue<number>;
+function OnCounter({ S, DK, DP, clock, picked }: {
+  S: SharedValue<any>; DK: SharedValue<Bundle>; DP: SharedValue<Bundle>; clock: SharedValue<number>; picked: string | null;
 }) {
   const macP = useDerivedValue<Pt>(() => {
     const u = S.value.mac;
@@ -700,9 +731,11 @@ function OnCounter({ S, DK, DP, clock }: {
   });
   return (
     <>
-      <ObjectArt parts={MAC_ART} tone={TONE} line={1.2} />
-      <Rider at={macP} art={ONE_MAC_ART} line={0.9} />
-      <Rider at={noteP} art={NOTE_ART} line={1} />
+      <Reactor id="macarons" correct={false} picked={picked}>
+        <LessonPicture name="biz2-macarons" />
+        <Rider at={macP} art={ONE_MAC_ART} line={0.9} />
+      </Reactor>
+      <Reactor id="notepad" correct picked={picked}><Rider at={noteP} art={NOTE_ART} line={1} /></Reactor>
       <Rider at={potP} art={POT_ART} line={1.1} />
       <Animated.View style={[styles.stream, streamSt]} pointerEvents="none" />
       <Rider at={hotP} art={HOT_ART} line={1} />
@@ -776,7 +809,7 @@ function FitTargets({ picked, onPick, live, S }: { picked: string | null; onPick
 
 /** Q2: how she finds out — her notepad, the recipe book, or the crystal ball. */
 const LEARN_Q = [
-  { id: 'notepad', label: 'NOTEPAD', left: NOTE_AT.x - 24, top: NOTE_AT.y - 10, w: 48, bottom: TAG_LOW, correct: true },
+  { id: 'notepad', label: 'NOTEPAD', left: NOTE_AT.x - 28, top: NOTE_AT.y - 10, w: 56, bottom: TAG_LOW, correct: true },
   { id: 'recipe-book', label: 'RECIPES', left: BOOK_AT.x - 21, top: BOOK_AT.y - 15, w: 42, bottom: TAG_HIGH, correct: false },
   { id: 'crystal-ball', label: 'CRYSTAL BALL', left: BALL_AT.x - 36, top: BALL_AT.y - 15, w: 72, bottom: TAG_HIGH, correct: false },
 ];
@@ -812,6 +845,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 150, top: 344, width: 100, height: 24, borderRadius: 3,
     // the shop's painted sign, in the same duck-egg as its counter and window frame (AR1)
     backgroundColor: NATURAL.duckEgg.base, borderWidth: 1.4, borderColor: INK, alignItems: 'center', justifyContent: 'center',
+    boxShadow: lipOf(TONE),
   },
   boardText: {
     fontFamily: 'Inter_700Bold', fontSize: 14, lineHeight: 16, letterSpacing: 2.4, color: NATURAL.duckEgg.label,
@@ -834,10 +868,11 @@ const styles = StyleSheet.create({
   hang: { flexGrow: 1, justifyContent: 'flex-end' },
   tag: {
     height: TAG_H, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2, borderColor: INK, boxShadow: lipOf(TONE),
   },
   tagText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
 });
 

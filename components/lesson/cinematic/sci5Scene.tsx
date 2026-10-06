@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './sci5Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, seated, travelStance, mixKeepLegs,
@@ -906,7 +907,6 @@ function InBoat({ S }: { S: SharedValue<any> }) {
 }
 
 // ── her claim, drawn on the water: a measuring line and the ghost of a monster ─
-const HUMPS = [[118, 26], [176, 30], [240, 24]];
 function Ghost({ S }: { S: SharedValue<any> }) {
   const line = useAnimatedStyle(() => ({ opacity: Math.min(1, S.value.ghost * 3), transform: [{ scaleX: S.value.ghost }] }));
   const body = useAnimatedStyle(() => ({ opacity: 0.85 * clamp01((S.value.ghost - 0.35) / 0.65) }));
@@ -914,12 +914,7 @@ function Ghost({ S }: { S: SharedValue<any> }) {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Animated.View style={[styles.ghostWrap, body]}>
-        {HUMPS.map(([x, r]) => (
-          <View key={x} style={[styles.hump, { left: x - r, top: 26 - r * 0.7, width: 2 * r, height: 2 * r, borderRadius: r }]} />
-        ))}
-        <View style={styles.ghostNeck} />
-        <View style={styles.ghostHead} />
-        <View style={styles.ghostTail} />
+        <LessonPicture name="sci5-monster" />
       </Animated.View>
       <Animated.View style={[styles.measure, line]}>
         <View style={styles.measureEndL} />
@@ -977,12 +972,13 @@ function Bottle({ S, k, ans, who }: { S: SharedValue<any>; k: number; ans: Share
     const t = S.value.t;
     const u = phaseOf(ans.value, who.value, k);
     const bob = 2.4 * Math.sin(t * 1.6 + k * 2.1);
-    const rise = q.correct ? 15 * u : -20 * u;
+    const rise = q.correct ? 15 * u + 9 * Math.sin(Math.PI * u) : -26 * u;
     return {
       opacity: S.value.q1 * (q.correct ? 1 : 1 - 0.95 * u),
       transform: [
         { translateX: q.x }, { translateY: q.y + bob * (1 - u) - rise },
-        { rotate: `${(q.rot + 2 * Math.sin(t * 1.1 + k)) * (q.correct ? 1 - u : 1)}deg` },
+        { rotate: `${(q.rot + 2 * Math.sin(t * 1.1 + k)) * (q.correct ? 1 - u : 1) + (q.correct ? 0 : -38 * u)}deg` },
+        { scale: q.correct ? 1 + 0.12 * Math.sin(Math.PI * u) : 1 },
       ],
     };
   });
@@ -1060,8 +1056,8 @@ function Card({ S, k, ans, who }: { S: SharedValue<any>; k: number; ans: SharedV
     // the right one is lifted and read; a wrong one lets go of its left peg and droops
     return {
       transform: q.correct
-        ? [{ translateY: -3 * u }, { rotate: `${sway * (1 - u)}deg` }, { scale: 1 + 0.1 * u }]
-        : [{ translateX: 19 }, { rotate: `${sway - 20 * u}deg` }, { translateX: -19 }],
+        ? [{ translateY: -9 * u - 5 * Math.sin(Math.PI * u) }, { rotate: `${sway * (1 - u)}deg` }, { scale: 1 + 0.16 * u }]
+        : [{ translateX: 19 }, { rotate: `${sway - 34 * u}deg` }, { translateX: -19 }, { translateY: 12 * u }],
       opacity: q.correct ? 1 : 1 - 0.35 * u,
     };
   });
@@ -1206,7 +1202,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 1.5, top: -12, width: 1.2, height: 6, borderRadius: 0.6,
     backgroundColor: NATURAL.cloudWhite.base, transform: [{ rotate: '10deg' }],
   },
-  ghostWrap: { position: 'absolute', left: 0, top: 466, width: STAGE_W, height: 26, overflow: 'hidden' },
+  ghostWrap: { position: 'absolute', left: 0, top: 450, width: STAGE_W, height: 42, overflow: 'hidden' },
   hump: {
     position: 'absolute', borderWidth: 1.4, borderStyle: 'dashed', borderColor: NATURAL.s5Moon.base,
   },
@@ -1240,7 +1236,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   scrollText: {
-    fontFamily: 'Caveat_700Bold', fontSize: 10.8, lineHeight: 11.6, color: INK, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 10.8, lineHeight: 11.6, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center',
   },
   drops: { position: 'absolute', left: 0, top: 15, width: 0, height: 0 },
   drop: { position: 'absolute', top: 0, width: 2.4, height: 3.4, borderRadius: 1.2, backgroundColor: NATURAL.s5Moon.base },
@@ -1297,7 +1293,7 @@ const styles = StyleSheet.create({
   },
   sketchWater: { position: 'absolute', left: 3, right: 3, top: 18, height: 7, backgroundColor: NATURAL.yellowed.base },
   cardText: {
-    fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 12, color: INK, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 12, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center',
   },
   peg: {
     position: 'absolute', top: -5, width: 4, height: 9, borderRadius: 1, backgroundColor: NATURAL.beech.base,

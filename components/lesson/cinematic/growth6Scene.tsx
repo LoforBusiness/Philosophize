@@ -19,14 +19,14 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, gr6Lens, gr6Pedestal, gr6Desk, gr6KeyBase, gr6KeyLever, gr6Token, gr6Coin, gr6Barometer,
+  NATURAL, gr6Pedestal, gr6Desk, gr6KeyBase, gr6KeyLever, gr6Token, gr6Coin, gr6Barometer,
   gr6Calendar, gr6CalDay, gr6Notes, gr6NotesInk, gr6Pencil, GR6_PENCIL_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -193,7 +193,6 @@ const COIN_ART = gr6Coin(0, 0, 12, 12);
 const TOKEN_ART = gr6Token(0, -8.5, 14, 17);
 
 // ── the still set ────────────────────────────────────────────────────────────
-const LENS_ART = gr6Lens(LENS_X, 390, 76, 120);
 const PEDESTAL_ART = gr6Pedestal(LENS_X, 475, 46, 50);
 const DESK_ART = gr6Desk(212, 482, 96, 36);
 const KEY_BASE_ART = gr6KeyBase(240, 460, 32, 8);
@@ -627,7 +626,7 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
       <ObjectArt parts={PEDESTAL_ART} tone={TONE} />
       <Crank S={SCENE} />
       <Beam S={SCENE} />
-      <ObjectArt parts={LENS_ART} tone={TONE} />
+      <LessonPicture name="growth6-lens" />
       <LensBars S={SCENE} />
       <LensGlow S={SCENE} clock={clock} />
       {/* the calendars, unrolled for the second question */}
@@ -1137,8 +1136,8 @@ const styles = StyleSheet.create({
     position: 'absolute', top: CAL_TOP - 5, width: CAL_W + 10, height: CAL_H + 10, borderRadius: 8, backgroundColor: N.gr6Sun.base,
   },
   calPlate: {
-    position: 'absolute', left: -20, top: 5, width: 40, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 2.5,
-    borderWidth: 1, borderColor: INK, paddingVertical: 0.4,
+    position: 'absolute', left: -20, top: 5, width: 40, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3.5,
+    borderWidth: 1, borderColor: INK, paddingVertical: 0.4, boxShadow: lipOf(TONE),
   },
   calText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.4, letterSpacing: 0, color: INK, includeFontPadding: false,
@@ -1151,8 +1150,8 @@ const styles = StyleSheet.create({
   shine: { position: 'absolute', left: -11, top: -11, width: 22, height: 22, borderRadius: 11, backgroundColor: N.gr6Signal.base },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 1,
+    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 1, boxShadow: lipOf(TONE),
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: INK, includeFontPadding: false,

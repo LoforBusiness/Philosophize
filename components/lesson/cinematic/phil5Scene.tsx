@@ -500,11 +500,15 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const jolt = A_JAM[n] ? 2 * bp(0.08, 0.1, 0.13) + 2 * bp(0.2, 0.22, 0.25) : 0;
     // Q1: the pod's light dies if the reader leaves him in it; the hatch rattles shut
     const ringDim = Math.min(1, rPod * 1.6) * (0.8 + 0.2 * Math.sin(rPod * 28));
+    // a wrong pick on the pod shakes its door in its frame, and dies away
+    const shudder = 3 * Math.sin(rPod * Math.PI * 9) * (1 - rPod) + 2.4 * Math.sin(rMine * Math.PI * 9) * (1 - rMine);
     const rattle = 2.6 * Math.sin(rHatch * Math.PI * 7) * (1 - rHatch);
     // Q2: the beam tips toward a claimant and will not stay; on the balance, it settles level
     const beamDeg = -15 * Math.sin(Math.PI * rMine) + 15 * Math.sin(Math.PI * rDouble)
       + 5 * Math.sin(rEqual * Math.PI * 3) * (1 - rEqual);
     const glint = Math.sin(Math.PI * clamp01((rEqual - 0.55) / 0.45));
+    // the plate is stamped down: it lands big, squashes and settles
+    const platePop = 1 + 0.22 * Math.sin(Math.PI * clamp01(rEqual * 2.2)) * (1 - clamp01((rEqual - 0.45) / 0.55));
 
     const vo = pose(figV, xV, gV, K, dV, 1);
     const bn = pose(figB, BN_X, GROUND, K, dB, 1);
@@ -514,7 +518,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     return {
       vo, bn, ph, db,
       ring: warm * (1 - ringDim) * (0.86 + 0.14 * Math.sin(t * 2.6)),
-      door, jolt, lid, rattle, flash, glint, beamDeg,
+      door, jolt: jolt + shudder, lid, rattle, flash, glint, beamDeg, platePop,
       trail: rMoon,
       moonPod: Math.max(clamp01(rMoon * 1.5 - 0.5), moonFlash),
       plate: carry(cv, 4, n, PLATE[p], PLATE[n], tr),
@@ -743,7 +747,7 @@ function Balance({ S }: { S: SharedValue<any> }) {
 }
 /** EQUAL CLAIM, on the console's front, from the second question on. */
 function EqualPlate({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.plate }));
+  const st = useAnimatedStyle(() => ({ opacity: S.value.plate, transform: [{ scale: S.value.platePop }] }));
   return (
     <Animated.View style={[styles.equalPlate, st]} pointerEvents="none">
       <Text style={styles.plateText}>EQUAL</Text>

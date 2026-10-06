@@ -9,6 +9,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './biz6Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -25,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, coin, bz6BoothBack, bz6BoothFront, bz6Turnstile, bz6Popcorn, bz6Glow, bz6Barrel, bz6Lantern,
+  NATURAL, tint, coin, bz6BoothBack, bz6BoothFront, bz6Popcorn, bz6Glow, bz6Lantern,
   bz6LanternR, bz6Torch, bz6TorchPlate, bz6Bell, bz6Counter, bz6Board, bz6Pumpkin, BZ6_HUB, BZ6_SLOT, BZ6_KNOB,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -252,11 +253,9 @@ const ARM_TILT = 6;
 // ── object drawings, laid 1:1 ───────────────────────────────────────────────
 const BOOTH_BACK_ART = bz6BoothBack(58, 426, 112, 148);
 const BOOTH_FRONT_ART = bz6BoothFront(58, 481, 116, 38);
-const TURN_ART = bz6Turnstile(TURN.x, TURN.y, TURN.w, TURN.h);
 const COUNTER_ART = bz6Counter(COUNTER.x, COUNTER.y, COUNTER.w, COUNTER.h);
 const LAMP_L_ART = bz6Lantern(LAMP_L.x, LAMP_L.y, 22, 33);
 const LAMP_R_ART = bz6LanternR(LAMP_R.x, LAMP_R.y, 22, 33);
-const BARREL_ART = bz6Barrel(BARREL.x, BARREL.y, 20, 32);
 const PUMPKIN_ARTS = [bz6Pumpkin(178, 492, 20, 16), bz6Pumpkin(386, 492, 20, 16)];
 const PLATE_ART = bz6TorchPlate(TORCH.x - 1, TORCH.y, 6, 14);
 /** Drawn about its pivot (the ring, 3 units below the drawing's middle). */
@@ -709,7 +708,7 @@ export default function Biz6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <GateFront S={SCENE} fixTag={on(Q1)} />
       <TorchLever clock={clock} S={SCENE} />
       <SecretPanel S={SCENE} front={on(UPTO_POINT)} back={on(FROM_POINT)} />
-      <ObjectArt parts={BARREL_ART} tone={TONE} />
+      <LessonPicture name="biz6-barrel" />
       {on(FROM_TENS) ? <Stack S={SCENE} /> : null}
       <ObjectArt parts={BOOTH_BACK_ART} tone={TONE} />
       <Web x={12} y={409} r={15} a0={0} />
@@ -1151,7 +1150,7 @@ function Arm({ S, k }: { S: SV; k: number }) {
 function Turnstile({ S }: { S: SV }) {
   return (
     <>
-      <ObjectArt parts={TURN_ART} tone={TONE} />
+      <LessonPicture name="biz6-turnstile" />
       {[0, 1, 2].map((k) => <Arm key={k} S={S} k={k} />)}
       <View style={styles.hubCap} pointerEvents="none" />
     </>

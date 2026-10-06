@@ -1,5 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -14,15 +17,16 @@ import {
 import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
+import LessonPicture from './LessonPicture';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo, lipsAt, sipHandAt, sipTilt, sipHead } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, cakeSlice, cakePlate, fork, teaspoon, cafeCup, saucer, bistroTable, specialsEasel, cafeFront,
+  NATURAL, fork, teaspoon, cafeCup, saucer, specialsEasel, 
   EASEL_SLATE, CAFE_SIGN, CAFE_LEDGE, CAFE_CUP_GRIP, SAUCER_SIZE,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -235,14 +239,9 @@ const tipAt = (c: number) => {
 };
 
 const EASEL_ART = specialsEasel(EASEL.x, EASEL.y, EASEL.w, EASEL.h);
-const CAFE_ART = cafeFront(CAFE.x, CAFE.y, CAFE.w, CAFE.h);
-const TABLE_M_ART = bistroTable(TABLE_M, GROUND - 13, 36, 26);
-const TABLE_W_ART = bistroTable(TABLE_W, GROUND - 13, 36, 26);
 // The things that move are drawn about their own centre and carried by a rider.
 const CW = 20;
 const CH = 13;
-const CAKE_ART = cakeSlice(0, 0, CW, CH);
-const PLATE_ART = cakePlate(0, 0, 30, 10);
 const FORK_ART = fork(0, 0, 5, 14);
 const SPOON_ART = teaspoon(0, 0, 5, 12);
 // drawn about its handle: cafeCup centres on its box, so shift the box by the grip
@@ -564,14 +563,14 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={CAFE_ART} tone={TONE} />
+      <LessonPicture name="phil2-cafe" />
       <View style={styles.signBox} pointerEvents="none">
         <Text style={styles.signText}>CAFÉ</Text>
       </View>
       <ObjectArt parts={EASEL_ART} tone={TONE} />
       <Board S={SCENE} />
-      <ObjectArt parts={TABLE_M_ART} tone={TONE} />
-      <ObjectArt parts={TABLE_W_ART} tone={TONE} />
+      <LessonPicture name="phil2-table" />
+      <LessonPicture name="phil2-table-w" />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -589,8 +588,8 @@ export default function Phil2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 // ── the things that are carried: her plate and fork, his spoon ───────
 
 type Pt = { x: number; y: number; o: number; r: number };
-function Rider({ at, art, line, lift }: {
-  at: SharedValue<Pt>; art: ReturnType<typeof fork>; line?: number; lift?: boolean;
+function Rider({ at, art, pic, line, lift }: {
+  at: SharedValue<Pt>; art?: ReturnType<typeof fork>; pic?: string; line?: number; lift?: boolean;
 }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
@@ -598,7 +597,7 @@ function Rider({ at, art, line, lift }: {
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} line={line} />
+      {pic ? <LessonPicture name={pic} /> : <ObjectArt parts={art!} tone={TONE} line={line} />}
     </Animated.View>
   );
 }
@@ -660,7 +659,7 @@ function Goods({ S, DW, DM }: { S: SharedValue<any>; DW: SharedValue<Bundle>; DM
   }));
   return (
     <>
-      <Rider at={plateP} art={PLATE_ART} />
+      <Rider at={plateP} pic="phil2-plate" />
       <Animated.View style={[styles.rider, crumbs]} pointerEvents="none">
         <View style={[styles.crumb, { left: -4, top: -3.4 }]} />
         <View style={[styles.crumb, { left: 1, top: -3 }]} />
@@ -669,7 +668,7 @@ function Goods({ S, DW, DM }: { S: SharedValue<any>; DW: SharedValue<Bundle>; DM
       <Animated.View style={[styles.rider, cake]} pointerEvents="none">
         <Animated.View style={[styles.eatenClip, clip]}>
           <View style={styles.eatenOrigin}>
-            <ObjectArt parts={CAKE_ART} tone={TONE} />
+            <LessonPicture name="phil2-cake" />
           </View>
           <Animated.View style={[styles.eatenEdge, cut]} />
         </Animated.View>
@@ -750,11 +749,42 @@ function RowTargets({ rows, ids, correct, picked, onPick, live, S, k }: {
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: EASEL.x - ROW_W / 2, top: ROWS[j] - ROW_H / 2, width: ROW_W, height: ROW_H }}
         >
-          <View style={styles.card}>
-            <Text style={styles.cardText}>{s}</Text>
-          </View>
+          <ReplyCard text={s} chosen={picked === ids[j]} right={j === correct} />
         </Target>
       ))}
+    </Animated.View>
+  );
+}
+
+/**
+ * A tappable row: a white plate on a hard ledge. Chosen, it reacts with weight: a right
+ * answer pops up, squashes and settles (a stamp coming down); a wrong one is knocked
+ * sideways twice and sags onto its ledge.
+ */
+function ReplyCard({ text, chosen, right }: { text: string; chosen: boolean; right: boolean }) {
+  const sx = useSharedValue(1);
+  const sy = useSharedValue(1);
+  const dx = useSharedValue(0);
+  const dy = useSharedValue(0);
+  useEffect(() => {
+    if (!chosen) return;
+    const e = Easing.out(Easing.quad);
+    if (right) {
+      sx.value = withSequence(withTiming(1.1, { duration: 110, easing: e }), withTiming(0.96, { duration: 110 }), withTiming(1, { duration: 140 }));
+      sy.value = withSequence(withTiming(1.18, { duration: 110, easing: e }), withTiming(0.88, { duration: 110 }), withTiming(1, { duration: 140 }));
+      dy.value = withSequence(withTiming(-3, { duration: 110, easing: e }), withTiming(1, { duration: 110 }), withTiming(0, { duration: 140 }));
+    } else {
+      dx.value = withSequence(withTiming(-3, { duration: 60 }), withTiming(3, { duration: 90 }), withTiming(-2, { duration: 80 }), withTiming(1, { duration: 70 }), withTiming(0, { duration: 60 }));
+      dy.value = withTiming(1.5, { duration: 200 });
+      sy.value = withSequence(withTiming(0.9, { duration: 120 }), withTiming(0.97, { duration: 200 }));
+    }
+  }, [chosen]);
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: dx.value }, { translateY: dy.value }, { scaleX: sx.value }, { scaleY: sy.value }],
+  }));
+  return (
+    <Animated.View style={[styles.card, st]}>
+      <Text style={styles.cardText}>{text}</Text>
     </Animated.View>
   );
 }
@@ -804,9 +834,11 @@ const styles = StyleSheet.create({
   },
   card: {
     flexGrow: 1, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: Math.min(PLATE_RADIUS, 5), borderWidth: 1.2, borderColor: INK,
+    boxShadow: `0 2px 0 ${lipOf(TONE)}`,
   },
   cardText: {
+    width: ROW_W - 4, textAlign: 'center',
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 14, color: INK, includeFontPadding: false,
   },
 });

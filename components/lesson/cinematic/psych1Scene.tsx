@@ -1,11 +1,15 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  Easing, useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './psych1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,7 +26,7 @@ import { reachHandTo, saucerHandAt, sipHandAt, sipHead, sipTilt } from './intera
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, carafe, cafeCup, saucer, tentCard, menuBoard, cafeCounter, cafeWindow, tint, CAFE_CUP_GRIP, SAUCER_SIZE,
+  NATURAL, tentCard, menuBoard, cafeCounter, cafeWindow, tint, CAFE_CUP_GRIP, SAUCER_SIZE,
   type ObjPart,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -194,9 +198,13 @@ const MENU_ART = menuBoard(313, 356, 150, 80);
 // The things that move are drawn about the point they are held by and carried by a
 // rider: the pot about its own centre, a saucer about its centre, a cup about its
 // handle (AR2).
-const POT_ART = carafe(0, 0, 26, 30);
-const CUP_ART = cafeCup(CAFE_CUP_GRIP.w / 2 - CAFE_CUP_GRIP.x, CAFE_CUP_GRIP.h / 2 - CAFE_CUP_GRIP.y, CAFE_CUP_GRIP.w, CAFE_CUP_GRIP.h);
-const SAUCER_ART = saucer(0, 0);
+// The pot, the cups and their saucers are DRAWN (LESSON_RULES AM13: lessonart/lessons/
+// psych1.mjs, against a filter-coffee decanter and a cup on its saucer) and baked. Each
+// picture takes the box its shape-built object had, about the same point: the pot about
+// its centre, a cup about its handle, a saucer about its centre.
+const POT_PIC = 'psych1-pot';
+const CUP_PIC = 'psych1-cup';
+const SAUCER_PIC = 'psych1-saucer';
 const GOLD_ART = tint(tentCard(0, 0, TENT_W, TENT_H), 'brass');
 const BARGAIN_ART = tint(tentCard(0, 0, TENT_W, TENT_H), 'apple');
 
@@ -219,6 +227,35 @@ function sm(b: number, a: number, z: number): number {
   const c = u < 0 ? 0 : u > 1 ? 1 : u;
   return c * c * (3 - 2 * c);
 }
+/**
+ * A WRONG thing tapped shudders where it stands: a side-to-side rattle, fast at first and
+ * dying away over 0.65s, as a cup does on its saucer when the counter is knocked. −1…1.
+ */
+function shudder(g: number): number {
+  'worklet';
+  if (g <= 0 || g >= 0.65) return 0;
+  return Math.sin(g * 42) * (1 - g / 0.65);
+}
+/**
+ * The RIGHT thing hops: a crouch (anticipation), a jump, a squash on landing and a
+ * settle — the weight of a thing that has been chosen. `y` in units (up is negative),
+ * `sy` its vertical scale, `shine` a glint that flashes at the top of the jump.
+ */
+function hop(g: number): { y: number; sy: number; shine: number } {
+  'worklet';
+  if (g <= 0 || g >= 0.72) return { y: 0, sy: 1, shine: 0 };
+  if (g < 0.08) return { y: 0, sy: 1 - 0.12 * Math.sin((g / 0.08) * (Math.PI / 2)), shine: 0 };
+  if (g < 0.44) {
+    const u = (g - 0.08) / 0.36;
+    return { y: -9 * Math.sin(u * Math.PI), sy: 1.06 - 0.06 * u, shine: Math.sin(u * Math.PI) };
+  }
+  const v = (g - 0.44) / 0.28;
+  return { y: 0, sy: 1 - 0.14 * Math.sin(v * Math.PI) * (1 - v * 0.4), shine: 0 };
+}
+/** Q1's three things, and Q2's three rows, in the order of their targets. */
+const TASTE_IDS = ['pot', 'cup', 'label'];
+const METHOD_IDS = ['ask', 'swap', 'trust'];
+const RIGHT_ROW = 1;
 /**
  * One figure's walk and facing for a beat. He walks from WHERE HE IS ON SCREEN — `src`,
  * read out of the carry — and turns from the way he was facing ON SCREEN, `dSrc`: a tap
@@ -326,6 +363,26 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   const heldCp = useHeld();
   const cv = useCarry(20);
   const on = useLinger(i);
+  // THE QUESTIONS ANSWER BACK: which of the three things was tapped on each graded beat,
+  // and how many seconds ago. A wrong thing shudders where it stands; the right one (the
+  // GOLD label) hops and lands with a squash, after a wrong pick too, a beat later, so the
+  // reader sees which it was. Each question keeps its own clock, so the second does not
+  // replay the first.
+  const pick1 = useSharedValue(-1);
+  const pick2 = useSharedValue(-1);
+  const since1 = useSharedValue(0);
+  const since2 = useSharedValue(0);
+  useEffect(() => {
+    const q1 = Q1[i] === 1;
+    const ids = q1 ? TASTE_IDS : Q2[i] ? METHOD_IDS : null;
+    if (!ids) return;
+    const k = picked === null ? -1 : ids.indexOf(picked);
+    const pk = q1 ? pick1 : pick2;
+    const sn = q1 ? since1 : since2;
+    pk.value = k;
+    sn.value = 0;
+    if (k >= 0) sn.value = withTiming(4, { duration: 4000, easing: Easing.linear });
+  }, [picked, i, pick1, pick2, since1, since2]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -507,6 +564,15 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // only after he kept it (b11 on)
     const kept = n > 10 ? 1 : 0;
 
+    // the answers' reactions (Q1 on the stage things, Q2 on the menu's rows)
+    const k1 = pick1.value;
+    const g1 = since1.value;
+    const potShake = k1 === 0 ? shudder(g1) : 0;
+    const cupRock = k1 === 1 ? shudder(g1) : 0;
+    const gold = k1 < 0 ? hop(-1) : hop(g1 - (k1 === 2 ? 0.05 : 0.7));
+    const k2 = pick2.value;
+    const g2 = since2.value;
+
     return {
       pl: pose(figPl, xPl, GROUND, K, dPl, 1),
       th: pose(figTh, xTh, GROUND, K, dTh, 1),
@@ -527,6 +593,12 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       potW: carry(cv, 9, n, 0, glide(0, potW, tr), tr),
       q1: carry(cv, 10, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 14, n, Q2[p], Q2[n], tr),
+      potShake,
+      cupRock,
+      goldY: gold.y,
+      goldSy: gold.sy,
+      goldShine: k1 === 2 ? gold.shine : 0,
+      rowShake: [0, 1, 2].map((k) => (k2 === k && k !== RIGHT_ROW ? shudder(g2) : 0)),
     };
   });
 
@@ -564,20 +636,20 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
 
 // ── the things on the counter, and the ones in people's hands ────────────────
 
-type Place = { readonly value: { x: number; y: number; o: number; r?: number; sx?: number } };
-function Rider({ at, art, lift, children }: {
-  at: Place; art: readonly ObjPart[]; lift?: boolean; children?: React.ReactNode;
+type Place = { readonly value: { x: number; y: number; o: number; r?: number; sx?: number; sy?: number } };
+function Rider({ at, art, pic, lift, children }: {
+  at: Place; art?: readonly ObjPart[]; pic?: string; lift?: boolean; children?: React.ReactNode;
 }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [
       { translateX: at.value.x }, { translateY: at.value.y },
-      { rotate: `${at.value.r ?? 0}deg` }, { scaleX: at.value.sx ?? 1 },
+      { rotate: `${at.value.r ?? 0}deg` }, { scaleX: at.value.sx ?? 1 }, { scaleY: at.value.sy ?? 1 },
     ],
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      {pic ? <LessonPicture name={pic} /> : art ? <ObjectArt parts={art} tone={TONE} /> : null}
       {children}
     </Animated.View>
   );
@@ -605,7 +677,13 @@ function Tents({ S, DC }: { S: SharedValue<any>; DC: SharedValue<Bundle> }) {
   // both of GOLD's journeys are in her right hand: set down on b1, moved on b8
   const gold = useDerivedValue(() => {
     const at = tentAt(S.value.tentG, wristOf(DC, 'wrR'), SPOT_R, wristOf(DC, 'wrR'), SPOT_L);
-    return { ...at, o: S.value.tentOG };
+    // Q1's answer: it hops and lands squashed, its foot kept on the counter
+    const sy = S.value.goldSy;
+    return { x: at.x, y: at.y + S.value.goldY + (TENT_H / 2) * (1 - sy), o: S.value.tentOG, sy };
+  });
+  const shine = useAnimatedStyle(() => {
+    const u = S.value.goldShine;
+    return { opacity: u, transform: [{ scale: 0.6 + 0.5 * u }] };
   });
   return (
     <>
@@ -614,6 +692,11 @@ function Tents({ S, DC }: { S: SharedValue<any>; DC: SharedValue<Bundle> }) {
       </Rider>
       <Rider at={gold} art={GOLD_ART}>
         <Text style={styles.tentWord}>GOLD</Text>
+        <Animated.View style={[styles.shine, shine]}>
+          <View style={[styles.ray, { left: -1, top: -7, transform: [{ rotate: '0deg' }] }]} />
+          <View style={[styles.ray, { left: -9, top: -4, transform: [{ rotate: '-40deg' }] }]} />
+          <View style={[styles.ray, { left: 7, top: -4, transform: [{ rotate: '40deg' }] }]} />
+        </Animated.View>
       </Rider>
     </>
   );
@@ -626,10 +709,13 @@ function Pot({ S, DC }: { S: SharedValue<any>; DC: SharedValue<Bundle> }) {
     const d = S.value.dCp;
     const h = wristOf(DC, 'wrR');
     return {
-      x: lerp(POT_AT.x, h.x + POT_OFF.x * d, w), y: lerp(POT_AT.y, h.y + POT_OFF.y, w), o: 1, sx: lerp(1, d, w),
+      // Q1's wrong answer: it rattles on the counter, the coffee in it shaken
+      x: lerp(POT_AT.x, h.x + POT_OFF.x * d, w) + 1.6 * S.value.potShake,
+      y: lerp(POT_AT.y, h.y + POT_OFF.y, w) - 0.9 * Math.abs(S.value.potShake),
+      o: 1, sx: lerp(1, d, w), r: 3 * S.value.potShake,
     };
   });
-  return <Rider at={at} art={POT_ART} />;
+  return <Rider at={at} pic={POT_PIC} />;
 }
 
 /**
@@ -654,7 +740,9 @@ function cupOf(S: SharedValue<any>, DP: SharedValue<Bundle>, left: boolean) {
   const sy = lerp(SAU_Y, hl.y - 0.5, ws);
   const cx = lerp(sx + ON_X * hs, hr.x, wc);
   const cy = lerp(sy + ON_Y, hr.y, wc);
-  return { sx, sy, cx, cy, r: sipTilt(up, d), hs, held: ws > 0.02 };
+  // Q1's wrong answer: the gold cup rocks in its saucer
+  const rock = left ? 0 : v.cupRock;
+  return { sx, sy, cx: cx + 0.8 * rock, cy: cy - 0.5 * Math.abs(rock), r: sipTilt(up, d) + 8 * rock, hs, held: ws > 0.02 };
 }
 function Cups({ S, DP, held }: { S: SharedValue<any>; DP: SharedValue<Bundle>; held: boolean }) {
   const lS = useDerivedValue(() => {
@@ -675,10 +763,10 @@ function Cups({ S, DP, held }: { S: SharedValue<any>; DP: SharedValue<Bundle>; h
   });
   return (
     <>
-      <Rider at={lS} art={SAUCER_ART} lift={held} />
-      <Rider at={lC} art={CUP_ART} lift={held} />
-      <Rider at={rS} art={SAUCER_ART} lift={held} />
-      <Rider at={rC} art={CUP_ART} lift={held} />
+      <Rider at={lS} pic={SAUCER_PIC} lift={held} />
+      <Rider at={lC} pic={CUP_PIC} lift={held} />
+      <Rider at={rS} pic={SAUCER_PIC} lift={held} />
+      <Rider at={rC} pic={CUP_PIC} lift={held} />
     </>
   );
 }
@@ -731,6 +819,15 @@ const METHOD_Q = [
   { id: 'trust', label: 'TRUST HIS TASTE', correct: false },
 ];
 const ROW_H = SLATE.h / 3;
+/** One of Q2's rows: a struck plate on the slate, standing on its ledge; a wrong pick shudders. */
+function Row({ S, k, label }: { S: SharedValue<any>; k: number; label: string }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: 2.6 * S.value.rowShake[k] }] }));
+  return (
+    <Animated.View style={[styles.choice, st]}>
+      <Text style={styles.choiceText}>{label}</Text>
+    </Animated.View>
+  );
+}
 function MethodTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
@@ -738,13 +835,11 @@ function MethodTargets({ picked, onPick, live, S }: { picked: string | null; onP
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {METHOD_Q.map((q, k) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: SLATE.left + 3, top: SLATE.top + k * ROW_H + 1, width: SLATE.w - 6, height: ROW_H - 2 }}
+          style={{ position: 'absolute', left: SLATE.left + 5, top: SLATE.top + k * ROW_H + 1.2, width: SLATE.w - 10, height: ROW_H - 5 }}
         >
-          <View style={styles.choice}>
-            <Text style={styles.choiceText}>{q.label}</Text>
-          </View>
+          <Row S={S} k={k} label={q.label} />
         </Target>
       ))}
     </Animated.View>
@@ -773,18 +868,26 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
     backgroundColor: NATURAL.slate.base, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
-  menuBlock: { alignItems: 'center' },
+  // AQ2: Caveat's letters draw past their advance, so each line's box is the slate's whole
+  // width, centred, and the slack beside the words holds the ink (never padding)
+  menuBlock: { alignSelf: 'stretch' },
   chalkHead: {
-    fontFamily: 'Caveat_700Bold', fontSize: 15, lineHeight: 17, color: PAPER_LIT, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 15, lineHeight: 17, color: PAPER_LIT, includeFontPadding: false, textAlign: 'center', alignSelf: 'stretch', width: SLATE.w,
   },
   chalkRow: {
-    fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 15, color: PAPER_LIT, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 15, color: PAPER_LIT, includeFontPadding: false, textAlign: 'center', alignSelf: 'stretch', width: SLATE.w,
   },
   clear: { flexGrow: 1 },
+  // a struck plate (group AG): a white face lit along its top, on a hard ledge of the
+  // branch's shade that it casts onto the slate
   choice: {
     flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 5, borderWidth: 1.2, borderColor: INK,
+    boxShadow: `inset 0px 1.2px 0px rgba(255, 255, 255, 0.85), 0px 2.4px 0px ${TONE.SHADE}, 0px 3.4px 0px rgba(10, 10, 10, 0.35)`,
   },
+  // the glint over the GOLD label as it hops (Q1's right answer)
+  shine: { position: 'absolute', left: 0, top: -TENT_H / 2 - 2, width: 0, height: 0 },
+  ray: { position: 'absolute', width: 2, height: 5, borderRadius: 1, backgroundColor: NATURAL.brass.base, borderWidth: 0.5, borderColor: INK },
   choiceText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },

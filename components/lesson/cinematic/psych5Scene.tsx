@@ -7,6 +7,7 @@ import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './psych5Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -16,14 +17,14 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle } from './stageSkin';
+import { floorStyle, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, ps5Crate, ps5CaseTan, ps5CaseRed, ps5CaseGreen, ps5Lantern, ps5Clock, ps5Gorse, ps5Cake, notepad, pencil,
+  NATURAL, ps5Lantern, ps5Clock, ps5Gorse, ps5Cake, notepad, pencil,
   PS5_GLOBE, PS5_DIAL, PS5_CAKE_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -175,9 +176,9 @@ const SIGN_POST = { x: CLOCK.x - 2, y: 428 };
 const CASE_W = 54;
 const CASE_H = 48;
 const CASES = [
-  { id: 'car', words: 'A CAR', x: 252, art: ps5CaseTan(252, 476, CASE_W, CASE_H) },
-  { id: 'weekend', words: 'A\nWEEKEND', x: 310, art: ps5CaseRed(310, 476, CASE_W, CASE_H) },
-  { id: 'house', words: 'A HOUSE\nAND\nA JOB', x: 368, art: ps5CaseGreen(368, 476, CASE_W, CASE_H) },
+  { id: 'car', pic: 'tan', words: 'A CAR', x: 252 },
+  { id: 'weekend', pic: 'red', words: 'A\nWEEKEND', x: 310 },
+  { id: 'house', pic: 'green', words: 'A HOUSE\nAND\nA JOB', x: 368 },
 ];
 /** Where each tag's string is tied: the middle of its case's handle. */
 const HANDLE_Y = 452 + 6.4 * (CASE_H / 46);
@@ -188,7 +189,6 @@ const CAKE_REST = { x: 232, y: 452 + 6.2 * (CASE_H / 46) };
 const CAKE_W = 18;
 const CAKE_H = CAKE_W * (PS5_CAKE_GRIP.h / PS5_CAKE_GRIP.w);
 
-const CRATE_ART = ps5Crate(CRATE.x, CRATE.y, CRATE.w, CRATE.h);
 const CLOCK_ART = ps5Clock(CLOCK.x, CLOCK.y, CLOCK.w, CLOCK.h);
 const LANTERN_ART = ps5Lantern(LANTERN.x, LANTERN.y, LANTERN.w, LANTERN.h);
 const GORSE_ART = ps5Gorse(372, 466, 84, 58);
@@ -490,7 +490,7 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     // the right sign springs up in a flash of lamplight, whichever was taken
     const springNow = answered1 && n === N_Q1 ? 14 * Math.sin(Math.PI * clamp01(a1 / 0.5)) + 4 * Math.sin(Math.PI * clamp01((a1 - 0.5) / 0.3)) : 0;
     const spring = carry(cv, 10, n, 0, springNow, tr);
-    const flashNow = answered1 && n === N_Q1 ? clamp01(a1 / 0.25) * (1 - 0.5 * clamp01((a1 - 0.45) / 0.5)) : 0;
+    const flashNow = answered1 && n === N_Q1 ? Math.sin(Math.PI * clamp01((a1 - 0.5) / 0.3)) : 0;
     const flash = carry(cv, 11, n, 0, flashNow, tr);
     // a wrong one falls flat on its face in the grass, and stays down
     const fallOf = (j: number) => {
@@ -538,8 +538,8 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
         x: lerp(lerp(SIGNS[1].x, heldX, hold), SIGN_POST.x, stick),
         y: lerp(lerp(SIGNS[1].y - spring, heldY, hold), SIGN_POST.y, stick),
         turn,
+        pop: flash,
       },
-      flash,
       fall: [fallL, 0, fallR],
       tagFlip,
       thud,
@@ -591,10 +591,9 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       {CASES.map((c, j) => <Case key={c.id} j={j} S={SCENE} />)}
       <Rider at={cakeP} art={CAKE_ART} />
-      <ObjectArt parts={CRATE_ART} tone={TONE} />
+      <LessonPicture name="psych5-crate" />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="lead" wear={[]} />
-      <Flash S={SCENE} />
       <Sign j={0} S={SCENE} />
       <Sign j={2} S={SCENE} />
       <Sign j={1} S={SCENE} />
@@ -691,12 +690,6 @@ function ClockHands({ S }: { S: SharedValue<any> }) {
 
 // ── the signs ────────────────────────────────────────────────────────────────
 
-/** A burst of lamplight behind the right sign as it springs up (Q1). */
-function Flash({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: 0.85 * S.value.flash, transform: [{ scaleX: 2 }, { scale: 0.7 + 0.5 * S.value.flash }] }));
-  return <Animated.View style={[styles.flash, st]} pointerEvents="none" />;
-}
-
 /**
  * One sign, drawn about its bottom-centre. The saved one (j 1) travels — snatched up,
  * held, turned round and stuck on the post — and shows its back once turned; the other
@@ -708,7 +701,7 @@ function Sign({ j, S }: { j: number; S: SharedValue<any> }) {
     if (j === 1) {
       const s = S.value.sign;
       const c = Math.cos(Math.PI * s.turn);
-      return { transform: [{ translateX: s.x }, { translateY: s.y }, { scaleX: Math.max(0.02, Math.abs(c)) }] };
+      return { transform: [{ translateX: s.x }, { translateY: s.y }, { scaleX: Math.max(0.02, Math.abs(c)) * (1 + 0.07 * s.pop) }, { scaleY: 1 - 0.14 * s.pop }] };
     }
     const f = S.value.fall[j];
     return { transform: [{ translateX: sg.x }, { translateY: sg.y }, { rotate: `${sg.rot * (1 - f)}deg` }, { scaleY: 1 - 0.86 * f }] };
@@ -755,7 +748,7 @@ function Case({ j, S }: { j: number; S: SharedValue<any> }) {
   return (
     <>
       <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${c.x}px ${GROUND}px` }, body]} pointerEvents="none">
-        <ObjectArt parts={c.art} tone={TONE} />
+        <LessonPicture name={`psych5-case-${c.pic}`} />
       </Animated.View>
       <Animated.View style={[styles.pin, tag]} pointerEvents="none">
         <View style={styles.tagString} />
@@ -887,7 +880,7 @@ const styles = StyleSheet.create({
   board: {
     position: 'absolute', left: -SIGN_W / 2, top: -SIGN_H, width: SIGN_W, height: SIGN_H, alignItems: 'center', justifyContent: 'center',
     backgroundColor: N.ps5Card.base, borderWidth: 1.2, borderColor: INK, borderRadius: 2, paddingHorizontal: 1.5,
-    boxShadow: `0px 2px 0px ${N.ps5Card.shade}`,
+    boxShadow: `0px 3px 0px ${lipOf(TONE)}`,
   },
   boardText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: N.ps5Card.label, textAlign: 'center',
@@ -898,13 +891,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: N.posterRed.base, textAlign: 'center',
     includeFontPadding: false,
   },
-  flash: {
-    position: 'absolute', left: SIGNS[1].x - 22, top: 463, width: 44, height: 44, borderRadius: 22, backgroundColor: N.ps5Glow.base,
-  },
   tagString: { position: 'absolute', left: -0.5, top: 0, width: 1, height: 4, backgroundColor: INK },
   tag: {
     position: 'absolute', left: -TAG_W / 2, top: 3.6, width: TAG_W, height: TAG_H, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: N.ps5Manila.base, borderWidth: 1.2, borderColor: INK, borderRadius: 2.5, paddingHorizontal: 1,
+    backgroundColor: N.ps5Manila.base, borderWidth: 1.2, borderColor: INK, borderRadius: 3, paddingHorizontal: 1,
+    boxShadow: `0px 2.4px 0px ${lipOf(TONE)}`,
   },
   tagBack: { backgroundColor: N.stopRed.base },
   tagText: {

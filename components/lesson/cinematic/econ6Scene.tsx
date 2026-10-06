@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
   slot: { position: 'absolute', top: SLATE.top, width: SLOT_W, height: SLATE.h },
   clip: { position: 'absolute', left: 0, top: 0, height: SLATE.h, overflow: 'hidden' },
   slotIn: { position: 'absolute', left: 0, top: 0, width: SLOT_W, height: SLATE.h - 4, alignItems: 'center', justifyContent: 'center' },
-  chalk: { fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: N.slate.label, includeFontPadding: false },
+  chalk: { alignSelf: 'stretch', textAlign: 'center', fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: N.slate.label, includeFontPadding: false },
   // the dust rises off the TOP of the word, never across it
   dust: { position: 'absolute', left: SLOT_W / 2 - 9, top: -9, width: 18, height: 10, borderRadius: 5, backgroundColor: N.ec6Foam.shade },
   underline: { position: 'absolute', left: SLOT_W / 2 - 16, top: SLATE.h - 4.4, height: 1.6, borderRadius: 0.8, backgroundColor: N.slate.label },
@@ -1160,7 +1160,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: FRONT_DX - 24.5, top: -13.5, width: 49, height: 25, borderRadius: 3, borderWidth: 0.8, borderColor: INK,
     backgroundColor: STONE, boxShadow: lipOf(TONE), alignItems: 'center', justifyContent: 'center',
   },
-  tagText: { fontFamily: 'Caveat_700Bold', fontSize: 10.5, lineHeight: 10.5, color: INK, textAlign: 'center', includeFontPadding: false },
+  tagText: { alignSelf: 'stretch', fontFamily: 'Caveat_700Bold', fontSize: 10.5, lineHeight: 10.5, color: INK, textAlign: 'center', includeFontPadding: false },
   smoke: { position: 'absolute', left: -7, top: -7, width: 14, height: 14, borderRadius: 7, backgroundColor: N.ec6Smoke.base },
   clear: { flexGrow: 1 },
 });

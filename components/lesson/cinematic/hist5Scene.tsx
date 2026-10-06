@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withSpring, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -476,7 +477,24 @@ function jurorOf(j: Juror, n: number, f: number, t: number, laugh: number, murmu
  */
 const FROZEN = JURORS.map((j) => jurorOf(j, 0, 0.5, 0, 0, 0, 0, 0, 0, 0));
 
-export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
+export default function Hist5Scene({ clock, bt, bi, picked, pickedOk }: SceneApi) {
+  // THE ANSWER LANDS ON THE STAGE: a seal is struck down (green tick / red cross) and the
+  // hall jolts: a short hop for right, a sideways shake for wrong. Drivers only, no beat tracks.
+  const verdict = useSharedValue(0);
+  const strike = useSharedValue(0);
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    if (picked === null) {
+      strike.value = withTiming(0, { duration: 160 });
+      shake.value = 0;
+      return;
+    }
+    verdict.value = pickedOk ? 1 : -1;
+    strike.value = 0;
+    strike.value = withSpring(1, { damping: 7, stiffness: 240, mass: 0.7 });
+    shake.value = 0;
+    shake.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.quad) });
+  }, [picked, pickedOk]);
   const heldP = useHeld();
   const heldC = useHeld();
   const cv = useCarry(21);
@@ -724,8 +742,22 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
   const DP = useDerivedValue<Bundle>(() => SCENE.value.plain);
   const worldT = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
-    return { transform: [{ translateX: c.x }, { translateY: c.y }, { scale: c.z }] };
+    const sh = shake.value;
+    const live = sh > 0 && sh < 1 ? 1 : 0;
+    const dx = verdict.value < 0 ? Math.sin(sh * 34) * (1 - sh) * 6 * live : 0;
+    const dy = verdict.value > 0 ? -Math.sin(Math.min(1, sh * 2) * Math.PI) * 4 * live : 0;
+    return { transform: [{ translateX: c.x + dx }, { translateY: c.y + dy }, { scale: c.z }] };
   });
+  const sealT = useAnimatedStyle(() => {
+    const u = strike.value;
+    const wob = verdict.value < 0 ? Math.sin(shake.value * 30) * (1 - shake.value) * 6 : 0;
+    return {
+      opacity: Math.min(1, u * 5),
+      transform: [{ scale: 1.9 - 0.9 * u }, { rotate: (verdict.value < 0 ? -8 : 6) * (1 - u) + wob + 'deg' }],
+    };
+  });
+  const sealRight = useAnimatedStyle(() => ({ opacity: verdict.value > 0 ? 1 : 0 }));
+  const sealWrong = useAnimatedStyle(() => ({ opacity: verdict.value < 0 ? 1 : 0 }));
   const duvetBack = useAnimatedStyle(() => ({ transform: [{ scaleX: SCENE.value.duvet }] }));
   const duvetFront = useAnimatedStyle(() => ({ opacity: SCENE.value.inBed > 0.5 ? 1 : 0, transform: [{ scaleX: SCENE.value.duvet }] }));
   const shutT = useAnimatedStyle(() => ({ opacity: SCENE.value.door < 0.08 ? 1 : 0 }));
@@ -781,6 +813,17 @@ export default function Hist5Scene({ clock, bt, bi }: SceneApi) {
         <Stickman D={DC} k={K} role="lead" wear={BY_ID.stroller.pieces} />
         <Animated.View style={[styles.duvet, duvetFront]} pointerEvents="none">
           <SetArt parts={DUVET} tone={TONE} line={1} />
+        </Animated.View>
+      </Animated.View>
+      {/* the verdict seal: struck down in front of the hall, tick or cross */}
+      <Animated.View style={[styles.seal, sealT]} pointerEvents="none">
+        <Animated.View style={[styles.sealFace, styles.sealGreen, sealRight]}>
+          <View style={[styles.bar, { left: 14, top: 28, width: 7, height: 17, transform: [{ rotate: '-45deg' }] }]} />
+          <View style={[styles.bar, { left: 29, top: 12, width: 7, height: 34, transform: [{ rotate: '40deg' }] }]} />
+        </Animated.View>
+        <Animated.View style={[styles.sealFace, styles.sealRed, sealWrong]}>
+          <View style={[styles.bar, { left: 21, top: 8, width: 7, height: 36, transform: [{ rotate: '45deg' }] }]} />
+          <View style={[styles.bar, { left: 21, top: 8, width: 7, height: 36, transform: [{ rotate: '-45deg' }] }]} />
         </Animated.View>
       </Animated.View>
     </View>
@@ -846,6 +889,11 @@ const styles = StyleSheet.create({
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   duvet: { position: 'absolute', left: 0, top: 0, width: DUVET_RIGHT, height: STAGE_H, transformOrigin: `${DUVET_RIGHT}px 0px` },
   door: { position: 'absolute', left: 0, top: 0, width: DOOR_HINGE, height: STAGE_H, transformOrigin: `${DOOR_HINGE}px 0px` },
+  seal: { position: 'absolute', left: 172, top: 186, width: 56, height: 56 },
+  sealFace: { position: 'absolute', left: 0, top: 0, width: 56, height: 56, borderRadius: 28, borderWidth: 3, borderColor: NATURAL.paper.base },
+  sealGreen: { backgroundColor: NATURAL.leaf.base, boxShadow: '0 3px 0 ' + NATURAL.leaf.shade },
+  sealRed: { backgroundColor: NATURAL.apple.base, boxShadow: '0 3px 0 ' + NATURAL.apple.shade },
+  bar: { position: 'absolute', borderRadius: 3.5, backgroundColor: NATURAL.paper.base },
   stream: {
     position: 'absolute', left: SPOUT.x - 1.2, top: SPOUT.y, width: 2.4, height: LOW_MOUTH - SPOUT.y,
     backgroundColor: NATURAL.water.base, borderRadius: 1.2,

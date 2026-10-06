@@ -1,11 +1,13 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './phil4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,7 +24,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, tint, coin, stationClock, departureScreen, platformSign, platformBench, tunnelPortal, railTicket,
+  NATURAL, tint, coin, departureScreen, railTicket,
   CLOCK_DIAL, DEP_SCREEN, PLATFORM_FACE, TUNNEL_MOUTH, TICKET_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -168,11 +170,12 @@ const TK_W = 14;
 const TK_H = 8.75;
 const TK_DX = ((8 - TICKET_GRIP.x) * TK_W) / 16;                 // grip → the ticket's middle
 
-const CLOCK_ART = stationClock(CLOCK.x, CLOCK.y, CLOCK.w, CLOCK.h);
+// The clock, the platform sign, the bench, the tunnel and the station behind them are
+// DRAWN (LESSON_RULES AM13; scripts/lib/lessonart/lessons/phil4.mjs, against Commons
+// photographs of Keighley, Halifax and Kemble stations and brick tunnel portals) and
+// baked, each at the box the shape-built object it replaced stood in. The departure
+// screen is a steel box in a steel case, so it stays parts.
 const SCREEN_ART = departureScreen(SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h);
-const SIGN_ART = platformSign(SIGN.x, SIGN.y, SIGN.w, SIGN.h);
-const BENCH_ART = platformBench(SIGN.x, 486, 56, 28);
-const TUNNEL_ART = tunnelPortal(TUNNEL.x, TUNNEL.y, TUNNEL.w, TUNNEL.h);
 // The things that move are drawn about the point they are held by.
 const TICKET_ART = railTicket(TK_DX, 0, TK_W, TK_H);
 const COIN_ART = tint(coin(0, 0, 8, 8), 'brass');
@@ -266,11 +269,35 @@ function wristOf(w: Bundle, k: 'wrR' | 'wrL') {
 
 const CAM = followMoves(TV_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('philosophy'));
 
-export default function Phil4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+/** The reader's pick, as a number the worklet can read (an id means its question's thing). */
+const PICK: Record<string, number> = { clock: 1, board: 2, ticket: 3, sign: 4 };
+
+/**
+ * THE ANSWER, ON THE THING CHOSEN (the brief of 2026-10-05: right and wrong each get their
+ * own physical answer). `r` is the answer's progress (0 to 1 over the reply), 0 everywhere
+ * but the graded beat, so both start and end at rest and nothing has to be carried away.
+ * Right: the thing pops up and settles with a small undershoot, as if struck. Wrong: it
+ * gives a knock of a shake that dies away.
+ */
+function popOf(r: number): number {
+  'worklet';
+  if (r <= 0) return 1;
+  return 1 + 0.075 * Math.sin(Math.PI * clamp01(r / 0.3)) - 0.024 * Math.sin(Math.PI * clamp01((r - 0.3) / 0.3));
+}
+function shakeOf(r: number): number {
+  'worklet';
+  return r <= 0 ? 0 : 3.2 * Math.sin(r * Math.PI * 9) * (1 - r);
+}
+
+export default function Phil4Scene({ clock, bt, bi, i, qv, picked, onPick }: SceneApi) {
   const heldV = useHeld();
   const heldP = useHeld();
   const cv = useCarry(8);
   const on = useLinger(i);
+  const pk = useSharedValue(0);
+  useEffect(() => {
+    pk.value = picked ? (PICK[picked] ?? 0) : 0;
+  }, [picked, pk]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -387,9 +414,33 @@ export default function Phil4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const lampNow = A_REST[n] ? st(0.08, 0.75) : n > 10 ? 1 : 0;
     const lamp = carry(cv, 5, n, lampNow, lampNow, tr);
 
+    // the reply to a tap, on the thing tapped
+    const q = qv.value;
+    const pc = pk.value;
+    const ans = (code: number) => {
+      'worklet';
+      return (Q1[n] || Q2[n]) && pc === code ? q : 0;
+    };
+    const rClock = ans(1);
+    const rBoard = ans(2);
+    const rTicket = ans(3);
+    const rSign = ans(4);
+    // the clock is right in Q1 and wrong in Q2; the board the other way round
+    const clockOk = Q1[n] === 1;
+    const boardOk = Q2[n] === 1;
+    // chosen, the stopped second hand tries to tick on twice, and falls back each time
+    const twitch = 6 * Math.sin(Math.PI * clamp01((rClock - 0.08) / 0.16)) + 6 * Math.sin(Math.PI * clamp01((rClock - 0.36) / 0.16));
+
     return {
       tv, ph,
-      ticket: { x: wTV.x + 1.5 * dV, y: wTV.y, o: 1, sx: dV },
+      ticket: { x: wTV.x + 1.5 * dV + shakeOf(rTicket), y: wTV.y, o: 1, sx: dV },
+      react: {
+        clock: { s: clockOk ? popOf(rClock) : 1, dx: clockOk ? 0 : shakeOf(rClock) },
+        board: { s: boardOk ? popOf(rBoard) : 1, dx: boardOk ? 0 : shakeOf(rBoard) },
+        sign: { s: 1, dx: shakeOf(rSign) },
+      },
+      second: 240 + twitch,
+      glow: boardOk ? Math.sin(Math.PI * rBoard) : 0,
       coin: { x: wPH.x + 2.5 * dPs, y: wPH.y - 3 + flipY, o: coinO, sx: 1, sy: spin },
       lamp,
       q1: carry(cv, 6, n, Q1[p], Q1[n], tr),
@@ -402,21 +453,29 @@ export default function Phil4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
   return (
     <View style={styles.scene}>
+      <LessonPicture name="phil4-station" />
       <View style={styles.floor} pointerEvents="none" />
       <View style={styles.safetyStripe} pointerEvents="none" />
-      <ObjectArt parts={TUNNEL_ART} tone={TONE} />
+      <LessonPicture name="phil4-tunnel" />
       <Lamp S={SCENE} />
-      <ObjectArt parts={SIGN_ART} tone={TONE} />
-      <View style={styles.signFace} pointerEvents="none">
-        <Text style={styles.signText}>PLATFORM 2</Text>
-      </View>
-      <ObjectArt parts={BENCH_ART} tone={TONE} />
-      <ObjectArt parts={CLOCK_ART} tone={TONE} />
-      <ObjectArt parts={SCREEN_ART} tone={TONE} />
-      <View style={styles.display} pointerEvents="none">
-        <Text style={styles.ledText}>09:30 LONDON</Text>
-        <Text style={styles.ledText}>ON TIME</Text>
-      </View>
+      <Reacts S={SCENE} k="sign" origin={SIGN_FOOT}>
+        <LessonPicture name="phil4-sign" />
+        <View style={styles.signFace} pointerEvents="none">
+          <Text style={styles.signText}>PLATFORM 2</Text>
+        </View>
+      </Reacts>
+      <LessonPicture name="phil4-bench" />
+      <Reacts S={SCENE} k="clock" origin={CLOCK_FOOT}>
+        <LessonPicture name="phil4-clock" />
+        <SecondHand S={SCENE} />
+      </Reacts>
+      <Reacts S={SCENE} k="board" origin={SCREEN_FOOT}>
+        <ObjectArt parts={SCREEN_ART} tone={TONE} />
+        <View style={styles.display} pointerEvents="none">
+          <Text style={styles.ledText}>09:30 LONDON</Text>
+          <Text style={styles.ledText}>ON TIME</Text>
+        </View>
+      </Reacts>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DP} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -449,6 +508,36 @@ function Held({ S, k, art }: { S: SharedValue<any>; k: 'ticket' | 'coin'; art: R
   );
 }
 
+/** Where each answerable thing stands, which it pops up from and shakes about. */
+const CLOCK_FOOT = `${CLOCK.x}px ${GROUND}px`;
+const SCREEN_FOOT = `${SCREEN.x}px ${GROUND}px`;
+const SIGN_FOOT = `${SIGN.x}px 419px`;
+/** A thing that answers a tap: popped (right) or knocked (wrong) about its own foot. */
+function Reacts({ S, k, origin, children }: { S: SharedValue<any>; k: 'clock' | 'board' | 'sign'; origin: string; children: ReactNode }) {
+  const st = useAnimatedStyle(() => {
+    const r = S.value.react[k];
+    return { transform: [{ translateX: r.dx }, { scale: r.s }] };
+  });
+  return <Animated.View style={[styles.layer, { transformOrigin: origin }, st]} pointerEvents="none">{children}</Animated.View>;
+}
+/** The clock's red second hand, stopped on forty: it only moves when the clock is chosen. */
+function SecondHand({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: DIAL.x }, { translateY: DIAL.y }, { rotate: `${S.value.second}deg` }],
+  }));
+  return (
+    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+      <View style={styles.secondHand} />
+      <View style={styles.secondHub} />
+    </Animated.View>
+  );
+}
+/** The departure screen's amber light, brightening round it when it is the right answer. */
+function BoardGlow({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => ({ opacity: 0.85 * S.value.glow }));
+  return <Animated.View style={[styles.boardGlow, st]} pointerEvents="none" />;
+}
+
 /** The train's headlamp, coming out of the dark of the tunnel: a light, so no outline. */
 function Lamp({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({
@@ -472,12 +561,13 @@ function Lamp({ S }: { S: SharedValue<any> }) {
  */
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
 const CLOCK_Q = { left: DIAL.x - DIAL.r - 3, top: DIAL.y - DIAL.r - 3, w: 2 * DIAL.r + 6, h: 2 * DIAL.r + 6, r: DIAL.r + 3 };
-const SCREEN_Q = { left: DISPLAY.left - 5, top: DISPLAY.top - 6, w: DISPLAY.w + 10, h: DISPLAY.h + 12, r: 4 };
+// its right edge stops short of the stage's, so the seal struck on its corner is not cut off
+const SCREEN_Q = { left: DISPLAY.left - 5, top: DISPLAY.top - 6, w: DISPLAY.w + 4, h: DISPLAY.h + 12, r: 4 };
 /** Q1: what made it a lucky guess — the stopped clock gave him no real reason. */
 const LUCKY_Q: Q[] = [
   { id: 'clock', ...CLOCK_Q, correct: true },
   { id: 'board', ...SCREEN_Q, correct: false },
-  { id: 'ticket', left: 233, top: 452, w: 24, h: 20, r: 3, correct: false },
+  { id: 'ticket', left: 229, top: 449, w: 32, h: 26, r: 4, correct: false },
 ];
 /** Q2: a good reason his train is on time — the departure screen. */
 const SOURCE_Q: Q[] = [
@@ -519,6 +609,13 @@ const styles = StyleSheet.create({
   ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
   safetyStripe: { position: 'absolute', left: 0, right: 0, top: GROUND + 3.5, height: 2.6, backgroundColor: NATURAL.safetyLine.base },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
+  secondHand: { position: 'absolute', left: -0.35, top: -12.6, width: 0.7, height: 15.6, borderRadius: 0.35, backgroundColor: NATURAL.clockRed.base },
+  secondHub: { position: 'absolute', left: -0.8, top: -0.8, width: 1.6, height: 1.6, borderRadius: 0.8, backgroundColor: NATURAL.clockRed.base },
+  boardGlow: {
+    position: 'absolute', left: DISPLAY.left - 6, top: DISPLAY.top - 6, width: DISPLAY.w + 12, height: DISPLAY.h + 12,
+    borderRadius: 8, backgroundColor: NATURAL.lampGlow.shade,
+  },
   lampHalo: {
     position: 'absolute', left: -LAMP_HALO / 2, top: -LAMP_HALO / 2, width: LAMP_HALO, height: LAMP_HALO,
     borderRadius: LAMP_HALO / 2, backgroundColor: NATURAL.lampGlow.shade, opacity: 0.55,

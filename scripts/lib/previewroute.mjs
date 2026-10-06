@@ -91,7 +91,12 @@ export function claimRoute({ route, src, owner, keep = false }) {
   const release = () => {
     if (released) return;
     released = true;
-    if (createdHere && !keep) { try { fs.unlinkSync(route); } catch {} }
+    // scripts/.preview-keep holds every route in place for everybody: with many harnesses
+    // sharing one Metro, a route deleted while expo's typed-routes watcher is still
+    // reading it crashes Metro outright (ENOENT out of the watch handler). The
+    // coordinator deletes the routes and the marker once the sweeps are over.
+    const keepAll = fs.existsSync(path.join('scripts', '.preview-keep'));
+    if (createdHere && !keep && !keepAll) { try { fs.unlinkSync(route); } catch {} }
     try {
       const held = JSON.parse(fs.readFileSync(lock, 'utf8'));
       if (held.pid === process.pid) fs.unlinkSync(lock);

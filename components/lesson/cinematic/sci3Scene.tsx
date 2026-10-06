@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -15,7 +17,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
@@ -306,6 +308,17 @@ function gripOf(top: { x: number; y: number; r: number }) {
   return { x: top.x - GRIP * Math.sin(a), y: top.y + GRIP * Math.cos(a) };
 }
 
+/** What was tapped, as a number a worklet can read. */
+const PK: Record<string, number> = { sun: 1, kiosk: 2, chart: 3, shade: 4, sand: 5, queue: 6 };
+function shakeOf(rx: number) {
+  'worklet';
+  return Math.sin(rx * 30) * (1 - rx) * (1 - rx) * 7;
+}
+function popOf(rx: number) {
+  'worklet';
+  return Math.exp(-5 * rx) * Math.sin(rx * 15) * 0.3;
+}
+
 const CAM = followMoves(PL_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('science'));
 
 export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
@@ -314,6 +327,15 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldB = useHeld();
   const cv = useCarry(14);
   const on = useLinger(i);
+  // the physical reaction to a tap: which thing, and how far through (a pop-and-settle for
+  // the right answer, a shake for the wrong one)
+  const pk = useSharedValue(0);
+  const rx = useSharedValue(0);
+  useEffect(() => {
+    pk.value = picked ? PK[picked] ?? 0 : 0;
+    rx.value = 0;
+    if (picked) rx.value = withTiming(1, { duration: 900, easing: Easing.linear });
+  }, [picked, pk, rx]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -490,23 +512,28 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   return (
     <View style={styles.scene}>
       <View style={styles.sky} pointerEvents="none" />
-      <Sky S={SCENE} />
+      <Sky S={SCENE} pk={pk} rx={rx} />
+      <Boat S={SCENE} />
       <Sea S={SCENE} />
       <View style={styles.floor} pointerEvents="none" />
       <View style={styles.sand} pointerEvents="none" />
       <View style={styles.paving} pointerEvents="none" />
       <View style={styles.kerb} pointerEvents="none" />
       <ObjectArt parts={RAIL_ART} tone={TONE} />
-      <ObjectArt parts={KIOSK_ART} tone={TONE} />
-      <View style={styles.sign} pointerEvents="none">
-        <Text style={styles.signText}>ICES</Text>
-      </View>
-      <ObjectArt parts={QUEUE_ART} tone={TONE} />
-      <ObjectArt parts={FLIP_ART} tone={TONE} />
-      <Chart S={SCENE} />
+      <Shaker pk={pk} rx={rx} ids={[2, 6]}>
+        <ObjectArt parts={KIOSK_ART} tone={TONE} />
+        <View style={styles.sign} pointerEvents="none">
+          <Text style={styles.signText}>ICES</Text>
+        </View>
+        <ObjectArt parts={QUEUE_ART} tone={TONE} />
+      </Shaker>
+      <Tipper pk={pk} rx={rx}>
+        <ObjectArt parts={FLIP_ART} tone={TONE} />
+        <Chart S={SCENE} />
+      </Tipper>
       <Shade S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
-      <Parasol S={SCENE} />
+      <Parasol S={SCENE} pk={pk} rx={rx} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: plain */}
@@ -515,7 +542,7 @@ export default function Sci3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
       <Held S={SCENE} />
       {on(Q1) ? <CauseTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
-      {on(Q2) ? <TrialTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
+      {on(Q2) ? <TrialTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} pk={pk} rx={rx} /> : null}
     </View>
   );
 }
@@ -553,19 +580,55 @@ function Held({ S }: { S: SharedValue<any> }) {
 }
 
 // ── the sun, and the cloud that drifts off it ───────────────────────────────
-function Sky({ S }: { S: SharedValue<any> }) {
-  // the sun turns slowly on its own clock, and swells a little as the cloud clears it
+// Pictures (sci3-sun, sci3-cloud, sci3-boat) drawn against references; each rides a point.
+function PicRider({ at, name }: { at: SharedValue<At>; name: string }) {
+  const st = useAnimatedStyle(() => ({
+    opacity: at.value.o,
+    transform: [
+      { translateX: at.value.x }, { translateY: at.value.y },
+      { rotate: `${at.value.r ?? 0}deg` },
+      { scaleX: at.value.sx ?? 1 }, { scaleY: at.value.sy ?? 1 },
+    ],
+  }));
+  return (
+    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+      <LessonPicture name={name} />
+    </Animated.View>
+  );
+}
+function Sky({ S, pk, rx }: { S: SharedValue<any>; pk: SharedValue<number>; rx: SharedValue<number> }) {
+  // the sun breathes a little, swells as the cloud clears it, and when it is tapped (the
+  // right answer) it squashes and springs back like a struck bell
   const sunP = useDerivedValue<At>(() => {
-    const s = 0.9 + 0.1 * S.value.sun;
-    return { x: SUN_AT.x, y: SUN_AT.y, o: 1, r: (S.value.t * 5) % 360, sx: s, sy: s };
+    const s = (0.9 + 0.1 * S.value.sun) * (1 + 0.02 * Math.sin(S.value.t * 1.3));
+    const pop = pk.value === 1 ? popOf(rx.value) : 0;
+    return { x: SUN_AT.x, y: SUN_AT.y, o: 1, r: 0, sx: s * (1 + pop), sy: s * (1 - pop * 0.6) };
   });
   const cloudP = useDerivedValue<At>(() => ({ x: lerp(CLOUD_IN, CLOUD_OUT, S.value.sun), y: CLOUD_Y, o: 1 }));
   return (
     <>
-      <Rider at={sunP} art={SUN_ART} />
-      <Rider at={cloudP} art={CLOUD_ART} />
+      <PicRider at={sunP} name="sci3-sun" />
+      <PicRider at={cloudP} name="sci3-cloud" />
     </>
   );
+}
+/** A far boat drifting along the horizon. */
+function Boat({ S }: { S: SharedValue<any> }) {
+  const at = useDerivedValue<At>(() => ({
+    x: 292 + Math.sin(S.value.t * 0.12) * 9, y: HORIZON - 1 + Math.sin(S.value.t * 0.9) * 0.6, o: 1,
+    r: Math.sin(S.value.t * 0.9 + 1) * 1.6,
+  }));
+  return <PicRider at={at} name="sci3-boat" />;
+}
+/** Shakes what it holds sideways while one of `ids` is the thing that was tapped (a refusal). */
+function Shaker({ pk, rx, ids, children }: { pk: SharedValue<number>; rx: SharedValue<number>; ids: number[]; children: React.ReactNode }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: ids.includes(pk.value) ? shakeOf(rx.value) : 0 }] }));
+  return <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">{children}</Animated.View>;
+}
+/** The flipchart rocks on its feet when it is tapped (wrong): it is not the cause. */
+function Tipper({ pk, rx, children }: { pk: SharedValue<number>; rx: SharedValue<number>; children: React.ReactNode }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ rotate: `${pk.value === 3 ? shakeOf(rx.value) * 0.5 : 0}deg` }] }));
+  return <Animated.View style={[StyleSheet.absoluteFill, st, { transformOrigin: `${FLIP.x}px ${GROUND}px` }]} pointerEvents="none">{children}</Animated.View>;
 }
 
 // ── the sea, with its swell breaking along the shore ────────────────────────
@@ -637,12 +700,14 @@ function Chart({ S }: { S: SharedValue<any> }) {
 }
 
 // ── the parasol: pole, furled canopy and open canopy, and its shade ─────────
-function Parasol({ S }: { S: SharedValue<any> }) {
+function Parasol({ S, pk, rx }: { S: SharedValue<any>; pk: SharedValue<number>; rx: SharedValue<number> }) {
   const poleP = useDerivedValue<At>(() => S.value.umb);
   const furledP = useDerivedValue<At>(() => ({ ...S.value.umb, o: 1 - clamp01((S.value.open - 0.1) * 4) }));
   const canopyP = useDerivedValue<At>(() => {
     const u = S.value.open;
-    return { x: PLANT.x, y: PLANT.y, o: clamp01(u * 5), sx: lerp(0.12, 1, u), sy: lerp(0.65, 1, u) };
+    // tapped as the right answer, the canopy squashes down and springs back
+    const pop = pk.value === 4 ? popOf(rx.value) : 0;
+    return { x: PLANT.x, y: PLANT.y, o: clamp01(u * 5), sx: lerp(0.12, 1, u) * (1 + pop * 0.5), sy: lerp(0.65, 1, u) * (1 - pop) };
   });
   return (
     <>
@@ -694,7 +759,7 @@ const TRIAL_Q: Q[] = [
   { id: 'sand', label: 'SAND', pw: 37, left: 260, top: 462, w: 39, h: 42, correct: false },
   { id: 'queue', label: 'QUEUE', pw: 44, left: 302, top: 448, w: 46, h: 56, correct: false },
 ];
-function TrialTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
+function TrialTargets({ picked, onPick, live, S, pk, rx }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; pk: SharedValue<number>; rx: SharedValue<number> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
   return (
@@ -706,12 +771,26 @@ function TrialTargets({ picked, onPick, live, S }: { picked: string | null; onPi
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
           <View style={styles.place}>
-            <View style={[styles.namePlate, { left: (q.w - q.pw) / 2, width: q.pw }]}>
-              <Text style={styles.nameText}>{q.label}</Text>
-            </View>
+            <NamePlate q={q} pk={pk} rx={rx} />
           </View>
         </Target>
       ))}
+    </Animated.View>
+  );
+}
+
+/** A struck plate on a hard ledge: the right one hops, a wrong one shakes. */
+function NamePlate({ q, pk, rx }: { q: Q; pk: SharedValue<number>; rx: SharedValue<number> }) {
+  const me = PK[q.id];
+  const st = useAnimatedStyle(() => {
+    if (pk.value !== me) return { transform: [{ translateY: 0 }] };
+    return q.correct
+      ? { transform: [{ translateY: -Math.abs(Math.sin(rx.value * 9)) * (1 - rx.value) * 9 }] }
+      : { transform: [{ translateX: shakeOf(rx.value) * 0.8 }] };
+  });
+  return (
+    <Animated.View style={[styles.namePlate, { left: (q.w - q.pw) / 2, width: q.pw }, st]}>
+      <Text style={styles.nameText}>{q.label}</Text>
     </Animated.View>
   );
 }
@@ -766,11 +845,12 @@ const styles = StyleSheet.create({
   clear: { flexGrow: 1 },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: PLATE_RADIUS / 2, borderWidth: 1,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: `0 2.5px 0 ${lipOf(TONE)}`,
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
 });
 

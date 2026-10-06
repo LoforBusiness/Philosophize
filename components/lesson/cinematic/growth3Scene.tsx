@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './growth3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, seated, travelStance, mixKeepLegs,
@@ -23,7 +25,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, bench, runningTrack, trackVerge, parkNoticeBoard, goalCard, wallCalendar, stopwatch, sportsBottle,
+  NATURAL, runningTrack, trackVerge, goalCard, wallCalendar, stopwatch, sportsBottle,
   litterBin, newspaper, ballpoint, floodlight, parkTree, CAL_TUESDAY, WATCH_DIAL,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -184,10 +186,8 @@ const TRACK_ART = runningTrack(200, 508, 400, 16);
 const VERGE_ART = trackVerge(200, 495, 400, 10);
 const MAST_ART = floodlight(300, 409, 40, 182);
 const TREE_ART = parkTree(352, 425, 72, 150);
-const BOARD_ART = parkNoticeBoard(BOARD.x, BOARD.y, BOARD.w, BOARD.h);
 const HEALTHIER_ART = goalCard(HEALTHIER_AT.x, HEALTHIER_AT.y, CARD.w, CARD.h, 'yellowed', 'tinPaint');
 const CAL_ART = wallCalendar(CAL.x, CAL.y, CAL.w, CAL.h);
-const BENCH_ART = tint(bench(46, 480, 72, 40), 'wood');
 const BOTTLE_ART = sportsBottle(BOTTLE.x, BOTTLE.y, BOTTLE.w, BOTTLE.h);
 const BIN_ART = litterBin(BIN.x, BIN.y, BIN.w, BIN.h);
 // The things that move are drawn about the point they are held or hung by.
@@ -458,18 +458,16 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
       <ObjectArt parts={MAST_ART} tone={TONE} />
       <ObjectArt parts={VERGE_ART} tone={TONE} />
       <ObjectArt parts={TRACK_ART} tone={TONE} />
-      <ObjectArt parts={BOARD_ART} tone={TONE} />
-      <ObjectArt parts={HEALTHIER_ART} tone={TONE} />
-      <View style={[styles.cardPlate, { left: HEALTHIER_AT.x - CARD.w / 2, top: HEALTHIER_AT.y - CARD.h / 2 }]} pointerEvents="none">
-        <Text style={styles.cardText}>Be healthier</Text>
-      </View>
-      <ObjectArt parts={CAL_ART} tone={TONE} />
+      {/* the board: a gabled cork board on two posts (growth3-board, drawn from references) */}
+      <LessonPicture name="growth3-board" />
+      <Healthier picked={picked} />
+      <CalendarArt picked={picked} />
       <Ring S={SCENE} />
-      <Cards S={SCENE} />
+      <Cards S={SCENE} picked={picked} />
       <Pen S={SCENE} />
-      <ObjectArt parts={BENCH_ART} tone={TONE} />
-      <ObjectArt parts={BOTTLE_ART} tone={TONE} />
-      <ObjectArt parts={BIN_ART} tone={TONE} />
+      <LessonPicture name="growth3-bench" />
+      <Fx picked={picked} id="bottle" correct={false} at={BOTTLE}><ObjectArt parts={BOTTLE_ART} tone={TONE} /></Fx>
+      <Fx picked={picked} id="bin" correct={false} at={BIN}><ObjectArt parts={BIN_ART} tone={TONE} /></Fx>
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: plain */}
@@ -487,7 +485,60 @@ export default function Growth3Scene({ clock, bt, bi, i, picked, onPick }: Scene
 // ── riders: a thing drawn about the point it is held by ─────────────────────
 
 type At = { x: number; y: number; o: number; r?: number; sx?: number; sy?: number };
-function Rider({ at, art, children }: { at: SharedValue<At>; art: ReturnType<typeof goalCard>; children?: ReactNode }) {
+// ── a tapped answer reacts on the stage, in the body of the thing tapped ─────
+// RIGHT: it pops up off the board and lands with a small squash. WRONG: it shakes side to
+// side and loses its swing, like something that was never going to fit (no glows, no colour).
+function useFx(picked: string | null, id: string, correct: boolean) {
+  const u = useSharedValue(0);
+  useEffect(() => {
+    u.value = 0;
+    if (picked === id) u.value = withTiming(1, { duration: 900, easing: Easing.linear });
+  }, [picked, id, u]);
+  return useAnimatedStyle(() => {
+    const v = u.value;
+    if (v <= 0 || v >= 1) return { transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }, { scale: 1 }] };
+    if (correct) {
+      const up = v < 0.62 ? Math.sin((Math.PI * v) / 0.62) : 0;
+      const squash = v >= 0.62 ? Math.sin((Math.PI * (v - 0.62)) / 0.38) : 0;
+      return { transform: [{ translateX: 0 }, { translateY: -5 * up + 1.2 * squash }, { rotate: '0deg' }, { scale: 1 + 0.2 * up - 0.06 * squash }] };
+    }
+    const w = Math.sin(v * Math.PI * 7) * (1 - v);
+    return { transform: [{ translateX: 3.4 * w }, { translateY: 0 }, { rotate: `${4 * w}deg` }, { scale: 1 }] };
+  });
+}
+/** Wraps a thing drawn in stage coordinates so its reaction turns about its own middle. */
+function Fx({ picked, id, correct, at, children }: {
+  picked: string | null; id: string; correct: boolean; at: { x: number; y: number }; children: ReactNode;
+}) {
+  const st = useFx(picked, id, correct);
+  return (
+    <Animated.View
+      style={[{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: `${at.x}px ${at.y}px` }, st]}
+      pointerEvents="none"
+    >
+      {children}
+    </Animated.View>
+  );
+}
+function Healthier({ picked }: { picked: string | null }) {
+  return (
+    <Fx picked={picked} id="healthier" correct={false} at={HEALTHIER_AT}>
+      <ObjectArt parts={HEALTHIER_ART} tone={TONE} />
+      <View style={[styles.cardPlate, { left: HEALTHIER_AT.x - CARD.w / 2, top: HEALTHIER_AT.y - CARD.h / 2 }]} pointerEvents="none">
+        <Text style={styles.cardText}>Be healthier</Text>
+      </View>
+    </Fx>
+  );
+}
+function CalendarArt({ picked }: { picked: string | null }) {
+  return (
+    <Fx picked={picked} id="calendar" correct at={CAL}>
+      <ObjectArt parts={CAL_ART} tone={TONE} />
+    </Fx>
+  );
+}
+
+function Rider({ at, art, fx, children }: { at: SharedValue<At>; art: ReturnType<typeof goalCard>; fx?: any; children?: ReactNode }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [
@@ -498,22 +549,26 @@ function Rider({ at, art, children }: { at: SharedValue<At>; art: ReturnType<typ
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
-      {children}
+      <Animated.View style={[styles.rider, fx]} pointerEvents="none">
+        <ObjectArt parts={art} tone={TONE} />
+        {children}
+      </Animated.View>
     </Animated.View>
   );
 }
 
 // ── the two cards that move: hers, and RUN ONE LAP lifted over it ───────────
-function Cards({ S }: { S: SharedValue<any> }) {
+function Cards({ S, picked }: { S: SharedValue<any>; picked: string | null }) {
+  const fxGet = useFx(picked, 'getfit', false);
+  const fxRun = useFx(picked, 'runlap', true);
   const getP = useDerivedValue<At>(() => S.value.getCard);
   const runP = useDerivedValue<At>(() => S.value.runCard);
   return (
     <>
-      <Rider at={getP} art={GETFIT_ART}>
+      <Rider at={getP} art={GETFIT_ART} fx={fxGet}>
         <View style={[styles.cardPlate, styles.riderPlate]}><Text style={styles.cardText}>Get fit!</Text></View>
       </Rider>
-      <Rider at={runP} art={RUNLAP_ART}>
+      <Rider at={runP} art={RUNLAP_ART} fx={fxRun}>
         <View style={[styles.cardPlate, styles.riderPlate]}><Text style={styles.cardText}>Run one lap</Text></View>
       </Rider>
     </>
@@ -635,7 +690,7 @@ const styles = StyleSheet.create({
   },
   riderPlate: { left: -CARD.w / 2, top: -CARD.h / 2 },
   cardText: {
-    fontFamily: 'Caveat_700Bold', fontSize: 9.6, lineHeight: 11, color: INK, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 9.6, lineHeight: 11, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center',
   },
   string: {
     position: 'absolute', left: 0, top: 0, height: 0.7, borderRadius: 0.35, backgroundColor: INK, transformOrigin: '0% 50%',

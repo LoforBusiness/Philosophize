@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -22,7 +24,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, pencil, loaf, shopFront, shopDoor, glassBreak, glassShards, football, twig, noticeBoard, BOARD_CORK,
+  NATURAL, pencil, shopFront, shopDoor, glassShards, noticeBoard, BOARD_CORK,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { EMBER } from '@/components/shared/tone';
@@ -138,14 +140,9 @@ const FRONT_ART = shopFront(200, 409, 400, 182);
 const DOOR = { left: 196, top: 400, w: 38, h: 100 };
 const DOOR_ART = shopDoor(DOOR.left + DOOR.w / 2, DOOR.top + DOOR.h / 2, DOOR.w, DOOR.h);
 const BREAK = { x: 304, y: 402 };
-const BREAK_ART = glassBreak(BREAK.x, BREAK.y, 56, 50);
 const BALL = { x: 326, y: 444, d: 16 };
-const BALL_ART = football(BALL.x, BALL.y, BALL.d, BALL.d);
-const LOAF_ART = [...tint(loaf(262, 444, 24, 15), 'crust'), ...tint(loaf(287, 445, 22, 13), 'crust')];
 const INNER_GLASS_ART = glassShards(330, 430, 40, 40);
-const STREET_GLASS_ART = glassShards(300, 476, 44, 44);
 const TWIG = { x: 346, y: 493 };
-const TWIG_ART = twig(346, 481, 40, 40);
 /** The pencil she writes the rule with (AR2): lying point-left, held a third from its end. */
 const PENCIL_ART = pencil(0, 0, 13, 3);
 
@@ -425,16 +422,23 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <View style={styles.fascia} pointerEvents="none">
         <Text style={styles.fasciaText}>BAKERY</Text>
       </View>
-      <ObjectArt parts={BREAK_ART} tone={TONE} />
-      <ObjectArt parts={LOAF_ART} tone={TONE} line={1.6} />
-      <ObjectArt parts={BALL_ART} tone={TONE} line={1.6} />
+      {/* drawn against references in lessonart/lessons/hist1.mjs */}
+      <LessonPicture name="hist1-break" />
+      <LessonPicture name="hist1-loaves" />
+      <Hop kind="hop" on={picked === 'ball'} style={{ left: BALL.x, top: BALL.y }}>
+        <LessonPicture name="hist1-ball" />
+      </Hop>
       <ObjectArt parts={INNER_GLASS_ART} tone={TONE} line={1} />
-      <ObjectArt parts={DOOR_ART} tone={TONE} />
+      <Hop kind="shake" on={picked === 'door'} style={{ left: 0, top: 0 }}>
+        <ObjectArt parts={DOOR_ART} tone={TONE} />
+      </Hop>
       <ObjectArt parts={BOARD_ART} tone={TONE} />
       <Board S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
-      <ObjectArt parts={STREET_GLASS_ART} tone={TONE} line={1} />
-      <ObjectArt parts={TWIG_ART} tone={TONE} line={1.4} />
+      <LessonPicture name="hist1-shards" />
+      <Hop kind="skitter" on={picked === 'twig'} style={{ left: 346, top: 492 }}>
+        <LessonPicture name="hist1-twig" />
+      </Hop>
       {/* cast: tophat */}
       <Stickman D={DH} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: bun */}
@@ -446,6 +450,40 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       {on(Q1) ? <EvidenceTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <QuestionTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
+  );
+}
+
+
+// ── a thing that answers PHYSICALLY when it is picked: the ball hops and lands, the
+// door and twig shudder, a wrong slip swings on its pin, the right one pops and settles ──
+function Hop({ kind, on, style, children }: {
+  kind: 'hop' | 'shake' | 'skitter' | 'swing' | 'pop'; on: boolean; style: any; children: React.ReactNode;
+}) {
+  const u = useSharedValue(0);
+  useEffect(() => {
+    u.value = 0;
+    if (on) u.value = withTiming(1, { duration: kind === 'hop' ? 900 : 650, easing: Easing.linear });
+  }, [on, kind, u]);
+  const st = useAnimatedStyle(() => {
+    const v = u.value;
+    const k = 1 - v;
+    if (v <= 0 || v >= 1) return { transform: [{ translateX: 0 }] };
+    if (kind === 'hop') {
+      // two bounces, each lower than the last, a squash on every landing
+      const h = Math.abs(Math.sin(v * Math.PI * 2)) * 15 * k * k;
+      const sq = 1 - 0.22 * Math.max(0, 1 - h / 2) * k;
+      return { transform: [{ translateY: -h }, { scaleY: sq }, { scaleX: 2 - sq }] };
+    }
+    if (kind === 'shake') return { transform: [{ translateX: 4 * Math.sin(v * Math.PI * 7) * k }] };
+    if (kind === 'skitter') return { transform: [{ translateX: -9 * Math.sin(v * Math.PI * 0.9) }, { rotate: `${-16 * Math.sin(v * Math.PI * 3) * k}deg` }] };
+    if (kind === 'swing') return { transform: [{ rotate: `${11 * Math.sin(v * Math.PI * 5) * k}deg` }, { translateY: 2 * Math.sin(v * Math.PI) }] };
+    // pop: toward the reader, then settles flat
+    return { transform: [{ scale: 1 + 0.16 * Math.sin(v * Math.PI) }] };
+  });
+  return (
+    <Animated.View style={[{ position: 'absolute', width: 0, height: 0 }, style, st]} pointerEvents="none">
+      {children}
+    </Animated.View>
   );
 }
 
@@ -565,9 +603,13 @@ function QuestionTargets({ picked, onPick, live, S }: { picked: string | null; o
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: SLIP_L, top: SLIPS[k].top, width: SLIP_W, height: SLIPS[k].h }}
         >
-          <View style={styles.slip}>
-            {q.lines.map((l) => <Text key={l} style={styles.slipText}>{l}</Text>)}
-            <View style={[styles.pin, styles.pinSlip]} />
+          <View style={styles.slipBox}>
+            <Hop kind={q.correct ? 'pop' : 'swing'} on={picked === q.id} style={{ left: 0, top: 0 }}>
+              <View style={[styles.slip, { width: SLIP_W, height: SLIPS[k].h }]}>
+                {q.lines.map((l) => <Text key={l} style={styles.slipText}>{l}</Text>)}
+                <View style={[styles.pin, styles.pinSlip]} />
+              </View>
+            </Hop>
           </View>
         </Target>
       ))}
@@ -606,12 +648,12 @@ const styles = StyleSheet.create({
   hours: {
     position: 'absolute', left: BOARD.x - 24, top: BOARD.y - 15, width: 48, height: 30,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2, borderColor: INK, boxShadow: `0px 2px 0px ${TONE.SHADE}`,
   },
   card: {
     position: 'absolute', left: CARD.left, top: CARD.top, width: CARD.w, height: CARD.h,
     justifyContent: 'center', paddingLeft: 5,
-    backgroundColor: PLATE_FACE, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2, borderColor: INK, boxShadow: `0px 2px 0px ${TONE.SHADE}`,
   },
   reveal: { overflow: 'hidden', height: 13 },
   ruleText: {
@@ -624,9 +666,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: INK, includeFontPadding: false,
   },
   clear: { flexGrow: 1 },
+  slipBox: { flexGrow: 1 },
   slip: {
-    flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingLeft: 1, paddingRight: 10,
-    backgroundColor: PLATE_FACE, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
+    alignItems: 'center', justifyContent: 'center', paddingLeft: 1, paddingRight: 10,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2, borderColor: INK, boxShadow: `0px 2px 0px ${TONE.SHADE}`,
   },
 });
 

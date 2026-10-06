@@ -1,11 +1,15 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './growth4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -15,15 +19,15 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, potWheel, wheelHead, potLow, potTop, clayLump, clayBall, waterBucket, tallStool, potRack,
-  glazedVase, glazedBowl, glazedJug, glazedJar, sideTable, wareBoard, topKiln, studioWindow,
+  NATURAL, clayBall, waterBucket, tallStool, potRack,
+  glazedVase, glazedBowl, glazedJug, glazedJar, sideTable, wareBoard, studioWindow,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -187,7 +191,6 @@ const BALL_REACH = 2.5;
 const BALL_DROP = 2.5;
 
 const WINDOW_ART = studioWindow(357, 386, 56, 48);
-const KILN_ART = topKiln(357, 479, 54, 42);
 const RACK_ART = potRack(55, 452, 70, 96);
 const RACK_POTS = [
   glazedVase(33, 411, 12, 18, 'celadon'),
@@ -196,21 +199,21 @@ const RACK_POTS = [
   glazedJug(32, 438, 14, 16, 'oatmeal'),
   glazedVase(54, 437, 12, 18, 'cobaltGlaze'),
   glazedBowl(76, 442, 16, 8, 'celadon'),
-  glazedJar(32, 464.5, 11, 15, 'celadon'),
   glazedBowl(52, 468, 16, 8, 'tenmoku'),
 ];
+/** The celadon jar on the bottom board, apart from the others so it can answer for itself in Q2. */
+const SHELF_JAR_ART = glazedJar(32, 464.5, 11, 15, 'celadon');
 /** The celadon jar on the bottom board that the second question asks about. */
 const SHELF_JAR = { x: 32, top: 457 };
 const TABLE_ART = sideTable(288, 487, 52, 26);
 const BOARD_ART = wareBoard(286, 450.5, 56, 9);
 const BOARD_BALLS = [clayBall(280, BALL_BOARD.y, BALL.w, BALL.h), clayBall(294, BALL_BOARD.y, BALL.w, BALL.h)];
 const STOOL_ART = tallStool(STOOL_X, 487, 22, 26);
-const WHEEL_ART = potWheel(W, 484, 40, 32);
-const HEAD_ART = wheelHead(W, 470.4, 26, 4);
+// The wheel, its splash pan and its head, the kiln, and the clay on the wheel are DRAWN
+// (AM13: scripts/lib/lessonart/lessons/growth4.mjs, baked by make-lesson-art): a thrown pot
+// is a belly and a neck of real curves, not a stack of boxes. The pot keeps its two pieces,
+// the belly and the neck hinged on its shoulder, so it can still slump.
 // The things that move are drawn about the point they stand on or are held by.
-const LUMP_ART = clayLump(0, -5.5, 17, 11);
-const LOW_ART = potLow(0, -LOW_H / 2, 13, 11);
-const TOP_ART = potTop(-LOW_HALF, -5, 14, 10);
 const BALL_ART = clayBall(0, 0, BALL.w, BALL.h);
 const BUCKET_ART = waterBucket(0, 10.6, 16, 23);
 
@@ -540,27 +543,39 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <ObjectArt parts={WINDOW_ART} tone={TONE} />
-      <ObjectArt parts={KILN_ART} tone={TONE} />
-      <ObjectArt parts={RACK_ART} tone={TONE} />
-      {RACK_POTS.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} />)}
+      <LessonPicture name="growth4-kiln" />
+      <Jolt picked={picked} on={Q1[i] === 1} id="shelf" right="bucket">
+        <ObjectArt parts={RACK_ART} tone={TONE} />
+        {RACK_POTS.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} />)}
+        <Jolt picked={picked} on={Q2[i] === 1} id="shelf" right="new">
+          <ObjectArt parts={SHELF_JAR_ART} tone={TONE} />
+        </Jolt>
+      </Jolt>
       <ObjectArt parts={BOARD_ART} tone={TONE} />
       {BOARD_BALLS.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} />)}
       <ObjectArt parts={TABLE_ART} tone={TONE} />
       <ObjectArt parts={STOOL_ART} tone={TONE} />
-      <ObjectArt parts={WHEEL_ART} tone={TONE} />
-      <ObjectArt parts={HEAD_ART} tone={TONE} />
+      <Jolt picked={picked} on={Q1[i] === 1} id="wheel" right="bucket">
+        <LessonPicture name="growth4-wheel" />
+      </Jolt>
       <Spin S={SCENE} />
       <Lump S={SCENE} />
-      <Pot S={SCENE} k="pot1" />
+      <Jolt picked={picked} on={Q2[i] === 1} id="first" right="new">
+        <Pot S={SCENE} k="pot1" />
+      </Jolt>
       <Ball S={SCENE} />
-      <Pot S={SCENE} k="pot2" />
+      <Jolt picked={picked} on={Q2[i] === 1} id="new" right="new">
+        <Pot S={SCENE} k="pot2" />
+      </Jolt>
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       {/* cast: plain */}
       <Stickman D={DB} k={K} role="lead" wear={[]} />
-      <Bucket S={SCENE} />
+      <Jolt picked={picked} on={Q1[i] === 1} id="bucket" right="bucket">
+        <Bucket S={SCENE} />
+      </Jolt>
       <Drops S={SCENE} />
       {on(Q1) ? <WetTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <LearnedTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
@@ -571,20 +586,20 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
 // ── riders: a thing drawn about the point it stands on or is held by ─────────
 
 type At = { x: number; y: number; o: number };
-function Rider({ at, art }: { at: SharedValue<At>; art: ReturnType<typeof clayBall> }) {
+function Rider({ at, art, children }: { at: SharedValue<At>; art?: ReturnType<typeof clayBall>; children?: ReactNode }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [{ translateX: at.value.x }, { translateY: at.value.y }],
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      {art ? <ObjectArt parts={art} tone={TONE} /> : children}
     </Animated.View>
   );
 }
 function Lump({ S }: { S: SharedValue<any> }) {
   const at = useDerivedValue<At>(() => S.value.lump1);
-  return <Rider at={at} art={LUMP_ART} />;
+  return <Rider at={at}><LessonPicture name="growth4-clay-dome" /></Rider>;
 }
 function Ball({ S }: { S: SharedValue<any> }) {
   const at = useDerivedValue<At>(() => S.value.ball);
@@ -626,11 +641,11 @@ function Pot({ S, k }: { S: SharedValue<any>; k: 'pot1' | 'pot2' }) {
   return (
     <Animated.View style={[styles.rider, outer]} pointerEvents="none">
       <Animated.View style={[styles.rider, low]}>
-        <ObjectArt parts={LOW_ART} tone={TONE} />
+        <LessonPicture name="growth4-pot-belly" />
         <Animated.View style={[styles.streak, streak]} />
       </Animated.View>
       <Animated.View style={[styles.rider, top]}>
-        <ObjectArt parts={TOP_ART} tone={TONE} />
+        <LessonPicture name="growth4-pot-neck" />
         <Animated.View style={[styles.dent, dentSt]} />
       </Animated.View>
     </Animated.View>
@@ -660,6 +675,39 @@ function Drop({ k, S }: { k: number; S: SharedValue<any> }) {
     return { opacity: d.o, transform: [{ translateX: d.x }, { translateY: d.y }] };
   });
   return <Animated.View style={[styles.drop, st]} pointerEvents="none" />;
+}
+
+// ── the answer, on the thing tapped ─────────────────────────────────────────
+/**
+ * Both questions answer ON THE THING, not just on its plate. A right pick HOPS — up
+ * with a quick ease out, down accelerating onto where it stood, and one small bounce as
+ * it lands; a wrong one SHAKES side to side, hard first and dying away, and then the
+ * right thing hops so the reader sees where the answer was. Translation only: the
+ * Target owns opacity and scale (Target.tsx), and nothing here moves a box.
+ */
+function Jolt({ picked, on, id, right, children }: {
+  picked: string | null; on: boolean; id: string; right: string; children: ReactNode;
+}) {
+  const hop = useSharedValue(0);
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    if (!on || picked === null) return;
+    const up = (d: number) => withDelay(d, withSequence(
+      withTiming(-5, { duration: 150, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 170, easing: Easing.in(Easing.quad) }),
+      withTiming(-1.3, { duration: 90, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 110, easing: Easing.in(Easing.quad) }),
+    ));
+    if (picked === id && id === right) hop.value = up(0);
+    else if (picked === id) {
+      shake.value = withSequence(
+        withTiming(-2.6, { duration: 55 }), withTiming(2.2, { duration: 90 }), withTiming(-1.5, { duration: 85 }),
+        withTiming(0.8, { duration: 80 }), withTiming(0, { duration: 90, easing: Easing.out(Easing.quad) }),
+      );
+    } else if (id === right) hop.value = up(420);
+  }, [picked, on, id, right, hop, shake]);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }, { translateY: hop.value }] }));
+  return <Animated.View style={[styles.jolt, st]} pointerEvents="none">{children}</Animated.View>;
 }
 
 // ── the two questions ────────────────────────────────────────────────────────
@@ -715,6 +763,7 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   floor: floorStyle(TONE, GROUND),
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  jolt: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   streak: {
     position: 'absolute', left: -0.6, top: -9.5, width: 1.2, height: 7.5, borderRadius: 0.6, backgroundColor: PAPER_LIT,
   },
@@ -731,8 +780,8 @@ const styles = StyleSheet.create({
   },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 5, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: lipOf(TONE),
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,

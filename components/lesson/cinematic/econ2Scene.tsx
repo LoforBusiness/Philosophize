@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -242,7 +243,34 @@ function walkOf(
 
 const CAM = followMoves(CP_X, BEATS.map(kindOf), seedOf('economics'));
 
+/**
+ * The physical reply to a tap: a 0→1 value that runs once, 700ms, each time `picked` changes.
+ * A wrong pick SHAKES what was tapped (a damped side-to-side); the right one POPS it (up to
+ * 1.18x with an overshoot back to 1) — the object answers, not just a colour.
+ */
+function useReply(picked: string | null) {
+  const u = useSharedValue(1);
+  useEffect(() => {
+    if (picked === null) { u.value = 1; return; }
+    u.value = 0;
+    u.value = withTiming(1, { duration: 700, easing: Easing.linear });
+  }, [picked, u]);
+  return u;
+}
+
 export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+  const reply = useReply(picked);
+  const rackShake = useAnimatedStyle(() => {
+    const u = reply.value;
+    const hit = picked === 'umbrellas' || picked === 'tag';
+    return { transform: [{ translateX: hit ? Math.sin(u * Math.PI * 7) * (1 - u) * 5 : 0 }] };
+  });
+  const signReply = useAnimatedStyle(() => {
+    const u = reply.value;
+    const sh = picked === 'up' || picked === 'level';
+    const dip = picked === 'down' ? Math.sin(u * Math.PI) * 5 * (1 - 0.4 * u) : 0;
+    return { transform: [{ translateX: sh ? Math.sin(u * Math.PI * 7) * (1 - u) * 5 : 0 }, { translateY: dip }] };
+  });
   const heldBn = useHeld();
   const heldTh = useHeld();
   const heldCp = useHeld();
@@ -463,15 +491,19 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <View style={styles.floor} pointerEvents="none" />
       <Heavens S={SCENE} />
       <ObjectArt parts={SUN_ART} tone={TONE} />
-      <Cloud S={SCENE} />
+      <Cloud S={SCENE} reply={reply} picked={picked} />
       <Van S={SCENE} />
       <ObjectArt parts={SHOP_ART} tone={TONE} />
       <ObjectArt parts={AWNING_ART} tone={TONE} />
-      <ObjectArt parts={SIGN_ART} tone={TONE} />
-      <Sign S={SCENE} />
-      <ObjectArt parts={RACK_ART} tone={TONE} />
-      <ObjectArt parts={TAG_ART} tone={TONE} />
-      <Tag S={SCENE} />
+      <Animated.View style={[StyleSheet.absoluteFill, signReply]} pointerEvents="none">
+        <ObjectArt parts={SIGN_ART} tone={TONE} />
+        <Sign S={SCENE} />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, rackShake]} pointerEvents="none">
+        <ObjectArt parts={RACK_ART} tone={TONE} />
+        <ObjectArt parts={TAG_ART} tone={TONE} />
+        <Tag S={SCENE} />
+      </Animated.View>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -501,8 +533,12 @@ function Heavens({ S }: { S: SharedValue<any> }) {
   );
 }
 
-function Cloud({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ transform: [{ translateX: CLOUD_AT.x + (1 - S.value.cloud) * 170 }, { translateY: CLOUD_AT.y }] }));
+function Cloud({ S, reply, picked }: { S: SharedValue<any>; reply: SharedValue<number>; picked: string | null }) {
+  const st = useAnimatedStyle(() => {
+    const u = reply.value;
+    const pop = picked === 'rain' ? 1 + 0.18 * Math.sin(u * Math.PI) * (1 - 0.35 * u) : 1;
+    return { transform: [{ translateX: CLOUD_AT.x + (1 - S.value.cloud) * 170 }, { translateY: CLOUD_AT.y }, { scale: pop }] };
+  });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <ObjectArt parts={CLOUD_ART} tone={TONE} />
@@ -739,6 +775,7 @@ const styles = StyleSheet.create({
   },
   signWord: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, letterSpacing: 1, color: PAPER_LIT, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   tagFace: { position: 'absolute', left: FACE.left, top: FACE.top, width: FACE.w, height: FACE.h },
   price: {

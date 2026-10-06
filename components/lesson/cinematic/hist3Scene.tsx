@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './hist3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -15,15 +17,15 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  tint, wheel, parkTree, footbridgeDeck, footbridgeRail, streamBed, cartHay, cartBody, brokenPlank, newPlank,
-  reeds, barn, weatherVane, CART_AXLE,
+  tint, wheel, footbridgeDeck, footbridgeRail, streamBed, cartHay, cartBody, brokenPlank, newPlank,
+  reeds, weatherVane, CART_AXLE,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -201,8 +203,6 @@ const TIP_HELD = 476;
 /** How far behind the carter's hands the tips are when he hauls. */
 const HAUL_BACK = 12;
 
-const TREE_ART = parkTree(26, 446, 64, 108);
-const BARN_ART = barn(376, 430, 92, 140);
 const VANE_ART = weatherVane(376, 340, 44, 46);
 const RAIL_ART = footbridgeRail(190, 476, 220, 48);
 const DECK_ART = footbridgeDeck(190, 509, 180, 18);
@@ -525,8 +525,8 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={TREE_ART} tone={TONE} />
-      <ObjectArt parts={BARN_ART} tone={TONE} />
+      <LessonPicture name="hist3-tree" />
+      <LessonPicture name="hist3-barn" />
       <ObjectArt parts={VANE_ART} tone={TONE} />
       <View style={styles.spare} pointerEvents="none"><ObjectArt parts={NEW_ART} tone={TONE} /></View>
       <ObjectArt parts={STREAM_ART} tone={TONE} />
@@ -629,12 +629,41 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
           <View style={styles.place}>
-            <View style={[styles.namePlate, { left: (q.w - q.pw) / 2, width: q.pw, height: q.ph }]}>
-              <Text style={styles.nameText}>{q.label}</Text>
-            </View>
+            <NamePlate q={q} picked={picked} />
           </View>
         </Target>
       ))}
+    </Animated.View>
+  );
+}
+
+/**
+ * A name plate struck white on a hard ledge. Answered, the plate itself reacts: the right
+ * one hops and lands with a squash; a wrong one is knocked sideways three times and sags
+ * onto its ledge.
+ */
+function NamePlate({ q, picked }: { q: Q; picked: string | null }) {
+  const hop = useSharedValue(0);
+  const sq = useSharedValue(1);
+  const shake = useSharedValue(0);
+  const sag = useSharedValue(0);
+  useEffect(() => {
+    if (picked !== q.id) return;
+    if (q.correct) {
+      hop.value = withSequence(withTiming(-7, { duration: 150, easing: Easing.out(Easing.quad) }), withTiming(0, { duration: 130, easing: Easing.in(Easing.quad) }));
+      sq.value = withSequence(withTiming(1, { duration: 280 }), withTiming(0.85, { duration: 70 }), withSpring(1, { damping: 7, stiffness: 260 }));
+    } else {
+      shake.value = withSequence(withTiming(-4, { duration: 50 }), withTiming(4, { duration: 90 }), withTiming(-3, { duration: 90 }), withTiming(2, { duration: 80 }), withTiming(0, { duration: 70 }));
+      sag.value = withTiming(2.5, { duration: 260, easing: Easing.out(Easing.quad) });
+    }
+  }, [picked]);
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: shake.value }, { translateY: hop.value + sag.value }, { scaleY: sq.value }, { scaleX: 2 - sq.value }],
+  }));
+  const w = Math.max(q.pw, q.label.length * 5.4 + 12);
+  return (
+    <Animated.View style={[styles.namePlate, { left: (q.w - w) / 2, width: w, height: q.ph }, st]} pointerEvents="none">
+      <Text style={styles.nameText}>{q.label}</Text>
     </Animated.View>
   );
 }
@@ -653,11 +682,12 @@ const styles = StyleSheet.create({
   place: { flexGrow: 1 },
   namePlate: {
     position: 'absolute', bottom: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: PLATE_FACE,
-    borderRadius: 3, borderWidth: 1.2, borderColor: INK, paddingHorizontal: 3,
+    borderRadius: 4, borderWidth: 1.2, borderColor: INK, paddingHorizontal: 3,
+    boxShadow: lipOf(TONE),
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
-    textAlign: 'center',
+    textAlign: 'center', alignSelf: 'stretch',
   },
 });
 

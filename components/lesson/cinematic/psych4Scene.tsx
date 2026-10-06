@@ -1,11 +1,13 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './psych4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,8 +24,7 @@ import { reachHandTo, sipHandAt, sipTilt, sipHead } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, shelterFrame, shelterGlass, advertCase, timetable, stopPole, stopNotice, cafeTerrace, takeawayCup,
-  TAKEAWAY_GRIP,
+  NATURAL, shelterFrame, shelterGlass, timetable, stopNotice, takeawayCup, TAKEAWAY_GRIP,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -161,11 +162,11 @@ const CUP_HOLD = { x: 10, y: -15 };
 
 const FRAME_ART = shelterFrame(130, 433, 240, 134);
 const GLASS_ART = shelterGlass(130, 433, 240, 134);
-const ADVERT_ART = advertCase(42, 436, 56, 104);
+// The advert, the café and the stop pole are DRAWINGS (LESSON_RULES AM13), baked from
+// scripts/lib/lessonart/lessons/psych4.mjs at the boxes their shapes used to take:
+// psych4-advert 14–70 × 384–488, psych4-cafe 343–402 × 330–500, psych4-pole 278–320 × 352–500.
 const TIMES_ART = timetable(222, 442, 38, 48);
-const POLE_ART = stopPole(300, 426, 40, 148);
 const NOTICE_ART = stopNotice(NOTICE.left + NOTICE.w / 2, NOTICE.top + NOTICE.h / 2, NOTICE.w, NOTICE.h);
-const CAFE_ART = cafeTerrace(372, 415, 56, 170);
 // The cup is drawn about the point it is held by, its sleeve.
 const CUP_ART = takeawayCup(
   TAKEAWAY_GRIP.w / 2 - TAKEAWAY_GRIP.x, TAKEAWAY_GRIP.h / 2 - TAKEAWAY_GRIP.y, TAKEAWAY_GRIP.w, TAKEAWAY_GRIP.h,
@@ -190,6 +191,24 @@ function holdAt(s: Stance, which: 1 | -1, lx: number, ly: number, w: number): St
   const cur = which > 0 ? s.fistR : s.fistL;
   const m = { x: lerp(cur.x, lx, w), y: lerp(cur.y, ly, w) };
   return which > 0 ? { ...s, fistR: m } : { ...s, fistL: m };
+}
+
+/**
+ * THE THINGS ANSWER BACK. When a question is answered the object itself replies, on the
+ * answer clock (`qv`, 0→1 over 780ms): the true one POPS — a lift and a swell that
+ * overshoots and settles — and a wrong one the reader took SHAKES, a damped rattle that
+ * dies away. Both end at rest, so nothing is left moved when the beat changes.
+ */
+function popOf(a: number) {
+  'worklet';
+  const up = Math.sin(Math.PI * clamp01(a / 0.42));
+  const settle = Math.sin(Math.PI * clamp01((a - 0.42) / 0.36));
+  return { s: 1 + 0.12 * up - 0.035 * settle, y: -4 * up };
+}
+function shakeOf(a: number) {
+  'worklet';
+  const u = clamp01(a / 0.8);
+  return Math.sin(u * Math.PI * 6) * (1 - u) * (1 - u);
 }
 
 /**
@@ -253,12 +272,20 @@ function wristOf(w: Bundle, k: 'wrR' | 'wrL') {
 
 const CAM = followMoves(BUN_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('psychology'));
 
-export default function Psych4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi) {
+export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: SceneApi) {
   const heldB = useHeld();
   const heldC = useHeld();
   const heldP = useHeld();
   const cv = useCarry(11);
   const on = useLinger(i);
+  // Which thing the reader took on each question: kept, so the reply can be played on it.
+  const pk1 = useSharedValue('');
+  const pk2 = useSharedValue('');
+  useEffect(() => {
+    if (picked === null) return;
+    if (Q1[i]) pk1.value = picked;
+    if (Q2[i]) pk2.value = picked;
+  }, [picked, i, pk1, pk2]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -368,10 +395,24 @@ export default function Psych4Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const psy = pose(figP, xP, GROUND, K, dP, 1);
     const wB = wristOf(bun, 'wrL');
 
+    // ── the replies: the notice swings out on its ties when it is the answer; a wrong
+    // thing the reader took rattles in place ──────────────────────────────────
+    const a = Q1[n] || Q2[n] ? qv.value : 0;
+    const got = Q1[n] ? pk1.value : Q2[n] ? pk2.value : '';
+    const rattle = (id: string) => {
+      'worklet';
+      return got === id && a > 0 ? shakeOf(a) : 0;
+    };
+    const pop = Q2[n] && got !== '' ? popOf(a) : { s: 1, y: 0 };
+    const swing = Q2[n] && got !== '' ? Math.sin(Math.PI * 3 * clamp01(a / 0.9)) * (1 - clamp01(a / 0.9)) : 0;
+
     return {
       bun, cap, psy,
       // the coffee rides her wrist by its sleeve, and tips toward her face as she drinks
       cup: { x: wB.x, y: wB.y, o: 1, r: sipTilt(sip, dB) },
+      notice: { s: pop.s, y: pop.y, r: 9 * swing + 7 * rattle('notice') },
+      times: { x: 2.6 * rattle('timetable') },
+      advert: { x: 2.2 * rattle('advert') },
       q1: carry(cv, 9, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 10, n, Q2[p], Q2[n], tr),
     };
@@ -385,19 +426,20 @@ export default function Psych4Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={CAFE_ART} tone={TONE} />
+      <LessonPicture name="psych4-cafe" />
       <View style={styles.cafeSign} pointerEvents="none">
         <Text style={styles.cafeText}>CAFÉ</Text>
       </View>
       <ObjectArt parts={GLASS_ART} tone={TONE} style={styles.glass} />
-      <ObjectArt parts={ADVERT_ART} tone={TONE} />
-      <ObjectArt parts={TIMES_ART} tone={TONE} />
+      <Shake S={SCENE} k="advert" origin="42px 436px">
+        <LessonPicture name="psych4-advert" />
+      </Shake>
+      <Shake S={SCENE} k="times" origin="222px 442px">
+        <ObjectArt parts={TIMES_ART} tone={TONE} />
+      </Shake>
       <ObjectArt parts={FRAME_ART} tone={TONE} />
-      <ObjectArt parts={POLE_ART} tone={TONE} />
-      <ObjectArt parts={NOTICE_ART} tone={TONE} />
-      <View style={styles.notice} pointerEvents="none">
-        <Text style={styles.noticeText}>CLOSED</Text>
-      </View>
+      <LessonPicture name="psych4-pole" />
+      <Notice S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="lead" wear={BY_ID.stroller.pieces} />
@@ -409,6 +451,33 @@ export default function Psych4Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       {on(Q1) ? <CopyTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <SureTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
+  );
+}
+
+// ── the things that reply to an answer ──────────────────────────────────────
+
+/** A thing that rattles sideways when the reader takes it and it is wrong. */
+function Shake({ S, k, origin, children }: { S: SharedValue<any>; k: 'advert' | 'times'; origin: string; children: ReactNode }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: S.value[k].x }, { rotate: `${0.8 * S.value[k].x}deg` }] }));
+  return <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: origin }, st]} pointerEvents="none">{children}</Animated.View>;
+}
+
+/** The yellow notice and its word: it swings on its ties and swells when it is the answer. */
+function Notice({ S }: { S: SharedValue<any> }) {
+  const st = useAnimatedStyle(() => {
+    const v = S.value.notice;
+    return { transform: [{ translateY: v.y }, { rotate: `${v.r}deg` }, { scale: v.s }] };
+  });
+  return (
+    <Animated.View
+      style={[StyleSheet.absoluteFill, { transformOrigin: `${NOTICE.left + NOTICE.w / 2}px ${NOTICE.top}px` }, st]}
+      pointerEvents="none"
+    >
+      <ObjectArt parts={NOTICE_ART} tone={TONE} />
+      <View style={styles.notice} pointerEvents="none">
+        <Text style={styles.noticeText}>CLOSED</Text>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -480,6 +549,9 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
   );
 }
 
+/** A small plate's ledge: the house lip (stageSkin.lipOf) in proportion to a 12-unit plate. */
+const PLATE_LIP = `inset 0px 1px 0px rgba(255, 255, 255, 0.9), 0px 2.2px 0px ${TONE.SHADE}, 0px 3.4px 0px rgba(26, 26, 26, 0.12)`;
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   floor: floorStyle(TONE, GROUND),
@@ -504,13 +576,15 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   place: { flexGrow: 1 },
+  // a name plate is STRUCK, like every plate in the app (group AG): a white face with a
+  // lit top edge, standing on a hard ledge of the lesson's shade
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 4, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 4.5, borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: PLATE_LIP,
   },
   namePlateTop: {
-    position: 'absolute', top: 10, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', top: 10, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 4.5, borderWidth: 1.2,
+    borderColor: INK, paddingHorizontal: 3, boxShadow: PLATE_LIP,
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,

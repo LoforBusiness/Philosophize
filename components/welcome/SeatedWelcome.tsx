@@ -604,7 +604,8 @@ const styles = StyleSheet.create({
   },
 
   endCard: { position: 'absolute', left: 0, right: 0, top: 232, height: 200, alignItems: 'center' },
-  lockWord: { fontFamily: 'PlayfairDisplay_700Bold_Italic', fontSize: 46, color: INK, lineHeight: 58 },
+  // stretched across the card, so the italic A's swash has room to its left (AQ2)
+  lockWord: { alignSelf: 'stretch', textAlign: 'center', fontFamily: 'PlayfairDisplay_700Bold_Italic', fontSize: 46, color: INK, lineHeight: 58 },
   beginSlot: { marginTop: 16 },
   beginLip: { position: 'absolute', left: 0, right: 0, bottom: 0, top: 4, backgroundColor: C.HUE, borderRadius: 25 },
   beginBtn: { backgroundColor: INK, borderRadius: 25, paddingVertical: 14, paddingHorizontal: 48 },

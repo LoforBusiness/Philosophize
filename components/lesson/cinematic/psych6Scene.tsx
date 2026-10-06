@@ -16,7 +16,7 @@ import {
   K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle } from './stageSkin';
+import { floorStyle, pillStyle } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
@@ -402,7 +402,7 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
   const heldP = useHeld();
   const heldB = useHeld();
   const heldT = useHeld();
-  const cv = useCarry(28);
+  const cv = useCarry(32);
   const on = useLinger(i);
   // Which machine and which phone the reader took: kept past the question, so a dull
   // machine stays dull and a dimmed phone stays dim.
@@ -612,6 +612,13 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const outT = answered1 && got1 === 2 ? heldAfter(n, N_Q1, clamp01((a1 - 0.05) / 0.7), 1) : 0;
     const lightsOut = carry(cv, 16, n, 0, outT, tr);
 
+    // the machine taken: a right pick hops and lands with a squash, a wrong one is shaken
+    const ok1 = got1 === 0;
+    const hop1T = answered1 && n === N_Q1 && ok1 ? bump(a1, 1, 0.0, 0.14, 0.36) : 0;
+    const shk1T = answered1 && n === N_Q1 && !ok1 ? Math.sin(a1 * 80) * (1 - clamp01(a1 / 0.45)) * 3.2 : 0;
+    const hop1 = carry(cv, 28, n, 0, hop1T, tr);
+    const shk1 = carry(cv, 29, n, 0, shk1T, tr);
+
     // ── the phones on the stand, and the second answer ────────────────────
     const awakeT = n > N_Q2 ? 1 : n === N_Q2 ? st(0.04, 0.16) : 0;
     const awake = carry(cv, 17, n, n > N_Q2 ? 1 : 0, awakeT, tr);
@@ -625,6 +632,11 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const buzz = carry(cv, 19, n, 0, buzzNow, tr);
     const flashNow = answered2 && got2 === 2 && n === N_Q2 ? bump(a2, 1, 0.05, 0.14, 0.4) : 0;
     const flash = carry(cv, 20, n, 0, flashNow, tr);
+    const ok2 = got2 === 1;
+    const hop2T = answered2 && n === N_Q2 && ok2 ? bump(a2, 1, 0.0, 0.14, 0.36) : 0;
+    const shk2T = answered2 && n === N_Q2 && !ok2 ? Math.sin(a2 * 80) * (1 - clamp01(a2 / 0.45)) * 2.4 : 0;
+    const hop2 = carry(cv, 30, n, 0, hop2T, tr);
+    const shk2 = carry(cv, 31, n, 0, shk2T, tr);
     const dimT = answered2 && got2 === 2 ? heldAfter(n, N_Q2, ease01(clamp01((a2 - 0.35) / 0.4)), 1) : 0;
     const dim = carry(cv, 21, n, 0, dimT, tr);
 
@@ -647,7 +659,7 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       coin: { x: bR.x - 1.6 * dB, y: bR.y - 1.2, o: coinT },
       tPhone: { x: tR.x, y: tR.y, o: carry(cv, 23, n, phoneT, phoneT, tr) },
       tNew: carry(cv, 24, n, tNew, tNew, tr),
-      rules, dull, pop, lightsOut,
+      rules, dull, pop, lightsOut, hop1, shk1, hop2, shk2, pk1v: got1, pk2v: got2,
       awake, refresh, buzz, flash, dim,
       blink: carry(cv, 25, n, A_REST[p] ? 1 : 0, A_REST[n] ? 1 : 0, tr),
       q1: carry(cv, 26, n, Q1[p], Q1[n], tr),
@@ -833,8 +845,17 @@ function Machine({ j, clock, S }: { j: number; clock: SharedValue<number>; S: Sh
   const ruleO = useAnimatedStyle(() => ({ opacity: S.value.rules * (j === 1 ? 1 - 0.6 * S.value.dull : 1) }));
   // a prize coughed into the red machine's flap
   const prize = useAnimatedStyle(() => ({ opacity: j === 1 ? S.value.pop : 0, transform: [{ translateY: -10 * (1 - S.value.pop) }] }));
+  const react = useAnimatedStyle(() => {
+    const me = S.value.pk1v === j;
+    const h = me ? S.value.hop1 : 0;
+    return {
+      transform: [{ translateX: me ? S.value.shk1 : 0 }, { translateY: -6 * h }, { scaleY: 1 - 0.06 * h }],
+      transformOrigin: `${cx}px ${CAB_TOP + CH}px`,
+    };
+  });
   return (
-    <>
+    <Animated.View style={[StyleSheet.absoluteFill, react]} pointerEvents="none">
+      <View style={[styles.pill, { left: cx - 34, top: CAB_TOP + CH - 2 }]} />
       <ObjectArt parts={CABS[j]} tone={TONE} />
       <ObjectArt parts={PILES[j]} tone={TONE} />
       {mine ? <ObjectArt parts={GREEN_ART} tone={TONE} /> : null}
@@ -865,7 +886,7 @@ function Machine({ j, clock, S }: { j: number; clock: SharedValue<number>; S: Sh
         <Animated.Text style={[styles.signText, { color: N[NEON[j]].base }, ruleO]}>{RULES[j]}</Animated.Text>
       </View>
       {[0, 1, 2, 3, 4, 5, 6].map((c) => <BulbCol key={c} j={j} c={c} clock={clock} S={S} />)}
-    </>
+    </Animated.View>
   );
 }
 
@@ -895,7 +916,15 @@ function BulbCol({ j, c, clock, S }: { j: number; c: number; clock: SharedValue<
 /** A demo phone; its screen is only built from the beat it wakes on (a View budget, not a look). */
 function Handset({ j, S, lit: on }: { j: number; S: SharedValue<any>; lit: boolean }) {
   const ph = PHONES[j];
-  const body = useAnimatedStyle(() => ({ transform: [{ translateX: ph.id === 'alarm' ? S.value.buzz : 0 }] }));
+  const body = useAnimatedStyle(() => {
+    const me = S.value.pk2v === j;
+    return {
+      transform: [
+        { translateX: (ph.id === 'alarm' ? S.value.buzz : 0) + (me ? S.value.shk2 : 0) },
+        { translateY: me ? -5 * S.value.hop2 : 0 },
+      ],
+    };
+  });
   const lit = useAnimatedStyle(() => ({ opacity: S.value.awake * (ph.id === 'calc' ? 1 - 0.45 * S.value.dim : 1) }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, body]} pointerEvents="none">
@@ -1188,6 +1217,7 @@ const styles = StyleSheet.create({
   tinyNew: { position: 'absolute', left: -2, top: -8, width: 3, height: 2.2, borderRadius: 0.6, backgroundColor: N.apple.base },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   place: { flexGrow: 1 },
+  pill: { ...pillStyle(2.6), top: 0, left: 0 },
 });
 
 export function Psych6Lesson({ lesson }: { lesson: Lesson }) {

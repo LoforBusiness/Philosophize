@@ -8820,6 +8820,18 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   Kadesh carvings at Abu Simbel against a Hittite tablet; weighing sources). Scripts
   `phil6 … hist6`, fourteen new question games, 63 lines for about 37,000 characters. Brief:
   `docs/superpowers/plans/2026-10-04-sixth-lessons-scene-brief.md`.
+- **No letter is cut off, and every lesson's objects are drawings (2026-10-05).** *"the end
+  of coin is slightly cut off … I've noticed this for other words."* Android's TextView clips
+  its ink to its CONTENT box (inside padding, so padding cannot help), and Caveat draws up to
+  0.23 em past its last letter: a browser never clips, so nothing had seen it. `check:replay`
+  holds LESSON_RULES **AQ2** (`ttfwidth.ink`, 89 found, now 0); a label gets a box wider than
+  its ink, and wrapped text or a name carries no-break spaces (`lib/utils/inkRoom.ts`: Profile's
+  name and journal, the streak mascot). Then every one of the 42 lessons was redesigned to
+  `docs/superpowers/plans/2026-10-05-lesson-redesign-lean.md`: shape-built objects redrawn as
+  pictures from references (163 in `assets/lesson-art/`, one module a lesson in
+  `scripts/lib/lessonart/lessons/`), plates struck on a ledge, a physical right and wrong
+  reaction on the stage, no glows. One builder a lesson, four at a time: fourteen at once
+  hit the session limit, and their orphaned headless Chrome tabs (5.6 GB) starved Metro.
 
 ---
 

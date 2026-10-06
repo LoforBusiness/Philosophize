@@ -17,6 +17,7 @@ import {
   slab, Lit, Stroke, LINE, WOOD, WOOD_LIT, WOOD_SHADE, SHEET_SHADE,
 } from '@/components/shared/drawn';
 import TearCalendar from './TearCalendar';
+import { inkWrap } from '@/lib/utils/inkRoom';
 import type { MoodState } from '@/lib/utils/streakMood';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -215,7 +216,7 @@ export default function StreakMascot({ mood, alive, count, tier, next, delay = 0
         </View>
       </View>
       <Animated.View style={[styles.saidWrap, sayStyle]}>
-        <Text style={styles.said}>{mood.line}</Text>
+        <Text style={styles.said}>{inkWrap(mood.line)}</Text>
       </Animated.View>
     </View>
   );

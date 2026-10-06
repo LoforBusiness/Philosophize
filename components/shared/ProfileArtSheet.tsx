@@ -15,6 +15,7 @@ import SketchIcon from './SketchIcon';
 import { ProfileArtFill } from './ProfileArt';
 import { PROFILE_BACKGROUNDS, backgroundById, tonePalette } from '@/data/profileBackgrounds';
 import { profileNameStyle, profileNameText } from '@/data/profileFonts';
+import { inkPad } from '@/lib/utils/inkRoom';
 
 const Paper = '#FAFAF7';
 const Ink = '#1A1A1A';
@@ -141,7 +142,7 @@ export default function ProfileArtSheet({
 
               <View style={styles.legendRow}>
                 <Text style={styles.legend}>
-                  {backgroundById(value).name}
+                  {inkPad(backgroundById(value).name)}
                 </Text>
               </View>
             </ScrollView>

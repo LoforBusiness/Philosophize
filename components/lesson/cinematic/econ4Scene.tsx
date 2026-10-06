@@ -1,30 +1,34 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './econ4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
   type Bundle, type Stance,
 } from './rig';
 import {
-  GROUND, K_FIG, STAGE_W, STAGE_H, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
+  GROUND, K_FIG, STAGE_W, STAGE_H, INK, RIGHT, WRONG, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle } from './stageSkin';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
-  NATURAL, raisedBed, tomatoPlant, tomatoFruit, henBird, henPeek, henHouse, coopRamp, picketFence, slatePost,
+  NATURAL, raisedBed, henPeek, henHouse, coopRamp, picketFence, slatePost,
   gardenSlate, eggBox, trugBack, trugFront, TOMATO_PICK, HEN_FOOT, HEN_HIP, COOP_SILL, COOP_WINDOW, COOP_NEST_LID,
-  GARDEN_SLATE_FACE, gardenHedge, gardenTree,
+  GARDEN_SLATE_FACE,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -150,9 +154,10 @@ const BN_P = [TALK, NOD, NOD, NOD, WAIT, TALK, NOD, NOD, WAIT, TALK, NOD, WAIT];
 const CP_P = [NOD, TALK, NOD, NOD, WAIT, NOD, NOD, TALK, WAIT, NOD, NOD, WAIT];
 const TH_P = [WAIT, WAIT, TALK, TALK, WAIT, NOD, TALK, NOD, WAIT, NOD, NOD, WAIT];
 
-// ── the backs of the gardens: a clipped hedge, and a tree over it ────────────
-const HEDGE_ART = gardenHedge(200, 452, 400, 96);
-const TREE_ART = gardenTree(140, 372, 150, 148);
+// ── the backs of the gardens: a clipped hedge, and an apple tree over it ─────
+// Both are DRAWN (LESSON_RULES AM13), against references, and baked to pictures:
+// scripts/lib/lessonart/lessons/econ4.mjs — 'econ4-hedge' at 0–400 × 404–500 and
+// 'econ4-tree' at 65–215 × 298–446, the boxes the shape-built ones had.
 
 // ── her garden ───────────────────────────────────────────────────────────────
 const BED = { x: 56, y: 491, w: 96, h: 18 };
@@ -162,8 +167,8 @@ const PLANT_A = 32;
 const PLANT_B = 74;
 const PLANT_Y = TOP - PLANT.h / 2;
 const BED_ART = raisedBed(BED.x, BED.y, BED.w, BED.h);
-const PLANT_A_ART = tomatoPlant(PLANT_A, PLANT_Y, PLANT.w, PLANT.h, false, true);
-const PLANT_B_ART = tomatoPlant(PLANT_B, PLANT_Y, PLANT.w, PLANT.h, true);
+// The two plants are drawn pictures too: 'econ4-plant-a' (10–54) and 'econ4-plant-b'
+// (52–96, without the two ripe tomatoes she picks), both 400–482.
 /** The two ripe tomatoes on plant B's right that she picks, in stage units. */
 const PICK = TOMATO_PICK.map((p) => ({ x: PLANT_B - PLANT.w / 2 + p.x, y: TOP - PLANT.h + p.y }));
 /** Her basket: its handle's top, standing on the bed's right end. */
@@ -187,6 +192,8 @@ const BREAST = { x: 4.8, y: -5.4 };
 
 // ── the fence, the slate, his garden ─────────────────────────────────────────
 const FENCE_ART = picketFence(275, 485, 250, 30);
+/** Where the fence rattles from when a reader picks it: the middle of its run, at the ground. */
+const FENCE_MID = 275;
 const SLATE_X = 330;
 const POST_ART = slatePost(SLATE_X, 458, 10, 84);
 const SLATE_ART = gardenSlate(SLATE_X, 422 + 29, 34, 58);
@@ -215,15 +222,14 @@ const LEAN = { x: 354, y: 470 };
 // A hen is drawn as her legs, about her feet, and her body, about her HIP, so she
 // pecks by tipping her body forward while her feet stay planted.
 const HIP_UP = HEN_FOOT.y - HEN_HIP.y;
-const HEN_LEGS = henBird(0, -HEN_FOOT.h / 2, HEN_FOOT.w, HEN_FOOT.h, 'henRusset', 'legs');
-const HEN_BODY = henBird(0, -HEN_FOOT.h / 2 + HIP_UP, HEN_FOOT.w, HEN_FOOT.h, 'henRusset', 'body');
-const WHITE_LEGS = henBird(0, -HEN_FOOT.h / 2, HEN_FOOT.w, HEN_FOOT.h, 'henWhite', 'legs');
-const WHITE_BODY = henBird(0, -HEN_FOOT.h / 2 + HIP_UP, HEN_FOOT.w, HEN_FOOT.h, 'henWhite', 'body');
+// The hens are drawn pictures (econ4.mjs): 'econ4-hen-legs' about her feet, and her body
+// ('econ4-hen-russet', 'econ4-hen-white') about her hip, in HEN_FOOT's 26 × 22.
+const HEN_W = HEN_FOOT.w;
 const TRUG_B = trugBack(0, 19 / 2 - 0.8, 18, 19);
 const TRUG_F = trugFront(0, 19 / 2 - 0.8, 18, 19);
-const IN_TRUG = [tomatoFruit(-1, 10.4, 6, 6), tomatoFruit(4.4, 10.8, 6, 6)];
+/** The two tomatoes already in the basket: where 'econ4-tomato' sits, from the handle's top. */
+const IN_TRUG = [{ x: -1, y: 10.8 }, { x: 4.4, y: 11.2 }];
 const BOX_ART = eggBox(0, -13 / 2, 16, 13);
-const TOM_ART = tomatoFruit(0, -0.4, 6, 6);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -320,6 +326,23 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldC = useHeld();
   const cv = useCarry(17);
   const on = useLinger(i);
+  // THE QUESTIONS ANSWER BACK: which of the three was tapped on each graded beat, and how
+  // many seconds ago. Each game keeps its own clock, so the second question never replays
+  // the first's reaction, and what a reaction leaves (a chalk ring) stays (AH4).
+  const pick1 = useSharedValue(-1);
+  const pick2 = useSharedValue(-1);
+  const since1 = useSharedValue(0);
+  const since2 = useSharedValue(0);
+  useEffect(() => {
+    const qs = FOCUS[i] ? FOCUS_Q : GAINS[i] ? GAIN_Q : null;
+    if (!qs) return;
+    const k = picked === null ? -1 : qs.findIndex((q) => q.id === picked);
+    const pick = FOCUS[i] ? pick1 : pick2;
+    const since = FOCUS[i] ? since1 : since2;
+    pick.value = k;
+    since.value = 0;
+    if (k >= 0) since.value = withTiming(4, { duration: 4000, easing: Easing.linear });
+  }, [picked, i, pick1, pick2, since1, since2]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -565,6 +588,10 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       rows: rowsNow, chalk,
       q1: carry(cv, 15, n, FOCUS[p], FOCUS[n], tr),
       q2: carry(cv, 16, n, GAINS[p], GAINS[n], tr),
+      // how far through its answer each of the three is, 0 → 1 over the second after a tap
+      a1: [0, 1, 2].map((k) => (pick1.value === k ? clamp01(since1.value / 1.1) : 0)),
+      a2: [0, 1, 2].map((k) => (pick2.value === k ? clamp01(since2.value / 1.1) : 0)),
+      ring: pick2.value >= 0 ? clamp01((since2.value - 0.15) / 0.5) : 0,
     };
   });
 
@@ -575,25 +602,33 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={TREE_ART} tone={TONE} />
-      <ObjectArt parts={HEDGE_ART} tone={TONE} />
+      <LessonPicture name="econ4-tree" />
+      <LessonPicture name="econ4-hedge" />
       {/* his garden, behind the fence */}
-      <ObjectArt parts={RAMP_ART} tone={TONE} />
-      <ObjectArt parts={COOP_ART} tone={TONE} />
-      <ObjectArt parts={PEEK_ART} tone={TONE} />
-      <WhiteHen S={SCENE} />
+      <Shaker S={SCENE} k={1} ox={COOP.left + COOP.w / 2} oy={GROUND}>
+        <ObjectArt parts={RAMP_ART} tone={TONE} />
+        <ObjectArt parts={COOP_ART} tone={TONE} />
+        <ObjectArt parts={PEEK_ART} tone={TONE} />
+        <WhiteHen S={SCENE} />
+      </Shaker>
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <Basket S={SCENE} layer="back" />
       <EggBox S={SCENE} layer="back" />
-      <ObjectArt parts={FENCE_ART} tone={TONE} />
+      <Shaker S={SCENE} k={2} ox={FENCE_MID} oy={GROUND}>
+        <ObjectArt parts={FENCE_ART} tone={TONE} />
+      </Shaker>
       <ObjectArt parts={POST_ART} tone={TONE} />
       <ObjectArt parts={SLATE_ART} tone={TONE} />
       <Slate S={SCENE} />
       {/* her garden, in front */}
       <ObjectArt parts={BED_ART} tone={TONE} />
-      <ObjectArt parts={PLANT_A_ART} tone={TONE} />
-      <ObjectArt parts={PLANT_B_ART} tone={TONE} />
+      <Bouncer S={SCENE} ox={PLANT_A} oy={TOP}>
+        <LessonPicture name="econ4-plant-a" />
+      </Bouncer>
+      <Bouncer S={SCENE} ox={PLANT_B} oy={TOP} lag={0.08}>
+        <LessonPicture name="econ4-plant-b" />
+      </Bouncer>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -628,17 +663,21 @@ function Rider({ at, art }: { at: SharedValue<At>; art: ReturnType<typeof eggBox
   );
 }
 
-/** A hen at her feet, facing `sx`, her body tipped forward `r` degrees about her hip. */
-function HenRider({ at, legs, body }: { at: SharedValue<At>; legs: ReturnType<typeof eggBox>; body: ReturnType<typeof eggBox> }) {
+/**
+ * A hen at her feet, facing `sx`, her body tipped forward `r` degrees about her hip.
+ * Her legs and her body are two drawn pictures (econ4.mjs), so the body tips to peck
+ * while her feet stay where they are.
+ */
+function HenRider({ at, body }: { at: SharedValue<At>; body: string }) {
   const outer = useAnimatedStyle(() => ({
     transform: [{ translateX: at.value.x }, { translateY: at.value.y }, { scaleX: at.value.sx ?? 1 }],
   }));
   const tip = useAnimatedStyle(() => ({ transform: [{ translateY: -HIP_UP }, { rotate: `${at.value.r ?? 0}deg` }] }));
   return (
     <Animated.View style={[styles.rider, outer]} pointerEvents="none">
-      <ObjectArt parts={legs} tone={TONE} />
+      <LessonPicture name="econ4-hen-legs" />
       <Animated.View style={[styles.rider, tip]}>
-        <ObjectArt parts={body} tone={TONE} />
+        <LessonPicture name={body} />
       </Animated.View>
     </Animated.View>
   );
@@ -647,13 +686,83 @@ function HenRider({ at, legs, body }: { at: SharedValue<At>; legs: ReturnType<ty
 /** Her hen, wherever she is: on the bed, on the grass, in a hand, on his ramp. */
 function Hen({ S }: { S: SharedValue<any> }) {
   const at = useDerivedValue<At>(() => S.value.hen);
-  return <HenRider at={at} legs={HEN_LEGS} body={HEN_BODY} />;
+  return <HenRider at={at} body="econ4-hen-russet" />;
 }
 
 /** His white hen on the nest-box lid, pecking at nothing now and then. */
 function WhiteHen({ S }: { S: SharedValue<any> }) {
   const at = useDerivedValue<At>(() => ({ x: WHITE_HEN.x, y: WHITE_HEN.y, r: 40 * S.value.white, sx: -1 }));
-  return <HenRider at={at} legs={WHITE_LEGS} body={WHITE_BODY} />;
+  return <HenRider at={at} body="econ4-hen-white" />;
+}
+
+/** One drawn tomato, laid with its middle at (x, y) of whatever holds it. */
+function TomatoAt({ x, y }: { x: number; y: number }) {
+  return (
+    <View style={[styles.rider, { transform: [{ translateX: x }, { translateY: y }] }]} pointerEvents="none">
+      <LessonPicture name="econ4-tomato" />
+    </View>
+  );
+}
+
+/** A tomato a hand moves: the drawn tomato, riding its point. */
+function TomatoRider({ at }: { at: SharedValue<At> }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: at.value.x }, { translateY: at.value.y }] }));
+  return (
+    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+      <LessonPicture name="econ4-tomato" />
+    </Animated.View>
+  );
+}
+
+// ── the answers, answered back on the stage ──────────────────────────────────
+
+/** Up over [a, m] and back down over [m, z] of a running value, eased both ways. */
+function hump(v: number, a: number, m: number, z: number): number {
+  'worklet';
+  const r = (q: number, w: number) => {
+    const u = clamp01((v - q) / (w - q));
+    return u * u * (3 - 2 * u);
+  };
+  return r(a, m) * (1 - r(m, z));
+}
+
+/**
+ * A wrong pick in Q1 RATTLES what it names: the hen house (k 1) shudders on its legs, the
+ * fence (k 2) wobbles, both dying away in under a second, and both pivoting on the ground
+ * line so nothing lifts off it.
+ */
+function Shaker({ S, k, ox, oy, children }: { S: SharedValue<any>; k: number; ox: number; oy: number; children: ReactNode }) {
+  const st = useAnimatedStyle(() => {
+    const g = S.value.a1[k];
+    const live = g > 0 && g < 1 ? 1 : 0;
+    const shake = live * Math.sin(g * 30) * (1 - g) * (1 - g);
+    return {
+      transform: [
+        { translateX: ox + 2.6 * shake }, { translateY: oy }, { rotate: `${1.6 * shake}deg` },
+        { translateX: -ox }, { translateY: -oy },
+      ],
+    };
+  });
+  return <Animated.View style={[styles.layer, st]} pointerEvents="none">{children}</Animated.View>;
+}
+
+/**
+ * The right pick in Q1: her tomato plants spring up off the soil — a squash, a stretch
+ * past their height, and a settle (k 0), pivoting on the bed's soil line.
+ */
+function Bouncer({ S, ox, oy, lag = 0, children }: { S: SharedValue<any>; ox: number; oy: number; lag?: number; children: ReactNode }) {
+  const st = useAnimatedStyle(() => {
+    const g = clamp01(S.value.a1[0] - lag);
+    const squash = hump(g, 0, 0.1, 0.22);
+    const stretch = hump(g, 0.12, 0.3, 0.55);
+    const settle = hump(g, 0.45, 0.6, 0.8);
+    const sy = 1 - 0.07 * squash + 0.09 * stretch - 0.025 * settle;
+    const sx = 1 + 0.05 * squash - 0.04 * stretch + 0.015 * settle;
+    return {
+      transform: [{ translateX: ox }, { translateY: oy }, { scaleX: sx }, { scaleY: sy }, { translateX: -ox }, { translateY: -oy }],
+    };
+  });
+  return <Animated.View style={[styles.layer, st]} pointerEvents="none">{children}</Animated.View>;
 }
 
 /**
@@ -672,7 +781,7 @@ function Basket({ S, layer }: { S: SharedValue<any>; layer: 'front' | 'back' }) 
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <ObjectArt parts={TRUG_B} tone={TONE} />
-      {IN_TRUG.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} />)}
+      {IN_TRUG.map((a, k) => <TomatoAt key={k} x={a.x} y={a.y} />)}
       <ObjectArt parts={TRUG_F} tone={TONE} />
     </Animated.View>
   );
@@ -684,8 +793,8 @@ function Tomatoes({ S }: { S: SharedValue<any> }) {
   const c = useDerivedValue<At>(() => S.value.tom1);
   return (
     <>
-      <Rider at={a} art={TOM_ART} />
-      <Rider at={c} art={TOM_ART} />
+      <TomatoRider at={a} />
+      <TomatoRider at={c} />
     </>
   );
 }
@@ -708,23 +817,54 @@ function Chalk({ S }: { S: SharedValue<any> }) {
   return <Animated.View style={[styles.chalkStick, st]} pointerEvents="none" />;
 }
 
-/** The slate's three rows, chalked on b6: each word revealed as the chalk runs along it. */
+/**
+ * The slate's three rows, chalked on b6: each word revealed as the chalk runs along it.
+ * Answered (Q2), the right row JUMPS and is ringed in chalk; a wrong row SHUDDERS in a
+ * puff of chalk dust and settles back.
+ */
 function Row({ S, r }: { S: SharedValue<any>; r: number }) {
   const st = useAnimatedStyle(() => ({ width: FACE.w * clamp01(S.value.rows - r) }));
+  const word = useAnimatedStyle(() => {
+    const g = S.value.a2[r];
+    const right = r === RIGHT_ROW;
+    const shake = !right && g > 0 && g < 1 ? 1.8 * Math.sin(g * 34) * (1 - g) : 0;
+    const pop = right ? 0.16 * hump(g, 0, 0.16, 0.45) : 0;
+    const lift = right ? -1.6 * hump(g, 0, 0.16, 0.45) : 0;
+    return { transform: [{ translateX: shake }, { translateY: lift }, { scale: 1 + pop }] };
+  });
   return (
     <Animated.View style={[styles.rowClip, { top: FACE.top + r * ROW_H }, st]}>
-      <View style={styles.rowInner}>
+      <Animated.View style={[styles.rowInner, word]}>
         <Text style={styles.chalkWord}>{ROWS[r]}</Text>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }
+/** A wrong row's puff of chalk dust, lifting off the word as it shudders. */
+function Dust({ S, r }: { S: SharedValue<any>; r: number }) {
+  const st = useAnimatedStyle(() => {
+    const u = S.value.a2[r];
+    return {
+      opacity: u > 0.01 && u < 0.99 ? 0.7 * (1 - u) : 0,
+      transform: [{ translateY: -7 * u }, { scale: 0.5 + 1.2 * u }],
+    };
+  });
+  return <Animated.View style={[styles.dust, { top: FACE.top + r * ROW_H + ROW_H / 2 - 5 }, st]} />;
+}
 function Slate({ S }: { S: SharedValue<any> }) {
+  // the chalk ring drawn round BOTH once it is picked, and kept
+  const ring = useAnimatedStyle(() => {
+    const u = S.value.ring * (S.value.a2[RIGHT_ROW] > 0 ? 1 : 0);
+    return { opacity: u > 0.02 ? 1 : 0, transform: [{ scaleX: 0.6 + 0.4 * u }, { scaleY: 0.6 + 0.4 * u }, { rotate: `${-8 + 4 * u}deg` }] };
+  });
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Row S={S} r={0} />
       <Row S={S} r={1} />
       <Row S={S} r={2} />
+      <Dust S={S} r={0} />
+      <Dust S={S} r={1} />
+      <Animated.View style={[styles.chalkRing, { top: FACE.top + RIGHT_ROW * ROW_H + 0.5 }, ring]} />
     </View>
   );
 }
@@ -741,18 +881,30 @@ const FOCUS_Q: Q[] = [
   { id: 'henhouse', left: 230, top: 398, w: 80, h: 62, r: 4, correct: false },
   { id: 'fence', left: 156, top: 452, w: 50, h: 32, r: 3, correct: false },
 ];
+/**
+ * What each Q1 target is called, on a struck plate inside it (AN1, S11), so the three
+ * choices can be told apart at a glance: a white face on a hard ledge in the stage's own
+ * shade, lit along its top. Its `top` is inside the target; each word is set in a box as
+ * wide as the plate, so no letter is clipped on a phone (AQ2).
+ */
+const FOCUS_LABEL: Record<string, { word: string; w: number; top: number }> = {
+  tomatoes: { word: 'TOMATOES', w: 66, top: 30 },
+  henhouse: { word: 'HENS', w: 38, top: 23 },
+  fence: { word: 'FENCE', w: 42, top: 9 },
+};
+const RIGHT_ROW = 2;
 /** Q2: who gains from the swap? Both of them. */
 const GAIN_Q: Q[] = ROWS.map((w, r) => ({
   id: w.toLowerCase(), left: FACE.left, top: FACE.top + r * ROW_H + 0.5, w: FACE.w, h: ROW_H - 1, r: 1.5, correct: w === 'BOTH',
 }));
 function FocusTargets(p: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
-  return <StageTargets {...p} qs={FOCUS_Q} k="q1" />;
+  return <StageTargets {...p} qs={FOCUS_Q} k="q1" labels />;
 }
 function GainTargets(p: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   return <StageTargets {...p} qs={GAIN_Q} k="q2" />;
 }
-function StageTargets({ picked, onPick, live, S, qs, k }: {
-  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2';
+function StageTargets({ picked, onPick, live, S, qs, k, labels }: {
+  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2'; labels?: boolean;
 }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value[k] }));
@@ -764,7 +916,13 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
-          <View style={styles.clear} />
+          <View style={styles.clear}>
+            {labels ? (
+              <View style={[styles.plate, { width: FOCUS_LABEL[q.id].w, left: (q.w - FOCUS_LABEL[q.id].w) / 2, top: FOCUS_LABEL[q.id].top }]}>
+                <Text style={[styles.plateWord, { width: FOCUS_LABEL[q.id].w - 2 }]}>{FOCUS_LABEL[q.id].word}</Text>
+              </View>
+            ) : null}
+          </View>
         </Target>
       ))}
     </Animated.View>
@@ -776,16 +934,34 @@ const styles = StyleSheet.create({
   floor: floorStyle(TONE, GROUND),
   ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  layer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   chalkStick: {
     position: 'absolute', left: -2.2, top: -0.8, width: 4.4, height: 1.6, borderRadius: 0.8,
     backgroundColor: NATURAL.picket.base,
   },
   rowClip: { position: 'absolute', left: FACE.left, height: ROW_H, overflow: 'hidden' },
   rowInner: {
-    position: 'absolute', left: 0, top: 0, width: FACE.w, height: ROW_H, alignItems: 'flex-start', justifyContent: 'center', paddingLeft: 3,
+    position: 'absolute', left: 0, top: 0, width: FACE.w, height: ROW_H, alignItems: 'flex-start', justifyContent: 'center',
   },
+  // A content box the width of the row, the word set 3 in from its left: Caveat's last
+  // letter draws past its advance, and the slack to its right holds that ink (AQ2).
   chalkWord: {
+    width: FACE.w - 3, marginLeft: 3, textAlign: 'left',
     fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 12, letterSpacing: 0, color: PAPER_LIT, includeFontPadding: false,
+  },
+  chalkRing: {
+    position: 'absolute', left: FACE.left + 0.5, width: FACE.w - 1, height: ROW_H - 1,
+    borderRadius: (ROW_H - 1) / 2, borderWidth: 1.1, borderColor: PAPER_LIT,
+  },
+  dust: {
+    position: 'absolute', left: FACE.left + 4, width: 14, height: 10, borderRadius: 5, backgroundColor: 'rgba(244, 242, 236, 0.75)',
+  },
+  plate: {
+    position: 'absolute', height: 14, borderRadius: 5, backgroundColor: PLATE_FACE,
+    borderWidth: 1, borderColor: INK, boxShadow: lipOf(TONE), alignItems: 'center', justifyContent: 'center',
+  },
+  plateWord: {
+    textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 9, lineHeight: 11, letterSpacing: 0.2, color: INK, includeFontPadding: false,
   },
   clear: { flexGrow: 1 },
 });

@@ -1,11 +1,15 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './psych2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -15,7 +19,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle } from './stageSkin';
+import { floorStyle, lipOf, PLATE_RADIUS } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
@@ -23,7 +27,7 @@ import { useLinger } from './useLinger';
 import { lineOf, stage, stageLin, bump } from './pace';
 import {
   NATURAL, tint, loaf, trolley, jamJar, jamSplat, jamLid, aisleSign, cctvMount, cctvCamera, cctvScreen,
-  shelfEnd, shoppingList, type NaturalKey, type ObjPart,
+  shoppingList, type ObjPart,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { EMBER } from '@/components/shared/tone';
@@ -179,25 +183,14 @@ const LID_BASKET = { x: 214, y: 462 };
 /** The marmalade in his basket, and the gap on the jam shelf it ends up in. */
 const OJ_BASKET = { x: 237, y: 458 };
 const OJ_ART = jamJar(0, 0, 11, 12, 'marmalade');
-const GAP = { x: 327, y: 444.5 };
 /** Her shopping list, clipped above her grip; and where it lands on the floor. */
 const LIST_ON = { dx: 0, y: 451 };
 const LIST_DOWN = { x: 96, y: 505 };
 const LIST_ART = shoppingList(0, 0, 12, 14);
 
-// ── the shelving at the end of the aisle, and its jam ────────────────────────
-const SHELF_ART = shelfEnd(354, 436, 84, 128);
-const JAR_XS = [327, 341, 355, 369, 383];
-const ROWS: { y: number; fills: NaturalKey[] }[] = [
-  { y: 390.5, fills: ['marmalade', 'marmalade', 'marmalade', 'marmalade', 'marmalade'] },
-  { y: 418.5, fills: ['blackcurrant', 'blackcurrant', 'blackcurrant', 'blackcurrant', 'blackcurrant'] },
-  { y: GAP.y, fills: ['jam', 'jam', 'jam', 'jam', 'jam'] },
-  { y: 470.5, fills: ['jam', 'marmalade', 'jam', 'marmalade', 'jam'] },
-];
-/** Every jar on the shelves but the one she took: the first on the third shelf. */
-const SHELF_JARS: ObjPart[] = ROWS.flatMap((r, k) => JAR_XS.flatMap((x, j) => (
-  k === 2 && j === 0 ? [] : jamJar(x, r.y, 11, 12, r.fills[j])
-)));
+// ── the shelving at the end of the aisle: one drawn picture (psych2-shelving), the jam
+// jars on it included. The gap she took her jar from is the third shelf's first place. ──
+const GAP = { x: 327, y: 444.5 };
 
 // ── hung from the ceiling ────────────────────────────────────────────────────
 const SIGN = { x: 150, y: 306, w: 160, h: 56 };
@@ -323,6 +316,12 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   const heldH = useHeld();
   const cv = useCarry(19);
   const on = useLinger(i);
+  // the tap's physical answer: 0 → 1 over 0.9s from the moment a pick is made
+  const kick = useSharedValue(0);
+  useEffect(() => {
+    kick.value = 0;
+    if (picked) kick.value = withTiming(1, { duration: 900, easing: Easing.linear });
+  }, [picked, kick]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -541,20 +540,20 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={SHELF_ART} tone={TONE} line={1.6} />
-      <ObjectArt parts={SHELF_JARS} tone={TONE} line={0.8} />
+      <LessonPicture name="psych2-shelving" />
       <ObjectArt parts={SIGN_ART} tone={TONE} line={1.4} />
       <Sign S={SCENE} />
       <ObjectArt parts={MOUNT_ART} tone={TONE} line={1} />
-      <Camera S={SCENE} clock={clock} />
+      <Camera S={SCENE} clock={clock} kick={kick} picked={picked} />
       <ObjectArt parts={SCREEN_ART} tone={TONE} line={1.2} />
       <Monitor S={SCENE} />
+      <LessonPicture name="psych2-tiles" />
       <View style={styles.ground} pointerEvents="none" />
       <BasketBits S={SCENE} />
       <Trolley S={SCENE} k="tb" dir={1} />
       <Trolley S={SCENE} k="tc" dir={-1} />
-      <Spill S={SCENE} />
-      <List S={SCENE} />
+      <Spill S={SCENE} kick={kick} picked={picked} />
+      <List S={SCENE} kick={kick} picked={picked} />
       {/* cast: tophat */}
       <Stickman D={DH} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: bun */}
@@ -562,10 +561,21 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <InHand S={SCENE} DC={DC} />
-      {on(Q1) ? <WordTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
+      {on(Q1) ? <WordTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} kick={kick} /> : null}
       {on(Q2) ? <WitnessTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
   );
+}
+
+/** A decaying wobble, 0 → 1 in `k`: a knock that settles. */
+function wobble(k: number): number {
+  'worklet';
+  return Math.exp(-4.2 * k) * Math.sin(k * 20);
+}
+/** A pop and settle: up fast, a small overshoot, home. */
+function pop(k: number): number {
+  'worklet';
+  return Math.exp(-5 * k) * Math.sin(k * 11);
 }
 
 // ── things that ride: drawn about their own centre, moved by a transform ─────
@@ -632,12 +642,15 @@ function BasketBits({ S }: { S: SharedValue<any> }) {
 }
 
 /** The jam on the floor: the pool spreads out from under the broken base. */
-function Spill({ S }: { S: SharedValue<any> }) {
+function Spill({ S, kick, picked }: { S: SharedValue<any>; kick: SharedValue<number>; picked: string | null }) {
+  const mine = picked === 'jam';
   const st = useAnimatedStyle(() => {
     const u = clamp01((S.value.fall - 0.94) / 0.06);
+    const w = mine ? wobble(kick.value) : 0;
+    // a wrong tap squelches the pool: it flattens and springs back
     return {
       opacity: u,
-      transform: [{ scaleX: 0.55 + 0.45 * u }],
+      transform: [{ scaleX: 0.55 + 0.45 * u + 0.18 * w }, { scaleY: 1 - 0.35 * w }],
     };
   });
   return (
@@ -648,16 +661,18 @@ function Spill({ S }: { S: SharedValue<any> }) {
 }
 
 /** Her shopping list: clipped above her grip, then drifting down to the floor. */
-function List({ S }: { S: SharedValue<any> }) {
+function List({ S, kick, picked }: { S: SharedValue<any>; kick: SharedValue<number>; picked: string | null }) {
+  const mine = picked === 'list';
   const at = useDerivedValue(() => {
     const u = S.value.list;
+    const w = mine ? wobble(kick.value) : 0;
     const x0 = S.value.tb + LIST_ON.dx;
     const sway = 7 * Math.sin(u * Math.PI * 3) * (1 - u);
     return {
       x: lerp(x0, LIST_DOWN.x, u) + sway,
-      y: lerp(LIST_ON.y, LIST_DOWN.y, u * u),
+      y: lerp(LIST_ON.y, LIST_DOWN.y, u * u) - 5 * Math.abs(w),
       o: 1,
-      r: 30 * Math.sin(u * Math.PI * 3) * (1 - u) - 14 * u,
+      r: 30 * Math.sin(u * Math.PI * 3) * (1 - u) - 14 * u + 40 * w,
       sy: 1 - 0.3 * u,
     };
   });
@@ -736,9 +751,11 @@ function Sign({ S }: { S: SharedValue<any> }) {
 
 // ── the ceiling camera, turning on its joint, its light blinking ─────────────
 
-function Camera({ S, clock }: { S: SharedValue<any>; clock: SharedValue<number> }) {
+function Camera({ S, clock, kick, picked }: { S: SharedValue<any>; clock: SharedValue<number>; kick: SharedValue<number>; picked: string | null }) {
+  const mine = picked === 'camera';
+  // the right answer: the camera snaps down at the trolleys and settles, as if it had caught it
   const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: PIVOT.x }, { translateY: PIVOT.y }, { rotate: `${S.value.aim}deg` }],
+    transform: [{ translateX: PIVOT.x }, { translateY: PIVOT.y }, { rotate: `${S.value.aim + (mine ? 16 * pop(kick.value) : 0)}deg` }],
   }));
   const rec = useAnimatedStyle(() => ({ opacity: 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(clock.value * 3.1)) }));
   return (
@@ -799,7 +816,7 @@ const WORD_Q = [
   { id: 'bumped', correct: false },
   { id: 'smashed', correct: true },
 ];
-function WordTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
+function WordTargets({ picked, onPick, live, S, kick }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; kick: SharedValue<number> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
   return (
@@ -810,11 +827,25 @@ function WordTargets({ picked, onPick, live, S }: { picked: string | null; onPic
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: SLAT_L + 1, top: SLAT_TOP + k * SLAT_H + 1, width: SLAT_W - 2, height: SLAT_H - 2 }}
         >
-          <View style={styles.slatIn}>
-            <Text style={styles.slatWordIn}>{SLAT_WORDS[1][k]}</Text>
-          </View>
+          <SlatPlate k={k} mine={picked === q.id} ok={q.correct} kick={kick} />
         </Target>
       ))}
+    </Animated.View>
+  );
+}
+
+/** One slat as a struck white plate on a hard ledge. Right: it stamps down and settles; wrong: it shakes. */
+function SlatPlate({ k, mine, ok, kick }: { k: number; mine: boolean; ok: boolean; kick: SharedValue<number> }) {
+  const st = useAnimatedStyle(() => {
+    if (!mine) return {};
+    const kv = kick.value;
+    return ok
+      ? { transform: [{ translateY: 1.6 * pop(kv) }, { scale: 1 + 0.1 * pop(kv) }] }
+      : { transform: [{ translateX: 3 * wobble(kv) }] };
+  });
+  return (
+    <Animated.View style={[styles.slatIn, st]}>
+      <Text style={styles.slatWordIn}>{SLAT_WORDS[1][k]}</Text>
     </Animated.View>
   );
 }
@@ -880,10 +911,13 @@ const styles = StyleSheet.create({
     backgroundColor: NATURAL.jam.base,
   },
   clear: { flexGrow: 1 },
-  slatIn: { flexGrow: 1, justifyContent: 'center', paddingLeft: 5 },
+  slatIn: {
+    flexGrow: 1, justifyContent: 'center', paddingLeft: 5, backgroundColor: NATURAL.paper.base,
+    borderRadius: PLATE_RADIUS / 2.5, boxShadow: lipOf(TONE),
+  },
   slatWordIn: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.6,
-    color: NATURAL.signBoard.label, includeFontPadding: false,
+    alignSelf: 'stretch', fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 11, letterSpacing: 0.6,
+    color: NATURAL.paper.label, includeFontPadding: false,
   },
   spillAt: { transformOrigin: `${SPLAT.x}px ${SPLAT.y}px` },
 });

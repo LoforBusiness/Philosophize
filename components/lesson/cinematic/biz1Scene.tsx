@@ -1,11 +1,15 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './biz1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, coin, lemonStand, standCounter, lemon, lemonadeJug, reamer, paperCup, cupStack, cashTin, tinLid,
+  NATURAL, tint, coin, standCounter, lemon, lemonadeJug, paperCup, cupStack, cashTin, tinLid,
   lemonCrateBack, lemonCrateFront, queueSign, cupBin, STAND_SLATE,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -218,8 +222,10 @@ const JUG_Y = { grab: JUG_GRAB.y, held: 458, pour: 440 };
 const TIP_DEG = -55;
 const LIP_OFF = { x: -14.8, y: -7.4 };
 
-const STAND_ART = lemonStand(STAND.x, STAND.y, STAND.w, STAND.h);
-const COUNTER_ART = standCounter(276, 488, 168, 24);
+// The stand's frame, sign, slate and valance are one drawing (scripts/lib/lessonart/lessons/biz1.mjs,
+// LESSON_RULES AM13), at the box the shape-built stand had. The counter reaches 4 units under
+// the ground line, so it stands ON the pavement and hides the feet of the two behind it.
+const COUNTER_ART = standCounter(276, 490, 168, 28);
 const TIN_ART = cashTin(TIN_AT.x, TIN_AT.y, 24, 14);
 const STACK_ART = cupStack(254, TOP - 10, 9, 20);
 const SIGN_ART = queueSign(78, 458, 60, 84);
@@ -231,7 +237,7 @@ const LID_ART = tinLid(13, 8, 26, 16);
 // The things that move are drawn about the point a hand holds them by.
 // The jug about its handle: the handle is 7.9 right of its middle and 0.5 below it.
 const JUG_ART = lemonadeJug(-7.9, -0.5, 18, 23);
-const REAMER_ART = reamer(9, 0, 22, 8);
+// The reamer is a drawing (biz1-reamer), laid in reamer(9, 0, 22, 8)'s box: held by its handle's end.
 const LEMON_ART = lemon(0, 0, 11, 8);
 const CUP_ART = paperCup(0, 0, 10, 13);
 const COIN_ART = tint(coin(0, 0, 8, 8), 'silver');
@@ -581,10 +587,11 @@ export default function Biz1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
+      <View style={styles.ground} pointerEvents="none" />
       <ObjectArt parts={BIN_ART} tone={TONE} line={1.8} />
       <ObjectArt parts={SIGN_ART} tone={TONE} line={1.8} />
       <QueueCard />
-      <ObjectArt parts={STAND_ART} tone={TONE} />
+      <LessonPicture name="biz1-stand" />
       <Board S={SCENE} />
       {/* cast: cap */}
       <Stickman D={DM} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
@@ -595,7 +602,6 @@ export default function Biz1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <TinInside S={SCENE} />
       <ObjectArt parts={STACK_ART} tone={TONE} line={1.4} />
       <Crate S={SCENE} />
-      <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DA} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       <Goods S={SCENE} DP={DP} DA={DA} DM={DM} />
@@ -654,9 +660,9 @@ function Crate({ S }: { S: SharedValue<any> }) {
 
 // ── the things on the counter, and the ones in people's hands ────────────────
 
-function Rider({ at, art, line, lift }: {
-  at: { readonly value: { x: number; y: number; o: number; r?: number; sx?: number } }; art: ReturnType<typeof coin>;
-  line?: number; lift?: boolean;
+function Rider({ at, art, pic, line, lift }: {
+  at: { readonly value: { x: number; y: number; o: number; r?: number; sx?: number } }; art?: ReturnType<typeof coin>;
+  pic?: string; line?: number; lift?: boolean;
 }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
@@ -666,7 +672,7 @@ function Rider({ at, art, line, lift }: {
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} line={line} />
+      {pic ? <LessonPicture name={pic} /> : art ? <ObjectArt parts={art} tone={TONE} line={line} /> : null}
     </Animated.View>
   );
 }
@@ -701,7 +707,7 @@ function Goods({ S, DP, DA, DM }: {
     if (u <= 2) return poundAt(u);
     const pt = at(DP, 'wrR');
     const v = u - 2;
-    return { x: lerp(pt.x, TIN_MOUTH.x - 3, v), y: lerp(pt.y, TIN_MOUTH.y + 4, v), o: 1 - clamp01((v - 0.6) / 0.4) };
+    return { x: lerp(pt.x, TIN_MOUTH.x - 3, v), y: lerp(pt.y, TIN_MOUTH.y + 4, v * v) - 7 * Math.sin(Math.PI * v), o: 1 - clamp01((v - 0.6) / 0.4) };
   });
   const cbP = useDerivedValue(() => {
     const u = S.value.cb;
@@ -712,10 +718,10 @@ function Goods({ S, DP, DA, DM }: {
     const pt = at(DP, 'wrR');
     const mk = at(DM, 'wrR');
     if (u <= 3) return { x: lerp(pt.x, SLIDE_A.x, u - 2), y: lerp(pt.y, SLIDE_A.y, u - 2), o: 1 };
-    if (u <= 4) return { x: lerp(SLIDE_A.x, SLIDE_B.x, u - 3), y: SLIDE_A.y, o: 1 };
+    if (u <= 4) { const w = u - 3; return { x: lerp(SLIDE_A.x, SLIDE_B.x, 1 - (1 - w) * (1 - w)), y: SLIDE_A.y, o: 1 }; }
     if (u <= 5) return { x: lerp(SLIDE_B.x, mk.x, u - 4), y: lerp(SLIDE_B.y, mk.y, u - 4), o: 1 };
     const v = u - 5;
-    return { x: lerp(mk.x, CRATE_MOUTH.x, v), y: lerp(mk.y, CRATE_MOUTH.y + 4, v), o: 1 - clamp01((v - 0.6) / 0.4) };
+    return { x: lerp(mk.x, CRATE_MOUTH.x, v), y: lerp(mk.y, CRATE_MOUTH.y + 4, v * v) - 6 * Math.sin(Math.PI * v), o: 1 - clamp01((v - 0.6) / 0.4) };
   });
   // His cup is in his right hand, so the second pound and the coin held up are in his left.
   const ccP = useDerivedValue(() => {
@@ -723,7 +729,7 @@ function Goods({ S, DP, DA, DM }: {
     const ad = at(DA, 'wrL');
     if (u <= 1) return { x: ad.x, y: ad.y, o: clamp01(u) };
     const v = u - 1;
-    return { x: lerp(ad.x, TIN_MOUTH.x + 3, v), y: lerp(ad.y, TIN_MOUTH.y + 4, v), o: 1 - clamp01((v - 0.6) / 0.4) };
+    return { x: lerp(ad.x, TIN_MOUTH.x + 3, v), y: lerp(ad.y, TIN_MOUTH.y + 4, v * v) - 7 * Math.sin(Math.PI * v), o: 1 - clamp01((v - 0.6) / 0.4) };
   });
   const proofP = useDerivedValue(() => {
     const ad = at(DA, 'wrL');
@@ -782,7 +788,7 @@ function Goods({ S, DP, DA, DM }: {
       <Rider at={jugP} art={JUG_ART} line={1.6} />
       <Animated.View style={[styles.pour, pourSt]} pointerEvents="none" />
       <Rider at={cupP} art={CUP_ART} line={1.3} />
-      <Rider at={sqzP} art={REAMER_ART} line={1.3} />
+      <Rider at={sqzP} pic="biz1-reamer" />
       <Rider at={lemon0P} art={LEMON_ART} line={1.2} />
       <Rider at={lemon1P} art={LEMON_ART} line={1.2} />
       <Rider at={caP} art={COIN_ART} line={1.1} lift />
@@ -814,37 +820,79 @@ function Board({ S }: { S: SharedValue<any> }) {
 
 // ── the two questions ────────────────────────────────────────────────────────
 
-/** Q1: three tags hung from the counter, each with its coins. The profit is what is left. */
+/**
+ * THE ANSWER, ON THE THING TAPPED (both questions). A right tag or row POPS — a quick
+ * rise past its size and a spring back down onto its ledge; a wrong one SHAKES its head
+ * side to side, hard first and dying away, and the chalk strikes it out. Both run once, on
+ * the tap, after the Target's own rise and seal.
+ */
+function Jolt({ picked, id, correct, strike, children }: {
+  picked: string | null; id: string; correct: boolean; strike?: boolean; children: ReactNode;
+}) {
+  const pop = useSharedValue(1);
+  const shake = useSharedValue(0);
+  const cross = useSharedValue(0);
+  useEffect(() => {
+    if (picked !== id) return;
+    if (correct) {
+      pop.value = withSequence(
+        withTiming(1.16, { duration: 130, easing: Easing.out(Easing.quad) }),
+        withSpring(1, { damping: 7, stiffness: 240, mass: 0.6 }),
+      );
+    } else {
+      shake.value = withSequence(
+        withTiming(-4, { duration: 55 }), withTiming(3.4, { duration: 90 }), withTiming(-2.4, { duration: 85 }),
+        withTiming(1.4, { duration: 80 }), withTiming(0, { duration: 90, easing: Easing.out(Easing.quad) }),
+      );
+      cross.value = withSequence(withTiming(0, { duration: 380 }), withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) }));
+    }
+  }, [picked, id, correct, pop, shake, cross]);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }, { rotate: `${shake.value * 0.9}deg` }, { scale: pop.value }] }));
+  const line = useAnimatedStyle(() => ({ opacity: cross.value > 0.01 ? 1 : 0, transform: [{ scaleX: cross.value }] }));
+  return (
+    <Animated.View style={[styles.jolt, st]}>
+      {children}
+      {strike ? <Animated.View style={[styles.strike, line]} pointerEvents="none" /> : null}
+    </Animated.View>
+  );
+}
+
+/** Q1: three price tags hung by a string from the counter's lip, each with its coins. The profit is what is left. */
 const TAG_W = 48;
-const TAG_H = 32;
+const TAG_H = 31;
 const TALLY_Q = [
   { id: 'paid', l1: 'PAID', l2: 'IN', coins: 2, x: 234, correct: false },
   { id: 'costs', l1: 'LEMONS &', l2: 'SUGAR', coins: 1, x: 283, correct: false },
   { id: 'left', l1: 'LEFT', l2: 'OVER', coins: 1, x: 332, correct: true },
 ];
-const TAG_COIN = tint(coin(4.5, 4.5, 8, 8), 'silver');
+const TAG_COIN = tint(coin(5, 5, 10, 10), 'silver');
 function TallyTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {TALLY_Q.map((q) => (
+        <View key={`s${q.id}`} style={[styles.tagString, { left: q.x - 0.6 }]} pointerEvents="none" />
+      ))}
+      {TALLY_Q.map((q) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={4}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={6}
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: q.x - TAG_W / 2, top: TOP + 2, width: TAG_W, height: TAG_H }}
         >
-          <View style={styles.tag}>
-            <View style={styles.tagCoins}>
-              {Array.from({ length: q.coins }, (_, k) => (
-                <View key={k} style={styles.tagCoin}>
-                  <ObjectArt parts={TAG_COIN} tone={TONE} line={1} />
-                </View>
-              ))}
+          <Jolt picked={picked} id={q.id} correct={q.correct}>
+            <View style={styles.tag}>
+              <View style={styles.tagCoins}>
+                {Array.from({ length: q.coins }, (_, k) => (
+                  <View key={k} style={styles.tagCoin}>
+                    <ObjectArt parts={TAG_COIN} tone={TONE} line={0.9} />
+                  </View>
+                ))}
+              </View>
+              <Text style={styles.tagText}>{q.l1}</Text>
+              <Text style={styles.tagText}>{q.l2}</Text>
             </View>
-            <Text style={styles.tagText}>{q.l1}</Text>
-            <Text style={styles.tagText}>{q.l2}</Text>
-          </View>
+          </Jolt>
         </Target>
       ))}
     </Animated.View>
@@ -865,13 +913,15 @@ function SplitTargets({ picked, onPick, live, S }: { picked: string | null; onPi
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {SPLIT_Q.map((q, k) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: SLATE.left + 4, top: SLATE.top + k * ROW_H + 1.5, width: SLATE.w - 8, height: ROW_H - 3 }}
+          style={{ position: 'absolute', left: SLATE.left + 6, top: SLATE.top + k * ROW_H + 1.2, width: SLATE.w - 12, height: ROW_H - 4.2 }}
         >
-          <View style={styles.choice}>
-            <Text style={styles.choiceText}>{q.label}</Text>
-          </View>
+          <Jolt picked={picked} id={q.id} correct={q.correct} strike>
+            <View style={styles.choice}>
+              <Text style={styles.choiceText}>{q.label}</Text>
+            </View>
+          </Jolt>
         </Target>
       ))}
     </Animated.View>
@@ -888,8 +938,11 @@ const styles = StyleSheet.create({
     position: 'absolute', left: 50, top: 419, width: 56, height: 31,
     alignItems: 'center', justifyContent: 'center',
   },
+  // AQ2: every free word is stretched across the plate it sits on, so the slack beside
+  // its letters holds a Caveat letter's ink past its last advance
   queueText: {
     fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 13.5, color: INK, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   inCoin: {
     position: 'absolute', top: TIN_AT.y - 5, width: 7, height: 3, borderRadius: 1.5,
@@ -904,34 +957,48 @@ const styles = StyleSheet.create({
   pour: { position: 'absolute', width: 2, borderRadius: 1, backgroundColor: NATURAL.lemonade.shade },
   slate: {
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
-    backgroundColor: NATURAL.slate.base, overflow: 'hidden',
+    overflow: 'hidden',
   },
-  chalkBlock: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
+  chalkBlock: { flexGrow: 1, width: SLATE.w, alignItems: 'center', justifyContent: 'center' },
   overlay: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   chalkHead: {
     fontFamily: 'Caveat_700Bold', fontSize: 22, lineHeight: 24, color: PAPER_LIT, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   chalkPrice: {
     fontFamily: 'Caveat_700Bold', fontSize: 16, lineHeight: 18, color: PAPER_LIT, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   chalkHeadSmall: {
     fontFamily: 'Caveat_700Bold', fontSize: 18, lineHeight: 20, color: PAPER_LIT, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   chalkRule: {
-    fontFamily: 'Caveat_700Bold', fontSize: 14, lineHeight: 16, color: PAPER_LIT, includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 15, color: PAPER_LIT, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
+  // the answers are struck plates (group AG): a white face lit along its top, on a hard
+  // ledge of the road's own shade, casting onto what is under it
+  jolt: { flexGrow: 1 },
+  strike: {
+    position: 'absolute', left: 8, right: 8, top: '50%', height: 1.8, marginTop: -0.9, borderRadius: 1,
+    backgroundColor: INK, transformOrigin: '0% 50%',
+  },
+  tagString: { position: 'absolute', top: TOP - 2, width: 1.2, height: 5, borderRadius: 0.6, backgroundColor: INK },
   tag: {
-    flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 1,
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    flexGrow: 1, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: PLATE_FACE, borderRadius: 6, borderWidth: 1.2, borderColor: INK,
+    boxShadow: `inset 0px 1.5px 0px rgba(255, 255, 255, 0.85), 0px 2.5px 0px ${TONE.SHADE}, 0px 3.5px 0px rgba(26, 26, 26, 0.14)`,
   },
-  tagCoins: { flexDirection: 'row', gap: 1, height: 9, marginBottom: 1 },
-  tagCoin: { width: 9, height: 9 },
+  tagCoins: { flexDirection: 'row', gap: 1, height: 9.5, marginBottom: 0.5 },
+  tagCoin: { width: 9.5, height: 9.5 },
   tagText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.6, letterSpacing: 0, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.4, letterSpacing: 0, color: INK, includeFontPadding: false,
   },
   choice: {
     flexGrow: 1, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 5, borderWidth: 1.2, borderColor: INK,
+    boxShadow: `inset 0px 1.2px 0px rgba(255, 255, 255, 0.85), 0px 2.4px 0px ${TONE.SHADE}, 0px 3.4px 0px rgba(0, 0, 0, 0.3)`,
   },
   choiceText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.1, color: INK, includeFontPadding: false,

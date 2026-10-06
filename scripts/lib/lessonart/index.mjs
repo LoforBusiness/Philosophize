@@ -28,3 +28,22 @@ export const ART = [
   { name: 'econ5-rat-b', svg: ratRunB, view: { x: 0, y: 0, w: 38, h: 13 }, box: { x: -15, y: -9.93, w: 30, h: 10.26 } },
   { name: 'econ5-rat-peek', svg: ratPeek, view: { x: 0, y: 0, w: 16, h: 13 }, box: { x: -8.5, y: -13.9, w: 17, h: 13.81 } },
 ];
+
+// ── one module a lesson ──────────────────────────────────────────────────────
+// scripts/lib/lessonart/lessons/<stem>.mjs exports `ART`, an array shaped like the one
+// above, with every name prefixed `<stem>-`. A module a lesson means two people drawing
+// two lessons never write the same file, and a lesson's pictures live beside each other.
+{
+  const fs = await import('node:fs');
+  const url = await import('node:url');
+  const dir = url.fileURLToPath(new URL('./lessons/', import.meta.url));
+  if (fs.existsSync(dir)) {
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.mjs')).sort()) {
+      const mod = await import(url.pathToFileURL(`${dir}${f}`).href);
+      for (const a of mod.ART || []) {
+        if (ART.some((b) => b.name === a.name)) throw new Error(`lessonart: two pictures are called ${a.name} (${f})`);
+        ART.push(a);
+      }
+    }
+  }
+}

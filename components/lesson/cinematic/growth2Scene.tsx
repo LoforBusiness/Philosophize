@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './growth2Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, seated, travelStance, mixKeepLegs,
@@ -15,15 +17,15 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo, sipHandAt, sipTilt, sipHead, lipsAt } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, table, kitchenWindow, kitchenUnit, splashback, wallClock, kettle, mug, biscuitJar, jarLid, biscuit,
-  kitchenChair, fruitBowl, fruitBowlFront, chocolateBar, apple, notepad, pencil, LID_HINGE,
+  NATURAL, tint, kitchenWindow, kitchenUnit, splashback, wallClock, kettle, mug, jarLid, biscuit,
+  fruitBowl, fruitBowlFront, chocolateBar, apple, notepad, pencil, LID_HINGE,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -195,10 +197,6 @@ const SPLASH_ART = splashback(WORKTOP.x, 456, WORKTOP.w, 40);
 const UNIT_ART = kitchenUnit(WORKTOP.x, 488, WORKTOP.w, 24);
 const CLOCK_ART = wallClock(CLOCK.x, CLOCK.y, CLOCK.d, CLOCK.d);
 const KETTLE_ART = kettle(184, TOP - 11, 20, 22);
-const JAR_ART = biscuitJar(JAR.x, JAR.y, JAR.w, JAR.h);
-const TABLE_ART = tint(table(290, 482, 84, 36), 'wood');
-const CAP_CHAIR_ART = kitchenChair(CAP_CHAIR, GROUND - CHAIR_H / 2, CHAIR_W, CHAIR_H, 'left');
-const PL_CHAIR_ART = kitchenChair(PL_CHAIR, GROUND - CHAIR_H / 2, CHAIR_W, CHAIR_H, 'right');
 const CHOC_ART = chocolateBar(CHOC.x, CHOC.y, 20, 7);
 // The things that move are drawn about the point they are held or turned by.
 const MUG_ART = mug(-MUG_GRIP, 0, MUG_W, MUG_H);
@@ -582,13 +580,13 @@ export default function Growth2Scene({ clock, bt, bi, i, picked, onPick }: Scene
       <ObjectArt parts={UNIT_ART} tone={TONE} />
       <ObjectArt parts={KETTLE_ART} tone={TONE} />
       <Steam S={SCENE} from="kettle" />
-      <ObjectArt parts={JAR_ART} tone={TONE} />
+      <LessonPicture name="growth2-jar" />
       <Lid S={SCENE} />
       <Bowl S={SCENE} />
-      <ObjectArt parts={TABLE_ART} tone={TONE} />
+      <LessonPicture name="growth2-table" />
       <ObjectArt parts={CHOC_ART} tone={TONE} />
-      <ObjectArt parts={CAP_CHAIR_ART} tone={TONE} />
-      <ObjectArt parts={PL_CHAIR_ART} tone={TONE} />
+      <LessonPicture name="growth2-chair-cap" />
+      <LessonPicture name="growth2-chair-pl" />
       <View style={styles.ground} pointerEvents="none" />
       <Pad S={SCENE} />
       {/* cast: tophat */}
@@ -755,12 +753,43 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
           <View style={styles.place}>
-            <View style={[styles.namePlate, { left: (q.w - q.pw) / 2, width: q.pw }]}>
-              <Text style={styles.nameText}>{q.label}</Text>
-            </View>
+            <PlateReact id={q.id} correct={q.correct} picked={picked} left={(q.w - q.pw) / 2} width={q.pw} label={q.label} />
           </View>
         </Target>
       ))}
+    </Animated.View>
+  );
+}
+
+
+/**
+ * A choice's name plate: struck white on a hard ledge. The plate the reader tapped
+ * reacts on the stage: the right one pops up and settles back with a bounce, the wrong
+ * one shakes side to side and drops a little, and the plate nobody tapped stays put.
+ */
+function PlateReact({ id, correct, picked, left, width, label }: {
+  id: string; correct: boolean; picked: string | null; left: number; width: number; label: string;
+}) {
+  const hop = useSharedValue(0);
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    if (picked !== id) { hop.value = 0; shake.value = 0; return; }
+    if (correct) {
+      hop.value = withSequence(withTiming(-5, { duration: 130, easing: Easing.out(Easing.quad) }), withSpring(0, { damping: 6, stiffness: 260 }));
+    } else {
+      shake.value = withSequence(
+        withTiming(-3, { duration: 55 }), withTiming(3, { duration: 90 }), withTiming(-2.4, { duration: 90 }),
+        withTiming(1.6, { duration: 80 }), withTiming(0, { duration: 70 }),
+      );
+      hop.value = withSequence(withTiming(1.6, { duration: 120 }), withTiming(0.8, { duration: 200 }));
+    }
+  }, [picked]);
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }, { translateY: hop.value }] }));
+  const won = picked === id && correct;
+  const lost = picked === id && !correct;
+  return (
+    <Animated.View style={[styles.namePlate, { left, width }, won ? styles.plateWon : null, lost ? styles.plateLost : null, st]}>
+      <Text style={[styles.nameText, won || lost ? styles.nameOn : null]}>{label}</Text>
     </Animated.View>
   );
 }
@@ -799,11 +828,14 @@ const styles = StyleSheet.create({
   },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 2, backgroundColor: PLATE_FACE, borderRadius: PLATE_RADIUS / 2, borderWidth: 1,
+    borderColor: INK, paddingVertical: 1, boxShadow: `0 2px 0 ${lipOf(TONE)}`,
   },
+  plateWon: { backgroundColor: NATURAL.leaf.base },
+  plateLost: { backgroundColor: NATURAL.clockRed.base },
+  nameOn: { color: PAPER_LIT },
   nameText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center',
   },
 });
 

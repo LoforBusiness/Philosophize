@@ -1,11 +1,15 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './biz4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,8 +26,8 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, foodTruck, truckCounter, truckMenu, cashBoxBack, cashBoxFront, cashBoxLid, b4Note, receiptSlip,
-  receiptSpike, pocketCalc, vanBoard, bakeryFront, roadway, type NaturalKey,
+  NATURAL, truckCounter, cashBoxBack, cashBoxFront, cashBoxLid, b4Note, receiptSlip,
+  receiptSpike, pocketCalc, vanBoard, roadway, type NaturalKey,
 } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
@@ -153,12 +157,13 @@ const TH_P = [LISTEN, LISTEN, EXPLAIN, EXPLAIN, NOD, NOD, EXPLAIN, NOD, NOD, NOD
 // ── the van and what is on its counter ───────────────────────────────────────
 const TOP = 466;                                      // the counter's top, at their hip
 const HATCH = { left: 140, top: 404, w: 148, h: 62 };
-const TRUCK_ART = foodTruck(152, 417, 300, 166);
+// The truck (2–302 × 334–500) and the bakery (308–398 × 318–466) are PICTURES now
+// (LESSON_RULES AM13): biz4-truck and biz4-bakery, drawn in scripts/lib/lessonart/lessons/biz4.mjs
+// against photographs of real step-van food trucks and an old bakery front, each in the box
+// of the shape-built object it replaced. The menu slate is painted on the truck's picture.
 const COUNTER_ART = truckCounter(214, 476, 160, 20);
 const MENU = { x: 214, y: 368, w: 108, h: 32 };
-const MENU_ART = truckMenu(MENU.x, MENU.y, MENU.w, MENU.h);
 const ROAD_ART = roadway(200, 483, 420, 34);
-const BAKERY_ART = bakeryFront(353, 392, 90, 148);
 /** The bakery's fascia, where its name is painted. */
 const FASCIA = { left: 308, top: 371, w: 90, h: 14 };
 
@@ -322,6 +327,24 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   const heldT = useHeld();
   const cv = useCarry(23);
   const on = useLinger(i);
+  // THE GAMES ANSWER BACK: which of the three was tapped on each graded beat, and how many
+  // seconds ago (one clock a question, so answering the second never replays the first).
+  // The cash box rattles, the menu shakes its head, the fuel receipt hops off the counter;
+  // on the board a wrong amount is struck through in red chalk and the right one ringed.
+  const pick1 = useSharedValue(-1);
+  const pick2 = useSharedValue(-1);
+  const since1 = useSharedValue(0);
+  const since2 = useSharedValue(0);
+  useEffect(() => {
+    const ids = Q1[i] ? COST_Q.map((q) => q.id) : Q2[i] ? PROFIT_Q.map((q) => q.id) : null;
+    if (!ids) return;
+    const k = picked === null ? -1 : ids.indexOf(picked);
+    const pk = Q1[i] ? pick1 : pick2;
+    const sc = Q1[i] ? since1 : since2;
+    pk.value = k;
+    sc.value = 0;
+    if (k >= 0) sc.value = withTiming(8, { duration: 8000, easing: Easing.linear });
+  }, [picked, i, pick1, pick2, since1, since2]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -474,6 +497,28 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // the van's lights, switched off at closing
     const lightsNow = A_REST[n] ? 1 - st(0.1, 0.4) : n > REST_N ? 0 : 1;
 
+    // ── the answers, answered back ─────────────────────────────────────────
+    const r1 = since1.value;
+    const r2 = since2.value;
+    const k1 = pick1.value;
+    const k2 = pick2.value;
+    const g1 = clamp01(r1 / 0.9);
+    const g2 = clamp01(r2 / 0.9);
+    // a wrong thing shudders, quick and then dying away
+    const shudder = (r: number, g: number) => {
+      'worklet';
+      return 2.2 * Math.sin(r * 36) * (1 - g) * (1 - g);
+    };
+    // the fuel receipt hops: a dip, up and over, a small bounce on landing
+    const hopUp = k1 === 1
+      ? 1.2 * Math.sin(Math.PI * clamp01(r1 / 0.08)) * (r1 < 0.08 ? 1 : 0)
+        - 9 * Math.sin(Math.PI * clamp01((r1 - 0.08) / 0.42))
+        - 2 * Math.sin(Math.PI * clamp01((r1 - 0.5) / 0.18))
+      : 0;
+    const hopTurn = k1 === 1 ? 14 * Math.sin(2 * Math.PI * clamp01((r1 - 0.08) / 0.42)) * (1 - clamp01((r1 - 0.5) / 0.3)) : 0;
+    // the right amount is ringed in chalk; after a wrong one, a beat later
+    const ringU = k2 === 1 ? clamp01(r2 / 0.35) : k2 >= 0 ? clamp01((r2 - 0.75) / 0.35) : 0;
+
     return {
       pl, cp, th, t,
       lid,
@@ -481,7 +526,10 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       notes: { x: lerp(NOTES_IN.x, wPR.x, notesIn), y: lerp(NOTES_IN.y, wPR.y + 6, notesIn), o: Math.max(notesIn, clamp01(lid * 3)) },
       fan,
       slip0: slipAt(0, s0),
-      slip1: slipAt(1, s1),
+      slip1: (() => {
+        const a = slipAt(1, s1);
+        return { ...a, y: a.y + hopUp, r: a.r + hopTurn };
+      })(),
       slip2: slipAt(2, s2),
       calc: { x: lerp(wTR.x + dT * 1.5, CALC_AT.x, calc), y: lerp(wTR.y - 2.5, CALC_AT.y, calc), o: 1 },
       // the chalk held by one end, its point forward and down to the slate (AR2)
@@ -494,6 +542,12 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       lights: carry(cv, 20, n, lightsNow, lightsNow, tr),
       q1: carry(cv, 21, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 22, n, Q2[p], Q2[n], tr),
+      boxJig: k1 === 0 ? shudder(r1, g1) : 0,
+      lidJig: k1 === 0 ? 0.16 * Math.abs(Math.sin(r1 * 30)) * (1 - g1) : 0,
+      jig1: [0, 1, 2].map((k) => (k === k1 && k !== 1 ? shudder(r1, g1) : 0)),
+      jig2: [0, 1, 2].map((k) => (k === k2 && k !== 1 ? shudder(r2, g2) : 0)),
+      strike: [0, 1, 2].map((k) => (k === k2 && k !== 1 ? clamp01(r2 / 0.28) : 0)),
+      ring: ringU,
     };
   });
 
@@ -505,13 +559,12 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <ObjectArt parts={ROAD_ART} tone={TONE} />
-      <ObjectArt parts={BAKERY_ART} tone={TONE} />
+      <LessonPicture name="biz4-bakery" />
       <View style={styles.fascia} pointerEvents="none">
         <Text style={styles.fasciaText}>BAKERY</Text>
       </View>
-      <ObjectArt parts={TRUCK_ART} tone={TONE} />
+      <LessonPicture name="biz4-truck" />
       <Glow S={SCENE} />
-      <ObjectArt parts={MENU_ART} tone={TONE} />
       <Festoon S={SCENE} />
       <View style={styles.hatch} pointerEvents="none">
         <View style={styles.hatchStage}>
@@ -564,7 +617,8 @@ function Festoon({ S }: { S: SharedValue<any> }) {
 // ── the cash box, its lid and the notes in it ────────────────────────────────
 
 function CashBox({ S }: { S: SharedValue<any> }) {
-  const lid = useAnimatedStyle(() => ({ transform: [{ scaleY: lerp(0.18, 1, S.value.lid) }] }));
+  const lid = useAnimatedStyle(() => ({ transform: [{ scaleY: lerp(0.18, 1, S.value.lid) - S.value.lidJig }] }));
+  const jig = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.boxJig }] }));
   const notes = useAnimatedStyle(() => ({
     opacity: S.value.notes.o,
     transform: [{ translateX: S.value.notes.x }, { translateY: S.value.notes.y }],
@@ -572,7 +626,7 @@ function CashBox({ S }: { S: SharedValue<any> }) {
   const fanL = useAnimatedStyle(() => ({ transform: [{ rotate: `${-30 * S.value.fan}deg` }] }));
   const fanR = useAnimatedStyle(() => ({ transform: [{ rotate: `${30 * S.value.fan}deg` }] }));
   return (
-    <>
+    <Animated.View style={[StyleSheet.absoluteFill, jig]} pointerEvents="none">
       <ObjectArt parts={BOX_BACK_ART} tone={TONE} />
       <Animated.View style={[styles.lid, lid]} pointerEvents="none">
         <ObjectArt parts={LID_ART} tone={TONE} />
@@ -583,7 +637,7 @@ function CashBox({ S }: { S: SharedValue<any> }) {
         <Animated.View style={[styles.rider, fanR]}><ObjectArt parts={NOTE_ART[2]} tone={TONE} /></Animated.View>
       </Animated.View>
       <ObjectArt parts={BOX_FRONT_ART} tone={TONE} />
-    </>
+    </Animated.View>
   );
 }
 
@@ -639,6 +693,27 @@ const PROFIT_Q = [
   { id: 'three-hundred-pounds', label: '£300', correct: false },
 ];
 
+/** One of Q2's chalked amounts: it shudders if it was the wrong pick, and is struck through in red chalk. */
+function PickRow({ S, k, label }: { S: SharedValue<any>; k: number; label: string }) {
+  const row = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.jig2[k] }] }));
+  const strike = useAnimatedStyle(() => ({ width: STRIKE_W * S.value.strike[k], opacity: S.value.strike[k] > 0.02 ? 1 : 0 }));
+  const ring = useAnimatedStyle(() => {
+    const u = S.value.ring;
+    // drawn round in one go, overshooting a little and settling (an ease-out-back)
+    const c = 1.9;
+    const back = 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2);
+    return { opacity: u > 0.02 ? 1 : 0, transform: [{ rotate: '-2deg' }, { scaleX: 0.3 + 0.7 * back }] };
+  });
+  return (
+    <Animated.View style={[styles.pickRow, { top: k * PICK_ROW_H }, row]}>
+      <Text style={styles.pickText}>{label}</Text>
+      <Animated.View style={[styles.strike, strike]} />
+      {k === 1 ? <Animated.View style={[styles.ring, ring]} /> : null}
+    </Animated.View>
+  );
+}
+const STRIKE_W = 26;
+
 function Chalked({ S }: { S: SharedValue<any> }) {
   const r1 = useAnimatedStyle(() => ({ width: SLATE.w * S.value.w1, opacity: S.value.sumO }));
   const r2 = useAnimatedStyle(() => ({ width: SLATE.w * S.value.w2, opacity: S.value.sumO }));
@@ -656,11 +731,7 @@ function Chalked({ S }: { S: SharedValue<any> }) {
         </Animated.View>
       ))}
       <Animated.View style={[styles.picks, picks]} pointerEvents="none">
-        {PROFIT_Q.map((q, k) => (
-          <View key={q.id} style={[styles.pickRow, { top: k * PICK_ROW_H }]}>
-            <Text style={styles.pickText}>{q.label}</Text>
-          </View>
-        ))}
+        {PROFIT_Q.map((q, k) => <PickRow key={q.id} S={S} k={k} label={q.label} />)}
       </Animated.View>
     </>
   );
@@ -692,7 +763,8 @@ function CostTargets({ picked, onPick, live, S }: { picked: string | null; onPic
           <Text style={styles.nameText}>{q.label}</Text>
         </View>
       ) : null))}
-      {COST_Q.map((q) => (
+      {COST_Q.map((q, k) => (
+        <Jig key={q.id} S={S} q="jig1" k={k}>
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={q.under ? 2 : 4}
           disabled={answered} sealAt="tr"
@@ -706,9 +778,16 @@ function CostTargets({ picked, onPick, live, S }: { picked: string | null; onPic
             )}
           </View>
         </Target>
+        </Jig>
       ))}
     </Animated.View>
   );
+}
+
+/** A tapped thing that was wrong shakes its head: the target, its ring and its seal together. */
+function Jig({ S, q, k, children }: { S: SharedValue<any>; q: 'jig1' | 'jig2'; k: number; children: ReactNode }) {
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: S.value[q][k] }] }));
+  return <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="box-none">{children}</Animated.View>;
 }
 
 function ProfitTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
@@ -717,13 +796,14 @@ function ProfitTargets({ picked, onPick, live, S }: { picked: string | null; onP
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {PROFIT_Q.map((q, k) => (
-        <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+        <Jig key={q.id} S={S} q="jig2" k={k}>
+        <Target id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: SLATE.left + 1, top: SLATE.top + k * PICK_ROW_H + 1, width: SLATE.w - 2, height: PICK_ROW_H - 2 }}
         >
           <View style={styles.place} />
         </Target>
+        </Jig>
       ))}
     </Animated.View>
   );
@@ -771,16 +851,34 @@ const styles = StyleSheet.create({
   },
   rule: { position: 'absolute', left: 7, right: 7, top: 1, height: 1.2, borderRadius: 0.6, backgroundColor: PAPER_LIT },
   underRule: { marginTop: 3 },
-  chalkText: { fontFamily: 'Caveat_700Bold', fontSize: 12.5, lineHeight: 14, color: PAPER_LIT, includeFontPadding: false },
+  // AQ2: stretched across the slate and centred, so Caveat's ink past its last advance
+  // lands inside the Text's own box (a phone clips at the content box).
+  chalkText: {
+    alignSelf: 'stretch', textAlign: 'center',
+    fontFamily: 'Caveat_700Bold', fontSize: 12.5, lineHeight: 14, color: PAPER_LIT, includeFontPadding: false,
+  },
   picks: { position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h },
   pickRow: {
     position: 'absolute', left: 0, width: SLATE.w, height: PICK_ROW_H, alignItems: 'center', justifyContent: 'center',
   },
-  pickText: { fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 15, color: PAPER_LIT, includeFontPadding: false },
+  pickText: {
+    alignSelf: 'stretch', textAlign: 'center',
+    fontFamily: 'Caveat_700Bold', fontSize: 13, lineHeight: 15, color: PAPER_LIT, includeFontPadding: false,
+  },
   place: { flexGrow: 1 },
+  strike: {
+    position: 'absolute', left: (SLATE.w - STRIKE_W) / 2, top: PICK_ROW_H / 2 - 0.8, height: 1.7, borderRadius: 0.9,
+    backgroundColor: NATURAL.tomato.base, transform: [{ rotate: '-9deg' }],
+  },
+  ring: {
+    position: 'absolute', left: (SLATE.w - 28) / 2, top: PICK_ROW_H - 2.4, width: 28, height: 1.8, borderRadius: 1,
+    backgroundColor: NATURAL.lemon.base,
+  },
+  // a struck name plate: a white face with its lit top edge, standing on a hard ledge
   namePlate: {
-    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
+    position: 'absolute', alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2,
     borderColor: INK, paddingHorizontal: 3,
+    boxShadow: `inset 0px 1px 0px rgba(255, 255, 255, 0.9), 0px 2px 0px ${TONE.SHADE}`,
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,

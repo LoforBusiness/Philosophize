@@ -1,5 +1,9 @@
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
+import LessonPicture from './LessonPicture';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -22,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  tint, posterWall, gigPoster, matchPoster, ticketKiosk, kioskFront, ticketRoll, ticket, note20, tinTakings,
+  tint, posterWall, ticketKiosk, kioskFront, ticketRoll, ticket, note20, tinTakings,
   cashTin, wallClock,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -187,8 +191,6 @@ const SHELF_G = { x: 261, y: TOP - 1.6 };
 const PASS = { x: 262, y: 461 };
 
 const WALL_ART = posterWall(WALL.x, WALL.y, WALL.w, WALL.h);
-const GIG_ART = gigPoster(GIG.x, GIG.y, GIG.w, GIG.h);
-const MATCH_ART = matchPoster(MATCH.x, MATCH.y, MATCH.w, MATCH.h);
 const KIOSK_ART = ticketKiosk(KIOSK.x, KIOSK.y, KIOSK.w, KIOSK.h);
 const FRONT_ART = kioskFront(FRONT.x, FRONT.y, FRONT.w, FRONT.h);
 const CLOCK_ART = tint(wallClock(CLOCK.x, CLOCK.y, CLOCK.d, CLOCK.d), 'brass');
@@ -473,12 +475,20 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <ObjectArt parts={WALL_ART} tone={TONE} />
-      <ObjectArt parts={GIG_ART} tone={TONE} />
-      <ObjectArt parts={MATCH_ART} tone={TONE} />
-      <Bills />
+      <Reacts id="concert" picked={picked} cx={GIG.x} cy={GIG.y}>
+        <LessonPicture name="econ3-concert" />
+        <BillWords p={GIG_BAND} word="CONCERT" />
+      </Reacts>
+      <Reacts id="football" picked={picked} cx={MATCH.x} cy={MATCH.y}>
+        <LessonPicture name="econ3-football" />
+        <BillWords p={MATCH_BAND} word="FOOTBALL" />
+        <BillWords p={FLASH} word="FREE" flash />
+      </Reacts>
       <ObjectArt parts={KIOSK_ART} tone={TONE} />
-      <ObjectArt parts={CLOCK_ART} tone={TONE} />
-      <ClockHands S={SCENE} />
+      <Reacts id="clock" picked={picked} cx={CLOCK.x} cy={CLOCK.y}>
+        <ObjectArt parts={CLOCK_ART} tone={TONE} />
+        <ClockHands S={SCENE} />
+      </Reacts>
       <View style={styles.sign} pointerEvents="none">
         <Text style={styles.signWord}>TICKETS</Text>
       </View>
@@ -487,8 +497,10 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <ObjectArt parts={FRONT_ART} tone={TONE} />
-      <ObjectArt parts={TAKINGS_ART} tone={TONE} />
-      <ObjectArt parts={TIN_ART} tone={TONE} />
+      <Reacts id="tin" picked={picked} cx={TIN.x} cy={TIN.y}>
+        <ObjectArt parts={TAKINGS_ART} tone={TONE} />
+        <ObjectArt parts={TIN_ART} tone={TONE} />
+      </Reacts>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
@@ -503,19 +515,45 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
 // ── the bills' printed words ─────────────────────────────────────────────────
 
-function Bills() {
+/** One printed word on a bill, in a box wider than its letters (AQ2). */
+function BillWords({ p, word, flash }: { p: { left: number; top: number; w: number; h: number }; word: string; flash?: boolean }) {
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={[styles.band, { left: GIG_BAND.left, top: GIG_BAND.top, width: GIG_BAND.w, height: GIG_BAND.h }]}>
-        <Text style={styles.bandWord}>CONCERT</Text>
-      </View>
-      <View style={[styles.band, { left: MATCH_BAND.left, top: MATCH_BAND.top, width: MATCH_BAND.w, height: MATCH_BAND.h }]}>
-        <Text style={styles.bandWord}>FOOTBALL</Text>
-      </View>
-      <View style={[styles.band, { left: FLASH.left, top: FLASH.top, width: FLASH.w, height: FLASH.h }]}>
-        <Text style={styles.flashWord}>FREE</Text>
-      </View>
+    <View style={[styles.band, { left: p.left, top: p.top, width: p.w, height: p.h }]} pointerEvents="none">
+      <Text style={[flash ? styles.flashWord : styles.bandWord, styles.fullWord]}>{word}</Text>
     </View>
+  );
+}
+
+/**
+ * The answer, said by the thing itself: the object that was tapped pops and settles when it
+ * is the right one, and jolts side to side and rocks when it is not. It returns to rest.
+ */
+function Reacts({ id, picked, cx, cy, children }: { id: string; picked: string | null; cx: number; cy: number; children: ReactNode }) {
+  const v = useSharedValue(0);
+  const s = useSharedValue(1);
+  const dx = useSharedValue(0);
+  useEffect(() => {
+    if (picked !== id) return;
+    if (id === 'concert') {
+      s.value = withSequence(
+        withTiming(0.93, { duration: 90, easing: Easing.in(Easing.quad) }),
+        withTiming(1.14, { duration: 150, easing: Easing.out(Easing.cubic) }),
+        withTiming(0.98, { duration: 120 }),
+        withTiming(1, { duration: 120 }),
+      );
+    } else {
+      const t = { duration: 70, easing: Easing.inOut(Easing.quad) };
+      dx.value = withSequence(withTiming(-5, t), withTiming(5, t), withTiming(-3.5, t), withTiming(3, t), withTiming(-1.5, t), withTiming(0, t));
+      v.value = withSequence(withTiming(1, { duration: 100 }), withTiming(-1, { duration: 200 }), withTiming(0, { duration: 160 }));
+    }
+  }, [picked, id, s, v, dx]);
+  const st = useAnimatedStyle(() => ({
+    transform: [{ translateX: dx.value }, { rotate: `${v.value * 3}deg` }, { scale: s.value }],
+  }));
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${cx}px ${cy}px` }, st]} pointerEvents="none">
+      {children}
+    </Animated.View>
   );
 }
 
@@ -649,6 +687,7 @@ const styles = StyleSheet.create({
     position: 'absolute', left: CLOCK.x - 1.4, top: CLOCK.y - 1.4, width: 2.8, height: 2.8, borderRadius: 1.4, backgroundColor: INK,
   },
   clear: { flexGrow: 1 },
+  fullWord: { alignSelf: 'stretch', textAlign: 'center' },
 });
 
 export function Econ3Lesson({ lesson }: { lesson: Lesson }) {

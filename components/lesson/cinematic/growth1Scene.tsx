@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './growth1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -15,15 +17,14 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, lipOf, PLATE_FACE } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, gardenTree, door, mug, shedWheel, flowerpot, puddle, wateringCan, sunflowerStem, sunflowerHead,
-  shed, shedDoor, gardenWall, houseFront, CAN_GRIP, CAN_ROSE, SHED_DOORWAY,
+  NATURAL, mug, flowerpot, puddle, sunflowerStem, sunflowerHead, gardenWall, CAN_GRIP, CAN_ROSE, SHED_DOORWAY,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -174,20 +175,17 @@ const MUG_W = 11;
 const MUG_H = 12;
 const MUG_LIP = { x: -0.8 * MUG_W, y: -0.33 * MUG_H };
 
-/** A tree at the back of the garden: a bark trunk under a green canopy (AR1). */
-const TREE_ART = gardenTree(318, 426, 150, 160);
-const HOUSE_ART = houseFront(30, 407, 60, 186);
-const DOOR_ART = tint(door(30, 452, 38, 96), 'doorPaint');
+// The house front with its door, the tree, the shed, its door leaf, the bicycle inside it
+// and the watering can are DRAWN pictures (AM13: scripts/lib/lessonart/lessons/growth1.mjs),
+// each in the box the shape-built object had, so nothing on the stage moved.
 const WALL_ART = gardenWall(WALL.x, GROUND - WALL.h / 2, WALL.w, WALL.h);
-const SPARE_ART = flowerpot(SPARE.x, SPARE.y, SPARE.s, SPARE.s, 'drySoil');
-const HIS_POT_ART = flowerpot(HIS_POT, 489, 22, 22);
-const SHED_ART = shed(SHED.x, SHED.y, SHED.w, SHED.h);
-const WHEEL_ART = shedWheel(372 - DOORWAY.left, 484 - DOORWAY.top, 28, 28);
+// The two pots that answer back on Q1 are drawn about the middle of their feet, so a
+// wobble rocks them on the ground (or the coping) rather than about their middles.
+const SPARE_ART = flowerpot(0, -SPARE.s / 2, SPARE.s, SPARE.s, 'drySoil');
+const HIS_POT_ART = flowerpot(0, -11, 22, 22);
 // The things that move are drawn about the point they are held by, and carried by a rider.
 const POT_ART = flowerpot(0, 0, 22, 22);
-const CAN_ART = wateringCan(((50 - CAN_GRIP.x) * CAN_W) / 100, ((50 - CAN_GRIP.y) * CAN_H) / 100, CAN_W, CAN_H);
 const MUG_ART = mug(-0.4 * MUG_W, -0.03 * MUG_H, MUG_W, MUG_H);
-const LEAF_ART = shedDoor(-DOORWAY.w / 2, DOORWAY.h / 2, DOORWAY.w, DOORWAY.h);
 const PUDDLE_ART = puddle(0, 0, 58, 9);
 /** The sunflower: the stalk about its base, the head about its own centre. */
 const FLOWER = 92;
@@ -322,7 +320,7 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
   const heldB = useHeld();
   const heldP = useHeld();
   const heldT = useHeld();
-  const cv = useCarry(22);
+  const cv = useCarry(23);
   const on = useLinger(i);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
@@ -453,6 +451,7 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const seedNow = A_PLANT[n] ? st(0.56, 0.6) + st(0.62, 0.66) + st(0.68, 0.76) : 3;
     const growNow = A_GROWN[n] ? st(0.02, 0.4) : MONTH[n];
     const headNow = A_GROWN[n] ? st(0.26, 0.46) : MONTH[n];
+    const sproutNow = A_PLANT[n] ? st(0.76, 0.92) : n > 0 && n < 6 ? 1 : 0;
     const doorNow = A_FORGET[n] ? st(0.48, 0.58) : n > 7 ? 1 : 0;
 
     const bun = pose(figB, xB, GROUND, K, dB, 1);
@@ -488,11 +487,25 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
       seedT: carry(cv, 16, n, seedNow, seedNow, tr),
       grow: carry(cv, 17, n, growNow, growNow, tr),
       head: carry(cv, 18, n, headNow, headNow, tr),
+      sprout: carry(cv, 22, n, sproutNow, sproutNow, tr),
       door: carry(cv, 19, n, doorNow, doorNow, tr),
       q1: carry(cv, 20, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 21, n, Q2[p], Q2[n], tr),
     };
   });
+
+  // Q1's answer as a physical reaction (a hop and squash, or a damped shake): 0 -> 1 over
+  // 900ms and back to rest at both ends, so nothing jumps when it starts or is reset.
+  const pickT = useSharedValue(0);
+  const pickK = useSharedValue(0);
+  useEffect(() => {
+    const k = picked === 'flooded' ? 1 : picked === 'cupful' ? 2 : picked === 'dry' ? 3 : 0;
+    pickK.value = k;
+    pickT.value = 0;
+    if (k) pickT.value = withTiming(1, { duration: 900, easing: Easing.linear });
+  }, [picked, pickK, pickT]);
+  const hisPot = useDerivedValue<At>(() => potReact(pickK.value === 2, pickT.value, 'hop', HIS_POT, 500));
+  const sparePot = useDerivedValue<At>(() => potReact(pickK.value === 3, pickT.value, 'shake', SPARE.x, SPARE.y + SPARE.s / 2));
 
   const DB = useDerivedValue<Bundle>(() => SCENE.value.bun);
   const DP = useDerivedValue<Bundle>(() => SCENE.value.pl);
@@ -501,25 +514,24 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={TREE_ART} tone={TONE} />
-      <ObjectArt parts={HOUSE_ART} tone={TONE} />
-      <ObjectArt parts={DOOR_ART} tone={TONE} />
-      <ObjectArt parts={SHED_ART} tone={TONE} />
+      <LessonPicture name="growth1-tree" />
+      <LessonPicture name="growth1-house" />
+      <LessonPicture name="growth1-shed" />
       <ShedInside S={SCENE} />
       <ShedLeaf S={SCENE} />
       <ObjectArt parts={WALL_ART} tone={TONE} />
-      <ObjectArt parts={SPARE_ART} tone={TONE} />
+      <Rider at={sparePot} art={SPARE_ART} />
       <View style={styles.ground} pointerEvents="none" />
       <Puddle S={SCENE} />
       <Sunflower S={SCENE} />
-      <ObjectArt parts={HIS_POT_ART} tone={TONE} />
+      <Rider at={hisPot} art={HIS_POT_ART} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="crowd" wear={[]} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
-      <Held S={SCENE} />
+      <Held S={SCENE} pickT={pickT} pickK={pickK} />
       {on(Q1) ? <PotTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <PlaceTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
@@ -528,29 +540,48 @@ export default function Growth1Scene({ clock, bt, bi, i, picked, onPick }: Scene
 
 // ── riders: a thing drawn about the point it is held by ─────────────────────
 
-type At = { x: number; y: number; o: number; r?: number; sx?: number; s?: number };
-function Rider({ at, art, lift }: { at: SharedValue<At>; art: ReturnType<typeof flowerpot>; lift?: boolean }) {
+type At = { x: number; y: number; o: number; r?: number; sx?: number; s?: number; q?: number; v?: number };
+
+/** A pot's answer to Q1 about its feet: the right one hops and squashes as it lands, a wrong one shakes and dies down. */
+function potReact(on: boolean, t: number, kind: 'hop' | 'shake', x: number, y: number): At {
+  'worklet';
+  if (!on) return { x, y, o: 1 };
+  if (kind === 'hop') {
+    const up = Math.sin(Math.PI * Math.min(1, t / 0.42));
+    const sq = Math.sin(Math.PI * Math.min(1, Math.max(0, (t - 0.42) / 0.3)));
+    return { x, y: y - 9 * up, o: 1, q: 1 + 0.1 * sq, v: 1 - 0.14 * sq };
+  }
+  const d = Math.exp(-4 * t) * Math.sin(t * 34);
+  return { x: x + 2.4 * d, y, o: 1, r: 7 * d };
+}
+function Rider({ at, art, pic, lift }: { at: SharedValue<At>; art?: ReturnType<typeof flowerpot>; pic?: string; lift?: boolean }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [
       { translateX: at.value.x }, { translateY: at.value.y },
-      { rotate: `${at.value.r ?? 0}deg` }, { scaleX: (at.value.sx ?? 1) * (at.value.s ?? 1) }, { scaleY: at.value.s ?? 1 },
+      { rotate: `${at.value.r ?? 0}deg` }, { scaleX: (at.value.sx ?? 1) * (at.value.s ?? 1) * (at.value.q ?? 1) }, { scaleY: (at.value.s ?? 1) * (at.value.v ?? 1) },
     ],
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      {pic ? <LessonPicture name={pic} /> : art ? <ObjectArt parts={art} tone={TONE} /> : null}
     </Animated.View>
   );
 }
 
-function Held({ S }: { S: SharedValue<any> }) {
+function Held({ S, pickT, pickK }: { S: SharedValue<any>; pickT: SharedValue<number>; pickK: SharedValue<number> }) {
   const canP = useDerivedValue<At>(() => S.value.can);
   const mugP = useDerivedValue<At>(() => S.value.mugAt);
   const potP = useDerivedValue<At>(() => {
     const u = S.value.potT;
     const w = S.value.wB;
-    return { x: lerp(w.x, HER_POT, u), y: lerp(w.y + 9, 489, u), o: 1 };
+    const a = potReact(pickK.value === 1, pickT.value, 'shake', 0, 0);
+    return { x: lerp(w.x, HER_POT, u) + a.x, y: lerp(w.y + 9, 489, u), o: 1, r: a.r };
+  });
+  const sproutP = useDerivedValue<At>(() => {
+    const g = S.value.sprout;
+    const a = potReact(pickK.value === 1, pickT.value, 'shake', 0, 0);
+    return { x: HER_POT + a.x, y: TOP_RIM + 1.5, o: g > 0.01 ? 1 : 0, s: 0.15 + 0.85 * g };
   });
   // the heavy pour: one unbroken stream from the rose down into her pot
   const stream = useAnimatedStyle(() => {
@@ -577,12 +608,13 @@ function Held({ S }: { S: SharedValue<any> }) {
     <>
       <Rider at={potP} art={POT_ART} />
       <PotWater S={S} />
+      <Rider at={sproutP} pic="growth1-sprout" />
       <Animated.View style={[styles.seed, seed]} pointerEvents="none" />
       <Rider at={mugP} art={MUG_ART} />
       <Animated.View style={[styles.stream, stream]} pointerEvents="none" />
       {DROPS.map((k) => <Drop key={`c${k}`} k={k} S={S} src="rose" to={HER_POT} amt="canDrops" />)}
       {DROPS.map((k) => <Drop key={`m${k}`} k={k} S={S} src="lip" to={HIS_POT} amt="mugDrops" />)}
-      <Rider at={canP} art={CAN_ART} lift />
+      <Rider at={canP} pic="growth1-can" lift />
     </>
   );
 }
@@ -648,9 +680,9 @@ function ShedInside({ S }: { S: SharedValue<any> }) {
   const can = useDerivedValue<At>(() => ({ x: CAN_HOOK.x - DOORWAY.left, y: CAN_HOOK.y - DOORWAY.top, o: S.value.shedCan }));
   return (
     <View style={styles.inside} pointerEvents="none">
-      <ObjectArt parts={WHEEL_ART} tone={TONE} />
+      <LessonPicture name="growth1-bike" />
       <View style={styles.hook} />
-      <Rider at={can} art={CAN_ART} />
+      <Rider at={can} pic="growth1-can" />
     </View>
   );
 }
@@ -658,7 +690,7 @@ function ShedLeaf({ S }: { S: SharedValue<any> }) {
   const at = useDerivedValue<At>(() => ({
     x: DOORWAY.left + DOORWAY.w, y: DOORWAY.top, o: 1, sx: 1 - 0.85 * S.value.door,
   }));
-  return <Rider at={at} art={LEAF_ART} />;
+  return <Rider at={at} pic="growth1-shedleaf" />;
 }
 
 // ── the two questions ────────────────────────────────────────────────────────
@@ -759,10 +791,11 @@ const styles = StyleSheet.create({
   clear: { flexGrow: 1 },
   place: { flexGrow: 1 },
   placePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 4, alignItems: 'stretch', backgroundColor: PLATE_FACE, borderRadius: 5, borderWidth: 1.2, borderColor: INK, paddingHorizontal: 3,
+    boxShadow: `0 3px 0 ${lipOf(TONE)}`,
   },
   placeText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false, textAlign: 'center', alignSelf: 'stretch',
   },
 });
 

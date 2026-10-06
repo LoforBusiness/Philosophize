@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import LessonPicture from './LessonPicture';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -16,17 +17,13 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive, postureStill } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import {
-  NATURAL, atticRoof, atticGable, atticBeams, atticWindow, atticDoorway, steamerTrunk, hatboxBack, hatboxFront,
-  hatboxLid, letterBundle, newsCorner, oldLetter, historyBook, historyBookOpen, museumLeaflet, oldNewspaper,
-  portraitFrame, shelfBooks, wallShelf,
-} from './objects';
+import { NATURAL, atticRoof, atticGable, atticBeams, atticWindow, atticDoorway } from './objects';
 import { BY_ID } from './wardrobe';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -157,27 +154,11 @@ const BEAMS_ART = atticBeams(200, 395, 400, 210);
 const WINDOW_ART = atticWindow(200, 372, 30, 26);
 const DOOR_ART = atticDoorway(30, 458, 48, 84);
 const TRUNK = { x: TH, top: 470 };
-const TRUNK_ART = steamerTrunk(TRUNK.x, 485, 90, 30);
 const BOX = { x: 297, rim: 478 };
-const BOX_BACK_ART = hatboxBack(BOX.x, BOX.rim, 26, 7);
-const BOX_FRONT_ART = hatboxFront(BOX.x, 489, 26, 22);
-const BOX_LID_ART = hatboxLid(BOX.x + 23, 487, 8, 26);
-const BUNDLE_ART = letterBundle(BOX.x - 5, 472, 20, 20);
 const CORNER = { x: BOX.x + 9, y: 476 };
-const CORNER_ART = newsCorner(CORNER.x, CORNER.y, 12, 12);
 const LEAFLET = { x: TH, y: 462 };
-const LEAFLET_ART = museumLeaflet(LEAFLET.x, LEAFLET.y, 12, 16);
-const SHELF_ART = wallShelf(332, 418, 64, 10.4);
-const SHELF_BOOKS_ART = shelfBooks(316, 400, 26, 26);
 const COPY = { x: 348, y: 403 };
-const COPY_ART = historyBook(COPY.x, COPY.y, 16, 20);
 const PORTRAIT = { x: 375, y: 481 };
-const PORTRAIT_ART = portraitFrame(PORTRAIT.x, PORTRAIT.y, 30, 38);
-// The things that move are drawn about their own centre and carried by a rider.
-const BOOK_ART = historyBook(0, 0, 16, 20);
-const BOOK_OPEN_ART = historyBookOpen(0, 0, 20, 13);
-const LETTER_ART = oldLetter(0, 0, 14, 18);
-const NEWS_ART = oldNewspaper(0, 0, 30, 26);
 
 // Where the things are held, passed and laid down.
 /**
@@ -489,20 +470,24 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <ObjectArt parts={WINDOW_ART} tone={TONE} />
       <ObjectArt parts={BEAMS_ART} tone={TONE} />
       <ObjectArt parts={DOOR_ART} tone={TONE} />
-      <ObjectArt parts={SHELF_ART} tone={TONE} />
-      <ObjectArt parts={SHELF_BOOKS_ART} tone={TONE} />
-      <ObjectArt parts={COPY_ART} tone={TONE} />
-      <ObjectArt parts={PORTRAIT_ART} tone={TONE} />
+      {/* drawn in lessonart/lessons/hist2.mjs */}
+      <LessonPicture name="hist2-shelf" />
+      <Reactor kind="shake" on={picked === 'copy'} cx={COPY.x} cy={COPY.y}>
+        <LessonPicture name="hist2-copy" />
+      </Reactor>
+      <Reactor kind="swing" on={picked === 'portrait'} cx={PORTRAIT.x} cy={PORTRAIT.y - 18}>
+        <LessonPicture name="hist2-portrait" />
+      </Reactor>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DH} k={K} role="second" wear={BY_ID.magistrate.pieces} />
-      <ObjectArt parts={TRUNK_ART} tone={TONE} />
-      <ObjectArt parts={LEAFLET_ART} tone={TONE} />
-      <ObjectArt parts={BOX_BACK_ART} tone={TONE} />
-      <ObjectArt parts={BUNDLE_ART} tone={TONE} />
-      <Corner S={SCENE} />
-      <ObjectArt parts={BOX_FRONT_ART} tone={TONE} />
-      <ObjectArt parts={BOX_LID_ART} tone={TONE} />
+      <LessonPicture name="hist2-trunk" />
+      <LessonPicture name="hist2-leaflet" />
+      <LessonPicture name="hist2-hatback" />
+      <LessonPicture name="hist2-bundle" />
+      <Corner S={SCENE} popped={picked === 'newspaper'} />
+      <LessonPicture name="hist2-hatfront" />
+      <LessonPicture name="hist2-hatlid" />
       <Dust S={SCENE} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
@@ -517,11 +502,13 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
 // ── the newspaper's corner in the hatbox, and the dust when something comes out ─
 
-function Corner({ S }: { S: SharedValue<any> }) {
+function Corner({ S, popped }: { S: SharedValue<any>; popped: boolean }) {
   const st = useAnimatedStyle(() => ({ opacity: S.value.corner }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]} pointerEvents="none">
-      <ObjectArt parts={CORNER_ART} tone={TONE} />
+      <Reactor kind="rise" on={popped} cx={CORNER.x} cy={CORNER.y}>
+        <LessonPicture name="hist2-corner" />
+      </Reactor>
     </Animated.View>
   );
 }
@@ -615,19 +602,19 @@ function Goods({ S, DB, DP, DH }: {
   return (
     <>
       <Rider at={shut}>
-        <ObjectArt parts={BOOK_ART} tone={TONE} />
+        <LessonPicture name="hist2-book" />
         <View style={styles.glintClip}>
           <Animated.View style={[styles.glint, glint]} />
         </View>
       </Rider>
       <Rider at={opened}>
-        <ObjectArt parts={BOOK_OPEN_ART} tone={TONE} />
+        <LessonPicture name="hist2-bookopen" />
       </Rider>
       <Rider at={letterP} lift>
-        <ObjectArt parts={LETTER_ART} tone={TONE} />
+        <LessonPicture name="hist2-letter" />
       </Rider>
       <Rider at={newsP} lift>
-        <ObjectArt parts={NEWS_ART} tone={TONE} />
+        <LessonPicture name="hist2-news" />
         <Animated.View style={[styles.mastBox, words]}>
           <Text style={styles.mast}>1916</Text>
         </Animated.View>
@@ -656,9 +643,11 @@ function SourceTargets({ picked, onPick, live, S }: { picked: string | null; onP
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
           <View style={styles.yearCell}>
-            <View style={styles.year}>
-              <Text style={styles.yearText}>{q.year}</Text>
-            </View>
+            <Tag kind={q.correct ? 'hop' : 'shake'} on={picked === q.id}>
+              <View style={styles.year}>
+                <Text style={styles.yearText}>{q.year}</Text>
+              </View>
+            </Tag>
           </View>
         </Target>
       ))}
@@ -690,6 +679,59 @@ function SettleTargets({ picked, onPick, live, S }: { picked: string | null; onP
   );
 }
 
+// ── things that answer PHYSICALLY when picked: the right one pops up or bounces and
+// settles with a squash, a wrong one shudders or swings on its nail and comes to rest ──
+type Kind = 'shake' | 'swing' | 'rise' | 'hop';
+function physical(kind: Kind, v: number) {
+  'worklet';
+  const k = 1 - v;
+  if (v <= 0 || v >= 1) return { x: 0, y: 0, r: 0, sx: 1, sy: 1 };
+  if (kind === 'shake') return { x: 3 * Math.sin(v * Math.PI * 8) * k, y: 0, r: 0.12 * Math.sin(v * Math.PI * 8) * k, sx: 1, sy: 1 };
+  if (kind === 'swing') return { x: 0, y: 0, r: 0.3 * Math.sin(v * Math.PI * 5) * k * k, sx: 1, sy: 1 };
+  if (kind === 'rise') {
+    // slides up out of the box, overshoots a little and stays proud of it
+    const e = 1 - Math.pow(1 - Math.min(1, v * 1.5), 2);
+    return { x: 0, y: -7 * e - 2 * Math.sin(v * Math.PI) * k, r: 0, sx: 1, sy: 1 };
+  }
+  // hop: two bounces, each lower than the last, a squash on every landing
+  const h = Math.abs(Math.sin(v * Math.PI * 2)) * 7 * k * k;
+  const sq = 1 - 0.2 * Math.max(0, 1 - h / 1.5) * k;
+  return { x: 0, y: -h, r: 0, sx: 2 - sq, sy: sq };
+}
+function usePlay(on: boolean, kind: Kind) {
+  const u = useSharedValue(0);
+  useEffect(() => {
+    u.value = 0;
+    if (on) u.value = withTiming(1, { duration: kind === 'hop' ? 900 : kind === 'rise' ? 700 : 750, easing: Easing.linear });
+  }, [on, kind, u]);
+  return u;
+}
+/** A scene-sized layer turning about (cx, cy): the picture inside keeps its scene coordinates. */
+function Reactor({ kind, on, cx, cy, children }: { kind: Kind; on: boolean; cx: number; cy: number; children: ReactNode }) {
+  const u = usePlay(on, kind);
+  const st = useAnimatedStyle(() => {
+    const p = physical(kind, u.value);
+    return { transform: [{ translateX: p.x }, { translateY: p.y }, { rotate: `${p.r}rad` }, { scaleX: p.sx }, { scaleY: p.sy }] };
+  });
+  return (
+    <Animated.View
+      style={[{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: `${cx}px ${cy}px` }, st]}
+      pointerEvents="none"
+    >
+      {children}
+    </Animated.View>
+  );
+}
+/** A year tag on its target: it hops when it is the right one, shudders when it is not. */
+function Tag({ kind, on, children }: { kind: Kind; on: boolean; children: ReactNode }) {
+  const u = usePlay(on, kind);
+  const st = useAnimatedStyle(() => {
+    const p = physical(kind, u.value);
+    return { transform: [{ translateX: p.x }, { translateY: p.y }, { rotate: `${p.r}rad` }, { scaleX: p.sx }, { scaleY: p.sy }] };
+  });
+  return <Animated.View style={st}>{children}</Animated.View>;
+}
+
 const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   floor: floorStyle(TONE, GROUND),
@@ -708,7 +750,8 @@ const styles = StyleSheet.create({
   yearCell: { flexGrow: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 1 },
   year: {
     width: 26, height: 12, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 2, borderWidth: 1.1, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1, borderColor: INK,
+    boxShadow: '0 2px 0 ' + lipOf(TONE),
   },
   yearText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, color: INK, includeFontPadding: false,

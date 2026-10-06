@@ -251,8 +251,11 @@ console.log('\nthe streak mascot\n');
   const MAX_ROWS = 3;
   const long = [];
   let worst = 0, worstLine = '';
+  // the line is drawn through inkWrap (lib/utils/inkRoom.ts): every word carries a no-break
+  // space, so each row is one space wider than its words (AQ2)
+  const tail = CAVEAT.width(' ', size);
   for (const L of all) {
-    const rows = wrap(L, size, inner, CAVEAT);
+    const rows = wrap(L, size, inner - tail, CAVEAT);
     if (rows.length > worst) { worst = rows.length; worstLine = L; }
     if (rows.length > MAX_ROWS) long.push([L, rows.length]);
   }

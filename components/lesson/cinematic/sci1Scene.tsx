@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
-import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './sci1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -21,9 +22,7 @@ import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import {
-  NATURAL, stepLadder, ironBall, tennisBall, yardWall, schoolSlate, patio, LADDER_TREADS, SLATE_FACE,
-} from './objects';
+import { LADDER_TREADS, SLATE_FACE } from './objects';
 import { BY_ID } from './wardrobe';
 import { PAPER_LIT } from '@/components/shared/tone';
 
@@ -83,7 +82,7 @@ import { PAPER_LIT } from '@/components/shared/tone';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TONE = stageTone('science');
-const { RULE } = TONE;
+const { RULE, STONE } = TONE;
 const TR = 0.85;
 /** 78 units of figure in a 208-unit band: 37.5%, under check:scale's 38%. */
 const K = K_FIG * 0.76;
@@ -183,13 +182,10 @@ const SLATE = {
   h: (SLATE_FACE.h * SL.h) / 100,
 };
 
-const WALL_ART = yardWall(200, 448, 400, 104);
-const PATIO_ART = patio(200, 508, 400, 16);
-const SLATE_ART = schoolSlate(SL.x, SL.y, SL.w, SL.h);
-const LADDER_ART = stepLadder(LAD.x, LAD.y, LAD.w, LAD.h);
-// The things that move are drawn about their own centre and carried by a rider.
-const HEAVY_ART = ironBall(0, 0, HEAVY_D, HEAVY_D);
-const LIGHT_ART = tennisBall(0, 0, LIGHT_D, LIGHT_D);
+// The yard, the ladder and the slate's frame are DRAWN (LESSON_RULES AM13): pictures baked
+// from scripts/lib/lessonart/lessons/sci1.mjs in the boxes their shape-built objects had,
+// so nothing on the stage moved. The two balls are pictures too, drawn about their own
+// centre and carried by a rider.
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -226,6 +222,12 @@ function sm(b: number, a: number, z: number): number {
   const u = (b - a) / (z - a);
   const c = u < 0 ? 0 : u > 1 ? 1 : u;
   return c * c * (3 - 2 * c);
+}
+/** A landing's squash: 0 → 1 → 0 over `len` seconds from `at`, sharp in and quick out. */
+function hitOf(b: number, at: number, len: number): number {
+  'worklet';
+  const u = (b - at) / len;
+  return u <= 0 || u >= 1 ? 0 : Math.sin(Math.PI * u) * (1 - u * 0.4);
 }
 /**
  * One figure's walk and facing for a beat. He walks from WHERE HE IS ON SCREEN — `src`,
@@ -441,12 +443,18 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // tennis ball bounces twice; the iron one stays where it hit.
     let fallU = FELL[n] ? 1 : 0;
     let bounce = 0;
+    // the weight of the landing: each ball squashes on the paving the instant it hits and
+    // springs back — the iron one hard and once, the tennis ball at every contact
+    let sqH = 0;
+    let sqL = 0;
     if (A_DROP[n]) {
       fallU = clamp01((b - REL) / FALL);
       const land = REL + FALL;
       const b1 = clamp01((b - land) / 0.34);
       const b2 = clamp01((b - land - 0.34) / 0.2);
       bounce = 11 * 4 * b1 * (1 - b1) + 3.5 * 4 * b2 * (1 - b2);
+      sqH = hitOf(b, land, 0.2);
+      sqL = hitOf(b, land, 0.1) + 0.7 * hitOf(b, land + 0.34, 0.08) + 0.4 * hitOf(b, land + 0.54, 0.07);
     }
     const u2 = fallU * fallU;
     const heavyY = lerp(HELD_Y, HEAVY_REST, u2);
@@ -467,6 +475,8 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       holdHH: carry(cv, 10, n, holdHp, holdHp, trq),
       holdHL: carry(cv, 11, n, holdHp, holdHp, trq),
       holdSc: carry(cv, 12, n, holdSc, holdSc, trq),
+      sqH,
+      sqL,
       q1: carry(cv, 13, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 14, n, Q2[p], Q2[n], tr),
     };
@@ -479,12 +489,12 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={WALL_ART} tone={TONE} />
-      <ObjectArt parts={PATIO_ART} tone={TONE} />
-      <ChalkMarks S={SCENE} />
-      <ObjectArt parts={SLATE_ART} tone={TONE} />
-      <Slate S={SCENE} />
-      <ObjectArt parts={LADDER_ART} tone={TONE} />
+      <LessonPicture name="sci1-yard" />
+      <ChalkMarks S={SCENE} picked={picked} live={Q1[i] === 1} />
+      <BallShadows S={SCENE} DH={DH} DT={DT} />
+      <LessonPicture name="sci1-slate" />
+      <Slate S={SCENE} picked={picked} live={Q2[i] === 1} />
+      <LessonPicture name="sci1-ladder" />
       {on(Q1) ? <DropLeader S={SCENE} /> : null}
       {/* cast: cap */}
       <Stickman D={DH} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
@@ -493,6 +503,7 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       {/* cast: plain */}
       <Stickman D={DS} k={K} role="lead" wear={[]} />
       <Balls S={SCENE} DH={DH} DT={DT} />
+      {on(Q1) ? <DropTags picked={picked} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q1) ? <DropTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <MethodTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
@@ -501,14 +512,29 @@ export default function Sci1Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
 
 // ── the balls, in hands and out of them ──────────────────────────────────────
 
-type Place = SharedValue<{ x: number; y: number; r: number }>;
-function Rider({ at, art }: { at: Place; art: ReturnType<typeof ironBall> }) {
-  const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: at.value.x }, { translateY: at.value.y }, { rotate: `${at.value.r}rad` }],
-  }));
+type Ball = { x: number; y: number; r: number; sq: number; d: number; free: number };
+/**
+ * A ball, drawn about its centre and carried by a rider. On a landing it SQUASHES — wider
+ * and shorter, its foot kept on the paving — and springs back, which is what says it hit
+ * something hard rather than stopped in the air.
+ */
+function Rider({ at, name }: { at: SharedValue<Ball>; name: string }) {
+  const st = useAnimatedStyle(() => {
+    const q = at.value.sq;
+    const sy = 1 - 0.22 * q;
+    return {
+      transform: [
+        { translateX: at.value.x },
+        { translateY: at.value.y + (at.value.d / 2) * (1 - sy) },
+        { rotate: `${at.value.r}rad` },
+        { scaleX: 1 + 0.16 * q },
+        { scaleY: sy },
+      ],
+    };
+  });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      <LessonPicture name={name} />
     </Animated.View>
   );
 }
@@ -519,43 +545,135 @@ function wristOf(w: SharedValue<Bundle>, k: 'wrR' | 'wrL') {
   return { x: v[0].translateX as number, y: v[1].translateY as number };
 }
 
+function heavyAt(S: SharedValue<any>, DH: SharedValue<Bundle>, DT: SharedValue<Bundle>): Ball {
+  'worklet';
+  const v = S.value;
+  const inH = wristOf(DH, 'wrL');
+  const inS = wristOf(DT, 'wrR');
+  const hh = v.holdHH;
+  const hs = v.holdSc;
+  const free = 1 - hh - hs < 0 ? 0 : 1 - hh - hs;
+  return {
+    x: v.heavyX * free + inH.x * hh + inS.x * hs,
+    y: v.heavyY * free + (inH.y + HOLD_OFF) * hh + (inS.y + HOLD_OFF) * hs,
+    r: 0,
+    sq: v.sqH * free,
+    d: HEAVY_D,
+    free,
+  };
+}
+function lightAt(S: SharedValue<any>, DH: SharedValue<Bundle>): Ball {
+  'worklet';
+  const v = S.value;
+  const inH = wristOf(DH, 'wrR');
+  const h = v.holdHL;
+  // a ball that rolls turns: the distance rolled over its radius
+  return {
+    x: lerp(v.lightX, inH.x, h),
+    y: lerp(v.lightY, inH.y + HOLD_OFF, h),
+    r: (-v.lightRot * (LIGHT_X - ROLLED_X)) / (LIGHT_D / 2),
+    sq: v.sqL * (1 - h),
+    d: LIGHT_D,
+    free: 1 - h,
+  };
+}
+
 function Balls({ S, DH, DT }: { S: SharedValue<any>; DH: SharedValue<Bundle>; DT: SharedValue<Bundle> }) {
-  const heavy = useDerivedValue(() => {
-    const v = S.value;
-    const inH = wristOf(DH, 'wrL');
-    const inS = wristOf(DT, 'wrR');
-    const hh = v.holdHH;
-    const hs = v.holdSc;
-    const free = 1 - hh - hs < 0 ? 0 : 1 - hh - hs;
-    return {
-      x: v.heavyX * free + inH.x * hh + inS.x * hs,
-      y: v.heavyY * free + (inH.y + HOLD_OFF) * hh + (inS.y + HOLD_OFF) * hs,
-      r: 0,
-    };
-  });
-  const light = useDerivedValue(() => {
-    const v = S.value;
-    const inH = wristOf(DH, 'wrR');
-    const h = v.holdHL;
-    // a ball that rolls turns: the distance rolled over its radius
-    return {
-      x: lerp(v.lightX, inH.x, h),
-      y: lerp(v.lightY, inH.y + HOLD_OFF, h),
-      r: (-v.lightRot * (LIGHT_X - ROLLED_X)) / (LIGHT_D / 2),
-    };
-  });
+  const heavy = useDerivedValue(() => heavyAt(S, DH, DT));
+  const light = useDerivedValue(() => lightAt(S, DH));
   return (
     <>
-      <Rider at={heavy} art={HEAVY_ART} />
-      <Rider at={light} art={LIGHT_ART} />
+      <Rider at={heavy} name="sci1-iron" />
+      <Rider at={light} name="sci1-tennis" />
     </>
   );
 }
 
+/**
+ * The pill of shade each ball casts on the paving (group AG5): faint and wide while the
+ * ball is high, dark and tight as it comes down onto it, so the fall reads as a fall TO
+ * the ground. Gone while a ball is in a hand.
+ */
+function Shadow({ at, d }: { at: SharedValue<Ball>; d: number }) {
+  const st = useAnimatedStyle(() => {
+    const v = at.value;
+    const gap = LAND_Y - (v.y + v.d / 2);
+    const near = clamp01(1 - gap / 90);
+    const w = d * (1.5 - 0.5 * near);
+    return {
+      opacity: v.free * (0.05 + 0.25 * near * near),
+      width: w,
+      transform: [{ translateX: v.x - w / 2 }],
+    };
+  });
+  return <Animated.View style={[styles.ballShadow, st]} pointerEvents="none" />;
+}
+function BallShadows({ S, DH, DT }: { S: SharedValue<any>; DH: SharedValue<Bundle>; DT: SharedValue<Bundle> }) {
+  const heavy = useDerivedValue(() => heavyAt(S, DH, DT));
+  const light = useDerivedValue(() => lightAt(S, DH));
+  return (
+    <>
+      <Shadow at={heavy} d={HEAVY_D} />
+      <Shadow at={light} d={LIGHT_D} />
+    </>
+  );
+}
+
+// ── the answer, as the scene reads it ────────────────────────────────────────
+
+/** How far along its reply a thing is: the one picked replies first, the right one after. */
+function phaseOf(ans: number, who: number, k: number): number {
+  'worklet';
+  if (who < 0) return 0;
+  const start = who === k ? 0 : 0.45;
+  const u = (ans * 1.6 - start) / 0.85;
+  return u < 0 ? 0 : u > 1 ? 1 : u;
+}
+/** A pop that overshoots and settles: 0 → 1.18 → 0.94 → 1 over u. */
+function popOf(u: number): number {
+  'worklet';
+  if (u <= 0) return 0;
+  if (u < 0.35) {
+    const a = u / 0.35;
+    return 1.18 * a * a * (3 - 2 * a);
+  }
+  const a = u >= 1 ? 1 : (u - 0.35) / 0.65;
+  return 1 + 0.18 * (1 - a) * Math.cos(Math.PI * a * 1.5);
+}
+/** A shake that dies away — a head-shake, side to side, over u. */
+function shakeOf(u: number): number {
+  'worklet';
+  return u <= 0 || u >= 1 ? 0 : Math.sin(u * Math.PI * 7) * (1 - u) * (1 - u);
+}
+/** The answer, latched: once a thing is picked, the scene keeps what it did. */
+function useAnswer(picked: string | null, live: boolean, ids: string[]) {
+  const first = live && picked !== null ? ids.indexOf(picked) : -1;
+  const ans = useSharedValue(first >= 0 ? 1 : 0);
+  const who = useSharedValue(first);
+  useEffect(() => {
+    if (!live || picked === null) return;
+    const k = ids.indexOf(picked);
+    if (k < 0 || who.value >= 0) return;
+    who.value = k;
+    ans.value = withTiming(1, { duration: 1500, easing: Easing.linear });
+  }, [picked, live]);
+  return { ans, who };
+}
+
 // ── the chalk crosses on the paving where each ball will land ────────────────
 
-function ChalkMarks({ S }: { S: SharedValue<any> }) {
-  const line = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+/**
+ * Two chalk crosses, one under each ball. Once the question is answered, the line that
+ * joins them is CHALKED IN from the middle out — the right answer, both together, drawn
+ * where the two balls are about to land.
+ */
+function ChalkMarks({ S, picked, live }: { S: SharedValue<any>; picked: string | null; live: boolean }) {
+  const { ans, who } = useAnswer(picked, live, DROP_Q.map((q) => q.id));
+  const line = useAnimatedStyle(() => {
+    const u = phaseOf(ans.value, who.value, 2);
+    const a = clamp01(u / 0.6);
+    return { opacity: S.value.q1 * (u > 0 ? 1 : 0), transform: [{ scaleX: a * a * (3 - 2 * a) }] };
+  });
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       {[HEAVY_X, LIGHT_X].map((x) => (
@@ -564,7 +682,6 @@ function ChalkMarks({ S }: { S: SharedValue<any> }) {
           <View style={[styles.chalkStroke, { left: x - 4.5, top: LAND_Y + 0.3, transform: [{ rotate: '-35deg' }] }]} />
         </View>
       ))}
-      {/* Q1's third choice: a chalk line joining the two marks — both together */}
       <Animated.View style={[styles.chalkJoin, line]} />
     </View>
   );
@@ -572,8 +689,55 @@ function ChalkMarks({ S }: { S: SharedValue<any> }) {
 
 // ── the slate: the test chalked up, and the three rows for Q2 ────────────────
 
-function Slate({ S }: { S: SharedValue<any> }) {
+/** Q2: the slate's three chalk rows. Testing it and looking is how science settles it. */
+const METHOD_Q = [
+  { id: 'argue', label: 'ARGUE LOUDER', correct: false },
+  { id: 'test', label: 'TEST IT AND LOOK', correct: true },
+  { id: 'ask', label: 'ASK THE OLDEST', correct: false },
+];
+const ROW_H = SLATE.h / 3;
+const ROW = { left: 3, w: SLATE.w - 6, h: ROW_H - 4 };
+
+/**
+ * One row chalked on the slate. Picked and wrong, it is STRUCK THROUGH with a chalk line
+ * drawn across it, left to right, and it shakes its head; the right one is RINGED in chalk,
+ * which springs round it, and its words pop and settle.
+ */
+function ChalkRow({ k, ans, who, S }: { k: number; ans: SharedValue<number>; who: SharedValue<number>; S: SharedValue<any> }) {
+  const q = METHOD_Q[k];
+  const row = useAnimatedStyle(() => {
+    const u = phaseOf(ans.value, who.value, k);
+    if (q.correct) {
+      const s = u > 0 ? popOf(Math.min(1, u * 1.4)) : 1;
+      return { opacity: S.value.q2, transform: [{ scale: u > 0 ? 0.92 + 0.08 * s : 1 }] };
+    }
+    const w = who.value === k ? u : 0;
+    return { opacity: S.value.q2 * (1 - 0.45 * w), transform: [{ translateX: 3.2 * shakeOf(w) }] };
+  });
+  const ring = useAnimatedStyle(() => {
+    const u = q.correct ? phaseOf(ans.value, who.value, k) : 0;
+    const a = clamp01(u / 0.5);
+    const p = popOf(a);
+    return { opacity: a > 0 ? 1 : 0, transform: [{ scaleX: 0.55 + 0.45 * p }, { scaleY: 0.4 + 0.6 * p }] };
+  });
+  const strike = useAnimatedStyle(() => {
+    const u = !q.correct && who.value === k ? phaseOf(ans.value, who.value, k) : 0;
+    const a = clamp01(u / 0.35);
+    return { opacity: a > 0 ? 1 : 0, transform: [{ scaleX: a }] };
+  });
+  return (
+    <Animated.View style={[styles.row, { top: k * ROW_H + 2 }, row]}>
+      <View style={styles.rowRule} />
+      <Text style={styles.rowText}>{q.label}</Text>
+      <Animated.View style={[styles.rowRing, ring]} />
+      <Animated.View style={[styles.rowStrike, strike]} />
+    </Animated.View>
+  );
+}
+
+function Slate({ S, picked, live }: { S: SharedValue<any>; picked: string | null; live: boolean }) {
   const sketch = useAnimatedStyle(() => ({ opacity: 1 - S.value.q2 }));
+  const { ans, who } = useAnswer(picked, live, METHOD_Q.map((q) => q.id));
   return (
     <View style={styles.slate} pointerEvents="none">
       <Animated.View style={[styles.sketch, sketch]}>
@@ -584,6 +748,7 @@ function Slate({ S }: { S: SharedValue<any> }) {
           <View style={[styles.chalkBall, styles.chalkBallSmall]} />
         </View>
       </Animated.View>
+      {METHOD_Q.map((q, k) => <ChalkRow key={q.id} k={k} ans={ans} who={who} S={S} />)}
     </View>
   );
 }
@@ -592,12 +757,14 @@ function Slate({ S }: { S: SharedValue<any> }) {
 
 /**
  * Q1: the iron ball, the tennis ball, and the chalk line between their marks. Both balls
- * are held out in FRONT of him now, side by side, so the iron ball's name sits on a plate
+ * are held out in FRONT of him, side by side, so the iron ball's name sits on a plate
  * behind him with a hairline to the ball (`DropLeader`, drawn under him); the tennis ball's
- * plate sits just past it, inside its own target. No two targets touch.
+ * plate sits just past it. No two targets touch. Each name is a struck plate on a ledge in
+ * the lesson's colour; picked wrong, it shakes its head and tips off level; the right one
+ * pops and settles, and the chalk line between the two marks is drawn in under it.
  */
 const DROP_Q = [
-  { id: 'heavy', label: 'HEAVY', left: 192, top: 402, w: 47, h: 16, labelLeft: 2, labelW: 42, correct: false },
+  { id: 'heavy', label: 'HEAVY', left: 192, top: 402, w: 47, h: 16, labelLeft: 2, labelW: 39, correct: false },
   { id: 'light', label: 'LIGHT', left: 272, top: 401, w: 56, h: 18, labelLeft: 15, labelW: 38, correct: false },
   { id: 'both', label: 'BOTH TOGETHER', left: (HEAVY_X + LIGHT_X) / 2 - 48, top: 507, w: 96, h: 12, labelLeft: 2, labelW: 92, correct: true },
 ];
@@ -605,6 +772,33 @@ const DROP_Q = [
 function DropLeader({ S }: { S: SharedValue<any> }) {
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
   return <Animated.View style={[styles.leader, fade]} pointerEvents="none" />;
+}
+function DropTag({ k, ans, who, S }: { k: number; ans: SharedValue<number>; who: SharedValue<number>; S: SharedValue<any> }) {
+  const q = DROP_Q[k];
+  const st = useAnimatedStyle(() => {
+    const u = phaseOf(ans.value, who.value, k);
+    if (q.correct) {
+      const s = u > 0 ? popOf(Math.min(1, u * 1.4)) : 1;
+      return { opacity: S.value.q1, transform: [{ translateY: -2.5 * clamp01(u * 3) }, { scale: u > 0 ? 0.85 + 0.15 * s : 1 }] };
+    }
+    const w = who.value === k ? u : 0;
+    return {
+      opacity: S.value.q1 * (1 - 0.35 * w),
+      transform: [{ translateX: 3 * shakeOf(w) }, { translateY: 2.5 * w }, { rotate: `${(k === 0 ? -9 : 9) * w}deg` }],
+    };
+  });
+  return (
+    <Animated.View
+      style={[styles.tag, { left: q.left + q.labelLeft, top: q.top + (q.h - 12) / 2, width: q.labelW }, st]}
+      pointerEvents="none"
+    >
+      <Text style={styles.tagText}>{q.label}</Text>
+    </Animated.View>
+  );
+}
+function DropTags({ picked, live, S }: { picked: string | null; live: boolean; S: SharedValue<any> }) {
+  const { ans, who } = useAnswer(picked, live, DROP_Q.map((q) => q.id));
+  return <>{DROP_Q.map((q, k) => <DropTag key={q.id} k={k} ans={ans} who={who} S={S} />)}</>;
 }
 function DropTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
@@ -617,24 +811,13 @@ function DropTargets({ picked, onPick, live, S }: { picked: string | null; onPic
           disabled={answered} sealAt="tr"
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
-          <View style={styles.clear}>
-            <View style={[styles.tag, { left: q.labelLeft, width: q.labelW, top: (q.h - 12) / 2 }]}>
-              <Text style={styles.tagText}>{q.label}</Text>
-            </View>
-          </View>
+          <View style={styles.clear} />
         </Target>
       ))}
     </Animated.View>
   );
 }
 
-/** Q2: the slate's three chalk rows. Testing it and looking is how science settles it. */
-const METHOD_Q = [
-  { id: 'argue', label: 'ARGUE LOUDER', correct: false },
-  { id: 'test', label: 'TEST IT AND LOOK', correct: true },
-  { id: 'ask', label: 'ASK THE OLDEST', correct: false },
-];
-const ROW_H = SLATE.h / 3;
 function MethodTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
@@ -642,13 +825,11 @@ function MethodTargets({ picked, onPick, live, S }: { picked: string | null; onP
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {METHOD_Q.map((q, k) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: SLATE.left + 3, top: SLATE.top + k * ROW_H + 2, width: SLATE.w - 6, height: ROW_H - 4 }}
+          style={{ position: 'absolute', left: SLATE.left + ROW.left, top: SLATE.top + k * ROW_H + 2, width: ROW.w, height: ROW.h }}
         >
-          <View style={styles.choice}>
-            <Text style={styles.choiceText}>{q.label}</Text>
-          </View>
+          <View style={styles.clear} />
         </Target>
       ))}
     </Animated.View>
@@ -668,36 +849,59 @@ const styles = StyleSheet.create({
   },
   slate: {
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 1,
-    backgroundColor: NATURAL.slate.shade, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   sketch: { alignItems: 'center', gap: 4 },
   sketchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  // AQ2: Caveat's letters draw up to 0.23 em past their advance, so each chalk word is
+  // given a content box wider than its ink, the words centred in it.
   chalkHead: {
+    width: 100, textAlign: 'center',
     fontFamily: 'Caveat_700Bold', fontSize: 15, lineHeight: 17, color: PAPER_LIT, includeFontPadding: false,
   },
   chalkVs: {
+    width: 18, textAlign: 'center',
     fontFamily: 'Caveat_700Bold', fontSize: 14, lineHeight: 16, color: PAPER_LIT, includeFontPadding: false,
   },
   chalkBall: { borderWidth: 1.6, borderColor: PAPER_LIT },
   chalkBallBig: { width: 18, height: 18, borderRadius: 9 },
   chalkBallSmall: { width: 11, height: 11, borderRadius: 5.5 },
   clear: { flexGrow: 1 },
+  ballShadow: {
+    position: 'absolute', left: 0, top: LAND_Y - 1.6, height: 3.2, borderRadius: 1.6, backgroundColor: STONE, borderWidth: 0.8, borderColor: INK,
+  },
   leader: {
     position: 'absolute', left: 239, top: HELD_Y - 0.5, width: HEAVY_X - HEAVY_D / 2 - 239, height: 1, backgroundColor: INK,
   },
+  // A name plate is STRUCK (group AG): a white face with a lit top edge, standing on a hard
+  // ledge in the lesson's own colour, with a rounded corner a third of its height.
   tag: {
     position: 'absolute', height: 12, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1.2, borderColor: INK,
+    boxShadow: `inset 0px 1px 0px rgba(255, 255, 255, 0.9), 0px 2.5px 0px ${TONE.SHADE}, 0px 3.5px 0px rgba(26, 26, 26, 0.14)`,
   },
   tagText: {
+    alignSelf: 'stretch', textAlign: 'center',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
-  choice: {
-    flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+  // A chalk row on the slate: its words, a faint chalk rule round it, and the two marks the
+  // answer chalks over it — a ring for the right one, a stroke through a wrong one.
+  row: { position: 'absolute', left: ROW.left, width: ROW.w, height: ROW.h, justifyContent: 'center' },
+  rowRule: {
+    ...StyleSheet.absoluteFill, borderRadius: 5, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.32)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  choiceText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
+  rowText: {
+    alignSelf: 'stretch', textAlign: 'center',
+    fontFamily: 'Caveat_700Bold', fontSize: 12.5, lineHeight: 14, letterSpacing: 0, color: PAPER_LIT, includeFontPadding: false,
+  },
+  rowRing: {
+    position: 'absolute', left: -1.5, top: -2, right: -1.5, bottom: -2, borderRadius: 11,
+    borderWidth: 1.8, borderColor: PAPER_LIT,
+  },
+  rowStrike: {
+    position: 'absolute', left: 8, right: 8, top: ROW.h / 2 - 0.9, height: 1.8, borderRadius: 0.9,
+    backgroundColor: PAPER_LIT, transformOrigin: '0% 50%',
   },
 });
 

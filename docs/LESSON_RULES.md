@@ -10737,8 +10737,10 @@ owner saw. So:
    proportions and the construction (a flying gallop, a six-spoked wheel at the back of the
    cab, a hammock's fan of cords to a ring on a hook). Name the reference in a comment.
    Nothing is traced or shipped; every curve is drawn.
-3. **Bake it**: list it in `scripts/lib/lessonart/index.mjs` with its own `view` and the
-   scene `box` it sits at, and `npm run make:lesson-art` renders it to
+3. **Bake it**: list it in the lesson's own module, `scripts/lib/lessonart/lessons/<stem>.mjs`
+   (an exported `ART` array; every name prefixed `<stem>-`; `index.mjs` gathers them all),
+   with its own `view` and the scene `box` it sits at, and `npm run make:lesson-art`
+   (`node scripts/make-lesson-art.mjs <name>` for one picture) renders it to
    `assets/lesson-art/<name>.png` and writes `lessonArt.ts`. A scene draws it with
    `<LessonPicture name=… />`. A picture that replaces a shape-built object takes that
    object's box exactly, so nothing on the stage moves, and it is one View where the shapes
@@ -11181,7 +11183,7 @@ named or that the build showed were load-bearing:
 - [ ] One real place; every object drawn from a reference and in its own colours (AR1).
 - [ ] Every hand act built the AR7 way: turns as tracks, holds in the figure's frame,
       objects on the wrist by their grip, sips at pauses, strokes as paths.
-- [ ] `check:replay` green on the lesson: AR1, AR4, AR5, AQ1, N21, C20c and cuts at zero.
+- [ ] `check:replay` green on the lesson: AR1, AR4, AR5, AQ1, AQ2, N21, C20c and cuts at zero.
 - [ ] `check:dialogue`, `check:objects`, `check:shade`, `check:fits`, `check:legible`,
       `check:smooth`, `check:still`, `check:idle`, `check:turn` green.
 - [ ] Looked at on a quiet Metro: every beat (`sheet-beats`), and every hand act close up
@@ -11603,6 +11605,36 @@ data tables included, and every label is measured on every beat. Zero in every d
 lesson; the retired lessons are counted, not failed. The first run found nine: CLOCK, JAR,
 APPLE and CHOCOLATE (growth2), MACARONS (biz2), £12 (econ2), POINTY NOSE (sci2) and the years
 1985 and 2010 (hist2).
+
+### AQ2 · A letter's ink lands inside its own Text's box
+
+> *"on the table where it says one coin, the end of coin is slightly cut off. And I've
+> noticed this for other words, where they'll be slightly cut off on the right side. I need
+> you to fix this anywhere it is."* (2026-10-05)
+
+Android's `TextView` clips what it draws to its CONTENT box — inside any padding — and an
+auto-width Text's content box is exactly the sum of its letters' advances. A face whose
+letters draw past their advance loses a sliver of the last letter on a phone, and a
+browser, which does not clip, shows it whole: so every check and every contact sheet was
+blind to it. Measured from the font files, the reach past the last advance is up to
+**0.23 em in Caveat** (its N, S, T, I, quotes), 0.19 in Playfair Bold Italic, 0.13 in
+Cormorant, 0.08 in Playfair's f and Abril, 0.05 in Cinzel's R; Inter's is nil. econ6's
+"1 COIN" lost 1.8 units of its N; the first sweep found 89 labels in 18 lessons.
+
+1. **PADDING DOES NOT FIX IT.** The clip sits inside the padding, so a Text given
+   `paddingRight` is clipped exactly as before. Do not reach for it.
+2. **GIVE THE TEXT A CONTENT BOX WIDER THAN ITS INK.** Stretch it across the plate it sits
+   on — `alignSelf: 'stretch'` (or the parent's default `alignItems`) with `textAlign`, or
+   an explicit `width` equal to the plate's inner width — so the slack beside the letters
+   holds the ink. A free label with no plate takes its own `width` and `textAlign:
+   'center'`, placed at `left: cx − width / 2`. The letters land exactly where they were.
+3. **THE PLATE MUST HAVE THE ROOM**: centred, each side needs the ink's reach; left-set,
+   the right side does. If it has not, widen the plate (AQ1.4).
+
+`check:replay` holds it beside AQ1 (`CLIPPED`): it works each label's content box out the
+way Yoga lays it out — its own width, left and right pinned, stretched by a column parent,
+else just its letters — places every line by its `textAlign`, and measures the ink of each
+line against the real font file (`ttfwidth.ink`). Zero in every dialogue lesson.
 
 ## Group AR · A hand uses a thing the way a person does, and the thing is what it is
 

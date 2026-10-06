@@ -140,7 +140,39 @@ export function loadFont(file) {
    */
   const missing = (str) => [...str].filter((ch) => !map.has(ch.codePointAt(0)));
 
-  return { width, missing, unitsPerEm, glyphs: map.size };
+  // ── ink: where the glyphs actually DRAW, which is not where they advance ──
+  //
+  // Android clips a Text's ink to the Text's own box, and that box is the sum of the
+  // ADVANCES. A handwriting or italic face draws past them — Caveat's N, an italic f —
+  // so the last letter of a word loses a sliver on a phone while a browser, which does
+  // not clip, shows it whole. `ink` says how far past each end of the advance box the
+  // glyphs reach, so a Text can be given exactly that much room (AQ2).
+  const box = new Map();
+  let boxOf = () => null;
+  if (tables.loca && tables.glyf) {
+    const longLoca = b.readInt16BE(tables.head.off + 50) === 1;
+    const at = (gid) => (longLoca ? b.readUInt32BE(tables.loca.off + gid * 4) : b.readUInt16BE(tables.loca.off + gid * 2) * 2);
+    boxOf = (gid) => {
+      if (box.has(gid)) return box.get(gid);
+      const s = at(gid), e = at(gid + 1);
+      const r = e > s ? { xMin: b.readInt16BE(tables.glyf.off + s + 2), xMax: b.readInt16BE(tables.glyf.off + s + 6) } : null;
+      box.set(gid, r);
+      return r;
+    };
+  }
+  /** How far the ink reaches past the LEFT and RIGHT ends of the advance box, at `px`. */
+  const ink = (str, px) => {
+    let pen = 0, lo = 0, hi = 0;
+    for (const ch of str) {
+      const gid = map.get(ch.codePointAt(0)) ?? 0;
+      const g = boxOf(gid);
+      if (g) { lo = Math.min(lo, pen + g.xMin); hi = Math.max(hi, pen + g.xMax); }
+      pen += advanceOf(gid);
+    }
+    return { left: (Math.max(0, -lo) * px) / unitsPerEm, right: (Math.max(0, hi - pen) * px) / unitsPerEm };
+  };
+
+  return { width, missing, ink, unitsPerEm, glyphs: map.size };
 }
 
 /**

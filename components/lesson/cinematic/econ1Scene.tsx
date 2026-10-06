@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
-import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './econ1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -21,10 +24,7 @@ import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import {
-  NATURAL, tint, oTri, counter, note, chalkboard, coin, econ1Pie, econ1Loaf, econ1Book, econ1Stall,
-  ECON1_PIE_FOOT, ECON1_LOAF_FOOT, ECON1_BOOK_FOOT, type NaturalKey, type ObjPart,
-} from './objects';
+import { NATURAL } from './objects';
 import { BY_ID } from './wardrobe';
 import { EMBER, PAPER_LIT } from '@/components/shared/tone';
 
@@ -133,22 +133,13 @@ const PASS = { x: 216, y: 462 };
 const BOARD = { x: 118, w: 104, h: 86 };
 const SLATE = { left: 82, top: 423, w: 72, h: 51 };
 
-// Every object in its own colours (AR1): a green-and-white striped canopy on wooden
-// posts, a wooden counter and A-board, a cherry pie in its dish, a bloomer loaf, an
-// orange paperback, a ten-pound note and two pound coins.
-const STALL_ART = econ1Stall(STALL_X, 420, STALL_W, 160);
-const COUNTER_ART = tint(counter(STALL_X, 488, STALL_W, 24), 'wood');
-const BOARD_ART = tint(chalkboard(BOARD.x, 500 - BOARD.h / 2, BOARD.w, BOARD.h).filter((p) => p.role === 'mass' || p.role === 'line'), 'wood');
-// The things that move are carried by a rider: the note and the coins about their middle,
-// the book, the pie and the loaf about their FOOT, so a hand under one lifts it.
-const NOTE_ART = tint(note(0, 0, 20, 11), 'note10');
-const COIN_ART = tint(coin(0, 0, 9, 9), 'brass');
-const BOOK_S = 30;
-const PIE_S = 36;
-const LOAF_S = 34;
-const BOOK_ART = econ1Book(0, -(ECON1_BOOK_FOOT - 50) * (BOOK_S / 100), BOOK_S, BOOK_S);
-const PIE_ART = econ1Pie(0, -(ECON1_PIE_FOOT - 50) * (PIE_S / 100), PIE_S, PIE_S);
-const LOAF_ART = econ1Loaf(0, -(ECON1_LOAF_FOOT - 50) * (LOAF_S / 100), LOAF_S, LOAF_S);
+// Every object in its own colours (AR1), and every one of them DRAWN against a reference
+// (LESSON_RULES AM13; scripts/lib/lessonart/lessons/econ1.mjs): the striped awning on its
+// posts, the trestle counter under its green cloth, the pavement A-board, the bunting, a
+// cherry pie with a lattice top in its dish, a bloomer, an orange paperback, a ten-pound
+// note and two pound coins. Each picture takes the box the shape-built object had, so
+// every hand-off lands where it always did. The things that move ride a zero-size View
+// placed at their FOOT (the book, the pie, the loaf) or their middle (the note, the coins).
 /** When the trade on b4 starts: the moment the stall-holder reaches the shopper's end. */
 const T_TRADE = moveTr(356, 240, TR);
 
@@ -196,8 +187,25 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldPl = useHeld();
   const heldTh = useHeld();
   const heldCp = useHeld();
-  const cv = useCarry(12);
+  const cv = useCarry(14);
   const on = useLinger(i);
+  // THE ANSWERS ANSWER BACK: which of the three was tapped on each graded beat, and how
+  // many seconds ago (the econ6 construction). The right pick hops and lands; a wrong one
+  // shudders, then is still.
+  const pick1 = useSharedValue(-1);
+  const pick2 = useSharedValue(-1);
+  const since1 = useSharedValue(0);
+  const since2 = useSharedValue(0);
+  useEffect(() => {
+    const ids = Q1[i] ? COST_IDS : Q2[i] ? PRICE_IDS : null;
+    if (!ids) return;
+    const k = picked === null ? -1 : ids.indexOf(picked);
+    const pk = Q1[i] ? pick1 : pick2;
+    const since = Q1[i] ? since1 : since2;
+    pk.value = k;
+    since.value = 0;
+    if (k >= 0) since.value = withTiming(8, { duration: 8000, easing: Easing.linear });
+  }, [picked, i, pick1, pick2, since1, since2]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -293,6 +301,9 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b3: he holds up the last loaf, his hand under it, as the economist names the bread
     const loafLift = A_SCARCE[n] ? bp(0.3, 0.46, 0.78) : 0;
+    // and each is set down with a little weight: it squashes onto the counter as it lands
+    const pieSq = A_OFFER[n] ? bp(0.5, 0.54, 0.64) : 0;
+    const loafSq = A_SCARCE[n] ? bp(0.76, 0.8, 0.9) : 0;
     if (A_SCARCE[n]) sc = hand(sc, xCp, dC, 1, LOAF_AT.x, LOAF_AT.y - 26 * loafLift, bp(0.2, 0.3, 0.86));
     // b4: the trade, one hand-off at a time, each ONE stroke of the hand (AR5) — the note
     // taken at the counter's end and carried straight to where it is laid; a turn to his
@@ -347,6 +358,8 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       bookT: carry(cv, 5, n, bookNow, bookNow, tr),
       pieLift: carry(cv, 6, n, 0, pieLift, tr),
       loafLift: carry(cv, 7, n, 0, loafLift, tr),
+      pieSq: carry(cv, 12, n, 0, pieSq, tr),
+      loafSq: carry(cv, 13, n, 0, loafSq, tr),
       board: carry(cv, 8, n, BOARD_V[p], BOARD_V[n], tr),
       q1: carry(cv, 9, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 10, n, Q2[p], Q2[n], tr),
@@ -361,66 +374,75 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <Bunting />
-      <ObjectArt parts={STALL_ART} tone={TONE} />
+      <LessonPicture name="econ1-stall" />
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
-      <ObjectArt parts={COUNTER_ART} tone={TONE} />
-      <ObjectArt parts={BOARD_ART} tone={TONE} />
+      <LessonPicture name="econ1-counter" />
+      <LessonPicture name="econ1-aboard" />
       <Board S={SCENE} />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="lead" wear={[]} />
-      <Goods S={SCENE} DP={DP} DC={DC} />
+      <Goods S={SCENE} DP={DP} DC={DC} pick={pick1} since={since1} />
       {on(Q1) ? <CostTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
-      {on(Q2) ? <PriceTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
+      {on(Q2) ? <PriceTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} pick={pick2} since={since2} /> : null}
     </View>
   );
 }
 
-// ── the market's bunting, strung from the stall's post to the edge of the stage ─
+// ── the market's bunting, strung from the edge of the stage to the stall's post ─
 //
-// Cotton pennants in their own colours (AR1), each a triangle hanging from the string
-// by its top edge. The string SAGS between its ends, as bunting does: two runs, each
-// tipped 1.6 degrees about its middle, meeting low at x 106 — and each pennant hangs
-// from the string where it actually is.
-
-const FLAGS = [0, 1, 2, 3, 4, 5, 6, 7];
-const SAG = Math.tan((1.6 * Math.PI) / 180);
-const stringY = (x: number) => (x < 106 ? 348.1 + (x - 53) * SAG : 348.1 - (x - 159) * SAG);
-const PENNANT: NaturalKey[] = ['pennantRed', 'pennantMustard', 'pennantTeal', 'canvasWhite'];
-const BUNTING_ART: ObjPart[] = FLAGS.map((k) => {
-  const cx = 18.5 + k * 23;
-  return { ...oTri('mass', cx, stringY(cx) + 5.2, 10, 11, 'down'), nat: PENNANT[k % 4] };
-});
+// Cotton pennants in their own colours (AR1), each hanging by its top edge from a string
+// that SAGS between its ends, as bunting does — drawn (econ1.mjs, `bunting`).
 function Bunting() {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <ObjectArt parts={BUNTING_ART} tone={TONE} />
-      <View style={styles.stringL} />
-      <View style={styles.stringR} />
+      <LessonPicture name="econ1-bunting" />
     </View>
   );
 }
 
 // ── the things on the counter, and the ones in people's hands ────────────────
 
-function Rider({ at, art, lift }: {
-  at: SharedValue<{ x: number; y: number; o: number }>; art: ReturnType<typeof note>; lift?: boolean;
-}) {
+type At = { x: number; y: number; o: number; sx?: number; sy?: number };
+/** A thing that moves: a zero-size View at its foot (or middle), so a squash on landing
+ *  squashes it down onto the counter rather than about its own middle. */
+function Rider({ at, lift, children }: { at: { value: At }; lift?: boolean; children: React.ReactNode }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
-    transform: [{ translateX: at.value.x }, { translateY: at.value.y }],
+    transform: [
+      { translateX: at.value.x }, { translateY: at.value.y },
+      { scaleX: at.value.sx ?? 1 }, { scaleY: at.value.sy ?? 1 },
+    ],
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      {children}
     </Animated.View>
   );
 }
 
-function Goods({ S, DP, DC }: { S: SharedValue<any>; DP: SharedValue<Bundle>; DC: SharedValue<Bundle> }) {
+/** Up over [a, m] and back down over [m, z] of a running value. */
+function hump(v: number, a: number, m: number, z: number): number {
+  'worklet';
+  const r = (p: number, q: number) => {
+    'worklet';
+    const u = clamp01((v - p) / (q - p));
+    return u * u * (3 - 2 * u);
+  };
+  return r(a, m) * (1 - r(m, z));
+}
+/** A wrong pick's shudder: a quick shake that dies away inside half a second. */
+function shudder(v: number): number {
+  'worklet';
+  return v > 0 && v < 0.55 ? 1.6 * Math.sin(v * 44) * (1 - v / 0.55) : 0;
+}
+
+function Goods({ S, DP, DC, pick, since }: {
+  S: SharedValue<any>; DP: SharedValue<Bundle>; DC: SharedValue<Bundle>; pick: SharedValue<number>; since: SharedValue<number>;
+}) {
   const at = (w: SharedValue<Bundle>, k: 'wrR' | 'wrL') => {
     'worklet';
     const v = w.value[k];
@@ -431,7 +453,7 @@ function Goods({ S, DP, DC }: { S: SharedValue<any>; DP: SharedValue<Bundle>; DC
     const pl = at(DP, 'wrR');
     const cp = at(DC, 'wrR');
     if (u <= 1) return { x: lerp(pl.x, cp.x, u), y: lerp(pl.y, cp.y, u), o: 1 };
-    if (u <= 2) return { x: lerp(cp.x, NOTE_AT.x, u - 1), y: lerp(cp.y, NOTE_AT.y, u - 1), o: 1 };
+    if (u <= 2) return { x: lerp(cp.x, NOTE_AT.x, u - 1) + (pick.value === 0 ? shudder(since.value) : 0), y: lerp(cp.y, NOTE_AT.y, u - 1), o: 1 };
     if (u <= 3) return { x: lerp(NOTE_AT.x, cp.x, u - 2), y: lerp(NOTE_AT.y, cp.y, u - 2), o: 1 };
     return { x: cp.x, y: cp.y, o: 1 - clamp01(u - 3) };
   });
@@ -440,7 +462,7 @@ function Goods({ S, DP, DC }: { S: SharedValue<any>; DP: SharedValue<Bundle>; DC
     const pl = at(DP, 'wrR');
     const cp = at(DC, 'wrR');
     if (u <= 1) return { x: cp.x, y: cp.y, o: clamp01(u) };
-    if (u <= 2) return { x: lerp(cp.x, COINS_AT.x, u - 1), y: lerp(cp.y, COINS_AT.y, u - 1), o: 1 };
+    if (u <= 2) return { x: lerp(cp.x, COINS_AT.x, u - 1) + (pick.value === 1 ? shudder(since.value) : 0), y: lerp(cp.y, COINS_AT.y, u - 1), o: 1 };
     if (u <= 3) return { x: lerp(COINS_AT.x, cp.x, u - 2), y: lerp(COINS_AT.y, cp.y, u - 2), o: 1 };
     if (u <= 4) return { x: lerp(cp.x, pl.x, u - 3), y: lerp(cp.y, pl.y, u - 3), o: 1 };
     return { x: pl.x, y: pl.y, o: 1 - clamp01(u - 4) };
@@ -452,15 +474,25 @@ function Goods({ S, DP, DC }: { S: SharedValue<any>; DP: SharedValue<Bundle>; DC
     if (u <= 1) return { x: lerp(BOOK_AT.x, cp.x, u), y: lerp(BOOK_AT.y, cp.y, u), o: 1 };
     return { x: lerp(cp.x, pl.x, u - 1), y: lerp(cp.y, pl.y, u - 1), o: 1 };
   });
-  const pieP = useDerivedValue(() => ({ x: PIE_AT.x, y: PIE_AT.y - 22 * S.value.pieLift, o: 1 }));
-  const loafP = useDerivedValue(() => ({ x: LOAF_AT.x, y: LOAF_AT.y - 26 * S.value.loafLift, o: 1 }));
+  // Q1 answered: the pie (the right answer) hops off the counter and lands with a squash;
+  // the note or the change, picked wrongly, shudders where it lies
+  const pieP = useDerivedValue(() => {
+    const v = pick.value === 2 ? since.value : 0;
+    const hop = 7 * hump(v, 0.04, 0.22, 0.46);
+    const sq = Math.max(S.value.pieSq, hump(v, 0.44, 0.5, 0.64));
+    return { x: PIE_AT.x, y: PIE_AT.y - 22 * S.value.pieLift - hop, o: 1, sx: 1 + 0.07 * sq, sy: 1 - 0.11 * sq };
+  });
+  const loafP = useDerivedValue(() => {
+    const sq = S.value.loafSq;
+    return { x: LOAF_AT.x, y: LOAF_AT.y - 26 * S.value.loafLift, o: 1, sx: 1 + 0.06 * sq, sy: 1 - 0.1 * sq };
+  });
   return (
     <>
-      <Rider at={pieP} art={PIE_ART} />
-      <Rider at={loafP} art={LOAF_ART} />
-      <Rider at={bookP} art={BOOK_ART} />
-      <Rider at={coinP} art={COIN_ART} />
-      <Rider at={noteP} art={NOTE_ART} lift />
+      <Rider at={pieP}><LessonPicture name="econ1-pie" /></Rider>
+      <Rider at={loafP}><LessonPicture name="econ1-loaf" /></Rider>
+      <Rider at={bookP}><LessonPicture name="econ1-book" /></Rider>
+      <Rider at={coinP}><LessonPicture name="econ1-coins" /></Rider>
+      <Rider at={noteP} lift><LessonPicture name="econ1-note" /></Rider>
     </>
   );
 }
@@ -479,7 +511,7 @@ function Board({ S }: { S: SharedValue<any> }) {
         <View style={styles.priceRow}>
           <Animated.View style={old}>
             <Text style={styles.chalkPrice}>£2</Text>
-            <Animated.View style={[styles.chalkStrike, strike]} />
+            <Animated.View nativeID="strike" style={[styles.chalkStrike, strike]} />
           </Animated.View>
           <Animated.Text style={[styles.chalkPrice, styles.chalkNew, fresh]}>£4</Animated.Text>
         </View>
@@ -491,6 +523,7 @@ function Board({ S }: { S: SharedValue<any> }) {
 // ── the two questions ────────────────────────────────────────────────────────
 
 /** Q1: the three things on the counter. The pie is what the book cost him. */
+const COST_IDS = ['note', 'change', 'pie'];
 const COST_Q = [
   { id: 'note', left: NOTE_AT.x - 14, top: TOP - 17, w: 28, h: 20, r: 4, correct: false },
   { id: 'change', left: COINS_AT.x - 9, top: TOP - 15, w: 18, h: 18, r: 9, correct: false },
@@ -520,22 +553,45 @@ const PRICE_Q = [
   { id: 'keep', arrow: '→', label: 'KEEP IT', correct: false },
   { id: 'lower', arrow: '↓', label: 'LOWER IT', correct: false },
 ];
+const PRICE_IDS = PRICE_Q.map((q) => q.id);
 const ROW_H = SLATE.h / 3;
-function PriceTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
+/**
+ * One chalk choice, struck as a BUTTON on the slate (group AG): a white face with a lit top
+ * edge on a hard ledge of the lesson's shade, its arrow in a round chip. Answered, the
+ * right one's chip jumps and lands; a wrong one shudders on its ledge.
+ */
+function PriceChoice({ q, k, pick, since }: { q: (typeof PRICE_Q)[number]; k: number; pick: SharedValue<number>; since: SharedValue<number> }) {
+  const body = useAnimatedStyle(() => ({
+    transform: [{ translateX: pick.value === k && !q.correct ? shudder(since.value) : 0 }],
+  }));
+  const chip = useAnimatedStyle(() => {
+    const v = pick.value === k && q.correct ? since.value : 0;
+    return { transform: [{ translateY: -3 * hump(v, 0.02, 0.16, 0.36) }, { scale: 1 + 0.28 * hump(v, 0.02, 0.16, 0.42) }] };
+  });
+  return (
+    <Animated.View style={[styles.choice, body]}>
+      <Animated.View style={[styles.chip, chip]}>
+        <Text style={styles.choiceArrow}>{q.arrow}</Text>
+      </Animated.View>
+      <Text style={styles.choiceText}>{q.label}</Text>
+    </Animated.View>
+  );
+}
+function PriceTargets({ picked, onPick, live, S, pick, since }: {
+  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>;
+  pick: SharedValue<number>; since: SharedValue<number>;
+}) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {PRICE_Q.map((q, k) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={4}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: SLATE.left + 3, top: SLATE.top + k * ROW_H + 1, width: SLATE.w - 6, height: ROW_H - 2 }}
+          style={{ position: 'absolute', left: SLATE.left + 3, top: SLATE.top + k * ROW_H + 0.5, width: SLATE.w - 6, height: ROW_H - 1 }}
         >
-          <View style={styles.choice}>
-            <Text style={styles.choiceArrow}>{q.arrow}</Text>
-            <Text style={styles.choiceText}>{q.label}</Text>
-          </View>
+          <PriceChoice q={q} k={k} pick={pick} since={since} />
         </Target>
       ))}
     </Animated.View>
@@ -561,27 +617,40 @@ const styles = StyleSheet.create({
     backgroundColor: NATURAL.slate.base, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   priceBlock: { alignItems: 'center' },
-  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  // AQ2: Caveat's letters draw up to a quarter of an em past their advance, and a phone
+  // clips a Text to its content box — so every chalk word has a box wider than its ink
   chalkHead: {
+    width: 64, textAlign: 'center',
     fontFamily: 'Caveat_700Bold', fontSize: 15, lineHeight: 17, color: PAPER_LIT, includeFontPadding: false,
   },
   chalkPrice: {
+    width: 28, textAlign: 'center',
     fontFamily: 'Caveat_700Bold', fontSize: 20, lineHeight: 22, color: PAPER_LIT, includeFontPadding: false,
   },
   chalkNew: { color: PAPER_LIT },
   chalkStrike: {
-    position: 'absolute', left: -2, right: -2, top: 11, height: 2, borderRadius: 1, backgroundColor: EMBER,
+    position: 'absolute', left: 4, right: 4, top: 11, height: 2, borderRadius: 1, backgroundColor: EMBER,
     transformOrigin: '0% 50%',
   },
   clear: { flexGrow: 1 },
+  // a struck button on the slate: a white face, a lit top edge, a hard ledge of the
+  // lesson's shade under it and the faint drop it casts (stageSkin's lipOf, sized down)
   choice: {
-    flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    flexGrow: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: 3, marginBottom: 2.5,
+    backgroundColor: PLATE_FACE, borderRadius: 4, borderWidth: 1, borderColor: INK,
+    boxShadow: `inset 0px 1px 0px rgba(255, 255, 255, 0.9), 0px 2px 0px ${TONE.SHADE}, 0px 3px 0px rgba(26, 26, 26, 0.25)`,
+  },
+  chip: {
+    width: 12, height: 12, borderRadius: 6, backgroundColor: NATURAL.slate.base,
+    alignItems: 'center', justifyContent: 'center',
   },
   choiceArrow: {
-    fontFamily: 'Inter_700Bold', fontSize: 10, lineHeight: 12, color: INK, includeFontPadding: false,
+    width: 12, textAlign: 'center',
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 12, color: PAPER_LIT, includeFontPadding: false,
   },
   choiceText: {
+    width: 46, marginLeft: 2, textAlign: 'left',
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.4, color: INK, includeFontPadding: false,
   },
 });

@@ -25,7 +25,7 @@ import { reachHandTo, headStage } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, sc6Cot, sc6Blanket, sc6Lantern, sc6Mast, sc6Chest, sc6Shelf,
+  NATURAL, sc6Cot, sc6Blanket, sc6Lantern, 
   sc6Tonic, sc6OnionBrown, sc6CaseBottle, sc6Vinegar, sc6Phial, sc6Basket, sc6Orange, sc6LedgerShut,
   sc6LedgerOpen, SC6_TONIC_GRIP, SC6_BASKET_GRIP, SC6_COT_AT,
 } from './objects';
@@ -207,9 +207,6 @@ const SUR_TURN: Track[] = BEATS.map((_, n) => {
 const COT_ART = sc6Cot(0, 0, COT_W, COT_H);
 const BLANKET_ART = sc6Blanket(0, 0, 44, 10);
 const LANTERN_ART = sc6Lantern(0, 30 / 2 - 1.6, 16, 30);
-const MAST_ART = sc6Mast(40, 393, 34, 230);
-const CHEST_ART = sc6Chest(192, 466, 144, 28);
-const SHELF_ART = sc6Shelf(SHELF.x, SHELF.y + 5, 48, 10);
 const TONIC_ART = sc6Tonic(0, TONIC.h / 2 - TONIC_GRIP_Y, TONIC.w, TONIC.h);
 const SEA_ART = sc6CaseBottle(0, BOT.h / 2 - BOT.grip, BOT.w, BOT.h);
 const VIN_ART = sc6Vinegar(0, BOT.h / 2 - BOT.grip, BOT.w, BOT.h);
@@ -710,13 +707,13 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       <Room S={SCENE} />
       <Port S={SCENE} />
       <Hammocks S={SCENE} />
-      <ObjectArt parts={SHELF_ART} tone={TONE} />
-      <ObjectArt parts={CHEST_ART} tone={TONE} />
+      <LessonPicture name="sci6-shelf" />
+      <LessonPicture name="sci6-chest" />
       <Tally S={SCENE} />
       <Cot />
       <Things S={SCENE} />
       {on(PAIRS_ON) ? <Pairs S={SCENE} picked={picked} live={Q2[i] === 1} /> : null}
-      <ObjectArt parts={MAST_ART} tone={TONE} />
+      <LessonPicture name="sci6-mast" />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="second" wear={[]} />
       {/* cast: tophat */}
@@ -816,6 +813,7 @@ function Port({ S }: { S: SharedValue<any> }) {
           <Animated.View style={[styles.portGlint, glint]} />
         </Animated.View>
       </View>
+      <LessonPicture name="sci6-port" />
       <View style={styles.portLid} pointerEvents="none" />
       <View style={styles.portLidRope} pointerEvents="none" />
     </>
@@ -1182,8 +1180,7 @@ const styles = StyleSheet.create({
   },
   floor: floorStyle(TONE, 506),
   portHole: {
-    position: 'absolute', left: 226, top: 368, width: 28, height: 28, borderRadius: 3, overflow: 'hidden',
-    borderWidth: 2.4, borderColor: C.sc6Timber.base,
+    position: 'absolute', left: 226, top: 368, width: 28, height: 28, borderRadius: 14, overflow: 'hidden',
   },
   portView: { position: 'absolute', left: -14, top: -10, width: 52, height: 44 },
   portSky: { position: 'absolute', left: 0, right: 0, top: 0, height: 24 },
@@ -1240,9 +1237,9 @@ const styles = StyleSheet.create({
   note: {
     position: 'absolute', width: NOTE.w, height: NOTE.h, borderRadius: 2, backgroundColor: C.paper.base,
     borderWidth: 1, borderColor: C.paper.shade, alignItems: 'center', justifyContent: 'center', paddingTop: 3,
-    transformOrigin: '50% 8%',
+    transformOrigin: '50% 8%', boxShadow: `0 3px 0 ${NATURAL.paper.shade}`,
   },
-  noteText: { fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 11.6, color: INK, includeFontPadding: false },
+  noteText: { fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 11.6, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center' },
   nail: {
     position: 'absolute', left: NOTE.w / 2 - 2, top: 1.4, width: 4, height: 4, borderRadius: 2, backgroundColor: C.iron.base,
   },
@@ -1256,7 +1253,7 @@ const styles = StyleSheet.create({
   },
   poisonTag: { height: 13, top: 4, backgroundColor: C.apple.base, borderColor: C.apple.shade },
   tagString: { position: 'absolute', left: 20, top: -8, width: 1, height: 8, backgroundColor: C.s5Rope.shade },
-  tagText: { fontFamily: 'Caveat_700Bold', fontSize: 10, lineHeight: 9.4, color: INK, includeFontPadding: false },
+  tagText: { fontFamily: 'Caveat_700Bold', fontSize: 10, lineHeight: 9.4, color: INK, includeFontPadding: false, alignSelf: 'stretch', textAlign: 'center' },
   poisonText: { color: C.paper.base },
   clear: { flexGrow: 1 },
 });

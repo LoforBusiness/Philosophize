@@ -27,7 +27,9 @@ import { ART } from './lib/lessonart/index.mjs';
 
 const Jimp = JimpPkg.default || JimpPkg;
 const REPO = process.cwd();
-const SCALE = Number(process.env.SCALE || 4);
+// 6 pixels a stage unit: sharp on a ~3x phone even with the camera pushed in to 1.72x.
+// (A run at the old default of 4 once quietly re-baked every picture a third softer.)
+const SCALE = Number(process.env.SCALE || 6);
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const ONLY = process.argv[2] || null;
 const outDir = path.join(REPO, 'assets/lesson-art');
@@ -68,7 +70,10 @@ import type { ImageSourcePropType } from 'react-native';
 export const LESSON_ART: Record<string, { source: ImageSourcePropType; x: number; y: number; w: number; h: number; stamp: string }> = {
 `;
 for (const r of rows) {
-  table += `  '${r.name}': { source: require('@/assets/lesson-art/${r.name}.png'), x: ${r.box.x}, y: ${r.box.y}, w: ${r.box.w}, h: ${r.box.h}, stamp: '${r.stamp}' },\n`;
+  // a picture not yet drawn stays out of the table, so a require() of a missing PNG can
+  // never break the bundle while somebody else is still drawing (check:lesson-art fails it)
+  if (!fs.existsSync(path.join(outDir, `${r.name}.png`))) { console.log(`  (${r.name}: no PNG yet — left out of the table)`); continue; }
+  table +=`  '${r.name}': { source: require('@/assets/lesson-art/${r.name}.png'), x: ${r.box.x}, y: ${r.box.y}, w: ${r.box.w}, h: ${r.box.h}, stamp: '${r.stamp}' },\n`;
 }
 table += '};\n';
 fs.writeFileSync(path.join(REPO, 'components/lesson/cinematic/lessonArt.ts'), table);

@@ -4,6 +4,7 @@ import {
   INK, MID, PAPER_LIT, DEEP, OLIVE, EMBER, FLAT_EDGE, mix,
 } from '@/components/shared/tone';
 import { LINE } from '@/components/shared/drawn';
+import { inkWrap } from '@/lib/utils/inkRoom';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WHO YOU'RE BECOMING, WRITTEN IN A JOURNAL (2026-09-26).
@@ -57,7 +58,7 @@ export default memo(function BecomingJournal({ bio }: { bio: string }) {
         ))}
         <View style={styles.margin} />
         <Text style={styles.kicker}>TODAY&rsquo;S ENTRY</Text>
-        <Text style={styles.hand}>{bio}</Text>
+        <Text style={styles.hand}>{inkWrap(bio)}</Text>
       </View>
 
       {/* the ribbon marking the page, hanging out past its foot */}

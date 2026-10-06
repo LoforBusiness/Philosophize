@@ -143,5 +143,10 @@ export function profileNameStyle(id: string | null | undefined, baseSize: number
 }
 
 export function profileNameText(id: string | null | undefined, name: string): string {
-  return profileFontById(id).transform === 'uppercase' ? name.toUpperCase() : name;
+  const shown = profileFontById(id).transform === 'uppercase' ? name.toUpperCase() : name;
+  // A no-break space each side (LESSON_RULES AQ2): several of these faces draw past their
+  // letters (Caveat's last letter by up to 0.23 em, the italic's first by 0.14), and
+  // Android clips a Text to its letters' box, so "Jeff" in Caveat lost the end of its f.
+  // The space travels with the name into every place it is shown.
+  return ` ${shown} `;
 }

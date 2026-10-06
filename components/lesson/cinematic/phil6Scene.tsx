@@ -27,7 +27,7 @@ import {
   NATURAL, ph6Cabinet, ph6Oracle, ph6OracleHead, ph6Ball, ph6Tray, ph6CardFace, ph6CardBack,
   ph6FortuneLoves, ph6FortuneSneeze, ph6FortuneBully, ph6BrassHand, ph6Counter, ph6Awning, ph6JarFudge,
   ph6JarMint, ph6JarToffee, ph6FudgeBit, ph6MintBit, ph6DieFive, ph6DieTwo,
-  ph6Carousel, ph6Rail, PH6_CAB,
+  ph6Rail, PH6_CAB,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -273,7 +273,6 @@ const FUDGE_ART = ph6FudgeBit(0, 0, 7, 6);
 const MINT_ART = ph6MintBit(0, 0, 7, 6);
 const DIE_A = ph6DieFive(0, 0, DICE.s, DICE.s);
 const DIE_B = ph6DieTwo(0, 0, DICE.s, DICE.s);
-const CAROUSEL_ART = ph6Carousel(318, 352, 184, 216);
 const RAIL_ART = ph6Rail(372, 485, 64, 30);
 
 /** The price tags hanging over the three jars. */
@@ -560,7 +559,7 @@ export default function Phil6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
       <View style={styles.turf} pointerEvents="none" />
       <Stars S={SCENE} />
       <Bunting S={SCENE} />
-      <ObjectArt parts={CAROUSEL_ART} tone={TONE} />
+      <LessonPicture name="phil6-carousel" />
       <CarouselBulbs S={SCENE} />
       <Galloper S={SCENE} k={0} />
       <Galloper S={SCENE} k={1} />
@@ -799,7 +798,6 @@ function Fan({ S }: { S: SharedValue<any> }) {
       {FAN_CARDS.map((c) => (
         <View key={c.id} style={[styles.fanRodArm, rodStyle(c.x, c.y + FC.h / 2 - 3)]} />
       ))}
-      <LovesGlow S={S} />
       <FanCard S={S} k={0} />
       <FanCard S={S} k={1} />
       <FanCard S={S} k={2} />
@@ -828,8 +826,8 @@ function FanCard({ S, k }: { S: SharedValue<any>; k: 0 | 1 | 2 }) {
     let deg: number = c.deg;
     let sc = 1;
     if (c.id === 'loves') {
-      dy -= 8 * v.rLoves;
-      sc = 1 + 0.08 * Math.sin(Math.PI * Math.min(1, v.rLoves * 1.6)) + 0.04 * v.rLoves;
+      dy -= 8 * v.rLoves + 5 * Math.sin(Math.PI * Math.min(1, v.rLoves * 1.5));
+      sc = 1 + 0.12 * Math.sin(Math.PI * Math.min(1, v.rLoves * 1.6)) + 0.04 * v.rLoves;
     }
     if (c.id === 'sneeze') {
       dx = 3 * Math.sin(v.rSneeze * Math.PI * 6) * (1 - v.rSneeze);
@@ -859,15 +857,6 @@ function FanCard({ S, k }: { S: SharedValue<any>; k: 0 | 1 | 2 }) {
       )}
     </Animated.View>
   );
-}
-/** The right card lights up behind as it rises. */
-function LovesGlow({ S }: { S: SharedValue<any> }) {
-  const c = FAN_CARDS[2];
-  const st = useAnimatedStyle(() => ({
-    opacity: 0.85 * S.value.rLoves,
-    transform: [{ translateX: c.x }, { translateY: c.y - 8 * S.value.rLoves }, { rotate: `${c.deg}deg` }, { scale: 0.9 + 0.25 * S.value.rLoves }],
-  }));
-  return <Animated.View style={[styles.rider, st]}><View style={styles.lovesGlow} /></Animated.View>;
 }
 /** A sneeze bursts out of the ACHOO! card when it is picked. */
 function Puff({ S }: { S: SharedValue<any> }) {
@@ -1039,10 +1028,6 @@ const styles = StyleSheet.create({
   fanLayer: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   fanRod: { position: 'absolute', left: FAN.x - 1.2, top: FAN.hand, width: 2.4, height: 30, backgroundColor: W.brass.shade },
   fanRodArm: { position: 'absolute', height: 2, backgroundColor: W.brass.base, transformOrigin: '0% 50%' },
-  lovesGlow: {
-    position: 'absolute', left: -FC.w / 2 - 6, top: -FC.h / 2 - 6, width: FC.w + 12, height: FC.h + 12, borderRadius: 8,
-    backgroundColor: W.ph6Bulb.shade,
-  },
   puff: { position: 'absolute', borderRadius: 8, backgroundColor: W.ph6Puff.base, borderWidth: 1, borderColor: W.ph6Puff.shade },
   heartLobe: { position: 'absolute', top: -5, width: 7, height: 7, borderRadius: 3.5, backgroundColor: W.ph6Heart.base },
   heartPoint: {

@@ -26,8 +26,8 @@ import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
   NATURAL, ratTail, tailBasket, coinSack, silverCoin, handLantern, candlestick, sealMatrix,
-  waxSeal, decreeSeal, rolledDraft, draftRoller, cabbageHead, vegCrate, hallBeam, townBanner, wallTorch,
-  mayorDais, mayorTable, stoneArch, bakeHouse, bakeDoor, townWell, wellLid, hatchTop, hatchUnder, cellarHole,
+  waxSeal, decreeSeal, rolledDraft, draftRoller, cabbageHead, hallBeam, townBanner, wallTorch,
+  stoneArch, bakeHouse, bakeDoor, townWell, wellLid,
 } from './objects';
 import { BY_ID } from './wardrobe';
 
@@ -247,7 +247,6 @@ const DOOR_AT = { x: 310, y: 437 };
 const WELL_LID_AT = { x: 358, y: 442.5 };
 
 // ── the cabbages ─────────────────────────────────────────────────────────────
-const CRATE_ART = vegCrate(316, 489, 36, 22);
 const CAB_BACK = [cabbageHead(328, 472.5, 13, 12), cabbageHead(318, 471, 13, 12)];
 const CAB_HOME = { x: 306, y: 472 };
 
@@ -260,12 +259,7 @@ const PROCLAIM_SEAL = decreeSeal(56, 392, 15, 17);
 const ARCH_ART = stoneArch(334, 406, 128, 128);
 const HOUSE_ART = bakeHouse(50, 50, 100, 104);
 const WELL_ART = townWell(74, 77, 44, 58);
-const DAIS_ART = mayorDais(86, 489, 168, 22);
-const TABLE_ART = mayorTable(87, 467, 154, 30);
 const CANDLE_ART = candlestick(22, TOP - 13, 10, 26);
-const HOLE_ART = cellarHole(25, 7.5, 50, 15);
-const LID_TOP_ART = hatchTop(25, 7.5, 50, 15);
-const LID_UNDER_ART = hatchUnder(25, 17, 50, 34);
 const ROLL_ART = rolledDraft(0, 0, 48, 6);
 const ROLLER_ART = draftRoller(0, 0, 50, 5);
 const DOOR_ART = bakeDoor(0, 0, 28, 42);
@@ -501,7 +495,7 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // is on screen; b10 she pushes it over and it falls shut
     const srcLid = carrySource(cv, 4, n, 0);
     let lidNow = 0;
-    if (Q1[n]) lidNow = q1 && pk === 0 ? 0.18 * rAt(0.15, 0.6) + 0.025 * rBump(0.6, 0.7, 0.85) : 0;
+    if (Q1[n]) lidNow = q1 && pk === 0 ? 0.3 * rAt(0.12, 0.5) + 0.06 * rBump(0.5, 0.62, 0.85) : 0;
     else if (A_FARM[n]) lidNow = lerp(srcLid, 1, sAt(1.25, 2.2));
     else if (A_CABBAGES[n]) {
       const fall = clamp01((b - 0.95) / 0.3);
@@ -707,12 +701,12 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       <FloorView />
       <Hatch S={SCENE} rats={i >= Q1_N && i <= CAB_N + 1} />
       {i >= LANTERN_N && i <= LANTERN_N + 1 ? <RunningRat S={SCENE} /> : null}
-      <ObjectArt parts={CRATE_ART} tone={TONE} />
+      <LessonPicture name="econ5-crate" />
       {CAB_BACK.map((a, k) => <ObjectArt key={k} parts={a} tone={TONE} />)}
-      <ObjectArt parts={DAIS_ART} tone={TONE} />
+      <LessonPicture name="econ5-dais" />
       {/* cast: plain */}
       <Stickman D={DM} k={K} role="second" wear={[]} />
-      <ObjectArt parts={TABLE_ART} tone={TONE} />
+      <LessonPicture name="econ5-table" />
       <ObjectArt parts={CANDLE_ART} tone={TONE} />
       <Flame S={SCENE} x={22} y={430.5} s={0.55} ph={4.2} />
       <Drafts S={SCENE} open={i >= WANT_N - 1} />
@@ -900,16 +894,16 @@ function Hatch({ S, rats }: { S: SharedValue<any>; rats: boolean }) {
   return (
     <>
       <View style={styles.holeBox} pointerEvents="none">
-        <ObjectArt parts={HOLE_ART} tone={TONE} />
+        <LessonPicture name="econ5-hole" />
       </View>
       <Animated.View style={[styles.lidUnder, under]} pointerEvents="none">
-        <ObjectArt parts={LID_UNDER_ART} tone={TONE} />
+        <LessonPicture name="econ5-lid-under" />
       </Animated.View>
       <View style={styles.ratClip} pointerEvents="none">
         {rats ? RAT_AT.map((x, r) => <PeekRat key={r} S={S} x={x} r={r} />) : null}
       </View>
       <Animated.View style={[styles.lidTop, top]} pointerEvents="none">
-        <ObjectArt parts={LID_TOP_ART} tone={TONE} />
+        <LessonPicture name="econ5-lid-top" />
       </Animated.View>
     </>
   );
@@ -1117,9 +1111,9 @@ const styles = StyleSheet.create({
   },
   proclaim: {
     position: 'absolute', left: 22, top: 330, width: 68, height: 58, borderRadius: 1.5, borderWidth: 1, borderColor: INK,
-    backgroundColor: NATURAL.e5Parch.base, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
+    backgroundColor: NATURAL.e5Parch.base, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2, boxShadow: `0 2px 0 ${NATURAL.e5Parch.shade}`,
   },
-  proclaimHead: { fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: NATURAL.e5Red.base, includeFontPadding: false },
+  proclaimHead: { width: 64, textAlign: 'center', fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: NATURAL.e5Red.base, includeFontPadding: false },
   proclaimText: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: NATURAL.e5Parch.label, textAlign: 'center', includeFontPadding: false,
   },
@@ -1138,15 +1132,15 @@ const styles = StyleSheet.create({
   drop: { position: 'absolute', left: -1.2, top: -1.6, width: 2.4, height: 3.2, borderRadius: 1.2, backgroundColor: NATURAL.water.base },
   plqBakery: {
     position: 'absolute', left: 5, top: 49, width: 42, height: 11, borderRadius: 1, borderWidth: 0.8, borderColor: INK,
-    backgroundColor: NATURAL.wood.base, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: NATURAL.wood.base, alignItems: 'center', justifyContent: 'center', boxShadow: `0 1.4px 0 ${NATURAL.wood.shade}`,
   },
   plqWell: {
     position: 'absolute', left: 343, top: 450, width: 30, height: 11, borderRadius: 1, borderWidth: 0.8, borderColor: INK,
-    backgroundColor: NATURAL.oak.base, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: NATURAL.oak.base, alignItems: 'center', justifyContent: 'center', boxShadow: `0 1.4px 0 ${NATURAL.wood.shade}`,
   },
   plqCellar: {
     position: 'absolute', left: 196, top: 452, width: 40, height: 12, borderRadius: 1, borderWidth: 0.8, borderColor: INK,
-    backgroundColor: NATURAL.oak.base, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: NATURAL.oak.base, alignItems: 'center', justifyContent: 'center', boxShadow: `0 1.4px 0 ${NATURAL.wood.shade}`,
   },
   plqText: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: NATURAL.oak.label, includeFontPadding: false },
   plqTextLight: { fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0, color: NATURAL.wood.label, includeFontPadding: false },
@@ -1162,7 +1156,7 @@ const styles = StyleSheet.create({
   // Three lines must end above the roll that hangs at the paper's foot (check:readable,
   // STRIKE): 2.5 + 3 × 10.5 = 34 of the paper's 40.
   draftText: {
-    fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 10.5, color: NATURAL.e5Parch.label, textAlign: 'center', includeFontPadding: false,
+    fontFamily: 'Caveat_700Bold', fontSize: 11, lineHeight: 10.5, color: NATURAL.e5Parch.label, textAlign: 'center', width: 42, includeFontPadding: false,
   },
   clear: { flexGrow: 1 },
 });

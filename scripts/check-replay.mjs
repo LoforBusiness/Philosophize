@@ -197,6 +197,78 @@ function labelsIn(elements, n, into) {
     }
   }
 }
+// ── AQ2 · A LETTER'S INK FITS INSIDE ITS TEXT'S OWN BOX ─────────────────────
+// The owner, 2026-10-05: *"on the table where it says one coin, the end of coin is
+// slightly cut off. And I've noticed this for other words."* Android's TextView clips its
+// drawing to its CONTENT box — inside any padding — and an auto-width Text's content box
+// is exactly the sum of its letters' ADVANCES. Caveat draws up to 0.23 of its size past
+// its last advance (Playfair's f 0.08, Cinzel's R 0.04), so on a phone the last letter
+// loses a sliver; a browser does not clip, which is why nothing saw it. Padding cannot
+// help, since the clip sits inside it. What helps is a content box wider than the letters:
+// a label that stretches across its plate, or one given its own width. So each label's
+// content box is worked out the way Yoga lays it out (its own width; or left and right
+// pinned; or stretched by a column parent; else just its letters), each line is placed by
+// its textAlign, and every line's ink must land inside.
+const INK_TOL = 0.5;
+const marX = (st) => {
+  const m = (k) => +(st[k] ?? st.marginHorizontal ?? st.margin ?? 0) || 0;
+  return m('marginLeft') + m('marginRight');
+};
+function inkIn(elements, n, into) {
+  for (const ch of elements) {
+    const t = ch[ch.length - 1];
+    if (!t.leafText || !/Text/.test(t.type) || !t.text) continue;
+    if (readElement(ch).vis < 0.3) continue;
+    const ts = styleOf(t);
+    const font = labelFace(ts.fontFamily);
+    const px = +ts.fontSize || 0;
+    if (!font || !px || !font.ink) continue;
+    const key = `ink|${t.src}|${t.text}`;
+    if (into.has(key)) continue;
+    const ls = +ts.letterSpacing || 0;
+    const lineW = (s) => font.width(s, px) + ls * [...s].length;
+    const ps = ch.length > 1 ? styleOf(ch[ch.length - 2]) : {};
+    const parentInner = numW(ps.width) ? numW(ps.width) - padX(ps) : 0;
+    // the content box, as Yoga gives it
+    let cw = 0;
+    if (numW(ts.width)) cw = numW(ts.width) - padX(ts);
+    else if (ts.position === 'absolute' && typeof ts.left === 'number' && typeof ts.right === 'number') cw = parentInner ? parentInner - ts.left - ts.right - padX(ts) : 0;
+    else if (ts.position !== 'absolute' && (ps.flexDirection ?? 'column').startsWith('column')
+      && (ts.alignSelf === 'stretch' || ((!ts.alignSelf || ts.alignSelf === 'auto') && (ps.alignItems ?? 'stretch') === 'stretch'))) cw = parentInner ? parentInner - padX(ts) - marX(ts) : 0;
+    else if (ts.flex || ts.flexGrow) continue; // grows into its row — wide by construction
+    // lines: wrapped at the box when it has one, else at the plate the auto box sits in
+    const words = String(t.text).split(/\s+/).filter(Boolean);
+    let wrapAt = cw;
+    if (!wrapAt) {
+      let j = ch.length - 2;
+      while (j >= 0 && !numW(styleOf(ch[j]).width)) j -= 1;
+      wrapAt = j >= 0 ? numW(styleOf(ch[j]).width) - padX(styleOf(ch[j])) : 1e9;
+    }
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const next = cur ? `${cur} ${w}` : w;
+      if (cur && lineW(next) > wrapAt) { lines.push(cur); cur = w; } else cur = next;
+    }
+    if (cur) lines.push(cur);
+    const auto = !cw;
+    if (auto) cw = Math.max(...lines.map(lineW));
+    const align = ts.textAlign || 'left';
+    for (const line of lines) {
+      const w = lineW(line);
+      const x0 = align === 'center' ? (cw - w) / 2 : align === 'right' ? cw - w : 0;
+      const k = font.ink(line, px);
+      const cutR = k.right - (cw - x0 - w);
+      const cutL = k.left - x0;
+      if (cutR > INK_TOL || cutL > INK_TOL) {
+        const side = cutR >= cutL ? `right by ${cutR.toFixed(1)}` : `left by ${cutL.toFixed(1)}`;
+        into.set(key, { n, kind: 'CLIPPED', say: `"${line}" draws past its ${auto ? 'auto-width' : `${cw.toFixed(1)}-wide`} box on the ${side} — Android cuts it (${t.src})` });
+        break;
+      }
+    }
+  }
+}
+
 const STRIP_BUDGET = 0;
 const DETACH_BUDGET = 0;
 // A CUT is a jump where the beat really did change — a prop that appears, vanishes
@@ -909,7 +981,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
       if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
       else if (f === steps) {
-        beatSnaps.last = snap(); detachedIn(elements, n, detached); labelsIn(elements, n, labels);
+        beatSnaps.last = snap(); detachedIn(elements, n, detached); labelsIn(elements, n, labels); inkIn(elements, n, labels);
         beatSnaps.figs = figs.map((ch) => {
           const link = ch[ch.length - 1];
           let B = null;
@@ -1226,10 +1298,17 @@ ok('no hand repeats one stroke over and over (AR5)', arLoop.length === 0, `${arL
 // AQ1 — every label fits its plate, and every plate sits on its object.
 {
   const hard = [], soft = [];
-  for (const r of rows) for (const x of r.labels || []) (r.dialogue ? hard : soft).push(`${r.id} beat ${x.n}: ${x.kind} — ${x.say}`);
+  for (const r of rows) for (const x of r.labels || []) if (x.kind !== 'CLIPPED') (r.dialogue ? hard : soft).push(`${r.id} beat ${x.n}: ${x.kind} — ${x.say}`);
   if (hard.length) { console.log('\n  LABELS — a word that does not fit its plate, or a plate off its object (AQ1):'); for (const h of hard) console.log(`    ${h}`); }
   if (process.env.REPLAY_VERBOSE && soft.length) { console.log('\n  (retired lessons, counted not failed)'); for (const h of soft) console.log(`    ${h}`); }
   ok('every word fits its plate, and every plate sits on its object (AQ1)', hard.length === 0, `${hard.length} in the dialogue lessons · ${soft.length} in the retired ones, counted`);
+}
+// AQ2 — every letter's ink lands inside its own Text's box, or Android cuts it off.
+{
+  const hard = [];
+  for (const r of rows) for (const x of r.labels || []) if (x.kind === 'CLIPPED') hard.push(`${r.id} beat ${x.n}: ${x.say}`);
+  if (hard.length) { console.log('\n  CLIPPED — a letter drawn past its own box, which a phone cuts off (AQ2):'); for (const h of hard) console.log(`    ${h}`); }
+  ok("every letter's ink lands inside its own box (AQ2)", hard.length === 0, `${hard.length}`);
 }
 console.log(`\n  not counted: ${pulses.length} authored pulses, ${advisory.length} changes out of a graded beat${VERBOSE ? '' : ' (REPLAY_VERBOSE=1 lists them)'}.`);
 

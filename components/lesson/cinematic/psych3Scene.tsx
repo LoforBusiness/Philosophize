@@ -1,11 +1,14 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withSequence, withTiming, withSpring, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
-import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './psych3Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, seated, travelStance, mixKeepLegs,
@@ -15,16 +18,13 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, PLATE_RADIUS, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
-import {
-  NATURAL, galleryPlinth, caseGlass, caseFrame, chippedMug, mugBase, labelStand, blankCard, galleryStool,
-  galleryWindow, giltPainting, MUG3_GRIP,
-} from './objects';
+import { NATURAL, MUG3_GRIP } from './objects';
 import { BY_ID } from './wardrobe';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -173,17 +173,6 @@ const CARD_W = 48;
 const CARD_H = 26;
 const LAY = { x: 250, y: 460 };
 
-const PLINTH_ART = galleryPlinth(PLINTH.x, PLINTH.y, PLINTH.w, PLINTH.h);
-const GLASS_ART = caseGlass(CASE.x, CASE.y, CASE.w, CASE.h);
-const FRAME_ART = caseFrame(CASE.x, CASE.y, CASE.w, CASE.h);
-const STAND_ART = labelStand(LABEL_C.x, 471, LABEL.w, 6);
-const STOOL_ART = galleryStool(336, 493, 26, 14);
-const WINDOW_ART = galleryWindow(331, 372, 64, 88);
-const PAINTING_ART = giltPainting(64, 372, 64, 50);
-// The things that move are drawn about the point they are held by.
-const MUG_ART = chippedMug(MUG_W / 2 - GRIP.x, MUG_H / 2 - GRIP.y, MUG_W, MUG_H);
-const BASE_ART = mugBase(BASE_W / 2 - BASE_END, 0, BASE_W, BASE_H);
-const CARD_ART = blankCard(-CARD_W / 2, 0, CARD_W, CARD_H);
 
 function hHold(code: number, t: number): Stance {
   'worklet';
@@ -428,26 +417,39 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   const baseP = useDerivedValue<At>(() => SCENE.value.base);
   const cardP = useDerivedValue<At>(() => SCENE.value.card);
 
+  // the two answers' PHYSICAL reaction (right: the thing pops and settles; wrong: it shakes)
+  const labelKind: Kick = i === 4 && picked === 'label' ? 'pop' : i === 9 && picked === 'label' ? 'shake' : null;
+  const kLabel = useKick(labelKind);
+  const kMug = useKick(i === 4 && picked === 'mug' ? 'shake' : null);
+  const kWindow = useKick(i === 4 && picked === 'window' ? 'shake' : null);
+  const kCase = useKick(i === 9 && picked === 'case' ? 'shake' : null);
+  const kSticker = useKick(i === 9 && picked === 'sticker' ? 'pop' : null);
+
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <View style={styles.skirting} pointerEvents="none" />
-      <ObjectArt parts={PAINTING_ART} tone={TONE} />
-      <ObjectArt parts={WINDOW_ART} tone={TONE} />
-      <ObjectArt parts={STOOL_ART} tone={TONE} />
+      <LessonPicture name="psych3-painting" />
+      <Animated.View style={[styles.whole, { transformOrigin: '331px 372px' }, kWindow]} pointerEvents="none">
+        <LessonPicture name="psych3-window" />
+      </Animated.View>
+      <LessonPicture name="psych3-stool" />
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: plain */}
       <Stickman D={DA} k={K} role="crowd" wear={[]} />
-      <ObjectArt parts={PLINTH_ART} tone={TONE} />
-      <ObjectArt parts={GLASS_ART} tone={TONE} style={styles.glass} />
-      <Rider at={mugP} art={MUG_ART} />
-      <Rider at={baseP} art={BASE_ART} />
-      <ObjectArt parts={FRAME_ART} tone={TONE} />
-      <ObjectArt parts={STAND_ART} tone={TONE} />
-      <View style={styles.label} pointerEvents="none">
+      <LessonPicture name="psych3-plinth" />
+      <Animated.View style={[styles.whole, { transformOrigin: '175px 460px' }, kCase]} pointerEvents="none">
+        <LessonPicture name="psych3-glass" />
+      </Animated.View>
+      <Rider at={mugP} name="psych3-mug" kick={kMug} />
+      <Rider at={baseP} name="psych3-mugbase" kick={kSticker} origin="-12.2px 0px" />
+      <Animated.View style={[styles.whole, { transformOrigin: '175px 460px' }, kCase]} pointerEvents="none">
+        <LessonPicture name="psych3-frame" />
+      </Animated.View>
+      <Animated.View style={[styles.label, kLabel]} pointerEvents="none">
         <Text style={styles.labelText}>ROYAL CUP</Text>
-      </View>
-      <Rider at={cardP} art={CARD_ART} />
+      </Animated.View>
+      <Rider at={cardP} name="psych3-card" />
       {/* cast: tophat */}
       <Stickman D={DP} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: cap */}
@@ -458,10 +460,29 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
   );
 }
 
+// ── a right answer pops and settles; a wrong one shakes ──────────────────────
+
+type Kick = 'pop' | 'shake' | null;
+function useKick(kind: Kick) {
+  const s = useSharedValue(1);
+  const dx = useSharedValue(0);
+  useEffect(() => {
+    if (kind === 'pop') {
+      s.value = withSequence(withTiming(1.2, { duration: 110, easing: Easing.out(Easing.quad) }), withSpring(1, { damping: 6, stiffness: 240 }));
+    } else if (kind === 'shake') {
+      dx.value = withSequence(
+        withTiming(-4, { duration: 55 }), withTiming(4, { duration: 85 }), withTiming(-3, { duration: 75 }),
+        withTiming(2, { duration: 65 }), withTiming(0, { duration: 70 }),
+      );
+    }
+  }, [kind, s, dx]);
+  return useAnimatedStyle(() => ({ transform: [{ translateX: dx.value }, { scale: s.value }] }));
+}
+
 // ── riders: a thing drawn about the point it is held by ─────────────────────
 
 type At = { x: number; y: number; o: number; r?: number; sx?: number; sy?: number; s?: number };
-function Rider({ at, art }: { at: SharedValue<At>; art: ReturnType<typeof chippedMug> }) {
+function Rider({ at, name, kick, origin }: { at: SharedValue<At>; name: string; kick?: ReturnType<typeof useKick>; origin?: string }) {
   const st = useAnimatedStyle(() => ({
     opacity: at.value.o,
     transform: [
@@ -472,7 +493,9 @@ function Rider({ at, art }: { at: SharedValue<At>; art: ReturnType<typeof chippe
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={TONE} />
+      <Animated.View style={[styles.rider, origin ? { transformOrigin: origin } : null, kick]}>
+        <LessonPicture name={name} />
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -539,11 +562,11 @@ const styles = StyleSheet.create({
   },
   ground: { position: 'absolute', left: 8, right: 8, top: GROUND, height: 1.5, backgroundColor: RULE },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
-  glass: { opacity: 0.6 },
+  whole: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   label: {
     position: 'absolute', left: LABEL.left, top: LABEL.top, width: LABEL.w, height: LABEL.h,
-    backgroundColor: NATURAL.brass.base, borderRadius: 1.5, borderWidth: 1.2, borderColor: INK,
-    paddingHorizontal: 1.5, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: NATURAL.brass.base, borderRadius: 3, borderWidth: 1.2, borderColor: INK, boxShadow: `0px 2px 0px ${NATURAL.brass.shade}`,
+    paddingHorizontal: 1.5, alignItems: 'stretch', justifyContent: 'center',
   },
   labelText: {
     fontFamily: 'Cinzel_700Bold', fontSize: 9, lineHeight: 9.6, letterSpacing: 0.4, color: NATURAL.brass.label,
@@ -551,15 +574,15 @@ const styles = StyleSheet.create({
   },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 3, alignItems: 'stretch', backgroundColor: PLATE_FACE, borderRadius: 5, borderWidth: 0.8, boxShadow: `0px 2.2px 0px ${TONE.SHADE}`,
+    borderColor: TONE.RULE, paddingHorizontal: 3,
   },
   namePlateTop: {
-    position: 'absolute', top: 9, alignItems: 'center', backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2,
-    borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', top: 9, alignItems: 'stretch', backgroundColor: PLATE_FACE, borderRadius: 5, borderWidth: 0.8, boxShadow: `0px 2.2px 0px ${TONE.SHADE}`,
+    borderColor: TONE.RULE, paddingHorizontal: 3,
   },
   nameText: {
-    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false, textAlign: 'center',
   },
 });
 

@@ -1,11 +1,15 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './hist4Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -15,14 +19,14 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, bicycleWheel, bicycleFrame, BIKE_AT, clockTower, towerBell, phoneShop, cycleRack, horseTrough,
+  NATURAL, tint, bicycleWheel, bicycleFrame, BIKE_AT, clockTower, towerBell, phoneShop, cycleRack,
   oldPhoto, TOWER_BELL_AT, SHOP_FASCIA,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -171,7 +175,6 @@ const FASCIA = {
 /** The shop's window, which a thumb points at. */
 const WINDOW = { x: 350, y: 440 };
 const TROUGH = { x: 236, y: 476, w: 56, h: 48 };
-const TROUGH_ART = horseTrough(TROUGH.x, TROUGH.y, TROUGH.w, TROUGH.h);
 /** A geranium on the trough's near end, which she touches. */
 const FLOWER = { x: 213, y: 461 };
 const RACK = { x: 367, y: 483, w: 64, h: 34 };
@@ -289,8 +292,23 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldB = useHeld();
   const heldP = useHeld();
   const heldH = useHeld();
-  const cv = useCarry(10);
+  const cv = useCarry(13);
   const on = useLinger(i);
+  // THE SQUARE ANSWERS BACK: which thing was tapped on a graded beat, and how many seconds
+  // ago. Each reply is physical and its own: the tower's bell swings out and rings (right)
+  // or gives one dull knock (wrong); the trough's flowers bounce up and settle (right); the
+  // shop shudders and the bike rocks on its stand (wrong, both new since the photograph).
+  // Everything they move is carried, so the next beat takes it from where it is (AH4).
+  const pick = useSharedValue(-1);
+  const since = useSharedValue(0);
+  useEffect(() => {
+    const qs = Q1[i] ? STAYED_Q : Q2[i] ? SLOWLY_Q : null;
+    if (!qs) return;
+    const k = picked === null ? -1 : ANSWER_IDS.indexOf(picked);
+    pick.value = k;
+    since.value = 0;
+    if (k >= 0) since.value = withTiming(6, { duration: 6000, easing: Easing.linear });
+  }, [picked, i, pick, since]);
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -298,6 +316,8 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const t = clock.value;
     const tr = ease01(b / TR);
     const L = lineOf(LINES, n);
+    const pk = Q1[n] || Q2[n] ? pick.value : -1;
+    const rs = since.value;
     const st = (a: number, z: number) => {
       'worklet';
       return stage(b, L, a, z);
@@ -432,13 +452,27 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wH = wristOf(his, 'wrR');
     const photo = { x: lerp(wB.x, wH.x, own), y: lerp(wB.y, wH.y, own) - 1, o: 1, r: 0 };
     // b10: the bell swings and strikes, twice, and settles
-    const bellNow = A_REST[n] ? 16 * Math.sin(b * 5.2) * Math.exp(-b * 0.9) * st(0.0, 0.08) : 0;
+    const bellRest = A_REST[n] ? 16 * Math.sin(b * 5.2) * Math.exp(-b * 0.9) * st(0.0, 0.08) : 0;
+    // the answers: the bell rings out for the tower in Q1, and knocks once for it in Q2
+    const swingIn = clamp01(rs / 0.12);
+    const bellAns = pk === ID_TOWER
+      ? (Q1[n] ? 24 * Math.sin(rs * 6.4) * Math.exp(-rs * 0.8) : 7 * Math.sin(rs * 9) * Math.exp(-rs * 3.2)) * swingIn
+      : 0;
+    const bellNow = bellRest + bellAns;
     const bell = carry(cv, 7, n, bellNow, bellNow, tr);
+    // the shop shudders · the bike rocks on its stand · the flowers bounce and settle
+    const shopNow = pk === ID_SHOP ? 2.4 * Math.sin(rs * 34) * Math.exp(-rs * 4.2) * swingIn : 0;
+    const rackNow = pk === ID_RACK ? 6 * Math.sin(rs * 13) * Math.exp(-rs * 3) * swingIn : 0;
+    const bloomNow = pk === ID_TROUGH ? 0.16 * Math.sin(rs * 11) * Math.exp(-rs * 3.4) * swingIn : 0;
+    const shop = carry(cv, 10, n, shopNow, shopNow, tr);
+    const rack = carry(cv, 11, n, rackNow, rackNow, tr);
+    const bloom = carry(cv, 12, n, bloomNow, bloomNow, tr);
 
     return {
       vis, loc, his, t,
       photo,
       bell: { x: BELL.x, y: BELL.y, o: 1, r: bell },
+      shop, rack, bloom,
       q1: carry(cv, 8, n, Q1[p], Q1[n], tr),
       q2: carry(cv, 9, n, Q2[p], Q2[n], tr),
     };
@@ -449,21 +483,48 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const DH = useDerivedValue<Bundle>(() => SCENE.value.his);
   const photoP = useDerivedValue<At>(() => SCENE.value.photo);
   const bellP = useDerivedValue<At>(() => SCENE.value.bell);
+  const shopShake = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.shop }] }));
+  // the bike and its rack rock about the rack's foot
+  const rackRock = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: RACK.x }, { translateY: GROUND }, { rotate: `${SCENE.value.rack}deg` },
+      { translateX: -RACK.x }, { translateY: -GROUND },
+    ],
+  }));
+  // the trough's planting springs up and settles, about the trough's foot
+  const troughBloom = useAnimatedStyle(() => {
+    const u = SCENE.value.bloom;
+    return {
+      transform: [
+        { translateX: TROUGH.x }, { translateY: GROUND }, { scaleX: 1 - u * 0.35 }, { scaleY: 1 + u },
+        { translateX: -TROUGH.x }, { translateY: -GROUND },
+      ],
+    };
+  });
 
   return (
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
-      <ObjectArt parts={SHOP_ART} tone={TONE} />
-      <View style={styles.fascia} pointerEvents="none">
-        <Text style={styles.fasciaText}>PHONES</Text>
-      </View>
+      {/* the far side of the square: houses, paving and sky, one picture behind it all */}
+      <LessonPicture name="hist4-street" />
+      <Animated.View style={[styles.rider, shopShake]} pointerEvents="none">
+        <ObjectArt parts={SHOP_ART} tone={TONE} />
+        <View style={styles.fascia} pointerEvents="none">
+          <Text style={styles.fasciaText}>PHONES</Text>
+        </View>
+      </Animated.View>
       <ObjectArt parts={TOWER_ART} tone={TONE} />
       <Rider at={bellP} art={BELL_ART} />
-      <ObjectArt parts={RACK_ART} tone={TONE} />
-      <ObjectArt parts={WHEEL_F_ART} tone={TONE} />
-      <ObjectArt parts={WHEEL_R_ART} tone={TONE} />
-      <ObjectArt parts={FRAME_ART} tone={TONE} />
-      <ObjectArt parts={TROUGH_ART} tone={TONE} />
+      <Animated.View style={[styles.rider, rackRock]} pointerEvents="none">
+        <ObjectArt parts={RACK_ART} tone={TONE} />
+        <ObjectArt parts={WHEEL_F_ART} tone={TONE} />
+        <ObjectArt parts={WHEEL_R_ART} tone={TONE} />
+        <ObjectArt parts={FRAME_ART} tone={TONE} />
+      </Animated.View>
+      {/* the horse trough, planted with flowers: a drawing (lessonart/lessons/hist4.mjs) */}
+      <Animated.View style={[styles.rider, troughBloom]} pointerEvents="none">
+        <LessonPicture name="hist4-trough" />
+      </Animated.View>
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="crowd" wear={[]} />
       {/* cast: tophat */}
@@ -502,6 +563,12 @@ function Rider({ at, art }: { at: SharedValue<At>; art: ReturnType<typeof oldPho
 type Q = { id: string; label: string; pw: number; ph: number; left: number; top: number; w: number; h: number; correct: boolean };
 const TOWER_Q = { id: 'tower', label: 'CLOCK TOWER', pw: 46, ph: 22.4, left: 38, top: 302, w: 64, h: 192 };
 const SHOP_Q = { id: 'shop', label: 'PHONE SHOP', pw: 76, ph: 12.4, left: 300, top: 312, w: 100, h: 150 };
+/** Every thing a reader can tap in either question, in the order the scene's replies read them. */
+const ANSWER_IDS = ['tower', 'shop', 'rack', 'trough'];
+const ID_TOWER = 0;
+const ID_SHOP = 1;
+const ID_RACK = 2;
+const ID_TROUGH = 3;
 /** Q1: the tower, the shop and the bike rack. The tower is in the old photograph and still stands. */
 const STAYED_Q: Q[] = [
   { ...TOWER_Q, correct: true },
@@ -558,12 +625,12 @@ const styles = StyleSheet.create({
   },
   place: { flexGrow: 1 },
   namePlate: {
-    position: 'absolute', bottom: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: PLATE_FACE,
-    borderRadius: 3, borderWidth: 1.2, borderColor: INK, paddingHorizontal: 3,
+    position: 'absolute', bottom: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: PLATE_FACE,
+    borderRadius: 4, borderWidth: 1.2, borderColor: INK, boxShadow: lipOf(TONE),
   },
   nameText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
-    textAlign: 'center',
+    textAlign: 'center', alignSelf: 'stretch',
   },
 });
 

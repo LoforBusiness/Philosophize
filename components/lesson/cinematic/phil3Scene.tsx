@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, withDelay, Easing, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
@@ -15,7 +18,7 @@ import {
   GROUND, K_FIG, STAGE_W, STAGE_H, INK, useHeld, carryFrom, keepHeld, useCarry, carry, carrySource, facing,
 } from './cinematicKit';
 import { stageTone } from './stageTones';
-import { floorStyle, PLATE_FACE } from './stageSkin';
+import { floorStyle, PLATE_FACE, lipOf } from './stageSkin';
 import { followMoves, kindOf, seedOf } from './camera';
 import { emoteStill, emoteStillLive } from './moves';
 import { reachHandTo } from './interact';
@@ -277,6 +280,7 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
   const heldT = useHeld();
   const cv = useCarry(13);
   const on = useLinger(i);
+  const RX = { picked, qk: Q1[i] === 1 ? ('q1' as const) : Q2[i] === 1 ? ('q2' as const) : null };
   const SCENE = useDerivedValue(() => {
     const n = bi.value;
     const p = n > 0 ? n - 1 : 0;
@@ -459,38 +463,79 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     <View style={styles.scene}>
       <View style={styles.floor} pointerEvents="none" />
       <ObjectArt parts={CASE_ART} tone={TONE} />
-      <ObjectArt parts={SIGN_ART} tone={TONE} />
-      <View style={styles.signFace} pointerEvents="none">
-        <Text style={styles.signText}>FOUND</Text>
-        <Text style={styles.signText}>PROPERTY</Text>
-      </View>
+      <Reply id="sign" ox={240} oy={356} {...RX}>
+        <ObjectArt parts={SIGN_ART} tone={TONE} />
+        <View style={styles.signFace} pointerEvents="none">
+          <Text style={styles.signText}>FOUND</Text>
+          <Text style={styles.signText}>PROPERTY</Text>
+        </View>
+      </Reply>
       <ObjectArt parts={BOARD_ART} tone={TONE} />
       <ObjectArt parts={FLYER_A} tone={TONE} />
       <ObjectArt parts={FLYER_B} tone={TONE} />
       <ObjectArt parts={PIN_A} tone={TONE} />
       <ObjectArt parts={PIN_B} tone={TONE} />
-      <Poster S={SCENE} />
-      <ObjectArt parts={BOX_BACK_ART} tone={TONE} />
+      <Reply id="poster" ox={350} oy={449} {...RX}><Poster S={SCENE} /></Reply>
+      <Reply id="box" ox={140} oy={500} {...RX}><ObjectArt parts={BOX_BACK_ART} tone={TONE} /></Reply>
       {/* cast: cap */}
       <Stickman D={DC} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <ObjectArt parts={DESK_ART} tone={TONE} />
       <ObjectArt parts={STACK_ART} tone={TONE} />
-      <Stamp S={SCENE} />
+      <Reply id="stamp" ox={273} oy={462} {...RX}><Stamp S={SCENE} /></Reply>
       <View style={styles.ground} pointerEvents="none" />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="second" wear={BY_ID.magistrate.pieces} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="lead" wear={BY_ID.bun.pieces} />
-      <Novel S={SCENE} />
+      <Reply id="novel" ox={212} oy={480} {...RX}><Novel S={SCENE} /></Reply>
       <Note S={SCENE} />
-      <ObjectArt parts={BOX_FRONT_ART} tone={TONE} />
-      <View style={styles.boxLabel} pointerEvents="none">
-        <Text style={styles.labelText}>LOST</Text>
-        <Text style={styles.labelText}>PROPERTY</Text>
-      </View>
+      <Reply id="box" ox={140} oy={500} {...RX}>
+        <ObjectArt parts={BOX_FRONT_ART} tone={TONE} />
+        <View style={styles.boxLabel} pointerEvents="none">
+          <Text style={styles.labelText}>LOST</Text>
+          <Text style={styles.labelText}>PROPERTY</Text>
+        </View>
+      </Reply>
       {on(Q1) ? <HarmTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <DutyTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
     </View>
+  );
+}
+
+// ── the answer lands on the object itself ────────────────────────────────────
+/**
+ * A tapped thing answers with its body. The right one hops twice and settles with a
+ * squash on each landing; the wrong one is rattled side to side. After a wrong pick the
+ * right one gives one small hop too, so the reader sees what it was.
+ */
+const RIGHT: Record<string, string> = { q1: 'poster', q2: 'sign' };
+function Reply({ id, qk, picked, ox, oy, children }: {
+  id: string; qk: 'q1' | 'q2' | null; picked: string | null; ox: number; oy: number; children: React.ReactNode;
+}) {
+  const t = useSharedValue(0);
+  const mode = !qk || picked === null ? 0 : picked === id ? (RIGHT[qk] === id ? 1 : 2) : RIGHT[qk] === id ? 3 : 0;
+  useEffect(() => {
+    t.value = 0;
+    if (mode) t.value = withDelay(mode === 3 ? 520 : 0, withTiming(1, { duration: mode === 3 ? 520 : 760, easing: Easing.linear }));
+  }, [mode, t]);
+  const st = useAnimatedStyle(() => {
+    const u = t.value;
+    if (mode === 1 || mode === 3) {
+      const a = mode === 1 ? 2 : 1;
+      const w = Math.abs(Math.sin(u * Math.PI * a));
+      const sq = Math.sin(u * Math.PI);
+      return { transform: [{ translateY: -6 * w * (1 - u) }, { scaleY: 1 - 0.07 * (1 - w) * sq }, { scaleX: 1 + 0.05 * (1 - w) * sq }] };
+    }
+    if (mode === 2) {
+      const sh = Math.sin(u * Math.PI * 7) * (1 - u);
+      return { transform: [{ translateX: 3.5 * sh }, { rotate: (0.05 * sh) + 'rad' }] };
+    }
+    return { transform: [{ translateX: 0 }] };
+  });
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: ox + 'px ' + oy + 'px' }, st]} pointerEvents="none">
+      {children}
+    </Animated.View>
   );
 }
 
@@ -623,10 +668,12 @@ const styles = StyleSheet.create({
   },
   posterSum: {
     fontFamily: 'Caveat_700Bold', fontSize: 12, lineHeight: 13, color: INK, includeFontPadding: false,
+    alignSelf: 'stretch', textAlign: 'center',
   },
   boxLabel: {
     position: 'absolute', left: 111, top: 476, width: 52, height: 22, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 2, borderWidth: 1.2, borderColor: INK,
+    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    boxShadow: '0 1.5px 0 ' + lipOf(TONE),
   },
   labelText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 9.2, letterSpacing: 0, color: INK, includeFontPadding: false,

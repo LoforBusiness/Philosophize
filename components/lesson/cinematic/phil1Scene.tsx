@@ -1,11 +1,15 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { useDerivedValue, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  Easing, useDerivedValue, useAnimatedStyle, useSharedValue, withTiming, type SharedValue,
+} from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
 import Stickman from './Stickman';
 import CinematicPlayer from './CinematicPlayer';
 import type { SceneApi } from './CinematicPlayer';
 import Target from './Target';
 import ObjectArt from './ObjectArt';
+import LessonPicture from './LessonPicture';
 import { BEATS } from './phil1Script';
 import {
   WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
@@ -22,7 +26,7 @@ import { reachHandTo } from './interact';
 import { useLinger } from './useLinger';
 import { lineOf, stage, bump } from './pace';
 import {
-  NATURAL, tint, bicycleWheel, bicycleFrame, repairStand, partsCrateBack, partsCrateFront, repairBill, wallBoard,
+  NATURAL, tint, repairStand, repairBill, wallBoard,
   workbench, pegboard, BIKE_AT, STAND_JAWS, WALL_SLATE, BENCH_SPIKE,
 } from './objects';
 import { BY_ID } from './wardrobe';
@@ -132,8 +136,6 @@ const PH_P = [LISTEN, LISTEN, LISTEN, EXPLAIN, EXPLAIN, LISTEN, NOD, LEAN, EXPLA
 const BIKE = { x: 248, y: 458.4, s: 70 };
 /** A point on the frame, from its own 100-unit square to the stage. */
 const onBike = (p: { x: number; y: number }) => ({ x: BIKE.x + (p.x - 50) * (BIKE.s / 100), y: BIKE.y + (p.y - 50) * (BIKE.s / 100) });
-const FRONT = onBike(BIKE_AT.frontAxle);
-const REAR = onBike(BIKE_AT.rearAxle);
 const GRIP = onBike(BIKE_AT.grip);
 const SADDLE = onBike(BIKE_AT.saddle);
 const SEAT = onBike(BIKE_AT.seatPost);
@@ -183,13 +185,11 @@ const BOARD_ART = wallBoard(BOARD.x, BOARD.y, BOARD.w, BOARD.h);
 const PEG_ART = pegboard(344, 392, 92, 84);
 const BENCH_ART = workbench(BENCH.x, BENCH.y, BENCH.w, BENCH.h);
 const STAND_ART = tint(repairStand(STAND.x, STAND.y, STAND_S, STAND_S), 'silver');
-const FRONT_WHEEL_ART = bicycleWheel(FRONT.x, FRONT.y, WHEEL_D, WHEEL_D);
-const REAR_WHEEL_ART = bicycleWheel(REAR.x, REAR.y, WHEEL_D, WHEEL_D);
-const FRAME_ART = tint(bicycleFrame(BIKE.x, BIKE.y, BIKE.s, BIKE.s), 'enamel');
-const CRATE_BACK_ART = partsCrateBack(CRATE.x, CRATE.y, CRATE.s, CRATE.s);
-const CRATE_FRONT_ART = partsCrateFront(CRATE.x, CRATE.y, CRATE.s, CRATE.s);
+// The bicycle (frame, wheels, saddle, bars, chainring), the crate and the old wheel are
+// DRAWINGS (LESSON_RULES AM13): scripts/lib/lessonart/lessons/phil1.mjs, against a steel
+// racing bicycle, a frame in a Park Tool stand and slatted fruit crates. Each takes the
+// box of the shapes it replaced, so every point a hand reaches for is where it was.
 // The things that move are drawn about their own centre and carried by a rider.
-const OLD_WHEEL_ART = tint(bicycleWheel(0, 0, WHEEL_D, WHEEL_D), 'rust');
 const BILL_ART = repairBill(0, BILL_H / 2, BILL_W, BILL_H);
 
 function hHold(code: number, t: number): Stance {
@@ -406,12 +406,10 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       {/* cast: cap */}
       <Stickman D={DM} k={K} role="crowd" wear={BY_ID.stroller.pieces} />
       <ObjectArt parts={STAND_ART} tone={TONE} />
-      <ObjectArt parts={REAR_WHEEL_ART} tone={TONE} line={1.6} />
-      <ObjectArt parts={FRONT_WHEEL_ART} tone={TONE} line={1.6} />
-      <ObjectArt parts={FRAME_ART} tone={TONE} line={1.8} />
+      <LessonPicture name="phil1-bike" />
       {/* cast: plain */}
       <Stickman D={DO} k={K} role="lead" wear={[]} />
-      <ObjectArt parts={CRATE_BACK_ART} tone={TONE} line={1.8} />
+      <LessonPicture name="phil1-crate-back" />
       <OldParts S={SCENE} DO={DO} DM={DM} />
       {on(Q1) ? <AskTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} /> : null}
       {on(Q2) ? <SettleTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} /> : null}
@@ -421,8 +419,8 @@ export default function Phil1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
 // ── the things that are carried: the old wheel and the bill ──────────────────
 
-function Rider({ at, art, tone, line, lift }: {
-  at: SharedValue<{ x: number; y: number; o: number }>; art: ReturnType<typeof repairBill>;
+function Rider({ at, art, pic, tone, line, lift }: {
+  at: SharedValue<{ x: number; y: number; o: number }>; art?: ReturnType<typeof repairBill>; pic?: string;
   tone: ReturnType<typeof stageTone>; line?: number; lift?: boolean;
 }) {
   const st = useAnimatedStyle(() => ({
@@ -431,7 +429,7 @@ function Rider({ at, art, tone, line, lift }: {
   }));
   return (
     <Animated.View style={[styles.rider, lift ? styles.onTop : null, st]} pointerEvents="none">
-      <ObjectArt parts={art} tone={tone} line={line} />
+      {pic ? <LessonPicture name={pic} /> : art ? <ObjectArt parts={art} tone={tone} line={line} /> : null}
     </Animated.View>
   );
 }
@@ -449,7 +447,10 @@ function OldParts({ S, DO, DM }: { S: SharedValue<any>; DO: SharedValue<Bundle>;
     const h = at(DO, 'wrR');
     const held = { x: h.x, y: h.y + WHEEL_R };
     if (u <= 1) return { x: lerp(OLD_IN.x, held.x, u), y: lerp(OLD_IN.y, held.y, u), o: 1 };
-    return { x: lerp(held.x, OLD_IN.x, u - 1), y: lerp(held.y, OLD_IN.y, u - 1), o: 1 };
+    // dropped back into the crate it lands with its weight: it sinks a little past where
+    // it rests, onto the old parts, and settles back (a settle, not a bounce)
+    const land = clamp01((u - 1.82) / 0.18);
+    return { x: lerp(held.x, OLD_IN.x, u - 1), y: lerp(held.y, OLD_IN.y, u - 1) + 1.6 * Math.sin(Math.PI * land), o: 1 };
   });
   // The bill is held by its top edge.
   const billP = useDerivedValue(() => {
@@ -461,8 +462,8 @@ function OldParts({ S, DO, DM }: { S: SharedValue<any>; DO: SharedValue<Bundle>;
   });
   return (
     <>
-      <Rider at={wheelP} art={OLD_WHEEL_ART} tone={TONE} line={1.6} />
-      <ObjectArt parts={CRATE_FRONT_ART} tone={TONE} line={1.8} />
+      <Rider at={wheelP} pic="phil1-wheel-old" tone={TONE} />
+      <LessonPicture name="phil1-crate-front" />
       <Rider at={billP} art={BILL_ART} tone={TONE} line={1.4} lift />
     </>
   );
@@ -496,60 +497,166 @@ function Board({ S }: { S: SharedValue<any> }) {
 
 // ── the two questions ────────────────────────────────────────────────────────
 
-/** Q1: a question tag on each of the three things. Only the bike's can't be settled by looking. */
-const TAG_W = 68;
+/** How far one thing's answer reaction has gone, 0 → 1: the picked thing first, the rest after. */
+function phaseOf(ans: number, who: number, k: number): number {
+  'worklet';
+  if (who < 0) return 0;
+  const start = who === k ? 0 : 0.45;
+  const u = (ans * 1.8 - start) / 0.9;
+  return u < 0 ? 0 : u > 1 ? 1 : u * u * (3 - 2 * u);
+}
+/** A pop that overshoots and settles: 0 → 1 → a held 0.35. */
+function popOf(u: number): number {
+  'worklet';
+  return u <= 0 ? 0 : u < 0.4 ? Math.sin((u / 0.4) * Math.PI * 0.5) : 0.35 + 0.65 * Math.cos(((u - 0.4) / 0.6) * Math.PI * 0.5);
+}
+/** The answer, latched: once a thing is picked, the scene keeps what it did. */
+function useAnswer(picked: string | null, live: boolean, ids: string[]) {
+  const first = live && picked !== null ? ids.indexOf(picked) : -1;
+  const ans = useSharedValue(first >= 0 ? 1 : 0);
+  const who = useSharedValue(first);
+  useEffect(() => {
+    if (!live || picked === null) return;
+    const k = ids.indexOf(picked);
+    if (k < 0 || who.value >= 0) return;
+    who.value = k;
+    ans.value = withTiming(1, { duration: 1800, easing: Easing.linear });
+  }, [picked, live]);
+  return { ans, who };
+}
+
+/**
+ * Q1: a manila JOB TAG on each of the three things (a1-bikestand-3: a workshop hangs one
+ * off the bars), its string from its eyelet to the thing it is tied to. Only the bike's
+ * can't be settled by looking. ANSWERED, the right tag pops forward on its string and
+ * settles; a wrong one swings down on its eyelet, the way a tag you have flicked does,
+ * and hangs there, dimmed.
+ */
 const TAG_H = 26;
+const EYE = { x: 6.4, y: TAG_H / 2 };
 const ASK_Q = [
-  { id: 'parts', l1: 'HOW MANY', l2: 'PARTS?', left: 141, top: 424, w: TAG_W, tie: { x: 158, y0: 450, y1: 469 }, correct: false },
-  { id: 'bike', l1: 'SAME', l2: 'BIKE?', left: 219, top: 418, w: 50, tie: { x: 244, y0: 444, y1: 461 }, correct: true },
-  { id: 'bill', l1: 'WHAT DID', l2: 'IT COST?', left: 300, top: 420, w: TAG_W, tie: { x: 306, y0: 446, y1: 452 }, correct: false },
+  { id: 'parts', l1: 'HOW MANY', l2: 'PARTS?', left: 141, top: 424, w: 68, pic: 'phil1-tag', to: { x: 158, y: 469 }, correct: false },
+  { id: 'bike', l1: 'SAME', l2: 'BIKE?', left: 219, top: 418, w: 50, pic: 'phil1-tag-short', to: { x: 242, y: 455 }, correct: true },
+  { id: 'bill', l1: 'WHAT DID', l2: 'IT COST?', left: 300, top: 420, w: 68, pic: 'phil1-tag', to: { x: 306, y: 452 }, correct: false },
 ];
+/** Each tag's string, eyelet to knot, as a centred bar turned to its angle. */
+const STRINGS = ASK_Q.map((q) => {
+  const ax = q.left + EYE.x;
+  const ay = q.top + EYE.y;
+  const len = Math.hypot(q.to.x - ax, q.to.y - ay);
+  return { left: (ax + q.to.x) / 2 - len / 2, top: (ay + q.to.y) / 2 - 0.45, w: len, r: Math.atan2(q.to.y - ay, q.to.x - ax) };
+});
+function Tag({ k, ans, who }: { k: number; ans: SharedValue<number>; who: SharedValue<number> }) {
+  const q = ASK_Q[k];
+  const st = useAnimatedStyle(() => {
+    const u = phaseOf(ans.value, who.value, k);
+    if (q.correct) {
+      const pop = popOf(u);
+      return { transform: [{ translateY: -3 * pop }, { scale: 1 + 0.12 * pop }] };
+    }
+    // flicked: it swings down on its eyelet past where it hangs, back, and comes to rest
+    const sw = 20 * u + 9 * Math.sin(u * Math.PI * 3) * (1 - u);
+    return { opacity: 1 - 0.45 * u, transform: [{ rotate: `${sw}deg` }] };
+  });
+  return (
+    <Animated.View
+      style={[styles.tag, { left: q.left, top: q.top, width: q.w, transformOrigin: `${EYE.x}px ${EYE.y}px` }, st]}
+      pointerEvents="none"
+    >
+      <LessonPicture name={q.pic} />
+      <View style={styles.tagFace}>
+        <Text style={styles.labelText}>{q.l1}</Text>
+        <Text style={styles.labelText}>{q.l2}</Text>
+      </View>
+    </Animated.View>
+  );
+}
 function AskTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
+  const { ans, who } = useAnswer(picked, live, ASK_Q.map((q) => q.id));
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
-      {ASK_Q.map((q) => (
-        <View key={`${q.id}-tie`} pointerEvents="none" style={[styles.tie, { left: q.tie.x - 0.6, top: q.tie.y0, height: q.tie.y1 - q.tie.y0 }]} />
+      {STRINGS.map((g, k) => (
+        <View
+          key={`${ASK_Q[k].id}-string`} pointerEvents="none"
+          style={[styles.string, { left: g.left, top: g.top, width: g.w, transform: [{ rotate: `${g.r}rad` }] }]}
+        />
       ))}
+      {ASK_Q.map((q, k) => <Tag key={q.id} k={k} ans={ans} who={who} />)}
       {ASK_Q.map((q) => (
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={4}
           disabled={answered} sealAt="br"
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: TAG_H }}
         >
-          <View style={styles.label}>
-            <View style={styles.eyelet} />
-            <Text style={styles.labelText}>{q.l1}</Text>
-            <Text style={styles.labelText}>{q.l2}</Text>
-          </View>
+          <View style={styles.clear} />
         </Target>
       ))}
     </Animated.View>
   );
 }
 
-/** Q2: the board's three rows. The best reason is the one that settles it. */
+/**
+ * Q2: the board is wiped and three answers go up on it as struck plates on the slate. The
+ * best reason is the one that settles it. ANSWERED, the right plate pops forward and a
+ * chalk tick is struck in the gutter beside it; a wrong one shudders on the slate and
+ * sinks back, dimmed.
+ */
 const SETTLE_Q = [
   { id: 'loud', label: 'THE LOUDEST VOICE', correct: false },
   { id: 'vote', label: 'A SHOW OF HANDS', correct: false },
   { id: 'reason', label: 'THE BEST REASON', correct: true },
 ];
-const ROW_H = SLATE.h / 3;
+const ROW_P = SLATE.h / 3;                 // the pitch of the rows
+const ROW_H = 13.4;                        // a plate, with its 3.4-unit ledge under it
+const GUTTER = 15;                         // the room for the tick, left of the plates
+const ROW_L = SLATE.left + GUTTER;
+const ROW_W = SLATE.w - GUTTER - 5;
+const rowTop = (k: number) => SLATE.top + k * ROW_P + (ROW_P - ROW_H - 3.4) / 2;
+function Row({ k, ans, who }: { k: number; ans: SharedValue<number>; who: SharedValue<number> }) {
+  const q = SETTLE_Q[k];
+  const st = useAnimatedStyle(() => {
+    const u = phaseOf(ans.value, who.value, k);
+    if (q.correct) {
+      const pop = popOf(u);
+      return { transform: [{ translateY: -1.5 * pop }, { scale: 1 + 0.07 * pop }] };
+    }
+    const shake = 2.6 * Math.sin(u * Math.PI * 6) * (1 - u);
+    return { opacity: 1 - 0.45 * u, transform: [{ translateX: shake }, { translateY: 1.4 * u }, { scale: 1 - 0.04 * u }] };
+  });
+  const tick = useAnimatedStyle(() => {
+    const u = q.correct ? phaseOf(ans.value, who.value, k) : 0;
+    return { opacity: u > 0.05 ? 1 : 0, transform: [{ scale: 0.4 + 0.6 * clamp01(u * 2.5) }] };
+  });
+  return (
+    <>
+      <Animated.View style={[styles.choice, { left: ROW_L, top: rowTop(k), width: ROW_W, height: ROW_H }, st]} pointerEvents="none">
+        <Text style={styles.choiceText}>{q.label}</Text>
+      </Animated.View>
+      {q.correct ? (
+        <Animated.View style={[styles.tick, { left: SLATE.left + 3, top: rowTop(k) + 1.5 }, tick]} pointerEvents="none">
+          <View style={styles.tickShort} />
+          <View style={styles.tickLong} />
+        </Animated.View>
+      ) : null}
+    </>
+  );
+}
 function SettleTargets({ picked, onPick, live, S }: { picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any> }) {
   const answered = picked !== null || !live;
+  const { ans, who } = useAnswer(picked, live, SETTLE_Q.map((q) => q.id));
   const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
+      {SETTLE_Q.map((q, k) => <Row key={q.id} k={k} ans={ans} who={who} />)}
       {SETTLE_Q.map((q, k) => (
         <Target
-          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={3}
+          key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={5}
           disabled={answered} sealAt="tr"
-          style={{ position: 'absolute', left: SLATE.left + 3, top: SLATE.top + k * ROW_H + 1.5, width: SLATE.w - 6, height: ROW_H - 3 }}
+          style={{ position: 'absolute', left: ROW_L, top: rowTop(k), width: ROW_W, height: ROW_H }}
         >
-          <View style={styles.choice}>
-            <Text style={styles.choiceText}>{q.label}</Text>
-          </View>
+          <View style={styles.clear} />
         </Target>
       ))}
     </Animated.View>
@@ -566,29 +673,43 @@ const styles = StyleSheet.create({
     position: 'absolute', left: SLATE.left, top: SLATE.top, width: SLATE.w, height: SLATE.h, borderRadius: 2,
     backgroundColor: NATURAL.slate.base, overflow: 'hidden',
   },
-  chalkBlock: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
+  // AQ2: every chalk line is as wide as the slate and centred in it, so the slack beside
+  // its letters holds the ink Caveat draws past its last advance
+  chalkBlock: { flexGrow: 1, alignItems: 'stretch', justifyContent: 'center' },
   overlay: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
   chalk: {
     fontFamily: 'Caveat_700Bold', fontSize: 15, lineHeight: 18, color: PAPER_LIT, includeFontPadding: false,
+    textAlign: 'center', width: SLATE.w,
   },
-  tie: { position: 'absolute', width: 1.2, backgroundColor: INK },
-  label: {
-    flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingLeft: 6, paddingRight: 2,
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
-  },
-  eyelet: {
-    position: 'absolute', left: 3, top: TAG_H / 2 - 3.5, width: 4, height: 4, borderRadius: 2,
-    borderWidth: 1, borderColor: INK,
-  },
+  string: { position: 'absolute', height: 0.9, borderRadius: 0.5, backgroundColor: NATURAL.oak.shade },
+  tag: { position: 'absolute', height: TAG_H },
+  // the words on a tag's face, right of its eyelet; AQ2: each line as wide as the face and
+  // centred in it, so the face's slack holds the ink
+  tagFace: { position: 'absolute', left: 11, right: 2, top: 0, bottom: 2.4, alignItems: 'stretch', justifyContent: 'center' },
   labelText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.2, color: INK, includeFontPadding: false,
+    textAlign: 'center',
   },
+  clear: { flexGrow: 1 },
+  // a struck plate on the slate: a white face, a lit top edge and a hard ledge of the
+  // branch's own shade (group AG), scaled to a 13-unit plate
   choice: {
-    flexGrow: 1, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: PLATE_FACE, borderRadius: 3, borderWidth: 1.2, borderColor: INK,
+    position: 'absolute', alignItems: 'stretch', justifyContent: 'center',
+    backgroundColor: PLATE_FACE, borderRadius: 4.5, borderWidth: 1.2, borderColor: INK,
+    boxShadow: `inset 0px 1.2px 0px rgba(255, 255, 255, 0.85), 0px 2.4px 0px ${TONE.SHADE}, 0px 3.4px 0px rgba(26, 26, 26, 0.22)`,
+  },
+  tick: { position: 'absolute', width: 9, height: 9 },
+  tickShort: {
+    position: 'absolute', left: -0.2, top: 4.4, width: 4.4, height: 1.8, borderRadius: 1, backgroundColor: PAPER_LIT,
+    transform: [{ rotate: '45deg' }],
+  },
+  tickLong: {
+    position: 'absolute', left: 2, top: 2.8, width: 8, height: 1.8, borderRadius: 1, backgroundColor: PAPER_LIT,
+    transform: [{ rotate: '-58deg' }],
   },
   choiceText: {
     fontFamily: 'Inter_700Bold', fontSize: 8.6, lineHeight: 10, letterSpacing: 0.1, color: INK, includeFontPadding: false,
+    textAlign: 'center',
   },
 });
 
