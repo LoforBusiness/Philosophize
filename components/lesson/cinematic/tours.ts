@@ -61,7 +61,7 @@ export const TOUR_STAMP: Record<string, string> = {
   'business-foundations-4': '2e29433c8591',
   'business-foundations-5': '2ee42dc542d7',
   'business-foundations-6': 'dd1b4e4421e3',
-  'economics-foundations-1': 'b28b625ca7ee',
+  'economics-foundations-1': '832b74fbdc2c',
   'economics-foundations-4': '0358fe481cde',
   'history-foundations-1': 'b23c3e62d4d8',
   'history-foundations-2': 'ca91fc4dfcd1',

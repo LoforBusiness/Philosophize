@@ -191,18 +191,55 @@ export const STYLES = {
     stray: { max: 0.42, aim: 0.32 },
     vary: true,
   },
+  // NATURAL (2026-10-07): the owner heard one line four ways (scratchpad/voice-ab.mjs) —
+  // as installed, at the voice's own speed, without pause tags, and untouched — and chose
+  // the UNTOUCHED take: the plain words, one request, the voice's own rate (1.0), nothing
+  // cut, set or stitched. Left alone, Zubenelgenubi rested at every mark (0.35, 0.51, 0.30)
+  // and spoke at 5.2–5.4, near the Claude Code clip; every edit made it sound assembled.
+  // So a NATURAL line is never edited. A take is asked for again only when it is broken —
+  // its last word cut off, or a sentence run straight through — at a rate 1% either side,
+  // because the same request returns the same bytes. These bands are wide on purpose: they
+  // only catch a take that went wrong, they do not steer the voice.
+  natural: {
+    paces: {
+      even: { aim: 5.2, min: 4.3, max: 6.1, factor: 1 },
+      brisk: { aim: 5.4, min: 4.4, max: 6.3, factor: 1 },
+      weighty: { aim: 5.0, min: 4.2, max: 6.0, factor: 1 },
+    },
+    pauses: {
+      comma: { aim: 0.3, min: 0.08, max: 0.7 },
+      dash: { aim: 0.3, min: 0.08, max: 0.8 },
+      semi: { aim: 0.35, min: 0.1, max: 0.8 },
+      colon: { aim: 0.4, min: 0.1, max: 0.9 },
+      stop: { aim: 0.5, min: 0.18, max: 1.0 },
+      exclaim: { aim: 0.5, min: 0.18, max: 1.0 },
+      question: { aim: 0.55, min: 0.18, max: 1.1 },
+      ellipsis: { aim: 0.7, min: 0.25, max: 1.3 },
+    },
+    stray: { max: 0.7, aim: 0.4 },
+    vary: false,
+    untouched: true,
+    // a person runs through some commas; only a sentence end must have its breath
+    commaOptional: true,
+  },
 };
 /** Which lessons are spoken in a style other than the default. */
 export const LESSON_STYLE = {
-  'economics-foundations-1': 'conversational',
+  'economics-foundations-1': 'natural',
 };
 const DEFAULT_STYLE = {
   paces: JSON.parse(JSON.stringify(PACES)),
   pauses: JSON.parse(JSON.stringify(PAUSES)),
   stray: { max: STRAY_MAX, aim: STRAY_AIM },
   vary: false,
+  untouched: false,
+  commaOptional: false,
 };
 let VARY = false;
+let UNTOUCHED = false;
+let COMMA_OPTIONAL = false;
+/** True while the style in place leaves the voice's take exactly as it came. */
+export const isUntouched = () => UNTOUCHED;
 /** The lesson a key like "economics-foundations-1/beat-03" belongs to. */
 export const lessonOfKey = (key) => String(key ?? '').split('/')[0];
 function applyStyle(st) {
@@ -211,6 +248,8 @@ function applyStyle(st) {
   STRAY_MAX = st.stray.max;
   STRAY_AIM = st.stray.aim;
   VARY = st.vary;
+  UNTOUCHED = !!st.untouched;
+  COMMA_OPTIONAL = !!st.commaOptional;
 }
 /** Put a lesson's style in place for the rest of the run (a render is one lesson). */
 export function useStyleFor(lesson) {
@@ -512,6 +551,9 @@ export function prosodyFaults(take, text) {
   for (const m of take.marks) {
     const p = PAUSES[m.kind];
     const where = `after "${words[m.word]}"`;
+    // an untouched voice's own phrasing stands: where it runs two sentences together, that
+    // is how it says them (natural style, the owner's pick); every other style must pause
+    if (m.gap < 0 && (UNTOUCHED || (COMMA_OPTIONAL && !SENTENCE_END.has(m.kind)))) continue;
     if (m.gap < 0) out.push({ kind: 'NO PAUSE', say: `the voice runs straight through the ${m.kind} ${where}; it must rest ${p.min}–${p.max}s there` });
     else if (m.len < p.min - 0.005 || m.len > p.max + 0.005) out.push({ kind: 'PAUSE', say: `rests ${m.len.toFixed(2)}s at the ${m.kind} ${where}, where a person rests ${p.min}–${p.max}s` });
   }

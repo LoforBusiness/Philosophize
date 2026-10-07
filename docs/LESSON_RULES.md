@@ -11588,14 +11588,34 @@ against economics 1 and philosophy 1:
 - **Loudness was not the difference:** the lessons are steadier than the clip (LRA 2.6 LU
   against 4.7).
 
-So the "too fast" of 2026-10-02 was short pauses, not quick words. `prosody.STYLES.
-conversational` is the clip's numbers. Even runs 5.05–5.7 and brisk 5.3–5.95. A comma rests
-about 0.26 and a stop about 0.42, longer before a long sentence and shorter before a short
-one. A comma before "and", "but" or "so" rests longer, one between list items shorter, and
-the voice keeps its own phrase breaks up to 0.42. `LESSON_STYLE` names the lessons spoken
-this way, and only economics 1 so far: every other lesson keeps AP17/AP21 until the owner
-has heard the trial. `withStyle` puts the defaults back after each call, so the checks judge
-each lesson by its own style.
+So the "too fast" of 2026-10-02 was short pauses, not quick words. The first answer,
+`STYLES.conversational`, set the clip's numbers by force: quicker words, and longer pauses
+that change with what comes next. The owner heard it and said it still did not sound as
+good as the clip.
+
+**The edits were the fault.** One line was then rendered four ways, all in the same voice
+(scratchpad/voice-ab.mjs):
+- as installed: speed forced, a pause tag at every mark, pauses set, two takes stitched;
+- at the voice's own rate;
+- at its own rate with no pause tags;
+- untouched: the plain words, one request, nothing edited.
+
+The owner chose the **untouched** take. Left alone, the voice rested at every mark (0.35,
+0.51, 0.30 s) and spoke near the clip's speed. Every edit made it sound assembled.
+
+So **`STYLES.natural`** is the AP22 style:
+- the plain words, at speaking rate 1.0, in one request;
+- a throwaway word after the line, cut in the silence before it, so the last word finishes;
+- nothing else cut, set or stitched;
+- a take is asked for again only when it is broken: its last word cut off, or a sentence
+  run straight into the next. A retake differs by 1% in rate, and only at a stop the voice
+  ran through does it carry one `[pause]` at that mark;
+- its bands are wide, because they catch a broken take and do not steer the voice.
+
+Economics 1 in this style measures 4.23 syllables a second overall against the clip's
+4.22, with pauses of 0.10–0.62 s. `LESSON_STYLE` names the lessons spoken this way, and
+every other lesson keeps AP17/AP21 until it is re-voiced. `withStyle` puts the defaults back
+after each call, so the checks judge each lesson by its own style.
 
 ## Group AQ · A word sits in its plate, and its plate on its thing
 
