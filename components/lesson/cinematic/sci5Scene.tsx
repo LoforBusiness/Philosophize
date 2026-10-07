@@ -92,7 +92,7 @@ const K = K_FIG * 0.76;
  * the water and sits again) and b8 (the turn, the flask, the cup and the pour), which
  * run on a little after their lines.
  */
-const LINES = [5.07, 5.31, 4.16, 5.91, 6.72, 0, 4.3, 5.43, 6.2, 0, 3.93, 0, 0];
+const LINES = [4.06, 5.37, 4.06, 6.1, 7.32, 0, 4.32, 4.96, 6.2, 0, 4.38, 0, 0];
 
 // The held poses (moves.ts act + 99), with still hands (AP18).
 const TALK = 167;

@@ -94,7 +94,7 @@ const JK = 0.8;
  * wait and the line together, in SPAN; the last beat walks him home to bed, so it is
  * paced over the walk.
  */
-const LINES = [4.6, 5.11, 4.38, 4.62, 4.72, 6.91, 7.54, 3.35, 3.94, 0, 5.37, 4.99, 4.59, 5.72, 6.3, 3.21, 3.39, 0, 4.83, 4.44, 3.31, 5.49, 6.13, 5.92, 3.44, 5.61, 4.13, 4.34, 0, 0];
+const LINES = [4.25, 5.93, 3.34, 4.41, 5.29, 6.61, 6.94, 3.36, 4.04, 0, 4.91, 3.93, 4.02, 4.85, 6.31, 3.26, 3.68, 0, 3.89, 3.5, 3.14, 4.62, 4.66, 6.83, 3.69, 5.52, 4.99, 3.24, 0, 0];
 const VA = BEATS.map((b) => b.voiceAfter ?? 0);
 const ACTS = ['wake', 'room', 'door', 'open', 'what', 'charge', 'jury', 'straws', 'why', 'ask', 'reply', 'sour', 'gloat',
   'clock', 'asks', 'prove', 'defend', 'vote', 'verdict', 'sleep', 'rest', 'summary'] as const;

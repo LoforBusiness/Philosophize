@@ -99,7 +99,7 @@ const K = K_FIG * 0.76;
  * plank shown, walked back and laid down), b5 (the haul), b6 (the walk out and two
  * points) and b10 (the new plank fetched and laid). 0 for a beat with no voice.
  */
-const LINES = [5.13, 3.57, 5.6, 6.6, 0, 5.4, 6.26, 4.01, 5.41, 0, 6.6, 0, 0];
+const LINES = [4.22, 4.16, 5.96, 6.6, 0, 5.4, 6.3, 3.51, 5.25, 0, 6.6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, nodding along, waiting for
 // an answer; and, at the hole, a crouch.

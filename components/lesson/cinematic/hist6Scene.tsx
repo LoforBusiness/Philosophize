@@ -98,7 +98,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, history-foundations-6), except b10, where stepping to the
  * tray, standing the tablet in it and patting it needs longer than the line and runs on.
  */
-const LINES = [4.88, 4.63, 2.59, 7.23, 0, 5.26, 4.05, 7.18, 4.33, 0, 3.6, 0, 0];
+const LINES = [5.91, 3.89, 2.99, 6.42, 0, 5.26, 4.08, 7.79, 3.85, 0, 3.6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, nodding along, waiting, explaining, the
 // kneel, the laugh; and the shrug, played once (299 + act).

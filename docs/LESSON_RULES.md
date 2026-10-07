@@ -11613,8 +11613,16 @@ So **`STYLES.natural`** is the AP22 style:
 - its bands are wide, because they catch a broken take and do not steer the voice.
 
 Economics 1 in this style measures 4.23 syllables a second overall against the clip's
-4.22, with pauses of 0.10–0.62 s. `LESSON_STYLE` names the lessons spoken this way, and
-every other lesson keeps AP17/AP21 until it is re-voiced. `withStyle` puts the defaults back
+4.22, with pauses of 0.10–0.62 s.
+
+**It is the house style (`HOUSE_STYLE`) since 2026-10-07: the owner heard economics 1 and
+had all 42 lessons re-voiced this way.** Across the 379 lines: 5.14 syllables a second of
+speech, 4.34 overall, 16% silence, and a full stop rests 0.23–0.76 s (median 0.41). About 1
+line in 60 came back with a clipping burst, which the installer refuses; a retake 1.5% off
+the rate fixes it. Where a line came out SHORTER than before and a gesture was paced across
+it, the scene keeps its old LINES length so the act is not squeezed (AR4, N21). AP17 and
+AP21's bands stay in the file as the defaults `PACE_REFERENCE` is measured against, and
+`LESSON_STYLE` can still give one lesson another style. `withStyle` puts the defaults back
 after each call, so the checks judge each lesson by its own style.
 
 ## Group AQ · A word sits in its plate, and its plate on its thing

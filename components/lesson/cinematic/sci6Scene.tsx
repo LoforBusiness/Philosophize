@@ -105,7 +105,7 @@ const K = K_FIG * 0.74;
  * orange and the jig), b8 (the ledger put back, the bottles lifted and put back) and
  * b10 (the chalk), which run on a little after their lines.
  */
-const LINES = [4.85, 5.26, 6.49, 5.8, 0, 5.4, 4.52, 5.65, 6.6, 0, 3.7, 0, 0];
+const LINES = [4.89, 4.93, 6.52, 5.8, 0, 5.4, 4.49, 4.7, 6.6, 0, 3.7, 0, 0];
 
 // The held poses (moves.ts act + 99), with still hands (AP18).
 const TALK = 167;

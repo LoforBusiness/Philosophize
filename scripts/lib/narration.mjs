@@ -609,27 +609,18 @@ export function spokenFaults(pcm, rate, text, pace, sha = null, lesson = null) {
 
 /**
  * Takes let through with a SPEED fault and nothing else, pinned by the WAV's SHA-256, so
- * a new take of the line is held to the band again. 2026-10-03: the owner asked for every
- * line slower than philosophy 4's "Being right" line, and then for fewer characters
- * spent. All 239 lines were re-voiced at the new bands and the misses retaken twice
- * (~95,000 characters); these twelve still missed by a little, and each is slower than the
- * take it replaced. The list may only shrink: check:narration fails a thirteenth, and an
- * entry whose take is no longer installed.
+ * a new take of the line is held to the band again. 2026-10-07: every lesson was re-voiced
+ * in the natural style (AP22) and the eleven old pins went with their takes. One is left,
+ * and it is the MEASURE that is wrong, not the take: the voice ran through the comma in
+ * "Of course you do, nobody…", so the reader matched that comma to the full stop's pause
+ * and the stop to the comma after "way,", and the second sentence measured 21 syllables
+ * a second. The list may only shrink: check:narration fails one more, and an entry whose
+ * take is no longer installed.
  */
 export const PACE_ALLOWANCE = {
-  c3534d8ec8f2269a06a292aca131c7ba12ca0feae6175c7b9ac978209334ecee: 'business-foundations-2/beat-09 — even 4.44, under 4.45',
-  dad5fae5f89cc3471f7c8e2d913458d16b14868f975d7bffa2a5309765ae2760: 'economics-foundations-2/beat-01 — one sentence 5.93, over 5.75',
-  '1fa41d14e27fc64d1eb88e9cc575405ffe9256496fad11481edf055e66a606da': 'economics-foundations-4/beat-05 — one sentence 6.34, over 5.75',
-  b550dc34bf1cd9b4128aa37f11c76a40c169a836d638d19700e139fe6893c54a: 'history-foundations-2/beat-00 — even 5.26, over 5.1',
-  '84e4e298dea83bdaf93fb1ab234045a0324ba299b955515f743d86a1a23490c1': 'personal-growth-foundations-1/beat-00 — brisk 4.75, one sentence 5.82',
-  '513d53e1b6d22e5b3f575d85b4d0c243a9967c8d9c4a721f8d570eb0a0e910cb': 'personal-growth-foundations-4/beat-09 — even 3.97, under 4.45',
-  c600c84e4eb29840397bd2b82a0a3efd6cd6129cb8ecf663f5590a96c17876b5: 'philosophy-foundations-3/beat-05 — brisk 4.73, under 4.8',
-  cb7f96ac4ebd23310197ef5ccf7e8c50ececc2328c4486a96f57dbf13bf6b14a: 'philosophy-foundations-4/beat-08 — one sentence 5.91, over 5.75',
-  '35ac2101363e94626f344dfc9913ede7bfe0d4a99f633fe6d3053cce6c39a73c': 'psychology-foundations-1/beat-03 — brisk 5.59, over 5.4',
-  '56077d0d086895012fc6f1fb5a2905c3ff91db387a83ae89d410c0ad54bf5489': 'science-foundations-1/beat-09 — even 4.40, under 4.45',
-  '082186d2fe6160e846eabeef195e57f53fe2710f687bcc2b7996ad5435bde4e7': 'science-foundations-3/beat-05 — one sentence 6.23, over 5.75',
+  e86da2cd30855cdd0ee97640f4304b4880fd95f406638caf2b9a02977c863479: 'psychology-foundations-6/beat-06 — a comma run through, so the second sentence is mis-measured at 21.6',
 };
-export const PACE_ALLOWANCE_MAX = 12;
+export const PACE_ALLOWANCE_MAX = 1;
 
 // ── WHAT EACH TAKE WAS RENDERED FROM ────────────────────────────────────────
 //

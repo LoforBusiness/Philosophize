@@ -91,7 +91,7 @@ const K = K_FIG * 0.76;
  * longer than the line and runs on after it — b1 (the ticket laid down), b7 (the note
  * put back) and b10 (the walk, the money and the ticket).
  */
-const LINES = [4.76, 3.2, 6.02, 6.28, 0, 4.03, 6.94, 5.6, 5.47, 0, 5.4, 0, 0];
+const LINES = [4.04, 3.2, 5.37, 5.78, 0, 3.93, 6.33, 5.6, 6.58, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, nodding along, waiting.
 // EXPLAINING (259) is not used: its resting far hand sits at the chest a little behind

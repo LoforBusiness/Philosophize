@@ -94,7 +94,7 @@ const K = K_FIG * 0.76;
  * longer and runs on after the line — b1 (the catch waits for the swing to come back),
  * b2 (two timings and two writings) and b7 (the walk, the push and one whole swing).
  */
-const LINES = [3.6, 5, 7.6, 6.33, 0, 5.59, 4.83, 8.4, 0, 5.04, 0, 0];
+const LINES = [3.61, 5, 7.6, 5.55, 0, 4.79, 5.14, 8.4, 0, 5.38, 0, 0];
 
 // The held poses (moves.ts act + 99), with still hands (AP18).
 const TALK = 167;

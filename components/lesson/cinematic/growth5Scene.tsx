@@ -96,7 +96,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, personal-growth-foundations-5), except b6, whose
  * wobble, fall and bounce run on a little after "Whoa!".
  */
-const LINES = [3.38, 4.78, 4.13, 3.8, 6.52, 0, 5.0, 5.44, 4.57, 0, 5.06, 0, 0];
+const LINES = [3.52, 5.15, 5.33, 4.02, 4.64, 0, 5, 5.83, 4.57, 0, 5.43, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, nodding along, waiting.
 const TALK = 167;

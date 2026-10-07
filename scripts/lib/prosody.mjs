@@ -202,18 +202,21 @@ export const STYLES = {
   // only catch a take that went wrong, they do not steer the voice.
   natural: {
     paces: {
-      even: { aim: 5.2, min: 4.3, max: 6.1, factor: 1 },
-      brisk: { aim: 5.4, min: 4.4, max: 6.3, factor: 1 },
-      weighty: { aim: 5.0, min: 4.2, max: 6.0, factor: 1 },
+      // only a take outside what a person does is broken: 3.5–7.3 a second of speech, which
+      // the first full re-voice (379 lines, 2026-10-07) showed this voice spans when left alone
+      even: { aim: 5.2, min: 3.5, max: 7.3, factor: 1 },
+      brisk: { aim: 5.4, min: 3.5, max: 7.3, factor: 1 },
+      weighty: { aim: 5.0, min: 3.5, max: 7.3, factor: 1 },
     },
     pauses: {
       comma: { aim: 0.3, min: 0.08, max: 0.7 },
       dash: { aim: 0.3, min: 0.08, max: 0.8 },
       semi: { aim: 0.35, min: 0.1, max: 0.8 },
       colon: { aim: 0.4, min: 0.1, max: 0.9 },
-      stop: { aim: 0.5, min: 0.18, max: 1.0 },
-      exclaim: { aim: 0.5, min: 0.18, max: 1.0 },
-      question: { aim: 0.55, min: 0.18, max: 1.1 },
+      // a quick stop between two short sentences is a person too, and so is a long beat
+      stop: { aim: 0.5, min: 0.08, max: 1.3 },
+      exclaim: { aim: 0.5, min: 0.08, max: 1.3 },
+      question: { aim: 0.55, min: 0.08, max: 1.3 },
       ellipsis: { aim: 0.7, min: 0.25, max: 1.3 },
     },
     stray: { max: 0.7, aim: 0.4 },
@@ -223,10 +226,13 @@ export const STYLES = {
     commaOptional: true,
   },
 };
-/** Which lessons are spoken in a style other than the default. */
-export const LESSON_STYLE = {
-  'economics-foundations-1': 'natural',
-};
+/**
+ * Every lesson is spoken in the HOUSE style (2026-10-07: the owner heard economics 1 untouched
+ * and asked for all 42 that way). LESSON_STYLE overrides it for one lesson. The DEFAULT tables
+ * above (AP17/AP21) remain what PACE_REFERENCE is measured against.
+ */
+export const HOUSE_STYLE = 'natural';
+export const LESSON_STYLE = {};
 const DEFAULT_STYLE = {
   paces: JSON.parse(JSON.stringify(PACES)),
   pauses: JSON.parse(JSON.stringify(PAUSES)),
@@ -253,7 +259,7 @@ function applyStyle(st) {
 }
 /** Put a lesson's style in place for the rest of the run (a render is one lesson). */
 export function useStyleFor(lesson) {
-  applyStyle(STYLES[LESSON_STYLE[lessonOfKey(lesson)]] ?? DEFAULT_STYLE);
+  applyStyle(STYLES[styleOf(lesson)] ?? DEFAULT_STYLE);
 }
 /** Run `fn` under a lesson's style, then put the defaults back. */
 export function withStyle(lesson, fn) {
@@ -261,7 +267,7 @@ export function withStyle(lesson, fn) {
   try { return fn(); } finally { applyStyle(DEFAULT_STYLE); }
 }
 /** The style a lesson is spoken in. */
-export const styleOf = (lesson) => LESSON_STYLE[lessonOfKey(lesson)] ?? 'default';
+export const styleOf = (lesson) => (lessonOfKey(lesson) ? LESSON_STYLE[lessonOfKey(lesson)] ?? HOUSE_STYLE : 'default');
 
 /**
  * How long to rest at mark `m`, under a style that varies its pauses. A person's pause

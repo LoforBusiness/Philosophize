@@ -87,7 +87,7 @@ const K = K_FIG * 0.76;
  * b5 (4.76s voiced) and b9 (4.0s) run on after their lines: the chalking, and the
  * umbrella handed across, are each a stroke at a time with a pause between (AR5).
  */
-const LINES = [4.95, 4.62, 6.05, 5.05, 0, 6.2, 6.86, 4.89, 0, 4.6, 0, 0];
+const LINES = [5.67, 4.32, 5.42, 4.72, 0, 6.2, 6.57, 5.35, 0, 4.6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, nodding along, leaning in,
 // and waiting for an answer. EXPLAINING (259) is not used: its resting far hand sits at

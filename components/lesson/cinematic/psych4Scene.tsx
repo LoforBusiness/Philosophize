@@ -86,7 +86,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, psychology-foundations-4), except b10, whose walk and
  * wave run on a little after the line.
  */
-const LINES = [4.51, 3.49, 4.52, 4.2, 6.12, 0, 6.02, 5.02, 7.16, 0, 4.24, 0, 0];
+const LINES = [4.03, 3.5, 4.41, 3.37, 5.73, 0, 5.25, 5.69, 4.7, 0, 3.51, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along.
 const TALK = 167;

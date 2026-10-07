@@ -87,7 +87,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b0 (pin, walk and stretch) and b10
  * (the pen, the ring, and off along the track).
  */
-const LINES = [5.4, 3.58, 5.61, 5.24, 0, 4.06, 5.59, 3.42, 5.23, 0, 6, 0, 0];
+const LINES = [5.4, 2.92, 5.78, 6.31, 0, 4.16, 4.68, 3.37, 6.43, 0, 6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, nodding along, hands on hips.
 const TALK = 167;

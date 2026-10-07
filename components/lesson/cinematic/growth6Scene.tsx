@@ -92,7 +92,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, personal-growth-foundations-6).
  */
-const LINES = [4.42, 3.83, 0, 4.46, 4.15, 3.86, 6.11, 6.25, 0, 3.86, 0, 0];
+const LINES = [4.49, 4.14, 0, 4.18, 3.26, 5.04, 6.61, 5.91, 0, 3.48, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, nodding along, waiting.
 const TALK = 167;

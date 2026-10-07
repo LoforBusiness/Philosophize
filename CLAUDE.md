@@ -8676,6 +8676,12 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   `render-narration` refuses to start until the lesson's prose checks pass, aims each
   voice's first take from its measured speed per unit of rate, and tries a line at most
   three times.
+- **AND THEN THE VOICE WAS LEFT ALONE (2026-10-07, LESSON_RULES AP22).** The owner sent a recording of
+  Claude Code reading aloud as the target. Measured, it has the lessons' overall pace but quicker words and
+  longer, varied pauses; forcing those numbers still sounded assembled. One line rendered four ways settled
+  it: the owner chose the UNTOUCHED take (plain words, the voice's own rate, one request, nothing cut, set
+  or stitched beyond a throwaway end word cut in silence). That is `STYLES.natural`, the house style, and
+  all 42 lessons were re-voiced in it (about 53,000 characters, from the same free Text-to-Speech setup).
 - **AND THEN SLOWER THAN PHILOSOPHY 4's "BEING RIGHT" LINE (2026-10-03).** The owner
   heard phil4's first three lines as *"way too fast"* and the top hat's *"Being right isn't
   the same as knowing …"* as *"a much better speed"*, and asked for every line to be slower
