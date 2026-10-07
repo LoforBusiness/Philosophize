@@ -93,7 +93,7 @@ const TR = 0.85;
 const K = K_FIG * 0.76;
 
 /** Seconds each beat's action is paced over (lib/narration/manifest.ts, philosophy-foundations-6). */
-const LINES = [3.79, 3.95, 2.96, 5.56, 5.6, 0, 2.78, 4.47, 7.43, 0, 3.84, 0, 0];
+const LINES = [3.79, 3.95, 2.96, 5.56, 5.6, 0, 2.78, 4.47, 7.43, 0, 3.45, 0, 0];
 
 const TALK = 167;
 const EXPLAIN = 259;

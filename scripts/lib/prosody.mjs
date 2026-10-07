@@ -528,7 +528,7 @@ export function readTake(pcm, rate, text, pace = 'even') {
   let e = 0;
   for (const d of tail) e += 10 ** (d / 10);
   const endDb = 10 * Math.log10(e / Math.max(1, tail.length) + 1e-12) - top;
-  return { gaps, marks, strays, sentences, rate: line.total / Math.max(0.1, talk), talk, endDb, frames: { F, first, last } };
+  return { gaps, marks, strays, sentences, rate: line.total / Math.max(0.1, talk), talk, endDb, frames: { F, first, last, end: nf } };
 }
 
 /**
@@ -552,6 +552,10 @@ export function paceRates(take) {
 /** What makes a take sound read out rather than spoken, as { kind, say }. */
 export function prosodyFaults(take, text) {
   const out = [];
+  // A NATURAL take is cut where the throwaway word began; the cut keeps the silence before it,
+  // so a take ending with almost none was cut inside its own last word ("bad-" of "badly",
+  // where the d's closure is a short silence). 2026-10-07: 14 of 379 lines shipped that way.
+  if (UNTOUCHED && take.frames.end - (take.frames.last + 1) < END_SILENCE_MIN * 100) out.push({ kind: 'CUT OFF', say: `the take ends ${((take.frames.end - take.frames.last - 1) / 100).toFixed(2)}s after its last sound, where a finished line keeps ${END_SILENCE_MIN}s or more: it was cut inside its last word` });
   if (take.endDb > -END_DROP_DB) out.push({ kind: 'CUT OFF', say: `the take stops while the last word is still sounding: its last 50 ms is ${(-take.endDb).toFixed(0)} dB under its loudest, where a finished take falls ${END_DROP_DB} or more` });
   const words = String(text).match(/\S+/g) || [];
   for (const m of take.marks) {
@@ -661,6 +665,41 @@ export const requestOf = (text, strong) => `${markupOf(text, strong)} ${TAIL_WOR
  * The take cut back to the line: everything up to the silence after its last word, with
  * `keepS` of that silence kept. Null when the take has no silence there to cut in.
  */
+/** A natural take keeps at least this much silence after its last word (see cutTailNatural). */
+export const END_SILENCE_MIN = 0.12;
+/** The shortest pause before the throwaway word that can be cut in: a stop consonant's closure inside a word is shorter. */
+export const TAIL_GAP_MIN = 0.15;
+
+/**
+ * Cut a NATURAL take before its throwaway word, without trusting the line's punctuation:
+ * the voice in the natural style runs through some marks, and matching marks to pauses in
+ * order then lands the cut on the wrong pause — sometimes the closure INSIDE the last word.
+ * So the throwaway word is found from the END: the last burst of sound, short enough to be
+ * one word, after a pause long enough not to be inside a word. Null when there is no such
+ * pause, and the render asks again.
+ */
+export function cutTailNatural(pcm, rate, keepS = 0.25) {
+  const fr = framesOf(pcm, rate);
+  const { db, floor, last, F } = fr;
+  if (last < 0) return null;
+  // walk back from the last sound: the throwaway word, then the pause before it
+  // (a silence shorter than TAIL_GAP_MIN inside it — the catch before the t of "Right" — is
+  // part of the word, not the pause before it)
+  let f = last, wordStart = last + 1, gapA = -1, gap = 0;
+  while (f >= 0) {
+    while (f >= 0 && db[f] > floor) f -= 1;
+    wordStart = f + 1;
+    let g = f;
+    while (g >= 0 && db[g] <= floor) g -= 1;
+    gapA = g + 1; gap = (wordStart - gapA) / 100;
+    if (g < 0 || gap >= TAIL_GAP_MIN || (last + 1 - wordStart) / 100 > 0.9) break;
+    f = g;
+  }
+  const word = (last + 1 - wordStart) / 100;
+  if (gapA <= 0 || gap < TAIL_GAP_MIN || word < 0.12 || word > 0.9) return null;
+  return pcm.slice(0, Math.min(wordStart * F - Math.round(rate * 0.03), gapA * F + Math.round(rate * keepS)));
+}
+
 export function cutTail(pcm, rate, text, keepS = 0.25) {
   const full = `${text} ${TAIL_WORD}`;
   const n = sentencesOf(full, 'even').length;

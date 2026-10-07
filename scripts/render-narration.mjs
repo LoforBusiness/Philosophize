@@ -49,7 +49,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
-import { PACES, aimOf, AIM_TOLERANCE, useStyleFor, styleOf, isUntouched, TAIL_WORD, SENTENCE_END as SENTENCE_ENDS, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
+import { PACES, aimOf, AIM_TOLERANCE, useStyleFor, styleOf, isUntouched, TAIL_WORD, cutTailNatural, SENTENCE_END as SENTENCE_ENDS, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
 
 // ── ONE GO (2026-10-01) ─────────────────────────────────────────────────────
 // The owner: *"I don't want to have to keep going back and back to keep reiterating the
@@ -254,12 +254,13 @@ try {
       for (const [t, rate] of [1, 0.99, 1.01].map((r) => Number((r * l.nudge).toFixed(3))).entries()) {
         // the plain words and a throwaway word after them, cut in the silence before it,
         // so the last word finishes (a voice never trims a word with more coming after it);
-        // on a retake one long pause is asked for AFTER the line only, so there is a gap to cut in
+        // one long pause is asked for AFTER the line only, so there is a real gap to cut in, and
+        // the cut finds it from the end (cutTailNatural), never by matching the line's marks
         const said = words.map((x, i) => (ranThrough.has(i) ? `${x} [pause]` : x)).join(' ');
-        const buf = await synth(`${said}${t ? ' [pause long]' : ''} ${TAIL_WORD}`, l.voice, rate, `${l.key} natural@${rate}`);
+        const buf = await synth(`${said} [pause long] ${TAIL_WORD}`, l.voice, rate, `${l.key} natural@${rate}`);
         if (!buf) break;
         const w = parseWav(buf);
-        const cut = cutTail(w.pcm, w.rate, l.text);
+        const cut = cutTailNatural(w.pcm, w.rate);
         if (!cut) { console.log(`    ${l.key} natural try ${t + 1}: no silence before the throwaway word`); continue; }
         const pcm = trimLead(cut, w.rate, 0.1);
         const take = readTake(pcm, w.rate, l.text, l.pace);

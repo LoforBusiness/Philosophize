@@ -11622,7 +11622,17 @@ line in 60 came back with a clipping burst, which the installer refuses; a retak
 the rate fixes it. Where a line came out SHORTER than before and a gesture was paced across
 it, the scene keeps its old LINES length so the act is not squeezed (AR4, N21). AP17 and
 AP21's bands stay in the file as the defaults `PACE_REFERENCE` is measured against, and
-`LESSON_STYLE` can still give one lesson another style. `withStyle` puts the defaults back
+`LESSON_STYLE` can still give one lesson another style.
+
+**The throwaway word is found from the END, never by the line's marks (2026-10-07).** The
+owner heard economics 4's "…nobody does both badly." stop on "bad-". The cut had matched the
+line's marks to its pauses in order, and an untouched voice runs through some marks, so the
+last mark landed on the closure INSIDE "badly" and the end of the word went out with
+"Right.". It was 11 lines of 379. Now every request asks for one long pause after the line,
+and `cutTailNatural` cuts at the pause before the last short burst, which must be at least
+`TAIL_GAP_MIN` (0.15 s), longer than any closure inside a word. `check:narration` fails a
+natural take that ends less than `END_SILENCE_MIN` (0.12 s) after its last sound, because a
+clean cut always keeps that much. `withStyle` puts the defaults back
 after each call, so the checks judge each lesson by its own style.
 
 ## Group AQ · A word sits in its plate, and its plate on its thing
