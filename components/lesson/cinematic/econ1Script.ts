@@ -95,7 +95,7 @@ export const BEATS: Econ1Beat[] = [
     act: 'settle', th: true, sale: 2, board: 0,
     speaker: 'tophat',
     text: 'Every choice has an opportunity cost. Spend an hour at this market, and you can’t spend that hour anywhere else.',
-    pace: ['even', 'even'],
+    pace: ['weighty', 'even'],
     dur: 2.1,
   },
   {

@@ -142,10 +142,111 @@ export const SENTENCE_END = new Set(['stop', 'exclaim', 'question', 'ellipsis'])
 const TAG = { comma: '[pause short]', dash: '[pause short]', semi: '[pause short]', colon: '[pause]', stop: '[pause]', exclaim: '[pause]', question: '[pause]', ellipsis: '[pause]' };
 
 /** A pause where the text has no mark is a catch of breath at most. */
-export const STRAY_MAX = 0.2;
-export const STRAY_AIM = 0.1;
+export let STRAY_MAX = 0.2;
+export let STRAY_AIM = 0.1;
 /** The shortest silence counted as a pause at all: a stop consonant's closure is shorter. */
 export const MIN_GAP_S = 0.08;
+
+// ── A LESSON'S DELIVERY STYLE (AP22, 2026-10-07) ─────────────────────────────
+//
+// The owner sent a recording of Claude Code reading aloud and asked for the lessons to be
+// spoken like it: *"not the actual voice, but the speed, the volume, the pauses, how it
+// speaks."* Measured on that clip with this file's own reader (37 s, 105 words), against
+// economics 1 and philosophy 1:
+//
+//   · THE OVERALL PACE IS THE SAME: 4.22 syllables a second with the pauses in, against
+//     4.20 and 4.16. What differs is how the time is spent.
+//   · ITS WORDS ARE QUICKER: 5.37 syllables a second of speech, against 4.78 and 4.80.
+//   · IT PAUSES MORE AND LONGER, AND NEVER THE SAME TWICE: 21% of its time is silence
+//     against 12%; a sentence ends on 0.3–0.5 s, a comma 0.2–0.3, a topic change 0.57,
+//     and it takes a 0.3–0.5 s phrase break where a long sentence needs a breath, with no
+//     comma there. The lessons rest exactly 0.36 at every stop and 0.16 at every comma.
+//
+// The owner had called words at 5.2–6.4 "way too fast" (2026-10-02), when the pauses were
+// short; at the same word speed with longer pauses they asked for exactly this. So the
+// pauses were the fault, and the CONVERSATIONAL style is the clip's numbers: quicker words,
+// longer pauses that change with what comes next, and the voice's own phrase breaks kept.
+//
+// A lesson listed in LESSON_STYLE is rendered, shaped and checked under its style; every
+// other lesson under the defaults above, untouched. `withStyle` swaps the tables in place
+// for the length of one call and always puts them back.
+export const STYLES = {
+  conversational: {
+    paces: {
+      even: { aim: 5.35, min: 5.05, max: 5.7, factor: 1.12 },
+      brisk: { aim: 5.6, min: 5.3, max: 5.95, factor: 1.17 },
+      weighty: { aim: 5.05, min: 4.8, max: 5.3, factor: 1.06 },
+    },
+    pauses: {
+      comma: { aim: 0.26, min: 0.16, max: 0.38 },
+      dash: { aim: 0.3, min: 0.2, max: 0.42 },
+      semi: { aim: 0.32, min: 0.22, max: 0.44 },
+      colon: { aim: 0.36, min: 0.26, max: 0.48 },
+      stop: { aim: 0.42, min: 0.3, max: 0.56 },
+      exclaim: { aim: 0.4, min: 0.3, max: 0.56 },
+      question: { aim: 0.48, min: 0.36, max: 0.62 },
+      ellipsis: { aim: 0.6, min: 0.4, max: 0.8 },
+    },
+    // the voice's own breath between phrases is kept up to this; a longer one is set to the aim
+    stray: { max: 0.42, aim: 0.32 },
+    vary: true,
+  },
+};
+/** Which lessons are spoken in a style other than the default. */
+export const LESSON_STYLE = {
+  'economics-foundations-1': 'conversational',
+};
+const DEFAULT_STYLE = {
+  paces: JSON.parse(JSON.stringify(PACES)),
+  pauses: JSON.parse(JSON.stringify(PAUSES)),
+  stray: { max: STRAY_MAX, aim: STRAY_AIM },
+  vary: false,
+};
+let VARY = false;
+/** The lesson a key like "economics-foundations-1/beat-03" belongs to. */
+export const lessonOfKey = (key) => String(key ?? '').split('/')[0];
+function applyStyle(st) {
+  for (const k of Object.keys(st.paces)) Object.assign(PACES[k], st.paces[k]);
+  for (const k of Object.keys(st.pauses)) Object.assign(PAUSES[k], st.pauses[k]);
+  STRAY_MAX = st.stray.max;
+  STRAY_AIM = st.stray.aim;
+  VARY = st.vary;
+}
+/** Put a lesson's style in place for the rest of the run (a render is one lesson). */
+export function useStyleFor(lesson) {
+  applyStyle(STYLES[LESSON_STYLE[lessonOfKey(lesson)]] ?? DEFAULT_STYLE);
+}
+/** Run `fn` under a lesson's style, then put the defaults back. */
+export function withStyle(lesson, fn) {
+  useStyleFor(lesson);
+  try { return fn(); } finally { applyStyle(DEFAULT_STYLE); }
+}
+/** The style a lesson is spoken in. */
+export const styleOf = (lesson) => LESSON_STYLE[lessonOfKey(lesson)] ?? 'default';
+
+/**
+ * How long to rest at mark `m`, under a style that varies its pauses. A person's pause
+ * follows what comes NEXT: a breath before a long sentence, a short beat before a short
+ * one, a little longer before "and", "but" or "so" turns a sentence, a little less between
+ * the items of a list. Always inside the mark's band, and the same for the same line.
+ */
+function pauseAimOf(m, words, sentences) {
+  const p = PAUSES[m.kind];
+  if (!VARY) return p.aim;
+  let aim = p.aim;
+  if (SENTENCE_END.has(m.kind)) {
+    const next = sentences.find((s) => s.from === m.word + 1);
+    if (next && next.syllables >= 12) aim += 0.08;
+    else if (next && next.syllables < 6) aim -= 0.07;
+  } else if (m.kind === 'comma') {
+    const after = String(words[m.word + 1] ?? '').toLowerCase().replace(/[^a-z]/g, '');
+    const sent = sentences.find((s) => m.word >= s.from && m.word <= s.to);
+    const commas = sent ? words.slice(sent.from, sent.to + 1).filter((w) => /,$/.test(w)).length : 0;
+    if (['and', 'but', 'so', 'or', 'because', 'then', 'when', 'which'].includes(after)) aim += commas >= 2 && after === 'and' ? 0 : 0.06;
+    else if (commas >= 2) aim -= 0.05;
+  }
+  return Math.max(p.min + 0.02, Math.min(p.max - 0.02, aim));
+}
 /** The last 50 ms of a take against its loudest frame: a finished word has fallen this far (AP16). */
 export const END_DROP_DB = 33;
 /**
@@ -445,7 +546,8 @@ export function shapePauses(pcm, rate, text, pace = 'even') {
   const take = readTake(pcm, rate, text, pace);
   const F = take.frames.F;
   const want = new Map();
-  for (const m of take.marks) if (m.gap >= 0) want.set(m.gap, PAUSES[m.kind].aim);
+  const words = String(text).match(/\S+/g) || [];
+  for (const m of take.marks) if (m.gap >= 0) want.set(m.gap, pauseAimOf(m, words, take.sentences));
   take.gaps.forEach((g, k) => { if (!want.has(k) && g.len > STRAY_MAX) want.set(k, STRAY_AIM); });
   let out = Int16Array.from(pcm);
   const order = [...want.keys()].sort((x, y) => y - x);

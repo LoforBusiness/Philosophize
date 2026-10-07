@@ -74,7 +74,7 @@ for (const it of items) {
       // A dialogue take must also be DELIVERED like a person talking (LESSON_RULES AP16),
       // and a paced one rest at every mark for as long as a person does (AP17).
       const b = m ? scripts.get(m[1])?.[Number(m[2])] : null;
-      if (b?.speaker) why.push(...spokenFaults(w.pcm, w.rate, it.text, b.pace, sha256hex(wav)).map((f) => `${f.kind}: ${f.say}`));
+      if (b?.speaker) why.push(...spokenFaults(w.pcm, w.rate, it.text, b.pace, sha256hex(wav), it.key).map((f) => `${f.kind}: ${f.say}`));
     }
   }
   if (why.length) {

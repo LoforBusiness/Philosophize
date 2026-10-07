@@ -49,7 +49,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
-import { PACES, aimOf, AIM_TOLERANCE, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
+import { PACES, aimOf, AIM_TOLERANCE, useStyleFor, styleOf, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
 
 // ── ONE GO (2026-10-01) ─────────────────────────────────────────────────────
 // The owner: *"I don't want to have to keep going back and back to keep reiterating the
@@ -80,6 +80,9 @@ if (!lessonId || !outDir) {
   console.error('usage: node scripts/render-narration.mjs <lesson-id> <out dir> [beat[@rate] …]');
   process.exit(2);
 }
+// a lesson listed in prosody.LESSON_STYLE is spoken in its own style (AP22)
+useStyleFor(lessonId);
+console.log(`style: ${styleOf(lessonId)} · even ${PACES.even.min}–${PACES.even.max} · brisk ${PACES.brisk.min}–${PACES.brisk.max}`);
 
 const scriptFile = LESSONS[lessonId]
   ?? wiredLessons().find((l) => l.id === lessonId)?.scriptFile;

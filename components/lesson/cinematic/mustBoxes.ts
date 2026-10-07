@@ -68,7 +68,7 @@ export const MUST_STAMP: Record<string, string> = {
   'business-foundations-4': '2e29433c8591',
   'business-foundations-5': '2ee42dc542d7',
   'business-foundations-6': 'dd1b4e4421e3',
-  'economics-foundations-1': 'd4030eea8230',
+  'economics-foundations-1': 'b28b625ca7ee',
   'economics-foundations-2': '9df4f568d6f2',
   'economics-foundations-3': '13df4a6772e0',
   'economics-foundations-4': '0358fe481cde',

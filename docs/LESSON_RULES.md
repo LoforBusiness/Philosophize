@@ -11573,6 +11573,30 @@ them, and how one aim was used for every sentence. The rules:
 What no number can hold is whether a sentence was given the right pace for what it does.
 That is the author's, and the ear is the test (AP20.7).
 
+### AP22 · A conversational delivery: quicker words, longer pauses that change (trial, 2026-10-07)
+
+The owner sent a recording of Claude Code reading aloud: *"not the actual voice, but the
+speed, the volume, the pauses, how it speaks."* Measured with `prosody.mjs`'s own reader
+against economics 1 and philosophy 1:
+
+- **Overall pace is the same:** 4.22 syllables a second with pauses, against 4.20 and 4.16.
+- **Its words are quicker:** 5.37 a second of speech, against 4.78 and 4.80.
+- **It pauses more, longer, and never the same twice:** 21% of its time is silence against
+  12%. A sentence ends on 0.3–0.5 s, a comma 0.2–0.3, a topic change about 0.57, and it takes
+  a 0.3–0.5 s breath inside a long sentence with no comma there. The lessons rested exactly
+  0.36 at every stop and 0.16 at every comma.
+- **Loudness was not the difference:** the lessons are steadier than the clip (LRA 2.6 LU
+  against 4.7).
+
+So the "too fast" of 2026-10-02 was short pauses, not quick words. `prosody.STYLES.
+conversational` is the clip's numbers. Even runs 5.05–5.7 and brisk 5.3–5.95. A comma rests
+about 0.26 and a stop about 0.42, longer before a long sentence and shorter before a short
+one. A comma before "and", "but" or "so" rests longer, one between list items shorter, and
+the voice keeps its own phrase breaks up to 0.42. `LESSON_STYLE` names the lessons spoken
+this way, and only economics 1 so far: every other lesson keeps AP17/AP21 until the owner
+has heard the trial. `withStyle` puts the defaults back after each call, so the checks judge
+each lesson by its own style.
+
 ## Group AQ · A word sits in its plate, and its plate on its thing
 
 ### AQ1 · A word fits the plate it is on, and the plate sits on its object

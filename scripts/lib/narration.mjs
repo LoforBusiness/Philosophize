@@ -27,7 +27,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { readTake, prosodyFaults } from './prosody.mjs';
+import { readTake, prosodyFaults, withStyle } from './prosody.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const ASSETS = path.join(ROOT, 'assets', 'narration');
@@ -601,9 +601,9 @@ export function deliveryFaults(d) {
  * held to AP17 — its speed per sentence and a pause of a person's length at every mark
  * (scripts/lib/prosody.mjs); one that does not, to AP16's coarser test.
  */
-export function spokenFaults(pcm, rate, text, pace, sha = null) {
+export function spokenFaults(pcm, rate, text, pace, sha = null, lesson = null) {
   if (pace === undefined) return deliveryFaults(deliveryOf(pcm, rate, text));
-  const faults = prosodyFaults(readTake(pcm, rate, text, pace), text);
+  const faults = withStyle(lesson, () => prosodyFaults(readTake(pcm, rate, text, pace), text));
   return sha && PACE_ALLOWANCE[sha] ? faults.filter((f) => f.kind !== 'TOO FAST' && f.kind !== 'TOO SLOW') : faults;
 }
 
@@ -618,7 +618,6 @@ export function spokenFaults(pcm, rate, text, pace, sha = null) {
  */
 export const PACE_ALLOWANCE = {
   c3534d8ec8f2269a06a292aca131c7ba12ca0feae6175c7b9ac978209334ecee: 'business-foundations-2/beat-09 — even 4.44, under 4.45',
-  '79b7dc56e3e23a6309db2316b8943d85eb768862d883cffeb55db458c39f5345': 'economics-foundations-1/beat-06 — one sentence 5.77, over 5.45',
   dad5fae5f89cc3471f7c8e2d913458d16b14868f975d7bffa2a5309765ae2760: 'economics-foundations-2/beat-01 — one sentence 5.93, over 5.75',
   '1fa41d14e27fc64d1eb88e9cc575405ffe9256496fad11481edf055e66a606da': 'economics-foundations-4/beat-05 — one sentence 6.34, over 5.75',
   b550dc34bf1cd9b4128aa37f11c76a40c169a836d638d19700e139fe6893c54a: 'history-foundations-2/beat-00 — even 5.26, over 5.1',
@@ -684,7 +683,7 @@ export function writeRenders(records, dir = ASSETS) {
  * there is none). make-narration and check-narration both call this, so the two cannot
  * disagree about a line.
  */
-export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false, pace }) {
+export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false, pace, lesson = null }) {
   const faults = [];
   const w = parseWav(wav);
   for (const say of headerFaults(w)) faults.push({ kind: 'HEADER', say });
@@ -704,7 +703,7 @@ export function lineFaults({ text, wav, record, clip, beat, at, dialogue = false
     m = measureAudio(w.pcm, w.rate);
     faults.push(...audioFaults(m, text));
     // A DIALOGUE line is a person talking, so it is also held to how it is delivered (AP16).
-    if (dialogue) faults.push(...spokenFaults(w.pcm, w.rate, text, pace, sha));
+    if (dialogue) faults.push(...spokenFaults(w.pcm, w.rate, text, pace, sha, lesson));
   }
   return { faults, m, w, sha };
 }

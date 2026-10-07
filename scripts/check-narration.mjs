@@ -121,7 +121,7 @@ for (const id of table) {
     if (!missing.length && Math.abs(e.at - l.at) > 0.0005) {
       note(key, 'OFFSET', `the manifest starts this line at ${e.at.toFixed(3)}s and it lands at ${l.at.toFixed(3)}s in ${LESSON_CLIP}: run scripts/encode-narration.mjs, then scripts/make-narration.mjs`);
     }
-    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at, dialogue: !!beats[i].speaker, pace: beats[i].pace });
+    const { faults, m } = lineFaults({ text, wav: l.wav, record: records[key], clip, beat: i, at, dialogue: !!beats[i].speaker, pace: beats[i].pace, lesson: id });
     for (const f of faults) note(key, f.kind, f.say);
     lines += 1;
     if (!m) continue;
