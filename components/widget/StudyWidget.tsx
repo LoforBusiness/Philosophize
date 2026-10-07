@@ -15,8 +15,9 @@ import { markFor, mix, STATUS_COLOR, STATUS_ICON, W } from './widgetTheme';
 // From three mocks drawn after Google's own widgets, the owner picked the one
 // after Pixel Weather's Material 3 Expressive widgets: one deep container; the
 // streak as the hero number where Weather puts the temperature; the status and his
-// line beside it; then rounded pills inside — the week, Monday first, like the
-// hourly forecast row, and a fact from the day's subject with its Material Symbol.
+// line beside it; then rounded pills inside — a fact from the day's subject with
+// its Material Symbol, and at the foot the week, Monday first, like the hourly
+// forecast row (the fact went above the week on 2026-10-07, at the owner's word).
 // No illustration. At 2×2 it is the streak alone; on a short 4×1 strip, one row.
 //
 // NOT a React Native tree: RemoteViews, in a headless task, so only the library's
@@ -136,17 +137,17 @@ export function StudyWidget({ mood, subjectName, subjectHue, width, height }: St
         </FlexWidget>
       </FlexWidget>
       <FlexWidget style={{ flex: 1 }} />
-      {/* The week, Monday first, like Weather's hourly row. */}
-      <FlexWidget style={{ width: 'match_parent', backgroundColor: hex(W.pill), borderRadius: 18, paddingVertical: WEEK.padY, paddingHorizontal: WEEK.padX }}>
-        <Week week={mood.week} disc={WEEK.disc} />
-      </FlexWidget>
-      {/* The day's subject and its fact, whole or not at all. */}
+      {/* The day's subject and its fact, whole or not at all, above the week (2026-10-07). */}
       {L.factLines ? (
-        <FlexWidget style={{ width: 'match_parent', marginTop: GAP, backgroundColor: hex(W.pill), borderRadius: 16, paddingVertical: FACT.padY, paddingHorizontal: FACT.padX, flexDirection: 'row', alignItems: 'center' }}>
+        <FlexWidget style={{ width: 'match_parent', marginBottom: GAP, backgroundColor: hex(W.pill), borderRadius: 16, paddingVertical: FACT.padY, paddingHorizontal: FACT.padX, flexDirection: 'row', alignItems: 'center' }}>
           <SvgWidget svg={svg(mood.subject as IconName, markFor(subjectHue))} style={{ width: FACT.icon, height: FACT.icon, marginRight: FACT.gap }} />
           <TextWidget text={mood.fact} maxLines={L.factLines} style={{ width: Math.floor(L.factW), fontSize: T.fact.size, color: hex(W.on) }} />
         </FlexWidget>
       ) : null}
+      {/* The week at the foot, Monday first, like Weather's hourly row. */}
+      <FlexWidget style={{ width: 'match_parent', backgroundColor: hex(W.pill), borderRadius: 18, paddingVertical: WEEK.padY, paddingHorizontal: WEEK.padX }}>
+        <Week week={mood.week} disc={WEEK.disc} />
+      </FlexWidget>
     </FlexWidget>
   );
 }

@@ -8,7 +8,7 @@
 //
 // Three shapes, after Pixel Weather's widgets (the owner's pick, 2026-10-02):
 //   FULL   (4×2 and up)  status and his line top-left, the streak big top-right,
-//                         then the week pill and the fact pill. The fact is shown
+//                         then the fact pill and, at the foot, the week pill. The fact is shown
 //                         only when it fits WHOLE; if it does not, it is left out
 //                         rather than cut.
 //   GLANCE (2×2)         the streak alone, big, with "day streak" and the status.
@@ -61,13 +61,15 @@ export const T = {
   line: { size: 12.5, lh: 16 },
   hero: { size: 44, lh: 46 },
   heroFlame: 26,
-  fact: { size: 12, lh: 16 },
+  // 14 since 2026-10-07: the owner asked for the fact larger. 3 lines of it fit
+  // beside a two-row line at 330×190 only at a 17.5 leading and the pill's 5 padding.
+  fact: { size: 14, lh: 17.5 },
   glanceHero: { size: 52, lh: 54 },
 };
 /** The week pill: seven discs with the day's letter in each. */
 export const WEEK = { disc: 20, padY: 8, padX: 12, h: 20 + 8 * 2 };
 /** The fact pill: a subject mark, then the fact. */
-export const FACT = { padY: 7, padX: 12, icon: 18, gap: 8 };
+export const FACT = { padY: 5, padX: 12, icon: 20, gap: 8 };
 export const GAP = 6;
 
 export interface FullLayout {

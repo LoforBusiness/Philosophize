@@ -126,8 +126,8 @@ export function widgetHtml(m, w, h) {
       <div class="row" style="flex:1;justify-content:flex-end">${icon('flame', flame, T.heroFlame, 2)}<div style="font-size:${T.hero.size}px;line-height:${T.hero.lh}px;font-weight:600;color:${C.on}">${m.streak}</div></div>
     </div>
     <div style="flex:1"></div>
+    ${L.factLines ? `<div class="row" style="margin-bottom:${GAP}px;background:${C.pill};border-radius:16px;padding:${FACT.padY}px ${FACT.padX}px">${icon(m.subject, markFor(subj.hue), FACT.icon, FACT.gap)}<div class="clamp" style="width:${Math.floor(L.factW)}px;font-size:${T.fact.size}px;line-height:${T.fact.lh}px;color:${C.on};-webkit-line-clamp:${L.factLines}">${esc(m.fact)}</div></div>` : ''}
     <div style="background:${C.pill};border-radius:18px;padding:${WEEK.padY}px ${WEEK.padX}px">${week(m.week, WEEK.disc)}</div>
-    ${L.factLines ? `<div class="row" style="margin-top:${GAP}px;background:${C.pill};border-radius:16px;padding:${FACT.padY}px ${FACT.padX}px">${icon(m.subject, markFor(subj.hue), FACT.icon, FACT.gap)}<div class="clamp" style="width:${Math.floor(L.factW)}px;font-size:${T.fact.size}px;line-height:${T.fact.lh}px;color:${C.on};-webkit-line-clamp:${L.factLines}">${esc(m.fact)}</div></div>` : ''}
   </div>`;
 }
 
