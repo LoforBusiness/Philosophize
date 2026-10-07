@@ -97,6 +97,43 @@ function durs(comp) {
   return body[1].split(/\n\s{2}\},?\s*\n?/).filter((c) => /\S/.test(c))
     .map((c) => { const m = c.match(/^\s{4}dur:\s*([\d.]+)/m); return m ? +m[1] : 0; });
 }
+/** Per beat, whether somebody SPEAKS on it (a dialogue line with a speaker), split as durs is. */
+function voiced(comp) {
+  const p = scriptPath(comp);
+  if (!fs.existsSync(p)) return [];
+  const body = fs.readFileSync(p, 'utf8').match(/BEATS[^=]*=\s*\[([\s\S]*)\n\];/);
+  if (!body) return [];
+  return body[1].split(/\n\s{2}\},?\s*\n?/).filter((c) => /\S/.test(c))
+    .map((c) => /^\s{4}speaker:\s*'/m.test(c) && /^\s{4}text:\s*'/m.test(c));
+}
+
+// ── EVERYONE ON A SPOKEN BEAT IS IN THE SHOT (K19, 2026-10-07) ──────────────────
+// The owner: *"the camera on screen does not zoom out when top hat stick man comes on
+// screen. So you hear him talking, but you don't see him."* The stations are planned from
+// must-boxes measured at a beat's START, and a beat with no station keeps the framing it
+// was handed — so a figure who walks on during a beat was never in the plan, and a push
+// held over a later beat left its speaker outside the frame (8 lines in 4 lessons).
+// So the camera is also checked against where every figure STANDS once the beat has
+// settled, read off the real scenes by check-replay (REPLAY_FIGS), and a spoken beat whose
+// resting frame leaves a figure out is given a framing of its own that holds everyone.
+import { spawnSync } from 'node:child_process';
+import os from 'node:os';
+const FIGS = (() => {
+  const f = path.join(os.tmpdir(), `ashmere-figs-${process.pid}.json`);
+  spawnSync(process.execPath, ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', path.join('scripts', 'check-replay.mjs')],
+    { env: { ...process.env, REPLAY_FIGS: f }, stdio: 'ignore', maxBuffer: 1 << 26 });
+  if (!fs.existsSync(f)) throw new Error('make-tours: check-replay wrote no settled figures (REPLAY_FIGS)');
+  const j = JSON.parse(fs.readFileSync(f, 'utf8'));
+  fs.unlinkSync(f);
+  return j;
+})();
+/** A settled figure's box in scene units: head to feet, arms' width. */
+const figBox = (fg) => {
+  const k = fg.k > 0.05 ? fg.k : 1;
+  const left = Math.min(fg.x, fg.hx) - 24 * k, right = Math.max(fg.x, fg.hx) + 24 * k;
+  const top = fg.hy - 22 * k, bottom = fg.y + 58 * k;
+  return [left, top, right - left, bottom - top];
+};
 
 /**
  * IS THE MEASUREMENT THIS TOUR WOULD BE BUILT FROM STILL TRUE?
@@ -209,6 +246,7 @@ function slicesWithin(t, k, holds, words, band, ground) {
 const tours = {};
 const stamps = {};
 const problems = [];
+const framedSpeakers = [];
 let nBeats = 0, nToured = 0, nStations = 0;
 const skipped = [];
 const rows = [];
@@ -340,6 +378,53 @@ for (const [id, comp] of map) {
     if (!changed) break;
   }
 
+  // K19 — walk the camera as the player does (a beat with no station keeps the framing
+  // it was handed) and give every spoken beat that leaves a figure out its own framing.
+  {
+    const talk = voiced(comp);
+    const settled = FIGS[id] || [];
+    const whole = [0, band[0], 400, band[1] - band[0]];
+    const inside = (b4, fb) => {
+      const w = visibleWindow(stationShot({ x: R(b4[0]), y: R(b4[1]), w: R(b4[2]), h: R(b4[3]) }, band, ground), band);
+      return fb[0] >= w.left - 4 && fb[0] + fb[2] <= w.right + 4 && fb[1] >= w.top - 4 && fb[1] + fb[3] <= w.bottom + 4;
+    };
+    let rest = whole;
+    for (let k = 0; k < per.length; k += 1) {
+      if (per[k]) { const end = per[k][per[k].length - 1]; rest = end.to ?? end.box; }
+      if (!talk[k]) continue;
+      const on = (settled[k] || []).filter((fg) => fg.opacity > 0.3 && fg.x > -10 && fg.x < 410).map(figBox)
+        .map(([x, y, w, h]) => { const l = Math.max(0, x), t = Math.max(band[0], y); return [l, t, Math.min(400, x + w) - l, Math.min(band[1], y + h) - t]; });
+      if (on.every((fb) => inside(rest, fb))) continue;
+      // the beat's own whole must-box and everyone on it, as one framing
+      const all = [boxes[k] ?? whole, ...on];
+      const l = Math.max(0, Math.min(...all.map((b4) => b4[0]))), t = Math.max(band[0], Math.min(...all.map((b4) => b4[1])));
+      const r = Math.min(400, Math.max(...all.map((b4) => b4[0] + b4[2]))), btm = Math.min(band[1], Math.max(...all.map((b4) => b4[1] + b4[3])));
+      let st = [{ box: [l, t, r - l, btm - t], tr: 0.8, dwell: 9 }];
+      const ok = (s) => checkTour([{ box: { x: s[0].box[0], y: s[0].box[1], w: s[0].box[2], h: s[0].box[3] }, tr: s[0].tr, dwell: s[0].dwell }], band,
+        boxes[k] ? { x: boxes[k][0], y: boxes[k][1], w: boxes[k][2], h: boxes[k][3] } : null, ground).length === 0
+        && !slicesWithin(s, k, per.map((p, j) => (j === k ? s : p)), words, band, ground)
+        && on.every((fb) => inside(s[0].box, fb));
+      if (!ok(st)) st = [{ box: whole, tr: 0.8, dwell: 9 }];
+      // already there (a figure at the very edge that no shot holds whole): no move (K3)
+      if (st[0].box.every((v, q) => Math.abs(v - rest[q]) < 12)) continue;
+      if (!per[k]) { toured += 1; nToured += 1; }
+      else nStations -= per[k].length;
+      per[k] = st;
+      nStations += 1;
+      rest = st[0].box;
+      framedSpeakers.push(`${id} beat ${k}`);
+    }
+    // a station the new framings left pointing where the camera already is goes (K3)
+    let was = null;
+    for (let k = 0; k < per.length; k += 1) {
+      if (!per[k]) continue;
+      const end = per[k][per[k].length - 1];
+      const box = end.to ?? end.box;
+      if (was && box.every((v, q) => Math.abs(v - was[q]) < 12)) { nStations -= per[k].length; per[k] = null; toured -= 1; nToured -= 1; continue; }
+      was = box;
+    }
+  }
+
   if (per.some(Boolean)) {
     tours[id] = per;
     // The same fingerprint the boxes carry: a tour derived from a scene that has
@@ -435,4 +520,5 @@ if (stats) {
     console.log(`    ${r.id.padEnd(30)} ${r.toured}/${r.beats} beats  ${r.tightest.toFixed(2)}×`);
   }
 }
+console.log(`  K19: ${framedSpeakers.length} spoken beat(s) given a framing that holds everyone on them${framedSpeakers.length ? ': ' + framedSpeakers.join(', ') : ''}`);
 console.log('');

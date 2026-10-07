@@ -238,13 +238,13 @@ const SHAFT_ART = b5UmbShaft(0, 25 - B5_UMB_GRIP.y, 50, 50);
 const CANOPY_ART = b5Canopy(0, 9, 46, 18);
 const UMB_APEX = -B5_UMB_GRIP.y;
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -317,11 +317,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: { walking: boolean; x0: number; x1: number; u: number }, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: { walking: boolean; x0: number; x1: number; u: number }, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -434,7 +434,7 @@ export default function Biz5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const pWalk = hopping
       ? { walking: true, x0: BY_BASKET, x1: IN_BASKET, u: hopU }
       : wp;
-    let sp = bodyOf(pWalk, PL_P, n, t, b);
+    let sp = bodyOf(pWalk, PL_P, n, t, b, 0);
     // the tin rides his LEFT hand all lesson, cradled in front of him at the waist —
     // raised to his chest to be opened on b2, held out to the accountant on b8
     const tinUp = A_TIN[n] ? st(0.02, 0.12) : A_EXPLAIN[n] ? 1 - st(0.2, 0.3) : 0;
@@ -489,14 +489,14 @@ export default function Biz5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const wv = bp(0.2, 0.3, 0.7);
       sp = hand(sp, xP, gP, dP, 1, xP + dP * (12 + 4 * Math.sin(st(0.3, 0.6) * Math.PI * 4)), 431 - lift, wv);
     }
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 0));
     const figP = keepHeld(heldP, pWalk.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the gas man ─────────────────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 8, n, CP_LEGS[0][0][1]), CP_LEGS[n], b, L);
     const xC = carry(cv, 8, n, wc.x, wc.x, 1);
     const dC = carry(cv, 9, n, 0, faceOf(carrySource(cv, 9, n, -1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 1);
     // the truck: wheeled in tilted back on its wheels, then stood upright
     const axleX = Math.max(PARK_AXLE, xC - 22);
     const arrived = A_DELIVER[n] ? wc.end / L : 0;
@@ -536,14 +536,14 @@ export default function Biz5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // b10: a hand up as his unpaid gas flies away — "Mostly."
     if (A_LIFTOFF[n]) sc = hand(sc, xC, GROUND, dC, 1, xC + dC * 11, 433, bp(0.74, 0.84, 1.1));
     if (A_LIFTOFF[n] || A_REST[n]) sc = lookUp(sc, A_LIFTOFF[n] ? st(0.6, 0.9) : 1);
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 1));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the accountant ──────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 11, n, -34), TH_LEGS[n], b, L);
     const xT = carry(cv, 11, n, wt.x, wt.x, 1);
     const dT = carry(cv, 12, n, 0, faceOf(carrySource(cv, 12, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 2);
     // the umbrella, in his RIGHT hand: open overhead as he comes in on b3; then furled,
     // swung down and leant on like a cane; raised to point its tip at the board
     const furlNow = n < EXPLAIN_N ? 0 : A_EXPLAIN[n] ? st(0.2, 0.3) : 1;
@@ -564,7 +564,7 @@ export default function Biz5Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       stt = hand(stt, xT, GROUND, dT, -1, k.x, k.y, st(0.12, 0.2) * (1 - st(0.5, 0.6)));
     }
     if (A_LIFTOFF[n] || A_REST[n]) stt = lookUp(stt, A_LIFTOFF[n] ? st(0.62, 0.92) : 1);
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── posed, and what rides the hands ────────────────────────────────────

@@ -281,13 +281,13 @@ const FLOOR_RAYS = [30, 110, 190, 270, 350].map((x) => {
   return { x: (x + xb) / 2 - len / 2, y: 470 + dy / 2, len, rot: (Math.atan2(dy, dx) * 180) / Math.PI };
 });
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 /** One hand on a stage point, for a figure standing on `g`. */
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
@@ -348,11 +348,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number): Stance {
+function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(code, t), hHold(code, t), hLive(code, t, b), w.u, WALK, 0)
-    : hLive(code, t, b);
+    ? travelStance(w.x0, w.x1, hHold(code, t, phase), hHold(code, t, phase), hLive(code, t, b, phase), w.u, WALK, 0)
+    : hLive(code, t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -442,11 +442,11 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const srcDM = carrySource(cv, 1, n, 1);
     const dMNow = Q2[n] === 1 && sealRight ? facing(srcDM, 1, rs) : faceOf(srcDM, MY_TURN[n], b, L);
     const dM = carry(cv, 1, n, 0, dMNow, 1);
-    let sm = bodyOf(wm, MY_P[n], t, b);
+    let sm = bodyOf(wm, MY_P[n], t, b, 0);
     // b7: the sniff — his nose goes up, and comes down again
     if (A_BLAME[n]) sm = { ...sm, neck: sm.neck + 0.32 * bp(0.12, 0.28, 0.6) };
     // Q2 answered wrong: he shrugs, once
-    if (q2 && pk !== RIGHT_DRAFT) sm = mixStance(sm, hLive(SHRUG, t, Math.max(0, rs - 0.35)), rAt(0.3, 0.5) * (1 - rAt(2.2, 2.6)));
+    if (q2 && pk !== RIGHT_DRAFT) sm = mixStance(sm, hLive(SHRUG, t, Math.max(0, rs - 0.35), 0), rAt(0.3, 0.5) * (1 - rAt(2.2, 2.6)));
     const pelM = DAIS - 34 * K;
     // b0: two taps on the top of the sack, and the hand back
     if (A_DECREE[n]) {
@@ -483,14 +483,14 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       const press = 3.2 * rBump(1.2, 1.38, 1.65);
       sm = hand(sm, xM, DAIS, dM, 1, DRAFT_X[RIGHT_DRAFT], TOP - 8 + press, rAt(0.9, 1.15) * (1 - rAt(2.1, 2.45)));
     }
-    const prevM = carryFrom(heldM, n, hHold(MY_P[p], t));
+    const prevM = carryFrom(heldM, n, hHold(MY_P[p], t, 0));
     const figM = keepHeld(heldM, wm.walking ? mixKeepLegs(prevM, sm, tr) : mixStance(prevM, sm, tr));
 
     // ── the catcher ─────────────────────────────────────────────────────────
     const wb = legsOf(carrySource(cv, 2, n, 156), BN_LEGS[n], b, L);
     const xB = carry(cv, 2, n, wb.x, wb.x, 1);
     const dB = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), BN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BN_P[n], t, b);
+    let sb = bodyOf(wb, BN_P[n], t, b, 1);
     // the hatch: how far open (0 shut · 1 standing up). b4 she lifts it from wherever it
     // is on screen; b10 she pushes it over and it falls shut
     const srcLid = carrySource(cv, 4, n, 0);
@@ -515,7 +515,7 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // b4: down on one knee at the hatch, a hand on its ring, and up it comes; then up
     // she gets to show it off
     if (A_FARM[n]) {
-      sb = mixStance(sb, hHold(KNEEL, t), sAt(0.75, 1.05) * (1 - sAt(2.45, 2.85)));
+      sb = mixStance(sb, hHold(KNEEL, t, 1), sAt(0.75, 1.05) * (1 - sAt(2.45, 2.85)));
       sb = hand(sb, xB, GROUND, dB, 1, RING_X, lidFront + 1, sAt(0.95, 1.2) * (1 - sAt(2.25, 2.5)));
     }
     // b10: the hatch pushed over by its top edge; then a cabbage from the crate, held up
@@ -527,14 +527,14 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = holdAt(sb, 1, 10, -14, sAt(4.6, 5.0));
     }
     if (n > CAB_N) sb = holdAt(sb, 1, 10, -14, 1);
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 1));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 5, n, TH_OFF), TH_LEGS[n], b, L);
     const xT = carry(cv, 5, n, wt.x, wt.x, 1);
     const dT = carry(cv, 6, n, 0, faceOf(carrySource(cv, 6, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P[n], t, b);
+    let stt = bodyOf(wt, TH_P[n], t, b, 2);
     // the lantern hangs from his left hand until b6, when he sets it on the table's end
     const lanternHeld = n < SUPPLY_N ? 1 : n === SUPPLY_N ? 1 - sAt(0.15, 0.5) : 0;
     stt = holdAt(stt, -1, 8, 4, lanternHeld);
@@ -569,7 +569,7 @@ export default function Econ5Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = holdAt(stt, 1, 5, -14, sAt(0.7, 0.95) * (1 - sAt(1.1, 1.3)));
       stt = hand(stt, xT, GROUND, dT, 1, 330, 418, sAt(1.9, 2.3) * (1 - sAt(5.0, 5.4)));
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the three people, posed ─────────────────────────────────────────────

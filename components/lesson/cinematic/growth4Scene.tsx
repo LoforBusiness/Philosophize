@@ -226,13 +226,13 @@ function inFront(code: number, s: Stance): Stance {
   'worklet';
   return code === EXPLAIN ? { ...s, fistL: { x: 8, y: -3 } } : s;
 }
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return inFront(code, emoteStill(code, t));
+  return inFront(code, emoteStill(code, t, phase));
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return inFront(code, emoteStillLive(code, t, bt));
+  return inFront(code, emoteStillLive(code, t, bt, phase));
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -298,11 +298,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -340,6 +340,8 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
@@ -379,7 +381,7 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
     // ── the beginner, at the wheel ──────────────────────────────────────────
     const xB = B_X;
     const dB = carry(cv, 0, n, 0, faceOf(carrySource(cv, 0, n, 1), B_TURN[n], b, L), 1);
-    let sb = hLive(B_P[n], t, b);
+    let sb = hLive(B_P[n], t, b, 0);
     // b0: a hand into the bucket, the water slopped on the clay, then both hands round
     // it as it rises, and his hand held out to it
     if (A_THROW[n]) {
@@ -414,14 +416,14 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
       sb = holdAt(sb, 1, 26, -30, down);
       sb = holdAt(sb, -1, 22, -22, down);
     }
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
-    const figB = keepHeld(heldB, mixStance(prevB, sb, tr));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
+    const figB = keepHeld(heldB, mixStance(prevB, sb, trAt(0)));
 
     // ── the potter ──────────────────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 1, n, C_AT), C_LEGS[n], b, L);
     const xC = carry(cv, 1, n, wc.x, wc.x, 1);
     const dC = carry(cv, 2, n, 0, faceOf(carrySource(cv, 2, n, -1), C_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, C_P, n, t, b);
+    let sc = bodyOf(wc, C_P, n, t, b, 3);
     // the fallen collar of the first pot, where a finger goes into it
     const sh1 = potShape(1, f1);
     const hinge = { x: W + LOW_HALF * sh1.sxS * PS, y: HEAD_Y - LOW_H * sh1.syS * PS };
@@ -454,14 +456,14 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
       sc = hand(sc, xC, dC, 1, lerp(80, 18, along), 430, st(0.06, 0.14) * (1 - st(0.56, 0.64)));
       sc = holdAt(sc, 1, 4, -17, st(0.66, 0.74) * (1 - st(0.92, 1)));
     }
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
-    const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 3));
+    const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, trAt(1)) : mixStance(prevC, sc, trAt(1)));
 
     // ── the coach ───────────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 3, n, T_OFF), T_LEGS[n], b, L);
     const xT = carry(cv, 3, n, wt.x, wt.x, 1);
     const dT = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, 1), T_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, T_P, n, t, b);
+    let stt = bodyOf(wt, T_P, n, t, b, 8);
     if (A_INFO[n]) {
       // the hat tipped once he has arrived, then a hand at the fallen pot
       const after = wt.dur / L;
@@ -483,8 +485,8 @@ export default function Growth4Scene({ clock, bt, bi, i, picked, onPick }: Scene
       stt = hand(stt, xT, dT, 1, W, HEAD_Y - 12, st(0.3, 0.36) * (1 - st(0.52, 0.58)));
       stt = hand(stt, xT, dT, 1, xT + 14 * dT, lerp(462, 442, st(0.64, 0.9)), st(0.58, 0.64) * (1 - st(0.94, 1)));
     }
-    const prevT = carryFrom(heldT, n, hHold(T_P[p], t));
-    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
+    const prevT = carryFrom(heldT, n, hHold(T_P[p], t, 8));
+    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, trAt(2)) : mixStance(prevT, stt, trAt(2)));
 
     // ── the things that move ───────────────────────────────────────────────
     const beg = pose(figB, xB, GROUND, K, dB, 1);

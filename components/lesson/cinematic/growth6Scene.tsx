@@ -222,13 +222,13 @@ const GAP_DAYS = [1, 2, 4, 8, 15, 29];
 const CIRCLE = Array.from({ length: 10 }, (_, k) => k);
 
 // ── how a figure moves ───────────────────────────────────────────────────────
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -333,6 +333,8 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
@@ -397,8 +399,8 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const wb = legsOf(carrySource(cv, 0, n, B_X), B_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), B_TURN[n], b, L), 1);
-    const liveB = hLive(B_P[n], t, b);
-    let sb = wb.walking ? travelStance(wb.x0, wb.x1, hHold(B_P[n], t), hHold(B_P[n], t), liveB, wb.u, WALK, 0) : liveB;
+    const liveB = hLive(B_P[n], t, b, 0);
+    let sb = wb.walking ? travelStance(wb.x0, wb.x1, hHold(B_P[n], t, 0), hHold(B_P[n], t, 0), liveB, wb.u, WALK, 0) : liveB;
     // her notes: held in front at the chest until they slip from her fingers on b4
     const heldNow = n < FORGOT_AT ? 1 : n === FORGOT_AT ? 1 - st(0.78, 0.8) : 0;
     const notesHeld = carry(cv, 5, n, 1, heldNow, tr);
@@ -454,12 +456,12 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const tipY = CIRCLE_AT.y + 4.2 * Math.sin(ang);
     if (aimW > 0) sb = hand(sb, xB, dB, 1, tipX, tipY, aimW);
     const circle = carry(cv, 17, n, 0, A_TOM[n] ? circ : n > TOM_AT ? 1 : 0, tr);
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
-    const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
+    const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, trAt(0)) : mixStance(prevB, sb, trAt(0)));
 
     // ── the helper ────────────────────────────────────────────────────────────
     const dC = carry(cv, 2, n, 0, faceOf(carrySource(cv, 2, n, -1), C_TURN[n], b, L), 1);
-    let sc = hLive(C_P[n], t, b);
+    let sc = hLive(C_P[n], t, b, 1);
     // b1: the Morse key — a dot, then a dash
     let press = 0;
     if (A_DAILY[n]) {
@@ -480,15 +482,15 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     }
     // b3: he looks up at the light as it starts to blink
     sc = { ...sc, neck: sc.neck + (A_STORM[n] ? st(0.4, 0.6) * 0.12 : 0) };
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
-    const figC = keepHeld(heldC, mixStance(prevC, sc, tr));
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 1));
+    const figC = keepHeld(heldC, mixStance(prevC, sc, trAt(1)));
 
     // ── the keeper ────────────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 3, n, T_X), T_LEGS[n], b, L);
     const xT = carry(cv, 3, n, wt.x, wt.x, 1);
     const dT = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, -1), T_TURN[n], b, L), 1);
-    const liveT = hLive(T_P[n], t, b);
-    let stt = wt.walking ? travelStance(wt.x0, wt.x1, hHold(T_P[n], t), hHold(T_P[n], t), liveT, wt.u, WALK, 0) : liveT;
+    const liveT = hLive(T_P[n], t, b, 2);
+    let stt = wt.walking ? travelStance(wt.x0, wt.x1, hHold(T_P[n], t, 2), hHold(T_P[n], t, 2), liveT, wt.u, WALK, 2) : liveT;
     // b3: he peers out, points at the boat's light, then waves the two to the window
     if (A_STORM[n]) {
       const peer = st(0.0, 0.1) * (1 - st(0.42, 0.5));
@@ -512,8 +514,8 @@ export default function Growth6Scene({ clock, bt, bi, i, qv, picked, onPick }: S
       const w2 = st(0.66, 0.71) * (1 - st(0.84, 0.88));
       stt = hand(stt, xT, dT, 1, handle.x, handle.y, Math.max(w1, w2));
     }
-    const prevT = carryFrom(heldT, n, hHold(T_P[p], t));
-    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
+    const prevT = carryFrom(heldT, n, hHold(T_P[p], t, 2));
+    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, trAt(2)) : mixStance(prevT, stt, trAt(2)));
 
     // ── the bodies, and what rides their hands ────────────────────────────────
     const bun = pose(figB, xB, GROUND, K, dB, 1);

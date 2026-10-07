@@ -174,13 +174,13 @@ const CARD_H = 26;
 const LAY = { x: 250, y: 460 };
 
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -237,11 +237,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -293,7 +293,7 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // and stay there but for the point on b5 (never behind his back: AR4)
     const backNow = A_ADMIRE[n] ? st(0.02, 0.2) : 1;
     const back = carry(cv, 3, n, backNow, backNow, tr);
-    let sv = bodyOf(wv, VIS_P, n, t, b);
+    let sv = bodyOf(wv, VIS_P, n, t, b, 0);
     const cock = A_PLAIN[n] ? bp(0.64, 0.72, 0.94) : 0;
     // on the quote, by the door: one more look back over at the cup, as he said he would
     const fond = A_REST[n] ? bp(0.1, 0.3, 0.75) : 0;
@@ -302,7 +302,7 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     sv = hand(sv, xV, dV, 1, xV + 7 * dV, 470, back * (1 - pointV));
     sv = hand(sv, xV, dV, -1, xV + 5 * dV, 472, back);
     if (pointV > 0) sv = hand(sv, xV, dV, 1, MUG_BODY.x, MUG_BODY.y, pointV);
-    const prevV = carryFrom(heldV, n, hHold(VIS_P[p], t));
+    const prevV = carryFrom(heldV, n, hHold(VIS_P[p], t, 0));
     const figV = keepHeld(heldV, wv.walking ? mixKeepLegs(prevV, sv, tr) : mixStance(prevV, sv, tr));
 
     // ── the attendant ───────────────────────────────────────────────────────
@@ -311,7 +311,7 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const wa = legsOf(carrySource(cv, 5, n, A_X0), ATT_LEGS[n], b, L);
     const xA = carry(cv, 5, n, wa.x, wa.x, 1);
     const dA = carry(cv, 6, n, 0, faceOf(carrySource(cv, 6, n, -1), ATT_TURN[n], b, L), 1);
-    let sa = bodyOf(wa, ATT_P, n, t, b);
+    let sa = bodyOf(wa, ATT_P, n, t, b, 3);
     if (seat > 0) {
       // on his stool he nods along while the visitor admires (N21); hands on his knees
       const nod = n === 0 ? Math.max(0, Math.sin(t * 1.45)) : 0;
@@ -340,14 +340,14 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       const hy = lerp(lerp(MUG_SHOW.y, MUG_UP.y, up), MUG_REST.y, down);
       sa = hand(sa, xA, dA, 1, hx, hy, 1 - st(0.48, 0.6));
     }
-    const prevA = carryFrom(heldA, n, n === 0 ? sitting(t) : hHold(ATT_P[p], t));
+    const prevA = carryFrom(heldA, n, n === 0 ? sitting(t) : hHold(ATT_P[p], t, 3));
     const figA = keepHeld(heldA, wa.walking ? mixKeepLegs(prevA, sa, tr) : mixStance(prevA, sa, tr));
 
     // ── the psychologist ────────────────────────────────────────────────────
     const wp = legsOf(carrySource(cv, 7, n, P_X0), PSY_LEGS[n], b, L);
     const xP = carry(cv, 7, n, wp.x, wp.x, 1);
     const dP = -1;
-    let sp = bodyOf(wp, PSY_P, n, t, b);
+    let sp = bodyOf(wp, PSY_P, n, t, b, 6);
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived; then a finger to his temple, tapped twice
       const after = moveTr(P_X0, P_X, TR) / L;
@@ -373,7 +373,7 @@ export default function Psych3Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sp = hand(sp, xP, dP, 1, STICK.x, STICK.y, bp(0.2, 0.28, 0.5));
       sp = hand(sp, xP, dP, 1, LABEL_C.x, LABEL_C.y, bp(0.66, 0.72, 0.95));
     }
-    const prevP = carryFrom(heldP, n, hHold(PSY_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PSY_P[p], t, 6));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the things that move ───────────────────────────────────────────────

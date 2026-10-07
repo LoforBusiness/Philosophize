@@ -221,13 +221,13 @@ const FACE = {
 };
 const MINI_ART = trolley(0, 0, 18, 14);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -301,11 +301,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 const CAM = followMoves(B_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('psychology'));
@@ -348,7 +348,7 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // her trolley's grip: pushed in front of her, then left where it stopped
     const tbNow = n <= N_JAM ? xB + PUSH - 3 * jolt : TB_GRIP;
     const tb = carry(cv, 2, n, tbNow, tbNow, n <= N_JAM ? 1 : tr);
-    let sb = bodyOf(wb, B_P, n, t, b);
+    let sb = bodyOf(wb, B_P, n, t, b, 0);
     if (A_BUMP[n]) {
       // both hands on the grip as she pushes; the jolt rocks her back; then a wave
       sb = hand(sb, xB, dB, 1, tb, GRIP_Y, 1 - bp(0.55, 0.66, 0.9));
@@ -392,7 +392,7 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sb = hand(sb, xB, dB, 1, xB + 18 * dB, 458, spread);
       sb = hand(sb, xB, dB, -1, xB + 7 * dB, 462, spread);
     }
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the shopper in the cap ──────────────────────────────────────────────
@@ -403,7 +403,7 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const creep = A_SURE[n] ? 5 * bp(0.32, 0.4, 0.5) : 0;
     const tcNow = A_BUMP[n] ? xC - PUSH + 3 * jolt : TC_GRIP + creep;
     const tc = carry(cv, 5, n, tcNow, tcNow, A_BUMP[n] || A_SURE[n] ? 1 : tr);
-    let sc = bodyOf(wc, C_P, n, t, b);
+    let sc = bodyOf(wc, C_P, n, t, b, 7);
     if (A_BUMP[n]) {
       sc = hand(sc, xC, dC, 1, tc, GRIP_Y, 1);
       sc = hand(sc, xC, dC, -1, tc + 1, GRIP_Y + 1, 1);
@@ -419,12 +419,12 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       const spread = bp(0.4, 0.48, 0.64);
       sc = hand(sc, xC, dC, 1, xC + 16 * dC, 468, spread);
       sc = hand(sc, xC, dC, -1, xC + 7 * dC, 471, spread);
-      sc = mixStance(sc, postureStill(CROUCH, t), st(0.8, 0.92));
+      sc = mixStance(sc, postureStill(CROUCH, t, 7), st(0.8, 0.92));
       lidT = st(0.76, 0.84);
     }
     if (A_RETELL[n]) {
       // still down by the jam: he picks up the lid, and holds it out to her back
-      sc = mixStance(sc, postureStill(CROUCH, t), 1);
+      sc = mixStance(sc, postureStill(CROUCH, t, 7), 1);
       const out = st(0.26, 0.36);
       sc = hand(sc, xC, dC, 1, lerp(LID_REST.x, xC - 15, out), lerp(LID_REST.y - 1, 470, out), st(0.12, 0.2));
       lidT = 1 + st(0.21, 0.25);
@@ -454,14 +454,14 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sc = hand(sc, xC, dC, -1, tc + 1, GRIP_Y + 1, grip);
       sc = hand(sc, xC, dC, 1, xC - 22, 454, bp(0.58, 0.68, 0.96));
     }
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 7));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the psychologist ────────────────────────────────────────────────────
     const wh = legsOf(carrySource(cv, 6, n, H_X0), H_LEGS[n], b, L);
     const xH = carry(cv, 6, n, wh.x, wh.x, 1);
     const dH = carry(cv, 7, n, 0, faceOf(carrySource(cv, 7, n, 1), H_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, H_P, n, t, b);
+    let sh = bodyOf(wh, H_P, n, t, b, 2);
     let aimNow = AIM_TROLLEYS;
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived; then, a pause later, "neither of them is
@@ -500,7 +500,7 @@ export default function Psych2Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sh = hand(sh, xH, dH, 1, xH + 9, 420, bp(0.03, 0.09, 0.32));
       sh = hand(sh, xH, dH, 1, xH + 20, 452, bp(0.4, 0.5, 0.72));
     }
-    const prevH = carryFrom(heldH, n, hHold(H_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(H_P[p], t, 2));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the things that change ──────────────────────────────────────────────

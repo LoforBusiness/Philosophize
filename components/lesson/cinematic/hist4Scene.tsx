@@ -196,13 +196,13 @@ const PHOTO_ART = oldPhoto(0, -PH.h / 2, PH.w, PH.h);
 /** Where the photograph passes from her hand to his. */
 const PASS = { x: 171, y: 458 };
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -272,11 +272,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -331,7 +331,7 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wb = legsOf(carrySource(cv, 0, n, B_X), B_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), B_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, B_P, n, t, b);
+    let sb = bodyOf(wb, B_P, n, t, b, 0);
     // she holds it by its bottom edge at her chest, in front of her, until she hands
     // it over on b8 (AR2, AR6)
     const bHolds = n < PACE_N ? 1 : n === PACE_N ? 1 - st(0.3, 0.38) : 0;
@@ -366,14 +366,14 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = lookOf({ ...sb, tilt: sb.tilt + 0.2 * bend }, 0.24, bend);
       sb = hand(sb, xB, dB, -1, FLOWER.x, FLOWER.y, bp(0.34, 0.44, 0.58));
     }
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the local, by the shop ─────────────────────────────────────────────
     const wp = legsOf(carrySource(cv, 2, n, P_X), P_LEGS[n], b, L);
     const xP = carry(cv, 2, n, wp.x, wp.x, 1);
     const dP = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), P_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, P_P, n, t, b);
+    let sp = bodyOf(wp, P_P, n, t, b, 1);
     // b1: a look down at her photograph, then up at the square, chin up, arms folded
     if (A_IMPROVE[n]) {
       sp = lookOf(sp, 0.18, bp(0.04, 0.16, 0.36));
@@ -392,14 +392,14 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sp = hand(sp, xP, dP, 1, w.x, w.y, bp(0.14, 0.24, 0.5));
       sp = lookOf(sp, -0.22, st(0.62, 0.74));
     }
-    const prevP = carryFrom(heldP, n, hHold(P_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(P_P[p], t, 1));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the historian ──────────────────────────────────────────────────────
     const wh = legsOf(carrySource(cv, 4, n, H_X0), H_LEGS[n], b, L);
     const xH = carry(cv, 4, n, wh.x, wh.x, 1);
     const dH = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), H_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, H_P, n, t, b);
+    let sh = bodyOf(wh, H_P, n, t, b, 2);
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived; then, turned back, a hand up at the clock
       const after = wh.arrive / L;
@@ -438,7 +438,7 @@ export default function Hist4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       }
       sh = hand(sh, xH, dH, 1, hx, hy, hHolds);
     }
-    const prevH = carryFrom(heldH, n, hHold(H_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(H_P[p], t, 2));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the things that move ───────────────────────────────────────────────

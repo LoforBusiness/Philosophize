@@ -197,13 +197,13 @@ const POSTER_ART = lostPoster(0, 0, POSTER_W, POSTER_H);
 const PIN_ART = pushpin(0, 0, 5, 5);
 const NOTE_ART = tint(note(0, 0, 18, 10), 'twenty');
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -258,11 +258,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -301,7 +301,7 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wb = legsOf(carrySource(cv, 0, n, BN_LEGS[0][0][1]), BN_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), BN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BN_P, n, t, b);
+    let sb = bodyOf(wb, BN_P, n, t, b, 0);
     if (A_FIND[n]) {
       // her right hand holds the novel open to read, then lays it on the desk
       const r = 1 - st(0.76, 0.9);
@@ -326,14 +326,14 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = hand(sb, xB, dB, -1, 160, 466, st(0.16, 0.34) * r);
       sb = hand(sb, xB, dB, -1, xB + 10 * dB + wave, 438, st(0.56, 0.66) * r);
     }
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the librarian, behind his desk ──────────────────────────────────────
     const wc = legsOf(carrySource(cv, 2, n, CP_LEGS[0][0][1]), CP_LEGS[n], b, L);
     const xC = carry(cv, 2, n, wc.x, wc.x, 1);
     const dC = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 2);
     if (A_FIND[n]) {
       // stamping the returned books: the stamp comes down on the top one twice (AR5)
       const hit = bp(0.12, 0.18, 0.26) + bp(0.5, 0.56, 0.64);
@@ -360,14 +360,14 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sc = hand(sc, xC, dC, 1, 282, 476 - STAMP_FOOT - 6 * (1 - desk), st(0.58, 0.66) * r);
       sc = hand(sc, xC, dC, 1, STAMP_ON.x, STAMP_ON.y, st(0.82, 0.9) * r);
     }
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 2));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the philosopher ─────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 4, n, -60), TH_LEGS[n], b, L);
     const xT = carry(cv, 4, n, wt.x, wt.x, 1);
     const dT = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 7);
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived
       const after = wt.first / L;
@@ -394,7 +394,7 @@ export default function Phil3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = hand(stt, xT, dT, 1, xT + lerp(20, 14, join) * dT, 448, out);
       stt = hand(stt, xT, dT, -1, xT + lerp(8, 12, join) * dT, 448.6, out);
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 7));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the things that move ───────────────────────────────────────────────

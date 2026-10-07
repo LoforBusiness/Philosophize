@@ -203,13 +203,13 @@ const PINK_ART = ticket(0, 0, TK.w, TK.h);
 const GREEN_ART = tint(ticket(0, 0, TK.w, TK.h), 'ticketGreen');
 const NOTE_ART = note20(0, 0, 18, 10);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -261,11 +261,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -289,6 +289,8 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
@@ -303,7 +305,7 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wp = legsOf(carrySource(cv, 0, n, PL_HOME), PL_LEGS[n], b, L);
     const xP = carry(cv, 0, n, wp.x, wp.x, 1);
     const dP = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), PL_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PL_P, n, t, b);
+    let sp = bodyOf(wp, PL_P, n, t, b, 0);
     // b0: a finger at the concert bill, across to the football bill, and back
     if (A_TORN[n]) {
       const tx = GIG.x + (MATCH.x - GIG.x) * (st(0.22, 0.3) - st(0.38, 0.46));
@@ -326,14 +328,14 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sp = hand(sp, xP, dP, 1, PASS.x + 2, PASS.y - 2, st(0.58, 0.65) * (1 - st(0.72, 0.78)));
     }
     if (lookNow > 0) sp = hand(sp, xP, dP, 1, xP + 13 * dP, lookY, lookNow);
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 0));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 3, n, -40), TH_LEGS[n], b, L);
     const xT = carry(cv, 3, n, wt.x, wt.x, 1);
     const dT = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 1);
     // b2: he tips his hat once he has arrived, and opens a hand to the music lover
     if (A_ARRIVE[n]) {
       const after = moveTr(-40, TH_HOME, TR) / L;
@@ -359,14 +361,14 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = hand(stt, xT, dT, 1, xT + 17 * dT, 458 + tip, out);
       stt = hand(stt, xT, dT, -1, xT + 8 * dT, 458 - tip, out);
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
-    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 1));
+    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, trAt(1)) : mixStance(prevT, stt, trAt(1)));
 
     // ── the seller, inside his kiosk ────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 5, n, CP_HOME), CP_LEGS[n], b, L);
     const xC = carry(cv, 5, n, wc.x, wc.x, 1);
     const dC = carry(cv, 6, n, 0, faceOf(carrySource(cv, 6, n, -1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 2);
     // leaning out of the window: to wave the free ticket (b1), and to trade (b10)
     const leanNow = A_FREE[n] ? bp(0.12, 0.24, 0.86) : A_BUY[n] ? 0.4 * bp(0.34, 0.44, 0.76) : 0;
     const lean = carry(cv, 7, n, leanNow, leanNow, tr);
@@ -405,8 +407,8 @@ export default function Econ3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sc = hand(sc, xC, dC, 1, TIN_MOUTH.x, TIN_MOUTH.y, st(0.5, 0.56) * (1 - st(0.62, 0.7)));
       sc = hand(sc, xC, dC, -1, PASS.x + 2, PASS.y - 2, st(0.56, 0.63) * (1 - st(0.7, 0.78)));
     }
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
-    const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 2));
+    const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, trAt(2)) : mixStance(prevC, sc, trAt(2)));
 
     // ── the three people, posed ─────────────────────────────────────────────
     const pl = pose(figP, xP, GROUND, K, dP, 1);

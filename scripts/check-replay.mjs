@@ -885,12 +885,20 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
     // How far each figure's head and hands travel through the beat — a figure that
     // stands frozen while another talks to him is the other half of N21.
     const figMove = figs.map(() => ({ lo: null, hi: null }));
+    // UNISON: each figure's head and hands relative to its own pelvis, mirrored to face
+    // right and in its own units, sampled through the beat (see N22 below)
+    const figTrace = figs.map(() => []);
     const figSample = () => figs.forEach((ch, i) => {
       let B = null;
       try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
       if (!B || !B.head || !B.wrR || !B.wrL) return;
       const v = [B.head[0].translateX, B.head[1].translateY, B.wrR[0].translateX, B.wrR[1].translateY,
         B.wrL[0].translateX, B.wrL[1].translateY].map(Number);
+      if (B.pel) {
+        const kk = ch[ch.length - 1].figK > 0.05 ? ch[ch.length - 1].figK : 1;
+        const px = +B.pel[0].translateX, py = +B.pel[1].translateY, sd = B.dir < 0 ? -1 : 1;
+        figTrace[i].push([(v[0] - px) * sd, v[1] - py, (v[2] - px) * sd, v[3] - py, (v[4] - px) * sd, v[5] - py].map((q) => q / kk));
+      }
       const m = figMove[i];
       m.lo = m.lo ? m.lo.map((a, j) => Math.min(a, v[j])) : v.slice();
       m.hi = m.hi ? m.hi.map((a, j) => Math.max(a, v[j])) : v.slice();
@@ -993,6 +1001,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
             x: +B.pel[0].translateX || 0, y: +B.pel[1].translateY || 0,
             hx: +B.head[0].translateX || 0, hy: +B.head[1].translateY || 0,
             opacity: B.opacity ?? 1,
+            trace: figTrace[figs.indexOf(ch)],
             hands: (() => {
               const m = handM[figs.indexOf(ch)];
               return m ? { behind: +m.behind.toFixed(1), at: +m.behindAt.toFixed(2), high: +m.high.toFixed(1), highAt: +m.highAt.toFixed(2), rev: Math.max(...m.rev), run: m.run || 0 } : null;
@@ -1218,6 +1227,42 @@ for (const r of rows) {
     }
   });
 }
+// ── N22 · NO TWO FIGURES MOVE IN UNISON (2026-10-07) ─────────────────────────
+// "sometimes when a stick man is talking, the other stick man nod in the exact same way
+// in the exact same time, so they're just copying each other." Every scene poses its
+// figures off one lesson clock, so two given the same nod or gesture moved in lockstep.
+// Two figures that both move (head or a hand travels UNISON_MOVE units of their own size)
+// and whose motion, each relative to its own body and facing, never differs by more than
+// UNISON_SAME of it, are copying each other.
+const UNISON_MOVE = 1.5;
+const UNISON_SAME = 0.25;
+const UNISON_BUDGET = Number(process.env.UNISON_BUDGET ?? 0);
+const unison = [];
+const devOf = (tr) => tr.map((v) => v.map((q, j) => q - tr[0][j]));
+const ampOf = (d) => Math.max(...d.map((v) => Math.max(Math.hypot(v[0], v[1]), Math.hypot(v[2], v[3]), Math.hypot(v[4], v[5]))));
+for (const r of rows) {
+  (r.figs || []).forEach((beat, n) => {
+    if (r.summary && r.summary[n]) return;
+    const vis = beat.filter((fg) => fg.opacity > 0.3 && fg.x > -10 && fg.x < 410 && fg.trace && fg.trace.length > 3);
+    for (let a = 0; a < vis.length; a++) {
+      for (let b = a + 1; b < vis.length; b++) {
+        const da = devOf(vis[a].trace), db = devOf(vis[b].trace);
+        if (da.length !== db.length) continue;
+        const amp = Math.min(ampOf(da), ampOf(db));
+        if (amp < UNISON_MOVE) continue;
+        // the hands compared as they are, and swapped (two figures facing each other
+        // mirror their hands), the closer of the two
+        const diff = (swap) => Math.max(...da.map((v, t) => {
+          const w = db[t];
+          const o = swap ? [w[0], w[1], w[4], w[5], w[2], w[3]] : w;
+          return Math.max(Math.hypot(v[0] - o[0], v[1] - o[1]), Math.hypot(v[2] - o[2], v[3] - o[3]), Math.hypot(v[4] - o[4], v[5] - o[5]));
+        }));
+        const d = Math.min(diff(false), diff(true));
+        if (d < UNISON_SAME * amp) unison.push(`${r.id} beat ${n}: the figures at x ${Math.round(vis[a].x)} and ${Math.round(vis[b].x)} move in unison (they differ by ${d.toFixed(1)} of ${amp.toFixed(1)})`);
+      }
+    }
+  });
+}
 const showN21 = (list, title) => {
   if (!list.length) return;
   console.log(`  ${title}`);
@@ -1227,6 +1272,7 @@ const showN21 = (list, title) => {
 };
 showN21(facingAway, 'FACING — a figure on a shared stage faces nobody (N21):');
 showN21(frozenListeners, 'FROZEN — a figure stands still while another talks (N21):');
+showN21(unison, 'UNISON — two figures copy each other\'s movement (N22):');
 
 ok('nothing moves on a beat where nothing changed (C20c)', c20c.length <= C20C_BUDGET,
   `${c20c.length} in ${byLesson(c20c)} lessons, budget ${C20C_BUDGET}`);
@@ -1242,6 +1288,7 @@ ok('every figure on a shared stage faces another (N21)', facingAway.length <= FA
   `${facingAway.length}, budget ${FACING_BUDGET}`);
 ok('nobody stands frozen while another talks to him (N21)', frozenListeners.length <= FROZEN_BUDGET,
   `${frozenListeners.length}, budget ${FROZEN_BUDGET}`);
+ok('no two figures move in unison (N22)', unison.length <= UNISON_BUDGET, `${unison.length}, budget ${UNISON_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
 
 // ── AR · A HAND USES A THING THE WAY A PERSON DOES (2026-10-01) ─────────────

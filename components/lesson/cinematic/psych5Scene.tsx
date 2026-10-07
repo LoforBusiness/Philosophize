@@ -207,13 +207,13 @@ const TOWN: [number, number][] = [
   [270, 438], [322, 436], [334, 440],
 ];
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 /** One hand on a stage point, for a figure standing on ground `g`. */
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
@@ -271,11 +271,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -329,7 +329,7 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const wp = legsOf(carrySource(cv, 0, n, P_X), PRO_LEGS[n], b, L);
     const xP = carry(cv, 0, n, wp.x, wp.x, 1);
     const dP = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), PRO_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PRO_P, n, t, b);
+    let sp = bodyOf(wp, PRO_P, n, t, b, 0);
     const G = CRATE_TOP;
     // b0: both arms thrown up to the sky on "lands on this hill", down, and a hand
     // patted to his chest on "told me personally"; his head goes up with them
@@ -371,14 +371,14 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       // turned back to the believer, a hand opened to him ("a lot more followers")
       sp = hand(sp, xP, G, dP, 1, xP + 20 * dP, G - 30, bp(0.88, 0.94, 1));
     }
-    const prevP = carryFrom(heldP, n, hHold(PRO_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PRO_P[p], t, 0));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the believer (the cap), behind his suitcase ─────────────────────────
     const xC = C_X;
     const dC = carry(cv, 2, n, -1, -1, 1);
     const GC = C_GROUND;
-    let sc = hLive(CAP_P[n], t, b);
+    let sc = hLive(CAP_P[n], t, b, 1);
     const cChest = { x: xC + 19 * dC, y: GC - 43 };
     const cHug = { x: xC + 13 * dC, y: GC - 44 };
     const cHigh = { x: xC + 12 * dC, y: GC - 74 };
@@ -400,7 +400,7 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       // b8: he looks down at his case as it is pointed at
       if (A_COST[n]) sc = { ...sc, neck: sc.neck - 0.24 * bp(0.62, 0.72, 0.96) };
     }
-    const prevC = carryFrom(heldC, n, hHold(CAP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CAP_P[p], t, 1));
     const figC = keepHeld(heldC, mixStance(prevC, sc, tr));
 
     // ── the psychologist (the top hat), behind the gorse, then out of it ────
@@ -408,7 +408,7 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const xT = carry(cv, 3, n, wt.x, wt.x, 1);
     const dT = carry(cv, 4, n, -1, -1, 1);
     const GT = T_GROUND;
-    let stt = bodyOf(wt, TOP_P, n, t, b);
+    let stt = bodyOf(wt, TOP_P, n, t, b, 2);
     // the notebook in his far hand: up over the gorse while he hides, at his chest after
     const out = n < N_CLASH ? 0 : n === N_CLASH ? st(0, 0.15) : 1;
     const nb = { x: xT + 9 * dT, y: lerp(GT - 60, GT - 44, out) };
@@ -454,7 +454,7 @@ export default function Psych5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       stt = hand(stt, xT, GT, dT, 1, xT + 20 * dT, GT - 46, bp(0.08, 0.16, 0.42));
       stt = hand(stt, xT, GT, dT, 1, CASES[0].x, GT - 30, bp(0.6, 0.7, 0.97));
     }
-    const prevT = carryFrom(heldT, n, hHold(TOP_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TOP_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the figures, posed ──────────────────────────────────────────────────

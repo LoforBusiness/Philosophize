@@ -248,13 +248,13 @@ function inFront(code: number, s: Stance): Stance {
   'worklet';
   return code === EXPLAIN ? { ...s, fistL: { x: 8, y: -3 } } : s;
 }
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return inFront(code, emoteStill(code, t));
+  return inFront(code, emoteStill(code, t, phase));
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return inFront(code, emoteStillLive(code, t, bt));
+  return inFront(code, emoteStillLive(code, t, bt, phase));
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -450,6 +450,8 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const u = b / L;
     const st = (a: number, z: number) => {
@@ -508,8 +510,8 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
 
     // ── the recruit ──────────────────────────────────────────────────────────
     const pB = carry(cv, 0, n, keyAt(B_KEYS[p], 1), keyAt(B_KEYS[n], u), tr);
-    const liveB = hLive(B_P[n], t, b);
-    const rb = routeAt(B_ROUTE, pB, hHold(B_P[n], t), liveB, 1);
+    const liveB = hLive(B_P[n], t, b, 0);
+    const rb = routeAt(B_ROUTE, pB, hHold(B_P[n], t, 0), liveB, 1);
     const dB = 1;
     let sb = rb.s;
     // arms out from the moment she steps on the rope; easier once she has it (b11)
@@ -530,14 +532,14 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
       sb = { ...sb, footR: { x: lerp(sb.footR.x, 15, rToe), y: lerp(sb.footR.y, -2, rToe) } };
     }
     sb = holdAt(holdAt(sb, 1, 13, -29, rFlinch), -1, 8, -26, rFlinch);
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
-    const figB = keepHeld(heldB, rb.moving ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
+    const figB = keepHeld(heldB, rb.moving ? mixKeepLegs(prevB, sb, trAt(0)) : mixStance(prevB, sb, trAt(0)));
 
     // ── the old hand ─────────────────────────────────────────────────────────
     const pC = carry(cv, 3, n, keyAt(C_KEYS[p], 1), keyAt(C_KEYS[n], u), tr);
-    const liveC = hLive(C_P[n], t, b);
+    const liveC = hLive(C_P[n], t, b, 1);
     const dC = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, 1), C_TURN[n], b, L), 1);
-    const rc = routeAt(C_ROUTE, pC, hHold(C_P[n], t), liveC, dC);
+    const rc = routeAt(C_ROUTE, pC, hHold(C_P[n], t, 1), liveC, dC);
     // arms out along the floor rope, down as he steps off it; out again on the middle rope
     const armsC = pC < 1 ? clamp01(pC / 0.08) * clamp01((1 - pC) / 0.08) : clamp01((pC - 4.2) / 0.4);
     // "If I can still wobble": one swing as he steadies on the rope
@@ -547,17 +549,17 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     // the bored stretch: head back, both arms up and out in front (AR4)
     sc = { ...sc, neck: sc.neck + 0.3 * rYawn, tilt: sc.tilt + 0.08 * rYawn };
     sc = holdAt(holdAt(sc, 1, 18, -34, rYawn), -1, 9, -31, rYawn);
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
-    const figC = keepHeld(heldC, rc.moving ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 1));
+    const figC = keepHeld(heldC, rc.moving ? mixKeepLegs(prevC, sc, trAt(1)) : mixStance(prevC, sc, trAt(1)));
 
     // ── the ringmaster ───────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 5, n, 160), T_LEGS[n], b, L);
     const xT = carry(cv, 5, n, wt.x, wt.x, 1);
     const dT = carry(cv, 6, n, 0, faceOf(carrySource(cv, 6, n, -1), T_TURN[n], b, L), 1);
     const sgn = dT < 0 ? -1 : 1;
-    const liveT = hLive(T_P[n], t, b);
+    const liveT = hLive(T_P[n], t, b, 2);
     let stt = wt.walking
-      ? travelStance(wt.x0, wt.x1, hHold(T_P[n], t), hHold(T_P[n], t), liveT, wt.u, WALK, 0)
+      ? travelStance(wt.x0, wt.x1, hHold(T_P[n], t, 2), hHold(T_P[n], t, 2), liveT, wt.u, WALK, 0)
       : liveT;
     // the cane hangs from his far hand, at his hip, in front of him (AR2, AR6)
     stt = holdAt(stt, -1, 5, 5, 1);
@@ -609,8 +611,8 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
       stt = hand(stt, xT, GROUND, dT, 1, lp.x + sgn * 5, lp.y + 2, lipsW);
     }
     const blastT = A_CROSS[n] ? bp(0.27, 0.3, 0.36) + bp(0.57, 0.6, 0.66) : 0;
-    const prevT = carryFrom(heldT, n, hHold(T_P[p], t));
-    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
+    const prevT = carryFrom(heldT, n, hHold(T_P[p], t, 2));
+    const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, trAt(2)) : mixStance(prevT, stt, trAt(2)));
 
     // ── the bodies, and what rides their hands ──────────────────────────────
     const bun = pose(figB, rb.x, rb.g, K, dB, 1);

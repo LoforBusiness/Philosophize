@@ -227,13 +227,13 @@ const BULBS = Array.from({ length: 11 }, (_, k) => {
   return { x, y: FESTOON.y + FESTOON.sag * (1 - Math.abs(x - 214) / 74) + 2.6 };
 });
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -254,9 +254,9 @@ function via(pts: readonly { x: number; y: number }[], us: readonly number[]) {
  * Leaning on the counter with his arms folded on it: act 62's fold, the body tipped
  * forward and the folded forearms brought down onto the counter in front of him.
  */
-function leanFold(t: number): Stance {
+function leanFold(t: number, phase?: number): Stance {
   'worklet';
-  const s = emoteStill(FOLD, t);
+  const s = emoteStill(FOLD, t, phase);
   return { ...s, tilt: s.tilt - 0.26, neck: s.neck + 0.14, fistL: { x: 19, y: -10 }, fistR: { x: 14, y: -7.5 } };
 }
 
@@ -305,11 +305,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -365,7 +365,7 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const wp = legsOf(carrySource(cv, 0, n, PL_LEGS[0][0][1]), PL_LEGS[n], b, L);
     const xP = carry(cv, 0, n, wp.x, wp.x, 1);
     const dP = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), PL_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PL_P, n, t, b);
+    let sp = bodyOf(wp, PL_P, n, t, b, 0);
     // the lid, how far open: lifted on b0 and left open, shut slowly on b7
     const lidNow = A_COUNT[n] ? st(0.12, 0.24) : A_SHRINK[n] ? 1 - st(0.2, 0.8) : n > SHRINK_N ? 0 : 1;
     const lid = carry(cv, 2, n, lidNow, lidNow, tr);
@@ -383,14 +383,14 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     if (A_SHRINK[n]) {
       sp = hand(sp, xP, FLOOR, dP, 1, BOX.x, lidTop(lid), st(0.06, 0.18) * (1 - st(0.82, 0.92)));
     }
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 0));
     const figP = keepHeld(heldP, mixStance(prevP, sp, tr));
 
     // ── the cook, inside the van ────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 3, n, CP_LEGS[0][0][1]), CP_LEGS[n], b, L);
     const xC = carry(cv, 3, n, wc.x, wc.x, 1);
     const dC = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, -1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 1);
     // b1: turned to the spike, the receipts taken at their tops, pulled up the rod and
     // off its point; turned back, held up to the owner, then brought in close
     if (A_RECEIPTS[n]) {
@@ -411,14 +411,14 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     }
     // b8: a hand raised to the bakery across the road, while he is turned to it
     if (A_BAKERY[n]) sc = hand(sc, xC, FLOOR, dC, 1, xC + dC * 22, 426, bp(0.08, 0.18, 0.5));
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 1));
     const figC = keepHeld(heldC, mixStance(prevC, sc, tr));
 
     // ── the accountant, on the pavement ─────────────────────────────────────
     const wt = legsOf(carrySource(cv, 5, n, -30), TH_LEGS[n], b, L);
     const xT = carry(cv, 5, n, wt.x, wt.x, 1);
     const dT = carry(cv, 6, n, 0, faceOf(carrySource(cv, 6, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 2);
     // the calculator: carried in, in his right hand and in front (AR6), until it is
     // set down on the counter's end on b2
     const after = A_ARRIVE[n] ? wt.end / L : 0;
@@ -442,7 +442,7 @@ export default function Biz4Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       ], [st(0.22, 0.25), st(0.25, 0.34), st(0.4, 0.44), st(0.44, 0.54), st(0.62, 0.66), st(0.66, 0.76), st(0.78, 0.82)]);
       stt = hand(stt, xT, GROUND, dT, 1, k.x, k.y, st(0.16, 0.21) * (1 - st(0.84, 0.88)));
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the things that move ───────────────────────────────────────────────

@@ -180,13 +180,13 @@ const LETTER_LID = { x: 206, y: 461 };
 /** The newspaper held open in both his hands, in front of his chest. */
 const NEWS_HANDS = { front: PL - 24, back: PL + 2, y: 462 };
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -247,11 +247,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 const CAM = followMoves(TH_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('history'));
@@ -282,7 +282,7 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wb = legsOf(carrySource(cv, 0, n, BN), BN_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), BN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BN_P, n, t, b);
+    let sb = bodyOf(wb, BN_P, n, t, b, 14);
     // how much of the book she holds: until he takes it across the trunk on b6
     const bnHolds = n < CHECK_N ? 1 : n === CHECK_N ? 1 - st(0.2, 0.26) : 0;
     if (A_BOAST[n]) {
@@ -334,19 +334,19 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = hand(sb, xB, dB, 1, xB + 6, 461, 1);
       sb = hand(sb, xB, dB, -1, xB + 3, 463, 1);
     }
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 14));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the plain man, at the trunk's right end ─────────────────────────────
     const wp = legsOf(carrySource(cv, 2, n, PL), PL_LEGS[n], b, L);
     const xP = carry(cv, 2, n, wp.x, wp.x, 1);
     const dP = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), PL_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PL_P, n, t, b);
+    let sp = bodyOf(wp, PL_P, n, t, b, 87);
     // how much of the letter he holds: from b1 until the historian takes it on b6
     const plHolds = n > LETTER_N && n < CHECK_N ? 1 : n === CHECK_N ? 1 - st(0.56, 0.62) : 0;
     if (A_LETTER[n]) {
       // down to the hatbox, a letter drawn out of it, up again, turned to her and read
-      sp = mixStance(sp, postureStill(CROUCH, t), st(0.17, 0.26) * (1 - st(0.4, 0.5)));
+      sp = mixStance(sp, postureStill(CROUCH, t, 87), st(0.17, 0.26) * (1 - st(0.4, 0.5)));
       const inBox = st(0.2, 0.28);
       const tx = lerp(lerp(BOX.x - 6, PL_BOX + 8, st(0.3, 0.4)), PL_HOLD.x, st(0.5, 0.62));
       const ty = lerp(lerp(BOX.rim, 462, st(0.3, 0.4)), PL_HOLD.y, st(0.5, 0.62));
@@ -368,7 +368,7 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // the newspaper: down to the hatbox again, drawn out, up, turned, opened in both hands
     const paperHeld = n > PAPER_N ? 1 : 0;
     if (A_PAPER[n]) {
-      sp = mixStance(sp, postureStill(CROUCH, t), st(0.12, 0.2) * (1 - st(0.32, 0.4)));
+      sp = mixStance(sp, postureStill(CROUCH, t, 87), st(0.12, 0.2) * (1 - st(0.32, 0.4)));
       const grip = st(0.46, 0.56);
       const tx = lerp(lerp(BOX.x - 2, PL_BOX + 8, st(0.26, 0.34)), NEWS_HANDS.front, grip);
       const ty = lerp(lerp(BOX.rim, 462, st(0.26, 0.34)), NEWS_HANDS.y, grip);
@@ -381,14 +381,14 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sp = hand(sp, xP, dP, 1, NEWS_HANDS.front, NEWS_HANDS.y + low, 1);
       sp = hand(sp, xP, dP, -1, NEWS_HANDS.back, NEWS_HANDS.y + low, 1);
     }
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 87));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the historian, behind the trunk ─────────────────────────────────────
     const wh = legsOf(carrySource(cv, 4, n, TH_X0), TH_LEGS[n], b, L);
     const xH = carry(cv, 4, n, wh.x, wh.x, 1);
     const dH = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), TH_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, TH_P, n, t, b);
+    let sh = bodyOf(wh, TH_P, n, t, b, 2);
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived; then a hand out to the book, and — turned —
       // to the letter: two sources
@@ -415,7 +415,7 @@ export default function Hist2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sh = lookOf(sh, -0.24, st(0.74, 0.84));
       sh = hand(sh, xH, dH, 1, xH + 20, 434, bp(0.76, 0.86, 0.98));
     }
-    const prevH = carryFrom(heldH, n, hHold(TH_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(TH_P[p], t, 2));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the things that change hands ────────────────────────────────────────

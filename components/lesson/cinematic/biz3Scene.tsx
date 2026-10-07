@@ -193,13 +193,13 @@ const BOW_ART = ribbonBow(0, 1, 11, 11);
 const LENGTH_ART = ribbonLength(0, 9, 18, 18);
 const PENNANT_ART = PENNANTS.map((p) => pennant(p.x, p.y + 5.6, 12, 12, p.key));
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -272,11 +272,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -314,7 +314,7 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const wc = legsOf(carrySource(cv, 0, n, CP_LEGS[0][0][1]), CP_LEGS[n], b, L);
     const xC = carry(cv, 0, n, wc.x, wc.x, 1);
     const dC = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 0);
     // b0: the candle in his right hand set at the front; the chalk off the tag's top
     // edge into his left, 50p chalked on the slate, and the chalk put back
     if (A_CHEAP[n]) {
@@ -357,14 +357,14 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const tie = Math.sin(tu * Math.PI) * 1.5;
       sc = hand(sc, xC, dC, 1, 281, 456 - tie, st(0.81, 0.85) * (1 - st(0.94, 0.99)));
     }
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 0));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the customer, at the stall's right end ──────────────────────────────
     const wp = legsOf(carrySource(cv, 2, n, 430), PL_LEGS[n], b, L);
     const xP = carry(cv, 2, n, wp.x, wp.x, 1);
     const dP = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), PL_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PL_P, n, t, b);
+    let sp = bodyOf(wp, PL_P, n, t, b, 1);
     // b1: the candle picked up, lifted to her nose for a sniff, and held to her chest
     if (A_SNIFF[n]) {
       sp = hand(sp, xP, dP, 1, FRONT.x, FRONT.y - GRIP, st(0.06, 0.18));
@@ -388,14 +388,14 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const back = A_TAG[n] ? st(0.88, 0.96) : 0;
       sp = hand(sp, xP, dP, -1, lerp(xP - 8, 285, give), lerp(462, 454, give), (n > TAG_N ? 0 : 1 - back) * rest);
     }
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 1));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the adviser ─────────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 4, n, -30), TH_LEGS[n], b, L);
     const xT = carry(cv, 4, n, wt.x, wt.x, 1);
     const dT = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 2);
     // b2: the hat tipped once he has arrived, a hand opened to the maker on "an hour of
     // work", then passed over the wax and the jars on "all of that"
     if (A_ARRIVE[n]) {
@@ -429,7 +429,7 @@ export default function Biz3Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       stt = hand(stt, xT, dT, 1, lerp(114, 110, meet), lerp(464 - low, 447, meet), apart);
       stt = lift(stt, xT, dT, -1, lerp(106, 108, meet), lerp(428 + high, 445, meet), apart);
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the things that move ───────────────────────────────────────────────

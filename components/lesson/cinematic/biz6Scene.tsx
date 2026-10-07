@@ -267,13 +267,13 @@ const BELL_ART = bz6Bell(0, 6.5, 10, 13);
 const BOARD_ART = bz6Board(30, 41, 60, 82);
 const COIN_ART = tint(coin(0, 0, 7, 7), 'brass');
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -354,11 +354,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: { walking: boolean; x0: number; x1: number; u: number }, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: { walking: boolean; x0: number; x1: number; u: number }, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -466,7 +466,7 @@ export default function Biz6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const wp = legsOf(srcP, PL_LEGS[n], b, L);
     const xP = carry(cv, 0, n, wp.x, wp.x, 1);
     const dP = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), PL_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PL_P, n, t, b);
+    let sp = bodyOf(wp, PL_P, n, t, b, 0);
     // b0: from inside the gateway, behind the bars, he pushes the left leaf and it swings
     // out and open; then he steps out through it
     const leafNow = A_WELCOME[n] ? st(0.04, 0.2) : 1;
@@ -505,14 +505,14 @@ export default function Biz6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
         fistL: { x: lerp(sp.fistL.x, 16, jumpW), y: lerp(sp.fistL.y, -24, jumpW) },
       };
     }
-    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PL_P[p], t, 0));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the seller, in the booth ────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 2, n, CP_HOME), CP_LEGS[n], b, L);
     const xC = carry(cv, 2, n, wc.x, wc.x, 1);
     const dC = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, 1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 1);
     // b1: the ticket lifted from under the ledge and held out; it floats away to the
     // turnstile (an invisible guest takes it)
     const tkUNow = A_BOOTH[n] ? st(0.06, 0.14) : n > BOOTH_N ? 1 : 0;
@@ -542,14 +542,14 @@ export default function Biz6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sc = hand(sc, xC, GROUND, dC, 1, KNOB_AT.x - 1, KNOB_AT.y + press, st(0.14, 0.2) * (1 - st(0.44, 0.5)));
       sc = lookUp(sc, st(0.62, 0.74));
     }
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 1));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the accountant ──────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 4, n, TH_OFF), TH_LEGS[n], b, L);
     const xT = carry(cv, 4, n, wt.x, wt.x, 1);
     const dT = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 2);
     // b2: a pointing finger, a path from one thing to the next: the castle, the lit
     // window ("the actors"), the lantern, the bill, the counter
     if (A_FIXED[n]) {
@@ -595,7 +595,7 @@ export default function Biz6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       stt = hand(stt, xT, GROUND, dT, 1, gx, gy, st(0.04, 0.11) * (1 - st(0.22, 0.27)));
       stt = hand(stt, xT, GROUND, dT, 1, chalkX, chalkY - 1, st(0.5, 0.56) * (1 - st(0.92, 0.97)));
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── posed, and what rides the hands ────────────────────────────────────

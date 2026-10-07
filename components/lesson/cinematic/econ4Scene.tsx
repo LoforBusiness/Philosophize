@@ -231,13 +231,13 @@ const TRUG_F = trugFront(0, 19 / 2 - 0.8, 18, 19);
 const IN_TRUG = [{ x: -1, y: 10.8 }, { x: 4.4, y: 11.2 }];
 const BOX_ART = eggBox(0, -13 / 2, 16, 13);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -297,11 +297,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -372,7 +372,7 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wb = legsOf(carrySource(cv, 0, n, 118), BN_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), BN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BN_P, n, t, b);
+    let sb = bodyOf(wb, BN_P, n, t, b, 0);
     // b9: down on one knee to pick the hen up off the grass, and up again
     if (A_HEN[n]) sb = mixStance(sb, hHold(KNEEL, t), sAt(0.3, 0.7) * (1 - sAt(1.0, 1.4)));
     // b0: she tells him over the fence, turns to the hen as she names it, and shoos it
@@ -414,14 +414,14 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = holdAt(sb, -1, 10, -16, sAt(1.0, 1.3) * (1 - sAt(1.75, 2.15)));
       sb = hand(sb, xB, dB, -1, PASS.x, PASS.y + 2, sAt(1.75, 2.15) * (1 - sAt(2.5, 2.85)));
     }
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 2, n, 440), TH_LEGS[n], b, L);
     const xT = carry(cv, 2, n, wt.x, wt.x, 1);
     const dT = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, -1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P, n, t, b);
+    let stt = bodyOf(wt, TH_P, n, t, b, 1);
     // b2: he tips his hat once he has arrived; from then on a hand rests on the pickets
     const after = moveTr(440, TH_HOME, TR) / lineOf(LINES, ARRIVE_N);
     if (A_ARRIVE[n]) stt = hand(stt, xT, dT, 1, xT + 5 * dT, GROUND - 76, bp(after + 0.02, after + 0.09, after + 0.2));
@@ -446,14 +446,14 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       rows = 3 * stageLin(b, L, 0.12, 0.82);
       stt = hand(stt, xT, dT, 1, cx, cy, chalkW);
     }
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 1));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the neighbour, behind his fence ─────────────────────────────────────
     const wc = legsOf(carrySource(cv, 4, n, CP_HOME), CP_LEGS[n], b, L);
     const xC = carry(cv, 4, n, wc.x, wc.x, 1);
     const dC = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P, n, t, b);
+    let sc = bodyOf(wc, CP_P, n, t, b, 2);
     // the egg box: at his side on b0, lifted over the fence and held out to her on b1,
     // then held close until he hands it over on b5
     const boxSide = n === 0 ? 1 : 0;
@@ -486,7 +486,7 @@ export default function Econ4Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sc = holdAt(sc, 1, 10, -16, sAt(2.55, 2.9) * (1 - sAt(3.6, 3.9)));
       sc = hand(sc, xC, dC, 1, HEN_RAMP.x + BREAST.x, HEN_RAMP.y + BREAST.y, sAt(3.6, 3.95) * (1 - sAt(4.25, 4.6)));
     }
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 2));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the three people, posed ─────────────────────────────────────────────

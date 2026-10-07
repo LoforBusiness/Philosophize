@@ -243,13 +243,13 @@ const FAR_LIGHTS = [154, 166, 178, 190, 262, 274, 286, 298, 310, 322];
 const RAIL_POSTS = Array.from({ length: 13 }, (_, k) => 4 + k * 33);
 const FASCIA_BULBS = Array.from({ length: 20 }, (_, k) => 10 + k * 20);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 /** One hand on a stage point. */
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
@@ -307,11 +307,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -441,7 +441,7 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     // ── the owner (the plain one), left of his pink machine, with his duster ─────
     const xP = P_X;
     const dP = 1;
-    let sp = hLive(PRO_P[n], t, b);
+    let sp = hLive(PRO_P[n], t, b, 0);
     const dusterOut = n < N_POLISH ? 1 : n === N_POLISH ? 1 - st(0.86, 0.94) : 0;
     const pHip = { x: xP + 7 * dP, y: G - 25 };
     if (n <= N_POLISH) {
@@ -464,14 +464,14 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       // arms folded (the pose), two slow nods, pleased with himself
       sp = { ...sp, neck: sp.neck - 0.2 * (bp(0.12, 0.22, 0.34) + bp(0.5, 0.6, 0.72)) };
     }
-    const prevP = carryFrom(heldP, n, hHold(PRO_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PRO_P[p], t, 0));
     const figP = keepHeld(heldP, mixStance(prevP, sp, tr));
 
     // ── the player (the bun), at her stick ──────────────────────────────────
     const wb = legsOf(carrySource(cv, 4, n, B_X), BUN_LEGS[n], b, L);
     const xB = carry(cv, 4, n, wb.x, wb.x, 1);
     const dB = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), BUN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BUN_P, n, t, b);
+    let sb = bodyOf(wb, BUN_P, n, t, b, 1);
     const chest = { x: xB + 11 * dB, y: G - 42 };
     const cradle = { x: xB + 9 * dB, y: G - 40 };
     const raise = { x: xB + 12 * dB, y: G - 60 };
@@ -488,7 +488,7 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     }
     if (A_WIN[n]) {
       // down to the flap, the bear out, up over her head ("I won!"), and a hug
-      sb = mixStance(sb, postureStill(CROUCH, t), st(0, 0.12) * (1 - st(0.26, 0.4)));
+      sb = mixStance(sb, postureStill(CROUCH, t, 1), st(0, 0.12) * (1 - st(0.26, 0.4)));
       const up = st(0.28, 0.46);
       const down = st(0.66, 0.82);
       const high = { x: xB + 19 * dB, y: G - 66 };
@@ -527,13 +527,13 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
         sb = hand(sb, xB, dB, 1, knob.x, knob.y, 1);
       }
     }
-    const prevB = carryFrom(heldB, n, hHold(BUN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BUN_P[p], t, 1));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the psychologist (the top hat), leaning on the red machine ───────────
     const xT = T_X;
     const dT = -1;
-    let stt = hLive(TOP_P[n], t, b);
+    let stt = hLive(TOP_P[n], t, b, 2);
     if (A_TRAP[n]) {
       // he leans in; taps the coin slot, then the prize chute
       stt = { ...stt, tilt: stt.tilt - 0.08 * st(0.05, 0.2) * (1 - st(0.82, 0.95)) };
@@ -568,7 +568,7 @@ export default function Psych6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       phoneT = 1 - st(0.3, 0.34);
       stt = hand(stt, xT, dT, 1, lerp(tChest.x, tPocket.x, back), lerp(tChest.y, tPocket.y, back), 1 - st(0.36, 0.5));
     }
-    const prevT = carryFrom(heldT, n, hHold(TOP_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TOP_P[p], t, 2));
     const figT = keepHeld(heldT, mixStance(prevT, stt, tr));
 
     // ── the figures, posed ──────────────────────────────────────────────────

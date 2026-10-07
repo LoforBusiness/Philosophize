@@ -235,13 +235,13 @@ function floorAt(x: number): number {
   if (x < 56) return lerp(GROUND, STEP_TOP, smooth01((x - 45) / 7));
   return lerp(STEP_TOP, PAD_TOP, smooth01((x - 65) / 7));
 }
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, g: number, k: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -308,11 +308,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
   return d;
 }
 /** One figure's body: walking its legs (in full-size units, so the stride fits), or holding its pose. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, speed: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, speed: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0 * speed, w.x1 * speed, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0 * speed, w.x1 * speed, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 const CAM = followMoves(VO_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('philosophy'));
@@ -372,7 +372,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const xV = carry(cv, 0, n, wv.x, wv.x, 1);
     const dV = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), VO_TURN[n], b, L), 1);
     const gV = floorAt(xV);
-    let sv = bodyOf(wv, VO_P, n, t, b, 1);
+    let sv = bodyOf(wv, VO_P, n, t, b, 1, 0);
     if (A_VOL[n]) {
       // up on the step, he turns out to face his public and strikes the pose for history: an
       // arm flung up and out (clear of his head, so it reads), the other fist on his hip
@@ -401,12 +401,12 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     // Q2: chin up while the balance tips his way; a palm up, with his double's, on the right answer
     sv = look(sv, -0.2 * Math.sin(Math.PI * rMine));
     sv = hand(sv, xV, gV, K, dV, 1, xV + 15 * dV, gV - 40, palm);
-    const prevV = carryFrom(heldV, n, hHold(VO_P[p], t));
+    const prevV = carryFrom(heldV, n, hHold(VO_P[p], t, 0));
     const figV = keepHeld(heldV, wv.walking ? mixKeepLegs(prevV, sv, tr) : mixStance(prevV, sv, tr));
 
     // ── the engineer ────────────────────────────────────────────────────────
     const dB = carry(cv, 2, n, 0, faceOf(carrySource(cv, 2, n, 1), BN_TURN[n], b, L), 1);
-    let sb = hLive(BN_P[n], t, b);
+    let sb = hLive(BN_P[n], t, b, 1);
     if (A_WARM[n]) {
       // the red button, then the green, then a sweep of the hand up the pod
       // one press on each: the hand rests on the red, then moves down onto the green
@@ -428,7 +428,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
       const bang = 6 * bp(0.06, 0.1, 0.15) + 6 * bp(0.18, 0.22, 0.28);
       sb = hand(sb, BN_X, GROUND, K, dB, 1, BUTTON.x + 1, 436 + bang, hd(0, 0.05, 0.32, 0.4));
     }
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 1));
     const figB = keepHeld(heldB, mixStance(prevB, sb, tr));
 
     // ── the philosopher ─────────────────────────────────────────────────────
@@ -446,7 +446,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const flP = carry(cv, 20, n, 0, fl, tr);
     const dP = carry(cv, 23, n, 0, faceOf(carrySource(cv, 23, n, -1), PH_TURN[n], b, L), 1);
     const gP = GROUND - liftP;
-    let sp = hLive(PH_P[n], t, b);
+    let sp = hLive(PH_P[n], t, b, 2);
     if (flP > 0) {
       // arms out in front for balance, feet together
       sp = floating(sp, flP);
@@ -460,7 +460,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     sp = hand(sp, xP, gP, K, dP, 1, xP + 40 * dP, gP - 50, toPod);
     sp = hand(sp, xP, gP, K, dP, 1, xP + 56 * dP, gP - 60, toMoon);
     sp = look(sp, -0.22 * toMoon);
-    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t, 2));
     const figP = keepHeld(heldP, mixStance(prevP, sp, tr));
     const sage = carry(cv, 5, n, SAGE[p], SAGE[n], tr);
 
@@ -472,7 +472,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     // drawn on the stage, standing on the screen's Moon: the display's corner plus his place on it
     const xDs = DISPLAY.left + xD;
     const gD = DISPLAY.top + MOON_GROUND;
-    let sd = bodyOf(wd, DB_P, n, t, b, SPD);
+    let sd = bodyOf(wd, DB_P, n, t, b, SPD, 3);
     if (A_JAM[n]) sd = look(sd, 0.18 * bp(0.4, 0.5, 0.62) - 0.14 * bp(0.62, 0.72, 0.86));
     if (A_CLAIM[n]) {
       // the same hand on the chest and the same point, at the same moments, back at the pod
@@ -481,7 +481,7 @@ export default function Phil5Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     }
     sd = look(sd, -0.2 * Math.sin(Math.PI * rDouble));
     sd = hand(sd, xDs, gD, KD, dD, 1, xDs + 15 * KR * dD, gD - 40 * KR, palm);
-    const prevD = carryFrom(heldD, n, hHold(NOD, t));
+    const prevD = carryFrom(heldD, n, hHold(NOD, t, 3));
     const figD = keepHeld(heldD, wd.walking ? mixKeepLegs(prevD, sd, tr) : mixStance(prevD, sd, tr));
     const dblNow = n === BEAM_AT ? st(0.84, 0.9) : n > BEAM_AT ? 1 : 0;
     const dbl = carry(cv, 8, n, dblNow, dblNow, tr);

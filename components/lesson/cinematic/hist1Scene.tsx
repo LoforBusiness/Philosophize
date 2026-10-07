@@ -173,13 +173,13 @@ const R_REACH = 8;
 /** The card's grip: the middle of its near edge, where her fingers hold it. */
 const CARD_GRIP = { x: CARD.left + 2, y: CARD.top + CARD.h / 2 };
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -256,11 +256,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 const CAM = followMoves(N_LEGS.map((l) => l[l.length - 1][1]), BEATS.map(kindOf), seedOf('history'));
@@ -291,7 +291,7 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const ws = legsOf(carrySource(cv, 0, n, S_X0), S_LEGS[n], b, L);
     const xS = carry(cv, 0, n, ws.x, ws.x, 1);
     const dS = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), S_TURN[n], b, L), 1);
-    let ss = bodyOf(ws, S_P, n, t, b);
+    let ss = bodyOf(ws, S_P, n, t, b, 0);
     if (A_FIND[n]) {
       // "My window!" — both hands thrown up IN FRONT of him, at the window he faces
       // (AR4); then, "it must have been the wind", a hand out and down at the twig
@@ -311,14 +311,14 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       ss = hand(ss, xS, dS, -1, xS + 5 * dS, 460, spread);
       ss = lookOf(ss, -0.32, st(0.66, 0.78));
     }
-    const prevS = carryFrom(heldS, n, hHold(S_P[p], t));
+    const prevS = carryFrom(heldS, n, hHold(S_P[p], t, 0));
     const figS = keepHeld(heldS, ws.walking ? mixKeepLegs(prevS, ss, tr) : mixStance(prevS, ss, tr));
 
     // ── the neighbour ───────────────────────────────────────────────────────
     const wn = legsOf(carrySource(cv, 2, n, N_X0), N_LEGS[n], b, L);
     const xN = carry(cv, 2, n, wn.x, wn.x, 1);
     const dN = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, 1), N_TURN[n], b, L), 1);
-    let sn = bodyOf(wn, N_P, n, t, b);
+    let sn = bodyOf(wn, N_P, n, t, b, 1);
     // b1: pointing at her ball as she comes, all the way along
     if (A_BALL[n]) sn = hand(sn, xN, dN, 1, BALL.x, BALL.y, st(0.16, 0.28) * (1 - st(0.86, 0.98)));
     if (A_ALIBI[n]) {
@@ -352,19 +352,19 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sn = hand(sn, xN, dN, -1, xN + 6 * dN, 440, face);
       sn = lookOf(sn, 0.32, face);
     }
-    const prevN = carryFrom(heldN, n, hHold(N_P[p], t));
+    const prevN = carryFrom(heldN, n, hHold(N_P[p], t, 1));
     const figN = keepHeld(heldN, wn.walking ? mixKeepLegs(prevN, sn, tr) : mixStance(prevN, sn, tr));
 
     // ── the historian ───────────────────────────────────────────────────────
     const wh = legsOf(carrySource(cv, 4, n, H_X0), H_LEGS[n], b, L);
     const xH = carry(cv, 4, n, wh.x, wh.x, 1);
     const dH = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), H_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, H_P, n, t, b);
+    let sh = bodyOf(wh, H_P, n, t, b, 2);
     if (A_ARRIVE[n]) {
       // the hat tipped once he has arrived, then down on his heels over the glass
       const after = wh.arrive / L;
       sh = hand(sh, xH, dH, 1, xH + 5 * dH, GROUND - 76, bp(after + 0.01, after + 0.06, after + 0.12));
-      sh = mixStance(sh, postureStill(CROUCH, t), st(after + 0.12, after + 0.2));
+      sh = mixStance(sh, postureStill(CROUCH, t, 2), st(after + 0.12, after + 0.2));
     }
     // b5: an open hand to her, then — turned — to him
     if (A_SOURCE[n]) {
@@ -373,7 +373,7 @@ export default function Hist1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b7: a hand up to the board as he names who decides
     if (A_TURN[n]) sh = hand(sh, xH, dH, 1, BOARD.x, BOARD.y, bp(0.4, 0.5, 0.92));
-    const prevH = carryFrom(heldH, n, hHold(H_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(H_P[p], t, 2));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the things that change ──────────────────────────────────────────────

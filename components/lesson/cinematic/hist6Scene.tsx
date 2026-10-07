@@ -235,13 +235,13 @@ const FLOOR_RAYS = [40, 120, 200, 280, 360].map((x) => {
   return { x: (x + xb) / 2 - len / 2, y: 476 + dy / 2, len, rot: (Math.atan2(dy, dx) * 180) / Math.PI };
 });
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 /** One hand on a stage point. */
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
@@ -321,11 +321,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number): Stance {
+function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(code, t), hHold(code, t), hLive(code, t, b), w.u, WALK, 0)
-    : hLive(code, t, b);
+    ? travelStance(w.x0, w.x1, hHold(code, t, phase), hHold(code, t, phase), hLive(code, t, b, phase), w.u, WALK, 0)
+    : hLive(code, t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -397,7 +397,7 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wb = legsOf(carrySource(cv, 0, n, B_X), B_LEGS[n], b, L);
     const xB = carry(cv, 0, n, wb.x, wb.x, 1);
     const dB = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), B_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, B_P[n], t, b);
+    let sb = bodyOf(wb, B_P[n], t, b, 0);
     // her free hand hangs at her side unless the beat gives it something to do
     if (!wb.walking) sb = holdAt(sb, -1, 3, 9, 1);
     // the torch in her right hand, upright, held close at her chest (AR2, AR6)
@@ -431,16 +431,16 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     if (n > 8 && n < 12) sb = holdAt(sb, -1, 14, -22, n === Q2_N ? 1 - st(0, 0.2) : 0);
     sb = holdAt(sb, 1, tx, ty, 1);
-    const prevB = carryFrom(heldB, n, hHold(B_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(B_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the archaeologist, at his tray ──────────────────────────────────────
     const wc = legsOf(carrySource(cv, 2, n, C_X), C_LEGS[n], b, L);
     const xC = carry(cv, 2, n, wc.x, wc.x, 1);
     const dC = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, 1), C_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, C_P[n], t, b);
+    let sc = bodyOf(wc, C_P[n], t, b, 1);
     // b3: up off his knee
-    if (n === REASON_N) sc = mixStance(hHold(KNEEL, t), sc, st(0.04, 0.22));
+    if (n === REASON_N) sc = mixStance(hHold(KNEEL, t, 1), sc, st(0.04, 0.22));
     // the tablet in his left hand: low over his knee while he works, held up to show her,
     // then at his chest once he is up
     let ax = 16;
@@ -478,9 +478,9 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // b6: a laugh, head back, then a shrug — the tablet rides his hand through it
     let shrugW = 0;
     if (A_CARDS[n]) {
-      sc = mixStance(sc, hHold(LAUGH, t), st(0.02, 0.1) * (1 - st(0.4, 0.5)));
+      sc = mixStance(sc, hHold(LAUGH, t, 1), st(0.02, 0.1) * (1 - st(0.4, 0.5)));
       shrugW = st(0.42, 0.52) * (1 - st(0.9, 1));
-      sc = inFront(mixStance(sc, hLive(SHRUG, t, Math.max(0, b - 0.46 * L)), shrugW));
+      sc = inFront(mixStance(sc, hLive(SHRUG, t, Math.max(0, b - 0.46 * L), 1), shrugW));
     }
     // b10: stepped to the tray, the tablet stood in the sand at its end, one pat
     let tabHeld = 1;
@@ -492,14 +492,14 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     if (n > NIL_N) tabHeld = 0;
     sc = holdAt(sc, -1, ax, ay, tabHeld * (A_NIL[n] ? 1 - st(0.28, 0.48) : 1));
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 1));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the historian, with his lantern ─────────────────────────────────────
     const wh = legsOf(carrySource(cv, 4, n, H_OFF), H_LEGS[n], b, L);
     const xH = carry(cv, 4, n, wh.x, wh.x, 1);
     const dH = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), H_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, H_P[n], t, b);
+    let sh = bodyOf(wh, H_P[n], t, b, 2);
     // the lantern hangs from his left hand (AR2: by its ring) — lifted to the king on b3,
     // held out toward the tablet and back up on b5, between his joined hands on b7
     let lx = 8;
@@ -527,7 +527,7 @@ export default function Hist6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sh = holdAt(sh, 1, 13, -18, j);
     }
     sh = holdAt(sh, -1, lx, ly, 1);
-    const prevH = carryFrom(heldH, n, hHold(H_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(H_P[p], t, 2));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the three people, posed ─────────────────────────────────────────────

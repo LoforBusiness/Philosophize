@@ -217,13 +217,13 @@ const WHEEL_ART = tint(wheel(0, 0, WHEEL_R * 2, WHEEL_R * 2), 'wood');
 const BROKEN_ART = brokenPlank(0, 0, 36, 7);
 const NEW_ART = newPlank(0, 0, 48, 4.5);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -293,11 +293,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -354,7 +354,7 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const wv = legsOf(carrySource(cv, 0, n, V_X), V_LEGS[n], b, L);
     const xV = carry(cv, 0, n, wv.x, wv.x, 1);
     const dV = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), V_TURN[n], b, L), 1);
-    let sv = bodyOf(wv, V_P, n, t, b);
+    let sv = bodyOf(wv, V_P, n, t, b, 0);
     // leaning on the post, forearms folded along its top: from b1 until b7
     const leanNow = A_TIMING[n] ? st(0.05, 0.3) : n > 1 && n < YEAR_N ? 1 : A_YEAR[n] ? 1 - st(0, 0.12) : 0;
     const lean = carry(cv, 2, n, leanNow, leanNow, tr);
@@ -379,19 +379,19 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
         footR: { x: lerp(sv.footR.x, 21, ext), y: lerp(sv.footR.y, -4, ext) - 6 * lift },
       };
     }
-    const prevV = carryFrom(heldV, n, hHold(V_P[p], t));
+    const prevV = carryFrom(heldV, n, hHold(V_P[p], t, 0));
     const figV = keepHeld(heldV, wv.walking ? mixKeepLegs(prevV, sv, tr) : mixStance(prevV, sv, tr));
 
     // ── the historian ───────────────────────────────────────────────────────
     const wh = legsOf(carrySource(cv, 4, n, H_X0), H_LEGS[n], b, L);
     const xH = carry(cv, 4, n, wh.x, wh.x, 1);
     const dH = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, 1), H_TURN[n], b, L), 1);
-    let sh = bodyOf(wh, H_P, n, t, b);
+    let sh = bodyOf(wh, H_P, n, t, b, 1);
     // down on his haunches at the gap (b2's end, b3's start), and again to lay it down
     const crHNow = A_ARRIVE[n] ? st(0.82, 0.92)
       : A_ROT[n] ? (1 - st(0.08, 0.18)) + st(0.7, 0.78) * (1 - st(0.88, 0.96)) : 0;
     const crH = carry(cv, 6, n, crHNow, crHNow, tr);
-    if (crH > 0) sh = mixStance(sh, postureStill(CROUCH, t), crH);
+    if (crH > 0) sh = mixStance(sh, postureStill(CROUCH, t, 1), crH);
     if (A_ARRIVE[n]) {
       // the hat tipped once he is on the bridge, and a hand down to the broken plank
       const after = wh.arrive / L;
@@ -429,14 +429,14 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sh = hand(sh, xH, dH, 1, xH + 20 * dH, 462 + tip, out);
       sh = hand(sh, xH, dH, -1, xH + 8 * dH, 462 - tip, out);
     }
-    const prevH = carryFrom(heldH, n, hHold(H_P[p], t));
+    const prevH = carryFrom(heldH, n, hHold(H_P[p], t, 1));
     const figH = keepHeld(heldH, wh.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
 
     // ── the carter ──────────────────────────────────────────────────────────
     const wc = legsOf(carrySource(cv, 9, n, C_X), C_LEGS[n], b, L);
     const xC = carry(cv, 9, n, wc.x, wc.x, 1);
     const dC = carry(cv, 10, n, 0, faceOf(carrySource(cv, 10, n, -1), C_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, C_P, n, t, b);
+    let sc = bodyOf(wc, C_P, n, t, b, 2);
     // the cart, which follows his haul: 0 the shafts lying on the ground · 1 at his hips
     const liftNow = A_RELIEF[n] ? st(0.07, 0.14) * (1 - st(0.42, 0.46)) : 0;
     const lift = carry(cv, 11, n, liftNow, liftNow, tr);
@@ -481,8 +481,8 @@ export default function Hist3Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sc = hand(sc, xC, dC, 1, lerp(carryX, layAt.x, lay), lerp(carryY, layAt.y, lay), st(0.13, 0.2) * (1 - st(0.76, 0.8)));
     }
     const crCar = carry(cv, 14, n, crC, crC, tr);
-    if (crCar > 0) sc = mixStance(sc, postureStill(CROUCH, t), crCar);
-    const prevC = carryFrom(heldC, n, hHold(C_P[p], t));
+    if (crCar > 0) sc = mixStance(sc, postureStill(CROUCH, t, 2), crCar);
+    const prevC = carryFrom(heldC, n, hHold(C_P[p], t, 2));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the things that move ───────────────────────────────────────────────

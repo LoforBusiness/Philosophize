@@ -303,13 +303,13 @@ function keyAt(keys: readonly Key[], u: number) {
   const e = keys[keys.length - 1];
   return { lx: e[1], y: e[2], w: e[3] };
 }
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -366,11 +366,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
   return d;
 }
 /** One figure's body: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 /** A wrist's place on the stage, out of a figure's bundle. */
 function wristOf(w: Bundle, k: 'wrR' | 'wrL') {
@@ -453,20 +453,20 @@ export default function Phil6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const wc = legsOf(carrySource(cv, 0, n, CU_START), CU_LEGS[n], b, L);
     const xC = carry(cv, 0, n, wc.x, wc.x, 1);
     const dC = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), CU_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CU_P, n, t, b);
+    let sc = bodyOf(wc, CU_P, n, t, b, 0);
     sc = keyed(sc, CU_KEYS[n], u, xC, dC, 1);
     if (n === PICK_AT) sc = look(sc, 0.14 * hd(0.58, 0.64, 0.84, 0.92));            // looking the jars over
     if (n === FLIP_AT) sc = look(sc, -0.16 * hd(0.5, 0.58, 0.86, 0.96));            // rearing back at the card
     if (n === SPITE_AT) sc = look(sc, 0.1 * st(0.8, 0.88));                          // glaring at the machine
     if (n === SECOND_AT) sc = look(sc, 0.1 * (1 - st(0, 0.1)) - 0.16 * hd(0.56, 0.64, 0.8, 0.9)); // recoiling
-    const prevC = carryFrom(heldC, n, hHold(CU_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CU_P[p], t, 0));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the attendant ───────────────────────────────────────────────────────
     const wa = legsOf(carrySource(cv, 2, n, AT_X), AT_LEGS[n], b, L);
     const xA = carry(cv, 2, n, wa.x, wa.x, 1);
     const dA = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, 1), AT_TURN[n], b, L), 1);
-    let sa = bodyOf(wa, AT_P, n, t, b);
+    let sa = bodyOf(wa, AT_P, n, t, b, 1);
     sa = keyed(sa, AT_KEYS[n], u, xA, dA, 1);
     sa = keyed(sa, AT_KEYS_L[n], u, xA, dA, -1);
     // the crank: one full turn, her hand on the knob all the way round
@@ -474,18 +474,18 @@ export default function Phil6Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const knobY = carry(cv, 7, n, BOSS.y, BOSS.y - CRANK_R * Math.sin(turn), tr);
     if (n === CRANK_AT) sa = hand(sa, xA, GROUND, dA, 1, KNOB_X, knobY, hd(0.28, 0.34, 0.86, 0.92));
     if (n === SECOND_AT) sa = look(sa, 0.14 * hd(0.36, 0.42, 0.54, 0.6));              // reading the card
-    const prevA = carryFrom(heldA, n, hHold(AT_P[p], t));
+    const prevA = carryFrom(heldA, n, hHold(AT_P[p], t, 1));
     const figA = keepHeld(heldA, wa.walking ? mixKeepLegs(prevA, sa, tr) : mixStance(prevA, sa, tr));
 
     // ── the philosopher ─────────────────────────────────────────────────────
     const wp = legsOf(carrySource(cv, 4, n, PH_OFF), PH_LEGS[n], b, L);
     const xP = carry(cv, 4, n, wp.x, wp.x, 1);
     const dP = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), PH_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PH_P, n, t, b);
+    let sp = bodyOf(wp, PH_P, n, t, b, 2);
     sp = keyed(sp, PH_KEYS[n], u, xP, dP, 1);
     sp = keyed(sp, PH_KEYS_L[n], u, xP, dP, -1);
     if (n === PUZZLE_AT) sp = look(sp, -0.1 * hd(0.7, 0.78, 0.94, 1));                // the puzzle, chin up
-    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t, 2));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     const cu = pose(figC, xC, GROUND, K, dC, 1);

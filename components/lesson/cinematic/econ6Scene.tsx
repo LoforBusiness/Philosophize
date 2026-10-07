@@ -239,13 +239,13 @@ const STONE = TONE.STONE;
 /** The front face of a crate is the left 49 of its 54: the tag is centred on that. */
 const FRONT_DX = -2.4;
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 /** One hand on a stage point, for a figure standing on `g`. */
 function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
@@ -307,11 +307,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number): Stance {
+function bodyOf(w: { x0: number; x1: number; u: number; walking: boolean }, code: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(code, t), hHold(code, t), hLive(code, t, b), w.u, WALK, 0)
-    : hLive(code, t, b);
+    ? travelStance(w.x0, w.x1, hHold(code, t, phase), hHold(code, t, phase), hLive(code, t, b, phase), w.u, WALK, 0)
+    : hLive(code, t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -395,7 +395,7 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     const xC = carry(cv, 0, n, wc.x, wc.x, 1);
     const dC = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, 1), CP_TURN[n], b, L), 1);
-    let sc = bodyOf(wc, CP_P[n], t, b);
+    let sc = bodyOf(wc, CP_P[n], t, b, 0);
     // the chest: in front of his hands while he shoves it, behind his hand on b9
     const chestNow = A_CHEST[n] ? (pushing > 0.5 ? xC + PUSH_GAP : CHEST_HOME)
       : A_BURY[n] ? Math.min(CHEST_HOME, xC + DRAG_GAP)
@@ -430,18 +430,18 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sc = hand(sc, xC, GROUND, dC, -1, chestX - 22, 489, sAt(1.75, 2.05));
     }
     if (n > BURY_N) sc = hand(sc, xC, GROUND, dC, -1, chestX - 22, 489, 1 - sAt(0.05, 0.45));
-    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CP_P[p], t, 0));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the seller ──────────────────────────────────────────────────────────
     const wb = legsOf(carrySource(cv, 4, n, BN_HOME), BN_LEGS[n], b, L, 1);
     const xB = carry(cv, 4, n, wb.x, wb.x, 1);
     const dB = carry(cv, 5, n, 0, faceOf(carrySource(cv, 5, n, -1), BN_TURN[n], b, L), 1);
-    let sb = bodyOf(wb, BN_P[n], t, b);
+    let sb = bodyOf(wb, BN_P[n], t, b, 1);
     // b1: down on one knee at her slate, one wipe of the old price right to left, and the
     // new one chalked left to right — one path, turning back once (AR5)
     if (A_SLATE[n]) {
-      sb = mixStance(sb, hHold(KNEEL, t), sAt(1.4, 1.8) * (1 - sAt(4.6, 5.05)));
+      sb = mixStance(sb, hHold(KNEEL, t, 1), sAt(1.4, 1.8) * (1 - sAt(4.6, 5.05)));
       const wipe = sAt(1.95, 2.15) * (1 - sAt(4.4, 4.6));
       const wx = SLOT_X[1] + 14 - 28 * sAt(2.15, 2.85) + 30 * sAt(3.15, 4.4);
       sb = hand(sb, xB, GROUND, dB, 1, wx, 483, wipe);
@@ -449,7 +449,7 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // Q1: a nod for the right price, a shrug for a wrong one
     if (q1) {
       if (k1 === RIGHT_PRICE) sb = { ...sb, neck: sb.neck - 0.16 * hump(rs, 0.2, 0.4, 0.7) };
-      else sb = mixStance(sb, hLive(SHRUG, t, Math.max(0, rs - 0.3)), ramp(rs, 0.25, 0.45) * (1 - ramp(rs, 2.1, 2.5)));
+      else sb = mixStance(sb, hLive(SHRUG, t, Math.max(0, rs - 0.3), 1), ramp(rs, 0.25, 0.45) * (1 - ramp(rs, 2.1, 2.5)));
     }
     // b7: the empty basket off the counter by its hoop, held up, hopeful; then at her chest
     const basketHeld = A_OLD[n] ? sAt(0.9, 1.0) : n > OLD_N ? 1 : 0;
@@ -459,14 +459,14 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = { ...sb, neck: sb.neck + 0.08 * sAt(1.2, 1.8) * (1 - sAt(3.9, 4.5)) };
     }
     sb = holdAt(sb, 1, 9, -8, n > OLD_N ? 1 : A_OLD[n] ? sAt(3.9, 4.5) : 0);
-    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BN_P[p], t, 1));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
     const wt = legsOf(carrySource(cv, 6, n, TH_HOME), TH_LEGS[n], b, L, 1);
     const xT = carry(cv, 6, n, wt.x, wt.x, 1);
     const dT = carry(cv, 7, n, 0, faceOf(carrySource(cv, 7, n, -1), TH_TURN[n], b, L), 1);
-    let stt = bodyOf(wt, TH_P[n], t, b);
+    let stt = bodyOf(wt, TH_P[n], t, b, 2);
     // b2: a point at the coconuts, at the gold in the sand, and back at the coconuts — a
     // path between three things, with a turn to each
     if (A_CHASE[n]) {
@@ -476,7 +476,7 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b4: down on one knee by the spilled gold, a doubloon picked up, held up and turned
     if (A_INFL[n]) {
-      stt = mixStance(stt, hHold(KNEEL, t), sAt(0.9, 1.25) * (1 - sAt(1.95, 2.35)));
+      stt = mixStance(stt, hHold(KNEEL, t, 2), sAt(0.9, 1.25) * (1 - sAt(1.95, 2.35)));
       stt = hand(stt, xT, GROUND, dT, 1, SPILL[BUY][0], SPILL[BUY][1] - 1, sAt(1.15, 1.45) * (1 - sAt(1.6, 1.9)));
       stt = holdAt(stt, 1, 13, -40, sAt(2.3, 2.75) * (1 - sAt(4.6, 5.1)));
       stt = holdAt(stt, 1, 9, -10, sAt(4.6, 5.1));
@@ -491,7 +491,7 @@ export default function Econ6Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       stt = hand(stt, xT, GROUND, dT, 1, COUNTER_COIN.x, COUNTER_COIN.y - 1, sAt(3.85, 4.25) * (1 - sAt(4.55, 4.95)));
     }
     stt = holdAt(stt, -1, 8, -9, A_WORTH[n] ? sAt(5.2, 5.7) : n > WORTH_N ? 1 : 0);
-    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t));
+    const prevT = carryFrom(heldT, n, hHold(TH_P[p], t, 2));
     const figT = keepHeld(heldT, wt.walking ? mixKeepLegs(prevT, stt, tr) : mixStance(prevT, stt, tr));
 
     // ── the three people, posed ─────────────────────────────────────────────

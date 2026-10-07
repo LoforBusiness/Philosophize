@@ -143,13 +143,13 @@ const SLATE = { left: 82, top: 423, w: 72, h: 51 };
 /** When the trade on b4 starts: the moment the stall-holder reaches the shopper's end. */
 const T_TRADE = moveTr(356, 240, TR);
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -162,7 +162,7 @@ function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: 
  * the final review found 100-unit jumps). He faces the way he goes (C18), then turns
  * to whom the beat has him face.
  */
-function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number) {
+function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number, phase?: number) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
   const xp = src;
@@ -176,8 +176,8 @@ function walkOf(src: number, xs: readonly number[], ds: readonly number[], codes
     ? lerp(facing(dp, way, b), ds[n], clamp01((b - walkDur) / 0.3))
     : facing(dp, ds[n], b);
   const s = walking
-    ? travelStance(xp, xn, hHold(codes[p], t), hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(xp, xn, hHold(codes[p], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), walkU, WALK, 0)
+    : hLive(codes[n], t, b, phase);
   return { xp, xn, walking, walkU, walkDur, dirV, s };
 }
 
@@ -212,6 +212,8 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
@@ -235,7 +237,7 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     // ── the shopper ─────────────────────────────────────────────────────────
     // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src0 = carrySource(cv, 0, n, -24);
-    const wp = walkOf(src0, PL_X, PL_D, PL_P, n, t, b);
+    const wp = walkOf(src0, PL_X, PL_D, PL_P, n, t, b, 0);
     const xPl = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
     let sp = wp.s;
     // b0: the note held out as he arrives
@@ -257,13 +259,13 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     }
     // b7: he reaches for the last loaf
     if (A_LOAF[n]) sp = hand(sp, xPl, wp.dirV, 1, LOAF_AT.x, LOAF_AT.y, st(0.34, 0.46) * (1 - st(0.86, 0.96)));
-    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t));
-    const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));
+    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t, 0));
+    const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, trAt(0)) : mixStance(prevPl, sp, trAt(0)));
 
     // ── the economist ───────────────────────────────────────────────────────
     // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src1 = carrySource(cv, 1, n, -40);
-    const wt = walkOf(src1, TH_X, TH_D, TH_P, n, t, b);
+    const wt = walkOf(src1, TH_X, TH_D, TH_P, n, t, b, 3);
     const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
     let stp = wt.s;
     // b2: he tips his hat once he has arrived
@@ -275,13 +277,13 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
     if (A_SCARCE[n]) stp = hand(stp, xTh, wt.dirV, 1, LOAF_AT.x, LOAF_AT.y, bp(0.34, 0.46, 0.72));
     // b7: and he wants that loaf too
     if (A_LOAF[n]) stp = hand(stp, xTh, wt.dirV, 1, LOAF_AT.x, LOAF_AT.y, st(0.4, 0.52) * (1 - st(0.86, 0.96)));
-    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
-    const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, tr) : mixStance(prevTh, stp, tr));
+    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t, 3));
+    const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, trAt(1)) : mixStance(prevTh, stp, trAt(1)));
 
     // ── the stall-holder, behind his counter ────────────────────────────────
     // where he stands on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src2 = carrySource(cv, 2, n, CP_X[0]);
-    const wc = walkOf(src2, CP_X, CP_D, CP_P, n, t, b);
+    const wc = walkOf(src2, CP_X, CP_D, CP_P, n, t, b, 6);
     const xCp = carry(cv, 2, n, wc.xp, wc.xn, wc.walking ? wc.walkU : tr);
     // He faces the shopper's end of the counter, and TURNS to his own side of it to lay
     // the change down (b4) and to pick it up again (b6): the coins lie at 258, behind
@@ -332,8 +334,8 @@ export default function Econ1Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       const after = wc.walkDur / L;
       sc = hand(sc, xCp, dC, 1, xCp - 5, GROUND - 52, st(after + 0.34, after + 0.44));
     }
-    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t));
-    const figCp = keepHeld(heldCp, wc.walking ? mixKeepLegs(prevCp, sc, tr) : mixStance(prevCp, sc, tr));
+    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t, 6));
+    const figCp = keepHeld(heldCp, wc.walking ? mixKeepLegs(prevCp, sc, trAt(2)) : mixStance(prevCp, sc, trAt(2)));
 
     // ── the things that change hands ────────────────────────────────────────
     // noteT  0 his hand · 1 hers (the stall-holder's) · 2 on the counter · 3 back in

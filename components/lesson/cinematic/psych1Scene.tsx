@@ -208,13 +208,13 @@ const SAUCER_PIC = 'psych1-saucer';
 const GOLD_ART = tint(tentCard(0, 0, TENT_W, TENT_H), 'brass');
 const BARGAIN_ART = tint(tentCard(0, 0, TENT_W, TENT_H), 'apple');
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -262,7 +262,7 @@ const RIGHT_ROW = 1;
  * mid-walk or mid-turn would otherwise put him somewhere else in one frame (group L).
  * He faces the way he goes (C18), then turns to whom the beat has him face.
  */
-function walkOf(src: number, dSrc: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number) {
+function walkOf(src: number, dSrc: number, xs: readonly number[], ds: readonly number[], codes: readonly number[], n: number, t: number, b: number, phase?: number) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
   const xp = src;
@@ -275,8 +275,8 @@ function walkOf(src: number, dSrc: number, xs: readonly number[], ds: readonly n
     ? lerp(facing(dSrc, way, b), ds[n], clamp01((b - walkDur) / 0.3))
     : facing(dSrc, ds[n], b);
   const s = walking
-    ? travelStance(xp, xn, hHold(codes[p], t), hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(xp, xn, hHold(codes[p], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), walkU, WALK, 0)
+    : hLive(codes[n], t, b, phase);
   return { xp, xn, walking, walkU, walkDur, dirV, s };
 }
 /**
@@ -389,6 +389,8 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     const b = bt.value;
     const t = clock.value;
     const tr = ease01(b / TR);
+    // each figure settles into its new pose a moment after the one before it, never in step (N22)
+    const trAt = (ph: number) => { 'worklet'; return ease01(Math.max(0, b - ph * 0.2) / TR); };
     const L = lineOf(LINES, n);
     const st = (a: number, z: number) => {
       'worklet';
@@ -402,7 +404,7 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     // ── the taster ──────────────────────────────────────────────────────────
     const src0 = carrySource(cv, 0, n, -30);
     const dSrc0 = carrySource(cv, 11, n, PL_D[0]);
-    const wp = walkOf(src0, dSrc0, PL_X, PL_D, PL_P, n, t, b);
+    const wp = walkOf(src0, dSrc0, PL_X, PL_D, PL_P, n, t, b, 3);
     const xPl = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
     // b2: he turns to the left cup to take it (AR4: a thing is taken in front of him),
     // and back to the server once he has slid it away
@@ -454,13 +456,13 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       cwL = l.wc;
       upL = l.up;
     }
-    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t));
-    const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));
+    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t, 3));
+    const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, trAt(0)) : mixStance(prevPl, sp, trAt(0)));
 
     // ── the psychologist ────────────────────────────────────────────────────
     const src1 = carrySource(cv, 1, n, -40);
     const dSrc1 = carrySource(cv, 12, n, 1);
-    const wt = walkOf(src1, dSrc1, TH_X, TH_D, TH_P, n, t, b);
+    const wt = walkOf(src1, dSrc1, TH_X, TH_D, TH_P, n, t, b, 1);
     const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
     const dTh = carry(cv, 12, n, wt.dirV, wt.dirV, 1);
     let stp = wt.s;
@@ -477,16 +479,16 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
     }
     // b8: a hand out toward the counter as he describes the swap
     if (A_METHOD[n]) stp = hand(stp, xTh, dTh, -1, xTh + 40, GROUND - 50, bp(0.36, 0.46, 0.66));
-    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
+    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t, 1));
     const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, tr) : mixStance(prevTh, stp, tr));
 
     // ── the server, behind her counter ──────────────────────────────────────
     const src2 = carrySource(cv, 2, n, 350);
     const dSrc2 = carrySource(cv, 13, n, -1);
-    const wc = walkOf(src2, dSrc2, CP_X, CP_D, CP_P, n, t, b);
+    const wc = walkOf(src2, dSrc2, CP_X, CP_D, CP_P, n, t, b, 9);
     // her walk starts from where she is on screen (src2), so it needs no carry of its own
     const xWalk = lerp(wc.xp, wc.xn, wc.walking ? wc.walkU : 1);
-    const lg = legsOf(LEGS[n], xWalk, wc.dirV, wc.s, hLive(CP_P[n], t, b), b);
+    const lg = legsOf(LEGS[n], xWalk, wc.dirV, wc.s, hLive(CP_P[n], t, b, 9), b);
     const xCp = carry(cv, 2, n, lg.x, lg.x, 1);
     // b3: she turns to the pot to take it by its handle, turns back to show it to him,
     // and turns to it again to set it down (AR4: a thing is taken in front of her)
@@ -554,9 +556,9 @@ export default function Psych1Scene({ clock, bt, bi, i, picked, onPick }: SceneA
       sc = hand(sc, xCp, dCp, 1, SPOT_L, TENT_Y - 12, bp(0.12, 0.22, 0.5));
       sc = hand(sc, xCp, dCp, 1, xCp + 4 * dCp, GROUND - 52, st(0.74, 0.84));
     }
-    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t));
+    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t, 9));
     const moving = wc.walking || LEGS[n].length > 0;
-    const figCp = keepHeld(heldCp, moving ? mixKeepLegs(prevCp, sc, tr) : mixStance(prevCp, sc, tr));
+    const figCp = keepHeld(heldCp, moving ? mixKeepLegs(prevCp, sc, trAt(2)) : mixStance(prevCp, sc, trAt(2)));
 
     // where the left cup rests: by its tent, then slid away on b2
     const restL = n > 2 ? PUSHED : lerp(CUP_L, PUSHED, pushL);

@@ -7563,6 +7563,26 @@ follow the camera would reject is not offered — the beat falls through to its 
 framing. The table regenerates again, and the thirty lessons that finished the
 takeover have stations.
 
+## K19 · Everyone on a spoken beat is in the shot (2026-10-07)
+
+> *"sometimes … the camera on screen does not zoom out when top hat stick man comes on
+> screen. So you hear him talking, but you don't see him."*
+
+Stations are planned from must-boxes measured at a beat's START, and a beat with no
+station keeps the framing it was handed. So a figure who walks on during a beat was never
+in the plan, and a push held over a later beat left its speaker outside the frame. The
+first count found 8 voiced lines in 4 lessons; the top hat on psychology 1's beats 4 and 6
+is the case the owner heard.
+
+`make-tours` now also reads where every figure STANDS once each beat has settled, by
+running `check-replay` with `REPLAY_FIGS`. It walks the camera as the player does. A spoken
+beat whose resting frame leaves any on-stage figure out gets a station of its own: the
+beat's must-box and every figure on it. If that would cut a word or break a K rule, the
+station is the whole band. 11 beats were given one.
+
+A figure who speaks and then walks OFF the stage on the same line (growth 3's last line)
+is seen while she speaks; her settled place is off-stage, and that is not a fault.
+
 ## W8 · The snapshot draws itself in, and the close is that reversed
 
 A leader hairline draws DOWN from under the tapped name; the card unfurls beneath
@@ -9039,6 +9059,35 @@ beat (in the figure's own units, so a half-size child waving counts as waving):
 
 All three are budgets of zero in `check:replay`, counter-tested by the numbers they
 started at (37, 169 and 28).
+
+### N22 · No two figures move in unison (2026-10-07)
+
+> *"sometimes when a stick man is talking, the other stick man nod in the exact same way
+> in the exact same time, so they're just copying each other and it looks bad."*
+
+Every scene poses its figures off one lesson clock. So two figures given the same code
+(two listeners on NOD, or two holding TALK) were the same motion at the same instant. On
+the first count, 95 pairs in 31 lessons moved within a quarter of their own movement of
+each other, most of them exactly (0.0 apart).
+
+**Each figure takes a `phase`**, a number fixed per figure: 0 for the first posed and 1,
+2, … for the others. `emoteStill`, `emoteStillLive` and `postureStill` take it last:
+- a held pose's living motion moves `PHASE_T` (1.618 s, a golden fraction, so no two
+  cycles line up again soon) a step along its cycle;
+- a played action starts `PHASE_LAG` (0.3 s) later a step.
+
+Phase 0 is exactly the old motion, so the first figure in every scene is unchanged.
+
+**A change of pose is staggered too.** Where two figures switch into the same new pose
+when a beat begins (both arms down off a raised pose), a phase cannot part them: the
+blend from the old pose to the new is the motion, and it ran on one shared `tr`. In
+those scenes each figure blends on `trAt(rank)`, 0.2 s after the one before it, by its
+ORDER and never its phase number (a phase of 9 would be a 1.8 s wait, and the figure
+reads as frozen, N21).
+`check:replay` holds it at zero. It compares each pair's head and hands, each relative to
+its own body and facing (and with the hands swapped, for two figures facing each other),
+through every beat. A pair whose motion never differs by more than a quarter of itself
+moves in unison.
 
 ### AA9 · A costume piece hangs off something the eye can see
 

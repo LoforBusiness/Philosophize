@@ -222,13 +222,13 @@ const MUG_ART = mug(0, 0, 15, 15);
 // leaves in the stage's tone take board, the rest keep their own colours.
 const NOTE_ART = notepad(0, 0, 12, 14).map((q) => (q.nat || q.role === 'line' || q.role === 'lit' ? q : { ...q, nat: 'cardboard' as NaturalKey }));
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -278,7 +278,7 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
  */
 function walkOf(
   src: number, dsrc: number, xs: readonly number[], turns: readonly Track[], codes: readonly number[],
-  n: number, t: number, b: number, L: number, start: number,
+  n: number, t: number, b: number, L: number, start: number, phase?: number,
 ) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
@@ -296,10 +296,10 @@ function walkOf(
     dirV = lerp(facing(d0, way, bw), faceOf(dsrc, tk, start + wd + 0.3, L), clamp01((bw - wd) / 0.3));
   }
   // A walk held back starts from the pose he is IN, not the one the last beat left.
-  const from = start > 0 ? hLive(codes[n], t, b) : hHold(codes[p], t);
+  const from = start > 0 ? hLive(codes[n], t, b, phase) : hHold(codes[p], t, phase);
   const s = walking && bw > 0
-    ? travelStance(xp, xn, from, hHold(codes[n], t), hLive(codes[n], t, b), walkU, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(xp, xn, from, hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), walkU, WALK, 0)
+    : hLive(codes[n], t, b, phase);
   return { xp, xn, walking, walkU, walkDur: wd + start, dirV, s };
 }
 
@@ -331,7 +331,7 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src0 = carrySource(cv, 0, n, PL_X[0]);
     const dsrc0 = carrySource(cv, 16, n, PL_TURN[0][0][1]);
-    const wp = walkOf(src0, dsrc0, PL_X, PL_TURN, PL_P, n, t, b, L, 0);
+    const wp = walkOf(src0, dsrc0, PL_X, PL_TURN, PL_P, n, t, b, L, 0, 0);
     const xPl = carry(cv, 0, n, wp.xp, wp.xn, wp.walking ? wp.walkU : tr);
     const dPl = carry(cv, 16, n, 0, wp.dirV, 1);
     let sp = wp.s;
@@ -364,14 +364,14 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       sp = lift(sp, xPl, dPl, -1, 150, 461, 1);
       sp = hand(sp, xPl, dPl, 1, 158, 462, 1);
     }
-    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t));
+    const prevPl = carryFrom(heldPl, n, hHold(PL_P[p], t, 0));
     const figPl = keepHeld(heldPl, wp.walking ? mixKeepLegs(prevPl, sp, tr) : mixStance(prevPl, sp, tr));
 
     // ── the adviser ─────────────────────────────────────────────────────────
     // where he stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src1 = carrySource(cv, 1, n, TH_X[0]);
     const dsrc1 = carrySource(cv, 17, n, 1);
-    const wt = walkOf(src1, dsrc1, TH_X, TH_TURN, TH_P, n, t, b, L, 0);
+    const wt = walkOf(src1, dsrc1, TH_X, TH_TURN, TH_P, n, t, b, L, 0, 1);
     const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
     const dTh = carry(cv, 17, n, 0, wt.dirV, 1);
     let stp = wt.s;
@@ -400,14 +400,14 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       stp = hand(stp, xTh, dTh, 1, xTh + 6, GROUND - 72 + tap, bp(0.02, 0.08, 0.38));
       stp = hand(stp, xTh, dTh, 1, HOT_AT.x, HOT_AT.y - 6, st(0.46, 0.54) * (1 - st(0.92, 1)));
     }
-    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
+    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t, 1));
     const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, stp, tr) : mixStance(prevTh, stp, tr));
 
     // ── the baker, behind her counter ───────────────────────────────────────
     // where she stands and faces on screen at this beat's first frame (from the start when nothing is drawn yet)
     const src2 = carrySource(cv, 2, n, BK_X[0]);
     const dsrc2 = carrySource(cv, 18, n, -1);
-    const wk = walkOf(src2, dsrc2, BK_X, BK_TURN, BK_P, n, t, b, L, A_SERVE[n] ? SERVE_STEP * L : 0);
+    const wk = walkOf(src2, dsrc2, BK_X, BK_TURN, BK_P, n, t, b, L, A_SERVE[n] ? SERVE_STEP * L : 0, 28);
     const xBk = carry(cv, 2, n, wk.xp, wk.xn, wk.walking ? wk.walkU : tr);
     const dBk = carry(cv, 18, n, 0, wk.dirV, 1);
     let sk = wk.s;
@@ -470,7 +470,7 @@ export default function Biz2Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       const down = st(0.04, 0.24);
       sk = hand(sk, xBk, dBk, 1, xBk + dBk * lerp(15, 12, down), lerp(440, 461, down), 1);
     }
-    const prevBk = carryFrom(heldBk, n, hHold(BK_P[p], t));
+    const prevBk = carryFrom(heldBk, n, hHold(BK_P[p], t, 28));
     const figBk = keepHeld(heldBk, wk.walking ? mixKeepLegs(prevBk, sk, tr) : mixStance(prevBk, sk, tr));
 
     // ── the things that change hands ────────────────────────────────────────

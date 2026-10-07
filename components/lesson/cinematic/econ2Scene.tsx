@@ -199,13 +199,13 @@ const RAIN_X = [218, 227, 236, 245, 254, 263, 272, 281, 290, 299, 308, 317, 326,
 const HEAVY_X = [222, 240, 258, 276, 294, 312, 330, 348, 366, 384, 231, 285, 339, 393];
 const LEFT_X = [5, 13];
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -220,7 +220,7 @@ function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: 
  */
 function walkOf(
   src: number, xs: readonly number[], codes: readonly number[], n: number, t: number, b: number,
-  delay: number, dStart: number, dEnd: number, turnAt: number, run: boolean,
+  delay: number, dStart: number, dEnd: number, turnAt: number, run: boolean, phase?: number,
 ) {
   'worklet';
   const p = n > 0 ? n - 1 : 0;
@@ -236,8 +236,8 @@ function walkOf(
     ? (bw < 0 ? dStart : lerp(facing(dStart, way, bw), dEnd, clamp01((bw - walkDur) / 0.3)))
     : facing(dStart, dEnd, b - turnAt);
   const s = walking
-    ? travelStance(xp, xn, hHold(codes[p], t), hHold(codes[n], t), hLive(codes[n], t, b), walkU, run ? RUN : WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(xp, xn, hHold(codes[p], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), walkU, run ? RUN : WALK, 0)
+    : hLive(codes[n], t, b, phase);
   return { xp, xn, walking, walkU, walkDur, dirV, s };
 }
 
@@ -304,7 +304,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
 
     // ── the passer-by ───────────────────────────────────────────────────────
     const src0 = carrySource(cv, 0, n, BN_X[0]);
-    const wb = walkOf(src0, BN_X, BN_P, n, t, b, 0, n > 0 ? BN_DE[p] : -1, BN_DE[n], 0, A_POUR[n] === 1);
+    const wb = walkOf(src0, BN_X, BN_P, n, t, b, 0, n > 0 ? BN_DE[p] : -1, BN_DE[n], 0, A_POUR[n] === 1, 1);
     const xBn = carry(cv, 0, n, wb.xp, wb.xn, wb.walking ? wb.walkU : tr);
     // b7: she turns to the van as it pulls in, and back to the seller
     const dBnNow = A_VAN[n]
@@ -328,12 +328,12 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       sb = hand(sb, xBn, dBn, 1, 320, 446, st(0.12, 0.2) * (1 - st(0.56, 0.64)));
       sb = hand(sb, xBn, dBn, 1, xBn - 22, 448, bp(0.72, 0.8, 0.95));
     }
-    const prevBn = carryFrom(heldBn, n, hHold(BN_P[p], t));
+    const prevBn = carryFrom(heldBn, n, hHold(BN_P[p], t, 1));
     const figBn = keepHeld(heldBn, wb.walking ? mixKeepLegs(prevBn, sb, tr) : mixStance(prevBn, sb, tr));
 
     // ── the economist ───────────────────────────────────────────────────────
     const src1 = carrySource(cv, 1, n, -40);
-    const wt = walkOf(src1, TH_X, TH_P, n, t, b, 0, 1, TH_DE[n], 0, false);
+    const wt = walkOf(src1, TH_X, TH_P, n, t, b, 0, 1, TH_DE[n], 0, false, 2);
     const xTh = carry(cv, 1, n, wt.xp, wt.xn, wt.walking ? wt.walkU : tr);
     const dTh = carry(cv, 4, n, wt.dirV, wt.dirV, trD);
     let sp = wt.s;
@@ -368,12 +368,12 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       const k = n === SETTLE_N ? sAt(3.6, 4.1) : 1;
       sp = hand(sp, xTh, dTh, 1, lerp(PASS.x, xTh + 8 * dTh, k), lerp(PASS.y, 458, k), holdTh);
     }
-    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t));
+    const prevTh = carryFrom(heldTh, n, hHold(TH_P[p], t, 2));
     const figTh = keepHeld(heldTh, wt.walking ? mixKeepLegs(prevTh, sp, tr) : mixStance(prevTh, sp, tr));
 
     // ── the seller ──────────────────────────────────────────────────────────
     const src2 = carrySource(cv, 2, n, CP_X[0]);
-    const wc = walkOf(src2, CP_X, CP_P, n, t, b, 0, n > 0 ? CP_DE[p] : 1, CP_DE[n], CP_DA[n] * L, false);
+    const wc = walkOf(src2, CP_X, CP_P, n, t, b, 0, n > 0 ? CP_DE[p] : 1, CP_DE[n], CP_DA[n] * L, false, 5);
     const xCp = carry(cv, 2, n, wc.xp, wc.xn, wc.walking ? wc.walkU : tr);
     const dCp = carry(cv, 5, n, wc.dirV, wc.dirV, trD);
     let sc = wc.s;
@@ -425,7 +425,7 @@ export default function Econ2Scene({ clock, bt, bi, i, picked, onPick }: SceneAp
       k0b = sAt(3.42, 3.55);
     }
     if (A_SUNNY[n]) k0a = st(0.1, 0.14) * (1 - st(0.56, 0.6));
-    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t));
+    const prevCp = carryFrom(heldCp, n, hHold(CP_P[p], t, 5));
     const figCp = keepHeld(heldCp, wc.walking ? mixKeepLegs(prevCp, sc, tr) : mixStance(prevCp, sc, tr));
 
     // ── the umbrellas she takes: 0 on the rail · 1 her hand · 2 her armful ──

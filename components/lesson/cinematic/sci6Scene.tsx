@@ -219,13 +219,13 @@ const BROWN_ART = sc6OnionBrown(0, BROWN.h / 2 - BROWN.grip, BROWN.w, BROWN.h);
 /** The hammocks across the bay: [x, which pair]. The messmate's (pair 2) empties on b5. */
 const FAR: [number, number][] = [[76, 0], [118, 0], [178, 1], [222, 1], [350, 2]];
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, gy: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -367,8 +367,8 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const dS = carry(cv, 3, n, 1, faceOf(carrySource(cv, 3, n, 1), SUR_TURN[n], b, L), 1);
     const code = SUR_P[n];
     let ss = ws.walking
-      ? travelStance(ws.x0, ws.x1, hHold(code, t), hHold(code, t), hLive(code, t, b), ws.u, WALK, 0)
-      : hLive(code, t, b);
+      ? travelStance(ws.x0, ws.x1, hHold(code, t, 0), hHold(code, t, 0), hLive(code, t, b, 0), ws.u, WALK, 0)
+      : hLive(code, t, b, 0);
     const fS = (lx: number) => {
       'worklet';
       return xS + dS * lx;
@@ -475,7 +475,7 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     ss = leanOf(ss, lean, 0);
     const nodS = carry(cv, 4, n, SUR_NOD[n], SUR_NOD[n], tr) * nodOf(t, 0.4);
     ss = { ...ss, neck: ss.neck + 0.18 * nodS + 0.1 * tap };
-    const prevS = carryFrom(heldS, n, hHold(SUR_P[p], t));
+    const prevS = carryFrom(heldS, n, hHold(SUR_P[p], t, 0));
     const figS = keepHeld(heldS, ws.walking ? mixKeepLegs(prevS, ss, tr) : mixStance(prevS, ss, tr));
     const sur = pose(figS, xS, FLOOR, K, dS, 1);
 
@@ -484,7 +484,7 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       'worklet';
       return CAPT_X + lx;
     };
-    let sp = hLive(CAPT_P[n], t, b);
+    let sp = hLive(CAPT_P[n], t, b, 1);
     // his bottle, held by the neck at his chest; up to show it off on b1
     let bx = fP(13);
     let by = 452;
@@ -503,7 +503,7 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     if (A_LUCKY[n]) {
       // a sniff at the bottle's mouth, then up at the hammocks over him, and a flick
       const sniff = bp(0.04, 0.12, 0.24);
-      const h = headStage(hHold(CAPT_P[n], t), { x: CAPT_X, groundY: FLOOR, k: K, dir: 1 });
+      const h = headStage(hHold(CAPT_P[n], t, 1), { x: CAPT_X, groundY: FLOOR, k: K, dir: 1 });
       bx = lerp(bx, h.x + 11, sniff);
       by = lerp(by, h.y + 9, sniff);
       sp = { ...sp, neck: sp.neck - 0.1 * sniff };
@@ -534,7 +534,7 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
     const nodP = carry(cv, 5, n, CAPT_NOD[n], CAPT_NOD[n], tr) * nodOf(t, 2.1);
     const lookV = carry(cv, 6, n, look, look, trq);
     sp = { ...sp, neck: sp.neck + 0.18 * nodP + lookV };
-    const prevP = carryFrom(heldP, n, hHold(CAPT_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(CAPT_P[p], t, 1));
     const figP = keepHeld(heldP, mixStance(prevP, sp, tr));
     const capt = pose(figP, CAPT_X, FLOOR, K, 1, 1);
 
@@ -555,7 +555,7 @@ export default function Sci6Scene({ clock, bt, bi, i, picked, onPick }: SceneApi
       'worklet';
       return xC - lx;
     };
-    let sc = hLive(CAP_P[n], t, b);
+    let sc = hLive(CAP_P[n], t, b, 8);
     let orangeHeld = n > DANCE_N ? 1 : 0;
     let jig = 0;
     if (A_DANCE[n]) {

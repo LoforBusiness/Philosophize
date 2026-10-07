@@ -180,13 +180,13 @@ const SCREEN_ART = departureScreen(SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h);
 const TICKET_ART = railTicket(TK_DX, 0, TK_W, TK_H);
 const COIN_ART = tint(coin(0, 0, 8, 8), 'brass');
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -253,11 +253,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -323,7 +323,7 @@ export default function Phil4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const wv = legsOf(carrySource(cv, 0, n, TV_START), TV_LEGS[n], b, L);
     const xV = carry(cv, 0, n, wv.x, wv.x, 1);
     const dV = carry(cv, 1, n, 0, faceOf(carrySource(cv, 1, n, -1), TV_TURN[n], b, L), 1);
-    let sv = bodyOf(wv, TV_P, n, t, b);
+    let sv = bodyOf(wv, TV_P, n, t, b, 0);
     // his ticket, held by its end in his left hand, in front of him at the waist
     // (AR2, AR6) — through the walk too, so that arm does not swing (a full hand)
     let tkX = xV + 8 * dV;
@@ -357,14 +357,14 @@ export default function Phil4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     // still folded and haughty while he is told, and a sniff on "while I'm still young"
     if (A_CHECK[n]) sv = look(fold(sv, 1), -0.12 - 0.12 * hd(0.72, 0.78, 0.88, 0.97));
     if (A_BOARD[n]) sv = look(sv, -0.3 * st(0.08, 0.22) * (1 - st(0.6, 0.72)));  // reading it
-    const prevV = carryFrom(heldV, n, hHold(TV_P[p], t));
+    const prevV = carryFrom(heldV, n, hHold(TV_P[p], t, 0));
     const figV = keepHeld(heldV, wv.walking ? mixKeepLegs(prevV, sv, tr) : mixStance(prevV, sv, tr));
 
     // ── the philosopher ─────────────────────────────────────────────────────
     const wp = legsOf(carrySource(cv, 2, n, PH_X), PH_LEGS[n], b, L);
     const xP = carry(cv, 2, n, wp.x, wp.x, 1);
     const dP = carry(cv, 3, n, 0, faceOf(carrySource(cv, 3, n, 1), PH_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PH_P, n, t, b);
+    let sp = bodyOf(wp, PH_P, n, t, b, 1);
     // up at the clock: the arm raised forward at about thirty degrees, so the hand clears
     // his head (aimed straight at the dial, it would rise past his face to scratch it)
     if (A_STOPPED[n]) sp = hand(sp, xP, dP, 1, xP + 40 * dP, 428, hd(0.05, 0.16, 0.82, 0.94));
@@ -400,7 +400,7 @@ export default function Phil4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
       sp = look(sp, 0.14 * bp(0.64, 0.7, 0.78));
     }
     if (A_CHECK[n]) sp = hand(sp, xP, dP, 1, SCREEN_AT.x, SCREEN_AT.y - 60, hd(0.32, 0.42, 0.84, 0.94)); // up the platform, over his head
-    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PH_P[p], t, 1));
     const figP = keepHeld(heldP, mixStance(prevP, sp, tr));
 
     // ── the things that move ───────────────────────────────────────────────

@@ -172,13 +172,13 @@ const CUP_ART = takeawayCup(
   TAKEAWAY_GRIP.w / 2 - TAKEAWAY_GRIP.x, TAKEAWAY_GRIP.h / 2 - TAKEAWAY_GRIP.y, TAKEAWAY_GRIP.w, TAKEAWAY_GRIP.h,
 );
 
-function hHold(code: number, t: number): Stance {
+function hHold(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return emoteStill(code, t);
+  return emoteStill(code, t, phase);
 }
-function hLive(code: number, t: number, bt: number): Stance {
+function hLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  return emoteStillLive(code, t, bt);
+  return emoteStillLive(code, t, bt, phase);
 }
 function hand(s: Stance, x: number, dir: number, which: 1 | -1, tx: number, ty: number, w: number): Stance {
   'worklet';
@@ -256,11 +256,11 @@ function faceOf(src: number, turns: Track, b: number, L: number) {
 }
 
 /** One figure's body for a beat: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number): Stance {
+function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
-    ? travelStance(w.x0, w.x1, hHold(codes[n], t), hHold(codes[n], t), hLive(codes[n], t, b), w.u, WALK, 0)
-    : hLive(codes[n], t, b);
+    ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
+    : hLive(codes[n], t, b, phase);
 }
 
 /** A wrist's place on the stage, out of a figure's bundle. */
@@ -312,7 +312,7 @@ export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     // b11: a sip of her coffee, in the quiet under the quotation (AR3)
     const sipNow = A_REST[n] ? st(0.16, 0.3) * (1 - st(0.46, 0.6)) : 0;
     const sip = carry(cv, 3, n, sipNow, sipNow, tr);
-    let sb = bodyOf(wb, BUN_P, n, t, b);
+    let sb = bodyOf(wb, BUN_P, n, t, b, 0);
     sb = { ...sb, tilt: sb.tilt - 0.24 * lean, neck: sb.neck + 0.12 * lean };
     // the coffee, in her left hand at her chest the whole lesson (AR6), lifted an inch on
     // "coffee" (b6) and to her lips for one sip (b11)
@@ -332,7 +332,7 @@ export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     }
     // b7: up to him and a nudge at his arm on "teamwork"
     if (A_TEAM[n]) sb = hand(sb, xB, dB, 1, C_X + 8, 456, bp(0.6, 0.68, 0.84));
-    const prevB = carryFrom(heldB, n, hHold(BUN_P[p], t));
+    const prevB = carryFrom(heldB, n, hHold(BUN_P[p], t, 0));
     const figB = keepHeld(heldB, wb.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ── the passer-by (the cap) ─────────────────────────────────────────────
@@ -342,7 +342,7 @@ export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     // b7: he rocks back a little at her nudge
     const rockNow = A_TEAM[n] ? bp(0.66, 0.72, 0.9) : 0;
     const rock = carry(cv, 6, n, rockNow, rockNow, tr);
-    let sc = bodyOf(wc, CAP_P, n, t, b);
+    let sc = bodyOf(wc, CAP_P, n, t, b, 1);
     sc = { ...sc, tilt: sc.tilt + 0.14 * rock };
     // b1: once he has stopped beside her, a hand opened to her on "the right stop"
     if (A_JOIN[n]) sc = hand(sc, xC, dC, 1, xC + 20 * dC, 452, bp(0.72, 0.8, 0.98));
@@ -357,14 +357,14 @@ export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       sc = hand(sc, xC, dC, 1, xC - 34, 444, bp(0.14, 0.22, 0.4));
       sc = hand(sc, xC, dC, 1, xC + 20 * dC, 452, bp(0.8, 0.88, 1));
     }
-    const prevC = carryFrom(heldC, n, hHold(CAP_P[p], t));
+    const prevC = carryFrom(heldC, n, hHold(CAP_P[p], t, 1));
     const figC = keepHeld(heldC, wc.walking ? mixKeepLegs(prevC, sc, tr) : mixStance(prevC, sc, tr));
 
     // ── the psychologist (the top hat) ──────────────────────────────────────
     const wp = legsOf(carrySource(cv, 7, n, P_X0), PSY_LEGS[n], b, L);
     const xP = carry(cv, 7, n, wp.x, wp.x, 1);
     const dP = carry(cv, 8, n, 0, faceOf(carrySource(cv, 8, n, -1), PSY_TURN[n], b, L), 1);
-    let sp = bodyOf(wp, PSY_P, n, t, b);
+    let sp = bodyOf(wp, PSY_P, n, t, b, 2);
     if (A_NOTICE[n]) {
       // the hat tipped once he has arrived, then the notice, on "closed all week"
       const after = moveTr(P_X0, P_X, TR) / L;
@@ -386,7 +386,7 @@ export default function Psych4Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       sp = hand(sp, xP, dP, 1, NOTICE_TAP.x, NOTICE_TAP.y, tap);
       sp = hand(sp, xP, dP, 1, xP + 22 * dP, 452, bp(0.72, 0.8, 0.96));
     }
-    const prevP = carryFrom(heldP, n, hHold(PSY_P[p], t));
+    const prevP = carryFrom(heldP, n, hHold(PSY_P[p], t, 2));
     const figP = keepHeld(heldP, wp.walking ? mixKeepLegs(prevP, sp, tr) : mixStance(prevP, sp, tr));
 
     // ── the things that move ───────────────────────────────────────────────

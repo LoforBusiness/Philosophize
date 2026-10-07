@@ -4132,16 +4132,29 @@ function stillArms(s: Stance, rest: readonly number[] | null | undefined): Stanc
   return { ...s, fistL: { x: rest[0], y: rest[1] }, fistR: { x: rest[2], y: rest[3] } };
 }
 
+/**
+ * EACH FIGURE ITS OWN TIMING (N22, 2026-10-07). The owner: *"when a stick man is
+ * talking, the other stick man nod in the exact same way in the exact same time, so
+ * they're just copying each other."* Every scene poses its figures off one lesson clock,
+ * so two given one code moved in lockstep. A figure's `phase` (0 for the first, 1, 2 …
+ * for the others) moves its living hold to another point of its cycle — PHASE_T seconds
+ * a step, a golden fraction so no two cycles line up again soon — and starts a played
+ * action PHASE_LAG seconds later. Phase 0 is exactly what every figure did before.
+ */
+export const PHASE_T = 1.618;
+export const PHASE_LAG = 0.3;
+
 /** emoteAny with the hands held at the pose's rest: a held pose's arms never drift. */
-export function emoteStill(code: number, t: number): Stance {
+export function emoteStill(code: number, t: number, phase?: number): Stance {
   'worklet';
+  const tt = t + (phase ?? 0) * PHASE_T;
   if (code < 100) {
     const r = emoteHold(code, 0);
-    return stillArms(emoteHold(code, t), [r.fistL.x, r.fistL.y, r.fistR.x, r.fistR.y]);
+    return stillArms(emoteHold(code, tt), [r.fistL.x, r.fistL.y, r.fistR.x, r.fistR.y]);
   }
   // a played action held at its end has its hands where it put them
-  if (code >= 300) return actStance(code - 299, t, 1);
-  return stillArms(actStance(code - 99, t, 1), ARM_REST_ACT[code - 100]);
+  if (code >= 300) return actStance(code - 299, tt, 1);
+  return stillArms(actStance(code - 99, tt, 1), ARM_REST_ACT[code - 100]);
 }
 
 /**
@@ -4149,16 +4162,17 @@ export function emoteStill(code: number, t: number): Stance {
  * first PLAY_SECONDS of the beat, because performing once is the point of one, and ends
  * where it ends. A held pose's hands never move.
  */
-export function emoteStillLive(code: number, t: number, bt: number): Stance {
+export function emoteStillLive(code: number, t: number, bt: number, phase?: number): Stance {
   'worklet';
-  if (code >= 300) return actStance(code - 299, t, playU(bt));
-  return emoteStill(code, t);
+  const ph = phase ?? 0;
+  if (code >= 300) return actStance(code - 299, t + ph * PHASE_T, playU(Math.max(0, bt - ph * PHASE_LAG)));
+  return emoteStill(code, t, ph);
 }
 
 /** postureHold with the free hand still. */
-export function postureStill(code: number, t: number): Stance {
+export function postureStill(code: number, t: number, phase?: number): Stance {
   'worklet';
-  return stillArms(postureHold(code, t), ARM_REST_POSTURE[code]);
+  return stillArms(postureHold(code, t + (phase ?? 0) * PHASE_T), ARM_REST_POSTURE[code]);
 }
 
 /** The played code for an action, and the held one. Use these rather than arithmetic. */
