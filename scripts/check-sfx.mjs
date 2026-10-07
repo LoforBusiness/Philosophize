@@ -42,8 +42,13 @@ for (const [key, s] of Object.entries(SOURCES)) {
   if (!fs.existsSync(path.join(ROOT, 'assets', 'sfx', 'src', `${s.id}.mp3`))) fail(`source ${key}: assets/sfx/src/${s.id}.mp3 is missing`);
 }
 const clipsSrc = fs.readFileSync(path.join(ROOT, 'lib', 'sfx', 'clips.ts'), 'utf8');
-const table = new Map([...clipsSrc.matchAll(/^\s{2}(\w+): \{ clip: require\('\.\.\/\.\.\/assets\/sfx\/(\w+)\.mp3'\), bed: (true|false), audible: ([\d.]+), hit: ([\d.]+) \},$/gm)]
-  .map((m) => [m[1], { file: m[2], bed: m[3] === 'true', audible: Number(m[4]), hit: Number(m[5]) }]));
+const table = new Map([...clipsSrc.matchAll(/^\s{2}(\w+): \{ clip: require\('\.\.\/\.\.\/assets\/sfx\/(\w+)\.mp3'\), bed: (true|false), audible: ([\d.]+), hit: ([\d.]+), top: (-?[\d.]+) \},$/gm)]
+  .map((m) => [m[1], { file: m[2], bed: m[3] === 'true', audible: Number(m[4]), hit: Number(m[5]), top: Number(m[6]) }]));
+// NEVER LOUDER THAN THE VOICE (2026-10-07): a clip's loudest tenth of a second, measured
+// off the file by make-sfx. Levelled by its mean, a short hit ran 12 dB over the voices
+// (the cash register at -4.5 under a line); foley stays 8 dB under the quietest voice,
+// any other effect no louder than the voices (make-sfx FOLEY_TOP, EVENT_TOP).
+const { FOLEY_TOP, EVENT_TOP } = { FOLEY_TOP: -26, EVENT_TOP: -20 };
 for (const c of CUTS) {
   if (!SOURCES[c.src]) fail(`cut ${c.id} is cut from "${c.src}", which is not in SOURCES`);
   if (!fs.existsSync(path.join(ROOT, 'assets', 'sfx', `${c.id}.mp3`))) fail(`cut ${c.id}: assets/sfx/${c.id}.mp3 is missing — run make-sfx`);
@@ -77,6 +82,10 @@ for (const c of CUTS) {
   if (c.foley && t && t.hit > FOLEY_MAX_HIT) fail(`cut ${c.id}: its hit comes ${t.hit}s into the clip; a foley clip starts on its hit (${FOLEY_MAX_HIT}s at most) — give it onset/onsetDb, or a window`);
   if (c.foley && c.bed) fail(`cut ${c.id} cannot be both foley and a bed`);
   if (c.foley && c.loud > FOLEY_LOUD) fail(`cut ${c.id} is foley and set to ${c.loud} LUFS; foley is ${FOLEY_LOUD} or quieter`);
+  if (t && !t.bed) {
+    const cap = c.foley ? FOLEY_TOP : EVENT_TOP;
+    if (t.top > cap + 0.5) fail(`cut ${c.id}: its loudest tenth of a second is ${t.top} dBFS, over ${cap} for ${c.foley ? 'foley' : 'an effect'} — run make-sfx`);
+  }
 }
 // the answer sounds the player plays on a stage tap (PICK_SFX in CinematicPlayer)
 const player = fs.readFileSync(path.join(DIR, 'CinematicPlayer.tsx'), 'utf8');

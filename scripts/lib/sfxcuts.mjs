@@ -112,7 +112,7 @@ export const SOURCES = {
  * under it, so the player's own gains start from one common scale.
  */
 export const CUTS = [
-  { id: 'court', src: 'crowd', from: 4, len: 40, loop: 2.5, loud: -24, bed: true },
+  { id: 'court', src: 'crowd', from: 4, len: 40, loop: 2.5, loud: -27, bed: true },
   { id: 'muffled', src: 'crowd', from: 4, len: 40, loop: 2.5, loud: -30, bed: true, filter: 'lowpass=f=420,lowpass=f=420' },
   { id: 'laugh', src: 'laugh', from: 0, len: 5.3, fadeOut: 0.8, loud: -20, onset: true },
   { id: 'murmur', src: 'murmur', from: 0, len: 5.6, fadeOut: 1.0, loud: -22, onset: true },

@@ -12143,6 +12143,19 @@ good quality.**
   cannot drift apart.
 - **The setting decides.** Sound follows the Sound setting (`soundEffects`), and is
   silent on the web, as the voice is.
+- **No sound is louder than the people talking (2026-10-07).** The owner asked that no
+  effect be overbearing or make a line hard to understand. Measured against the voices
+  (−19.3 to −17.9 LUFS), 160 cues failed. The cause was ~50 clips, not the lessons.
+  - **Why:** `make-sfx` levelled a clip by its MEAN, and a short hit in a second of
+    silence has a low mean, so the clip was turned up until the hit ran hot. The cash
+    register played at about −6, 12 dB over the line it sat under.
+  - **The rule now:** a clip is also capped by its loudest tenth of a second. Foley,
+    which may sound under a line, tops out at −26 dBFS (8 dB or more under the quietest
+    voice at gain 0.85). Any other effect tops out at −20, no louder than the voices.
+  - **The court crowd bed** came down 3 dB (−27), because chatter is the hardest thing to
+    hear speech over.
+  - `check:sfx` reads each clip's measured `top` from lib/sfx/clips.ts and fails one over
+    its cap.
 
 ### AT8 · Every lesson is heard, and a sound lands with its action
 
