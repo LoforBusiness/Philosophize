@@ -28,12 +28,12 @@ export interface Circle {
 
 export const CIRCLES: Circle[] = [
   { tier: 1, name: 'The Clay Circle', subtitle: 'The Foundations' },
-  { tier: 2, name: 'The Iron Circle', subtitle: 'The Doubt' },
-  { tier: 3, name: 'The Bronze Circle', subtitle: 'The Argument' },
-  { tier: 4, name: 'The Jade Circle', subtitle: 'The Conduct' },
-  { tier: 5, name: 'The Lapis Circle', subtitle: 'The Real' },
-  { tier: 6, name: 'The Crimson Circle', subtitle: 'The Quarrel' },
-  { tier: 7, name: 'The Amethyst Circle', subtitle: 'The Vision' },
+  { tier: 2, name: 'The Iron Circle', subtitle: 'The Questions' },
+  { tier: 3, name: 'The Bronze Circle', subtitle: 'The Reasoning' },
+  { tier: 4, name: 'The Jade Circle', subtitle: 'The Practice' },
+  { tier: 5, name: 'The Lapis Circle', subtitle: 'The Depth' },
+  { tier: 6, name: 'The Crimson Circle', subtitle: 'The Daring' },
+  { tier: 7, name: 'The Amethyst Circle', subtitle: 'The Mastery' },
   { tier: 8, name: 'The Aurum Circle', subtitle: 'The Summit' },
 ];
 
@@ -47,54 +47,54 @@ export const RANK_EPITHETS: Record<number, string> = {
   4: 'Reading the great conversation.',
   5: 'The page stops being difficult.',
   6: 'Copying it out is how it sticks.',
-  // iron — the doubt
+  // iron — the questions
   7: 'Nothing is taken on trust.',
-  8: 'Certainty is the first thing to go.',
-  9: 'Asking better, not more.',
+  8: 'Following the clue to its source.',
+  9: 'Seeing what is actually there.',
   10: 'Taking the claim apart.',
   11: 'Suspending judgement on purpose.',
-  12: 'Doubt with the manners taken off.',
-  // bronze — the argument
+  12: 'Judging the work, not the worker.',
+  // bronze — the reasoning
   13: 'Premises, and what follows.',
-  14: 'The machinery of proof.',
-  15: 'Two positions, one conversation.',
+  14: 'Thinking three moves ahead.',
+  15: 'Two sides, one conversation.',
   16: 'Finding the joint to cut at.',
   17: 'Saying it so it lands.',
   18: 'Willing to be shown wrong in public.',
-  // jade — the conduct
+  // jade — the practice
   19: 'The world before anyone explained it.',
-  20: 'What is owed, and to whom.',
-  21: 'Character over calculation.',
-  22: 'What is yours to control.',
-  23: 'Thinking while walking.',
-  24: 'A citizen of nowhere in particular.',
-  // lapis — the real
-  25: 'What there is, under the names.',
-  26: 'How anyone knows anything.',
-  27: 'Being, and its furniture.',
-  28: 'The mind was here first.',
-  29: 'Reason settles it, not the eye.',
-  30: 'Go and look, then argue.',
-  // crimson — the quarrel
-  31: 'Judgement becomes taste.',
-  32: 'The argument taken to them.',
+  20: 'Passing on what you have learned.',
+  21: 'Good hands, and getting better.',
+  22: 'Deep in one thing, curious about the rest.',
+  23: 'Learning on the road.',
+  24: 'Finding the way between subjects.',
+  // lapis — the depth
+  25: 'Going to the source.',
+  26: 'Others ask you now.',
+  27: 'Building ideas that hold weight.',
+  28: 'Seeing the pattern under the facts.',
+  29: 'At home in every subject.',
+  30: 'Go and test it, then argue.',
+  // crimson — the daring
+  31: 'Lighting the way others will follow.',
+  32: 'Turning an idea into a thing.',
   33: 'Breaking what everyone agreed on.',
-  34: 'Wrong in the useful direction.',
-  35: 'The order was never necessary.',
-  36: 'Some arguments are meant to spread.',
-  // amethyst — the vision
-  37: 'Knowing which questions are worth it.',
-  38: 'Past what argument reaches.',
-  39: 'A light for others to read by.',
-  40: 'Answering what was not asked.',
+  34: 'Right in the unexpected direction.',
+  35: 'Off the edge of the map.',
+  36: 'Some ideas are meant to spread.',
+  // amethyst — the mastery
+  37: 'The long study, chosen on purpose.',
+  38: 'Knowing which questions are worth it.',
+  39: 'First down a road nobody had taken.',
+  40: 'Able to teach it to anyone.',
   41: 'Seeing the shape of it whole.',
-  42: 'Handing on what was handed down.',
+  42: 'Holding the keys to the subject.',
   // aurum — the summit
   43: 'Holding the thread of the whole.',
   44: 'Others navigate by you now.',
-  45: 'Knowledge old enough to look like magic.',
+  45: 'Making the difficult look easy.',
   46: 'The work outlasts the worker.',
-  47: 'Past the edge of words.',
+  47: 'The example others measure by.',
   48: 'The summit of the ascent.',
 };
 

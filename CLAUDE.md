@@ -877,7 +877,7 @@ the month calendar draws a run as one flat capsule (`StreakCalendar`).
   are FROZEN and `check:badges` holds the roll — the roll is a literal list in
   `validate-badges.mjs`, so **adding one is a deliberate two-file act**, which is
   what the 32,000 and 50,000 XP badges were, and then the four SUBJECTS badges (2026-09-30, §23).
-- **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Philosopher), in **eight
+- **Ranks** — **48** in `data/ranks.ts` (Novice → Grand Master), in **eight
   orders of six**: clay, iron, bronze, jade, lapis, crimson, amethyst, aurum.
   **TWO AXES, and a pin is the pair.** `order` picks the MATERIAL and the
   SHAPE; `degree` picks what is BUILT onto it. No two of the forty-eight draw the

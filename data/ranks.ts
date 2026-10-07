@@ -29,7 +29,7 @@ export interface RankDef {
 // pointer uses max() so re-reading a lesson cannot skip anyone forward, but the
 // XP is paid every time. 21,400 is not a ceiling, it is a FIRST PASS. So 50,000
 // is roughly the app read through once and then some — which is exactly what the
-// top of a ladder called Grand Philosopher ought to cost.
+// top of a ladder called Grand Master ought to cost.
 //
 // The worked figures, because "roughly" is not good enough for a top rank:
 //
@@ -69,7 +69,7 @@ export interface RankDef {
 // That is a state this file has never had to describe before, and it is why
 // `rankProgress` measures the band from `min(current.xp, totalXP)` rather than
 // from the threshold. Measuring from the threshold made the two halves of the
-// same sentence disagree: "0 / 600 XP" beside "2,100 XP to Logician".
+// same sentence disagree: "0 / 600 XP" beside "2,100 XP to Strategist".
 // ─────────────────────────────────────────────────────────────────────────────
 export const RANKS: RankDef[] = [
   // ── CLAY · the disc ──────────────────────────────────────────────────
@@ -81,53 +81,53 @@ export const RANKS: RankDef[] = [
   { id: 6, name: 'Scribe', xp: 740, glyph: 'feather' },
   // ── IRON · the cut plate ─────────────────────────────────────────────
   { id: 7, name: 'Questioner', xp: 1000, glyph: 'question' },
-  { id: 8, name: 'Doubter', xp: 1350, glyph: 'magnifier' },
-  { id: 9, name: 'Inquirer', xp: 1700, glyph: 'eye' },
+  { id: 8, name: 'Investigator', xp: 1350, glyph: 'magnifier' },
+  { id: 9, name: 'Observer', xp: 1700, glyph: 'eye' },
   { id: 10, name: 'Examiner', xp: 2100, glyph: 'xcross' },
   { id: 11, name: 'Sceptic', xp: 2550, glyph: 'chain' },
-  { id: 12, name: 'Cynic', xp: 3050, glyph: 'mask' },
+  { id: 12, name: 'Critic', xp: 3050, glyph: 'mask' },
   // ── BRONZE · the hexagon ─────────────────────────────────────────────
   { id: 13, name: 'Reasoner', xp: 3600, glyph: 'scales' },
-  { id: 14, name: 'Logician', xp: 4200, glyph: 'grid' },
-  { id: 15, name: 'Dialectician', xp: 4800, glyph: 'cycle' },
+  { id: 14, name: 'Strategist', xp: 4200, glyph: 'grid' },
+  { id: 15, name: 'Debater', xp: 4800, glyph: 'cycle' },
   { id: 16, name: 'Analyst', xp: 5500, glyph: 'dottarget' },
-  { id: 17, name: 'Rhetorician', xp: 6200, glyph: 'wheel' },
-  { id: 18, name: 'Disputant', xp: 6950, glyph: 'anvil' },
+  { id: 17, name: 'Orator', xp: 6200, glyph: 'wheel' },
+  { id: 18, name: 'Challenger', xp: 6950, glyph: 'anvil' },
   // ── JADE · the notched gem ───────────────────────────────────────────
   { id: 19, name: 'Naturalist', xp: 7750, glyph: 'tree' },
-  { id: 20, name: 'Ethicist', xp: 8600, glyph: 'heart' },
-  { id: 21, name: 'Moralist', xp: 9500, glyph: 'willow' },
-  { id: 22, name: 'Stoic', xp: 10400, glyph: 'flower' },
-  { id: 23, name: 'Peripatetic', xp: 11400, glyph: 'lotus' },
-  { id: 24, name: 'Cosmopolite', xp: 12400, glyph: 'bridge' },
+  { id: 20, name: 'Mentor', xp: 8600, glyph: 'heart' },
+  { id: 21, name: 'Journeyman', xp: 9500, glyph: 'willow' },
+  { id: 22, name: 'Specialist', xp: 10400, glyph: 'flower' },
+  { id: 23, name: 'Wayfarer', xp: 11400, glyph: 'lotus' },
+  { id: 24, name: 'Pathfinder', xp: 12400, glyph: 'bridge' },
   // ── LAPIS · the shield ───────────────────────────────────────────────
-  { id: 25, name: 'Metaphysician', xp: 13500, glyph: 'pyramid' },
-  { id: 26, name: 'Epistemologist', xp: 14600, glyph: 'target' },
-  { id: 27, name: 'Ontologist', xp: 15700, glyph: 'dome' },
-  { id: 28, name: 'Idealist', xp: 16900, glyph: 'ripple' },
-  { id: 29, name: 'Rationalist', xp: 18200, glyph: 'infinity' },
-  { id: 30, name: 'Empiricist', xp: 19500, glyph: 'prism' },
+  { id: 25, name: 'Researcher', xp: 13500, glyph: 'pyramid' },
+  { id: 26, name: 'Expert', xp: 14600, glyph: 'target' },
+  { id: 27, name: 'Architect', xp: 15700, glyph: 'dome' },
+  { id: 28, name: 'Theorist', xp: 16900, glyph: 'ripple' },
+  { id: 29, name: 'Polymath', xp: 18200, glyph: 'infinity' },
+  { id: 30, name: 'Experimenter', xp: 19500, glyph: 'prism' },
   // ── CRIMSON · the crested shield ─────────────────────────────────────
-  { id: 31, name: 'Aesthete', xp: 20800, glyph: 'torch' },
-  { id: 32, name: 'Polemicist', xp: 22200, glyph: 'lamp' },
+  { id: 31, name: 'Trailblazer', xp: 20800, glyph: 'torch' },
+  { id: 32, name: 'Inventor', xp: 22200, glyph: 'lamp' },
   { id: 33, name: 'Iconoclast', xp: 23600, glyph: 'shieldcross' },
-  { id: 34, name: 'Heretic', xp: 25000, glyph: 'gate' },
-  { id: 35, name: 'Revolutionary', xp: 26500, glyph: 'ship' },
+  { id: 34, name: 'Maverick', xp: 25000, glyph: 'gate' },
+  { id: 35, name: 'Explorer', xp: 26500, glyph: 'ship' },
   { id: 36, name: 'Firebrand', xp: 28100, glyph: 'beacon' },
   // ── AMETHYST · the winged ────────────────────────────────────────────
-  { id: 37, name: 'Sage', xp: 29700, glyph: 'crescent' },
-  { id: 38, name: 'Mystic', xp: 31300, glyph: 'hexagram' },
-  { id: 39, name: 'Illuminate', xp: 33000, glyph: 'ring' },
-  { id: 40, name: 'Oracle', xp: 34700, glyph: 'owl' },
+  { id: 37, name: 'Scholar', xp: 29700, glyph: 'crescent' },
+  { id: 38, name: 'Sage', xp: 31300, glyph: 'hexagram' },
+  { id: 39, name: 'Pioneer', xp: 33000, glyph: 'ring' },
+  { id: 40, name: 'Professor', xp: 34700, glyph: 'owl' },
   { id: 41, name: 'Visionary', xp: 36400, glyph: 'gem' },
-  { id: 42, name: 'Hierophant', xp: 38200, glyph: 'key' },
+  { id: 42, name: 'Master', xp: 38200, glyph: 'key' },
   // ── AURUM · the crowned ──────────────────────────────────────────────
-  { id: 43, name: 'Archon', xp: 40100, glyph: 'crown' },
+  { id: 43, name: 'Sovereign', xp: 40100, glyph: 'crown' },
   { id: 44, name: 'Luminary', xp: 42000, glyph: 'star' },
-  { id: 45, name: 'Magus', xp: 43900, glyph: 'orbit' },
-  { id: 46, name: 'Immortal', xp: 45900, glyph: 'sunface' },
-  { id: 47, name: 'Transcendent', xp: 47900, glyph: 'starcompass' },
-  { id: 48, name: 'Grand Philosopher', xp: 50000, glyph: 'bookrays' },
+  { id: 45, name: 'Virtuoso', xp: 43900, glyph: 'orbit' },
+  { id: 46, name: 'Legend', xp: 45900, glyph: 'sunface' },
+  { id: 47, name: 'Paragon', xp: 47900, glyph: 'starcompass' },
+  { id: 48, name: 'Grand Master', xp: 50000, glyph: 'bookrays' },
 ];
 
 /**
