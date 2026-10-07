@@ -46,7 +46,7 @@ const LINES = [
   { key: 'l1', text: 'Welcome. / My name is Alfred.' },
   // Two rows a page at most: a third row lifts the bubble over the window's sill.
   { key: 'l2', text: 'And I will be walking you | through any subject / of your choosing.' },
-  { key: 'l3', text: 'Between philosophy, / psychology, business, | science, history, and more.' },
+  { key: 'l3', text: 'Between philosophy, / psychology, business, | science, history, / and more.' },
   { key: 'l4', text: 'Turn on your mind / to curiosity, | and begin this wonderful / journey of learning.' },
 ];
 

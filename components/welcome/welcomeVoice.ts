@@ -41,7 +41,7 @@ export const VOICE_LINES: VoiceLine[] = [
   {
     text: "Between philosophy, psychology, business, science, history, and more.",
     pages: [0, 4],
-    rows: [2],
+    rows: [2, 6],
     at: 6.63,
     dur: 5.290,
     words: [0, 0.4, 1.31, 2.23, 3, 3.88, 4.56, 4.73],
