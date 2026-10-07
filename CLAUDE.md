@@ -8341,6 +8341,14 @@ tonight's is dropped once a lesson is done and only tonight's quotes the real
 streak number; the quote of the day is written days ahead from
 `getQuoteForDay(day)` so the lock screen and the app agree.
 
+**The words live in `lib/notifications/nagCopy.ts` (zero imports).** The daily
+nudge was all philosophy until 2026-10-07; it has a pool of four for each of the
+seven subjects now, passive-aggressive or a true fact with a jab, and the day picks
+a new subject each day and a new line each week (`dailyNagFor`). Because it fires
+whether or not a lesson is done, no daily line may say the reader skipped today.
+`check:quips` holds the voice (attendance, never ability), every subject's pool,
+the length, and that four weeks reach every line.
+
 > **This was the blocker and it is now cleared.** `expo-notifications` was added
 > on 2026-08-01, after build 16 — so for a week no shipped APK contained it, and
 > an OTA cannot add a native module to a binary that lacks one. **Build 19

@@ -487,7 +487,7 @@ console.log('\nthe herald (Pass tab)\n');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 4. HE NEEDLES ATTENDANCE, NEVER ABILITY — ACROSS ALL FOUR POOLS
+// 4. HE NEEDLES ATTENDANCE, NEVER ABILITY — ACROSS ALL FIVE POOLS
 // ═════════════════════════════════════════════════════════════════════════════
 //
 // check-streak already held this over streakMood. It never covered the reward
@@ -501,6 +501,7 @@ console.log('\nthe one hard line\n');
     ['the mascot', 'lib/utils/streakMood.ts', 'const LINES', 'export function lineFor'],
     ['the bio', 'lib/utils/userBio.ts', 'const ARCHETYPE', 'export function generateUserBio'],
     ['the herald', 'lib/utils/passQuips.ts', 'export const FREE_QUIPS', 'export function quipFor'],
+    ['the reminders', 'lib/notifications/nagCopy.ts', 'export const DAILY_NAGS', 'END_OF_FILE'], // not in the file: indexOf is -1, so the block runs to its end
   ];
   let hits = 0;
   for (const [name, file, from, to] of pools) {
@@ -510,7 +511,24 @@ console.log('\nthe one hard line\n');
     const offenders = strings(block).filter((l) => l.length > 6 && BANNED.test(l));
     if (offenders.length) { hits++; bad(`${name}: ${offenders.length} line(s) attack ability, not attendance`, JSON.stringify(offenders[0])); }
   }
-  if (!hits) ok('every line in all four pools needles attendance, not ability');
+  if (!hits) ok('every line in all five pools needles attendance, not ability');
+}
+
+// The reminders were philosophy alone until 2026-10-07: every subject has a pool now,
+// and the day rotation reaches it.
+{
+  const nag = await loadTs('lib/notifications/nagCopy.ts');
+  const subj = await loadTs('data/subjects.ts');
+  let miss = 0;
+  for (const s of subj.SUBJECTS) {
+    const pool = nag.DAILY_NAGS[s.slug];
+    if (!pool || pool.length < 4 || !nag.NAG_ORDER.includes(s.slug)) { miss++; bad(`the reminders: ${s.slug} has no pool of four in the day rotation`); }
+  }
+  const long = Object.values(nag.DAILY_NAGS).flat().filter((n) => n.title.length > 28 || n.body.length > 110);
+  if (long.length) { miss++; bad(`the reminders: ${long.length} line(s) too long for a lock screen`, JSON.stringify(long[0])); }
+  const seen = new Set(Array.from({ length: 28 }, (_, d) => nag.dailyNagFor(d).body));
+  if (seen.size !== Object.values(nag.DAILY_NAGS).flat().length) { miss++; bad(`the reminders: four weeks of days reach ${seen.size} lines, not all of them`); }
+  if (!miss) ok(`the reminders speak for all ${subj.SUBJECTS.length} subjects, a subject a day, every line reached in four weeks`);
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

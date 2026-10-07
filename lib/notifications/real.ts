@@ -3,6 +3,7 @@ import * as N from 'expo-notifications';
 import { getQuoteForDay, dayNumber } from '@/lib/dailyQuote';
 import { reminderAt } from '@/lib/utils/trial';
 import { reminderNotification } from '@/lib/utils/trialTerms';
+import { dailyNagFor, STREAK_NAGS } from './nagCopy';
 import type {
   NotificationOpen, NotificationsProvider, ReminderPrefs, StreakContext, TrialReminder,
 } from './types';
@@ -97,73 +98,7 @@ function openOf(r: N.NotificationResponse): NotificationOpen | null {
   return r.notification.request.content.data?.open === 'trial' ? 'trial' : null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THE VOICE, AND THE TWO RULES IT KEEPS.
-//
-// Dry, faintly disappointed, and entirely uninterested in motivating anybody.
-// "One lesson. One idea you did not have yesterday" is a homework reminder; this
-// is a housemate who has noticed you came in late and is not going to make a
-// thing of it.
-//
-//   1. IT NEEDLES ATTENDANCE, NEVER ABILITY. A lock screen is the most public
-//      surface this app has. "You have not been in" survives a colleague reading
-//      it over a shoulder; anything about how quick or clever the reader is does
-//      not, and gets the app deleted rather than opened.
-//   2. IT NEVER CLAIMS A FACT IT CANNOT HOLD. Nothing here can be composed at
-//      send time (see the header), so a line counting what the reader did today
-//      would be a guess printed as a statement. The jabs are rhetorical — "I
-//      imagine today was busy" — never numeric.
-// ─────────────────────────────────────────────────────────────────────────────
-const DAILY_NAGS = [
-  { title: 'Still here',
-    body: 'So are the philosophers. None of us has anywhere better to be.' },
-  { title: 'No rush',
-    body: 'Socrates gave his whole life to one question. I am asking for a minute.' },
-  { title: 'Whenever suits you',
-    body: 'The unexamined life is going fine, I am sure. People do say that.' },
-  { title: 'Don’t mind me',
-    body: 'Two minutes was the entire pitch. I have not revised it.' },
-  { title: 'It’s fine',
-    body: 'I have been in here with the ideas. We were just talking about you.' },
-  { title: 'Just checking',
-    body: 'You said you wanted to think more clearly. Your words. I kept them.' },
-  { title: 'Nothing urgent',
-    body: 'Marcus Aurelius ran an empire and still wrote something down at night.' },
-  { title: 'Take your time',
-    body: 'Ideas keep. That is rather the point of them. And yet.' },
-  { title: 'I imagine today was busy',
-    body: 'They usually are. That is generally how it goes.' },
-  { title: 'Hello again',
-    body: 'I am not going to nag. I am simply going to be here, at this hour, daily.' },
-];
-
-// SEVEN, BECAUSE THE WINDOW IS SEVEN EVENINGS. At four, a reader who leaves the
-// app alone for a week gets nights five, six and seven repeating nights one, two
-// and three word for word — and a nag that repeats stops being a voice and
-// becomes a bug. One per evening the window can reach.
-//
-// `known` is TONIGHT, the only evening whose facts are real: whether a lesson is
-// already done and what the streak actually stands at. `blind` is any later
-// evening. A blind line may still say "nothing today", because a blind evening
-// only fires when the app was not opened that day at all — and a day the app was
-// not opened is a day no lesson was finished. It may not say the NUMBER, which
-// would be days stale by the time it arrived.
-const STREAK_NAGS = [
-  { known: 'One lesson before midnight and it carries. I will wait up.',
-    blind: 'One lesson keeps it. I am not going anywhere.' },
-  { known: 'It ends at midnight. That is not a threat, it is a timetable.',
-    blind: 'Still nothing today. There is time, but not much of it.' },
-  { known: 'Two minutes. I have watched you spend more than that scrolling.',
-    blind: 'A lesson takes two minutes. I have done the maths.' },
-  { known: 'I would hate to see this one go. I would mention it often.',
-    blind: 'Whatever you are doing instead — is it going well?' },
-  { known: 'After midnight it is just a number you used to have.',
-    blind: 'Nothing yet today. I am choosing not to read into it.' },
-  { known: 'You have kept this going. Odd place to stop.',
-    blind: 'One lesson and I will leave you alone until tomorrow. Promise.' },
-  { known: 'I am not going to beg. I am simply noting how late it is getting.',
-    blind: 'Getting late. I am noting it, that is all.' },
-];
+// WHAT THE REMINDERS SAY lives in nagCopy.ts, with the two rules its voice keeps.
 
 async function doSync(prefs: ReminderPrefs, ctx: StreakContext, trial: TrialReminder) {
   await ensureChannel();
@@ -187,7 +122,8 @@ async function doSync(prefs: ReminderPrefs, ctx: StreakContext, trial: TrialRemi
     // foreground, so keying the line to `dayNumber()` means it changes each day
     // the app is opened and simply holds if it is not. Nothing is asserted about
     // the day it fires on, which is the actual constraint.
-    const nag = DAILY_NAGS[dayNumber() % DAILY_NAGS.length];
+    // Since 2026-10-07 the day also picks the SUBJECT, so the week goes round all seven.
+    const nag = dailyNagFor(dayNumber());
     await schedule(
       'daily-reminder',
       nag.title,
