@@ -49,7 +49,6 @@ const COUNTER = '#8E3B22', COUNTER_D = '#6F2C18', COUNTER_TOP = '#A86B45', COUNT
 const GLASS_NIGHT = '#3E5468', GLASS_NIGHT_D = '#2F4254', GOLD = '#D9B24A', GOLD_D = '#A9852E';
 const BRASS = '#CFA54A', BRASS_D = '#A27E2E', BRASS_L = '#E6C677';
 const CREAM = '#F3E8CC', CREAM_D = '#DCCDA8';
-const SACK = '#D8C49A', SACK_D = '#BCA578';
 const LAMP_GREEN = '#3F7A4E', LAMP_GREEN_D = '#2D5A39';
 const TINS = [['#B5372C', '#8E2820'], ['#2F6E9A', '#22557A'], ['#D3A43A', '#AD8228'], ['#3D7A4A', '#2C5B36'], ['#E2DACA', '#C4BBA8']];
 const JAR = '#DCEBEE', JAR_D = '#B9D2D8';
@@ -76,12 +75,6 @@ function jar(x, yb, w, h, k) {
   o.push(box(x + w * 0.2, yb - h + 1, w * 0.18, h - 2, JAR_D, 0.8));
   o.push(rect(x - w / 2 + 0.6, yb - h - 2.4, w - 1.2, 2.6, k % 2 ? '#B5372C' : BRASS, 0.5));
   return o.join('');
-}
-/** A sack of flour slumped on the floor, its neck tied. */
-function sack(x, yb, w, h) {
-  return fill(`M${x - w / 2},${yb} C${x - w / 2 - 1},${yb - h * 0.6} ${x - w * 0.3},${yb - h} ${x},${yb - h} C${x + w * 0.3},${yb - h} ${x + w / 2 + 1},${yb - h * 0.6} ${x + w / 2},${yb} Z`, SACK, 0.7)
-    + flat(`M${x + w * 0.1},${yb - h + 1} C${x + w * 0.35},${yb - h} ${x + w / 2 + 0.6},${yb - h * 0.6} ${x + w / 2 - 0.4},${yb - 0.4} L${x + w * 0.15},${yb - 0.4} Z`, SACK_D)
-    + text(x, yb - h * 0.35, 'FLOUR', w * 0.22, '#7A5A34');
 }
 /** A packet box on a shelf. */
 function packet(x, yb, w, h, c, cd) {
@@ -183,11 +176,21 @@ export function storeFar() {
   for (const x of [198, 216, 234]) o.push(packet(x, 390, 15, 24, k % 2 ? '#D3A43A' : '#3D7A4A', k % 2 ? '#AD8228' : '#2C5B36'), (k += 1, ''));
   for (const x of [270, 286, 302, 318]) o.push(tin(x, 390, 13, 20, k++));
   for (const x of [346, 366, 386]) o.push(jar(x, 390, 15, 22, k++));
-  // the lowest bay: sacks of flour on the floor behind the counter (mostly hidden by it)
+  // the lowest bay: a row of packets on its shelf, and under it a bank of small wooden
+  // drawers down to the floor — a quiet dark ground behind the counter, so the abacus, the
+  // ledger and the till read against it now the counter is down at his hip
   const levels2 = [426];
   for (const y of levels2) { o.push(rect(SX0, y, SX1 - SX0 + 4, 4, SHELF_L, 0.7)); o.push(box(SX0 + 1, y + 4, SX1 - SX0 + 2, 2, '#3A2212', 0.6)); }
-  for (const x of [204, 230, 290, 360]) o.push(sack(x, 470, 24, 30));
-  for (const x of [262, 316, 386]) o.push(packet(x, 426, 16, 22, '#C9682E', '#A4511F'));
+  for (const x of [204, 262, 316, 386]) o.push(packet(x, 426, 16, 22, '#C9682E', '#A4511F'));
+  o.push(rect(SX0, 432, SX1 - SX0 + 4, 40, SHELF_D, 0.8));
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 10; c++) {
+      const dx = SX0 + 3 + c * 22, dy = 434.5 + r * 12.4;
+      o.push(rect(dx, dy, 20, 10.4, SHELF, 0.5));
+      o.push(box(dx + 0.6, dy + 0.6, 18.8, 1.4, SHELF_L));
+      o.push(circ(dx + 10, dy + 5.6, 1.1, BRASS, 0.35));
+    }
+  }
   // the ladder on its rail, leaning against the shelves on the right
   o.push(rect(SX0, 250, SX1 - SX0 + 4, 3, BRASS, 0.6));
   o.push(line('M372,251 L384,470 M388,251 L400,470', SHELF_L, 3));
@@ -248,12 +251,12 @@ export function bell() {
 /** NEAR: the long counter, drawn over the accountant's legs, and what stays put on it. */
 export function storeCounter() {
   const o = [];
-  const X0 = 186, X1 = 404, TOP = 468;
+  const X0 = 186, X1 = 404, TOP = 474;
   // the front: dark red tongue-and-groove boards, a kick plate at the foot
-  o.push(rect(X0 + 2, TOP + 6, X1 - X0, 28, COUNTER, 1));
-  for (let x = X0 + 6; x < X1; x += 6) o.push(line(`M${x},${TOP + 8} L${x},${TOP + 30}`, COUNTER_D, 0.6));
+  o.push(rect(X0 + 2, TOP + 6, X1 - X0, 22, COUNTER, 1));
+  for (let x = X0 + 6; x < X1; x += 6) o.push(line(`M${x},${TOP + 8} L${x},${TOP + 24}`, COUNTER_D, 0.6));
   o.push(box(X0 + 3, TOP + 7, X1 - X0 - 2, 3, COUNTER_D));
-  o.push(rect(X0 + 1, TOP + 30, X1 - X0 + 2, 4, '#5A2414', 0.7));
+  o.push(rect(X0 + 1, TOP + 24, X1 - X0 + 2, 4, '#5A2414', 0.7));
   // the top: a worn wooden slab with a lit front edge
   o.push(rect(X0 - 2, TOP, X1 - X0 + 6, 6, COUNTER_TOP, 1));
   o.push(box(X0 - 1, TOP + 0.6, X1 - X0 + 4, 1.4, COUNTER_TOP_L));
@@ -522,14 +525,18 @@ export function streetFar() {
   return o.join('');
 }
 
-/** NEAR: the chestnut cart on its pavement, drawn over the seller's legs. In street x. */
+/**
+ * NEAR: the chestnut cart on its pavement. In street x. Its top is at a man's HIP (474), the
+ * seller stands at its RIGHT END beside the brazier and the accountant at its LEFT END, so the
+ * cart covers nobody.
+ */
 export function cart() {
   const o = [];
-  const X0 = 164, X1 = 278, TOP = 466;
-  // the canopy on two posts
-  o.push(rect(167, 398, 3, TOP - 398, '#5A3A26', 0.6));
-  o.push(rect(272, 398, 3, TOP - 398, '#5A3A26', 0.6));
-  const stripes = 12, sw = (X1 - X0 + 16) / stripes;
+  const X0 = 164, X1 = 250, TOP = 474;
+  // the canopy on ONE pole, set in from the end the accountant works at (the price slate
+  // hangs in front of it), so no post ever stands across a man at either end of the cart
+  o.push(rect(184.5, 398, 3, TOP - 398, '#5A3A26', 0.6));
+  const stripes = 10, sw = (X1 - X0 + 16) / stripes;
   for (let k = 0; k < stripes; k++) {
     const sx = X0 - 8 + k * sw;
     o.push(fill(P([[sx + 4, 384], [sx + sw + 4, 384], [sx + sw, 398], [sx, 398]]), k % 2 ? '#F4EBD8' : '#B5372C', 0.6));
@@ -539,37 +546,38 @@ export function cart() {
     o.push(fill(`M${f2(sx)},398 Q${f2(sx + sw / 2)},404 ${f2(sx + sw)},398 Z`, k % 2 ? '#F4EBD8' : '#B5372C', 0.6));
   }
   o.push(rect(X0 - 10, 382, X1 - X0 + 22, 3, '#5A3A26', 0.6));
-  // the brazier: a round iron drum, its fire door, a tray of chestnuts on top
-  o.push(rect(228, 446, 24, 20, '#3F4448', 1));
-  o.push(box(242, 447, 9, 18, '#2C3033'));
-  o.push(line('M228,452 L252,452 M228,460 L252,460', '#2C3033', 0.6));
-  o.push(rect(233, 454, 10, 8, '#2C3033', 0.6));
-  o.push(rect(225, 441, 30, 5, '#5E6468', 0.8));
-  for (let k = 0; k < 9; k++) o.push(circ(228.5 + k * 2.9, 440.4 - (k % 2) * 0.8, 1.6, '#7A4A2A', 0.4));
-  // the seller's pile of paper bags at the right
-  for (let k = 0; k < 3; k++) o.push(rect(258 + k * 1.2, 456 - k * 1.4, 8, 10, '#C99B62', 0.5));
+  // the brazier at the seller's end: a round iron drum, its fire door, a tray of chestnuts on top
+  const BX = 222;
+  o.push(rect(BX, TOP - 20, 24, 20, '#3F4448', 1));
+  o.push(box(BX + 14, TOP - 19, 9, 18, '#2C3033'));
+  o.push(line(`M${BX},${TOP - 14} L${BX + 24},${TOP - 14} M${BX},${TOP - 6} L${BX + 24},${TOP - 6}`, '#2C3033', 0.6));
+  o.push(rect(BX + 5, TOP - 12, 10, 8, '#2C3033', 0.6));
+  o.push(rect(BX - 3, TOP - 25, 30, 5, '#5E6468', 0.8));
+  for (let k = 0; k < 9; k++) o.push(circ(BX + 0.5 + k * 2.9, TOP - 25.6 - (k % 2) * 0.8, 1.6, '#7A4A2A', 0.4));
+  // the seller's pile of paper bags on the cart top, beside the brazier
+  for (let k = 0; k < 3; k++) o.push(rect(204 + k * 1.2, TOP - 10 - k * 1.4, 8, 10, '#C99B62', 0.5));
   // the accountant's end: a pile of paper bags
-  for (let k = 0; k < 3; k++) o.push(rect(168 + k * 1.2, 456 - k * 1.4, 8, 10, '#C99B62', 0.5));
+  for (let k = 0; k < 3; k++) o.push(rect(165 + k * 1.2, TOP - 10 - k * 1.4, 8, 10, '#C99B62', 0.5));
   // the cart body: a wooden box, its top, a painted name
   o.push(rect(X0, TOP, X1 - X0, 6, '#B98451', 1));
-  o.push(rect(X0 + 2, TOP + 6, X1 - X0 - 4, 22, '#2F5D45', 1));
-  o.push(box(X1 - 30, TOP + 7, 27, 20, '#244A37'));
-  o.push(text(240, TOP + 21, 'HOT CHESTNUTS', 6.4, '#E8C870', ' letter-spacing="0.6"'));
+  o.push(rect(X0 + 2, TOP + 6, X1 - X0 - 4, 16, '#2F5D45', 1));
+  o.push(box(X1 - 24, TOP + 7, 21, 14, '#244A37'));
+  o.push(text(225, TOP + 16, 'HOT CHESTNUTS', 4.4, '#E8C870', ' letter-spacing="0.3"'));
   // the rent notice pinned to its side
-  o.push(rect(176, TOP + 9, 24, 17, '#F7F2E4', 0.6));
-  o.push(text(188, TOP + 16, 'PITCH', 4.6, '#2E241C'));
-  o.push(text(188, TOP + 23, '£60 A DAY', 4.2, '#B23A2E'));
-  o.push(circ(178, TOP + 10.4, 0.9, '#B23A2E', 0.3), circ(198, TOP + 10.4, 0.9, '#B23A2E', 0.3));
-  // the handles and the wheel
-  o.push(line(`M${X1},${TOP + 4} L${X1 + 18},${TOP - 2}`, '#5A3A26', 2.2));
-  o.push(circ(232, TOP + 22, 12.5, '#3A2A1E', 1));
-  o.push(circ(232, TOP + 22, 10, '#B98451', 0.6));
+  o.push(rect(176, TOP + 7, 24, 14, '#F7F2E4', 0.6));
+  o.push(text(188, TOP + 13, 'PITCH', 4.4, '#2E241C'));
+  o.push(text(188, TOP + 19, '£60 A DAY', 4, '#B23A2E'));
+  o.push(circ(178, TOP + 8.4, 0.9, '#B23A2E', 0.3), circ(198, TOP + 8.4, 0.9, '#B23A2E', 0.3));
+  // the wheel, standing on the pavement, and the leg at the far end
+  const WY = 500 - 11;
+  o.push(circ(207, WY, 11, '#3A2A1E', 1));
+  o.push(circ(207, WY, 8.6, '#B98451', 0.6));
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI;
-    o.push(line(`M${f2(232 - 9.4 * Math.cos(a))},${f2(TOP + 22 - 9.4 * Math.sin(a))} L${f2(232 + 9.4 * Math.cos(a))},${f2(TOP + 22 + 9.4 * Math.sin(a))}`, '#7A5232', 0.8));
+    o.push(line(`M${f2(207 - 8 * Math.cos(a))},${f2(WY - 8 * Math.sin(a))} L${f2(207 + 8 * Math.cos(a))},${f2(WY + 8 * Math.sin(a))}`, '#7A5232', 0.8));
   }
-  o.push(circ(232, TOP + 22, 2.2, '#5A3A26', 0.5));
-  o.push(rect(170, TOP + 28, 3, 6, '#5A3A26', 0.5));
+  o.push(circ(207, WY, 2, '#5A3A26', 0.5));
+  o.push(rect(170, TOP + 22, 3, 500 - TOP - 22, '#5A3A26', 0.5));
   return o.join('');
 }
 

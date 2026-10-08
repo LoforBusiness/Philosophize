@@ -216,12 +216,14 @@ function slateTile(x, y, w, h, label, lx, anchor = 'start') {
 export function hallMid() {
   const o = [];
   // ── the urn table (left) ──
-  o.push(rect(38, 456, 48, 5, WOOD_L, 0.8));
-  o.push(rect(41, 461, 42, 6, WOOD, 0.7));
-  for (const x of [43, 77]) { o.push(rect(x, 467, 4, 30, WOOD_D, 0.6)); }
-  o.push(rect(43, 486, 38, 2.4, WOOD_D, 0.5));
+  // (the table stands at 28–76, the urn at 48, so the woman at 84 pours at its tap without
+  //  her body hiding the urn)
+  o.push(rect(28, 456, 48, 5, WOOD_L, 0.8));
+  o.push(rect(31, 461, 42, 6, WOOD, 0.7));
+  for (const x of [33, 67]) { o.push(rect(x, 467, 4, 30, WOOD_D, 0.6)); }
+  o.push(rect(33, 486, 38, 2.4, WOOD_D, 0.5));
   // the urn: square plinth, waisted foot, the vase body, the lid and finial, two loop handles
-  const UX = 58;
+  const UX = 48;
   o.push(rect(UX - 9, 451, 18, 5, SILVER, 0.7));
   o.push(fill(`M${UX - 4},451 C${UX - 3},446 ${UX - 3},444 ${UX - 6},441 L${UX + 6},441 C${UX + 3},444 ${UX + 3},446 ${UX + 4},451 Z`, SILVER, 0.7));
   o.push(fill(`M${UX - 11},412 C${UX - 12},426 ${UX - 9},437 ${UX - 3},442 L${UX + 3},442 C${UX + 9},437 ${UX + 12},426 ${UX + 11},412 Z`, SILVER, 0.9));
@@ -239,7 +241,7 @@ export function hallMid() {
   o.push(fill(`M${UX + 16},438 L${UX + 18},438 L${UX + 18},443.6 L${UX + 16},443.6 Z`, SILVER_D, 0.5));
   o.push(rect(UX + 11.2, 434.4, 2.6, 4.2, '#EDE3C8', 0.4));
   // cups and saucers waiting on the table
-  for (const x of [42.5]) {
+  for (const x of [32.5]) {
     o.push(ell(x, 455.4, 4, 1.1, '#F7F5EE', 0.4));
     o.push(fill(`M${x - 2.6},450.4 L${x + 2.6},450.4 L${x + 2},455 L${x - 2},455 Z`, '#F7F5EE', 0.5));
   }
@@ -292,26 +294,27 @@ export function hallMid() {
   o.push(flat('M170,476.6 L220,476.6 L218,478 L172,478 Z', '#E6E3D6', 0.5));
   o.push(rect(146, 474, 8, 2.2, CHALK, 0.3));
 
-  // ── the clerk's high desk (right): a sloped top, ledgers, an inkwell, a brass balance ──
-  o.push(fill('M356,446 L404,438 L404,446 L356,452 Z', MAHOG_L, 0.9));
-  o.push(rect(358, 452, 46, 12, MAHOG, 0.8));
-  for (const x of [360, 398]) o.push(rect(x, 464, 4, 33, MAHOG_D, 0.6));
-  o.push(rect(362, 478, 40, 2.4, MAHOG_D, 0.5));
+  // ── the clerk's desk (right), hip-high to the man beside it: a sloped top, ledgers, an
+  //    inkwell, a brass balance (the near edge of the top is 40 above the floor at 500) ──
+  o.push(fill('M356,460 L404,453 L404,460 L356,466 Z', MAHOG_L, 0.9));
+  o.push(rect(358, 466, 46, 9, MAHOG, 0.8));
+  for (const x of [360, 398]) o.push(rect(x, 475, 4, 22, MAHOG_D, 0.6));
+  o.push(rect(362, 488, 40, 2.4, MAHOG_D, 0.5));
   // ledgers on the shelf under it
-  for (const [x, c] of [[364, '#7A2E2A'], [372, '#2F4A5E'], [380, '#5E4A2A'], [388, '#7A2E2A']]) o.push(rect(x, 465, 7, 13, c, 0.5));
+  for (const [x, c] of [[364, '#7A2E2A'], [372, '#2F4A5E'], [380, '#5E4A2A'], [388, '#7A2E2A']]) o.push(rect(x, 477, 7, 11, c, 0.5));
   // an inkwell and a quill
-  o.push(rect(392, 434, 7, 5, '#2A2A30', 0.5));
-  o.push(line('M396,434 L404,424', '#F2EEE2', 1.2));
+  o.push(rect(392, 449, 7, 5, '#2A2A30', 0.5));
+  o.push(line('M396,449 L404,439', '#F2EEE2', 1.2));
   // the balance: a post on the desk, a beam, two pans (the coin lies on the left one, live)
-  o.push(rect(367, 426, 2.4, 20, BRASS_D, 0.5));
-  o.push(rect(364, 446, 8, 2, BRASS_D, 0.4));
-  o.push(rect(356, 425, 26, 2, BRASS, 0.5));
-  o.push(circ(368.2, 426, 1.6, BRASS_L, 0.4));
+  o.push(rect(367, 440, 2.4, 19, BRASS_D, 0.5));
+  o.push(rect(364, 458, 8, 2, BRASS_D, 0.4));
+  o.push(rect(356, 439, 26, 2, BRASS, 0.5));
+  o.push(circ(368.2, 440, 1.6, BRASS_L, 0.4));
   for (const x of [358, 380]) {
-    o.push(line(`M${x - 3},437 L${x},427 L${x + 3},437`, BRASS_D, 0.4));
-    o.push(fill(`M${x - 5},437 L${x + 5},437 C${x + 4},440 ${x - 4},440 ${x - 5},437 Z`, BRASS, 0.5));
+    o.push(line(`M${x - 3},451 L${x},441 L${x + 3},451`, BRASS_D, 0.4));
+    o.push(fill(`M${x - 5},451 L${x + 5},451 C${x + 4},454 ${x - 4},454 ${x - 5},451 Z`, BRASS, 0.5));
   }
-  o.push(ell(380, 436.2, 2.4, 0.9, BRASS_L, 0.3));                                       // a weight on the right pan
+  o.push(ell(380, 450.2, 2.4, 0.9, BRASS_L, 0.3));                                       // a weight on the right pan                                       // a weight on the right pan
   return o.join('');
 }
 

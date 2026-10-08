@@ -46,9 +46,12 @@ import { BY_ID } from './wardrobe';
 //   38, 420; the rim 444), the OFFICIAL'S TABLE 82–116 × 454–484, the market crowd, the
 //   MERCHANT'S STALL 110–224 (awning 384–404, the balance hung at 166, 397; counter
 //   449–488), and the STOA 222–400 (roof 262–280, columns at 238, 282, 326, 370 from 289
-//   to 450). The philosopher stands at 332 BEHIND his stone TABLE 250–392 × 452–494,
-//   which is drawn over his legs; on it the shards (268), the wax tablet (312) and the
-//   herald's horn (360), a dish of figs (326).
+//   to 450). The philosopher stands at 250, at the LEFT END of his stone TABLE 258–372
+//   (top 466, hip high; feet 495), which stands BEHIND the people so it hides nobody (the
+//   recap fix, 2026-10-08: it used to be drawn over his legs). On it, left to right, a dish
+//   of figs (260), the wax tablet (269), the shards (312) and the herald's horn (346).
+//   The plain one leans on the column at 370 from 378, so the two face each other across
+//   the table's length.
 //   HARBOUR (its own x 0–400): sky, the sea to Salamis, Mounichia's hill and houses; the
 //   shipsheds 0–140; the OLD SHIP 146–392 (mast 252, 218–420), her planks a patchwork of
 //   new and old; the quay 440–514; the SUNDIAL at 66 (dial 437–448, pedestal to 494).
@@ -56,10 +59,10 @@ import { BY_ID } from './wardrobe';
 //   b0   alone in the stoa: a fig from the dish, writes a line (pencil 1.2s), a second
 //        (2.6s), taps his chin, rubs the second out (paper 4.1s), writes it again
 //        (5.3s), rests the stylus, looks up at the Acropolis and murmurs his line.
-//   b1   the plain one strolls in from the market, chin up, and leans on a column.
+//   b1   the plain one strolls in from the stoa's far end, chin up, and leans on a column.
 //   b2   the philosopher draws a wheel on the tablet (pencil 1.4s) and taps it twice.
 //   b3   the plain one spreads his hands.          b4   the philosopher holds the tablet up, then stands it on the table.
-//   b5   the plain one turns and waves at the crowd (murmur 0.3s), and back.
+//   b5   the plain one waves at the market crowd over the philosopher's head (murmur 0.3s).
 //   b6   Q1 CAST YOUR VOTE: the shards, the tablet or the horn.
 //   b7   he peers at the tablet and sniffs.        b8   the philosopher lays it flat, writes two short lines (1.0s), stands it up; the plain one wanders off toward the fountain.
 //   b9   he finds the purse on the fountain's rim, picks it up and jingles it (2.1s).
@@ -128,48 +131,55 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 
 // ── where everybody stands (WORLD x; the harbour is x + 400) ──────────────────
 const HX = 400;
-const TH_DESK = 332;
-const TH_QUAY = HX + 110;
+const TH_DESK = 250;
+const TH_QUAY = HX + 128;
 const TH_SHIP = HX + 182;
 /** The walk down (b14): out of the agora to the right, a fade through at CUT, in from the harbour's left. */
 const CUT = 2.4;
-const TH_EXIT = 392;
+const TH_EXIT = 410;
 const TH_ENTER = HX - 30;
-const PL_EXIT = 330;
+const PL_EXIT = 430;
 const PL_ENTER = HX + 10;
-const PL_OFF = -30;
-const PL_COL = 226;
-const PL_DRIFT = 150;
+const PL_OFF = 432;
+const PL_COL = 378;
+const PL_DRIFT = 200;
 const PL_FOUNT = 72;
+/** Where he strolls back to after handing the purse in, on his way down to the harbour. */
+const PL_BACK = 290;
 const PL_QUAY = HX + 175;
 const PL_HULL = HX + 236;
 
 const TH_LEGS: Track[] = per((n) => (n < HARBOUR ? [[0, TH_DESK]] : n === HARBOUR ? [[0.32, TH_QUAY]]
   : n < SELF ? [[0, TH_QUAY]] : [[0, TH_SHIP]]));
 const PL_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, PL_OFF]] : n === ARRIVE ? [[0.02, PL_COL]]
-  : n < ARGUE ? [[0, PL_COL]] : n === ARGUE ? [[0.72, PL_DRIFT]]
-    : n < FREE ? [[0, PL_FOUNT]] : n === FREE ? [[0.3, PL_COL]]
+  : n < ARGUE ? [[0, PL_COL]] : n === ARGUE ? [[0.12, PL_DRIFT]]
+    : n < FREE ? [[0, PL_FOUNT]] : n === FREE ? [[0.05, PL_BACK]]
       : n === HARBOUR ? [[0, PL_QUAY]] : n < SHIP ? [[0, PL_QUAY]] : [[0, PL_HULL]]));
-const TH_TURN: Track[] = per((n) => (n < HARBOUR ? [[0, -1]] : n === HARBOUR ? [[0, -1], [0.1, 1]]
-  : n === KNOW ? [[0.02, -1], [0.58, 1]] : [[0, 1]]));
-const PL_TURN: Track[] = per((n) => (n === CROWD ? [[0, 1], [0.08, -1], [0.7, 1]]
-  : n === ARGUE ? [[0, 1], [0.68, -1], [0.94, 1]]
+const TH_TURN: Track[] = per((n) => (n < ARGUE ? [[0, 1]] : n === ARGUE ? [[0, 1], [0.5, -1]]
+  : n < FREE ? [[0, -1]] : n === FREE ? [[0, -1], [0.62, 1]] : n === HARBOUR ? [[0, 1]]
+    : n === KNOW ? [[0.02, -1], [0.58, 1]] : [[0, 1]]));
+const PL_TURN: Track[] = per((n) => (n < ARGUE ? [[0, -1]]
+  : n === ARGUE ? [[0, -1], [0.6, 1]]
     : n === PURSE ? [[0, 1], [0.01, -1], [0.76, 1]]
       : n === HARBOUR ? [[0, 1], [1.02, -1]]
       : n === KNOW || n === Q3_AT ? [[0.02, -1]]
         : n === SHIP ? [[0, 1], [0.6, -1]]
-          : n > SHIP ? [[0, -1]] : [[0, 1]]));
+          : n > SHIP ? [[0, -1]] : n === FREE ? [[0, 1], [0.7, -1]] : [[0, 1]]));
 const TH_P = per((n) => (BEATS[n].speaker === 'tophat' ? (n % 2 ? TALK : EXPLAIN) : NOD));
 const PL_P = per((n) => (BEATS[n].speaker === 'plain' ? TALK : NOD));
 
 // ── the wax tablet: lying on the table, held up, stood on the table ───────────
-const TAB = { x: 315, w: 22, h: 15, flatY: 468.5, flatSy: 0.28, propY: 462.5 };
-/** A stylus tip on the lying tablet, as the wrist that holds it (he faces left at 332). */
-const tip = (share: number, lxTip: number, w = 1): Key => [share, TH_DESK - (TAB.x + lxTip) - 5, 465, w];
+const TAB = { x: 269, w: 22, h: 15, flatY: 468.5, flatSy: 0.28, propY: 462.5 };
+/**
+ * A stylus tip on the lying tablet, as the wrist that holds it. `lxTip` runs along a line as
+ * it is written, -9 to 7; he stands LEFT of the tablet facing right and writes each line toward
+ * himself, so the line is laid mirrored (see the scratches, which grow from their right end).
+ */
+const tip = (share: number, lxTip: number, w = 1): Key => [share, TAB.x - lxTip - 2 - TH_DESK - 5, 465, w];
 /** The wheel: eight points round it, drawn over [a, b] of the line. */
 const wheelKeys = (a: number, b: number): Key[] => Array.from({ length: 9 }, (_, k) => {
   const ang = (k / 8) * Math.PI * 2;
-  return [a + ((b - a) * k) / 8, TH_DESK - (TAB.x + 6 + 3 * Math.cos(ang)) - 5, 465 + 0.8 * Math.sin(ang), 1] as Key;
+  return [a + ((b - a) * k) / 8, TAB.x + 6 + 3 * Math.cos(ang) - TH_DESK - 5, 465 + 0.8 * Math.sin(ang), 1] as Key;
 });
 
 /** His right hand, the stylus hand. */
@@ -179,28 +189,28 @@ const TH_R: (readonly Key[])[] = per((n) => {
       [S0(2.2), 9, 437, 1], tip(S0(2.45), -9), tip(S0(3.3), 2),
       [S0(3.55), 6, 433, 1], [S0(3.85), 6, 434.5, 1],
       tip(S0(4.05), 2), tip(S0(4.75), -8),
-      [S0(5.0), 11, 467, 1], tip(S0(5.2), -9), tip(S0(6.0), 3), [S0(6.3), 10, 469, 1]];
+      [S0(5.0), 11, 467, 1], tip(S0(5.2), -9), tip(S0(6.0), 3), [S0(6.3), 3, 469, 1]];
   }
   if (n === BIKE) {
-    return [[0, 10, 469, 1], [0.22, 14, 463, 1], ...wheelKeys(0.27, 0.45),
-      [0.52, 9, 462, 1], [0.56, 9, 465.4, 1], [0.6, 9, 462, 1], [0.64, 9, 465.4, 1], [0.76, 10, 469, 1]];
+    return [[0, 3, 469, 1], [0.22, 14, 463, 1], ...wheelKeys(0.27, 0.45),
+      [0.52, 9, 462, 1], [0.56, 9, 465.4, 1], [0.6, 9, 462, 1], [0.64, 9, 465.4, 1], [0.76, 3, 469, 1]];
   }
   if (n === ARGUE) {
-    return [[0, 10, 469, 1], [0.12, 24, 464, 1], tip(0.14, -9), tip(0.24, -3.5), tip(0.27, -2), tip(0.35, 1.5), [0.42, 10, 469, 1]];
+    return [[0, 3, 469, 1], [0.12, 24, 464, 1], tip(0.14, -9), tip(0.24, -3.5), tip(0.27, -2), tip(0.35, 1.5), [0.42, 3, 469, 1]];
   }
   if (n === WEIGH) {
-    return [[0, 10, 469, 1], [0.08, 18, 448, 1], [0.3, 18, 443, 1], [0.5, 18, 452, 1], [0.7, 18, 448, 1], [0.86, 10, 469, 1]];
+    return [[0, 3, 469, 1], [0.08, 18, 448, 1], [0.3, 18, 443, 1], [0.5, 18, 452, 1], [0.7, 18, 448, 1], [0.86, 3, 469, 1]];
   }
   if (n === KNOW) return [[0.08, 10, 452, 0], [0.16, 22, 445, 1], [0.48, 22, 445, 1], [0.58, 10, 452, 0]];
   if (n === SELF) return [[0.46, 12, 456, 0], [0.54, 24, 455, 1], [0.6, 20, 456, 1], [0.66, 24, 455, 1], [0.74, 8, 424, 1], [0.9, 8, 424, 1], [1, 8, 450, 0]];
   if (n === COPY) return [[0.06, 8, 452, 0], [0.16, 12, 429, 1], [0.8, 12, 429, 1], [0.92, 8, 452, 0]];
-  if (n < HARBOUR) return [[0, 10, 469, 1]];
+  if (n < HARBOUR) return [[0, 3, 469, 1]];
   return NONE;
 });
 /** His left hand: a fig; the tablet up and down; weighing; nothing at the harbour. */
 const TH_L: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(0.08), 6, 470, 0], [S0(0.2), 6, 468, 1], [S0(0.38), 6, 468, 1], [S0(0.7), 7, 433, 1], [S0(0.95), 7, 433, 1], [S0(1.25), 7, 470, 0]];
+    return [[S0(0.08), 10, 470, 0], [S0(0.2), 10, 468, 1], [S0(0.38), 10, 468, 1], [S0(0.7), 7, 433, 1], [S0(0.95), 7, 433, 1], [S0(1.25), 7, 470, 0]];
   }
   if (n === BIKE) return [[0.02, 16, 470, 0], [0.08, 19, 469, 1], [0.86, 19, 469, 1], [0.94, 16, 470, 0]];
   if (n === REASONS) return [[0.04, 16, 470, 0], [0.1, 18, 469, 1], [0.24, 18, 438, 1], [0.74, 18, 438, 1], [0.86, 19, 467, 1], [0.94, 16, 470, 0]];
@@ -210,7 +220,7 @@ const TH_L: (readonly Key[])[] = per((n) => {
 });
 /** The plain one's right hand: the column, his boast, the wave, the purse, the sky, his heart, the hull. */
 const PL_R: (readonly Key[])[] = per((n) => {
-  if (n === ARRIVE) return [[1.08, 8, 452, 0], [1.16, 12, 441, 1]];
+  if (n === ARRIVE) return [[0.5, 8, 452, 0], [0.62, 12, 441, 1]];
   if (n === BIKE) return [[0, 12, 441, 1]];
   if (n === BOAST || n === BOAST2) return [[0, 12, 441, n === BOAST ? 1 : 0], [0.08, 18, 441, 1], [0.84, 18, 441, 1], [0.94, 8, 452, 0]];
   if (n === CROWD) return [[0.14, 8, 452, 0], [0.22, 14, 424, 1], [0.34, 9, 427, 1], [0.46, 14, 424, 1], [0.6, 8, 452, 0]];
@@ -226,18 +236,21 @@ const PL_R: (readonly Key[])[] = per((n) => {
 const PL_L: (readonly Key[])[] = per((n) => (n === BOAST || n === BOAST2 ? [[0.08, 8, 452, 0], [0.16, 14, 446, 1], [0.84, 14, 446, 1], [0.94, 8, 452, 0]] : NONE));
 
 // ── Q1, the table's three things (world = screen in the agora) ───────────────
-const SHARDS = { x: 268, y: 469 };
+const SHARDS = { x: 312, y: 469 };
 const SHARD_BITS = [[-8, 0, 20], [-3, -2.6, -15], [2.5, 0.2, 35], [7, -1.4, -30], [0, -4.2, 10]] as const;
-const HORN = { x: 360, y: 467 };
-const DISH = { x: 326, y: 468.5 };
+const HORN = { x: 346, y: 467 };
+const DISH = { x: 260, y: 468.5 };
 // ── Q2, the merchant's balance and three weights ────────────────────────────
 const BAL = { x: 166, y: 406, arm: 26, drop: 34 };
 const WEIGHTS = [
-  { id: 'law', x: 120, lines: ['THE LAW SAYS', 'RETURN IT'] },
-  { id: 'sandals', x: 196, lines: ['IT MATCHES', 'MY SANDALS'] },
-  { id: 'hungry', x: 276, lines: ['ITS OWNER WILL', 'GO HUNGRY'] },
+  { id: 'law', x: 116, lines: ['THE LAW SAYS', 'RETURN IT'] },
+  { id: 'sandals', x: 188, lines: ['IT MATCHES', 'MY SANDALS'] },
+  { id: 'hungry', x: 318, lines: ['ITS OWNER WILL', 'GO HUNGRY'] },
 ] as const;
 const WEIGHT_Y = 487;
+/** Q1's boxes and the tablet's plate: see VOTE_Q. */
+const Q1_TOP = 428;
+const Q1_TAB_C = 274;
 const PLATE2 = { y: 489, w: 74, h: 23 };
 // ── Q3, the quay (harbour x) ────────────────────────────────────────────────
 const DIAL = { x: HX + 66, y: 445.4, len: 17 };
@@ -544,7 +557,7 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
 
     return {
       pl, ph, cam, t, sT, fade,
-      tab: { x: tabX, y: tabY - 3 * Math.max(propped, held) * (1 - held), sy: tabSy, k: tabK, pop: rTab },
+      tab: { x: tabX, y: tabY - 3 * Math.max(propped, held) * (1 - held), sy: tabSy, k: tabK, pop: rTab, h: held },
       lines: { a: lA, b: lB, b2: lB2, w: lW, c: lC, d: lD, tap: tapW },
       tR, fig, purse,
       rShards, rHorn, rTab, rLaw, rSandals, rHungry, tilt, rDial, rHeart, rGull,
@@ -559,7 +572,6 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
   const DP = useDerivedValue<Bundle>(() => SCENE.value.pl);
   const DT = useDerivedValue<Bundle>(() => SCENE.value.ph);
   const world = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
-  const world2 = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
 
   return (
     <View style={styles.scene}>
@@ -573,6 +585,13 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
         <View style={styles.tableShadow} />
         <Fountain S={SCENE} />
         <Balance S={SCENE} />
+        {/* his stone table: behind the people, so it hides nobody; he works at its left end */}
+        <LessonPicture name="phil7-agora-table" />
+        <Shards S={SCENE} />
+        <Horn S={SCENE} />
+        <View style={styles.dish} />
+        <View style={[styles.figBit, { left: DISH.x - 4.5, top: DISH.y - 3.4 }]} />
+        <View style={[styles.figBit, { left: DISH.x - 1.5, top: DISH.y - 3.8 }]} />
         <LessonPicture name="phil7-harbour-far" />
         <Cloud S={SCENE} x={HX + 60} y={236} s={0.9} k={3} />
         <Cloud S={SCENE} x={HX + 200} y={226} s={1} k={4} />
@@ -588,21 +607,15 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
         <QuayGull S={SCENE} />
         <Weights S={SCENE} />
       </Animated.View>
+      {/* the tablet and the fig sit on the table behind him, so a hand that rests by them,
+          holds them or writes on them is in front of them */}
+      <Tablet S={SCENE} front={false} />
+      <Fig S={SCENE} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
+      <Tablet S={SCENE} front />
       <Stylus S={SCENE} />
       <Fingers S={SCENE} />
-      {/* his stone table, over his legs, and what is on it */}
-      <Animated.View style={[styles.world, world2]} pointerEvents="none">
-        <LessonPicture name="phil7-agora-table" />
-        <Shards S={SCENE} />
-        <Horn S={SCENE} />
-        <View style={styles.dish} />
-        <View style={[styles.figBit, { left: DISH.x - 4.5, top: DISH.y - 3.4 }]} />
-        <View style={[styles.figBit, { left: DISH.x - 1.5, top: DISH.y - 3.8 }]} />
-      </Animated.View>
-      <Tablet S={SCENE} />
-      <Fig S={SCENE} />
       {/* cast: plain */}
       <Stickman D={DP} k={K} role="second" wear={[]} />
       <Purse S={SCENE} />
@@ -685,7 +698,7 @@ function DialShadow({ S }: { S: SharedValue<any> }) {
     return { transform: [{ translateX: DIAL.x }, { translateY: DIAL.y }, { rotate: `${deg}deg` }, { scale: 1 + 0.18 * pop }] };
   });
   return (
-    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+    <Animated.View nativeID="ph7-dial" style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.shadow} />
     </Animated.View>
   );
@@ -713,7 +726,7 @@ function QuayGull({ S }: { S: SharedValue<any> }) {
       ],
     };
   });
-  return <Animated.View style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="phil7-gull" /></Animated.View>;
+  return <Animated.View nativeID="ph7-quaygull" style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="phil7-gull" /></Animated.View>;
 }
 
 // ── the stoa's table ─────────────────────────────────────────────────────────
@@ -733,7 +746,7 @@ function Shard({ S, k, dx, dy, deg }: { S: SharedValue<any>; k: number; dx: numb
       ],
     };
   });
-  return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.shard} /></Animated.View>;
+  return <Animated.View nativeID="ph7-shards" style={[styles.rider, st]} pointerEvents="none"><View style={styles.shard} /></Animated.View>;
 }
 /** The herald's bronze horn: picked, it blares — it jumps and shudders and its noise goes up. */
 function Horn({ S }: { S: SharedValue<any> }) {
@@ -748,7 +761,7 @@ function Horn({ S }: { S: SharedValue<any> }) {
   });
   return (
     <>
-      <Animated.View style={[styles.rider, st]} pointerEvents="none">
+      <Animated.View nativeID="ph7-horn" style={[styles.rider, st]} pointerEvents="none">
         <View style={styles.hornTube} />
         <View style={styles.hornBell} />
         <View style={styles.hornMouth} />
@@ -761,11 +774,13 @@ function Horn({ S }: { S: SharedValue<any> }) {
   );
 }
 /** The wax tablet: a frame of boxwood round dark wax, and what has been scratched in it. */
-function Tablet({ S }: { S: SharedValue<any> }) {
+function Tablet({ S, front }: { S: SharedValue<any>; front: boolean }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.tab;
     const pop = Math.sin(Math.PI * Math.min(1, v.pop * 1.5));
     return {
+      // on the table it is behind him; held up, it is in front of him (two copies, one shown)
+      opacity: (v.h > 0.02) === front ? 1 : 0,
       transform: [{ translateX: v.x }, { translateY: v.y - 7 * pop }, { scale: v.k * (1 + 0.16 * pop) }, { scaleY: Math.max(0.05, v.sy) }],
     };
   });
@@ -776,14 +791,14 @@ function Tablet({ S }: { S: SharedValue<any> }) {
   const D = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0.001, S.value.lines.d) }] }));
   const wheel = useAnimatedStyle(() => ({ opacity: S.value.lines.w, transform: [{ scale: 1 + 0.15 * S.value.lines.tap }] }));
   return (
-    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+    <Animated.View nativeID="ph7-tablet" style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.tabFrame} />
       <View style={styles.tabWax} />
       <Animated.View style={[styles.scratch, { left: -9, top: -4.5, width: 16 }, A]} />
-      <Animated.View style={[styles.scratch, { left: -9, top: -1, width: 11 }, B]} />
-      <Animated.View style={[styles.scratch, { left: -9, top: -1, width: 12 }, B2]} />
-      <Animated.View style={[styles.scratch, { left: -9, top: 3.5, width: 5.5 }, C]} />
-      <Animated.View style={[styles.scratch, { left: -2, top: 3.5, width: 3.5 }, D]} />
+      <Animated.View style={[styles.scratch, { left: -4, top: -1, width: 11 }, B]} />
+      <Animated.View style={[styles.scratch, { left: -5, top: -1, width: 12 }, B2]} />
+      <Animated.View style={[styles.scratch, { left: 1.5, top: 3.5, width: 5.5 }, C]} />
+      <Animated.View style={[styles.scratch, { left: -3.5, top: 3.5, width: 3.5 }, D]} />
       <Animated.View style={[styles.wheel, wheel]}>
         <View style={styles.wheelRim} />
         <View style={styles.spokeH} />
@@ -823,7 +838,7 @@ function Purse({ S }: { S: SharedValue<any> }) {
     transform: [{ translateX: S.value.purse.x }, { translateY: S.value.purse.y }, { rotate: `${S.value.purse.rot}deg` }],
   }));
   return (
-    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+    <Animated.View nativeID="ph7-purse" style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.purseBody} />
       <View style={styles.purseNeck} />
       <View style={styles.purseTie} />
@@ -882,7 +897,7 @@ function Weight({ S, id, x }: { S: SharedValue<any>; id: string; x: number }) {
       const f = clamp01(v.rHungry / 0.55);
       const e = panAt(v.tilt, -1);
       tx = lerp(x, e.x, f);
-      ty = lerp(WEIGHT_Y, e.y + BAL.drop - 1, f) - 42 * Math.sin(Math.PI * f);
+      ty = lerp(WEIGHT_Y, e.y + BAL.drop - 1, f) - 112 * Math.sin(Math.PI * f);
       deg = -360 * f;
     } else if (id === 'law') {
       const r = v.rLaw;
@@ -896,7 +911,7 @@ function Weight({ S, id, x }: { S: SharedValue<any>; id: string; x: number }) {
     }
     return { opacity: show, transform: [{ translateX: tx }, { translateY: ty }, { rotate: `${deg}deg` }] };
   });
-  return <Animated.View style={[styles.rider, st]} pointerEvents="none"><WeightBody /></Animated.View>;
+  return <Animated.View nativeID={`ph7-weight-${id}`} style={[styles.rider, st]} pointerEvents="none"><WeightBody /></Animated.View>;
 }
 
 /** The fade through on the walk down to the harbour. */
@@ -919,7 +934,7 @@ function Heart({ S }: { S: SharedValue<any> }) {
     };
   });
   return (
-    <Animated.View style={[styles.rider, st]} pointerEvents="none">
+    <Animated.View nativeID="ph7-heart" style={[styles.rider, st]} pointerEvents="none">
       <View style={[styles.heartLobe, { left: -6.5 }]} />
       <View style={[styles.heartLobe, { left: -0.5 }]} />
       <View style={styles.heartPoint} />
@@ -932,17 +947,17 @@ function Heart({ S }: { S: SharedValue<any> }) {
 
 type Plate = { x: number; y: number; w: number; lines: readonly string[] };
 const Q1_PLATES: Plate[] = [
-  { x: SHARDS.x, y: 477, w: 42, lines: ['VOTES'] },
-  { x: TAB.x, y: 477, w: 42, lines: ['REASON'] },
-  { x: HORN.x, y: 477, w: 42, lines: ['A HORN'] },
+  { x: Q1_TAB_C, y: 477, w: 42, lines: ['REASON'] },
+  { x: SHARDS.x, y: 477, w: 34, lines: ['VOTES'] },
+  { x: HORN.x + 2, y: 477, w: 40, lines: ['A HORN'] },
 ];
 const PAN_PLATES: Plate[] = [
-  { x: 142, y: 454, w: 80, lines: ['CONSEQUENCES'] },
-  { x: 201, y: 454, w: 34, lines: ['RULE'] },
+  { x: 142, y: 446, w: 80, lines: ['CONSEQUENCES'] },
+  { x: 201, y: 446, w: 34, lines: ['RULE'] },
 ];
 const Q2_PLATES: Plate[] = WEIGHTS.map((g) => ({ x: g.x, y: PLATE2.y, w: g.id === 'hungry' ? 80 : PLATE2.w, lines: g.lines }));
 const Q3_PLATES: Plate[] = [
-  { x: 66, y: 496, w: 72, lines: ['THE SUNDIAL'] },
+  { x: 61, y: 496, w: 68, lines: ['THE SUNDIAL'] },
   { x: 175, y: 402, w: 72, lines: ['HIS FEELING'] },
   { x: 318, y: 337, w: 46, lines: ['A GULL'] },
 ];
@@ -960,22 +975,31 @@ function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2' | 'q3' | 
 }
 
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
-/** CAST YOUR VOTE: which of the three could settle the bicycle question? */
+/**
+ * CAST YOUR VOTE: which of the three could settle the bicycle question? Each box reaches up
+ * above its thing, so the verdict seal (struck at the box's top-right) lands in the air over
+ * the table, never on the tablet, the shards, the horn or their plates; the tablet's box sits
+ * a little right of the tablet, clear of the philosopher at its end.
+ */
 const VOTE_Q: Q[] = [
-  { id: 'shards', left: SHARDS.x - 21, top: 456, w: 42, h: 44, r: 4, correct: false },
-  { id: 'tablet', left: TAB.x - 21, top: 448, w: 42, h: 50, r: 4, correct: true },
-  { id: 'horn', left: HORN.x - 21, top: 456, w: 42, h: 44, r: 4, correct: false },
+  { id: 'tablet', left: Q1_TAB_C - 19, top: Q1_TOP, w: 38, h: 500 - Q1_TOP, r: 4, correct: true },
+  { id: 'shards', left: SHARDS.x - 16, top: Q1_TOP, w: 32, h: 500 - Q1_TOP, r: 4, correct: false },
+  { id: 'horn', left: HORN.x - 18, top: Q1_TOP, w: 32, h: 500 - Q1_TOP, r: 4, correct: false },
 ];
 /** LOAD THE SCALES: which weight belongs on the consequences pan? */
 const SCALE_Q: Q[] = WEIGHTS.map((g) => {
   const w = g.id === 'hungry' ? 80 : PLATE2.w;
-  return { id: g.id, left: g.x - w / 2, top: WEIGHT_Y - 14, w, h: PLATE2.y + PLATE2.h - WEIGHT_Y + 15, r: 4, correct: g.id === 'hungry' };
+  return { id: g.id, left: g.x - w / 2, top: WEIGHT_Y - 16, w, h: PLATE2.y + PLATE2.h - WEIGHT_Y + 17, r: 4, correct: g.id === 'hungry' };
 });
-/** READ THE HOUR: which gives him a good reason to think it is noon? (the harbour, on screen) */
+/**
+ * READ THE HOUR: which gives him a good reason to think it is noon? (the harbour, on screen)
+ * The heart's box reaches right of him and the gull's up above it, so each verdict seal (the
+ * box's top-right) lands in the air beside the thing, not on it or on its plate.
+ */
 const HOUR_Q: Q[] = [
-  { id: 'dial', left: 30, top: 428, w: 72, h: 86, r: 5, correct: true },
-  { id: 'heart', left: 157, top: 440, w: 36, h: 30, r: 6, correct: false },
-  { id: 'gull', left: 292, top: 306, w: 52, h: 46, r: 6, correct: false },
+  { id: 'dial', left: 26, top: 428, w: 70, h: 86, r: 5, correct: true },
+  { id: 'heart', left: 159, top: 440, w: 60, h: 30, r: 6, correct: false },
+  { id: 'gull', left: 292, top: 294, w: 52, h: 58, r: 6, correct: false },
 ];
 function StageTargets({ picked, onPick, live, S, qs, k }: {
   picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2' | 'q3';
@@ -1002,7 +1026,7 @@ const styles = StyleSheet.create({
   world: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   fade: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.cloudWhite.base },
-  tableShadow: { position: 'absolute', left: 256, top: 506, width: 140, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.45 },
+  tableShadow: { position: 'absolute', left: 260, top: 493, width: 114, height: 4, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.45 },
   cloud: { position: 'absolute', backgroundColor: W.cloudWhite.base },
   cloudFoot: { position: 'absolute', backgroundColor: W.cloudWhite.shade },
   stream: { position: 'absolute', left: 36.9, top: 425.6, width: 2.2, height: 19.4, borderRadius: 1.1, backgroundColor: W.ph7Water.base },
@@ -1033,7 +1057,7 @@ const styles = StyleSheet.create({
     backgroundColor: W.ph7Frame.base, borderWidth: 0.8, borderColor: INK,
   },
   tabWax: { position: 'absolute', left: -TAB.w / 2 + 1.8, top: -TAB.h / 2 + 1.8, width: TAB.w - 3.6, height: TAB.h - 3.6, backgroundColor: W.ph7Wax.base },
-  scratch: { position: 'absolute', height: 0.9, borderRadius: 0.45, backgroundColor: W.ph7Scratch.base, transformOrigin: '0% 50%' },
+  scratch: { position: 'absolute', height: 0.9, borderRadius: 0.45, backgroundColor: W.ph7Scratch.base, transformOrigin: '100% 50%' },
   wheel: { position: 'absolute', left: 3, top: -0.5, width: 6, height: 6 },
   wheelRim: { position: 'absolute', left: 0, top: 0, width: 6, height: 6, borderRadius: 3, borderWidth: 0.8, borderColor: W.ph7Scratch.base },
   spokeH: { position: 'absolute', left: 0.6, top: 2.7, width: 4.8, height: 0.6, backgroundColor: W.ph7Scratch.base },

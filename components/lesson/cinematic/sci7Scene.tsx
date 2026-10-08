@@ -43,11 +43,11 @@ import { BY_ID } from './wardrobe';
 //   windows on the night (30–80, 118–168, 300–350), shelves of jars between them, the
 //   panelled dado, the open door at the left edge (0–24) and the plank floor; then the
 //   stone sink and its brass tap (34–98), the BLACKBOARD 254–314 × 396–458, the REAGENT
-//   SHELF 300–398 at 428; then the BENCH 104–400 (top 462), drawn over both people's legs,
+//   SHELF 300–398 at 428; then the BENCH 104–400 (top 462, hip height, on open legs), stood behind both people,
 //   and on it the KIT — the small burner at 158 and the big one at 188, each under a
 //   tripod (gauze 440) with a beaker of water and a thermometer — the sugar bowl (145),
 //   and his own rig at 290: a lower tripod (gauze 446), the conical flask, the stock jar
-//   (302) and his notebook (304–318).
+//   (302) and his notebook (301–314); he works at it from 320, beside it, not over it.
 //   DOME (its own x 0–400): the pale shell and its ribs, the shutter SLIT 96–236 open on
 //   the night — a last sunset glow low at the left, the stars, Mars (150, 318), the town's
 //   roofs and street lamps — the brick drum and its rail, the floor; the stair's rail at
@@ -59,7 +59,9 @@ import { BY_ID } from './wardrobe';
 //        4.6s), writes in his notebook (pencil 5.4s), taps his chin, murmurs his line.
 //   b1   the door swings (its glass 1.4s); she walks in and waves.
 //   b2   one finger up, then he points out of the window.      b3 her two fists, the heavy one first.
-//   b4   both fists fall together.        b5 she stirs sugar into both beakers (stir 0.6s, glass 2.2s).
+//   b4   both fists fall together.        b5 she stirs the small beaker from its left (stir 0.6s),
+//        taps its rim (glass 2.2s), then stirs the big one from its far side (212) and
+//        turns back to him; in b6 she steps back to 76 as he comes over.
 //   b6   he walks over and turns the big burner down to match; she steps back.
 //   b7   Q1 LEVEL THE BENCH: the thermometers, the beakers or the burners.
 //   b8   she takes a stopwatch from her pocket (click 1.2s) and brings it over.
@@ -67,11 +69,12 @@ import { BY_ID } from './wardrobe';
 //   b10  she points at the eleven and beams.   b11 he rings the eleven (chalk tap 1.0s).
 //   b12  she uncorks her tonic (jar lid 0.4s), sips and strikes a pose.
 //   b13  he takes the bottle, walks it to the shelf and sets it down (glass 1.6s).
-//   b14  Q2 STOCK THE SHELF: the second tonic, the crate of plain bottles or the label.
-//   b15  up into the dome (a fade through the night); she points at the lamps and stars.
+//   b14  Q2 STOCK THE SHELF: the second tonic, the crate of plain bottles or the label (he steps back to 276).
+//   b15  up into the dome (a fade through the night); she points at the lamps and stars. In the dome
+//        he stands at the eyepiece end (310) and she by the stair (120), both clear of the tube.
 //   b16  he points at the sunset's last glow, the lamps and the stars.
-//   b17  she taps the telescope, then waves at the sky by Mars.    b18 he folds his arms.
-//   b19  she spreads her hands.   b20 he swings the telescope onto Mars (creak 0.8s).
+//   b17  she points at the telescope, then waves at the sky by Mars.    b18 he folds his arms.
+//   b19  she spreads her hands.   b20 he swings the telescope onto Mars by its eyepiece end (creak 0.8s).
 //   b21  Q3 CHECK THE SKY: the eyepiece, the poster or her diary.   b22 at ease.
 //
 // SIMPLE ON PURPOSE (AP7): two figures, each its own phase (N22) and its own blend start
@@ -131,37 +134,39 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 
 // ── where everybody stands (WORLD x; the dome is x + 400) ──────────────────────
 const HX = 400;
-const TH_WORK = 312;
+const TH_WORK = 320;
 const TH_KIT = 212;
 const TH_BOARD = 240;
 const TH_SHELF = 302;
-const TH_DOME = HX + 240;
+/** On the shelf question he steps back from it, so the tonic, the crate and the label are clear of him. */
+const TH_ASIDE = 276;
+const TH_DOME = HX + 310;
 const B_OFF = -40;
 const B_KIT = 134;
-const B_STIR = 164;
-const B_BACK = 110;
+const B_STIR = 212;
+const B_BACK = 76;
 const B_NEAR = 206;
-const B_DOME = HX + 306;
+const B_DOME = HX + 120;
 /** The climb (b15): a fade through the night at CUT; they come in from the stair, mid-walk. */
 const CUT = 0.45;
 const TH_ENTER = HX + 150;
-const B_ENTER = HX + 238;
+const B_ENTER = HX + 40;
 
 /** Each figure's walks for a beat: [start share, to x], one after another. */
 const TH_LEGS: Track[] = per((n) => (n < FAIR ? [[0, TH_WORK]] : n === FAIR ? [[0.0225, TH_KIT], [0.715, TH_BOARD]]
-  : n < HOPE ? [[0, TH_BOARD]] : n === HOPE ? [[0.092, TH_SHELF]] : n < DOME ? [[0, TH_SHELF]] : [[0, TH_DOME]]));
+  : n < HOPE ? [[0, TH_BOARD]] : n === HOPE ? [[0.092, TH_SHELF]] : n < DOME ? [[0, Q2[n] ? TH_ASIDE : TH_SHELF]] : [[0, TH_DOME]]));
 const B_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, B_OFF]] : n === ARRIVE ? [[0.2146, B_KIT]]
-  : n < SUGAR ? [[0, B_KIT]] : n === SUGAR ? [[0.278, B_STIR], [0.693, B_KIT]]
-    : n === FAIR ? [[0.595, B_BACK]] : n < ONCE ? [[0, B_BACK]] : n === ONCE ? [[0.325, B_NEAR]]
+  : n < SUGAR ? [[0, B_KIT]] : n === SUGAR ? [[0.47, B_STIR]]
+    : n === FAIR ? [[0, B_BACK]] : n < ONCE ? [[0, B_BACK]] : n === ONCE ? [[0.325, B_NEAR]]
       : n < DOME ? [[0, B_NEAR]] : [[0, B_DOME]]));
 /** Which way each faces: [share, ±1], eased through a profile; a walk turns them first. */
 const TH_TURN: Track[] = per((n) => (n < DOME ? (n === FAIR ? [[0, -1], [0.9, -1]]
   : n === REPEAT ? [[0, -1], [0.095, 1], [0.78, -1]]
     : n === CHECK ? [[0, -1], [0.02, 1], [0.36, -1]]
       : n === HOPE ? [[0, -1], [0.31, -1]] : [[0, -1]])
-  : n === HIDDEN ? [[0, 1], [0.05, -1], [0.82, 1]] : [[0, 1]]));
-const B_TURN: Track[] = per((n) => (n < DOME ? (n === SUGAR ? [[0, 1], [0.94, 1]] : n === FAIR ? [[0, 1], [0.78, 1]] : [[0, 1]])
-  : n === DOME ? [[0, 1], [0.36, -1]] : [[0, -1]]));
+  : n === DOME ? [[0, 1], [0.6, -1]] : [[0, -1]]));
+const B_TURN: Track[] = per((n) => (n < DOME ? (n === SUGAR ? [[0, 1], [0.757, -1], [0.95, 1]] : n === FAIR ? [[0, 1], [0.78, 1]] : [[0, 1]])
+  : [[0, 1]]));
 const TH_P = per((n) => (BEATS[n].speaker === 'tophat' ? (n % 2 ? TALK : EXPLAIN) : NOD));
 const B_P = per((n) => (BEATS[n].speaker === 'bun' ? TALK : NOD));
 
@@ -174,8 +179,8 @@ const MY_GAUZE = 445.6;
 const MOUTH = { x: 290, y: 426 };
 const JAR = { x: 302, y: 448 };
 const DROPPER = { x: 309, y: 460 };
-const PENCIL = { x: 315, y: 460.4 };
-const SPOON_REST = { x: 176, y: 461 };
+const PENCIL = { x: 311, y: 460.4 };
+const SPOON_REST = { x: 200, y: 461 };
 const CORK_REST = { x: 240, y: 461 };
 const SHELF_Y = 428;
 const SET = { x: 320, y: SHELF_Y };
@@ -217,9 +222,10 @@ const PICK: Record<string, number> = { thermo: 1, beakers: 2, burners: 3, tonic:
  *  the fists; the collar; the stopwatch and the chalk; the bottle; the sky; the arms folded. */
 const TH_R: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(0.15), 8, 464, 0], [S0(0.45), 10, 450, 1], [S0(0.8), 16, 426, 1], [S0(1.8), 17, 425, 1], [S0(2.05), 12, 442, 1],
-      [S0(2.3), 10, 450, 1], [S0(2.6), 8, 466, 0], [S0(4.9), 4, 462, 0.4],
-      [S0(5.2), 0, 459.4, 1], [S0(5.45), 3, 459.4, 1], [S0(5.7), 6, 459.4, 1], [S0(5.95), 9, 459.4, 1], [S0(6.25), 4, 456, 1], [S0(6.5), 8, 466, 0]];
+    // (he stands at 320, just right of his notebook, so nothing on the bench is behind him)
+    return [[S0(0.15), 16, 464, 0], [S0(0.45), 18, 450, 1], [S0(0.8), 24, 429, 1], [S0(1.8), 25, 428, 1], [S0(2.05), 20, 442, 1],
+      [S0(2.3), 18, 450, 1], [S0(2.6), 16, 466, 0], [S0(4.9), 12, 462, 0.4],
+      [S0(5.2), 7, 459.4, 1], [S0(5.45), 9, 459.4, 1], [S0(5.7), 11, 459.4, 1], [S0(5.95), 13, 459.4, 1], [S0(6.25), 10, 456, 1], [S0(6.5), 14, 466, 0]];
   }
   if (n === GUESS) return [[0.02, 8, 452, 0], [0.07, 12, 422, 1], [0.36, 12, 422, 1], [0.44, 169, 320, 1], [0.86, 169, 320, 1], [0.95, 8, 452, 0]];
   if (n === DROP) return [[0.02, 8, 452, 0], [0.08, 14, 426, 1], [0.3, 14, 426, 1], [0.36, 14, 454, 1], [0.45, 14, 454, 1], [0.52, 8, 452, 0]];
@@ -238,8 +244,8 @@ const TH_R: (readonly Key[])[] = per((n) => {
 /** His left hand: steadying the flask, the chin, the fists, the arms folded. */
 const TH_L: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(2.45), 8, 452, 0], [S0(2.85), 20, 457, 1], [S0(3.1), 21, 456, 1], [S0(3.4), 8, 452, 0],
-      [S0(3.95), 3, 459, 1], [S0(4.35), 18, 420, 1], [S0(4.75), 18, 420, 1], [S0(4.95), 3, 459, 1], [S0(5.15), 8, 452, 0],
+    return [[S0(2.45), 8, 452, 0], [S0(2.85), 28, 457, 1], [S0(3.1), 29, 456, 1],
+      [S0(3.95), 11, 459, 1], [S0(4.35), 24, 432, 1], [S0(4.75), 24, 432, 1], [S0(4.95), 11, 459, 1], [S0(5.15), 8, 452, 0],
       [S0(6.7), 8, 452, 0], [S0(6.95), 4, 420, 1], [S0(7.1), 4, 421.6, 1], [S0(7.25), 4, 420, 1], [S0(7.55), 8, 452, 0]];
   }
   if (n === DROP) return [[0.02, 8, 452, 0], [0.08, 9, 428, 1], [0.3, 9, 428, 1], [0.36, 9, 456, 1], [0.45, 9, 456, 1], [0.52, 8, 452, 0]];
@@ -251,9 +257,12 @@ const B_R: (readonly Key[])[] = per((n) => {
   if (n === ARRIVE) return [[0.79, 8, 452, 0], [0.84, 10, 418, 1], [0.88, 14, 414, 1], [0.92, 9, 416, 1], [0.97, 8, 452, 0]];
   if (n === BALLS) return [[0.04, 8, 452, 0], [0.12, 14, 424, 1], [0.5, 14, 424, 1], [0.58, 14, 452, 1], [0.8, 14, 452, 1], [0.9, 8, 452, 0]];
   if (n === SUGAR) {
+    // the small beaker from her side of it (134), a tap on its rim (the glass, 2.2s), then
+    // round to the far side (212) to stir the big one facing back — never standing over either
     return [[0.02, 8, 452, 0], [0.06, 11, 455, 1], [0.09, 11, 457.5, 1], [0.1, 14, 440, 1], [0.124, 24, 428, 1],
       [0.15, 21, 431, 1], [0.19, 26, 431, 1], [0.23, 24, 428, 1], [0.26, 12, 446, 1],
-      [0.42, 24, 428, 1], [0.45, 24, 430, 1], [0.5, 21, 431, 1], [0.56, 26, 431, 1], [0.6, 24, 429, 1], [0.64, 12, 459, 1], [0.68, 8, 452, 0]];
+      [0.4, 20, 427, 1], [0.43, 21, 425.4, 1], [0.455, 20, 427, 1], [0.47, 12, 446, 1],
+      [0.84, 24, 428, 1], [0.88, 24, 431.5, 1], [0.92, 24, 428.5, 1], [0.95, 12, 459, 1], [0.97, 8, 452, 0]];
   }
   if (n === ONCE) return [[0.02, 8, 452, 0], [0.07, 2, 468, 1], [0.15, 10, 440, 1], [0.22, 12, 436, 1], [0.26, 12, 436.5, 1], [0.3, 9, 440, 1]];
   if (n === REPEAT) return [[0, 9, 440, 1], [0.05, 22, 440, 1], [0.16, 22, 440, 1], [0.24, 8, 444, 1]];
@@ -263,10 +272,10 @@ const B_R: (readonly Key[])[] = per((n) => {
       [0.26, 6, 416, 1], [0.31, 12, 440, 1], [0.37, 14, 418, 1], [0.6, 14, 418, 1], [0.7, 22, 440, 1]];
   }
   if (n === HOPE) return [[0, 22, 440, 1], [0.04, 22, 440, 1], [0.07, 8, 452, 0]];
-  if (n === DOME) return [[0.38, 8, 452, 0], [0.44, 126, 398, 1], [0.56, 126, 398, 1], [0.62, 130, 290, 1], [0.78, 130, 290, 1], [0.85, 8, 452, 0]];
+  if (n === DOME) return [[0.38, 8, 452, 0], [0.44, 50, 398, 1], [0.56, 50, 398, 1], [0.62, 60, 290, 1], [0.78, 60, 290, 1], [0.85, 8, 452, 0]];
   if (n === PLANET) {
-    return [[0.02, 8, 452, 0], [0.06, 22, 442, 1], [0.08, 24, 444, 1], [0.1, 22, 442, 1], [0.12, 24, 444, 1], [0.16, 8, 452, 0],
-      [0.26, 8, 452, 0], [0.32, 150, 312, 1], [0.38, 150, 324, 1], [0.44, 150, 312, 1], [0.52, 8, 452, 0]];
+    return [[0.02, 8, 452, 0], [0.07, 60, 404, 1], [0.16, 60, 404, 1], [0.2, 8, 452, 0],
+      [0.26, 8, 452, 0], [0.32, 30, 312, 1], [0.38, 30, 324, 1], [0.44, 30, 312, 1], [0.52, 8, 452, 0]];
   }
   if (n === COMMIT) return [[0.04, 8, 452, 0], [0.14, 20, 428, 1], [0.8, 20, 428, 1], [0.9, 8, 452, 0]];
   return NONE;
@@ -503,7 +512,7 @@ export default function Sci7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
     sb = keyed(sb, B_L[n], u, xB, dB, -1);
     if (n === ARRIVE) sb = look(sb, -0.1 * st(0.8, 0.86));
     if (n === BALLS) sb = look(sb, 0.16 * hd(0.5, 0.58, 0.8, 0.9));
-    if (n === SUGAR) sb = look(sb, 0.14 * hd(0.04, 0.1, 0.62, 0.7));
+    if (n === SUGAR) sb = look(sb, 0.14 * hd(0.04, 0.1, 0.92, 0.96));
     if (n === ONCE) sb = look(sb, -0.12 * hd(0.24, 0.3, 0.9, 1));
     if (n === OUTLIER) sb = look(sb, -0.12 * hd(0.2, 0.28, 0.6, 0.7));
     if (n === TONIC) sb = look(sb, -0.18 * hd(0.37, 0.42, 0.6, 0.66));
@@ -535,7 +544,7 @@ export default function Sci7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
     const aim = carry(cv, 5, n, AIM0, aimNow, tr);
     if (n === WRONG) {
       const g = hd(0.04, 0.12, 0.3, 0.36);
-      const gp = tubeAt(-16, aim);
+      const gp = tubeAt(12, aim);
       sh = hand(sh, xT, GROUND, dT, 1, gp.x + cam + HX, gp.y + 1, g);
       sh = lean(sh, -0.08 * st(0.34, 0.44));
     }
@@ -590,12 +599,12 @@ export default function Sci7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
     // ── the kit: the big flame turned down, the spoon, the sugar ─────────────
     const bigNow = n < FAIR ? 1 : n === FAIR ? 1 - st(0.36, 0.46) : 0;
     const big = carry(cv, 21, n, 1, bigNow, tr);
-    const spoonHold = n === SUGAR ? hd(0.07, 0.09, 0.62, 0.64) : 0;
+    const spoonHold = n === SUGAR ? hd(0.07, 0.09, 0.95, 0.96) : 0;
     const spoonX = carry(cv, 22, n, SPOON_REST.x, lerp(SPOON_REST.x + cam, bR.x, spoonHold), tr);
     const spoonY = carry(cv, 23, n, SPOON_REST.y, lerp(SPOON_REST.y, bR.y, spoonHold), tr);
     const spoonO = carry(cv, 24, n, 0, n < SUGAR ? 0 : n === SUGAR ? st(0.06, 0.08) : n < DOME ? 1 : 0, tr);
     const sugarA = n === SUGAR ? hd(0.11, 0.124, 0.24, 0.26) : 0;
-    const sugarB = n === SUGAR ? hd(0.4, 0.42, 0.58, 0.6) : 0;
+    const sugarB = n === SUGAR ? hd(0.84, 0.855, 0.9, 0.92) : 0;
 
     // ── the stopwatch: out of her pocket, held, tapped, back in her pocket ──
     const swIn = n < ONCE ? 0 : n === ONCE ? st(0.06, 0.09) : n < TONIC ? 1 : n === TONIC ? 1 - st(0.02, 0.035) : 0;
@@ -708,11 +717,7 @@ export default function Sci7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
           <Poster S={SCENE} />
           <Diary S={SCENE} />
         </Animated.View>
-        {/* cast: tophat */}
-        <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
-        {/* cast: bun */}
-        <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
-        {/* the bench, over both people's legs, and the apparatus on it */}
+        {/* the bench, BEHIND both people (they work at its near side), and the apparatus on it */}
         <Animated.View style={[styles.world, world2]} pointerEvents="none">
           <View style={styles.benchShadow} />
           <Flames S={SCENE} />
@@ -721,6 +726,10 @@ export default function Sci7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
           <Flask S={SCENE} />
           <Notes S={SCENE} />
         </Animated.View>
+        {/* cast: tophat */}
+        <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
+        {/* cast: bun */}
+        <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
         {/* what is in their hands */}
         <Jar S={SCENE} />
         <Dropper S={SCENE} />
@@ -1040,7 +1049,7 @@ function Notes({ S }: { S: SharedValue<any> }) {
     <>
       <Animated.View style={[styles.noteLine, { top: 461.2 }, a]} />
       <Animated.View style={[styles.noteLine, { top: 461.9, width: 4 }, b]} />
-      <Animated.View style={[styles.noteLine, { left: 312.4, top: 461.2, width: 4.4 }, c]} />
+      <Animated.View style={[styles.noteLine, { left: 311.6, top: 461.2, width: 2.2 }, c]} />
     </>
   );
 }
@@ -1209,7 +1218,7 @@ function Fade({ S }: { S: SharedValue<any> }) {
 type Plate = { x: number; y: number; w: number; lines: readonly string[] };
 const Q1_PLATES: Plate[] = [
   { x: 173, y: 389, w: 78, lines: ['THERMOMETERS'] },
-  { x: 222, y: 425, w: 48, lines: ['BEAKERS'] },
+  { x: 124, y: 425, w: 48, lines: ['BEAKERS'] },
   { x: 173, y: 465, w: 50, lines: ['BURNERS'] },
 ];
 const Q2_PLATES: Plate[] = [
@@ -1219,7 +1228,7 @@ const Q2_PLATES: Plate[] = [
 ];
 const Q3_PLATES: Plate[] = [
   { x: POSTER.x + 32, y: 401, w: 46, lines: ['POSTER'] },
-  { x: 282, y: 452, w: 54, lines: ['EYEPIECE'] },
+  { x: 268, y: 452, w: 54, lines: ['EYEPIECE'] },
   { x: DIARY.x, y: 466, w: 40, lines: ['DIARY'] },
 ];
 function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2' | 'q3'; items: Plate[] }) {
@@ -1251,7 +1260,7 @@ const SHELF_Q: Q[] = [
 /** CHECK THE SKY: which could prove her bright planet wrong? (the dome, on screen) */
 const SKY_Q: Q[] = [
   { id: 'poster', left: POSTER.x - 2, top: 348, w: 68, h: 68, r: 5, correct: false },
-  { id: 'eyepiece', left: 260, top: 430, w: 44, h: 38, r: 6, correct: true },
+  { id: 'eyepiece', left: 252, top: 430, w: 40, h: 38, r: 6, correct: true },
   { id: 'diary', left: DIARY.x - 22, top: 446, w: 44, h: 36, r: 5, correct: false },
 ];
 function StageTargets({ picked, onPick, live, S, qs, k }: {
@@ -1316,7 +1325,7 @@ const styles = StyleSheet.create({
   liquidPic: { position: 'absolute', left: 10, bottom: -0.4, width: 0, height: 0 },
   flaskBubble: { position: 'absolute', left: -0.9, top: -0.9, width: 1.8, height: 1.8, borderRadius: 0.9, backgroundColor: W.sc7Glass.base },
   dropBead: { position: 'absolute', left: -0.8, top: 0, width: 1.6, height: 2.2, borderRadius: 0.8, backgroundColor: W.sc7Blue.base },
-  noteLine: { position: 'absolute', left: 305.6, width: 4.6, height: 0.4, backgroundColor: W.sc7Iron.base, transformOrigin: '0% 50%' },
+  noteLine: { position: 'absolute', left: 306.8, width: 4.6, height: 0.4, backgroundColor: W.sc7Iron.base, transformOrigin: '0% 50%' },
   streamAt: { position: 'absolute', left: -0.7, top: 0, width: 1.4, borderRadius: 0.7, backgroundColor: W.sc7Blue.base, transformOrigin: '50% 0%' },
   jarGlass: { position: 'absolute', left: -4.6, top: 1, width: 9.2, height: 13, borderRadius: 1.6, backgroundColor: W.sc7Glass.base, borderWidth: 0.8, borderColor: INK },
   jarFill: { position: 'absolute', left: -3.8, top: 5, width: 7.6, height: 8.2, borderBottomLeftRadius: 1.2, borderBottomRightRadius: 1.2, backgroundColor: W.sc7Blue.base },

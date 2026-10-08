@@ -44,11 +44,13 @@ import { BY_ID } from './wardrobe';
 //   284), the EYE CHART 178–218 × 292–354, the BLACKBOARD 232–388 × 288–372 with its chalk
 //   curve of reaction times, oak panelling 410–488 and a parquet floor; then the DOORWAY
 //   2–46 × 364–490 (its oak leaf swings), the coat stand (64), a bentwood chair (96), the
-//   glass CABINET 112–174 × 318–488; then the OAK BENCH 203–401 (top 461–470) drawn over
-//   the psychologist's legs: on it the bean JAR (212), the CHRONOSCOPE (238) and the card
-//   PRICELESS, his NOTEBOOK (264), the tray with two white CUPS (289, 307) and the pot
-//   (300), his own cup (328), the LOGBOOK (328), the telegraph KEY (340), the METRONOME
-//   (362), notebooks and a green lamp.
+//   glass CABINET 112–174 × 318–488; then the OAK BENCH 203–401 at a working height, its
+//   top 468–473 at his hip, and both of them stand IN FRONT of it (nothing of it is ever
+//   over a figure): on it the CHRONOSCOPE (222) with the card PRICELESS leaning at its foot,
+//   the bean JAR (257), his NOTEBOOK (279), the tray with two white CUPS (294, 311) and the
+//   pot (302), his own cup (334), the LOGBOOK (325), the telegraph KEY (340), the METRONOME
+//   (374) and a green lamp. He works the tray from 324, the card from 240, the desk from
+//   348; the plain one works the chronoscope from the bench's left end (192).
 //   CONCOURSE (its own x 0–400): the iron-and-glass shed roof, the far end screen, the
 //   platforms and the train at gate 2; the train at gate 5 (it pulls out); the brick screen
 //   wall with GATE 2 52–150 and GATE 5 262–360, their enamel numbers, the stone floor, the
@@ -136,9 +138,9 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 
 // ── where everybody stands (WORLD x; the concourse is x + 400) ────────────────
 const HX = 400;
-const TH_DESK = 350;
-const TH_TRAY = 310;
-const TH_TIMER = 290;
+const TH_DESK = 348;
+const TH_TRAY = 324;
+const TH_TIMER = 240;
 const TH_HALL = HX + 236;
 const TH_TICKET = HX + 294;
 const TH_SEAT = HX + 294;
@@ -150,8 +152,8 @@ const PL_EXIT = 360;
 const PL_ENTER = HX + 30;
 const PL_OFF = -40;
 const PL_LEAN = 186;
-const PL_TIMER = 214;
-const PL_GATE2 = HX + 160;
+const PL_TIMER = 192;
+const PL_GATE2 = HX + 176;
 const PL_GATE5 = HX + 332;
 const PL_MACHINE = HX + 356;
 const PL_SEAT = HX + 324;
@@ -173,18 +175,18 @@ const TH_P = per((n) => (n === REWARD ? FOLD : BEATS[n].speaker === 'tophat' ? (
 const PL_P = per((n) => (BEATS[n].speaker === 'plain' ? TALK : NOD));
 
 // ── the bench (world = screen in the laboratory) ──────────────────────────────
-const JAR = { x: 212, y: 466 };
-const TIMER = { x: 238, y: 463 };
-const BOOK = { x: 264, y: 466 };
-const CUP_A = { x: 286.5, y: 462.7 };
-const CUP_B = { x: 307, y: 462.7 };
-const MYCUP = { x: 328, y: 460.4 };
-const LOG = { x: 328, y: 466 };
-const KEY = { x: 340, y: 466 };
-const METRO = { x: 358, y: 461 };
-const PENCIL = { x: 336, y: 465.6 };
-const TALLY_C = { x: 298, y: 466 };
-const PRICE = { x: 268, y: 451.5, w: 54 };
+const JAR = { x: 257, y: 473 };
+const TIMER = { x: 222, y: 470 };
+const BOOK = { x: 279, y: 473 };
+const CUP_A = { x: 294.5, y: 469.7 };
+const CUP_B = { x: 310.6, y: 469.7 };
+const MYCUP = { x: 334, y: 467.4 };
+const LOG = { x: 325, y: 473 };
+const KEY = { x: 340, y: 473 };
+const METRO = { x: 374, y: 468 };
+const PENCIL = { x: 338, y: 472.6 };
+const TALLY_C = { x: 302, y: 473 };
+const PRICE = { x: 222, y: 475, w: 54 };
 // ── the concourse (own x; screen = own x once there) ─────────────────────────
 const TRAIN = { x: 250, y: 466 };
 const BOARD = { x: 206, y: 290 };
@@ -202,18 +204,18 @@ const PICK: Record<string, number> = { opinion: 1, cups: 2, beans: 3, memory: 4,
 /** His right hand: the key, the pencil, the metronome, the cups, the pot, the card, the logbook, the crowd, the ticket. */
 const TH_R: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(0.35), 9, 468, 0], [S0(0.7), 10, 459, 1], [S0(1.1), 10, 464.4, 1], [S0(1.35), 12, 462, 1],
-      [S0(2.2), 22, 463, 1], [S0(2.4), 22, 465, 1], [S0(3.2), 13, 465.3, 1], [S0(3.55), 10, 459, 1], [S0(3.8), 10, 464.4, 1], [S0(4.1), 9, 468, 0],
-      [S0(5.45), 9, 468, 0], [S0(5.62), 12, 444, 1], [S0(5.8), 14, 447, 1], [S0(6.05), 9, 468, 0]];
+    return [[S0(0.35), 9, 468, 0], [S0(0.7), 10, 466, 1], [S0(1.1), 10, 471.4, 1], [S0(1.35), 12, 469, 1],
+      [S0(2.2), 22, 470, 1], [S0(2.4), 22, 472, 1], [S0(3.2), 13, 472.3, 1], [S0(3.55), 10, 466, 1], [S0(3.8), 10, 471.4, 1], [S0(4.1), 9, 468, 0],
+      [S0(5.45), 9, 468, 0], [S0(5.62), 22, 451, 1], [S0(5.8), 24, 454, 1], [S0(6.05), 9, 468, 0]];
   }
-  if (n === ARRIVE) return [[0.04, 9, 468, 0], [0.12, 16, 461, 1], [0.22, 12, 465, 1], [0.32, 9, 468, 0]];
-  if (n === CUPS) return [[0.18, 8, 468, 0], [0.24, 6, 461, 1], [0.27, 6, 461, 1], [0.36, 5, 446, 1], [0.78, 5, 446, 1], [0.86, 6, 461, 1], [0.92, 8, 468, 0]];
-  if (n === POT) return [[0.04, 9, 468, 0], [0.13, 12, 440, 1], [0.18, 12, 443, 1], [0.23, 12, 440, 1], [0.28, 12, 443, 1], [0.38, 9, 468, 0]];
-  if (n === TALLY) return [[0.13, 9, 468, 0], [0.19, 14, 463, 1], [0.24, 13, 461, 1], [0.28, 15, 461, 1], [0.32, 13, 461, 1], [0.36, 15, 461, 1], [0.4, 12, 459, 1], [0.46, 9, 468, 0]];
-  if (n === CARD) return [[0.02, 9, 468, 0], [0.1, 22, 452, 1], [0.13, 22, 452, 1], [0.22, 16, 438, 1], [0.3, 16, 438, 1], [0.38, 14, 464, 1], [0.44, 9, 468, 0]];
+  if (n === ARRIVE) return [[0.04, 9, 468, 0], [0.12, 18, 468, 1], [0.22, 14, 472, 1], [0.32, 9, 468, 0]];
+  if (n === CUPS) return [[0.18, 8, 468, 0], [0.24, 13.4, 468, 1], [0.27, 13.4, 468, 1], [0.36, 5, 446, 1], [0.78, 5, 446, 1], [0.86, 13.4, 468, 1], [0.92, 8, 468, 0]];
+  if (n === POT) return [[0.04, 9, 468, 0], [0.13, 21, 440, 1], [0.18, 21, 443, 1], [0.23, 21, 440, 1], [0.28, 21, 443, 1], [0.38, 9, 468, 0]];
+  if (n === TALLY) return [[0.13, 9, 468, 0], [0.19, 22, 470, 1], [0.24, 21, 468, 1], [0.28, 23, 468, 1], [0.32, 21, 468, 1], [0.36, 23, 468, 1], [0.4, 20, 466, 1], [0.46, 9, 468, 0]];
+  if (n === CARD) return [[0.02, 9, 468, 0], [0.1, 18, 470, 1], [0.13, 18, 470, 1], [0.22, 6, 438, 1], [0.3, 6, 438, 1], [0.38, 18, 476, 1], [0.44, 9, 468, 0]];
   if (n === REBUILD) {
-    return [[0, 9, 468, 0], [0.04, 18, 462, 1], [0.08, 14, 464, 1], [0.13, 9, 468, 0],
-      [0.5, 9, 468, 0], [0.56, 20, 462, 1], [0.6, 20, 465, 1], [0.64, 20, 462, 1], [0.68, 20, 465, 1], [0.76, 9, 468, 0]];
+    return [[0, 9, 468, 0], [0.04, 22, 469, 1], [0.08, 18, 471, 1], [0.13, 9, 468, 0],
+      [0.5, 9, 468, 0], [0.56, 26, 469, 1], [0.6, 24, 472, 1], [0.66, 18, 472, 1], [0.76, 9, 468, 0]];
   }
   if (n === COPY) return [[0.08, 8, 452, 0], [0.18, 22, 432, 1], [0.7, 22, 432, 1], [0.8, 8, 452, 0]];
   if (n === STORY) return [[0.18, 8, 452, 0], [0.27, 20, 448, 1], [0.32, 20, 448, 1], [0.42, 12, 412, 1], [0.8, 12, 412, 1], [0.9, 7, 452, 1]];
@@ -224,10 +226,10 @@ const TH_R: (readonly Key[])[] = per((n) => {
 /** His left hand: his coffee cup, the gold cup, the gold label. */
 const TH_L: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(4.15), 8, 468, 0], [S0(4.35), 22, 459, 1], [S0(4.65), 11, 433, 1], [S0(4.92), 11, 434, 1], [S0(5.08), 22, 459.4, 1], [S0(5.25), 8, 468, 0]];
+    return [[S0(4.15), 8, 468, 0], [S0(4.35), 16, 466, 1], [S0(4.65), 11, 433, 1], [S0(4.92), 11, 434, 1], [S0(5.08), 16, 466.4, 1], [S0(5.25), 8, 468, 0]];
   }
-  if (n === CUPS) return [[0.18, 8, 468, 0], [0.24, 23, 461, 1], [0.27, 23, 461, 1], [0.36, 18, 444, 1], [0.78, 18, 444, 1], [0.86, 23, 461, 1], [0.92, 8, 468, 0]];
-  if (n === TALLY) return [[0.02, 8, 468, 0], [0.07, 23, 459, 1], [0.1, 23, 459, 1], [0.15, 5, 459, 1], [0.18, 5, 459, 1], [0.22, 8, 468, 0]];
+  if (n === CUPS) return [[0.18, 8, 468, 0], [0.24, 29.5, 468, 1], [0.27, 29.5, 468, 1], [0.36, 18, 444, 1], [0.78, 18, 444, 1], [0.86, 29.5, 468, 1], [0.92, 8, 468, 0]];
+  if (n === TALLY) return [[0.02, 8, 468, 0], [0.07, 29.5, 466, 1], [0.1, 29.5, 466, 1], [0.15, 13.4, 466, 1], [0.18, 13.4, 466, 1], [0.22, 8, 468, 0]];
   return NONE;
 });
 /** The plain one's right hand: his boast, his chest and temple, the timer, the floor, his forehead, the ticket, the coins. */
@@ -236,9 +238,9 @@ const PL_R: (readonly Key[])[] = per((n) => {
   if (n === INSIST) {
     return [[0.06, 8, 452, 0], [0.16, 5, 456, 1], [0.3, 5, 456, 1], [0.48, 9, 428, 1], [0.64, 9, 428, 1], [0.8, 8, 452, 0]];
   }
-  if (n === ADMIRE) return [[0.6, 8, 452, 0], [0.7, 15, 444, 1], [0.9, 15, 444, 1], [1, 8, 452, 0]];
+  if (n === ADMIRE) return [[0.6, 8, 452, 0], [0.7, 20, 446, 1], [0.9, 20, 446, 1], [1, 8, 452, 0]];
   if (n === STICKER) {
-    return [[0.03, 8, 452, 0], [0.1, 17, 434, 1], [0.16, 20, 438, 1], [0.4, 20, 438, 1], [0.48, 17, 434, 1], [0.54, 8, 452, 0],
+    return [[0.03, 8, 452, 0], [0.1, 22, 440, 1], [0.16, 24, 444, 1], [0.4, 24, 444, 1], [0.48, 22, 440, 1], [0.54, 8, 452, 0],
       [0.6, 8, 452, 0], [0.68, 14, 478, 1], [0.74, 18, 480, 1], [0.8, 12, 478, 1], [0.86, 18, 480, 1], [0.94, 8, 452, 0]];
   }
   if (n === Q2_AT) return [[0.02, 8, 452, 0], [0.12, 10, 425, 1]];
@@ -533,8 +535,8 @@ export default function Psych7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const cardDown = n === CARD ? st(0.37, 0.39) : n > CARD ? 1 : 0;
     const flip = n === CARD ? st(0.24, 0.32) : n > CARD ? 1 : 0;
     const price = {
-      x: lerp(lerp(PRICE.x + cam, 280 + cam, cardDown), tR.x, cardUp),
-      y: lerp(lerp(PRICE.y, 465, cardDown), tR.y + 2, cardUp),
+      x: lerp(PRICE.x + cam, tR.x, cardUp),
+      y: lerp(lerp(PRICE.y, 478, cardDown), tR.y + 2, cardUp),
       sy: lerp(1, 0.26, cardDown),
       flip,
     };
@@ -592,6 +594,7 @@ export default function Psych7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
   const DT = useDerivedValue<Bundle>(() => SCENE.value.ph);
   const world = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
   const world2 = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
+  const world3 = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
 
   return (
     <View style={styles.scene}>
@@ -612,22 +615,25 @@ export default function Psych7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
         <Board S={SCENE} />
         <StationClock S={SCENE} />
       </Animated.View>
-      {/* cast: tophat */}
-      <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
-      {/* the oak bench, over his legs, and what is on it */}
+      {/* the oak bench at hip height, and what rests on it; he stands IN FRONT of it */}
       <Animated.View style={[styles.world, world2]} pointerEvents="none">
         <LessonPicture name="psych7-lab-bench" />
         <Jar S={SCENE} />
         <Timer S={SCENE} />
         <Book S={SCENE} />
-        <MyCup S={SCENE} />
         <Metronome S={SCENE} />
+        <MyCup S={SCENE} />
         <Logbook S={SCENE} />
         <TallyCard S={SCENE} />
+        <TelegraphKey S={SCENE} />
+      </Animated.View>
+      {/* cast: tophat */}
+      <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
+      {/* what passes through his hands: the two cups and their gold label */}
+      <Animated.View style={[styles.world, world3]} pointerEvents="none">
         <Cup S={SCENE} k="cupA" />
         <Cup S={SCENE} k="cupB" />
         <Label S={SCENE} />
-        <TelegraphKey S={SCENE} />
       </Animated.View>
       <Pencil S={SCENE} />
       <PriceCard S={SCENE} />
@@ -948,7 +954,7 @@ function Coin({ S }: { S: SharedValue<any> }) {
 function StickerPlate({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({ opacity: S.value.sticker, transform: [{ scale: 0.8 + 0.2 * S.value.sticker }] }));
   return (
-    <Animated.View style={[styles.plate, { left: 216, top: 472, width: 82, height: 14 }, st]} pointerEvents="none">
+    <Animated.View style={[styles.plate, { left: 200, top: 480, width: 82, height: 14 }, st]} pointerEvents="none">
       <Text style={[styles.plateText, { width: 80 }]}>KITCHEN TIMER</Text>
     </Animated.View>
   );
@@ -957,7 +963,7 @@ function StickerPlate({ S }: { S: SharedValue<any> }) {
 function FirstClass({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({
     opacity: S.value.first,
-    transform: [{ translateX: S.value.ticket.x }, { translateY: S.value.ticket.y - 16 }, { scale: 0.8 + 0.2 * S.value.first }],
+    transform: [{ translateX: S.value.ticket.x }, { translateY: S.value.ticket.y - 44 }, { scale: 0.8 + 0.2 * S.value.first }],
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
@@ -977,14 +983,14 @@ function Fade({ S }: { S: SharedValue<any> }) {
 
 type Plate = { x: number; y: number; w: number; lines: readonly string[] };
 const Q1_PLATES: Plate[] = [
-  { x: JAR.x, y: 490, w: 40, lines: ['BEANS'] },
-  { x: BOOK.x, y: 474, w: 50, lines: ['HIS', 'OPINION'] },
-  { x: 314, y: 490, w: 80, lines: ['SWAPPED CUPS'] },
+  { x: JAR.x, y: 497, w: 40, lines: ['BEANS'] },
+  { x: BOOK.x, y: 481, w: 66, lines: ['HIS OPINION'] },
+  { x: 319, y: 497, w: 80, lines: ['SWAPPED CUPS'] },
 ];
 const Q2_PLATES: Plate[] = [
   { x: 240, y: 360, w: 68, lines: ['HIS MEMORY'] },
-  { x: 320, y: 474, w: 52, lines: ['LOGBOOK'] },
-  { x: 368, y: 490, w: 62, lines: ['METRONOME'] },
+  { x: LOG.x, y: 481, w: 52, lines: ['LOGBOOK'] },
+  { x: 368, y: 497, w: 62, lines: ['METRONOME'] },
 ];
 const Q3_PLATES: Plate[] = [
   { x: 104, y: 402, w: 64, lines: ['THE CROWD'] },
@@ -1007,15 +1013,15 @@ function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2' | 'q3'; i
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean; seal?: 'br' | 'tr' };
 /** RUN THE TEST: which would show whether the gold label changed the taste? */
 const TEST_Q: Q[] = [
-  { id: 'beans', left: 190, top: 432, w: 44, h: 74, r: 5, correct: false },
-  { id: 'opinion', left: 238, top: 452, w: 50, h: 46, r: 5, correct: false },
-  { id: 'cups', left: 276, top: 438, w: 78, h: 68, r: 5, correct: true },
+  { id: 'beans', left: 243, top: 448, w: 25, h: 66, r: 5, correct: false },
+  { id: 'opinion', left: 268, top: 462, w: 25, h: 46, r: 5, correct: false },
+  { id: 'cups', left: 293, top: 446, w: 38, h: 68, r: 5, correct: true },
 ];
 /** FIND THE RECORD: which could settle what was dropped that day? */
 const RECORD_Q: Q[] = [
   { id: 'memory', left: 204, top: 378, w: 64, h: 64, r: 8, correct: false, seal: 'br' },
-  { id: 'logbook', left: 293, top: 452, w: 52, h: 38, r: 5, correct: true },
-  { id: 'metronome', left: 345, top: 434, w: 54, h: 72, r: 5, correct: false },
+  { id: 'logbook', left: 299, top: 459, w: 52, h: 38, r: 5, correct: true },
+  { id: 'metronome', left: 356, top: 440, w: 42, h: 74, r: 5, correct: false },
 ];
 /** FIND YOUR PLATFORM: where should he look to find the five past ten? (the concourse, on screen) */
 const PLATFORM_Q: Q[] = [

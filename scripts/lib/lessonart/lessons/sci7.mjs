@@ -238,23 +238,29 @@ export function labMid() {
   return o.join('');
 }
 
-/** NEAR: the long bench, drawn over both people's legs — a dark slate top on a panelled
- *  cupboard base — and the still apparatus on it: the burners, their tripods and hoses,
- *  the gas tap, the sugar bowl, the notebook. */
+/** The long bench, stood BEHIND both people (they work at its near side, nothing of them
+ *  hidden): a slate top at hip height (38 above the floor) on an open frame of four square
+ *  legs, an apron under the top and a low stretcher shelf near the floor — so the room
+ *  shows through it and their legs read against the floor, not against a dark cupboard —
+ *  and the still apparatus on it: the burners, their tripods and hoses, the gas tap, the
+ *  sugar bowl, the notebook. */
 export function labBench() {
   const o = [];
+  // the four legs, the low stretcher shelf between them, and a crate stored on it
+  for (const x of [108, 204, 300, 392]) {
+    o.push(rect(x, 466, 4.4, 34, WOOD_D, 0.8));
+    o.push(box(x + 2.6, 467, 1.4, 32, WOOD_DD, 0.6));
+  }
+  o.push(rect(108, 487, 288, 3, WOOD, 0.8));
+  o.push(box(109, 487.4, 286, 0.9, WOOD_L, 0.8));
+  o.push(rect(338, 477, 26, 10, WOOD_L, 0.8));
+  o.push(box(339, 481.6, 24, 1, WOOD_D, 0.7));
+  // the apron under the top
+  o.push(rect(106, 467.4, 292, 4, WOOD_D, 0.8));
+  o.push(box(107, 467.9, 290, 1, WOOD, 0.8));
   // the slate top and its lit edge
   o.push(rect(104, 462, 296, 6, TOP_L, 1));
   o.push(box(105, 462.6, 294, 1.6, '#7A685A'));
-  // the cupboard base
-  o.push(rect(108, 468, 290, 34, WOOD_D, 1));
-  o.push(box(350, 469, 47, 32, WOOD_DD, 0.45));
-  for (let x = 114; x < 392; x += 46) {
-    o.push(rect(x, 472, 40, 26, WOOD, 0.7, 1));
-    o.push(box(x + 1, 473, 38, 1.6, WOOD_L, 0.7));
-    o.push(rect(x + 18, 482, 4, 4, BRASS, 0.5, 2));                                 // a knob
-  }
-  o.push(box(108, 498, 290, 4, WOOD_DD));                                            // the plinth's shadow
   // the gas tap tower between the two kit burners, its hoses curling out to each
   o.push(line('M170,462 C166,460 162,461 158,462.4', HOSE_D, 2.4));
   o.push(line('M170,462 C166,460 162,461 158,462.4', HOSE, 1.3));
@@ -283,8 +289,8 @@ export function labBench() {
   o.push(fill('M140.4,456 L149.6,456 C149.6,461 147,462 145,462 C143,462 140.4,461 140.4,456 Z', '#E8E2D2', 0.7));
   o.push(ell(145, 456, 4.6, 1.2, '#FAFAF4', 0.5));
   // his notebook lying open on the bench
-  o.push(fill('M304,460.6 L318,460.6 L319,462.6 L303,462.6 Z', '#F3ECD9', 0.6));
-  o.push(line('M311,460.6 L311,462.6', '#C9BEA0', 0.4));
+  o.push(fill('M301,460.6 L314,460.6 L315,462.6 L300,462.6 Z', '#F3ECD9', 0.6));
+  o.push(line('M307.5,460.6 L307.5,462.6', '#C9BEA0', 0.4));
   return o.join('');
 }
 

@@ -291,37 +291,39 @@ export function labMid() {
   return o.join('');
 }
 
-/** NEAR: the long oak bench over his legs: its top, apron and legs, the green lamp, the
- *  stack of notebooks, the tray of saucers, the coffee pot, the key's wires. */
+/** NEAR: the long oak bench, at a working height (its top at his hip, 32 above the floor):
+ *  its top, apron and legs, the green lamp at its far end, the tray of saucers with the
+ *  coffee pot, the key's wires. He stands IN FRONT of it, so nothing of it is over him. */
 export function labBench() {
   const o = [];
   // the floor shadow under it
   o.push(flat('M206,500 L398,500 L400,506 L204,506 Z', '#000', 0.12));
   // the legs (back legs first, a touch higher and darker), the stretcher
-  o.push(rect(214, 470, 7, 28, OAK_D, 0.8));
-  o.push(rect(386, 470, 7, 28, OAK_D, 0.8));
-  o.push(rect(206, 470, 8, 31, OAK, 0.9));
-  o.push(box(210.5, 471, 3, 29, OAK_D));
-  o.push(rect(390, 470, 8, 31, OAK, 0.9));
-  o.push(box(394.5, 471, 3, 29, OAK_D));
-  o.push(rect(213, 490, 178, 3.4, OAK_D, 0.7));
+  o.push(rect(214, 477, 7, 21, OAK_D, 0.8));
+  o.push(rect(386, 477, 7, 21, OAK_D, 0.8));
+  o.push(rect(206, 477, 8, 24, OAK, 0.9));
+  o.push(box(210.5, 478, 3, 22, OAK_D));
+  o.push(rect(390, 477, 8, 24, OAK, 0.9));
+  o.push(box(394.5, 478, 3, 22, OAK_D));
+  o.push(rect(213, 492, 178, 3, OAK_D, 0.7));
   // the top: the far edge, the lit top face, the front edge and the apron
-  o.push(fill('M206,461 L398,461 L400,466 L204,466 Z', OAK_L, 0.9));
-  o.push(rect(203, 466, 198, 4.4, OAK, 0.9));
-  o.push(box(204, 469, 196, 1.2, OAK_D));
-  o.push(rect(208, 470.4, 188, 9, OAK_D, 0.8));
-  o.push(line('M260,475 L262,475 M320,475 L322,475', BRASS, 1.2));       // drawer pulls
-  o.push(line('M232,470.4 L232,479.4 M292,470.4 L292,479.4 M352,470.4 L352,479.4', OAK_DD, 0.6));
+  o.push(fill('M206,468 L398,468 L400,473 L204,473 Z', OAK_L, 0.9));
+  o.push(rect(203, 473, 198, 4.4, OAK, 0.9));
+  o.push(box(204, 476, 196, 1.2, OAK_D));
+  o.push(rect(208, 477.4, 188, 7.4, OAK_D, 0.8));
+  o.push(line('M260,481 L262,481 M320,481 L322,481', BRASS, 1.2));       // drawer pulls
+  o.push(line('M232,477.4 L232,484.8 M292,477.4 L292,484.8 M352,477.4 L352,484.8', OAK_DD, 0.6));
   // the wires from the key along the back of the bench to the timer
-  o.push(line('M343,465 C330,463 300,462.4 280,462.2 C266,462 258,462.6 254,462', '#7A3B2A', 0.7));
-  o.push(line('M343,464.4 C330,462.6 300,461.8 280,461.6 C266,461.4 260,462 255,461.4', '#2F4E68', 0.6));
+  o.push(line('M343,472 C330,470 300,469.4 280,469.2 C260,469 240,469.6 232,469', '#7A3B2A', 0.7));
+  o.push(line('M343,471.4 C330,469.6 300,468.8 280,468.6 C260,468.4 242,469 233,468.4', '#2F4E68', 0.6));
   // the tray of saucers (the cups sit on them), and the coffee pot behind
-  o.push('<g transform="translate(298 465.6) scale(1.3) translate(-298 -465.6)">');
-  o.push(fill('M278,465.6 L314,465.6 L312,463.4 L280,463.4 Z', '#C9CCCE', 0.7));
-  o.push(line('M277,464.4 L276,462.8 M315,464.4 L316,462.8', '#9EA2A6', 0.8));
-  o.push(ell(289.2, 463.4, 5.2, 1.1, '#F6F3EC', 0.5));
-  o.push(ell(305, 463.4, 5.2, 1.1, '#F6F3EC', 0.5));
+  o.push('<g transform="translate(302 472.6) scale(1.3) translate(-302 -472.6)">');
+  o.push(fill('M284,472.6 L320,472.6 L318,470.4 L286,470.4 Z', '#C9CCCE', 0.7));
+  o.push(line('M283,471.4 L282,469.8 M321,471.4 L322,469.8', '#9EA2A6', 0.8));
+  o.push(ell(296.2, 470.4, 5.2, 1.1, '#F6F3EC', 0.5));
+  o.push(ell(308.6, 470.4, 5.2, 1.1, '#F6F3EC', 0.5));
   // the coffee pot: enamel, a lid knob, a curved spout and a handle
+  o.push('<g transform="translate(6.4 7)">');
   o.push(fill('M290.4,461.6 L301.6,461.6 L300.2,447.4 C300.2,445 291.8,445 291.8,447.4 Z', '#E9E4D6', 0.8));
   o.push(flat('M297,447 C299,447.4 300.2,447.8 300.2,448 L301.6,461.6 L297.6,461.6 Z', '#CFC8B4'));
   o.push(fill('M292.6,446 C292.6,443.4 299.4,443.4 299.4,446 Z', '#E9E4D6', 0.6));
@@ -331,15 +333,11 @@ export function labBench() {
   o.push(line('M300.6,449 C304.6,449 305,457 300.8,457.6', '#3B3B3B', 1.1));
   o.push(line('M291.4,456 L300.8,456', '#2F4E68', 0.9));
   o.push('</g>');
+  o.push('</g>');
   // the saucer his own cup sits on, at the back
-  o.push(ell(328, 461.2, 6.5, 1.3, '#F6F3EC', 0.5));
-  // the stack of leather notebooks, the green-shaded lamp
-  o.push('<g transform="translate(386 461) scale(1.22) translate(-386 -461)">');
-  o.push(rect(372, 456, 15, 3, '#5E3A2A', 0.6, 0.6));
-  o.push(rect(373, 453, 13, 3, '#2F4E44', 0.6, 0.6));
-  o.push(rect(371.4, 450, 15, 3, '#7A3E2C', 0.6, 0.6));
-  o.push(rect(374, 447.6, 12, 2.4, '#3E3A5C', 0.5, 0.6));
-  o.push(box(372, 456.8, 14, 1, '#F0E8D4'));
+  o.push(ell(328, 468.2, 6.5, 1.3, '#F6F3EC', 0.5));
+  // the green-shaded lamp at the far end
+  o.push('<g transform="translate(392 468) scale(1.22) translate(-391 -461)">');
   o.push(ell(391, 461, 5.4, 1.4, BRASS, 0.6));
   o.push(line('M391,461 L391,446', BRASS_D, 1.2));
   o.push(line('M391,446 L388,442', BRASS_D, 1));

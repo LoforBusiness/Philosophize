@@ -129,11 +129,11 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 
 // ── where everybody stands (WORLD x; the dig is x + 400) ─────────────────────
 const HX = 400;
-const TH_WORK = 300;
-const TH_PUSH = 342;
-const TH_HOME = 228;
+const TH_WORK = 318;
+const TH_PUSH = 350;
+const TH_HOME = 222;
 const BN_OFF = -30;
-const BN_HOME = 178;
+const BN_HOME = 164;
 const BN_DIG = HX + 200;
 const TH_DIG = HX + 262;
 /** The cut to the dig, seconds into b11, under the fade. */
@@ -141,7 +141,7 @@ const CUT = 0.22;
 
 /** Each figure's walks on a beat: [share of the line it starts at, where to]; several legs run in turn. */
 const TH_LEGS: Track[] = per((n) => (n === WORK ? [[S0(4.35), TH_PUSH], [S0(5.75), TH_HOME]]
-  : n === PRIMARY ? [[0.32, TH_HOME + 12], [0.74, TH_HOME]]
+  : n === PRIMARY ? [[0.32, TH_HOME + 18], [0.74, TH_HOME]]
   : n < DIG ? [[0, TH_HOME]] : [[0, TH_DIG]]));
 const BN_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, BN_OFF]] : n === ARRIVE ? [[0.02, BN_HOME]]
   : n < DIG ? [[0, BN_HOME]] : [[0, BN_DIG]]));
@@ -153,13 +153,16 @@ const TH_P = per((n) => (BEATS[n].speaker === 'tophat' ? (n % 2 ? TALK : EXPLAIN
 const BN_P = per((n) => (BEATS[n].speaker === 'bun' ? TALK : NOD));
 
 // ── things on the desk (world = screen in the room) ─────────────────────────
-const FIREBOX = { x: 202, y: 451 };
-const NB_BOX = { x: 199, y: 446 };       // the notebook standing in the box
-const NB_LAID = { x: 262, y: 450 };      // laid open under the lamp
-const BK_BOX = { x: 192, y: 445 };       // the booklet standing in the box
-const PAINT = { x: 292, y: 451 };
-const PAD = { x: 312, y: 447.6 };
-const BOXA = { x0: 330, x1: 372, y: 451 };
+// THE DESK IS LOW (2026-10-08): its top at y 460, 40 over the floor, at their hips, and drawn
+// BEHIND them; everything on it sits DESK_DY lower than when it stood at 451.
+const DESK_DY = 9;
+const FIREBOX = { x: 186, y: 460 };
+const NB_BOX = { x: 183, y: 455 };       // the notebook standing in the box
+const NB_LAID = { x: 262, y: 459 };      // laid open under the lamp
+const BK_BOX = { x: 186, y: 449 };       // the booklet standing up out of the box, in full view
+const PAINT = { x: 292, y: 460 };
+const PAD = { x: 312, y: 456.6 };
+const BOXA = { x0: 340, x1: 372, y: 460 };
 // ── the corkboard ────────────────────────────────────────────────────────────
 const CARD_X = 264;
 const CARD_W = 88;
@@ -209,11 +212,13 @@ function hand(s: Stance, x: number, g: number, dir: number, which: 1 | -1, tx: n
   return w <= 0 ? s : reachHandTo(s, { x, groundY: g, k: K, dir: dir < 0 ? -1 : 1 }, which, tx, ty, w);
 }
 /** A hand on its path for this beat, in the figure's own frame (AR7.2). */
-function keyed(s: Stance, keys: readonly Key[], u: number, x: number, d: number, which: 1 | -1): Stance {
+function keyed(s: Stance, keys: readonly Key[], u: number, x: number, d: number, which: 1 | -1, desk = false): Stance {
   'worklet';
   if (keys.length === 0) return s;
   const k = keyAt(keys, u);
-  return hand(s, x, GROUND, d, which, x + k.lx * (d < 0 ? -1 : 1), k.y, k.w);
+  // in the room a hand working at the desk works DESK_DY lower, ramped in so a path is never cut
+  const y = desk ? k.y + DESK_DY * clamp01((k.y - 428) / 10) : k.y;
+  return hand(s, x, GROUND, d, which, x + k.lx * (d < 0 ? -1 : 1), y, k.w);
 }
 /** A look: the head up (negative) or down (positive). */
 function look(s: Stance, v: number): Stance {
@@ -325,7 +330,7 @@ const TH_R: (readonly Key[])[] = per((n) => {
     return [[0.12, 8, 452, 0], [0.19, 26, 446, 1], [0.24, 26, 446, 1], [0.3, 12, 447, 1], [0.42, 12, 447, 1],
       [0.5, 22, 443, 1], [0.58, 22, 443, 1], [0.64, 8, 452, 0]];
   }
-  if (n === COUNCIL) return [[0.2, 8, 452, 0], [0.28, 24, 443, 1], [0.33, 24, 446.5, 1], [0.38, 24, 443, 1], [0.48, 8, 452, 0]];
+  if (n === COUNCIL) return [[0.2, 8, 452, 0], [0.28, 30, 443, 1], [0.33, 30, 446.5, 1], [0.38, 30, 443, 1], [0.48, 8, 452, 0]];
   if (n === CAUSES) return [[0.08, 8, 452, 0], [0.18, 24, 422, 1], [0.36, 24, 422, 1], [0.72, 24, 432, 1], [0.84, 24, 432, 1], [0.95, 8, 452, 0]];
   if (n === BALLOT) return [[0.06, 8, 452, 0], [0.14, 26, 447, 1], [0.2, 22, 447, 1], [0.3, 10, 416, 1], [0.8, 10, 416, 1], [0.92, 10, 448, 1]];
   if (n > BALLOT && n < CHECK) return [[0, 10, 448, 1]];
@@ -346,8 +351,8 @@ const BN_R: (readonly Key[])[] = per((n) => {
   if (n === EVIDENCE) return [[0, 22, 451, 1], [0.1, 8, 452, 0]];
   if (n === NOTEBOOK) return [[0.06, 8, 452, 0], [0.16, 21, 437, 1], [0.21, 21, 437, 1], [0.33, 14, 426, 1], [0.4, 14, 428, 1], [0.54, 25, 466, 1], [0.78, 25, 466, 1], [0.86, 14, 446, 1]];
   if (n === PRIMARY) return [[0, 14, 446, 1], [0.12, 25, 446, 1], [0.24, 25, 446, 1], [0.34, 8, 452, 0]];
-  if (n === BOOKLET) return [[0.02, 8, 452, 0], [0.05, 15, 437, 1], [0.08, 15, 437, 1], [0.22, 14, 422, 1]];
-  if (n === COUNCIL) return [[0, 14, 422, 1], [0.1, 25, 446, 1]];
+  if (n === BOOKLET) return [[0.02, 8, 452, 0], [0.05, 22, 432, 1], [0.08, 22, 432, 1], [0.22, 24, 422, 1]];
+  if (n === COUNCIL) return [[0, 24, 422, 1], [0.1, 25, 446, 1]];
   if (n === SULK) return [[0, 25, 446, 1], [0.12, 15, 440, 1], [0.2, 15, 440, 1], [0.32, 6, 447, 1]];
   if (n === CAUSES || n === CAUSES + 1) return [[0, 6, 447, 1]];
   if (n === DIG) return [[0, 8, 452, 0], [0.04, 20, 488, 1], [0.12, 20, 488, 1], [0.24, 14, 470, 1], [0.6, 14, 470, 1], [0.86, 20, 446, 1]];
@@ -423,8 +428,8 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const sitB = n === REST ? st(0.06, 0.4) : n > REST ? 1 : 0;
     if (kneel > 0) sb = mixStance(sb, postureStill(KNEEL, t, 1), kneel);
     if (sitB > 0) sb = mixStance(sb, postureStill(SIT, t, 1), sitB);
-    sb = keyed(sb, BN_R[n], u, xB, dB, 1);
-    sb = keyed(sb, BN_L[n], u, xB, dB, -1);
+    sb = keyed(sb, BN_R[n], u, xB, dB, 1, n < DIG);
+    sb = keyed(sb, BN_L[n], u, xB, dB, -1, n < DIG);
     if (n === ARRIVE) sb = look(sb, -0.08 * hd(0.2, 0.3, 0.5, 0.6));
     if (n === NOTEBOOK) sb = look(sb, 0.12 * hd(0.3, 0.38, 0.46, 0.54));
     if (n === BOOKLET) sb = look(sb, -0.1 * hd(0.2, 0.28, 0.8, 0.9));
@@ -447,8 +452,8 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     let sh = bodyOf(wT, TH_P, n, t, b, 0);
     const sitT = n === REST ? st(0.14, 0.5) : n > REST ? 1 : 0;
     if (sitT > 0) sh = mixStance(sh, postureStill(SIT, t, 0), sitT);
-    sh = keyed(sh, TH_R[n], u, xT, dT, 1);
-    sh = keyed(sh, TH_L[n], u, xT, dT, -1);
+    sh = keyed(sh, TH_R[n], u, xT, dT, 1, n < DIG);
+    sh = keyed(sh, TH_L[n], u, xT, dT, -1, n < DIG);
     if (n === WORK) {
       const reading = 0.14 * hd(S0(1.5), S0(1.7), S0(2.25), S0(2.45));
       const writing = 0.1 * (hd(S0(2.6), S0(2.75), S0(3.3), S0(3.45)) + hd(S0(3.7), S0(3.85), S0(4.05), S0(4.2)));
@@ -473,7 +478,7 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     // ── b0: the lid, the letter, the glass, the pencil, the stamp, the box ───
     const w0 = n === WORK;
     const lidOff = w0 ? stage(b, L, S0(0.65), S0(0.95)) : 1;
-    const boxW = carry(cv, 20, n, BOXA.x0, n > WORK ? BOXA.x1 : w0 && b > 4.42 ? Math.min(BOXA.x1, Math.max(BOXA.x0, tR.x - cam + 12)) : BOXA.x0, n > WORK ? tr : 1);
+    const boxW = carry(cv, 20, n, BOXA.x0, n > WORK ? BOXA.x1 : w0 && b > 4.42 ? Math.min(BOXA.x1, Math.max(BOXA.x0, tR.x - cam + 4)) : BOXA.x0, n > WORK ? tr : 1);
     const letter = w0 ? hd(S0(1.12), S0(1.18), S0(2.42), S0(2.48)) : 0;
     const glassIn = w0 ? hd(S0(1.38), S0(1.46), S0(2.47), S0(2.58)) : 0;
     const pencilIn = w0 ? hd(S0(2.5), S0(2.58), S0(3.4), S0(3.48)) : 0;
@@ -508,7 +513,7 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const rNb = carry(cv, 7, n, 0, ans(3, Q1), tr);
     const rS = Math.max(rBk, rPt, rNb);
     const sTx = rBk > 0 ? BK_BOX.x : rPt > 0 ? PAINT.x : NB_LAID.x;
-    const sTy = rBk > 0 ? 428 : rPt > 0 ? 430 : 438;
+    const sTy = (rBk > 0 ? 428 : rPt > 0 ? 430 : 438) + DESK_DY;
     let stampX = PAD.x + cam;
     let stampY = PAD.y;
     let stampSq = 1;
@@ -569,8 +574,8 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     return {
       bn, th, cam, t, fade, atDig,
       lidOff, boxX: boxW + cam, letter, glassIn, pencilIn, stampIn, labelInk,
-      tR, tL, bR, bL, nb, bk,
-      stamp: { x: stampX, y: stampY, sq: stampSq },
+      tR, tL, bR, bL, nb, bk, nbH: nbHolder > 0 ? 1 : 0, bkH: bkHeld,
+      stamp: { x: stampX, y: stampY, sq: stampSq }, stH: stampIn > 0 || rS > 0 ? 1 : 0,
       rBk, rPt, rNb, inked,
       rH, rO, rW,
       disc, dust, puff, brushO, tag, splash, puffQ, spotX: spot.x + HX + cam, spotY: spot.y,
@@ -597,6 +602,8 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
         <LessonPicture name="hist7-room-pendants" />
         <Cards S={SCENE} />
         <View style={styles.deskShadow} />
+        {/* the desk, low and BEHIND the figures: they stand at it, not in it */}
+        <LessonPicture name="hist7-room-desk" />
         <LessonPicture name="hist7-dig-far" />
         <Cloud S={SCENE} x={HX + 60} y={250} s={1} k={0} />
         <Cloud S={SCENE} x={HX + 210} y={232} s={0.8} k={1} />
@@ -609,16 +616,18 @@ export default function Hist7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
         <Well S={SCENE} />
         <SteleDust S={SCENE} />
       </Animated.View>
+      {/* what lies on the desk, BEHIND the figures, who stand in front of it */}
+      <DeskRest S={SCENE} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
-      {/* the desk over their legs, and the trench's near edge over her knees */}
+      {/* the trench's near edge over her knees */}
       <Animated.View style={[styles.world, world2]} pointerEvents="none">
-        <LessonPicture name="hist7-room-desk" />
         <LessonPicture name="hist7-dig-near" />
       </Animated.View>
-      <Desk S={SCENE} />
+      {/* what is in a hand, in FRONT of the figures */}
+      <DeskHeld S={SCENE} />
       <Disc S={SCENE} />
       <Brush S={SCENE} />
       <Tag S={SCENE} />
@@ -738,18 +747,29 @@ function Thread({ S }: { S: SharedValue<any> }) {
 }
 
 /** What is on the desk: the painting, the notebook, the booklet, the fire's box over them, his box and its lid, the glass, letter, pencil and stamp. */
-function Desk({ S }: { S: SharedValue<any> }) {
+// The figures stand IN FRONT of the low desk (2026-10-08), so a thing lying on it is drawn
+// behind them and the same thing in a hand is drawn in front: two copies, one shown at a time.
+function DeskRest({ S }: { S: SharedValue<any> }) {
   return (
     <>
       <Painting S={S} />
-      <Notebook S={S} />
-      <Booklet S={S} />
+      <Notebook S={S} held={false} />
       <FireBox S={S} />
+      <Booklet S={S} held={false} />
       <BoxA S={S} />
+      <Stamp S={S} held={false} />
+    </>
+  );
+}
+function DeskHeld({ S }: { S: SharedValue<any> }) {
+  return (
+    <>
+      <Notebook S={S} held />
+      <Booklet S={S} held />
       <Glass S={S} />
       <Letter S={S} />
       <Pencil S={S} />
-      <Stamp S={S} />
+      <Stamp S={S} held />
     </>
   );
 }
@@ -766,11 +786,11 @@ function Painting({ S }: { S: SharedValue<any> }) {
     </Animated.View>
   );
 }
-function Notebook({ S }: { S: SharedValue<any> }) {
+function Notebook({ S, held }: { S: SharedValue<any>; held: boolean }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.nb;
     const j = popOf(clamp01((S.value.rNb - 0.44) / 0.56));
-    return { transform: [{ translateX: v.x }, { translateY: v.y - 7 * j }, { rotate: `${v.tilt}deg` }, { scale: 1 + 0.18 * j }] };
+    return { opacity: (S.value.nbH === 1) === held ? 1 : 0, transform: [{ translateX: v.x }, { translateY: v.y - 7 * j }, { rotate: `${v.tilt}deg` }, { scale: 1 + 0.18 * j }] };
   });
   const shut = useAnimatedStyle(() => ({ opacity: S.value.nb.open < 0.5 ? 1 : 0, transform: [{ scaleX: Math.max(0.05, 1 - 2 * S.value.nb.open) }] }));
   const open = useAnimatedStyle(() => ({ opacity: S.value.nb.open >= 0.5 ? 1 : 0, transform: [{ scaleX: Math.max(0.05, 2 * S.value.nb.open - 1) }] }));
@@ -786,11 +806,11 @@ function Notebook({ S }: { S: SharedValue<any> }) {
     </Animated.View>
   );
 }
-function Booklet({ S }: { S: SharedValue<any> }) {
+function Booklet({ S, held }: { S: SharedValue<any>; held: boolean }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.bk;
     const j = shake(clamp01((S.value.rBk - 0.44) / 0.56), 2.5);
-    return { transform: [{ translateX: v.x + j }, { translateY: v.y }, { scaleX: Math.max(0.05, Math.abs(1 - 2 * v.flip)) }] };
+    return { opacity: (S.value.bkH === 1) === held ? 1 : 0, transform: [{ translateX: v.x + j }, { translateY: v.y }, { scaleX: Math.max(0.05, Math.abs(1 - 2 * v.flip)) }] };
   });
   const back = useAnimatedStyle(() => ({ opacity: S.value.bk.flip > 0.5 ? 1 : 0 }));
   const mark = useAnimatedStyle(() => ({ opacity: S.value.rBk > 0 ? S.value.inked * (1 - 0.6 * clamp01((S.value.rBk - 0.6) / 0.4)) : 0 }));
@@ -853,9 +873,9 @@ function Pencil({ S }: { S: SharedValue<any> }) {
   }));
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.pencil} /></Animated.View>;
 }
-function Stamp({ S }: { S: SharedValue<any> }) {
+function Stamp({ S, held }: { S: SharedValue<any>; held: boolean }) {
   const st = useAnimatedStyle(() => ({
-    opacity: S.value.atDig ? 0 : 1,
+    opacity: S.value.atDig || (S.value.stH === 1) !== held ? 0 : 1,
     transform: [{ translateX: S.value.stamp.x }, { translateY: S.value.stamp.y }, { scaleY: S.value.stamp.sq }, { scaleX: 2 - S.value.stamp.sq }],
   }));
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="hist7-stamp" /></Animated.View>;
@@ -997,9 +1017,9 @@ function Fade({ S }: { S: SharedValue<any> }) {
 
 type Plate = { x: number; y: number; w: number; lines: readonly string[] };
 const Q1_PLATES: Plate[] = [
-  { x: 194, y: 458, w: 52, lines: ['BOOKLET'] },
-  { x: NB_LAID.x, y: 458, w: 60, lines: ['NOTEBOOK'] },
-  { x: PAINT.x, y: 474, w: 56, lines: ['PAINTING'] },
+  { x: 196, y: 483, w: 52, lines: ['BOOKLET'] },
+  { x: NB_LAID.x, y: 467, w: 60, lines: ['NOTEBOOK'] },
+  { x: PAINT.x, y: 483, w: 56, lines: ['PAINTING'] },
 ];
 const Q3_PLATES: Plate[] = [
   { x: 70, y: 492, w: 54, lines: ['OLD WELL'] },
@@ -1022,9 +1042,9 @@ function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q3'; items: P
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
 /** STAMP IT PRIMARY: which of the three was made that night, by someone who was there? */
 const STAMP_Q: Q[] = [
-  { id: 'booklet', left: 172, top: 420, w: 48, h: 52, r: 4, correct: false },
-  { id: 'notebook', left: 240, top: 428, w: 44, h: 44, r: 4, correct: true },
-  { id: 'painting', left: 286, top: 422, w: 32, h: 66, r: 4, correct: false },
+  { id: 'booklet', left: 166, top: 429, w: 42, h: 52, r: 4, correct: false },
+  { id: 'notebook', left: 240, top: 437, w: 44, h: 44, r: 4, correct: true },
+  { id: 'painting', left: 276, top: 431, w: 32, h: 66, r: 4, correct: false },
 ];
 /** PIN THE SLOW CAUSE: which cause had been building for years? */
 const CAUSE_Q: Q[] = CARDS.map((c) => ({ id: c.id, left: CARD_X - CARD_W / 2, top: c.y - 12, w: CARD_W, h: 24, r: 4, correct: c.correct }));
@@ -1120,7 +1140,7 @@ const styles = StyleSheet.create({
   },
   tagPuff: { position: 'absolute', left: -9, top: -6, width: 18, height: 10, borderRadius: 5, backgroundColor: W.hi7Dust.shade },
   clear: { flexGrow: 1 },
-  deskShadow: { position: 'absolute', left: 150, top: 498, width: 194, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.4 },
+  deskShadow: { position: 'absolute', left: 154, top: 498, width: 190, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.4 },
   steleShadow: { position: 'absolute', left: HX + 212, top: 481, width: 42, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.35 },
   hutShadow: { position: 'absolute', left: HX + 316, top: 486, width: 76, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.35 },
 });

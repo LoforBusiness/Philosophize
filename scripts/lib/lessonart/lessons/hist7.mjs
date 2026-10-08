@@ -201,8 +201,8 @@ export function roomFar() {
   o.push(circ(124, 372, 5, 'none', 0.5));
   o.push(flat('M193,300 C200,306 205,312 212,314 L212,299 Z', '#000', 0.08));      // a curled corner
   // the steel shelves on the right, a slot left empty at desk height for the box
-  o.push(shelving(346, 400, 281, 451, 5, 4));
-  o.push(shelving(346, 400, 451, 466, 1));
+  o.push(shelving(346, 400, 281, 460, 5, 4));
+  o.push(shelving(346, 400, 460, 466, 1, 0));
   // the skirting and the floor of boards
   o.push(rect(-2, 466, 404, 7, PANEL_D, 0.7));
   o.push(rect(-2, 472, 404, 44, FLOOR, 0.8));
@@ -246,36 +246,39 @@ export function roomDesk() {
   for (const y of [486, 490, 494]) o.push(line(`M137,${y} L155,${y}`, WICKER_D, 0.5));
   o.push(rect(135, 480.6, 22, 2.6, WICKER_D, 0.6));
   o.push(circ(142, 480, 2.6, '#F2EBDA', 0.4));
-  // the desk: the top's lit edge, its front, two pedestals of drawers
-  o.push(rect(148, 451, 198, 6, OAK_L, 1));
-  o.push(box(150, 455, 194, 1.6, OAK));
-  o.push(rect(152, 457, 190, 8, OAK, 0.9));
-  o.push(rect(156, 465, 32, 35, OAK, 0.9));
-  o.push(box(176, 465.6, 11, 33.8, OAK_D));
-  o.push(rect(306, 465, 32, 35, OAK, 0.9));
-  o.push(box(326, 465.6, 11, 33.8, OAK_D));
-  for (const x of [156, 306]) {
-    for (const y of [469, 481]) {
-      o.push(rect(x + 3, y, 26, 9, OAK_L, 0.5));
-      o.push(rect(x + 13, y + 3.6, 6, 1.8, BRASS, 0.3));
+  // the desk, LOW (2026-10-08): its top at y 460, 40 units over the floor, at a stickman's hip;
+  // drawn BEHIND the figures, who stand at it rather than in it. The top's lit edge, its
+  // front, two pedestals of drawers.
+  const DY = 9;
+  o.push(rect(152, 460, 194, 5, OAK_L, 1));
+  o.push(box(154, 463.6, 190, 1.4, OAK));
+  o.push(rect(156, 465, 186, 6, OAK, 0.9));
+  o.push(rect(160, 471, 30, 29, OAK, 0.9));
+  o.push(box(179, 471.6, 10, 27.8, OAK_D));
+  o.push(rect(308, 471, 30, 29, OAK, 0.9));
+  o.push(box(327, 471.6, 10, 27.8, OAK_D));
+  for (const x of [160, 308]) {
+    for (const y of [474, 486]) {
+      o.push(rect(x + 3, y, 24, 9, OAK_L, 0.5));
+      o.push(rect(x + 12, y + 3.6, 6, 1.8, BRASS, 0.3));
     }
   }
-  o.push(line('M160,461 L334,461', OAK_D, 0.6));
-  o.push(rect(152, 499, 190, 2, OAK_D, 0.4));
+  o.push(line('M164,468 L334,468', OAK_D, 0.6));
+  o.push(rect(156, 499, 186, 1.6, OAK_D, 0.4));
   // the banker's lamp: a round brass foot, a stem, an arm, the green shade over the blotter
-  o.push(ell(278, 450, 7, 1.8, BRASS, 0.7));
-  o.push(rect(276.6, 418, 2.8, 31, BRASS, 0.5));
-  o.push(box(278.4, 418.5, 1, 30, BRASS_D));
-  o.push(line('M278,419 L266,419', BRASS_D, 1.2));
-  o.push(fill('M250,424 C250,416 256,413 264,413 C272,413 278,416 278,424 Z', GREEN, 0.8));
-  o.push(flat('M266,413.4 C272,413.6 277.4,416.4 277.6,423.6 L270,423.6 C270,418 268.6,415 266,413.4 Z', GREEN_D));
-  o.push(flat('M254,421 C254.6,417 258,415 262,414.6 C258.6,416 256.4,418.4 256,421 Z', GREEN_L));
-  o.push(line('M272,424 L272,431', '#9A9A8C', 0.4));
-  o.push(circ(272, 432, 0.8, BRASS, 0.3));
+  o.push(ell(278, 450 + DY, 7, 1.8, BRASS, 0.7));
+  o.push(rect(276.6, 418 + DY, 2.8, 31, BRASS, 0.5));
+  o.push(box(278.4, 418.5 + DY, 1, 30, BRASS_D));
+  o.push(line(`M278,${419 + DY} L266,${419 + DY}`, BRASS_D, 1.2));
+  o.push(fill(`M250,${424 + DY} C250,${416 + DY} 256,${413 + DY} 264,${413 + DY} C272,${413 + DY} 278,${416 + DY} 278,${424 + DY} Z`, GREEN, 0.8));
+  o.push(flat(`M266,${413.4 + DY} C272,${413.6 + DY} 277.4,${416.4 + DY} 277.6,${423.6 + DY} L270,${423.6 + DY} C270,${418 + DY} 268.6,${415 + DY} 266,${413.4 + DY} Z`, GREEN_D));
+  o.push(flat(`M254,${421 + DY} C254.6,${417 + DY} 258,${415 + DY} 262,${414.6 + DY} C258.6,${416 + DY} 256.4,${418.4 + DY} 256,${421 + DY} Z`, GREEN_L));
+  o.push(line(`M272,${424 + DY} L272,${431 + DY}`, '#9A9A8C', 0.4));
+  o.push(circ(272, 432 + DY, 0.8, BRASS, 0.3));
   // the leather blotter under the lamp, and the ink pad
-  o.push(rect(246, 449.4, 30, 2.2, '#4C6A52', 0.4));
-  o.push(rect(305, 447.6, 14, 3.6, '#3A4E6E', 0.6));
-  o.push(box(306.4, 448.2, 11.2, 1.2, RED_D));
+  o.push(rect(246, 449.4 + DY, 30, 2.2, '#4C6A52', 0.4));
+  o.push(rect(305, 447.6 + DY, 14, 3.6, '#3A4E6E', 0.6));
+  o.push(box(306.4, 448.2 + DY, 11.2, 1.2, RED_D));
   return o.join('');
 }
 

@@ -44,7 +44,7 @@ import { BY_ID } from './wardrobe';
 //   log walls, a plank floor and a rag rug, the DOOR (its leaf live, hinged at 8), crossed
 //   snowshoes, the hooks with a rope and an ice axe, the CHAIR 60–98, the CORK BOARD 102–152 ×
 //   402–444 over the BENCH 98–192 (seat 464), the STOVE 193–249 (hob 440, the pipe up at 201),
-//   a basket of logs, a shelf; then, near, the TABLE 256–402 (top 448–462) and the trail MAP
+//   a basket of logs, a shelf; then, near, the TABLE 256–402 (top 448–462, legs down to 498, so it stands BEHIND the guide at its near end) and the trail MAP
 //   on it 258–304 × 447–462. The guide stands at 256, the bun at 132.
 //   TRAIL (its own x 0–400): the morning sky, the snowy range, the valley far below with its
 //   turquoise LAKE (92–232 × 410–434) and the little LAKE HUT (222–234, 406–419), forest; then
@@ -132,6 +132,8 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 const HX = 400;
 const TH_MAP = 256;
 const TH_BOOK = 176;
+/** Where he steps back to at Q1, off the map's end, so the whole map and its three pins are in view. */
+const TH_ASIDE = 234;
 const BU_OFF = -42;
 const BU_IN = 132;
 const BU_CARD = 204;
@@ -150,7 +152,7 @@ function groundOf(x: number): number {
   return 469;
 }
 
-const TH_LEGS: Track[] = per((n) => (n < CRAM ? [[0, TH_MAP]] : n === CRAM ? [[0.36, TH_BOOK]]
+const TH_LEGS: Track[] = per((n) => (Q1[n] ? [[0.02, TH_ASIDE]] : n < CRAM ? [[0, TH_MAP]] : n === CRAM ? [[0.36, TH_BOOK]]
   : n < TRAIL ? [[0, TH_BOOK]] : n < REST ? [[0, TH_T]] : n === REST ? [[0.04, TH_REST]] : [[0, TH_REST]]));
 const BU_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, BU_OFF]] : n === ARRIVE ? [[0.02, BU_IN]]
   : n < TRAIL ? [[0, BU_IN]] : n < VIEW ? [[0, BU_T]] : n === VIEW ? [[0.02, BU_BEND]] : [[0, BU_BEND]]));
@@ -668,17 +670,7 @@ export default function Growth7Scene({ clock, bt, bi, i, qv, picked, onPick }: S
         <Arm S={SCENE} id="zigzag" />
         <Arm S={SCENE} id="valley" />
       </Animated.View>
-      {/* cast: tophat */}
-      <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
-      <Pencil S={SCENE} />
-      <Jug S={SCENE} />
-      <Pole S={SCENE} />
-      {/* cast: bun */}
-      <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
-      <BunLaces S={SCENE} />
-      <Cake S={SCENE} />
-      <Rucksack S={SCENE} />
-      {/* the table, over the guide's side, and what is on it */}
+      {/* the table, BEHIND the guide (he stands at its near end, its top below his hip), and what is on it */}
       <Animated.View style={[styles.world, world2]} pointerEvents="none">
         <View style={styles.tableShadow} />
         <LessonPicture name="growth7-hut-table" />
@@ -686,6 +678,17 @@ export default function Growth7Scene({ clock, bt, bi, i, qv, picked, onPick }: S
         <MapMarks S={SCENE} />
         <Pins S={SCENE} />
       </Animated.View>
+      {/* on the hob and the bench, behind whoever stands in front of them */}
+      <Jug S={SCENE} />
+      <Cake S={SCENE} />
+      {/* cast: tophat */}
+      <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
+      <Pencil S={SCENE} />
+      <Pole S={SCENE} />
+      {/* cast: bun */}
+      <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
+      <BunLaces S={SCENE} />
+      <Rucksack S={SCENE} />
       {/* the labels and the things to tap */}
       {on(Q1) ? <Leaders S={SCENE} /> : null}
       {on(Q1) ? <Plates S={SCENE} /> : null}
@@ -1079,9 +1082,10 @@ function Arm({ S, id }: { S: SharedValue<any>; id: ArmId }) {
 
 type Plate = { id: string; x: number; y: number; w: number; lines: readonly string[] };
 const Q1_PLATES: Plate[] = [
-  { id: 'lake', x: 330, y: 298, w: 74, lines: ['THE LAKE HUT', 'BY SATURDAY'] },
-  { id: 'person', x: 330, y: 345, w: 74, lines: ['A PROPER', 'MOUNTAIN', 'PERSON'] },
-  { id: 'summit', x: 330, y: 402, w: 74, lines: ['THE SUMMIT,', 'SOMEDAY'] },
+  // 34 apart, so the verdict seal over each one's top-right corner lands in clear wall and on no plate
+  { id: 'lake', x: 334, y: 288, w: 74, lines: ['THE LAKE HUT', 'BY SATURDAY'] },
+  { id: 'person', x: 334, y: 348, w: 74, lines: ['A PROPER', 'MOUNTAIN', 'PERSON'] },
+  { id: 'summit', x: 334, y: 418, w: 74, lines: ['THE SUMMIT,', 'SOMEDAY'] },
 ];
 const PIN_OF: Record<string, { x: number; y: number }> = { lake: P_LAKE, person: P_PERSON, summit: P_SUMMIT };
 function plateH(g: Plate): number {
@@ -1208,14 +1212,16 @@ function Fade({ S }: { S: SharedValue<any> }) {
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
 /** MARK THE MAP: which pin is a goal she could check she'd reached? */
 // each box reaches up into the clear wall above its plate, so the verdict seal lands there and not on a word
-const MAP_Q: Q[] = Q1_PLATES.map((g) => ({ id: g.id, left: g.x - g.w / 2 - 3, top: g.y - 18, w: g.w + 6, h: plateH(g) + 21, r: 5, correct: g.id === 'lake' }));
+const MAP_Q: Q[] = Q1_PLATES.map((g) => ({ id: g.id, left: g.x - g.w / 2 - 3, top: g.y - 22, w: g.w + 6, h: plateH(g) + 25, r: 5, correct: g.id === 'lake' }));
 /** PICK THE PAGE: which plan will get her ready for Saturday? */
 const PAGE_Q: Q[] = PAGES.map((g) => ({ id: g.id, left: g.x - g.w / 2 - 3, top: g.y - 18, w: g.w + 6, h: plateH(g) + 21, r: 5, correct: g.id === 'stepups' }));
-/** CHOOSE THE ROUTE: which arm to climb? (the trail, on screen) */
+/** CHOOSE THE ROUTE: which arm to climb? (the trail, on screen). The two right-hand boxes run
+ *  past their arm's tip and the valley's up over its arm, so the verdict seal (top right of the
+ *  box) lands in the clear and never on an arm or its word. */
 const ROUTE_Q: Q[] = [
-  { id: 'cliff', left: 196, top: 334, w: 76, h: 26, r: 5, correct: false },
-  { id: 'zigzag', left: 196, top: 366, w: 76, h: 22, r: 5, correct: true },
-  { id: 'valley', left: 116, top: 321, w: 82, h: 25, r: 5, correct: false },
+  { id: 'cliff', left: 196, top: 334, w: 100, h: 26, r: 5, correct: false },
+  { id: 'zigzag', left: 196, top: 366, w: 100, h: 22, r: 5, correct: true },
+  { id: 'valley', left: 116, top: 298, w: 82, h: 48, r: 5, correct: false },
 ];
 function StageTargets({ picked, onPick, live, S, qs, k }: {
   picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2' | 'q3';
@@ -1244,7 +1250,7 @@ const styles = StyleSheet.create({
   fade: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.gr7Cloud.base },
   stoveShadow: { position: 'absolute', left: 192, top: 485, width: 60, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.4 },
   ruckShadow: { position: 'absolute', left: RUCK_X - 20, top: 497, width: 40, height: 5, borderRadius: 2.5, backgroundColor: SHADE },
-  tableShadow: { position: 'absolute', left: 262, top: 507, width: 138, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.4 },
+  tableShadow: { position: 'absolute', left: 262, top: 495.5, width: 138, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.4 },
   signShadow: { position: 'absolute', left: SIGN.x - 9, top: 495, width: 20, height: 3, borderRadius: 1.5, backgroundColor: SHADE, opacity: 0.45 },
   doorLeaf: { position: 'absolute', left: 7.4, top: 361.4, width: 49.2, height: 111.2, transformOrigin: '0% 50%' },
   doorPic: { position: 'absolute', left: -7.4, top: -361.4, width: 0, height: 0 },

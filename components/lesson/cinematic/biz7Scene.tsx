@@ -44,17 +44,19 @@ import { BY_ID } from './wardrobe';
 //   backwards; the wall clock (42, 286); the SHELVES 184–404 × 246–450, floor to ceiling,
 //   tins, sweet jars, bottles, sacks of flour, the ladder on its rail; the floorboards
 //   446–514; the pendant lamp over the counter (300, 242). The COUNTER 186–404, its top
-//   at 446, drawn over the accountant's legs; on it the ABACUS (234, rods at 404/419/434),
+//   at 474 — his HIP, so it hides his legs and nothing above them — drawn over the
+//   accountant's legs; on it the ABACUS (234, rods at 432/447/462),
 //   the teacup (272), the LEDGER (306), the receipt SPIKE (358) and the TILL (378). The
 //   accountant stands at 330 (the books) and 352 (the till); the owner at 172 (the counter's
 //   end, the biscuit tin at 192) and 250 (leaning over the ledger).
 //   STREET (its own x 0–400): the morning sky; across the road a brick house under
 //   SCAFFOLDING with two builders on it (0–140), the BANK with its clock (140–262, the clock
 //   at 201, 287), the bakery and the ironmonger with their market stalls (262–400); the
-//   cobbled road 452–480, the kerb and the near pavement. The CHESTNUT CART 164–278 (top
-//   466) is drawn over the owner's legs; its brazier 228–252 with its tray, the PRICE SLATE
-//   hung from the canopy (206, 424–446), the rent notice on its side (188, 475). The
-//   accountant at 150 (and 186 for the tally), the owner at 260.
+//   cobbled road 452–480, the kerb and the near pavement. The CHESTNUT CART 164–250 (top
+//   474, his hip); its brazier 222–246 at the seller's end with its tray, the PRICE SLATE
+//   hung from the canopy on its pole (186, 424–446), the rent notice on its side (188, 481–495). The
+//   accountant at 140 beside its left end (156 for the tally, still clear of it);
+//   the owner at 268, BESIDE its right end at the brazier, so nothing covers him.
 //
 //   b0   alone: writes in the ledger (pencil 1.0s), turns and walks to the till, rings it
 //        open and counts the coins (coin 2.4s), shuts the drawer (cashbox 3.6s), tears off
@@ -134,13 +136,14 @@ const secs = (L: number, ks: readonly (readonly [number, number, number, number]
 const HX = 400;
 const TH_HOME = 330;
 const TH_TILL = 352;
-const TH_ST = HX + 150;
-const TH_TALLY = HX + 186;
+const TH_ST = HX + 140;
+/** Beside the cart's left end (164) and the hung slate (173), so nothing covers him. */
+const TH_TALLY = HX + 156;
 const TH_ST_OFF = HX - 30;
 const PL_OFF = -24;
 const PL_HOME = 172;
 const PL_PEEK = 250;
-const PL_ST = HX + 260;
+const PL_ST = HX + 268;
 /** The night passes under a fade this far into b13. */
 const CUT = 0.45;
 
@@ -159,32 +162,43 @@ const TH_P = per((n) => (BEATS[n].speaker === 'tophat' ? (n % 2 ? TALK : EXPLAIN
 const PL_P = per((n) => (BEATS[n].speaker === 'plain' ? TALK : NOD));
 
 // ── the counter's things ────────────────────────────────────────────────────
-const ABACUS = { x: 234, y: 442 };
-const RODS = [426, 441, 456];
+const ABACUS = { x: 234, y: 448 };
+const RODS = [432, 447, 462];
 /** Beads a row, and how many are pushed across to the right: 300, 220 and 80. */
 const BEADS = 6;
 const PUSHED = [4, 3, 1];
 const BEAD_D = 4.4;
-const LEDGER = { x: 306, y: 467 };
-const TILL = { x: 378, y: 450 };
-const DRAWER = { x: 378, y: 471 };
-const SPIKE = { x: 358, top: 448 };
-const TIN_REST = { x: 192, y: 463 };
-const NOTE_IN = { x: 300, y: 466 };
-const RECEIPT_SLOT = { x: 372, y: 432 };
-const RECEIPT_DESK = { x: 364, y: 466.5 };
+const LEDGER = { x: 306, y: 473 };
+const TILL = { x: 378, y: 456 };
+const DRAWER = { x: 378, y: 477 };
+const SPIKE = { x: 358, top: 454 };
+const TIN_REST = { x: 192, y: 469 };
+const NOTE_IN = { x: 300, y: 472 };
+const RECEIPT_SLOT = { x: 372, y: 438 };
+const RECEIPT_DESK = { x: 364, y: 472.5 };
 // ── the cart's things (world) ───────────────────────────────────────────────
-const SLATE = { x: HX + 206, y: 435 };
-const TRAY = { x: HX + 240, y: 440 };
-const PILE_T = { x: HX + 172, y: 451 };
+const SLATE = { x: HX + 186, y: 435 };
+const TRAY = { x: HX + 234, y: 448 };
+const PILE_T = { x: HX + 169, y: 459 };
 const BUILDER_IN = HX + 318;
 const BUILDER_OFF = HX + 440;
-const LEAN = [HX + 190, HX + 220, HX + 250];
+const LEAN = [HX + 182, HX + 206, HX + 230];
 const LEAN_Y = 483;
 
-/** The counter top is 22 below where these hand paths were first laid: a store key at or below the counter's lip is lowered with it. */
-const COUNTER_DROP = 22;
-const lowered = (arr: (readonly Key[])[]) => arr.map((ks, n) => (n < STREET && n !== WORK && n !== REVENUE ? ks.map((k) => (k[2] >= 436 ? [k[0], k[1], k[2] + COUNTER_DROP, k[3]] as Key : k)) : ks));
+/**
+ * The counter top is 28 below where most store hand paths were first laid (and 6 below where
+ * b0's and b4's were written — it was brought down to his hip): a store key at or below the
+ * counter's lip is lowered with it. On the street the cart was brought down 8 to his hip, and
+ * the keys that touch its top or its side come down with it.
+ */
+const COUNTER_DROP = 28;
+const REAL_DROP = 6;
+const CART_DROP = 8;
+const lowered = (arr: (readonly Key[])[]) => arr.map((ks, n) => (n < STREET
+  ? ks.map((k) => (n === WORK || n === REVENUE
+    ? (k[2] >= 430 ? [k[0], k[1], k[2] + REAL_DROP, k[3]] as Key : k)
+    : (k[2] >= 436 ? [k[0], k[1], k[2] + COUNTER_DROP, k[3]] as Key : k)))
+  : ks));
 
 /** The reader's pick, as a number the worklet can read. */
 const PICK: Record<string, number> = { r300: 1, r220: 2, r80: 3, profit: 4, note: 5, cash: 6, p20: 7, p2: 8, p2000: 9 };
@@ -213,12 +227,12 @@ const TH_R: (readonly Key[])[] = lowered(per((n) => {
   if (n === JOBS) return [[0.04, 12, 452, 1], [0.12, 14, 426, 1], [0.86, 14, 426, 1], [0.96, 12, 452, 1]];
   if (n < STREET) return [[0, 12, 452, 1]];
   if (n === PRICE) {
-    return [[0.06, 10, 462, 0], [0.14, 22, 455, 1], [0.24, 16, 440, 1], [0.32, 16, 444, 1], [0.4, 16, 439, 1], [0.48, 16, 443, 1],
-      [0.7, 16, 441, 1], [0.82, 22, 455, 1], [0.9, 10, 462, 0]];
+    return [[0.06, 10, 462, 0], [0.14, 27, 455 + CART_DROP, 1], [0.24, 16, 440, 1], [0.32, 16, 444, 1], [0.4, 16, 439, 1], [0.48, 16, 443, 1],
+      [0.7, 16, 441, 1], [0.82, 27, 455 + CART_DROP, 1], [0.9, 10, 462, 0]];
   }
-  if (n === RENT) return [[0.1, 10, 462, 0], [0.2, 26, 474, 1], [0.75, 26, 474, 1], [0.85, 10, 462, 0]];
+  if (n === RENT) return [[0.1, 10, 462, 0], [0.2, 34, 474 + CART_DROP, 1], [0.75, 34, 474 + CART_DROP, 1], [0.85, 10, 462, 0]];
   if (n === EVEN) {
-    return secs(LINES[EVEN], [[0.9, 10, 462, 0], [1.1, 13, 442, 1], [1.45, 13, 442, 1], [1.8, 24, 442, 1], [2.4, 14, 462, 0]]);
+    return secs(LINES[EVEN], [[0.9, 10, 462, 0], [1.1, 22, 442, 1], [1.45, 22, 442, 1], [1.8, 33, 442, 1], [2.4, 14, 462, 0]]);
   }
   return NONE;
 }));
@@ -253,7 +267,7 @@ const PL_R: (readonly Key[])[] = lowered(per((n) => {
 const PL_L: (readonly Key[])[] = lowered(per((n) => {
   if (n === BOAST) return [[0.1, 8, 456, 0], [0.18, 12, 440, 1], [0.84, 12, 440, 1], [0.94, 8, 456, 0]];
   if (n === APRON) return [[0.1, 8, 456, 0], [0.2, 6, 430, 1], [0.84, 6, 430, 1], [0.94, 8, 456, 0]];
-  if (n === STREET) return [[0.14, 6, 458, 0], [0.18, 22, 441, 1], [0.21, 20, 438, 1], [0.25, 10, 452, 1], [0.33, 6, 458, 0]];
+  if (n === STREET) return [[0.14, 6, 458, 0], [0.18, 22, 441 + CART_DROP, 1], [0.21, 20, 438 + CART_DROP, 1], [0.25, 10, 452, 1], [0.33, 6, 458, 0]];
   if (n === BUILDERS) return [[0.08, 6, 458, 0], [0.18, 26, 410, 1], [0.7, 26, 410, 1], [0.8, 6, 458, 0]];
   if (n === BAGS) return [[0.04, 4, 458, 0], [0.12, 2, 458, 1], [0.2, 10, 438, 1], [0.85, 10, 438, 1], [0.95, 4, 460, 1]];
   if (n > BAGS) return [[0, 4, 460, 1]];
@@ -658,7 +672,8 @@ export default function Biz7Scene({ clock, bt, bi, i, qv, picked, onPick }: Scen
       {on(Q1) ? <Plates S={SCENE} k="q1" items={Q1_PLATES} /> : null}
       {on(Q2) ? <Plates S={SCENE} k="q2" items={Q2_PLATES} /> : null}
       <Fade S={SCENE} />
-      {on(Q1) ? <StageTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} qs={ABACUS_Q} k="q1" /> : null}
+      {/* the verdict seal goes under the abacus row and the slate picked, never over their beads or the hung price slate */}
+      {on(Q1) ? <StageTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} qs={ABACUS_Q} k="q1" seal="br" /> : null}
       {on(Q2) ? <StageTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} qs={TILL_Q} k="q2" /> : null}
       {on(Q3) ? <StageTargets picked={picked} onPick={onPick} live={Q3[i] === 1} S={SCENE} qs={SLATE_Q} k="q3" /> : null}
     </View>
@@ -895,7 +910,7 @@ function Fire({ S }: { S: SharedValue<any> }) {
 }
 function Ember({ S, k }: { S: SharedValue<any>; k: number }) {
   const st = useAnimatedStyle(() => ({ opacity: 0.55 + 0.45 * Math.sin(S.value.t * (3 + k) + k * 2) }));
-  return <Animated.View style={[styles.ember, { left: HX + 234.5 + k * 2.6, top: 457 + (k % 2) * 1.6 }, st]} pointerEvents="none" />;
+  return <Animated.View style={[styles.ember, { left: HX + 228.5 + k * 2.6, top: 465 + (k % 2) * 1.6 }, st]} pointerEvents="none" />;
 }
 function Smoke({ S, k }: { S: SharedValue<any>; k: number }) {
   const st = useAnimatedStyle(() => {
@@ -1066,9 +1081,9 @@ const Q1_PLATES: Plate[] = [
   { x: 296, y: RODS[2] - 6, w: 32, lines: ['£80'] },
 ];
 const Q2_PLATES: Plate[] = [
-  { x: 306, y: 480, w: 64, lines: ['PROFIT LINE'] },
+  { x: 282, y: 486, w: 64, lines: ['PROFIT LINE'] },
   { x: 266, y: 412, w: 62, lines: ['HOTEL NOTE'] },
-  { x: 369, y: 484, w: 50, lines: ['THE CASH'] },
+  { x: 343, y: 490, w: 50, lines: ['THE CASH'] },
 ];
 function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2'; items: Plate[] }) {
   const fade = useAnimatedStyle(() => ({ opacity: S.value[k] }));
@@ -1083,7 +1098,8 @@ function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2'; items: P
   );
 }
 
-type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
+/** `seal`: which corner the verdict seal is struck on — chosen so it never lands on the thing picked. */
+type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean; seal?: 'tr' | 'br' };
 /** SLIDE THE ABACUS: which row shows what the shop kept? */
 const ABACUS_Q: Q[] = [
   { id: 'r300', left: 210, top: RODS[0] - 7, w: 48, h: 14, r: 4, correct: false },
@@ -1092,14 +1108,19 @@ const ABACUS_Q: Q[] = [
 ];
 /** EMPTY THE TILL: which can pay the coal man tonight? */
 const TILL_Q: Q[] = [
-  { id: 'profit', left: 272, top: 459, w: 68, h: 36, r: 4, correct: false },
-  { id: 'note', left: 233, top: 408, w: 89, h: 28, r: 4, correct: false },
-  { id: 'cash', left: 340, top: 466, w: 38, h: 32, r: 4, correct: true },
+  // the seal goes above the ledger, under the held note, and under the drawer
+  { id: 'profit', left: 270, top: 448, w: 62, h: 52, r: 4, correct: false, seal: 'tr' },
+  { id: 'note', left: 233, top: 408, w: 89, h: 28, r: 4, correct: false, seal: 'br' },
+  { id: 'cash', left: 340, top: 472, w: 52, h: 32, r: 4, correct: true, seal: 'br' },
 ];
 /** CHALK THE PRICE: which slate goes on the cart? (the street, on screen) */
-const SLATE_Q: Q[] = LEAN.map((x, k) => ({ id: ['p20', 'p2', 'p2000'][k], left: x - HX - 14, top: LEAN_Y - 40, w: 28, h: 57, r: 4, correct: k === 1 }));
-function StageTargets({ picked, onPick, live, S, qs, k }: {
-  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2' | 'q3';
+// The seal goes above the outer two (clear of the hung slate) and under the middle one (so it
+// never lands on the hung slate the right answer chalks).
+const SLATE_Q: Q[] = LEAN.map((x, k) => ({
+  id: ['p20', 'p2', 'p2000'][k], left: x - HX - 14, top: LEAN_Y - 40, w: 28, h: 57, r: 4, correct: k === 1, seal: k === 1 ? 'br' : 'tr',
+}));
+function StageTargets({ picked, onPick, live, S, qs, k, seal = 'tr' }: {
+  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2' | 'q3'; seal?: 'tr' | 'br';
 }) {
   const answered = picked !== null || !live;
   const fade = useAnimatedStyle(() => ({ opacity: S.value[k] }));
@@ -1108,7 +1129,7 @@ function StageTargets({ picked, onPick, live, S, qs, k }: {
       {qs.map((q) => (
         <Target
           key={q.id} id={q.id} correct={q.correct} picked={picked} onPick={onPick} radius={q.r}
-          disabled={answered} sealAt="tr"
+          disabled={answered} sealAt={q.seal ?? seal}
           style={{ position: 'absolute', left: q.left, top: q.top, width: q.w, height: q.h }}
         >
           <View style={styles.clear} />
@@ -1128,7 +1149,7 @@ const styles = StyleSheet.create({
   streak: { position: 'absolute', left: -0.4, top: 0, width: 0.8, height: 9, borderRadius: 0.4, backgroundColor: W.bz7Rain.base },
   shopShadow: { position: 'absolute', left: 6, top: 497, width: 56, height: 6, borderRadius: 3, backgroundColor: SHADE, opacity: 0.45 },
   counterShadow: { position: 'absolute', left: 184, top: 499, width: 216, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.5 },
-  cartShadow: { position: 'absolute', left: HX + 160, top: 499, width: 130, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.45 },
+  cartShadow: { position: 'absolute', left: HX + 160, top: 499, width: 96, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.45 },
   bead: { position: 'absolute', left: -BEAD_D / 2, top: -BEAD_D / 2, width: BEAD_D, height: BEAD_D, borderRadius: BEAD_D / 2, borderWidth: 0.5, borderColor: INK },
   beadShade: { position: 'absolute', left: 0, top: -1.2, width: 1.4, height: 2.6, borderRadius: 0.7 },
   drawerTray: { position: 'absolute', left: -12, top: -4.4, width: 24, height: 4.4, backgroundColor: W.bz7Drawer.shade, borderWidth: 0.5, borderColor: INK },

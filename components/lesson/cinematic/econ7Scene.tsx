@@ -43,12 +43,13 @@ import { BY_ID } from './wardrobe';
 //   EXCHANGE), the gallery's arches and its iron railing, the great clock (246, 304), the
 //   street doors 4–44, two windows on the dawn 58–92 and 100–134, a third 362–396, the
 //   panelled dado and a honey herringbone floor (454–514). MID: the URN on its table
-//   38–86 (tap spout 76, 444; a cup waits under it), the TICKER on its pedestal (works
+//   28–76 (tap spout 66, 444; a cup waits under it), the TICKER on its pedestal (works
 //   112, dome 101–123 × 404–437, its tape slot 97, 445), the PRICE BOARD 140–352 × 340–496
 //   (TODAY'S PRICES; four slates — WHEAT 148–244 × 398–436 marked at 226, WOOL 248–344
 //   marked at 266, COAL below with yesterday’s level line at 226, UMBRELLAS below with
-//   its chip landing at 330, 465 and the van chalked at 256–270; the ledge 476–481), and
-//   the CLERK'S DESK 356–400 with the brass balance (left pan 358, 436).
+//   its chip landing at 312, 461 and the van chalked at 256–270; the ledge 476–481), and
+//   the CLERK'S DESK 356–404, hip-high (top 453–466), with the brass balance (left pan 358, 450).
+//   He TALKS from x 200, left of the marks, and steps to 246 between them only to chalk or tap.
 //   HARBOUR (its own x 0–400): the morning sky, warehouses and a church tower across the
 //   water, the headland and its lighthouse, the sea (376–452); the BRIG riding at her
 //   mooring 190–404; the quay (446–514) with bollards, cargo, the HARBOURMASTER'S HUT
@@ -136,10 +137,13 @@ const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
 
 // ── where everybody stands (WORLD x; the harbour is x + 400) ──────────────────
 const HX = 400;
-const TH_HOME = 246;
+/** Where he talks from: left of the marks, so his body hides none of them (the slates' gap 186–214). */
+const TH_HOME = 200;
+/** Where he works at the board, between the two marks, and only while he chalks or taps. */
+const TH_BOARD = 246;
 const TH_DESK = 344;
 const TH_EXIT = 446;
-const TH_Q = HX + 330;
+const TH_Q = HX + 360;
 const BU_OFF = -30;
 const BU_HOME = 84;
 const BU_EXIT = 206;
@@ -149,7 +153,11 @@ const BU_STALL = HX + 98;
 const CUT = 2.6;
 
 /** Each figure's walks on a beat: [share of the line it starts at, where to]; several legs run in turn. */
-const TH_LEGS: Track[] = per((n) => (n < MINT ? [[0, TH_HOME]] : n === MINT ? [[0.13, TH_DESK]]
+const TH_LEGS: Track[] = per((n) => (n === WORK ? [[0, TH_BOARD], [S0(7.75), TH_HOME]]
+  : n === SCARCE ? [[0, TH_BOARD], [0.76, TH_HOME]]
+    : n === DEMAND ? [[0, TH_BOARD], [0.52, TH_HOME]]
+      : n === SUPPLY ? [[0, TH_BOARD], [0.78, TH_HOME]]
+        : n < MINT ? [[0, TH_HOME]] : n === MINT ? [[0.13, TH_DESK]]
   : n === INFLATE ? [[0, TH_DESK]] : n === HARBOUR ? [[0.04, TH_EXIT]] : [[0, TH_Q]]));
 const BU_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, BU_OFF]] : n === ARRIVE ? [[0.02, BU_HOME]]
   : n < HARBOUR ? [[0, BU_HOME]] : n === HARBOUR ? [[0.14, BU_EXIT]]
@@ -157,8 +165,8 @@ const BU_LEGS: Track[] = per((n) => (n < ARRIVE ? [[0, BU_OFF]] : n === ARRIVE ?
       : n === SACKS ? [[0.24, BU_Q]] : [[0, BU_Q]]));
 /** Scripted turns: [share, facing]. A walk turns the figure first by itself. */
 const TH_TURN: Track[] = per((n) => (n === WORK ? [[0, -1], [S0(4.42), 1], [S0(7.7), -1]]
-  : n === DEMAND ? [[0, 1], [0.4, -1]]
-    : n === SUPPLY ? [[0, 1], [0.6, -1]]
+  : n === DEMAND ? [[0, 1]]
+    : n === SUPPLY ? [[0, 1]]
       : n === MINT ? [[0, -1], [0.6, -1]]
         : n === INFLATE ? [[0, 1], [0.34, -1]]
           : n === HARBOUR ? []
@@ -173,24 +181,24 @@ const TH_P = per((n) => (BEATS[n].speaker === 'tophat' ? (n % 2 ? TALK : EXPLAIN
 const BU_P = per((n) => (BEATS[n].speaker === 'bun' ? TALK : NOD));
 
 // ── the board's chalk marks (world = screen in the exchange) ─────────────────
-const WHEAT = { x: 226, top: 418, bot: 430 };
-const WOOL = { x: 266, top: 418, bot: 430 };
+const WHEAT = { x: 232, top: 418, bot: 430 };
+const WOOL = { x: 262, top: 418, bot: 430 };
 const VAN = { x: 256, y: 459 };
-const CHIP_LAND = { x: 330, y: 465 };
+const CHIP_LAND = { x: 312, y: 461 };
 const CHIPS = [
-  { id: 'level', x: 270, label: 'LEVEL', correct: false },
-  { id: 'up', x: 306, label: 'UP', correct: true },
+  { id: 'level', x: 230, label: 'LEVEL', correct: false },
+  { id: 'up', x: 286, label: 'UP', correct: true },
   { id: 'down', x: 342, label: 'DOWN', correct: false },
 ] as const;
 const CHIP_Y = 489;
-const LEDGE_CHALK = { x: 234, y: 475 };
+const LEDGE_CHALK = { x: 188, y: 475 };
 // ── the urn, the cup, the ticker, the balance ────────────────────────────────
-const SPOUT = { x: 76, y: 444 };
-const CUP_T = { x: 76, y: 455 };
+const SPOUT = { x: 66, y: 444 };
+const CUP_T = { x: 66, y: 455 };
 const SLOT = { x: 97, y: 445 };
 const TAPE_REST = { x: 92, y: 494 };
 const WHEEL = { x: 112, y: 420 };
-const PAN = { x: 358, y: 435.6 };
+const PAN = { x: 358, y: 449.6 };
 // ── her crate (its handle's top), the fish, the sacks (harbour = x + 400) ────
 const CRATE_EX = { x: 90, y: 478 };
 const CRATE_Q = { x: BU_Q + 6, y: 478 };
@@ -199,8 +207,8 @@ const FISH_C = { x: HX + 97, y: 453 };
 const FISH_ON_CRATE = { x: HX + 82, y: 440 };
 const SACK_X = [HX + 44, HX + 62, HX + 80];
 // ── Q2: the things at her feet; Q3: the notices on the line ──────────────────
-const ROD = { x: HX + 226, y: 498 };
-const BASKET = { x: HX + 292, y: 500 };
+const ROD = { x: HX + 240, y: 498 };
+const BASKET = { x: HX + 316, y: 500 };
 const NOTICES = [
   { id: 'litter', x: HX + 246, lines: ['A COIN PER', 'SACK OF', 'LITTER'], correct: false },
   { id: 'berth', x: HX + 304, lines: ['A COIN PER', 'CLEAN', 'BERTH'], correct: true },
@@ -352,22 +360,22 @@ function popOf(r: number): number {
 /** His right hand: the chalk; then the coin; pointing at the harbour; his arms folded. */
 const TH_R: (readonly Key[])[] = per((n) => {
   if (n === WORK) {
-    return [[S0(0.7), 8, 462, 0], [S0(0.98), 20, 431, 1], [S0(1.1), 20, 430, 1], [S0(1.75), 20, 418, 1],
-      [S0(1.95), 20, 419, 1], [S0(2.25), 18, 427, 1], [S0(2.4), 20.5, 428, 1], [S0(2.55), 18, 428, 1], [S0(2.8), 8, 462, 0],
-      [S0(4.7), 8, 462, 0], [S0(4.95), 20, 417, 1], [S0(5.0), 20, 418, 1], [S0(5.7), 20, 430, 1],
-      [S0(5.9), 18, 432, 1], [S0(6.15), 12, 436, 1], [S0(6.4), 8, 462, 0],
+    return [[S0(0.7), 8, 462, 0], [S0(0.98), 14, 431, 1], [S0(1.1), 14, 430, 1], [S0(1.75), 14, 418, 1],
+      [S0(1.95), 14, 419, 1], [S0(2.25), 12, 427, 1], [S0(2.4), 14.5, 428, 1], [S0(2.55), 12, 428, 1], [S0(2.8), 8, 462, 0],
+      [S0(4.7), 8, 462, 0], [S0(4.95), 16, 417, 1], [S0(5.0), 16, 418, 1], [S0(5.7), 16, 430, 1],
+      [S0(5.9), 14, 432, 1], [S0(6.15), 10, 436, 1], [S0(6.4), 8, 462, 0],
       [S0(6.9), 8, 462, 0], [S0(7.1), 7, 434, 1], [S0(7.4), 7, 435, 1], [S0(7.6), 8, 462, 0]];
   }
-  if (n === SCARCE) return [[0.08, 8, 462, 0], [0.17, 19, 426, 1], [0.2, 20, 424.5, 1], [0.21, 20.8, 426, 1], [0.23, 19, 427, 1], [0.34, 20, 446, 1], [0.44, 20, 464, 1], [0.54, 8, 462, 0]];
-  if (n === DEMAND) return [[0.04, 8, 462, 0], [0.11, 11, 459, 1], [0.136, 11, 459, 1], [0.144, 12.4, 462, 1], [0.17, 11, 459, 1], [0.3, 8, 462, 0]];
+  if (n === SCARCE) return [[0.28, 8, 462, 0], [0.37, 13, 426, 1], [0.4, 14, 424.5, 1], [0.41, 14.8, 426, 1], [0.43, 13, 427, 1], [0.54, 14, 446, 1], [0.64, 14, 464, 1], [0.74, 8, 462, 0]];
+  if (n === DEMAND) return [[0.24, 8, 462, 0], [0.31, 11, 459, 1], [0.336, 11, 459, 1], [0.344, 12.4, 462, 1], [0.37, 11, 459, 1], [0.5, 8, 462, 0]];
   if (n === SUPPLY) {
-    return [[0.08, 8, 462, 0], [0.16, 10, 459, 1], [0.187, 10, 459, 1], [0.29, 19, 459, 1],
-      [0.38, 19, 467, 1], [0.48, 19, 467, 1], [0.56, 8, 462, 0]];
+    return [[0.28, 8, 462, 0], [0.36, 10, 459, 1], [0.387, 10, 459, 1], [0.49, 19, 459, 1],
+      [0.58, 19, 467, 1], [0.68, 19, 467, 1], [0.76, 8, 462, 0]];
   }
   if (n === COST) return [[0.1, 8, 462, 0], [0.2, 24, 447, 1], [0.42, 24, 447, 1], [0.52, 22, 424, 1], [0.8, 22, 424, 1], [0.9, 8, 462, 0]];
   if (n === MINT) return [[0, 8, 462, 0], [0.04, 12, 474, 1], [0.08, 12, 474, 1], [0.11, 8, 462, 0]];
   if (n === INFLATE) {
-    return [[0, 8, 462, 0], [0.065, 14, 436, 1], [0.092, 14, 436, 1], [0.16, 12, 422, 1], [0.84, 12, 422, 1], [0.91, 4, 447, 1], [0.97, 8, 462, 0]];
+    return [[0, 8, 462, 0], [0.065, 14, 450, 1], [0.092, 14, 450, 1], [0.16, 12, 422, 1], [0.84, 12, 422, 1], [0.91, 4, 447, 1], [0.97, 8, 462, 0]];
   }
   if (n === SPECIAL) return [[0.06, 8, 462, 0], [0.15, 24, 454, 1], [0.38, 24, 454, 1], [0.46, 26, 432, 1], [0.72, 26, 432, 1], [0.82, 8, 462, 0]];
   if (n === FAIR) return [[0.04, 8, 462, 0], [0.14, 5, 449, 1], [0.86, 5, 449, 1], [0.96, 8, 462, 0]];
@@ -382,12 +390,12 @@ const TH_L: (readonly Key[])[] = per((n) => {
 /** Her right hand: the crate, pointing at the urn, the tape, the umbrella, the cup, the coins, the fish, the rope. */
 const BU_R: (readonly Key[])[] = per((n) => {
   if (n === ARRIVE) return [[0, 6, 472, 1], [0.72, 6, 472, 1], [0.8, 6, 478, 1], [0.86, 6, 478, 1], [0.93, 8, 462, 0]];
-  if (n === COFFEE) return [[0.18, 8, 462, 0], [0.28, 22, 430, 1], [0.56, 22, 430, 1], [0.66, 8, 462, 0]];
+  if (n === COFFEE) return [[0.18, 8, 462, 0], [0.28, 28, 430, 1], [0.56, 28, 430, 1], [0.66, 8, 462, 0]];
   if (n === TICKER) return [[0, 8, 462, 0], [0.05, 13, 446, 1], [0.065, 13, 446, 1], [0.12, 10, 428, 1], [0.72, 10, 428, 1], [0.82, 8, 462, 0]];
   if (n === UMBRELLA) return [[0.06, 8, 462, 0], [0.16, 4, 410, 1], [0.7, 4, 410, 1], [0.8, 8, 462, 0]];
-  if (n === FREECUP) return [[0, 8, 462, 0], [0.14, 8, 452, 1], [0.6, 8, 452, 1], [0.66, 8, 447, 1], [0.8, 9, 447, 1], [0.86, 6, 433, 1], [0.94, 6, 433, 1], [1, 9, 447, 1]];
+  if (n === FREECUP) return [[0, 8, 462, 0], [0.14, 18, 452, 1], [0.6, 18, 452, 1], [0.66, 8, 447, 1], [0.8, 9, 447, 1], [0.86, 6, 433, 1], [0.94, 6, 433, 1], [1, 9, 447, 1]];
   if (n === COST) return [[0, 9, 447, 1], [0.66, 9, 447, 1], [0.72, 6, 433, 1], [0.8, 6, 433, 1], [0.86, 9, 447, 1]];
-  if (n === MINT) return [[0, 9, 447, 1], [0.36, 9, 447, 1], [0.42, 8, 452, 1], [0.44, 8, 452, 1], [0.48, 8, 462, 0], [0.56, 8, 462, 0], [0.64, 4, 412, 1], [0.84, 4, 412, 1], [0.92, 8, 462, 0]];
+  if (n === MINT) return [[0, 9, 447, 1], [0.36, 9, 447, 1], [0.42, 18, 452, 1], [0.44, 18, 452, 1], [0.48, 8, 462, 0], [0.56, 8, 462, 0], [0.64, 4, 412, 1], [0.84, 4, 412, 1], [0.92, 8, 462, 0]];
   if (n === HARBOUR) return [[0, 8, 462, 0], [0.06, 6, 478, 1], [0.1, 6, 478, 1], [0.14, 6, 472, 1]];
   if (n === SPECIAL) return [[0, 6, 472, 1], [0.86, 6, 472, 1], [0.92, 6, 478, 1], [0.95, 6, 478, 1], [0.99, 8, 462, 0]];
   if (n === SWAP) {
@@ -473,7 +481,7 @@ export default function Econ7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const figB = keepHeld(heldB, wB.walking ? mixKeepLegs(prevB, sb, trAt(1)) : mixStance(prevB, sb, trAt(1)));
 
     // ── the economist ───────────────────────────────────────────────────────
-    let srcT = carrySource(cv, 3, n, TH_HOME);
+    let srcT = carrySource(cv, 3, n, TH_BOARD);
     if (late || cutDone) srcT = TH_Q;
     const fT = carrySource(cv, 4, n, -1);
     const lt = cutDone ? { w: walkOf(TH_Q, TH_Q, 0, -1, b), f: -1 } : legsOf(srcT, TH_LEGS[n], b, L, fT);
@@ -509,10 +517,10 @@ export default function Econ7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const mWool = n > WORK ? 1 : w0 ? stage(b, L, S0(5.0), S0(5.95)) : 0;
     const ledger = w0 ? hd(S0(2.9), S0(3.05), S0(4.2), S0(4.32)) : 0;
     const page = w0 ? stage(b, L, S0(3.72), S0(3.98)) : 0;
-    const tap = w0 ? hd(S0(2.36), S0(2.4), S0(2.42), S0(2.5)) : n === SCARCE ? hd(0.2, 0.209, 0.215, 0.24) : n === DEMAND ? hd(0.136, 0.144, 0.15, 0.17) : 0;
-    const tapAt = n === DEMAND ? { x: 258, y: 462 } : { x: 227, y: 428 };
+    const tap = w0 ? hd(S0(2.36), S0(2.4), S0(2.42), S0(2.5)) : n === SCARCE ? hd(0.4, 0.409, 0.415, 0.44) : n === DEMAND ? hd(0.336, 0.344, 0.35, 0.37) : 0;
+    const tapAt = n === DEMAND ? { x: 258, y: 462 } : { x: 233, y: 428 };
     // the van, chalked in b8: the box, the cab, the wheels
-    const van = n > SUPPLY ? 1 : n === SUPPLY ? clamp01((u - 0.187) / (0.45 - 0.187)) : 0;
+    const van = n > SUPPLY ? 1 : n === SUPPLY ? clamp01((u - 0.387) / (0.65 - 0.387)) : 0;
     // the chalk: in his hand until he lays it on the ledge in b11
     const chalkDown = n > MINT ? 1 : n === MINT ? st(0.06, 0.08) : 0;
     const chalk = {
@@ -621,15 +629,16 @@ export default function Econ7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
         <View style={styles.hutShadow} />
         <Pinned S={SCENE} />
       </Animated.View>
-      <Tape S={SCENE} />
-      <Cup S={SCENE} />
-      <Coin S={SCENE} />
       {/* cast: tophat */}
       <Stickman D={DT} k={K} role="lead" wear={BY_ID.magistrate.pieces} />
       <Chalk S={SCENE} />
       <Ledger S={SCENE} />
       {/* cast: bun */}
       <Stickman D={DB} k={K} role="second" wear={BY_ID.bun.pieces} />
+      {/* the things in their hands are painted over both of them, so a hand never hides them */}
+      <Tape S={SCENE} />
+      <Cup S={SCENE} />
+      <Coin S={SCENE} />
       <Crate S={SCENE} />
       <Fish S={SCENE} />
       <Sacks S={SCENE} />
@@ -680,7 +689,7 @@ function Steam({ S }: { S: SharedValue<any> }) {
 function Puff({ S, ph }: { S: SharedValue<any>; ph: number }) {
   const st = useAnimatedStyle(() => {
     const c = (S.value.t * 0.32 + ph) % 1;
-    return { opacity: Math.sin(Math.PI * c) * 0.85, transform: [{ translateX: 58 + 3 * Math.sin(c * 7 + ph * 9) }, { translateY: 390 - 22 * c }, { scale: 0.6 + 0.8 * c }] };
+    return { opacity: Math.sin(Math.PI * c) * 0.85, transform: [{ translateX: 48 + 3 * Math.sin(c * 7 + ph * 9) }, { translateY: 390 - 22 * c }, { scale: 0.6 + 0.8 * c }] };
   });
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.puff} /></Animated.View>;
 }
@@ -1038,7 +1047,7 @@ function Pinned({ S }: { S: SharedValue<any> }) {
 /** The fade through on the walk down to the harbour. */
 function Fade({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({ opacity: S.value.fade }));
-  return <Animated.View style={[styles.fade, st]} pointerEvents="none" />;
+  return <Animated.View nativeID="e7stage" style={[styles.fade, st]} pointerEvents="none" />;
 }
 
 // ── the labels and the three games ───────────────────────────────────────────
@@ -1065,15 +1074,19 @@ function Plates({ S, k, items }: { S: SharedValue<any>; k: 'q1' | 'q2'; items: P
 
 type Q = { id: string; left: number; top: number; w: number; h: number; r: number; correct: boolean };
 /** CHALK THE BOARD: which mark goes on the umbrella slate? */
-const BOARD_Q: Q[] = CHIPS.map((c) => ({ id: c.id, left: c.x - 17, top: 479, w: 34, h: 35, r: 4, correct: c.correct }));
+// Each box runs past its chip's right side, so the verdict seal (top-right corner, 28 across)
+// lands in the gap between chips, never on the chip or its plate.
+const BOARD_Q: Q[] = CHIPS.map((c) => ({ id: c.id, left: c.x - 17, top: 479, w: 53, h: 35, r: 4, correct: c.correct }));
 /** SWAP AT THE QUAY: what does she take to the fish stall? (the harbour, on screen) */
+// Tall boxes: the seal (top-right corner) sits above the quay things, off each object and its plate.
 const SWAP_Q: Q[] = [
-  { id: 'crate', left: CRATE_Q.x - HX - 28, top: 474, w: 56, h: 40, r: 5, correct: true },
-  { id: 'rod', left: ROD.x - HX + 3, top: 474, w: 34, h: 40, r: 5, correct: false },
-  { id: 'basket', left: BASKET.x - HX - 25, top: 474, w: 50, h: 40, r: 5, correct: false },
+  { id: 'crate', left: CRATE_Q.x - HX - 30, top: 454, w: 62, h: 60, r: 5, correct: true },
+  { id: 'rod', left: ROD.x - HX - 4, top: 454, w: 52, h: 60, r: 5, correct: false },
+  { id: 'basket', left: BASKET.x - HX - 26, top: 454, w: 54, h: 60, r: 5, correct: false },
 ];
 /** PIN THE NOTICE: which notice does the harbourmaster pin up? (the harbour, on screen) */
-const NOTICE_Q: Q[] = NOTICES.map((g) => ({ id: g.id, left: g.x - HX - NOTE.w / 2 - 1, top: NOTE.y - 4, w: NOTE.w + 2, h: NOTE.h + 7, r: 4, correct: g.correct }));
+// The box rises above its notice, so the seal lands in the sky over it and not on its words.
+const NOTICE_Q: Q[] = NOTICES.map((g) => ({ id: g.id, left: g.x - HX - NOTE.w / 2 - 1, top: NOTE.y - 21, w: NOTE.w + 2, h: NOTE.h + 28, r: 4, correct: g.correct }));
 function StageTargets({ picked, onPick, live, S, qs, k }: {
   picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2' | 'q3';
 }) {
@@ -1100,7 +1113,7 @@ const styles = StyleSheet.create({
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   fade: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.ec7Cloud.base },
   boardShadow: { position: 'absolute', left: 140, top: 495, width: 214, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.4 },
-  tableShadow: { position: 'absolute', left: 36, top: 495, width: 54, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.38 },
+  tableShadow: { position: 'absolute', left: 26, top: 495, width: 54, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.38 },
   deskShadow: { position: 'absolute', left: 354, top: 495, width: 48, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.38 },
   stallShadow: { position: 'absolute', left: HX - 2, top: 496, width: 104, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.38 },
   hutShadow: { position: 'absolute', left: HX + 106, top: 451, width: 114, height: 4, borderRadius: 2, backgroundColor: SHADE, opacity: 0.32 },

@@ -278,18 +278,26 @@ export function agoraMid() {
   return o.join('');
 }
 
-/** NEAR: the philosopher's stone table, drawn over his legs. */
+/**
+ * The philosopher's stone table, standing BEHIND the people (it hides nobody; he works at
+ * its left end, beside it). Hip high to him: the top at 466, 34 above the ground line his
+ * feet stand on (500), and its own feet a little up the paving at 495 because it stands
+ * a step further back. A slab with a lit edge and a shaded front face on two stout
+ * trestle legs, like the marble tables of the stoa (p7agora-1).
+ */
 export function agoraTable() {
   const o = [];
-  // the top slab, its lit edge, the front face, two stout legs
-  o.push(rect(250, 452, 142, 7, MARBLE, 1));
-  o.push(box(252, 456.2, 138, 2.2, MARBLE_D));
-  o.push(rect(256, 459, 130, 8, MARBLE_D, 0.9));
-  o.push(rect(262, 467, 14, 27, MARBLE, 0.9));
-  o.push(box(270, 468, 5, 25, MARBLE_D));
-  o.push(rect(366, 467, 14, 27, MARBLE, 0.9));
-  o.push(box(374, 468, 5, 25, MARBLE_D));
-  o.push(line('M260,463 L382,463', MARBLE_DD, 0.5));
+  const X0 = 258, X1 = 372;
+  // the trestle legs, under the slab's ends: a block each, its right side in shade
+  for (const lx of [X0 + 8, X1 - 22]) {
+    o.push(rect(lx, 474, 14, 21, MARBLE, 0.9));
+    o.push(box(lx + 8.6, 475, 4.6, 19.4, MARBLE_D));
+    o.push(rect(lx - 2, 492.5, 18, 3, MARBLE_D, 0.8));
+  }
+  // the top slab: its upper face seen a little from above, then the front edge in shade
+  o.push(rect(X0, 466, X1 - X0, 4.6, MARBLE, 1));
+  o.push(rect(X0 + 1, 470.4, X1 - X0 - 2, 4.4, MARBLE_D, 0.9));
+  o.push(line(`M${X0 + 3},472.6 L${X1 - 3},472.6`, MARBLE_DD, 0.5));
   return o.join('');
 }
 
@@ -440,7 +448,7 @@ export function gull() {
 export const ART = [
   { name: 'phil7-agora-far', svg: agoraFar, view: { x: 0, y: 214, w: 400, h: 300 }, box: { x: 0, y: 214, w: 400, h: 300 } },
   { name: 'phil7-agora-mid', svg: agoraMid, view: { x: 0, y: 214, w: 400, h: 300 }, box: { x: 0, y: 214, w: 400, h: 300 } },
-  { name: 'phil7-agora-table', svg: agoraTable, view: { x: 246, y: 448, w: 150, h: 50 }, box: { x: 246, y: 464, w: 150, h: 50 } },
+  { name: 'phil7-agora-table', svg: agoraTable, view: { x: 250, y: 460, w: 140, h: 40 }, box: { x: 250, y: 460, w: 140, h: 40 } },
   { name: 'phil7-harbour-far', svg: harbourFar, view: { x: 0, y: 214, w: 400, h: 300 }, box: { x: 400, y: 214, w: 400, h: 300 } },
   { name: 'phil7-harbour-mid', svg: harbourMid, view: { x: 0, y: 214, w: 400, h: 300 }, box: { x: 400, y: 214, w: 400, h: 300 } },
   { name: 'phil7-ship', svg: oldShip, view: { x: -14, y: 218, w: 260, h: 250 }, box: { x: -14, y: 218, w: 260, h: 250 } },

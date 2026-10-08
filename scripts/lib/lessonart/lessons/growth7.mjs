@@ -329,17 +329,17 @@ export function hutDoor() {
 export function hutTable() {
   const o = [];
   // back legs (partly hidden), then the top's front edge, apron and front legs
-  o.push(rect(276, 466, 6, 30, '#7E5129', 0.8));
-  o.push(rect(382, 466, 6, 30, '#7E5129', 0.8));
+  o.push(rect(276, 466, 6, 22, '#7E5129', 0.8));
+  o.push(rect(382, 466, 6, 22, '#7E5129', 0.8));
   // the top, seen from above: its far edge set back a little to the right
   o.push(fill('M258,462 L264,448 L400,448 L400,462 Z', '#B98451', 1));
   for (const y of [452.6, 457.2]) o.push(line(`M${262 - (y - 452) * 0.4},${y} L400,${y}`, '#9A6638', 0.5));
   o.push(rect(256, 462, 146, 6, '#9A6638', 0.9));
   o.push(box(258, 466, 142, 1.6, '#7E5129'));
   o.push(rect(262, 468, 138, 6, '#8A5A2F', 0.7));
-  o.push(rect(262, 468, 8, 42, '#9A6638', 0.9));
-  o.push(box(266.5, 469, 3, 40, '#7E5129'));
-  o.push(rect(390, 468, 8, 42, '#9A6638', 0.9));
+  o.push(rect(262, 468, 8, 30, '#9A6638', 0.9));
+  o.push(box(266.5, 469, 3, 28, '#7E5129'));
+  o.push(rect(390, 468, 8, 30, '#9A6638', 0.9));
   return o.join('');
 }
 
