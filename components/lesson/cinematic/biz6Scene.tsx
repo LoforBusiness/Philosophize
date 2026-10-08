@@ -167,7 +167,7 @@ const CP_LEGS: Track[] = BEATS.map((_, n) => {
   if (A_LATER[n]) return [[0, CP_HOME], [0.02, 100], [0.52, CP_HOME]];
   return [[0, CP_HOME]];
 });
-const CP_TURN: Track[] = BEATS.map((_, n) => (A_BOOTH[n] ? [[0, 1], [0.26, -1], [0.49, 1]] : [[0, 1]]));
+const CP_TURN: Track[] = BEATS.map((_, n) => (A_BOOTH[n] ? [[0, 1], [0.26, -1], [0.49, 1]] : A_LATER[n] ? [[0, 1], [0.49, -1], [0.8, 1]] : [[0, 1]]));
 /** The accountant: off the stage, right, until he walks in on b1; at the board from b8. */
 const TH_OFF = 440;
 const TH_HOME = 314;

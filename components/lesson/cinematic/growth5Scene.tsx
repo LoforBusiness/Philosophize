@@ -536,7 +536,7 @@ export default function Growth5Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const figB = keepHeld(heldB, rb.moving ? mixKeepLegs(prevB, sb, trAt(0)) : mixStance(prevB, sb, trAt(0)));
 
     // ── the old hand ─────────────────────────────────────────────────────────
-    const pC = carry(cv, 3, n, keyAt(C_KEYS[p], 1), keyAt(C_KEYS[n], u), tr);
+    const pC = carry(cv, 3, n, n === 0 ? keyAt(C_KEYS[0], 0) : keyAt(C_KEYS[p], 1), keyAt(C_KEYS[n], u), tr);
     const liveC = hLive(C_P[n], t, b, 1);
     const dC = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, 1), C_TURN[n], b, L), 1);
     const rc = routeAt(C_ROUTE, pC, hHold(C_P[n], t, 1), liveC, dC);

@@ -429,6 +429,21 @@ export default function CinematicPlayer({
     }
     narration.stop();
   }, [narrated, narrationOn, shown, done, guideOpen, lesson.id, beats]);
+  // A LINE THAT WAITS FOR ITS VOICE IS NOT SHOWN UNTIL THE VOICE COMES (2026-10-07). The
+  // owner, on the philosophy recap's slow open: "at the beginning I see some beginning
+  // words, and then after a while those words disappear and then they reappear when the
+  // narration starts." The veil lifted after the opening breath while the line still had
+  // 6 s to wait, and the letters then rose again with the voice. So its words are veiled
+  // for the same wait, on the same clock as the voice (after any hold), sound on or off.
+  const [voiceWait, setVoiceWait] = useState(() => (beats[0]?.voiceAfter ?? 0) > 0);
+  useEffect(() => {
+    const wait = beats[shown]?.voiceAfter ?? 0;
+    if (wait <= 0 || done) { setVoiceWait(false); return; }
+    setVoiceWait(true);
+    if (guideOpen) return;
+    const h = setTimeout(() => setVoiceWait(false), wait * 1000);
+    return () => clearTimeout(h);
+  }, [shown, guideOpen, done, beats]);
 
   // ── SOUND EFFECTS AND THE BED (LESSON_RULES AT6) ─────────────────────────────
   // Only a lesson whose script declares one has any of this. `lead` is at the beat's
@@ -1595,7 +1610,7 @@ export default function CinematicPlayer({
             // the paragraph on screen stayed the one Fade had built before any of
             // it. Nothing throws and nothing logs. Measured, it is indistinguishable
             // from an onPress that was never wired.
-            revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}|${peek ?? ''}|${opening ? 1 : 0}`}
+            revision={`${picked ?? ''}|${quoteSaved ? 1 : 0}|${peek ?? ''}|${opening ? 1 : 0}|${voiceWait ? 1 : 0}`}
             duration={XFADE}
             render={() => (
               <>
@@ -1603,7 +1618,7 @@ export default function CinematicPlayer({
                 {/* The first line is not drawn during the opening breath (AP19): its
                     place is kept, so nothing reflows when it arrives. */}
                 {beat.text ? (
-                  <OpeningVeil hidden={opening}>
+                  <OpeningVeil hidden={opening || voiceWait}>
                   <SpokenBy who={beat.speaker}>
                   <NarrationText
                     text={beat.text}

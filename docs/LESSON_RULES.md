@@ -7006,6 +7006,14 @@ symmetric, so in the figure's OWN frame the legs do exactly the right thing. It 
 the frame that is never flipped, and nothing in the rig can notice, because the
 rig is HANDED the direction rather than deriving it.
 
+**And it came back in the dialogue lessons, measured on the stage (2026-10-07).** The
+owner, on the philosophy recap: *"they're walking forward, but their body moves
+backwards."* `check:replay` now reads every figure's pelvis and facing each frame. It fails
+a figure whose body travels more than 8 units against the way he faces in a beat (a jump of
+over 600 units a second is a cut to another place and is not counted). The first run found
+10 such walks in 8 lessons, 75 to 198 units in the recap. A figure turns to face where he
+is going, walks forwards, and turns to his scripted facing only once the walk is done.
+
 ### The two lines, and why both
 
 ```ts
@@ -12460,7 +12468,9 @@ Spec: `docs/superpowers/specs/2026-10-07-recap-lessons-design.md`. Brief for its
   other half-remembers, mixes up or brags; the top hat sets it straight. Never a narrator.
 - **AV4 · A slow open.** Beat 0 waits (`voiceAfter`, about 6 s) while the top hat works
   alone, with sound cues on what his hands do, then a short murmur. The second figure
-  arrives on beat 1.
+  arrives on beat 1. The words of a line that waits for its voice stay veiled for the whole wait and
+  appear as the voice starts (the player's `voiceWait`); shown after the opening breath, they
+  appeared, vanished and rose again when the voice came in.
 - **AV5 · Three questions, three games**, each a different small game on the stage (AU),
   drawing on the lessons it recaps. A recap pays 25 + 3 × 10 + 15 = 70 XP. `validate-cinematic`
   reads `// AV: recap` in the script's header and holds three graded questions and at most 24

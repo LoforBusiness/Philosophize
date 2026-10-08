@@ -164,7 +164,8 @@ const BN_LEGS: Track[] = each((n) => (
     : n < FARM_N + 1 ? [[0, 244], [2.95 / L_FARM, 256]] : n < CAB_N ? [[0, 256]] : n === CAB_N ? [[1.5 / L_CAB, 286]] : [[0, 286]]
 ));
 const BN_TURN: Track[] = each((n) => (
-  n === LANTERN_N ? [[0, 1], [2.2 / L_LANTERN, -1]] : n === CAB_N ? [[0, -1], [1.35 / L_CAB, 1], [4.4 / L_CAB, -1]] : [[0, -1]]
+  n === LANTERN_N ? [[0, 1], [2.2 / L_LANTERN, -1]] : n === CAB_N ? [[0, -1], [1.35 / L_CAB, 1], [4.4 / L_CAB, -1]]
+    : n === FARM_N ? [[0, -1], [2.5 / L_FARM, 1], [3.6 / L_FARM, -1]] : [[0, -1]]
 ));
 const TH_OFF = -60;
 const TH_HOME = 166;

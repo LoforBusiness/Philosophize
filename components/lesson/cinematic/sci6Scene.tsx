@@ -187,7 +187,7 @@ const CAP_NOD = [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1];
 /** The surgeon's walks: [share of line, x]. */
 const SUR_LEGS: Track[] = BEATS.map((_, n) => {
   if (A_PAIRS[n]) return [[0.3, 216], [0.58, 140]];
-  if (A_REMEDY[n]) return [[0.02, 152], [0.25, 206], [0.44, 290], [0.84, SUR_HOME]];
+  if (A_REMEDY[n]) return [[0.25, 206], [0.44, 290], [0.84, SUR_HOME]];
   if (A_HOPE[n]) return [[0.33, 246], [0.9, SUR_HOME]];
   // every other beat he is at home — and a reader who tapped through a walk sees him
   // finish it from where he was, rather than stop there for the rest of the lesson
@@ -197,7 +197,7 @@ const SUR_LEGS: Track[] = BEATS.map((_, n) => {
 const SUR_TURN: Track[] = BEATS.map((_, n) => {
   if (n < PAIRS_N) return [[0, 1]];
   if (A_PAIRS[n]) return [[0, 1], [0.27, -1]];
-  if (A_REMEDY[n]) return [[0, -1], [0.22, 1], [0.8, -1], [0.95, 1]];
+  if (A_REMEDY[n]) return [[0, -1], [0.22, 1], [0.8, -1]];
   if (n < COMPARE_N) return [[0, 1]];
   if (A_HOPE[n]) return [[0, -1], [0.88, 1], [0.97, -1]];
   return [[0, -1]];

@@ -909,6 +909,22 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
     // the planted foot sliding, and a walk with too few or too many steps for its
     // distance shows as its stride.
     const slide = figs.map(() => ({ slide: 0, worst: 0, travel: 0, steps: 0, prev: null, down: [false, false] }));
+    // MOONWALK (C18 on the stage, 2026-10-07): a figure whose body travels one way while he
+    // faces the other. Seconds of travel against the facing, per figure, through the beat.
+    const back = figs.map(() => ({ s: 0, dist: 0, prev: null, worst: 0 }));
+    const backSample = () => figs.forEach((ch, i) => {
+      let B = null;
+      try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
+      if (!B || !B.pel) return;
+      const x = +B.pel[0].translateX, d = +B.dir;
+      const m = back[i];
+      if (m.prev !== null) {
+        const v = (x - m.prev) / DT;
+        // faster than 600 a second is a cut to another place, not a step
+        if (Math.abs(v) > 12 && Math.abs(v) < 600 && Math.abs(d) > 0.5 && Math.sign(v) !== Math.sign(d)) { m.s += DT; m.dist += Math.abs(v) * DT; m.worst = Math.max(m.worst, Math.abs(v)); }
+      }
+      m.prev = x;
+    });
     const slideSample = () => figs.forEach((ch, i) => {
       let B = null;
       try { B = ch[ch.length - 1].figD.value; } catch { B = null; }
@@ -985,6 +1001,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
     for (let f = 0; f <= steps; f++) {
       FRAME++;
       handSample();
+      backSample();
       if (process.env.REPLAY_SLIDE) slideSample();
       if (f % 6 === 0) figSample();
       if (f === 0) beatSnaps.first = snap();
@@ -1006,6 +1023,7 @@ function play(Scene, BEATS, sceneFile, upto = BEATS.length - 1) {
               const m = handM[figs.indexOf(ch)];
               return m ? { behind: +m.behind.toFixed(1), at: +m.behindAt.toFixed(2), high: +m.high.toFixed(1), highAt: +m.highAt.toFixed(2), rev: Math.max(...m.rev), run: m.run || 0 } : null;
             })(),
+            back: (() => { const m = back[figs.indexOf(ch)]; return m ? { s: +m.s.toFixed(2), dist: +m.dist.toFixed(1), v: +m.worst.toFixed(0) } : null; })(),
             slide: (() => {
               const m = slide[figs.indexOf(ch)];
               return m ? { slide: +m.slide.toFixed(2), worst: +m.worst.toFixed(2), travel: +m.travel.toFixed(1), steps: m.steps } : null;
@@ -1263,6 +1281,24 @@ for (const r of rows) {
     }
   });
 }
+// C18 · NOBODY WALKS BACKWARDS (2026-10-07). "a lot of the walking happens to be backwards …
+// they're walking forward, but their body moves backwards." A figure whose body travels
+// faster than a shuffle against the way he faces, for more than BACK_S of a beat.
+// A settle of a few units after a walk is the feet finding their place, not a walk.
+const BACK_UNITS = Number(process.env.BACK_UNITS ?? 8);
+const BACK_BUDGET = Number(process.env.BACK_BUDGET ?? 0);
+const moonwalk = [];
+// CARRIED, NOT WALKING: a figure a vehicle moves, facing the way a person really faces in
+// it. Each entry is a lesson beat and its reason; nothing else is excused.
+const CARRIED = {
+  'science-foundations-5 0': 'he rows the boat out, and a rower sits facing the stern',
+};
+for (const r of rows) {
+  (r.figs || []).forEach((beat, n) => {
+    if (CARRIED[`${r.id} ${n}`]) return;
+    for (const fg of beat) if (fg.back && fg.back.dist > BACK_UNITS) moonwalk.push(`${r.id} beat ${n}: the figure at x ${Math.round(fg.x)} travels ${fg.back.dist} units backwards over ${fg.back.s}s (up to ${fg.back.v} units a second)`);
+  });
+}
 const showN21 = (list, title) => {
   if (!list.length) return;
   console.log(`  ${title}`);
@@ -1273,6 +1309,7 @@ const showN21 = (list, title) => {
 showN21(facingAway, 'FACING — a figure on a shared stage faces nobody (N21):');
 showN21(frozenListeners, 'FROZEN — a figure stands still while another talks (N21):');
 showN21(unison, 'UNISON — two figures copy each other\'s movement (N22):');
+showN21(moonwalk, 'BACKWARDS — a body travels against the way it faces (C18):');
 
 ok('nothing moves on a beat where nothing changed (C20c)', c20c.length <= C20C_BUDGET,
   `${c20c.length} in ${byLesson(c20c)} lessons, budget ${C20C_BUDGET}`);
@@ -1289,6 +1326,7 @@ ok('every figure on a shared stage faces another (N21)', facingAway.length <= FA
 ok('nobody stands frozen while another talks to him (N21)', frozenListeners.length <= FROZEN_BUDGET,
   `${frozenListeners.length}, budget ${FROZEN_BUDGET}`);
 ok('no two figures move in unison (N22)', unison.length <= UNISON_BUDGET, `${unison.length}, budget ${UNISON_BUDGET}`);
+ok('nobody walks backwards (C18)', moonwalk.length <= BACK_BUDGET, `${moonwalk.length}, budget ${BACK_BUDGET}`);
 ok('every scene could be run', unread.length <= UNREAD_BUDGET, `${unread.length} unread, budget ${UNREAD_BUDGET}`);
 
 // ── AR · A HAND USES A THING THE WAY A PERSON DOES (2026-10-01) ─────────────

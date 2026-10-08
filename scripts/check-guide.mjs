@@ -170,7 +170,8 @@ for (const name of PLAYERS) {
   if (!/setTimeout\(\(\) => setOpening\(false\), OPENING_MS\)/.test(host)) missing.push('the guide host never ends the breath after OPENING_MS');
   if (!/useGuideStore\(isHeld\)/.test(pl)) missing.push('the player\'s voice is not held for the breath (useGuideStore(isHeld))');
   if (!/getState\(\)\.opening\) \{ setOpening\(false\); return; \}/.test(pl)) missing.push('a tap during the breath does not start the lesson');
-  if (!/<OpeningVeil hidden=\{opening\}>/.test(pl)) missing.push('the first line\'s words are drawn during the breath');
+  // the words are veiled during the breath, and (AV4) while a line waits for its voice
+  if (!/<OpeningVeil hidden=\{opening( \|\| voiceWait)?\}>/.test(pl)) missing.push('the first line\'s words are drawn during the breath');
   // AI8 — THE MOMENT IT BEGINS IS A FADE, NOT A CUT OR A RE-LAYOUT. The tap hint is one
   // slice of the stage/deck/hint split; unmounted during the breath, it took its slice
   // back from the stage on the frame the lesson began, and the whole picture shrank and

@@ -516,17 +516,30 @@ export default function Hist5Scene({ clock, bt, bi, picked, pickedOk }: SceneApi
     };
 
     // ── the cap ────────────────────────────────────────────────────────────
-    const wc = legsOf(carrySource(cv, 0, n, SIT_X), C_LEGS[n], b, L);
+    // A reader who taps through the walk home reaches the rest beat with him still on the
+    // way (C18): he finishes the walk facing it, then sits and lies down, instead of being
+    // dragged to his bed backwards while he turns round.
+    const srcC = carrySource(cv, 0, n, SIT_X);
+    const away = a === A.rest && Math.abs(srcC - SIT_X) > 1;
+    const awayDur = away ? moveTr(srcC, SIT_X, TR) : 0;
+    const aw = b - awayDur;
+    const wc = legsOf(srcC, away ? [[0, SIT_X]] : C_LEGS[n], b, L);
     const xc = carry(cv, 0, n, wc.x, wc.x, 1);
-    const dc = carry(cv, 1, n, 1, faceOf(carrySource(cv, 1, n, 1), C_TURN[n], b, L), 1);
+    const dc = carry(cv, 1, n, 1, away
+      ? faceOf(carrySource(cv, 1, n, -1), [[0, -1], [awayDur, 1]], b, 1)
+      : faceOf(carrySource(cv, 1, n, 1), C_TURN[n], b, L), 1);
     // How far into bed he is: edgeW 0 standing → 1 on the bed's edge; inW 0 legs over
     // the edge → 1 legs on the bed; lie 0 sitting up → 1 lying down. The door beat gets
     // him up (the duvet thrown off, the legs swung round, the rise) BEFORE he walks, so
     // a reader who taps early never sees it hurried; the sleep beat is the same, read
     // backwards, once he has walked home.
-    const edgeNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.14, 0.235) : a === A.sleep ? st(0.715, 0.795) : 0;
-    const inNow = a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.05, 0.13) : a === A.sleep ? st(0.8, 0.86) : 0;
-    const lieNow = a === A.wake ? 1 - st(0.22, 0.46) : a >= A.rest ? 1 : a === A.sleep ? st(0.87, 0.96) : 0;
+    const awayW = (x: number, y: number) => {
+      'worklet';
+      return ease01(clamp01((aw - x) / (y - x)));
+    };
+    const edgeNow = away ? awayW(0.3, 1.7) : a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.14, 0.235) : a === A.sleep ? st(0.715, 0.795) : 0;
+    const inNow = away ? awayW(2.0, 3.0) : a <= A.room || a >= A.rest ? 1 : a === A.door ? 1 - st(0.05, 0.13) : a === A.sleep ? st(0.8, 0.86) : 0;
+    const lieNow = away ? awayW(3.3, 5.0) : a === A.wake ? 1 - st(0.22, 0.46) : a >= A.rest ? 1 : a === A.sleep ? st(0.87, 0.96) : 0;
     const edgeW = carry(cv, 2, n, edgeNow, edgeNow, tr);
     const inW = carry(cv, 3, n, inNow, inNow, tr);
     const lie = carry(cv, 4, n, lieNow, lieNow, tr);

@@ -297,49 +297,74 @@ function look(s: Stance, v: number): Stance {
   'worklet';
   return v === 0 ? s : { ...s, neck: s.neck + v };
 }
-/** Where a walking figure stands at time `b` of a beat (from where he is). */
-function legsOf(src: number, legs: Track, b: number, L: number) {
+/** How long a figure takes to turn round through a profile before he sets off. */
+const TURN_S = 0.36;
+/**
+ * A walk from `src` to `to` that starts `start` seconds into the beat — later if he is
+ * facing the wrong way and must turn first (C18: he always walks forwards). Eased in and
+ * out, and the gait is driven by the same eased distance, so the feet stay planted.
+ */
+function walkOf(src: number, to: number, start: number, faceSrc: number, b: number) {
   'worklet';
-  let from = src;
-  let free = 0;
-  let x = src;
-  let x0 = src;
-  let x1 = src;
-  let u = 1;
-  for (let k = 0; k < legs.length; k += 1) {
-    const to = legs[k][1];
-    const d = Math.abs(to - from);
-    const dur = d > 1 ? moveTr(from, to, TR) : 0;
-    const start = Math.max(legs[k][0] * L, free);
-    if (b < start) break;
-    x0 = from;
-    x1 = to;
-    u = dur > 0 ? clamp01((b - start) / dur) : 1;
-    x = d > 1 ? lerp(from, to, ease01(u)) : to;
-    free = start + dur;
-    from = to;
-  }
-  const walking = Math.abs(x1 - x0) > 1 && u < 1;
-  return { x, x0, x1, u: ease01(u), walking, end: free, dir: Math.abs(x1 - x0) > 1 ? Math.sign(x1 - x0) : 0 };
+  const d = Math.abs(to - src);
+  if (d <= 1) return { x: to, x0: to, x1: to, u: 1, walking: false, ws: 0, we: 0, wd: 0 };
+  const wd = to > src ? 1 : -1;
+  const ws = (faceSrc < 0 ? -1 : 1) !== wd && start < TURN_S - 0.04 ? TURN_S - 0.04 : start;
+  const we = ws + moveTr(src, to, TR);
+  const lin = clamp01((b - ws) / (we - ws));
+  const e = ease01(lin);
+  return { x: lerp(src, to, e), x0: src, x1: to, u: e, walking: b >= ws && lin < 1, ws, we, wd };
+}
+type Walk = ReturnType<typeof walkOf>;
+/** The beat's own walk: its one leg, from where he is. */
+function legsOf(src: number, legs: Track, b: number, L: number, faceSrc: number): Walk {
+  'worklet';
+  const leg = legs[legs.length - 1];
+  return walkOf(src, leg[1], legs[0][0] * L, faceSrc, b);
+}
+/** The same walk, begun `off` seconds into the beat (the harbour half of the walk down). */
+function shifted(w: Walk, off: number): Walk {
+  'worklet';
+  return { ...w, ws: w.ws + off, we: w.we + off };
 }
 /**
- * Which way a figure faces at time `b`, turning through a profile from its screen facing.
- * A turn against the way he is walking waits until the walk is done (C18: no moonwalk).
+ * Which way a figure faces at time `b`: the scripted turns, eased through a profile — but a
+ * walk wins. He turns to face where he is going just before he sets off, and a scripted turn
+ * the other way waits until he has arrived.
  */
-function faceOf(src: number, turns: Track, b: number, L: number, wEnd = 0, wDir = 0) {
+function faceOf(src: number, turns: Track, b: number, L: number, w: Walk) {
   'worklet';
+  const ts: number[] = [];
+  const ds: number[] = [];
+  for (let k = 0; k < turns.length; k += 1) {
+    let tt = turns[k][0] * L;
+    const dd = turns[k][1];
+    if (w.wd !== 0 && dd !== w.wd && tt >= w.ws - TURN_S - 0.05 && tt < w.we) tt = w.we;
+    ts.push(tt);
+    ds.push(dd);
+  }
+  if (w.wd !== 0) {
+    ts.push(Math.max(0, w.ws - TURN_S));
+    ds.push(w.wd);
+  }
+  // in time order (a handful of turns at most)
+  for (let i = 1; i < ts.length; i += 1) {
+    for (let j = i; j > 0 && ts[j] < ts[j - 1]; j -= 1) {
+      const t0 = ts[j]; ts[j] = ts[j - 1]; ts[j - 1] = t0;
+      const d0 = ds[j]; ds[j] = ds[j - 1]; ds[j - 1] = d0;
+    }
+  }
   let from = src;
   let d = src;
-  for (let k = 0; k < turns.length; k += 1) {
-    const at0 = wDir !== 0 && turns[k][1] !== wDir ? Math.max(turns[k][0] * L, wEnd) : turns[k][0] * L;
-    if (b < at0) break;
-    d = facing(from, turns[k][1], b - at0);
-    from = turns[k][1];
+  for (let k = 0; k < ts.length; k += 1) {
+    if (b < ts[k]) break;
+    d = facing(from, ds[k], b - ts[k], TURN_S);
+    from = ds[k];
   }
   return d;
 }
 /** One figure's body: walking its legs, or holding its pose live. */
-function bodyOf(w: ReturnType<typeof legsOf>, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
+function bodyOf(w: Walk, codes: readonly number[], n: number, t: number, b: number, phase?: number): Stance {
   'worklet';
   return w.walking
     ? travelStance(w.x0, w.x1, hHold(codes[n], t, phase), hHold(codes[n], t, phase), hLive(codes[n], t, b, phase), w.u, WALK, 0)
@@ -397,21 +422,16 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const legsP = PL_LEGS[n];
     let srcP = carrySource(cv, 0, n, PL_OFF);
     if (late) srcP = legsP[legsP.length - 1][1];
-    let wP = legsOf(srcP, legsP, b, L);
-    if (n === HARBOUR) {
-      if (b < CUT) wP = legsOf(srcP, [[0, PL_EXIT]], b, L);
-      else {
-        const w2 = legsOf(PL_ENTER, [[0, PL_QUAY]], b - CUT, L);
-        wP = { ...w2, end: w2.end + CUT };
-      }
-    }
+    const fP = carrySource(cv, 2, n, 1);
+    let wP = legsOf(srcP, legsP, b, L, fP);
+    if (n === HARBOUR) wP = b < CUT ? walkOf(srcP, PL_EXIT, 0, fP, b) : shifted(walkOf(PL_ENTER, PL_QUAY, 0, 1, b - CUT), CUT);
     const xPw = carry(cv, 0, n, wP.x, wP.x, 1);
     // ── the camera: the agora, then (cut under the fade) the harbour ────────
     const camNow = n < HARBOUR ? 0 : n === HARBOUR ? (b < CUT ? 0 : -HX) : -HX;
     const cam = carry(cv, 1, n, 0, camNow, 1);
     const fade = n === HARBOUR ? stage(b, 1, CUT - 0.35, CUT) * (1 - stage(b, 1, CUT, CUT + 0.45)) : late ? 1 - stage(b, 1, 0, 0.45) : 0;
     const xP = xPw + cam;
-    const dP = carry(cv, 2, n, 0, faceOf(carrySource(cv, 2, n, 1), PL_TURN[n], b, L, wP.end, wP.dir), 1);
+    const dP = carry(cv, 2, n, 0, faceOf(fP, PL_TURN[n], b, L, wP), 1);
     let sp = bodyOf(wP, PL_P, n, t, b, 1);
     sp = keyed(sp, PL_R[n], u, xP, dP, 1);
     sp = keyed(sp, PL_L[n], u, xP, dP, -1);
@@ -427,17 +447,12 @@ export default function Phil7Scene({ clock, bt, bi, i, qv, picked, onPick }: Sce
     const legsT = TH_LEGS[n];
     let srcT = carrySource(cv, 3, n, TH_DESK);
     if (late) srcT = legsT[legsT.length - 1][1];
-    let wT = legsOf(srcT, legsT, b, L);
-    if (n === HARBOUR) {
-      if (b < CUT) wT = legsOf(srcT, [[0.1, TH_EXIT]], b, L);
-      else {
-        const w2 = legsOf(TH_ENTER, [[0.04, TH_QUAY]], b - CUT, L);
-        wT = { ...w2, end: w2.end + CUT };
-      }
-    }
+    const fT = carrySource(cv, 4, n, -1);
+    let wT = legsOf(srcT, legsT, b, L, fT);
+    if (n === HARBOUR) wT = b < CUT ? walkOf(srcT, TH_EXIT, 0.1 * L, fT, b) : shifted(walkOf(TH_ENTER, TH_QUAY, 0.24, 1, b - CUT), CUT);
     const xTw = carry(cv, 3, n, wT.x, wT.x, 1);
     const xT = xTw + cam;
-    const dT = carry(cv, 4, n, 0, faceOf(carrySource(cv, 4, n, -1), TH_TURN[n], b, L, wT.end, wT.dir), 1);
+    const dT = carry(cv, 4, n, 0, faceOf(fT, TH_TURN[n], b, L, wT), 1);
     let sh = bodyOf(wT, TH_P, n, t, b, 0);
     sh = keyed(sh, TH_R[n], u, xT, dT, 1);
     sh = keyed(sh, TH_L[n], u, xT, dT, -1);

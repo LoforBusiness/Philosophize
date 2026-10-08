@@ -60,7 +60,7 @@ export const TOUR_STAMP: Record<string, string> = {
   'business-foundations-3': '671825c81859',
   'business-foundations-4': 'cfdbfb04f04e',
   'business-foundations-5': '03e1989c31a5',
-  'business-foundations-6': '27ad71872e0c',
+  'business-foundations-6': 'c3375b620acb',
   'economics-foundations-1': '1eb4a17e96c8',
   'economics-foundations-4': 'f403dfc8ece8',
   'history-foundations-1': '966ccba9e0b2',
@@ -77,6 +77,6 @@ export const TOUR_STAMP: Record<string, string> = {
   'psychology-foundations-2': 'f6052bf92fab',
   'psychology-foundations-6': '1af9a8f24a80',
   'science-foundations-1': '6793ea523ae8',
-  'science-foundations-2': '039806b1ff57',
+  'science-foundations-2': 'a151d85e738f',
   'science-foundations-3': 'b3a9df02e0c5',
 };
