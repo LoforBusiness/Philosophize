@@ -5,6 +5,7 @@ import third from './lessons/how-do-you-set-a-price';
 import fourth from './lessons/what-is-profit';
 import fifth from './lessons/profit-isnt-cash';
 import sixth from './lessons/when-do-you-break-even';
+import recap from './lessons/business-recap';
 
 const units: Path[] = [
   {
@@ -12,7 +13,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "What a business is, what profit is, and what a leader does.",
-    lessons: [first, second, third, fourth, fifth, sixth],
+    lessons: [first, second, third, fourth, fifth, sixth, recap],
   },
 ];
 

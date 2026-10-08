@@ -19,8 +19,10 @@ export const MENTION_NAMED = 1;
 export const LESSON_MENTIONS: Record<string, readonly Mention[]> = {
   'business-foundations-4': [['walter-benjamin', 1]],
   'economics-foundations-4': [['adam-smith', 3]],
+  'economics-foundations-7': [['adam-smith', 3]],
   'personal-growth-foundations-2': [['william-james', 3]],
   'personal-growth-foundations-3': [['seneca', 3]],
+  'personal-growth-foundations-7': [['laozi', 3]],
   'philosophy-foundations-1': [['socrates', 3], ['plato', 1]],
   'philosophy-foundations-2': [['john-stuart-mill', 3]],
   'philosophy-foundations-3': [['jeremy-bentham', 3]],

@@ -5,6 +5,7 @@ import third from './lessons/why-we-see-what-we-expect';
 import fourth from './lessons/why-we-follow-the-crowd';
 import fifth from './lessons/when-the-saucer-doesnt-come';
 import sixth from './lessons/why-one-more-go';
+import recap from './lessons/psychology-recap';
 
 const units: Path[] = [
   {
@@ -12,7 +13,7 @@ const units: Path[] = [
     slug: "foundations",
     name: "Foundations",
     description: "What psychology is, and why it tests instead of asking.",
-    lessons: [first, second, third, fourth, fifth, sixth],
+    lessons: [first, second, third, fourth, fifth, sixth, recap],
   },
 ];
 
