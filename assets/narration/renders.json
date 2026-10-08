@@ -1369,6 +1369,96 @@
     "wav": "9373212f816e90005071401b7c58173d5bb98b5a7fcac864af9e157dd57c3767",
     "voice": "en-US-Chirp3-HD-Kore"
   },
+  "philosophy-foundations-7/beat-00": {
+    "text": "Six questions, and not one of them easy.",
+    "wav": "8396c6fbc9aa5404868f81ae5d517525a0cb36f6f6c75798cbc88c35498eace7",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-01": {
+    "text": "Found you. I was the star of most of those questions, you know.",
+    "wav": "4c4090ef3cfacbf4f507ea39f05c13b8f74c2fbe6ee7ca6394eb5386f92ebbf3",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-02": {
+    "text": "You were in them, which isn’t the same thing. Remember the bicycle with the new frame and the new saddle?",
+    "wav": "921be61857c12f31485b6e800263a4a7e2f9bba3620502d1d2cc4755bb71c907",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-03": {
+    "text": "Easy. New frame, new saddle, so it’s a new bicycle. Case closed.",
+    "wav": "96da602549ab699c8cb19db19db5587beaadd02e289dcf8286f51f4a215b7745",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-04": {
+    "text": "You agreed on every fact and still couldn’t agree on the answer. That’s a philosophy question, and it’s settled by reasons.",
+    "wav": "bca44f8e24241dc1ca4ce32b45343b0c7cce9b1b83667997f0ba5abeabe2a417",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-05": {
+    "text": "Then let’s ask the market. Everyone here agrees with me, so I’m right.",
+    "wav": "695505b7544dc8175d505105d961eaa16315f91d49a08e43bdbaf39aa6f75570",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-07": {
+    "text": "Says the man who still writes on wax.",
+    "wav": "50efdeaa56fa39bcfddc38db68067af87262dea63ff065a95b83e44d8e95e2ea",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-08": {
+    "text": "That’s an attack on me, not on my reasons. A good argument needs true reasons, and a conclusion that follows from them.",
+    "wav": "28751ecb78008684f70c5249700662f777d1c10e2f3da191ceba68fc383a5a9d",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-09": {
+    "text": "Oh, look, a purse on the fountain. Finders keepers.",
+    "wav": "2747f81c4b2e7c04a3b811a21da3fd9f0da7edfc89efdb9dc6e36381e4b076e0",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-10": {
+    "text": "There are two ways to decide what’s right. Ask who your choice helps and harms, or ask which rule it keeps, whatever happens next.",
+    "wav": "262d93d78ea55499802c669e619e5c8c8d692433a4fd7bd33708dcf3b5b33de7",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-12": {
+    "text": "Fine, I’ll hand it in. Nobody’s making me, I just like looking good.",
+    "wav": "aecffab5ac13b0a01fd89c7e05bcc8cf625ee5b3cad69357712dd8e31ed9cc57",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-13": {
+    "text": "Then on one answer, you chose freely. Your wants have causes, but nobody forced them on you.",
+    "wav": "038835d6f0f855c6080b1c6b7510dc10ff994b358d755c3e269a6f064d9e8dab",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-14": {
+    "text": "My ship sails at noon, and I can feel that it’s noon. I’m never wrong about these things.",
+    "wav": "56f7b221769c568d0e753d388bf0fc1c46d9205b8ac718679c70e51f77483e34",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-15": {
+    "text": "Even if you’re right, a feeling isn’t a reason. To know something, it has to be true, and you need a good reason for it.",
+    "wav": "540ef0433aa3922066b4be3dcf16253e52babc3cf75e86de5f4dd1eb52d06b98",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-17": {
+    "text": "And there’s my ship. Every plank’s been replaced, but it’s still mine.",
+    "wav": "9f0865b23822c6615d959ebf83a58d02a926ccfa8d3a67ce3f4f8ef82b68dab1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-18": {
+    "text": "Same puzzle as the teleporter. Are you your body, or what you remember?",
+    "wav": "64cc03eb8bfc3be609c682783dabdbf868dd19c28fe27c97a5d9d7b57485d3b5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-foundations-7/beat-19": {
+    "text": "What I remember, of course. It’s far too good to lose.",
+    "wav": "e3de441474cc3d6ad7cf35403389d952e26aeed131c15908b0fd08916b60cc5d",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-foundations-7/beat-20": {
+    "text": "A copy of you’d remember it all too. So memories alone can’t settle which one is you.",
+    "wav": "c9fc1feeacc010aefc977539219b00a61d493df1861012d5bfd113737b7f43c1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
   "psychology-foundations-1/beat-00": {
     "text": "I can always tell cheap coffee from the good stuff. Always.",
     "wav": "05bc08ce5c7edf184375ad6c4e32eb5f51f1ed36801368d17cb0db7f655a47bd",

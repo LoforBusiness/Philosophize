@@ -12437,3 +12437,36 @@ comment. Rules:
 - **Still simple** (AP7): at most two movers at once, no silent extras outside a staged
   scene (AT2), and no branches. A reader's answer is never voiced back (AT4, AT5 cost a
   voiced line per answer, and the owner chose a normal lesson over that).
+
+## Group AV · A recap: the road so far, in a fuller place (2026-10-07)
+
+> *"I want a recap lesson for each subject … the tophat stickman in a couple different
+> situations … the recap starts off slow … with just sound effects … I want to really be
+> accurate on what is presented in the recap so it's actually helping the user remember
+> what they learned in a fun way … I want it to be a bit more real … if you need to use
+> more of the screen … have more backgrounds and more realistic settings."*
+
+Spec: `docs/superpowers/specs/2026-10-07-recap-lessons-design.md`. Brief for its scene:
+`docs/superpowers/plans/2026-10-07-recap-scene-brief.md`.
+
+- **AV1 · Where it sits.** Stop 7 on its road, `<subject>-foundations-7`, after lesson 6.
+  Its lesson data carries `recap: true`, and its road sign's strip says RECAP with a spiral.
+  Lessons added later go after it.
+- **AV2 · Every claim comes from a lesson.** The script's header lists, lesson by lesson, the
+  idea it restates and the beats that restate it. Each of the six lessons gets at least one
+  line, worded from that lesson's own lines, quizzes and summary. Nothing new is taught,
+  and nothing is rounded into something the lesson did not say.
+- **AV3 · Two people, top hat leading.** The top hat and one other cast member (AS). The
+  other half-remembers, mixes up or brags; the top hat sets it straight. Never a narrator.
+- **AV4 · A slow open.** Beat 0 waits (`voiceAfter`, about 6 s) while the top hat works
+  alone, with sound cues on what his hands do, then a short murmur. The second figure
+  arrives on beat 1.
+- **AV5 · Three questions, three games**, each a different small game on the stage (AU),
+  drawing on the lessons it recaps. A recap pays 25 + 3 × 10 + 15 = 70 XP. `validate-cinematic`
+  reads `// AV: recap` in the script's header and holds three graded questions and at most 24
+  beats.
+- **AV6 · A real place, filling the stage.** The band is 400 × 300 (`band={[214, 514]}`),
+  not a 208-unit strip, so the picture fills the phone's stage box. Each setting is a whole
+  place in layers: far (sky, hills, back wall), middle (buildings, columns, shelves), near
+  (floor, the table, props). Still layers are baked pictures (AM13). Two settings or more,
+  linked by a smooth change of place.

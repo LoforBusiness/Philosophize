@@ -184,6 +184,8 @@ export interface Lesson {
   estimatedMinutes: number;
   xpReward: number;
   cards: CardData[];
+  /** A RECAP of the road's lessons before it (LESSON_RULES AV): its road sign says RECAP. */
+  recap?: boolean;
 }
 
 export interface Path {

@@ -28,6 +28,7 @@ export const LESSON_ADDED: Record<string, string> = {
   'philosophy-foundations-4': '2026-10-02',
   'philosophy-foundations-5': '2026-10-03',
   'philosophy-foundations-6': '2026-10-04',
+  'philosophy-foundations-7': '2026-10-07',
   'psychology-foundations-2': '2026-09-30',
   'psychology-foundations-3': '2026-10-01',
   'psychology-foundations-4': '2026-10-02',

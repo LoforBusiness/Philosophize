@@ -46,6 +46,7 @@ import { Biz6Lesson } from '@/components/lesson/cinematic/biz6Scene';
 import { Econ6Lesson } from '@/components/lesson/cinematic/econ6Scene';
 import { Sci6Lesson } from '@/components/lesson/cinematic/sci6Scene';
 import { Hist6Lesson } from '@/components/lesson/cinematic/hist6Scene';
+import { Phil7Lesson } from '@/components/lesson/cinematic/phil7Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -88,6 +89,7 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'philosophy-foundations-4': Phil4Lesson,
   'philosophy-foundations-5': Phil5Lesson,
   'philosophy-foundations-6': Phil6Lesson,
+  'philosophy-foundations-7': Phil7Lesson,
   'psychology-foundations-1': Psych1Lesson,
   'psychology-foundations-2': Psych2Lesson,
   'psychology-foundations-3': Psych3Lesson,

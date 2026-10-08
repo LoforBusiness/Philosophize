@@ -230,6 +230,7 @@ export default function BranchDetailScreen() {
         needsPass: lm.needsPass,
         // NEW on the sign for five days from the day it was added (data/lessonAdded.ts).
         isNew: isNewLesson(lm.lesson.id),
+        recap: !!lm.lesson.recap,
       });
     }
     if (hasReview(u.unit.id)) {

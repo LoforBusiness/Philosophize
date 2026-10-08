@@ -27,6 +27,7 @@ export const LESSON_MENTIONS: Record<string, readonly Mention[]> = {
   'philosophy-foundations-4': [['bertrand-russell', 3]],
   'philosophy-foundations-5': [['john-locke', 3]],
   'philosophy-foundations-6': [['arthur-schopenhauer', 3]],
+  'philosophy-foundations-7': [['heraclitus', 3]],
   'psychology-foundations-1': [['william-james', 3]],
   'psychology-foundations-3': [['william-james', 3]],
   'science-foundations-5': [['karl-popper', 3]],

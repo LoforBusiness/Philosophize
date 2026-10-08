@@ -55,6 +55,7 @@ export const LESSONS = {
   'philosophy-foundations-4': 'phil4Script.ts',
   'philosophy-foundations-5': 'phil5Script.ts',
   'philosophy-foundations-6': 'phil6Script.ts',
+  'philosophy-foundations-7': 'phil7Script.ts',
   'psychology-foundations-1': 'psych1Script.ts',
   'psychology-foundations-2': 'psych2Script.ts',
   'psychology-foundations-3': 'psych3Script.ts',

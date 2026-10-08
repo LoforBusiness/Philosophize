@@ -268,7 +268,7 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 > ROAD SINCE 2026-10-02, 28 in all (§23).** Everything below about 41 a branch, the takeover and the 246
 > describes philosophy's six old branches, whose lessons were DELETED on 2026-10-02
 > (§23); a reader's progress in them survives as counts (`data/retiredBranches.ts`). It
-> is kept as a finding. `check:cinematic` counts the 42 lessons, so `SOLID_FLOOR` is 42.
+> is kept as a finding. `check:cinematic` counts the 43 lessons (42 and philosophy's recap), so `SOLID_FLOOR` is 43.
 
 ### Shape today
 
@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 42** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 28 with the fourth lessons, 29 with history's staged fifth, 35 with the other six fifth lessons, and 42 with the sixth lessons), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 43** (246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 28 with the fourth lessons, 29 with history's staged fifth, 35 with the other six fifth lessons, and 42 with the sixth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -320,7 +320,7 @@ because every lesson id is in the `CINEMATIC` map — and was deleted on 2026-10
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 42, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 43, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -1315,7 +1315,7 @@ they belong to, so the rule book has them and this file did not:
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 42 DIALOGUE lessons, six on each road (History's fifth is staged as a scene with a silent jury; from the other roads' fifths on, 2026-10-03, every lesson is built to group AU: harder ideas in exciting places, each question a small game)** (§23, LESSON_RULES
+- **Lessons (live): 43 DIALOGUE lessons, six on each road and philosophy's recap (group AV) (History's fifth is staged as a scene with a silent jury; from the other roads' fifths on, 2026-10-03, every lesson is built to group AU: harder ideas in exciting places, each question a small game)** (§23, LESSON_RULES
   groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
@@ -1429,8 +1429,8 @@ they belong to, so the rule book has them and this file did not:
 **Known gaps / tech debt:**
 > Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
 > are about philosophy's narrated library, deleted on 2026-10-02 (§23): kept as findings.
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 42, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 42 (the 42 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 43, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 43 (the 43 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -2665,7 +2665,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 42 of the 42 lessons are here now (the dialogue lessons, one of them a staged scene; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 43 of the 43 lessons are here now (the dialogue lessons, one of them a staged scene and one a recap; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8834,6 +8834,7 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   Kadesh carvings at Abu Simbel against a Hittite tablet; weighing sources). Scripts
   `phil6 … hist6`, fourteen new question games, 63 lines for about 37,000 characters. Brief:
   `docs/superpowers/plans/2026-10-04-sixth-lessons-scene-brief.md`.
+- **A recap at the end of each road (2026-10-07, LESSON_RULES group AV).** Stop 7, `<subject>-foundations-7`, its sign marked RECAP. The top hat and one other in two new places that fit the subject, a slow wordless open, every line restating what the six lessons taught (each traced in the script header), three question games (70 XP), and a TALLER stage (band 214–514, 400 × 300) filled by layered, baked backdrops. Philosophy's is first (the agora, then the harbour of Piraeus); the other six follow once the owner has seen it. Spec `docs/superpowers/specs/2026-10-07-recap-lessons-design.md`, scene brief `docs/superpowers/plans/2026-10-07-recap-scene-brief.md`.
 - **No letter is cut off, and every lesson's objects are drawings (2026-10-05).** *"the end
   of coin is slightly cut off … I've noticed this for other words."* Android's TextView clips
   its ink to its CONTENT box (inside padding, so padding cannot help), and Caveat draws up to

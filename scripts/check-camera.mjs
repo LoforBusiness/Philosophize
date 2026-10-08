@@ -47,6 +47,9 @@ for (const f of scenes) {
   // A scene rolls its own when it builds a camera transform itself.
   const ownCamera = /transform:\s*\[[^\]]*scale/.test(src) && /\bcam\b/.test(src);
   if (!ownCamera || playerOwned) continue;
+  // A scene may record that its targets were checked in shot by hand, on its renders,
+  // for each question beat (`// OWN CAMERA: targets checked in shot <date>`).
+  if (/^\/\/ OWN CAMERA: targets checked in shot \d{4}-\d{2}-\d{2}/m.test(src)) continue;
   if (!hasInteract(f)) continue;
   unguarded++;
   rows.push(`  ${f.replace('Scene.tsx', '')}`);

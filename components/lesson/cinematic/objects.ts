@@ -674,6 +674,22 @@ export const NATURAL = {
   hi6Bristle:   { base: '#3E3229', shade: '#2B221C', label: '#FAFAF7', what: 'an archaeologist\'s soft brush, its dark bristles' },
   hi6Sand:      { base: '#E2C79A', shade: '#C6A979', label: '#1A1A1A', what: 'sieved sand in a finds tray' },
   hi6Sky:       { base: '#A9D3EE', shade: '#72AAD6', label: '#1A1A1A', what: 'a postcard\'s printed blue sky' },
+  // phil7 colours:
+  ph7Water: { base: '#6FB1CF', shade: '#4F92B4', label: '#1A1A1A', what: 'fountain water and the harbour sea' },
+  ph7Foam: { base: '#E8F6FB', shade: '#BFE2EF', label: '#1A1A1A', what: 'white water where a spout splashes, glints on the sea' },
+  ph7Wax: { base: '#4A3A2C', shade: '#382B20', label: '#FAFAF7', what: 'the dark wax in a writing tablet' },
+  ph7Frame: { base: '#BC8A52', shade: '#94683A', label: '#1A1A1A', what: 'a wax tablet’s boxwood frame' },
+  ph7Scratch: { base: '#EAD9B0', shade: '#CDB98C', label: '#1A1A1A', what: 'a line scratched into wax, showing the pale wood' },
+  ph7Bronze: { base: '#C08A3E', shade: '#94672A', label: '#1A1A1A', what: 'a herald’s bronze horn, bronze weights and a balance' },
+  ph7Clay: { base: '#CB7E4C', shade: '#A3603A', label: '#1A1A1A', what: 'broken terracotta voting shards' },
+  ph7Leather: { base: '#8C5C34', shade: '#6A4326', label: '#FAFAF7', what: 'a leather purse' },
+  ph7Fig: { base: '#7A4462', shade: '#5A3048', label: '#FAFAF7', what: 'a ripe purple fig' },
+  ph7Gull: { base: '#F6F4EF', shade: '#D3CFC6', label: '#1A1A1A', what: 'a herring gull’s white body' },
+  ph7GullTip: { base: '#4B4B4B', shade: '#333333', label: '#FAFAF7', what: 'a gull’s dark wing tips' },
+  ph7Heart: { base: '#B93B33', shade: '#962C25', label: '#FAFAF7', what: 'a red heart' },
+  ph7Shadow: { base: '#5C5243', shade: '#463E33', label: '#FAFAF7', what: 'the gnomon’s shadow on a marble sundial' },
+  ph7Stylus: { base: '#C9A86A', shade: '#9E8148', label: '#1A1A1A', what: 'a bone stylus' },
+  ph7Chain: { base: '#7E6440', shade: '#5E4A2E', label: '#FAFAF7', what: 'a balance’s bronze chains' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 

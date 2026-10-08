@@ -141,7 +141,10 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
     : n;
   const firstPerson = fs.existsSync(path.join(DIR, `${name}Scene.tsx`))
     && /^\/\/ AT(1: first person|2: silent extras)/m.test(fs.readFileSync(path.join(DIR, `${name}Scene.tsx`), 'utf8'));
-  const ceiling = firstPerson ? 26 : 19;
+  // A RECAP (group AV) restates six lessons and asks three questions, so it runs longer.
+  const recap = fs.existsSync(path.join(DIR, `${name}Script.ts`))
+    && /^\/\/ AV: recap$/m.test(fs.readFileSync(path.join(DIR, `${name}Script.ts`), 'utf8'));
+  const ceiling = firstPerson ? 26 : recap ? 24 : 19;
   if (!LEGACY.has(name)) {
     if (played < 7 || played > ceiling) errs.push(`${played} beats played${played !== n ? ` (${n} written)` : ''} (H52 wants 7–${ceiling}${firstPerson ? ' for a staged scene (group AT)' : ' since the segmenting split; 8 was the old house length'})`);
     if (quotes.length !== 1) errs.push(`${quotes.length} quote beats, want exactly 1 (H52)`);
@@ -156,9 +159,10 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   if (summaries.length !== 1) errs.push(`${summaries.length} summary beats, want exactly 1 (H52)`);
   else if (summaries[0] !== n - 1) errs.push(`the summary is beat ${summaries[0]} of ${n - 1}, must be last (H52)`);
 
-  if (graded.length !== 2) {
+  const wantGraded = recap ? 3 : 2;
+  if (graded.length !== wantGraded) {
     errs.push(
-      `${graded.length} graded questions, want exactly 2 — a lesson pays ` +
+      `${graded.length} graded questions, want exactly ${wantGraded}${recap ? ' for a recap (AV)' : ''} — a lesson pays ` +
         `${25 + graded.length * 10 + 15} XP instead of 60 (H53). An extra interaction is a \`tap\`.`,
     );
   }
@@ -423,7 +427,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 42; // the 42 dialogue lessons: six a road since 2026-10-04 (history's staged fifth first); 267 until the retired 246 were deleted (2026-10-02)
+const SOLID_FLOOR = 43; // 42 dialogue lessons (six a road since 2026-10-04) and philosophy's recap (2026-10-07, group AV); 267 until the retired 246 were deleted (2026-10-02)
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //

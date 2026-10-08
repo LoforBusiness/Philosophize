@@ -101,6 +101,8 @@ export interface WorldLesson {
   hidden?: boolean;
   /** Added in the last twelve days (data/lessonAdded.ts): the sign wears NEW. */
   isNew?: boolean;
+  /** A RECAP of the road so far (LESSON_RULES AV): its sign's strip says RECAP. */
+  recap?: boolean;
 }
 
 /** What is mounted right now: which ground chunk, which sign, which place. */
@@ -595,8 +597,8 @@ function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
               // A review is named for the unit it reviews: its strip already says UNIT REVIEW.
               title={l.review ? l.unitTitle : l.title}
               hue={hue}
-              label={l.review ? 'UNIT REVIEW' : `LESSON ${n}`}
-              icon={l.review ? 'reload' : 'book'}
+              label={l.review ? 'UNIT REVIEW' : l.recap ? 'RECAP' : `LESSON ${n}`}
+              icon={l.review ? 'reload' : l.recap ? 'spiral' : 'book'}
               here={here}
               done={l.done}
               locked={!l.accessible}
