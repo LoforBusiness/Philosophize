@@ -93,6 +93,12 @@ export const LESSONS = {
   'history-foundations-6': 'hist6Script.ts',
   'history-foundations-7': 'hist7Script.ts',
   'history-caesar-1': 'caesar1Script.ts',
+  'science-penicillin-1': 'fleming1Script.ts',
+  'psychology-milgram-1': 'milgram1Script.ts',
+  'philosophy-descartes-1': 'descartes1Script.ts',
+  'personal-growth-endurance-1': 'endur1Script.ts',
+  'economics-tulips-1': 'tulip1Script.ts',
+  'business-amazon-1': 'amazon1Script.ts',
 };
 
 /** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */

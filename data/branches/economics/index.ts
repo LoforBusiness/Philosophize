@@ -1,5 +1,6 @@
 import type { Branch } from '@/data/types';
-import units from './paths/foundations';
+import foundations from './paths/foundations';
+import tulips from './paths/tulips';
 
 // Economics & Finance's first course (data/subjects.ts). One unit, one lesson so far;
 // `more` puts a MORE COMING SOON sign at the end of its road.
@@ -10,7 +11,7 @@ const economicsBranch: Branch = {
   description: 'Scarcity, choice, and why prices move.',
   icon: '💷',
   color: '#335172',
-  paths: units,
+  paths: [...foundations, ...tulips],
   more: true,
 };
 

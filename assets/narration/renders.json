@@ -1,4 +1,99 @@
 {
+  "business-amazon-1/beat-00": {
+    "text": "Two thousand three hundred percent in a year. And I’m the only person in New York who’s noticed.",
+    "wav": "ffd01b4017c67975aa4890c707b96bd98efe0648157940969917390fa9628511",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-01": {
+    "text": "It’s late, Bezos, and you’re grinning at a printout. Explain, or go home.",
+    "wav": "020d1d4cb39ce593fd31b0ef43da0d2fe08f6cbbf02c8c7be43baf7ef19effe3",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-amazon-1/beat-02": {
+    "text": "That’s how fast the web is growing, David, and nothing else grows like it. So I’ve made a list of twenty things to sell on it.",
+    "wav": "1d5a2a06a03d79706bb9f2df5d6a83a5e1663380f7b1ab2da0f3d37a8db0b7a4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-03": {
+    "text": "Twenty things, and you haven’t opened a single shop. Pick one, and then go home.",
+    "wav": "34bed68754e0f0ea8a97f46980962ed134310ae630fcd1deca94fe85fde89cf8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-amazon-1/beat-05": {
+    "text": "Books, of course. No bookshop can hold three million titles, but a website can list them all.",
+    "wav": "2aaf95f0ba17b4fd3184fb0575207ce85d1efd485a2714b73e6176c305731547",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-06": {
+    "text": "It’s a good idea, I’ll admit. It’s a better idea for someone who doesn’t already have a good job.",
+    "wav": "0837089e03614e7efa873d998c14162c2bf235ab0a2b347290866ed3fc8f1944",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-amazon-1/beat-07": {
+    "text": "I pictured myself at eighty. I wouldn’t regret failing, but I’d regret never trying.",
+    "wav": "275d1fb63b1be7e8917591f4a179b54654d46b497e21452635d8378e98a31d3f",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-08": {
+    "text": "You’ll walk out halfway through the year and lose your bonus. Shut the door on your way out.",
+    "wav": "b8ba4ad70df57b32e93a2be9273ef281d9288cee785ca6141dbf9d8a3fd0cc0e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "business-amazon-1/beat-09": {
+    "text": "Your dad’s old Blazer drives beautifully! Remind me where we’re going again?",
+    "wav": "419f068eea25f919abb29ca77b8bc346ffb8382003c1f362ce5852f43366b6ed",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-amazon-1/beat-10": {
+    "text": "A city near the books, full of coders, in a small state. I chose it weeks ago, like a genius.",
+    "wav": "ea52e5de70ef030117406185a2d80d6eadd0cef22dad10005569aa7d7d457603",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-12": {
+    "text": "Seattle. The biggest book warehouse is a day away, and the whole town is full of programmers.",
+    "wav": "2aecdf3a31d99205b4b4ba23072733a531fb969722f149b3438512101bf6a34a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-13": {
+    "text": "You’ve been typing since Texas. Should I drive slower so the numbers don’t spill?",
+    "wav": "8316ebdd1389ad79c549cacf8a2715f4eb07fef9885ce1dae42b976c668b8be3",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-amazon-1/beat-14": {
+    "text": "It’s the business plan, and the numbers are holding on fine. One day, people will study this draft.",
+    "wav": "9bde535cc4ab25de4ac6775741b3c8f53dddeb0e23a9b071436898f4eb52b017",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-15": {
+    "text": "Hi, I’m Shel Kaphan. I’ve written software for years, and I’d love to help you build this.",
+    "wav": "d64021c9116438648eb75915b64a8c932960f49dd799f51e54c82da0525e211c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-amazon-1/beat-16": {
+    "text": "Welcome to head office. Desks cost too much, so we’re making ours out of doors.",
+    "wav": "c08fd3821acf820b4717d7d181389f0089713d85c229e32e4d7d77a0fa990edd",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-17": {
+    "text": "Good thinking, Jeff. I’ll hold it steady while you put the legs on.",
+    "wav": "d50532aa320680a9891b8d2de8f9593ea2f8632263acd582b709877fb6c96699",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "business-amazon-1/beat-18": {
+    "text": "I love it in here! What’s the shop called, again?",
+    "wav": "47a8c78173331fede0e12f641f2569f8cd6a021d0c3b9d204633db2d6d9d3bea",
+    "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "business-amazon-1/beat-19": {
+    "text": "Cadabra, as in abracadabra. You wish for a book, and it appears like magic.",
+    "wav": "debcb1193e9f817977e27b05aa290157bf8143e40ad7dfa519ce4df575117587",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "business-amazon-1/beat-20": {
+    "text": "Our lawyer heard it on the phone and thought you’d said cadaver. That means a dead body, Jeff.",
+    "wav": "922a8fe2b8816e25063b4c63a0201a33fa39eb65b427e9771e5dc268665826c4",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "business-foundations-1/beat-00": {
     "text": "Fresh lemonade, made with lemons, sugar and a bit of love! One pound a cup.",
     "wav": "f0c008fe138f8121cd29d4beb91b4d46d6dd6ecc7ea59ce87c0b588f518b3dff",
@@ -689,6 +784,101 @@
     "wav": "3268023cb4f66246cdf1bb8febf6c32574137a6564ce95edc832e67927b70abe",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
+  "economics-tulips-1/beat-00": {
+    "text": "Leiden, at last. The university wanted the greatest botanist in Europe, so they sent for me.",
+    "wav": "1f8d44f8a23ebfea5478e7eaf21a5a5942bae98c3bb3f825224d595972b9a086",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-01": {
+    "text": "I’ve dug these beds since summer. Please tell me those crates aren’t full of onions.",
+    "wav": "2bfdfd64523dcbad9f12965a86ab39e1d970989b39acea2fc605f6ced18cd920",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-02": {
+    "text": "Tulip bulbs, from my garden in Vienna. They come from the Ottoman Empire, where they’ve been grown for generations.",
+    "wav": "fd4dab12a70aa768d15d67f642b0fd87035a20db413016d80d479f33ccf1a0dc",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-03": {
+    "text": "How did they get from Turkey to Vienna, sir? I’ll write it on the label.",
+    "wav": "9738cbedc8c5c061c67d8626ea247947fb367c39e2eca9853654306f8fdf1595",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-tulips-1/beat-04": {
+    "text": "A friend of mine was the emperor’s ambassador to the Sultan. He saw them in Turkey and wrote home about them.",
+    "wav": "5fae78fec0eec8825906f974a807d8c6bc5200f5ae1a9a9ea9fa1ab1708ff5c2",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-05": {
+    "text": "So I bury your foreign onions in October and wait until spring. Lovely.",
+    "wav": "c2f0bde289ea923c9728dbd26c75c8af58a185014b1e3df885536265fd2aa284",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-06": {
+    "text": "They’re up, sir, every colour! And there’s a crowd at the gate asking to buy them.",
+    "wav": "a575db8605b28bd6c24eb48bc6cf013e85f853edc48c6893ed595bbfc7b05d82",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-tulips-1/beat-07": {
+    "text": "Sell them? They’re for science, not for every merchant with a fat purse.",
+    "wav": "65c5d3ba7239e8bdede384079726e5bb16218e37e6c3fb82088d345d67239f79",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-08": {
+    "text": "Sir, come quick! Somebody climbed the wall last night and dug up the bulbs.",
+    "wav": "cc467cad1391c6007334a4d8f2e37a650d5ce7b5436bf2f5af6734235005d617",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-tulips-1/beat-09": {
+    "text": "My tulips! Thieves, in my garden, and they took the best ones.",
+    "wav": "21853a4c453376bc7b349afed136176a70f928de00aa3c70fafc7709e32757da",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-10": {
+    "text": "There’s a story going round that you asked so much, nobody could buy one. So they stole them instead.",
+    "wav": "edd54226715362e8fac718b91037f3fd6bee1cccf3a5f9090605246c3ec26bae",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-11": {
+    "text": "Look at this tulip, sir. Red flames on white, like somebody painted the petals.",
+    "wav": "2e59d2fed93f2e41a937a33a01e271158fca951ee340836367d3d45742b9f400",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-tulips-1/beat-12": {
+    "text": "A broken tulip. Glorious, and weak, and its bulb grows fewer young bulbs than a healthy one.",
+    "wav": "4a7c2711a5eec19b3bb81085199ff720ca9701e367b0a0d90a1bce21302cd2ae",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-13": {
+    "text": "That’s called scarcity. Nobody can break a tulip on purpose, so there are only ever a few.",
+    "wav": "62c33a0fe3be6badd3cd44dd5f8229e9ded20d5c97373b7ee5e0890178a6a881",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-15": {
+    "text": "Striped again, sir! So the stripes must live inside the bulb.",
+    "wav": "7906c18b322f0fac610d0de87ffe2781ab35dd1b9271427126fe59b751d6a88c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "economics-tulips-1/beat-16": {
+    "text": "They do. Three hundred years later, scientists found a virus, carried from plant to plant by tiny insects called aphids.",
+    "wav": "1e2713d76c93ba8dc7e9a28c7fe40a81e1be65a5ddaad49b22f95fbaa57a55c5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-18": {
+    "text": "Rare, beautiful, and grown by me. People will pay a fortune for these one day.",
+    "wav": "74737de72fcc11a55784b405ceb2eaf3390826d758a353779c32d152a2ee68fb",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "economics-tulips-1/beat-19": {
+    "text": "They did, long after you died. In 1624, the owner of a striped bulb called Semper Augustus turned down three thousand guilders.",
+    "wav": "b3fcae465ee81775eedd2a10877c1770cb11516e31eceed5a806c15b8d5bc6f2",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "economics-tulips-1/beat-20": {
+    "text": "That’s about ten years’ pay for a skilled worker, sir.",
+    "wav": "467f26be07d96b94809ec0adf5c9c8cb0049b5c24e90470df21fd5301b005ea2",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
   "history-caesar-1/beat-00": {
     "text": "Rhodes by next week. The best teacher of speaking in the world, and soon, his best student.",
     "wav": "19f27b3f521788c2d06cf29699294170b995607adc957d445561d9d7d6767c37",
@@ -1199,6 +1389,101 @@
     "wav": "cb7d0cef1120c1835865fbc1b8ce8c3b2930a0297fbc19956777234ad5f46e46",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
+  "personal-growth-endurance-1/beat-00": {
+    "text": "Nobody has ever walked across Antarctica, coast to coast. I’ll be the first, and it’ll make a lovely book.",
+    "wav": "686a43f8111e6ab1831544a8ea9734d3f32e242cab06ab558b4886c313b0ce4e",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-01": {
+    "text": "Eighteen hundred miles of ice, on foot. My ship drops you on one coast, and you walk to the other.",
+    "wav": "7cc37852d88e197a4b8e56ba84e79419e35615af3a549bafb7491ec2c1a887ac",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-endurance-1/beat-02": {
+    "text": "The lads say you put an advert in the paper, Boss. Men wanted for a hazardous journey?",
+    "wav": "a0b576fa058d27cdb6b26b023f5fd3f40ef10fe408283d746e74a4a52b2d9024",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-03": {
+    "text": "Nobody’s ever found that advert. About five thousand people wrote to me anyway, which is hardly a surprise.",
+    "wav": "04dbd6840c90d20ceb140bf1c7ad221c7b0bd8773130f357e05a2c42e9f0fdb6",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-04": {
+    "text": "There’s bad news in the paper, though. Britain’s calling up its soldiers and sailors for a war.",
+    "wav": "5397c4df2ab22d8d500a741d96246e1c98c10e963a36dc1c885ccfcf69afd122",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-05": {
+    "text": "Then I’ve wired the Admiralty. They can have the ship, the stores, and all of us.",
+    "wav": "b01e46b6d7b7a89b3b06c8134c7c3a867fc693d1e1c8ca05cb0316c0c76889af",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-06": {
+    "text": "You’ve given my ship to the Navy without asking me. Wonderful.",
+    "wav": "93c4163776c032890e57c03c519e47f4f3432ea9c9e52fd777a41e4977a8d2d8",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-endurance-1/beat-08": {
+    "text": "One word from the Admiralty: Proceed. Even the Navy knows a national treasure when it sees one.",
+    "wav": "4be0f0e24841506fe3e9a64eeeac330193681afe4a5121c15656a332d703e6a1",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-09": {
+    "text": "South Georgia, Boss. The whalers here say the ice down south is the worst they’ve ever seen.",
+    "wav": "a7455a99bb7f21e3822763d240a2c04add1a6e94b396dca3293ad82f5206d99c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-10": {
+    "text": "Then we listen to the people who sail it. A goal can stay fixed, but the plan has to bend to the ice.",
+    "wav": "32b2787cc007d9eb1eda9f1aa45568ba4321238222fd1fa88655345aa94f8420",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-endurance-1/beat-11": {
+    "text": "Fine, we’ll wait a month for the ice to loosen. I was about to suggest it myself.",
+    "wav": "79afb063700c390ce9986ffa0f40b564b745702a787a6e65f9bfae20386aa90c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-12": {
+    "text": "Fifth of December, and we’re off. Twenty-eight men, sixty-nine dogs, and one very full deck.",
+    "wav": "543281af7fe6a70248522ec8f2105eb7a69e1f7be70f0731442caffe99eb3645",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-13": {
+    "text": "January, and she’s stuck fast. The ice closed round her overnight, a day’s sail from land.",
+    "wav": "431cfd09a4506ccd1bc044bf89b56558878c71f88625838d33c9756ac26fbbec",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-endurance-1/beat-14": {
+    "text": "Out on the ice, everyone. Picks, saws and chisels, and we’ll cut her a path to open water.",
+    "wav": "f54301640e0c4c3d48c87b1319c6a0eba844875f96f9027679ca173fb86e47a7",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-15": {
+    "text": "Two whole days of chopping. I don’t like to boast, but I was the best at it.",
+    "wav": "6576e2a638b9f0fde64eaf2864100c4ed2b662da8a1ae55c5d491fde9fc3922c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-16": {
+    "text": "The path froze shut behind us. The pack runs to the sky in every direction, and drifts where the wind takes it.",
+    "wav": "5da89864f54bccb94cdbfa446de81739ed844716f63e8ee9ed1e556eb2d20499",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "personal-growth-endurance-1/beat-18": {
+    "text": "We’ll spend the winter in the ice and cross next year. I’m not upset at all, I’m adapting.",
+    "wav": "0119d2ff9ed25923fc020607c440c1b169145da1fbd158ef6081d6e3721298fc",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "personal-growth-endurance-1/beat-19": {
+    "text": "Then let’s make her a proper home. I’ll move the crates below and get the stove lit.",
+    "wav": "03de88c3c0faa6f741e96d47b23265688e9b7652237e963d9590b9830e50abe8",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "personal-growth-endurance-1/beat-20": {
+    "text": "The Boss didn’t rage or sulk, and the men noticed. A crew takes its mood from the Boss.",
+    "wav": "5f9497fa88f554060bc5af8ed6658111c3412008b965f496245846309274d0d6",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
   "personal-growth-foundations-1/beat-00": {
     "text": "New me! I’m growing the tallest sunflower on the street, starting today.",
     "wav": "edae590d5d9d62ed1b56437e1ca1714e420a23f0c3d33e63d3073acd7a02bb81",
@@ -1548,6 +1833,96 @@
     "text": "I wobbled twice on the zigzag, and I kept going. Is that the lake hut down there?",
     "wav": "e7bceca0f90ea4ab225c661da0faf468a4464260f11223749c47d1952d9c63c0",
     "voice": "en-US-Chirp3-HD-Kore"
+  },
+  "philosophy-descartes-1/beat-00": {
+    "text": "Twenty-three years old, a gentleman soldier, and nobody to fight until spring. What a waste of me.",
+    "wav": "8b77b607dd81a9a7c6f9c5708924af549e6cdde4a50f78be1170b1d8d573f5e4",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-01": {
+    "text": "The war stops for the snow, sir. They’ve found you a room in town with a big stove.",
+    "wav": "7c2a2748245ea0d1834b96ead4b989d41e99ccf8f42ab083d46e0065a47a588a",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "philosophy-descartes-1/beat-02": {
+    "text": "My best room, and my best stove. The wood isn’t free, young man.",
+    "wav": "c8e1d16fdd6bb6d3b476f80aea700aed2be8094d8dc159cd460d198656d31347",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-descartes-1/beat-03": {
+    "text": "Lovely. Now nobody talk to me, please. I’m going to think.",
+    "wav": "8362ad6716724fbd6beafab6a5074270200fe622099d575497a2763f411f663c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-04": {
+    "text": "All day, shut in a room? Soldiers drink in winter, they don’t sit and think.",
+    "wav": "d574b80e833c83597cd74a06e21b1e4c7b3b70ea2f4a2808c883216084922f59",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-descartes-1/beat-05": {
+    "text": "I went to La Flèche, one of the best schools in Europe. All it gave me was a pile of doubts.",
+    "wav": "0d159010d81122f44bf2a9190b27050d34de8a0c36207964c47b87a349aec379",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-06": {
+    "text": "The town’s nice though, sir. Hundreds of years of builders, each one adding a bit.",
+    "wav": "ad8b04a8652888f69485a4c2e27ee0d53551663bb651fc7d62951b5314735701",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "philosophy-descartes-1/beat-07": {
+    "text": "That’s the trouble with it. A town that one person plans is far neater than one a hundred builders patched.",
+    "wav": "616597ae3c6c89dad4d7ffb1f1e9052afe9f6a49d0e66eb27b7a121ec152a1e5",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-08": {
+    "text": "So I’ll pull down my own beliefs, every one of them. Then I’ll build again from the ground up.",
+    "wav": "a258db4d95ca203be05763114c055be5dcb90e29af06a86cf9927ba3a699179a",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-09": {
+    "text": "I brought you some apples, sir. A few might have gone bad, sorry.",
+    "wav": "928a3cea54b28367e6be7599e1dcd6997d3e913c5461c5f6f7383db24ee356c3",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "philosophy-descartes-1/beat-11": {
+    "text": "All of them out, then back one by one, only the good ones. Beliefs work the same way.",
+    "wav": "6971db9a4b34fd94e316100f8923b84b0578c04ddea876a856db56858efaa810",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-12": {
+    "text": "Descartes puts that basket in a book in 1642. Until then, my floor is covered in apples.",
+    "wav": "7d5058995ce148838b2d72646f07e1da35a91f130d29e2ed983991f0dd7a6e1f",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-descartes-1/beat-13": {
+    "text": "The tenth of November, and I’ve found the foundations of a wonderful science. Write that down, history.",
+    "wav": "e726a44108b9a29d6d6fb4c7af818879aef8e7f4df743ded9fbd3b7d0cf12277",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-14": {
+    "text": "Now I’m dreaming. A wind is spinning me round, and I can’t stand up straight.",
+    "wav": "26c4a784b238ebc5a264c490fbd27f6c185e2b9bcc51a84cb71be0e6140f43a0",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-15": {
+    "text": "A bang like thunder, and sparks all over the room. Am I awake, or still dreaming?",
+    "wav": "7f9c725970eee1325fb59d436914407c5cccb804b0f8f4ef41e10987a3e7c636",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-17": {
+    "text": "My own path. I doubt everything, and then I rebuild it properly.",
+    "wav": "3ce5d0658b49c0f148ba898eee068e1336c05dea589ef7d8bcefaf93a09da868",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "philosophy-descartes-1/beat-18": {
+    "text": "He also vowed a trip to the shrine at Loreto. Now, will everyone please go to sleep?",
+    "wav": "a838a30121a2f53d6af9dbba16eda15c985bfdf443f4c317069f040c721fffdd",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "philosophy-descartes-1/beat-19": {
+    "text": "The notebook got lost, sir. We know the dreams from a book about him, written seventy years later.",
+    "wav": "c9ded95d5f8aad7b796b9680800ddf00cfd8615fa0b91b4d0fc33f0ebac10870",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
   },
   "philosophy-foundations-1/beat-00": {
     "text": "One squeaky wheel. That’s all I asked you to fix.",
@@ -2249,6 +2624,96 @@
     "wav": "bcb5e64c3657d48b34854bacbe8cd2ff8987c023f2cdc1e0f64377167b4cf92c",
     "voice": "en-GB-Chirp3-HD-Algieba"
   },
+  "psychology-milgram-1/beat-00": {
+    "text": "Adolf Eichmann’s on trial in Jerusalem. He sent millions to the death camps, and he says he was only following orders.",
+    "wav": "481afc76d8d8af736e3473e41914d299a39d7dd24ce23323beee467ba82ce4f3",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-milgram-1/beat-01": {
+    "text": "Every man at that trial says the same thing. Did you call me in to read me the newspaper?",
+    "wav": "c4cde06a9e1ff0f5607ab18317b21f87521fde27f859c7c8d235d3886ff7bc47",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-02": {
+    "text": "I called you in for my brilliant question. Would an ordinary man hurt a stranger, just because someone in charge told him to?",
+    "wav": "5bd83b486ba460a5c9d7535ebf463461e2660684ce4db0f7adee3b848f9cdec2",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-milgram-1/beat-03": {
+    "text": "Lovely. And how do you test that at Yale without hurting anybody?",
+    "wav": "49719afee035f292ea6fc3de88f9713174f39bc35f682b422f2c268f258224ee",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-04": {
+    "text": "I’ve put an advert in the New Haven paper. A study of memory, four dollars an hour, and you’ll run it in a grey lab coat.",
+    "wav": "b20e5f2992f19a35cc6f936a0494b0e87ba23bc77655c609379bef701ca7a1e5",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-milgram-1/beat-05": {
+    "text": "A biology teacher in a lab coat, running a memory study that isn’t one. Wonderful.",
+    "wav": "8430c52f893a87f1ca60a47acc5c39a227b6ebcb1f022664dbebbec669c388d1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-06": {
+    "text": "Good afternoon, I’m here for the memory study. Do I keep the money, even if my memory’s no good?",
+    "wav": "73ec4dab3b1bd550bcaac10aefba3dc9ecb7f664ae054f4d03b529e0f6432b2c",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-milgram-1/beat-07": {
+    "text": "It’s yours just for coming. Now, you and Mr Wallace each draw a slip from this hat.",
+    "wav": "2eb0b0ab38e0c967e8b3f10362a23f89168e86c0b37721990b6c5deb57addbd1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-09": {
+    "text": "I’m the teacher! Bad luck, Mr Wallace, but I’ll go easy on you.",
+    "wav": "e1a29269c5baf29699d79fa37598d1f73fd05fb3dbea881f13e5371d1a4ca62f",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-milgram-1/beat-10": {
+    "text": "This paste stops any burns. The shocks can be very painful, but they cause no permanent tissue damage.",
+    "wav": "f897758c5120d1547c37b830345398a7dbeffbf8580b01f361a4fa1a191cfdbb",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-11": {
+    "text": "Mr Wallace is an accountant I hired to act. The wires to his chair go nowhere, so he’ll never feel a thing.",
+    "wav": "31c918a67fb2a120360de3ad86e3742ed328c33768e25cda0290e4822bb62797",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "psychology-milgram-1/beat-12": {
+    "text": "This is the shock generator. Thirty switches, from fifteen volts up to four hundred and fifty.",
+    "wav": "ec55c11db3fe3b678e5ea72c8fa7b47327d031f8b0fbfd3c54e6dd524126c8b3",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-13": {
+    "text": "The labels go from slight shock up to danger, severe shock. The last two just say three X’s.",
+    "wav": "aad521c9419090b91eae25eeea463116136e237a556339adb0d1726ca5b37bcd",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-milgram-1/beat-14": {
+    "text": "Hold out your wrist. Here’s a real shock of forty-five volts, so you know what he’ll feel.",
+    "wav": "9ff7a254fe2bbd8e2562bbe9448b7a67e11a5f210fb2e0d48855de863e5d8e2e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-15": {
+    "text": "That stung! Now, Mr Wallace, which goes with blue: sky, ink, box, or lamp?",
+    "wav": "e19c98377d7cb5ff8d3268fb2c0a71459dc36a978abb9c7d3585d6a05ffd0994",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-milgram-1/beat-16": {
+    "text": "The learner’s light says lamp, and that’s wrong. Say the voltage, then press the first switch.",
+    "wav": "52652ad10b6ca2a5a2fdeb67c24c58660a508502a8e73ada484c9b31ca1bb841",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "psychology-milgram-1/beat-17": {
+    "text": "Fifteen volts. Sorry, Mr Wallace, I’m sure it’s only nerves.",
+    "wav": "c3bac6e58dc700254c3f3f869661d8a204467f7effee9773aa43a108058f6f43",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "psychology-milgram-1/beat-18": {
+    "text": "Later, I’ll describe all this to thirty-nine psychiatrists. They’ll guess that one man in a thousand goes to the very end.",
+    "wav": "4ed807936655ec9d9ba6267dc645975eb3cccea75c8b4c58af54bbf65c3056da",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
   "science-foundations-1/beat-00": {
     "text": "The heavy ball lands first, of course. Everybody knows that.",
     "wav": "9382acff3494fa1e380ecae9b0499e882954da9266a19800a446129293d3d490",
@@ -2602,6 +3067,101 @@
   "science-foundations-7/beat-20": {
     "text": "Good, now your planet could fail a test. So look hardest for the result that would prove you wrong.",
     "wav": "11c27535b4ac6491ec82215c5726428ac1fe95b7c2d4d74570b28630edc2dfa7",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-00": {
+    "text": "Back from my summer holiday in Suffolk. The finest germ man in London has returned to his bench.",
+    "wav": "ea2065b41fd5fd64ddd4147a2405c053e3f716c399fdcd74ad4ce42b8ac97024",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-01": {
+    "text": "Morning, Dr Fleming. Shall I help you clear this tower of glass dishes?",
+    "wav": "40727c7d5a8c2352b44fef888447dd011891b6ae9136e488fa5c1e39ff7e3c0b",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-penicillin-1/beat-02": {
+    "text": "They’re culture plates, and it’s a system, not a mess. Each dish holds a thin layer of agar, a jelly made from seaweed.",
+    "wav": "0c487b5e962c1c6942fd40b31cbf2ec68434a198ce012673f044c3e075e0aa16",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-03": {
+    "text": "And each golden dot on the jelly is a colony. It started as one germ and grew into millions.",
+    "wav": "6381820b9d28c6b05db65fc827d880ab0e7a6897abad8b41e8f923ac70b35869",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-penicillin-1/beat-04": {
+    "text": "Staphylococcus, the germ behind boils and infected wounds. I’m writing about it for a very important book.",
+    "wav": "9c261907e9f85f37360814bd64c3d5c4d35474d9d7c799de1b35ae3641654694",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-05": {
+    "text": "The old ones go in the cleaning fluid, then. Some of these have sat here for weeks.",
+    "wav": "facd198a4af7332d27ba7b30b4d660c9b16721b4d89331a416d877f4b046ab68",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-penicillin-1/beat-07": {
+    "text": "That’s funny. There’s a fluffy mould at the edge, and the germs near it have gone see-through.",
+    "wav": "c172069603c338da6cc9d28b6816e4097a7800db9f96f521c5cac8e8d9a46060",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-08": {
+    "text": "There’s a clear ring all the way round it. Something coming out of that mould is killing them.",
+    "wav": "cdf8f7290d8997688fb44e89aa5b28370dde91d99cd9b289817c20ca299fd94b",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-penicillin-1/beat-09": {
+    "text": "Just like my lysozyme, which I found with a drip from my own nose. I make discoveries by being untidy.",
+    "wav": "6c9303b729d2f5786ba3d4a308411f88e22f13f760a58777e06683299b4204d5",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-10": {
+    "text": "Maybe a spore drifted up from the mould lab downstairs. Nobody knows for sure.",
+    "wav": "b34ffca613942760bcbc34a9dc990c1916139430d4c9b86fec84440d079ac217",
+    "voice": "en-AU-Chirp3-HD-Zubenelgenubi"
+  },
+  "science-penicillin-1/beat-11": {
+    "text": "So now I grow your mould on meat broth, in every flask we own. The yellow broth below the mould is your mould juice.",
+    "wav": "565fd1cb3c14e522f3cda5b8ed42c3decf30f7dafba7fc04e822d32d17901ad0",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-12": {
+    "text": "Now the test. A trench cut across a plate and filled with juice, and three germs streaked toward it.",
+    "wav": "67e84ba9033a9450d54c5a73db8c0e41390c08502bd03349ece8eca37e90477e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-14": {
+    "text": "The boil germ stops short of the trench. The typhoid germ and the gut germ walk straight up to the juice.",
+    "wav": "558b2066c0151df02151bfc1a116d5f02893a79ffc0ffc7dc2c5b4ac762bbef1",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-15": {
+    "text": "Watered down hundreds of times, the juice still kills Staphylococcus. A rabbit and a mouse got injections, and neither animal minded.",
+    "wav": "c8c8cb199d850a39e84686e02167ff52114614fa6140bc842ab1a37ab19d4b46",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-16": {
+    "text": "And within weeks the juice loses its strength, and nobody here can make it pure. A medicine has to keep.",
+    "wav": "e9d183693952891c870ab3ca5c2060bb680e3fc1fcc2a40cdc86e9b39773ede5",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-17": {
+    "text": "Gentlemen of the Medical Research Club, I give you a mould that kills germs. Any questions?",
+    "wav": "dfabcf4bb9faa6c5c3546c8efb25bdecd1681901a93a5d36ce7029150653df84",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-18": {
+    "text": "Not one. You spent the talk on using it to grow a germ people blamed for flu.",
+    "wav": "793873f40e27a02604b4915838dad1ccfc52fbe291503ae1ebac73746d0e950e",
+    "voice": "en-GB-Chirp3-HD-Algieba"
+  },
+  "science-penicillin-1/beat-19": {
+    "text": "Penicillin, after the mould. The name goes in a paper, and some genius will read the paper eventually.",
+    "wav": "9522297b70b4adc217ac32aca2ef844d10f0326efc2b61e8926fe6564c37743c",
+    "voice": "en-GB-Chirp3-HD-Sadachbia"
+  },
+  "science-penicillin-1/beat-20": {
+    "text": "Two scientists at Oxford did. Nearly ten years later.",
+    "wav": "9503c28e59a51f60c287918f03b87a201837202bbba39d106541bacb4414ead2",
     "voice": "en-GB-Chirp3-HD-Algieba"
   }
 }

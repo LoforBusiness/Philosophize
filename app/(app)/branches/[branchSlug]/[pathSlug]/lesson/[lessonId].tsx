@@ -53,6 +53,12 @@ import { Hist7Lesson } from '@/components/lesson/cinematic/hist7Scene';
 import { Growth7Lesson } from '@/components/lesson/cinematic/growth7Scene';
 import { Psych7Lesson } from '@/components/lesson/cinematic/psych7Scene';
 import { Sci7Lesson } from '@/components/lesson/cinematic/sci7Scene';
+import { Amazon1Lesson } from '@/components/lesson/cinematic/amazon1Scene';
+import { Tulip1Lesson } from '@/components/lesson/cinematic/tulip1Scene';
+import { Endur1Lesson } from '@/components/lesson/cinematic/endur1Scene';
+import { Descartes1Lesson } from '@/components/lesson/cinematic/descartes1Scene';
+import { Milgram1Lesson } from '@/components/lesson/cinematic/milgram1Scene';
+import { Fleming1Lesson } from '@/components/lesson/cinematic/fleming1Scene';
 import { Caesar1Lesson } from '@/components/lesson/cinematic/caesar1Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
@@ -134,6 +140,12 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'history-foundations-6': Hist6Lesson,
   'history-foundations-7': Hist7Lesson,
   'history-caesar-1': Caesar1Lesson,
+  'science-penicillin-1': Fleming1Lesson,
+  'psychology-milgram-1': Milgram1Lesson,
+  'philosophy-descartes-1': Descartes1Lesson,
+  'personal-growth-endurance-1': Endur1Lesson,
+  'economics-tulips-1': Tulip1Lesson,
+  'business-amazon-1': Amazon1Lesson,
 };
 
 export default function LessonScreen() {

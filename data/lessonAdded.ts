@@ -66,6 +66,12 @@ export const LESSON_ADDED: Record<string, string> = {
   'history-foundations-6': '2026-10-04',
   'history-foundations-7': '2026-10-08',
   'history-caesar-1': '2026-10-09',
+  'science-penicillin-1': '2026-10-09',
+  'psychology-milgram-1': '2026-10-09',
+  'philosophy-descartes-1': '2026-10-09',
+  'personal-growth-endurance-1': '2026-10-09',
+  'economics-tulips-1': '2026-10-09',
+  'business-amazon-1': '2026-10-09',
 };
 
 /** How long a lesson wears NEW, in days from the day it was added. */
