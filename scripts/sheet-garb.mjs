@@ -64,32 +64,32 @@ const dot = (xf, r) => disc(xf[0].translateX, xf[1].translateY, r);
 function drawFigure(cv, B, k, outfit, ox, oy) {
   const limb = RIG.STR.limb * k; const torso = RIG.STR.torso * k;
   const ink = (d) => cv.path(d, INK, ox, oy);
-  // far leg and far arm, then the trunk, then the near leg — Stickman's order
-  ink(bone(B.thighL, limb) + bone(B.shinL, limb) + bone(B.uarmL, limb) + bone(B.farmL, limb)
-    + dot(B.shLd, limb / 2) + dot(B.kneeL, limb / 2) + dot(B.ankL, limb / 2) + dot(B.elL, limb / 2) + dot(B.wrL, limb / 2));
-  ink(bone(B.torso, torso) + dot(B.pel, torso / 2) + dot(B.shB, torso / 2));
-  ink(bone(B.thighR, limb) + bone(B.shinR, limb) + dot(B.kneeR, limb / 2) + dot(B.ankR, limb / 2));
-  // the garment
-  if (outfit.garb) {
-    const line = G.GARB_LINE * k;
-    const draw = (bands, withLine) => {
+  const line = G.GARB_LINE * k;
+  const bands = outfit.garb ? outfit.garb.bands : [];
+  // one shared outline among a layer's bands, then their fills (Stickman's garbLayer)
+  const layer = (n) => {
+    const of = bands.filter((b) => (b.layer ?? 0) === n);
+    const draw = (set, withLine) => {
       if (withLine) {
         let d = '';
-        for (const b of bands) { const g = G.bandAt(B, k, b, line); d += rrect(g.cx, g.cy, g.len, g.w, (b.r ?? b.w / 2) * k + line, g.ang); }
+        for (const b of set) if (!b.flat) { const g = G.bandAt(B, k, b, line); d += rrect(g.cx, g.cy, g.len, g.w, (b.r ?? b.w / 2) * k + line, g.ang); }
         if (d) ink(d);
       }
-      for (const b of bands) {
-        const g = G.bandAt(B, k, b, 0);
-        cv.path(rrect(g.cx, g.cy, g.len, g.w, (b.r ?? b.w / 2) * k, g.ang), b.fill, ox, oy);
-      }
+      for (const b of set) { const g = G.bandAt(B, k, b, 0); cv.path(rrect(g.cx, g.cy, g.len, g.w, (b.r ?? b.w / 2) * k, g.ang), b.fill, ox, oy); }
     };
-    const body = outfit.garb.bands.filter((b) => !b.layer);
-    draw(body, true);
-    for (const b of outfit.garb.bands.filter((b) => b.layer === 1)) draw([b], !b.flat);
-  }
-  // head, then the near arm
+    if (n === 1) for (const b of of) draw([b], !b.flat); else draw(of, true);
+  };
+  // far leg and far arm, their cloth, then the trunk, the near leg — Stickman's order
+  ink(bone(B.thighL, limb) + bone(B.shinL, limb) + bone(B.uarmL, limb) + bone(B.farmL, limb)
+    + dot(B.shLd, limb / 2) + dot(B.kneeL, limb / 2) + dot(B.ankL, limb / 2) + dot(B.elL, limb / 2) + dot(B.wrL, limb / 2));
+  layer(-1);
+  ink(bone(B.torso, torso) + dot(B.pel, torso / 2) + dot(B.shB, torso / 2));
+  ink(bone(B.thighR, limb) + bone(B.shinR, limb) + dot(B.kneeR, limb / 2) + dot(B.ankR, limb / 2));
+  layer(0); layer(1);
+  // head, then the near arm and its sleeve
   ink(dot(B.head, RIG.STR.headR * k));
   ink(bone(B.uarmR, limb) + bone(B.farmR, limb) + dot(B.shRd, limb / 2) + dot(B.elR, limb / 2) + dot(B.wrR, limb / 2));
+  layer(2);
   // head and hand pieces
   const hx = B.head[0].translateX; const hy = B.head[1].translateY;
   const sx = B.shB[0].translateX; const sy = B.shB[1].translateY;
@@ -120,7 +120,7 @@ function drawFigure(cv, B, k, outfit, ox, oy) {
 }
 
 const want = process.argv[2] || null;
-const list = Object.values(G.OUTFITS).filter((o) => !want || o.id === want);
+const list = Object.values({ ...G.OUTFITS, ...G.UNIT2_OUTFITS }).filter((o) => !want || o.id === want);
 const FIG = Number(process.env.FIG || 170);
 const k = FIG / RIG.FIG_H;
 const POSES = [

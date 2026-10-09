@@ -293,7 +293,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
   const garbLayer = (layer: number) => {
     const out: ReactNode[] = [];
     const idx = garbStatic.map((s, i) => (s && s.layer === layer ? i : -1)).filter((i) => i >= 0);
-    if (layer === 0) {
+    if (layer !== 1) {
       for (const i of idx) if (garbStatic[i]!.out) out.push(<Animated.View key={`go${i}`} style={[garbStatic[i]!.out!, garbStyles[i]]} />);
       for (const i of idx) out.push(<Animated.View key={`gf${i}`} style={[garbStatic[i]!.fill, garbStyles[i]]} />);
     } else {
@@ -373,6 +373,8 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
           find the hands before it can ask whether the thing drawn in them is
           in them. React Native Web renders it as data-testid. */}
       <Animated.View testID="fist-l" style={[S.fist, a.wrL]} />
+      {/* cloth on the far limbs (garb.ts layer −1): with them, behind the trunk */}
+      {garbLayer(-1)}
 
       <Animated.View style={[S.torsoBone, a.torso]} />
       <Animated.View style={[S.pelvis, a.pel]} />
@@ -400,6 +402,8 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       <Animated.View style={[S.joint, a.shRd]} />
       <Animated.View style={[S.joint, a.elR]} />
       <Animated.View testID="fist-r" style={[S.fist, a.wrR]} />
+      {/* cloth on the near arm (garb.ts layer 2): a sleeve over it */}
+      {garbLayer(2)}
 
       {/* LAST, so a hat sits over the head rather than under it. Everything here
           is the same ink as the figure, so overlap costs nothing — except the

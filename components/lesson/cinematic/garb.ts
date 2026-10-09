@@ -49,8 +49,13 @@ export interface Band {
   /** How far the band runs past each end, rig units. */
   extA?: number;
   extB?: number;
-  /** 0: the garment's body. 1: drawn over it with its own outline. */
-  layer?: 0 | 1;
+  /**
+   * 0: the garment's body (trunk, skirt, the NEAR leg's trouser). 1: drawn over it with its
+   * own outline (a drape, a sash, a lapel). −1: on the FAR limbs, drawn with them, behind the
+   * trunk (the far sleeve, the far trouser leg). 2: on the NEAR arm, drawn after it (the near
+   * sleeve). Layers −1, 0 and 2 each share one outline among their bands.
+   */
+  layer?: -1 | 0 | 1 | 2;
   /** Drawn without an outline (a stripe printed on the cloth). */
   flat?: boolean;
 }
@@ -178,7 +183,7 @@ const TOGA: Band[] = [
 ];
 
 /** A working tunic, belted: the pirates, the sailors, the soldiers in the ranks. */
-function tunic(fill: string, shade: string, belt: string): Band[] {
+export function tunic(fill: string, shade: string, belt: string): Band[] {
   return [
     { a: { j: 'shB', dy: -2 }, b: { j: 'pel' }, w: 24, fill, r: 8 },
     { a: { j: 'shL' }, b: { j: 'shR' }, w: 12, fill, extA: 5, extB: 5 },
@@ -226,7 +231,7 @@ export interface HeadPiece {
  * branch and not a comb; the purple tie hangs at the back. Leaves carry an ink edge, so
  * they read on the black head and on the paper alike.
  */
-function laurel(): HeadPiece[] {
+export function laurel(): HeadPiece[] {
   const out: HeadPiece[] = [];
   const n = 7;
   for (let i = 0; i < n; i += 1) {
@@ -240,7 +245,7 @@ function laurel(): HeadPiece[] {
 }
 
 /** A cloth wrap knotted at the back of the head, its tails hanging, and a gold hoop. */
-function headWrap(fill: string, earring: boolean): HeadPiece[] {
+export function headWrap(fill: string, earring: boolean): HeadPiece[] {
   const p: HeadPiece[] = [
     { at: 'head', x: -1, y: -11, w: 43, h: 20, r: 10, fill },
     { at: 'head', x: -22, y: -7, w: 9, h: 9, r: 4.5, fill },
@@ -269,4 +274,150 @@ export const OUTFITS: Record<string, Outfit> = {
   caesarYoung: { id: 'caesarYoung', label: 'young Caesar — toga, bare head', garb: GARBS.toga, head: [] },
   pirateCaptain: { id: 'pirateCaptain', label: 'pirate captain', garb: GARBS.pirateCaptain, head: [...headWrap(CLOTH.wrapRed, true), ...SICA] },
   pirate: { id: 'pirate', label: 'pirate', garb: GARBS.pirate, head: headWrap(CLOTH.wrapOchre, false) },
+};
+
+// ── UNIT 2, THE OTHER SIX STORIES (2026-10-09) ──────────────────────────────
+//
+// Built from PARTS, so a cast reads at a glance and a new role is a line, not a drawing:
+// trousers on both legs (the far leg behind the trunk, layer −1), a coat or jacket on the
+// trunk with its skirt cut to the hip or the knee, sleeves on both arms (the near one over
+// the arm, layer 2), and a stripe or two on top (a shirt front, a tie, a sash).
+
+export const WEAR = {
+  labCoat: '#F3F2EC', labCoatShade: '#DAD8CF',
+  greyCoat: '#9EA3A3',
+  suitCharcoal: '#5C6168', suitNavy: '#3D4D6E', tweed: '#7A6247',
+  trouserGrey: '#55595C', trouserDark: '#4A4D52', khaki: '#BFA77A', denim: '#4A6283',
+  shirtWhite: '#F4F4F0', shirtBlue: '#9DB6D3', tieRed: '#8E2F2B', tieBlue: '#2F4A73',
+  cardigan: '#8C7A5B', sweaterGreen: '#5C7A5A', tshirt: '#C9553E',
+  buff: '#C49A62', buffShade: '#A07C4C', sashRed: '#A33A30', breeches: '#5A4632',
+  doubletBlack: '#4A4650', ruff: '#F5F3EC', capotain: '#252428',
+  smock: '#C8B98F', smockShade: '#A89A72', knitNavy: '#2F3D57', knitRed: '#9C3B32', knitCream: '#E7DFCB',
+  plume: '#F2EFE6', hatBrown: '#5B4330', peak: '#1E1F22', glass: '#D9ECEF', agar: '#E8D9A0',
+} as const;
+
+export function trousers(fill: string): Band[] {
+  return [
+    { a: { j: 'hipL' }, b: { j: 'kneeL' }, w: 14, fill, layer: -1, extA: 2, r: 5 },
+    { a: { j: 'kneeL' }, b: { j: 'ankL' }, w: 12.5, fill, layer: -1, extB: -2, r: 5 },
+    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 6 }, w: 22, fill, r: 7 },
+    { a: { j: 'hipR' }, b: { j: 'kneeR' }, w: 14, fill, extA: 2, r: 5 },
+    { a: { j: 'kneeR' }, b: { j: 'ankR' }, w: 12.5, fill, extB: -2, r: 5 },
+  ];
+}
+/** Knee breeches: to the knee only, the stockinged shin left bare. */
+export function breeches(fill: string): Band[] {
+  return [
+    { a: { j: 'hipL' }, b: { j: 'kneeL' }, w: 15, fill, layer: -1, extA: 2, extB: 2, r: 5 },
+    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 6 }, w: 23, fill, r: 7 },
+    { a: { j: 'hipR' }, b: { j: 'kneeR' }, w: 15, fill, extA: 2, extB: 2, r: 5 },
+  ];
+}
+export function sleeves(fill: string, long = true): Band[] {
+  const s: Band[] = [
+    { a: { j: 'shL' }, b: { j: 'elL' }, w: 12.5, fill, layer: -1, extA: 3, r: 5 },
+    { a: { j: 'shR' }, b: { j: 'elR' }, w: 12.5, fill, layer: 2, extA: 3, r: 5 },
+  ];
+  if (long) s.push(
+    { a: { j: 'elL' }, b: { j: 'wrL' }, w: 11.5, fill, layer: -1, extB: -3, r: 5 },
+    { a: { j: 'elR' }, b: { j: 'wrR' }, w: 11.5, fill, layer: 2, extB: -3, r: 5 },
+  );
+  return s;
+}
+/** A coat on the trunk; its skirt stops at the belt, the hip, mid-thigh or the knee. */
+export function coat(fill: string, skirt: 'none' | 'hip' | 'thigh' | 'knee'): Band[] {
+  const b: Band[] = [
+    { a: { j: 'shB', dy: -2 }, b: { j: 'pel', dy: 2 }, w: 25, fill, r: 9 },
+    { a: { j: 'shL' }, b: { j: 'shR' }, w: 13, fill, extA: 5, extB: 5 },
+  ];
+  if (skirt === 'hip') b.push({ a: { j: 'pel', dy: -4 }, b: { j: 'pel', dy: 9 }, w: 26, fill, r: 6 });
+  if (skirt === 'thigh' || skirt === 'knee') {
+    const e = skirt === 'knee' ? 3 : -7;
+    b.push(
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeL' }, w: 19, fill, extB: e, r: 4 },
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeR' }, w: 19, fill, extB: e, r: 4 },
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeMid' }, w: 24, fill, extB: e, r: 4 },
+    );
+  }
+  return b;
+}
+/** A stripe printed down the front of the trunk: a shirt front, a tie, a placket. */
+export function front(fill: string, w: number, dx = 8, flat = true): Band {
+  return { a: { j: 'shB', dx, dy: 1 }, b: { j: 'pel', dx, dy: -3 }, w, fill, layer: 1, flat };
+}
+/** The shirt and tie showing down the front of a jacket. */
+export function shirtAndTie(shirt: string, tie: string): Band[] {
+  return [front(shirt, 6, 8.5), front(tie, 2.4, 9)];
+}
+
+// head and hand pieces
+const PETRI: HeadPiece[] = [
+  { at: 'handR', x: 5, y: -3, w: 15, h: 4, r: 1.5, fill: WEAR.glass },
+  { at: 'handR', x: 5, y: -6, w: 11, h: 2.5, r: 1, fill: WEAR.agar },
+];
+const CLIPBOARD: HeadPiece[] = [
+  { at: 'handL', x: 4, y: -5, w: 13, h: 17, r: 1.5, fill: '#B98B55' },
+  { at: 'handL', x: 4, y: -4, w: 10, h: 12, r: 1, fill: '#F4F2EA' },
+];
+/** A tall black hat of the Dutch Republic (a capotain), with a band. */
+const CAPOTAIN: HeadPiece[] = [
+  { at: 'head', x: 0, y: -14, w: 50, h: 4.5, r: 2, fill: WEAR.capotain },
+  { at: 'head', x: 0, y: -28, w: 28, h: 24, r: 5, fill: WEAR.capotain },
+  { at: 'head', x: 0, y: -19, w: 29, h: 3.5, r: 1, fill: '#6B5A3A' },
+];
+/**
+ * A white ruff. There is no neck (the head overlaps the shoulders), so it is cloth on the
+ * BODY, drawn before the head: the head covers its middle and it shows as white wings either
+ * side of the chin, which is how a ruff reads from the side.
+ */
+const RUFF: Band[] = [{ a: { j: 'shB', dx: -17, dy: -3 }, b: { j: 'shB', dx: 17, dy: -3 }, w: 10, fill: WEAR.ruff, r: 5 }];
+/** A broad soldier's hat with a white plume, 1619. */
+const PLUMED: HeadPiece[] = [
+  { at: 'head', x: 0, y: -14, w: 62, h: 5, r: 2.5, rot: -6, fill: WEAR.hatBrown },
+  { at: 'head', x: 0, y: -23, w: 28, h: 14, r: 5, fill: WEAR.hatBrown },
+  { at: 'head', x: -13, y: -24, w: 22, h: 7, r: 3.5, rot: -18, fill: WEAR.plume },
+];
+/** A knitted cap pulled over the skull, rolled at the brim. */
+export function knitCap(fill: string): HeadPiece[] {
+  return [
+    { at: 'head', x: 0, y: -13, w: 41, h: 18, r: 9, fill },
+    { at: 'head', x: 0, y: -7, w: 42, h: 5, r: 2.5, fill },
+    { at: 'head', x: 0, y: -24, w: 8, h: 7, r: 3.5, fill },
+  ];
+}
+/** A ship's officer's peaked cap. */
+const PEAKED: HeadPiece[] = [
+  { at: 'head', x: 0, y: -18, w: 36, h: 11, r: 4, fill: WEAR.suitNavy },
+  { at: 'head', x: 15, y: -12, w: 16, h: 3.5, r: 1.6, rot: 8, fill: WEAR.peak },
+  { at: 'head', x: 0, y: -13.5, w: 34, h: 2.5, r: 1, fill: CLOTH.gold },
+];
+
+export function dressed(id: string, label: string, bands: Band[], head: HeadPiece[] = []): Outfit {
+  return { id, label, garb: { id, label, bands }, head };
+}
+
+export const UNIT2_OUTFITS: Record<string, Outfit> = {
+  // SCIENCE — Fleming, St Mary's Hospital, London, 1928
+  fleming: dressed('fleming', 'Fleming: white lab coat, a Petri dish', [...trousers(WEAR.trouserGrey), ...coat(WEAR.labCoat, 'knee'), ...sleeves(WEAR.labCoat), ...shirtAndTie(WEAR.shirtWhite, WEAR.tieRed)], PETRI),
+  labColleague: dressed('labColleague', 'a lab colleague: lab coat', [...trousers(WEAR.trouserDark), ...coat(WEAR.labCoat, 'knee'), ...sleeves(WEAR.labCoat), ...shirtAndTie(WEAR.shirtWhite, WEAR.tieBlue)]),
+  // PSYCHOLOGY — Milgram, Yale, 1961
+  milgram: dressed('milgram', 'Milgram: charcoal suit, clipboard', [...trousers(WEAR.suitCharcoal), ...coat(WEAR.suitCharcoal, 'hip'), ...sleeves(WEAR.suitCharcoal), ...shirtAndTie(WEAR.shirtWhite, WEAR.tieBlue)], CLIPBOARD),
+  experimenter: dressed('experimenter', 'the experimenter: grey lab coat', [...trousers(WEAR.trouserDark), ...coat(WEAR.greyCoat, 'knee'), ...sleeves(WEAR.greyCoat), ...shirtAndTie(WEAR.shirtWhite, WEAR.peak)]),
+  volunteer: dressed('volunteer', 'a volunteer: tweed jacket', [...trousers(WEAR.trouserGrey), ...coat(WEAR.tweed, 'hip'), ...sleeves(WEAR.tweed), ...shirtAndTie(WEAR.shirtBlue, WEAR.tieRed)]),
+  learner: dressed('learner', 'the learner: cardigan', [...trousers(WEAR.khaki), ...coat(WEAR.cardigan, 'hip'), ...sleeves(WEAR.cardigan), front(WEAR.shirtWhite, 5)]),
+  // PHILOSOPHY — Descartes, Bavaria, 1619
+  descartes: dressed('descartes', 'Descartes: buff soldier coat, red sash, plumed hat', [...breeches(WEAR.breeches), ...coat(WEAR.buff, 'thigh'), ...sleeves(WEAR.buff), { a: { j: 'shB', dx: 9, dy: -2 }, b: { j: 'pel', dx: -10, dy: 4 }, w: 5, fill: WEAR.sashRed, layer: 1, r: 2 }], PLUMED),
+  soldier: dressed('soldier', 'a fellow soldier: dark buff coat', [...breeches(WEAR.breeches), ...coat(WEAR.buffShade, 'thigh'), ...sleeves(WEAR.buffShade)]),
+  // ECONOMICS — Haarlem, 1636
+  burgher: dressed('burgher', 'a Dutch burgher: black doublet, ruff, tall hat', [...breeches(WEAR.doubletBlack), ...coat(WEAR.doubletBlack, 'hip'), ...sleeves(WEAR.doubletBlack), front('#5A5560', 2, 9), ...RUFF], CAPOTAIN),
+  burgherBare: dressed('burgherBare', 'a Dutch burgher: plum doublet and ruff', [...breeches('#3C3550'), ...coat('#3C3550', 'hip'), ...sleeves('#3C3550'), ...RUFF]),
+  // PERSONAL GROWTH — the Endurance, 1914–16
+  shackleton: dressed('shackleton', 'Shackleton: gabardine smock, navy knitted cap', [...trousers(WEAR.trouserDark), ...coat(WEAR.smock, 'thigh'), ...sleeves(WEAR.smock), front(WEAR.smockShade, 3, 8)], knitCap(WEAR.knitNavy)),
+  explorer: dressed('explorer', 'a crewman: cream jumper, red cap', [...trousers(WEAR.trouserGrey), ...coat(WEAR.knitCream, 'hip'), ...sleeves(WEAR.knitCream)], knitCap(WEAR.knitRed)),
+  captain: dressed('captain', 'the ship captain: navy jacket, peaked cap', [...trousers(WEAR.suitNavy), ...coat(WEAR.suitNavy, 'hip'), ...sleeves(WEAR.suitNavy), ...shirtAndTie(WEAR.shirtWhite, WEAR.peak)], PEAKED),
+  // BUSINESS — Amazon, 1994
+  bezos: dressed('bezos', 'Bezos, 1994: blue oxford shirt, khakis', [...trousers(WEAR.khaki), ...coat(WEAR.shirtBlue, 'none'), ...sleeves(WEAR.shirtBlue), front('#86A0BF', 1.6, 9)]),
+  bossSuit: dressed('bossSuit', 'a Wall Street boss: navy suit', [...trousers(WEAR.suitNavy), ...coat(WEAR.suitNavy, 'hip'), ...sleeves(WEAR.suitNavy), ...shirtAndTie(WEAR.shirtWhite, WEAR.tieRed)]),
+  sweater: dressed('sweater', 'green sweater and jeans', [...trousers(WEAR.denim), ...coat(WEAR.sweaterGreen, 'hip'), ...sleeves(WEAR.sweaterGreen)]),
+  tshirt: dressed('tshirt', 't-shirt and jeans', [...trousers(WEAR.denim), ...coat(WEAR.tshirt, 'hip'), ...sleeves(WEAR.tshirt, false)]),
 };
