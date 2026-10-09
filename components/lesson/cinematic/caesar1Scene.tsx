@@ -102,7 +102,7 @@ const KS = K / 0.85;
 const G = GROUND;
 
 /** Seconds each beat's action is paced over (lib/narration/manifest.ts); b0 is the wait (6.0s) and the line together. */
-const LINES = [11.22, 5.08, 5.03, 3.76, 4.7, 0, 6.47, 4.0, 5.1, 3.27, 3.82, 5.83, 2.01, 2.81, 3.71, 4.09, 3.69, 3.69, 0, 4.86, 5.2, 0, 0];
+const LINES = [11.22, 5.08, 5.16, 3.96, 4.7, 0, 6.47, 4.16, 5.23, 3.27, 3.94, 5.83, 2.01, 2.81, 3.71, 4.13, 3.87, 3.77, 0, 4.87, 5.24, 0, 0];
 
 const TALK = 167;
 const NOD = 263;

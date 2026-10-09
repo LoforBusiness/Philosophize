@@ -94,7 +94,7 @@ const K = K_FIG * 0.76;
  * Seconds each beat's action is paced over: the voiced line from the manifest
  * (lib/narration/manifest.ts, psychology-foundations-2). 0 for a beat with no voice.
  */
-const LINES = [4.41, 4.77, 5.65, 4.96, 7.21, 0, 6.67, 4.13, 7.3, 0, 4.31, 0, 0];
+const LINES = [4.41, 4.77, 5.69, 4.96, 7.32, 0, 6.67, 4.13, 7.3, 0, 4.31, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // arms folded, waiting for the answer, leaning in; and a posture for the crouch.

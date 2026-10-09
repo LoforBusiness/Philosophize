@@ -102,7 +102,7 @@ const DAIS = 482;
  * longer than the line and runs on after it — b1 (the coins and the sack set down), b8
  * (three drafts let down and the seal picked up) and b10 (the hatch, the walk, the cabbage).
  */
-const LINES = [4.92, 5.51, 5.26, 0, 6.07, 5.69, 6.83, 4.2, 6, 0, 5.6, 0, 0];
+const LINES = [4.92, 5.51, 5.26, 0, 6.07, 5.69, 6.83, 4.31, 6, 0, 5.6, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, nodding along, arms folded,
 // kneeling; and the shrug, played once (299 + act).

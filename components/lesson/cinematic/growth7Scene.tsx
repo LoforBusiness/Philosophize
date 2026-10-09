@@ -84,7 +84,7 @@ const TR = 0.85;
 const K = K_FIG * 0.84;
 
 /** Seconds each beat's action is paced over (lib/narration/manifest.ts); b0 is the wait (6.2s) and the line together. */
-const LINES = [8.97, 4.4, 5.84, 5.01, 5.17, 0, 3.75, 5.81, 5.85, 5.18, 6.6, 0, 3.53, 6.93, 4.34, 6.99, 3.76, 4.17, 0, 4.33, 0, 0];
+const LINES = [8.97, 4.66, 5.9, 5.01, 5.22, 0, 3.75, 5.81, 5.99, 5.18, 6.76, 0, 3.83, 6.93, 4.6, 7.09, 3.76, 4.29, 0, 4.45, 0, 0];
 
 const TALK = 167;
 const EXPLAIN = 259;

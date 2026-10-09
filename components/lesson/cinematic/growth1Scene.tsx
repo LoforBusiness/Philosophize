@@ -84,7 +84,7 @@ const K = K_FIG * 0.76;
  * needs longer than the line and runs on after it — b2 (the pour and putting the can
  * back), b8 (fetching the can across the garden) and b10 (the cupful and the door).
  */
-const LINES = [4.55, 2.69, 6.61, 4.31, 5.97, 0, 6.55, 4.52, 5.98, 0, 5.4, 0, 0];
+const LINES = [4.59, 2.75, 6.61, 4.34, 6.22, 0, 6.55, 4.62, 5.98, 0, 5.4, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // kneeling beside a thing.

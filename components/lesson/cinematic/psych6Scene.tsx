@@ -97,7 +97,7 @@ const K = K_FIG * 0.76;
 const G = 500;
 
 /** Seconds each beat's action is paced over: the voiced line (lib/narration/manifest.ts). */
-const LINES = [4.28, 4.68, 4.35, 0, 7.8, 3.1, 4.16, 4.82, 0, 5.14, 0, 0];
+const LINES = [4.54, 4.68, 4.53, 0, 7.84, 3.1, 4.95, 4.93, 0, 5.21, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding, arms folded.
 const TALK = 167;

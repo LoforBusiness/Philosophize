@@ -90,7 +90,7 @@ const KD = K * 0.46;
 const KR = KD / K;
 
 /** Seconds each beat's action is paced over (lib/narration/manifest.ts, philosophy-foundations-5). */
-const LINES = [5.61, 3.29, 5.01, 4.52, 6.11, 0, 2.99, 4.74, 3.39, 7.26, 0, 0, 0];
+const LINES = [5.89, 3.37, 5.19, 4.56, 6.11, 0, 3.37, 4.74, 3.44, 7.26, 0, 0, 0];
 
 const TALK = 167;
 const EXPLAIN = 259;

@@ -93,7 +93,7 @@ const K = K_FIG * 0.76;
  * (lib/narration/manifest.ts, economics-foundations-6). A question or the quotation
  * paces over the fallback.
  */
-const LINES = [5.25, 5.74, 5.59, 0, 5.61, 3.47, 6.86, 4.16, 0, 4.26, 0, 0];
+const LINES = [5.43, 5.74, 5.59, 0, 5.68, 4.22, 6.86, 4.35, 0, 4.26, 0, 0];
 
 // The held poses (moves.ts act + 99): talking with the hands, nodding along, kneeling;
 // and the shrug, played once (299 + act).

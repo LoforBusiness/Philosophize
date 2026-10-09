@@ -49,7 +49,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { LESSONS, beatsOf, spoken, keyOf, voiceFor, endingMarkup, trimTail, parseWav } from './lib/narration.mjs';
 import { wiredLessons } from './lib/dialogue.mjs';
 import { openLedger } from './lib/ttsledger.mjs';
-import { PACES, aimOf, AIM_TOLERANCE, useStyleFor, styleOf, isUntouched, TAIL_WORD, cutTailNatural, SENTENCE_END as SENTENCE_ENDS, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
+import { PACES, aimOf, AIM_TOLERANCE, useStyleFor, styleOf, isUntouched, TAIL_WORD, cutTailNatural, lengthenStops, SENTENCE_END as SENTENCE_ENDS, requestOf, cutTail, sentencesOf, readTake, prosodyFaults, shapePauses, spliceSentences, wavOf, trimLead, paceFault, paceRates, END_DROP_DB, MIN_SYLLABLES, SENTENCE_SLACK } from './lib/prosody.mjs';
 
 // ── ONE GO (2026-10-01) ─────────────────────────────────────────────────────
 // The owner: *"I don't want to have to keep going back and back to keep reiterating the
@@ -262,7 +262,8 @@ try {
         const w = parseWav(buf);
         const cut = cutTailNatural(w.pcm, w.rate);
         if (!cut) { console.log(`    ${l.key} natural try ${t + 1}: no silence before the throwaway word`); continue; }
-        const pcm = trimLead(cut, w.rate, 0.1);
+        // a full stop the voice gave too short a rest gets silence laid into it (prosody.lengthenStops)
+        const pcm = lengthenStops(trimLead(cut, w.rate, 0.1), w.rate, l.text, l.pace);
         const take = readTake(pcm, w.rate, l.text, l.pace);
         for (const m of take.marks) if (m.gap < 0 && SENTENCE_ENDS.has(m.kind)) ranThrough.add(m.word);
         const faults = prosodyFaults(take, l.text);

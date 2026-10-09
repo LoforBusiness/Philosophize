@@ -213,11 +213,15 @@ export const STYLES = {
       dash: { aim: 0.3, min: 0.08, max: 0.8 },
       semi: { aim: 0.35, min: 0.1, max: 0.8 },
       colon: { aim: 0.4, min: 0.1, max: 0.9 },
-      // a quick stop between two short sentences is a person too, and so is a long beat
-      stop: { aim: 0.5, min: 0.08, max: 1.3 },
-      exclaim: { aim: 0.5, min: 0.08, max: 1.3 },
-      question: { aim: 0.55, min: 0.08, max: 1.3 },
-      ellipsis: { aim: 0.7, min: 0.25, max: 1.3 },
+      // A SENTENCE ENDS ON A STOP (owner, 2026-10-09: "when there are punctuations, like
+      // periods especially … there is a more stop instead of keep on going"). Measured, a
+      // quarter of the 506 sentence ends rested under 0.3 s and 7 ran straight through. A
+      // full stop now rests at least STOP_FLOOR: the take is kept as the voice gave it, and
+      // a short stop is lengthened by laying silence into it (lengthenStops) — only silence.
+      stop: { aim: 0.5, min: 0.34, max: 1.3 },
+      exclaim: { aim: 0.5, min: 0.34, max: 1.3 },
+      question: { aim: 0.55, min: 0.34, max: 1.3 },
+      ellipsis: { aim: 0.7, min: 0.34, max: 1.3 },
     },
     stray: { max: 0.7, aim: 0.4 },
     vary: false,
@@ -561,9 +565,9 @@ export function prosodyFaults(take, text) {
   for (const m of take.marks) {
     const p = PAUSES[m.kind];
     const where = `after "${words[m.word]}"`;
-    // an untouched voice's own phrasing stands: where it runs two sentences together, that
-    // is how it says them (natural style, the owner's pick); every other style must pause
-    if (m.gap < 0 && (UNTOUCHED || (COMMA_OPTIONAL && !SENTENCE_END.has(m.kind)))) continue;
+    // an untouched voice's own phrasing stands at a comma, where a person may run through;
+    // a SENTENCE END must stop, in every style (owner, 2026-10-09)
+    if (m.gap < 0 && !SENTENCE_END.has(m.kind) && (UNTOUCHED || COMMA_OPTIONAL)) continue;
     if (m.gap < 0) out.push({ kind: 'NO PAUSE', say: `the voice runs straight through the ${m.kind} ${where}; it must rest ${p.min}–${p.max}s there` });
     else if (m.len < p.min - 0.005 || m.len > p.max + 0.005) out.push({ kind: 'PAUSE', say: `rests ${m.len.toFixed(2)}s at the ${m.kind} ${where}, where a person rests ${p.min}–${p.max}s` });
   }
@@ -637,6 +641,44 @@ export function shapePauses(pcm, rate, text, pace = 'even') {
       next.set(out.subarray(at), at + add);
       out = next;
     }
+  }
+  return out;
+}
+
+/** How long a full stop rests, at least, once lengthenStops has had it (owner, 2026-10-09). */
+export const STOP_FLOOR = 0.38;
+
+/**
+ * The take with every SENTENCE END that rests under STOP_FLOOR lengthened to it — and
+ * nothing else touched. Zeros are laid into the gap's quietest 10 ms, so the decay of the
+ * word before and the onset of the word after are never touched; no sound is cut, sped up
+ * or moved against another. This is the one edit an untouched (natural) take gets: the
+ * voice's own words, at its own speed, with a real stop where the text has a full stop.
+ */
+export function lengthenStops(pcm, rate, text, pace = 'even') {
+  const take = readTake(pcm, rate, text, pace);
+  const F = take.frames.F;
+  const grow = take.marks
+    .filter((m) => SENTENCE_END.has(m.kind) && m.gap >= 0 && m.len < STOP_FLOOR)
+    .map((m) => m.gap)
+    .sort((x, y) => y - x);
+  let out = Int16Array.from(pcm);
+  for (const k of grow) {
+    const g = take.gaps[k];
+    const a = g.a * F, b = g.b * F;
+    const add = Math.round((STOP_FLOOR - g.len) * rate);
+    if (add <= 0) continue;
+    let best = a, bestE = Infinity;
+    for (let s = a; s + F <= b; s += F) {
+      let e = 0;
+      for (let i = s; i < s + F; i += 1) e += out[i] * out[i];
+      if (e < bestE) { bestE = e; best = s; }
+    }
+    const at = best + Math.floor(F / 2);
+    const next = new Int16Array(out.length + add);
+    next.set(out.subarray(0, at), 0);
+    next.set(out.subarray(at), at + add);
+    out = next;
   }
   return out;
 }

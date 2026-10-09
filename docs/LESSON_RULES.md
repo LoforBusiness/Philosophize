@@ -11692,6 +11692,16 @@ natural take that ends less than `END_SILENCE_MIN` (0.12 s) after its last sound
 clean cut always keeps that much. `withStyle` puts the defaults back
 after each call, so the checks judge each lesson by its own style.
 
+**A full stop is a stop (2026-10-09).** The owner: *"when there are punctuations, like
+periods especially … there is a more stop instead of keep on going."* Measured, a quarter of
+the 506 sentence ends rested under 0.3 s and 7 lines ran a sentence straight into the next.
+So the one edit an untouched take gets is `lengthenStops`: every sentence end (`.`, `!`, `?`,
+`…`) that rests under `STOP_FLOOR` (0.38 s) has silence laid into its quietest 10 ms until it
+does. Nothing is cut, sped up or moved. A sentence run straight through is broken in every
+style now and is rendered again. 254 takes were lengthened and 8 re-rendered; every full stop
+in the app rests 0.38 s or more, and `check:narration` holds the floor (0.34 s, allowing for
+the 10 ms frame).
+
 ## Group AQ · A word sits in its plate, and its plate on its thing
 
 ### AQ1 · A word fits the plate it is on, and the plate sits on its object

@@ -626,9 +626,8 @@ export function spokenFaults(pcm, rate, text, pace, sha = null, lesson = null) {
  * take is no longer installed.
  */
 export const PACE_ALLOWANCE = {
-  e86da2cd30855cdd0ee97640f4304b4880fd95f406638caf2b9a02977c863479: 'psychology-foundations-6/beat-06 — a comma run through, so the second sentence is mis-measured at 21.6',
 };
-export const PACE_ALLOWANCE_MAX = 1;
+export const PACE_ALLOWANCE_MAX = 0;
 
 // ── WHAT EACH TAKE WAS RENDERED FROM ────────────────────────────────────────
 //

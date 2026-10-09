@@ -84,7 +84,7 @@ const K = K_FIG * 0.76;
  * longer and runs on after it — b1 (the walk round behind the plinth), b5 (the card),
  * b7 (the mug out of the case) and b10 (the stroll away).
  */
-const LINES = [5.96, 4.8, 6.21, 6.61, 0, 3.28, 5.51, 4.2, 4.64, 0, 5.2, 0, 0];
+const LINES = [5.96, 4.8, 6.33, 6.61, 0, 3.28, 5.51, 4.2, 4.71, 0, 5.2, 0, 0];
 
 // The held poses (moves.ts act + 99): talking, explaining, listening, nodding along,
 // waiting.
