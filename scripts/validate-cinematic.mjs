@@ -144,7 +144,11 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Script.ts')).sort(
   // A RECAP (group AV) restates six lessons and asks three questions, so it runs longer.
   const recap = fs.existsSync(path.join(DIR, `${name}Script.ts`))
     && /^\/\/ AV: recap$/m.test(fs.readFileSync(path.join(DIR, `${name}Script.ts`), 'utf8'));
-  const ceiling = firstPerson ? 26 : recap ? 24 : 19;
+  // A STORY UNIT's lesson (group AW) plays one event of a true story, so it runs as long
+  // as a recap; it still asks two questions.
+  const story = fs.existsSync(path.join(DIR, `${name}Script.ts`))
+    && /^\/\/ AW: story$/m.test(fs.readFileSync(path.join(DIR, `${name}Script.ts`), 'utf8'));
+  const ceiling = firstPerson ? 26 : (recap || story) ? 24 : 19;
   if (!LEGACY.has(name)) {
     if (played < 7 || played > ceiling) errs.push(`${played} beats played${played !== n ? ` (${n} written)` : ''} (H52 wants 7–${ceiling}${firstPerson ? ' for a staged scene (group AT)' : ' since the segmenting split; 8 was the old house length'})`);
     if (quotes.length !== 1) errs.push(`${quotes.length} quote beats, want exactly 1 (H52)`);
@@ -427,7 +431,7 @@ for (const f of fs.readdirSync(DIR).filter((n) => n.endsWith('Scene.tsx')).sort(
 //     branch. It may only go UP. Converting a lesson from behind the frontier
 //     lowers CARD_BUDGET without moving this, and the check says so.
 const CARD_BUDGET = 0;
-const SOLID_FLOOR = 49; // 42 dialogue lessons (six a road since 2026-10-04) and philosophy's recap (2026-10-07, group AV); 267 until the retired 246 were deleted (2026-10-02)
+const SOLID_FLOOR = 50; // + history-caesar-1, the first story lesson (2026-10-09, group AW); 42 dialogue lessons (six a road since 2026-10-04) and philosophy's recap (2026-10-07, group AV); 267 until the retired 246 were deleted (2026-10-02)
 
 // ── THE A/B/C/D DECK IS BEING RETIRED TOO ───────────────────────────────────
 //
@@ -475,16 +479,27 @@ for (const branch of fs.readdirSync(BRANCHES).sort()) {
   if (!fs.existsSync(paths)) continue;
   // READING ORDER comes out of the unit index, not the directory listing — the
   // filesystem is alphabetical and the reader is not.
-  const unitDir = fs.readdirSync(paths)[0];
-  const idx = fs.readFileSync(path.join(paths, unitDir, 'index.ts'), 'utf8');
-  const imports = {};
-  for (const m of idx.matchAll(/^import (\w+) from '\.\/lessons\/([^']+)';/gm)) imports[m[1]] = m[2];
-  const order = [...idx.matchAll(/lessons: \[([^\]]*)\]/g)]
-    .flatMap((m) => m[1].split(',').map((s) => s.trim()).filter(Boolean));
+  // A road may hold SEVERAL units since unit 2 (group AW): read them in the order the
+  // branch's own index imports them, not alphabetically ('caesar' sorts before
+  // 'foundations' and the reader meets foundations first).
+  const branchIdx = path.join(BRANCHES, branch, 'index.ts');
+  const listed = fs.existsSync(branchIdx)
+    ? [...fs.readFileSync(branchIdx, 'utf8').matchAll(/from '\.\/paths\/([\w-]+)'/g)].map((m) => m[1])
+    : [];
+  const unitDirs = listed.length ? listed : fs.readdirSync(paths).slice(0, 1);
+  const order = [];
+  for (const unitDir of unitDirs) {
+    const idx = fs.readFileSync(path.join(paths, unitDir, 'index.ts'), 'utf8');
+    const imports = {};
+    for (const m of idx.matchAll(/^import (\w+) from '\.\/lessons\/([^']+)';/gm)) imports[m[1]] = m[2];
+    for (const m of idx.matchAll(/lessons: \[([^\]]*)\]/g)) {
+      for (const name of m[1].split(',').map((s) => s.trim()).filter(Boolean)) order.push({ unitDir, file: imports[name] });
+    }
+  }
 
   let lessons = 0, cine = 0, solid = 0, frontier = null;
-  for (const name of order) {
-    const file = path.join(paths, unitDir, 'lessons', `${imports[name]}.ts`);
+  for (const { unitDir, file: lessonFile } of order) {
+    const file = path.join(paths, unitDir, 'lessons', `${lessonFile}.ts`);
     if (!fs.existsSync(file)) continue;
     const src = fs.readFileSync(file, 'utf8');
     const id = src.match(/^ {2}id: '([^']+)',/m)?.[1];

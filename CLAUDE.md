@@ -268,7 +268,7 @@ Curriculum content lives in `data/branches/` as strongly-typed TypeScript files.
 > ROAD SINCE 2026-10-02, 28 in all (§23).** Everything below about 41 a branch, the takeover and the 246
 > describes philosophy's six old branches, whose lessons were DELETED on 2026-10-02
 > (§23); a reader's progress in them survives as counts (`data/retiredBranches.ts`). It
-> is kept as a finding. `check:cinematic` counts the 49 lessons (42 and a recap on each road), so `SOLID_FLOOR` is 49.
+> is kept as a finding. `check:cinematic` counts the 50 lessons (42, a recap on each road, and the first story lesson of history's unit 2), so `SOLID_FLOOR` is 50.
 
 ### Shape today
 
@@ -305,7 +305,7 @@ Two ratchets in `scripts/validate-cinematic.mjs`, both high-water marks:
   and the check says so. It also prints **the next lesson to convert in each
   branch**, so "in order" is never a judgement call.
 
-**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 49** (43 with philosophy's recap, 246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 28 with the fourth lessons, 29 with history's staged fifth, 35 with the other six fifth lessons, and 42 with the sixth lessons), which is what the takeover
+**`CARD_BUDGET` IS NOW 0 AND `SOLID_FLOOR` IS 50** (49 with every recap, 43 with philosophy's recap, 246 when the takeover finished, 267 with the seven roads, 21 once the old library was deleted, 28 with the fourth lessons, 29 with history's staged fifth, 35 with the other six fifth lessons, and 42 with the sixth lessons), which is what the takeover
 finishing looks like in this file. Both stay in place: the budget is what makes a
 new card-only lesson a build error rather than a decision somebody has to remember,
 and the floor is what stops the frontier walking backwards. The card runner
@@ -320,7 +320,7 @@ because every lesson id is in the `CINEMATIC` map — and was deleted on 2026-10
 ### Shape today
 
 **Every branch holds exactly 41 lessons, and every one of them is cinematic.**
-The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 49, and there is no
+The takeover is DONE: `CARD_BUDGET` is 0, `SOLID_FLOOR` is 50, and there is no
 lesson left in the app that a reader meets as a card deck. Both numbers were
 deliberate invariants on the way rather than where the counts happened to land —
 the totals were 27–30 and the cinematic share was 11–14, and both showed on the
@@ -1315,7 +1315,7 @@ they belong to, so the rule book has them and this file did not:
   lessons** — is retired from the app until rebuilt. **341 philosophers**
   with bios, eras and **1,856 quotations** between them — and all 341 have exactly
   three "Did you know?" facts, with nothing missing. No tab lists them since the Thinkers tab went (§23).
-- **Lessons (live): 49 DIALOGUE lessons, six on each road and a recap closing each road (group AV) (History's fifth is staged as a scene with a silent jury; from the other roads' fifths on, 2026-10-03, every lesson is built to group AU: harder ideas in exciting places, each question a small game)** (§23, LESSON_RULES
+- **Lessons (live): 50 DIALOGUE lessons, six on each road and a recap closing each road (group AV), plus the first lesson of history's second unit, a story told in costume (group AW, §23) (History's fifth is staged as a scene with a silent jury; from the other roads' fifths on, 2026-10-03, every lesson is built to group AU: harder ideas in exciting places, each question a small game)** (§23, LESSON_RULES
   groups AP–AS): two or three of the four-strong cast in one real place, every line voiced
   in its speaker's own Chirp 3 HD voice with their face beside the words, objects
   in their own colours, and both graded questions answered by tapping the stage.
@@ -1429,8 +1429,8 @@ they belong to, so the rule book has them and this file did not:
 **Known gaps / tech debt:**
 > Entries that name a lesson by branch (`ethics10`, `aesthetics16`…) or count out of 246
 > are about philosophy's narrated library, deleted on 2026-10-02 (§23): kept as findings.
-- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 49, `CARD_BUDGET` 0,
-  `SOLID_FLOOR` 49 (the 49 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
+- **~~Card decks are a minority.~~ THERE ARE NONE.** 0 of 50, `CARD_BUDGET` 0,
+  `SOLID_FLOOR` 50 (the 50 dialogue lessons were cinematic from the start). What is left of the old format is the DATA — every lesson
   still carries its `cards` array, which is the fallback the runner uses if a
   `CINEMATIC` entry is ever removed, and that is what makes a scene safe to roll
   back (§17). The runner itself is now unreachable; see the note at the top of §5.
@@ -2665,7 +2665,7 @@ app became seven subjects, one road each, built as dialogue lessons (§23).
 
 ## 17. Cinematic Lessons
 
-**This is the format the app converged ON** — 49 of the 49 lessons are here now (the dialogue lessons, one of them a staged scene and seven recaps; the 246 narrated ones were deleted on 2026-10-02),
+**This is the format the app converged ON** — 50 of the 50 lessons are here now (the dialogue lessons, one of them a staged scene, seven recaps and one story lesson; the 246 narrated ones were deleted on 2026-10-02),
 and the card runner they replaced is deleted (2026-10-02, §5). They are not card
 decks at all: they are tap-advanced animated scenes.
 `app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx` holds a
@@ -8835,6 +8835,27 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
   `phil6 … hist6`, fourteen new question games, 63 lines for about 37,000 characters. Brief:
   `docs/superpowers/plans/2026-10-04-sixth-lessons-scene-brief.md`.
 - **A recap at the end of each road (2026-10-07, LESSON_RULES group AV).** Stop 7, `<subject>-foundations-7`, its sign marked RECAP. The top hat and one other in two new places that fit the subject, a slow wordless open, every line restating what the six lessons taught (each traced in the script header), three question games (70 XP), and a TALLER stage (band 214–514, 400 × 300) filled by layered, baked backdrops. Philosophy's came first (the agora, then the harbour of Piraeus); the other six followed on 2026-10-08: psychology (a 1905 lab, a railway concourse), personal growth (a mountain hut, the switchback trail), business (a general store at night, a market street), economics (a trading exchange at dawn, a harbour market), science (a gaslit lab, an observatory dome) and history (a museum record room, a dig among Greek ruins). Scripts psych7 … hist7, each the top hat and one other. Spec `docs/superpowers/specs/2026-10-07-recap-lessons-design.md`, scene brief `docs/superpowers/plans/2026-10-07-recap-scene-brief.md`.
+- **Unit 2 of every road is ONE TRUE STORY, told in costume (2026-10-09, LESSON_RULES group AW).**
+  *"The first unit is the foundation. Now I want to get more into specific things … a story of
+  their life … the plain stickman portrays the person … the other stickmen dress up as other
+  people."* Up to six lessons a story; the plain one plays the protagonist (his vanity is the
+  person's), the others the people around him, each voice staying with its cast member. Picks:
+  history Julius Caesar (the pilot), then science Fleming's penicillin, psychology Milgram,
+  philosophy Descartes' doubt, economics tulip mania, personal growth Shackleton, business Amazon.
+  - **Costumes are worn on the body now** (`garb.ts`, approved from `node scripts/sheet-garb.mjs`):
+    a garment is BANDS between joints, light filled cloth with one shared ink outline, drawn by
+    `Stickman`'s `garb` prop after the legs and trunk and before the head and near arm, so it
+    follows every pose. Head and hand pieces may carry `fill` (a laurel, a head wrap, a blade);
+    `WORN_SLOTS` is 16. `CinematicPlayer`'s `roles` puts each speaker's ROLE head on the face
+    beside the words. This reverses the old "nothing on the body" rule (§17): that rule was
+    about small ink shapes inside the silhouette, and a garment is the opposite.
+  - **A road may hold several units**: `data/branches/history/paths/caesar` (unit
+    `history-caesar`) follows foundations; `validate-cinematic` reads units in the branch
+    index's order. `// AW: story` in a script's header allows 24 beats; check:dialogue lets a
+    story's figures (cast or extra) wear `OUTFITS.*`.
+  - **history-caesar-1, "Caesar and the Pirates"** (stem `caesar1`, 23 beats, recap-size band):
+    the merchant ship, the pirates' cove by day, and by night; PICK THE CHEST and SEAL THE ORDER.
+    The rest of the Caesar unit: the climb, Gaul, the Rubicon, Egypt, the Ides of March.
 - **No letter is cut off, and every lesson's objects are drawings (2026-10-05).** *"the end
   of coin is slightly cut off … I've noticed this for other words."* Android's TextView clips
   its ink to its CONTENT box (inside padding, so padding cannot help), and Caveat draws up to

@@ -16,5 +16,5 @@ export type LessonName = readonly [surface: string, philosopherId: string];
 
 /** Longest surface form first — the matcher takes them in order. */
 export const LESSON_NAMES: Record<string, readonly LessonName[]> = {
-
+  'history-caesar-1': [['Miletus', 'thales']],
 };

@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
-import { BONE_SRC, STR, type Bundle } from './rig';
+import { BONE_SRC, STR, pose, stand, type Bundle } from './rig';
 import { pillStyle } from './stageSkin';
 import type { Piece } from './wardrobe';
+import { GARB_LINE, GARB_SLOTS, bandAt, type Band } from './garb';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Draws one figure from a Bundle of transform arrays, as native RN Views.
@@ -50,6 +51,12 @@ interface Props {
    * the scenes that state it need no edit.
    */
   role?: 'lead' | 'second' | 'crowd';
+  /**
+   * CLOTHES ON THE BODY (garb.ts) — unit 2's costumes: a toga, a tunic. Drawn after the
+   * legs and the trunk and before the head and the near arm, so the cloth covers the
+   * body and his near arm still works in front of it.
+   */
+  garb?: Band[];
 }
 
 /**
@@ -63,7 +70,7 @@ interface Props {
  * A costume with MORE pieces than this loses the rest in silence, so `check:wardrobe`
  * reads this number and fails one that does not fit.
  */
-const WORN_SLOTS = 8;
+const WORN_SLOTS = 16;
 
 /** The stage's own ground, so a `paper` piece reads as a gap rather than a mark. */
 const PAPER = '#FAFAF7';
@@ -71,10 +78,14 @@ const PAPER = '#FAFAF7';
 /** One empty costume, shared, so a bare figure's `worn` is the same array every render. */
 const NO_WEAR: Piece[] = [];
 
-export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear }: Props) {
+/** No garment, shared, for the same reason as NO_WEAR. */
+const NO_GARB: Band[] = [];
+
+export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear, garb }: Props) {
   // What he wears is exactly what the scene hands him; with nothing he is the bare
   // mascot, which is what the launch screen, the road and the welcome have always drawn.
   const worn = wear ?? NO_WEAR;
+  const bands = garb ?? NO_GARB;
   // Thicknesses are baked per figure. They never animate, so they stay in style.
   const S = useMemo(() => {
     const limb = STR.limb * k;
@@ -220,13 +231,79 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       // A RING SHOWS WHAT IS BEHIND IT, which is the whole point of the monocle:
       // most of its circle sits proud of the head, so the hole reads against
       // paper. Drawn as a fill it would be a black disc stuck to his temple.
-      if (p.ring) return { ...base, borderWidth: p.ring * k, borderColor: color, borderRadius: w / 2 };
+      if (p.ring) return { ...base, borderWidth: p.ring * k, borderColor: p.fill ?? color, borderRadius: w / 2 };
+      // A COLOURED piece (garb.ts) wears a thin ink edge, so it reads on the black
+      // head and on the paper alike. The edge is grown OUTSIDE the drawn size.
+      if (p.fill) {
+        const e = GARB_LINE * 0.75 * k;
+        return {
+          ...base, left: -w / 2 - e, top: -h / 2 - e, width: w + 2 * e, height: h + 2 * e,
+          borderRadius: (p.r ?? 0) * k + e, borderWidth: e, borderColor: color, backgroundColor: p.fill,
+        };
+      }
       // PAPER, not ink — see `Piece.paper`. The value matches the stage ground so
       // the line reads as an absence rather than as a pale object.
       return { ...base, backgroundColor: p.paper ? PAPER : color };
     }),
     [worn, k, color],
   );
+
+  // ── the garment (garb.ts) ─────────────────────────────────────────────────
+  //
+  // Each band is ONE View sized at its length in a standing pose, moved, turned and
+  // stretched to where the joints put it this frame. Band lengths barely change with
+  // a pose (a thigh is a thigh), so the stretch is a few percent and the rounded ends
+  // keep their shape. A band is drawn twice: an ink copy grown by the outline, then its
+  // fill — all the body's outlines first, so overlapping bands share one edge.
+  const garbStatic = useMemo(() => {
+    const B0 = pose(stand(0), 0, 0, k, 1, 1) as unknown as Parameters<typeof bandAt>[0];
+    const line = GARB_LINE * k;
+    return Array.from({ length: GARB_SLOTS }, (_, i) => {
+      const b = bands[i];
+      if (!b) return null;
+      const box = (grow: number, fill: string): ViewStyle => {
+        const g = bandAt(B0, k, b, grow);
+        const L = Math.max(g.len, 1);
+        return {
+          position: 'absolute', left: -L / 2, top: -g.w / 2, width: L, height: g.w,
+          borderRadius: (b.r ?? b.w / 2) * k + grow, backgroundColor: fill,
+        };
+      };
+      return { out: b.flat ? null : box(line, color), fill: box(0, b.fill), len0: Math.max(bandAt(B0, k, b, 0).len, 1), layer: b.layer ?? 0 };
+    });
+  }, [bands, k, color]);
+
+  const garbStyles = Array.from({ length: GARB_SLOTS }, (_, i) => {
+    const b = bands[i];
+    const len0 = garbStatic[i]?.len0 ?? 1;
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- GARB_SLOTS is constant
+    return useAnimatedStyle(() => {
+      if (!b) return { opacity: 0, transform: [{ translateX: -9999 }, { translateY: -9999 }] };
+      const g = bandAt(D.value as unknown as Parameters<typeof bandAt>[0], k, b, 0);
+      return {
+        opacity: 1,
+        transform: [
+          { translateX: g.cx }, { translateY: g.cy },
+          { rotate: `${(g.ang * 180) / Math.PI}deg` },
+          { scaleX: g.len / len0 },
+        ],
+      };
+    });
+  });
+  const garbLayer = (layer: number) => {
+    const out: ReactNode[] = [];
+    const idx = garbStatic.map((s, i) => (s && s.layer === layer ? i : -1)).filter((i) => i >= 0);
+    if (layer === 0) {
+      for (const i of idx) if (garbStatic[i]!.out) out.push(<Animated.View key={`go${i}`} style={[garbStatic[i]!.out!, garbStyles[i]]} />);
+      for (const i of idx) out.push(<Animated.View key={`gf${i}`} style={[garbStatic[i]!.fill, garbStyles[i]]} />);
+    } else {
+      for (const i of idx) {
+        if (garbStatic[i]!.out) out.push(<Animated.View key={`go${i}`} style={[garbStatic[i]!.out!, garbStyles[i]]} />);
+        out.push(<Animated.View key={`gf${i}`} style={[garbStatic[i]!.fill, garbStyles[i]]} />);
+      }
+    }
+    return out;
+  };
 
   const wornStyles = Array.from({ length: WORN_SLOTS }, (_, i) => {
     const p = worn[i];
@@ -305,6 +382,11 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
       <Animated.View style={[S.limbBone, a.shinR]} />
       <Animated.View style={[S.joint, a.kneeR]} />
       <Animated.View testID="ankle-r" style={[S.joint, a.ankR]} />
+
+      {/* The garment (garb.ts): over the legs and the trunk, under the head and the
+          near arm. Empty for every figure that wears none. */}
+      {garbLayer(0)}
+      {garbLayer(1)}
 
       {/* testID for the same reason the ankles and the fists have one, and it is
           AL1's: "does he move up and down" is a question about the HEAD, and the

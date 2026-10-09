@@ -92,6 +92,7 @@ export const LESSONS = {
   'history-foundations-5': 'hist5Script.ts',
   'history-foundations-6': 'hist6Script.ts',
   'history-foundations-7': 'hist7Script.ts',
+  'history-caesar-1': 'caesar1Script.ts',
 };
 
 /** A beat's line, named: "metaphysics-being-4/beat-04". Its WAV master is that name. */

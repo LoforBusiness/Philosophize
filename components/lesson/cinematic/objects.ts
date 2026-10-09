@@ -795,6 +795,27 @@ export const NATURAL = {
   gr7Brass: { base: '#B8893A', shade: '#94692A', label: '#1A1A1A', what: 'a brass lantern' },
   gr7Water: { base: '#8CC7E0', shade: '#5FA6C6', label: '#1A1A1A', what: 'water pouring from a jug' },
   gr7Pebble: { base: '#BDB4A2', shade: '#9A917F', label: '#1A1A1A', what: 'loose gravel pebbles' },
+  // caesar1 colours:
+  caesar1Silver: { base: '#DADEE2', shade: '#A9B0B6', label: '#1A1A1A', what: 'silver coins, a talent of them' },
+  caesar1Slate: { base: '#3B3733', shade: '#2A2724', label: '#FAFAF7', what: 'a dark board on a chest, chalked' },
+  caesar1Chalk: { base: '#F4F1E8', shade: '#D8D4C8', label: '#1A1A1A', what: 'chalk marks' },
+  caesar1Paper: { base: '#F1E6C8', shade: '#D9C9A0', label: '#1A1A1A', what: 'a papyrus scroll, a letter' },
+  caesar1Rod: { base: '#8C5C34', shade: '#6A4326', label: '#FAFAF7', what: 'a scroll’s wooden rods' },
+  caesar1Reed: { base: '#D4B26C', shade: '#B0904E', label: '#1A1A1A', what: 'a woven reed mat' },
+  caesar1Rope: { base: '#A88A5E', shade: '#866B44', label: '#1A1A1A', what: 'a rope tying wrists, a boat’s painter' },
+  caesar1Flame: { base: '#F2A23A', shade: '#D9721E', label: '#1A1A1A', what: 'a campfire’s flames, a torch' },
+  caesar1FlameCore: { base: '#FBE38A', shade: '#F2C94C', label: '#1A1A1A', what: 'the hot yellow heart of a flame' },
+  caesar1Smoke: { base: '#DAD6D0', shade: '#BAB5AE', label: '#1A1A1A', what: 'woodsmoke rising' },
+  caesar1Gold: { base: '#D8B04A', shade: '#A8842A', label: '#1A1A1A', what: 'a gold signet ring' },
+  caesar1Wax: { base: '#B3322C', shade: '#8E241F', label: '#FAFAF7', what: 'red sealing wax' },
+  caesar1Haze: { base: '#D8ECF4', shade: '#B9D9E7', label: '#1A1A1A', what: 'bright sea haze' },
+  caesar1Night: { base: '#121A30', shade: '#0C1222', label: '#FAFAF7', what: 'the dark of a night at sea' },
+  caesar1Firelight: { base: '#F4C27A', shade: '#E2A458', label: '#1A1A1A', what: 'firelight lying on the sand' },
+  caesar1Glint: { base: '#EAF6FB', shade: '#C4E3EF', label: '#1A1A1A', what: 'sunlight glinting on the sea' },
+  caesar1Cloud: { base: '#FCFDFE', shade: '#D6E2EA', label: '#1A1A1A', what: 'a white fair-weather cloud' },
+  caesar1Inside: { base: '#3A2618', shade: '#2A1B10', label: '#FAFAF7', what: 'the dark inside of a wooden chest' },
+  caesar1Oar: { base: '#9A6638', shade: '#734A27', label: '#FAFAF7', what: 'a boatman’s sculling oar' },
+  caesar1DarkSail: { base: '#3C2422', shade: '#2A1716', label: '#FAFAF7', what: 'a pirate galley’s dark sail far off' },
 } as const;
 export type NaturalKey = keyof typeof NATURAL;
 

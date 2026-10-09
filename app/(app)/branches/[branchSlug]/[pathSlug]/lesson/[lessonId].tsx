@@ -53,6 +53,7 @@ import { Hist7Lesson } from '@/components/lesson/cinematic/hist7Scene';
 import { Growth7Lesson } from '@/components/lesson/cinematic/growth7Scene';
 import { Psych7Lesson } from '@/components/lesson/cinematic/psych7Scene';
 import { Sci7Lesson } from '@/components/lesson/cinematic/sci7Scene';
+import { Caesar1Lesson } from '@/components/lesson/cinematic/caesar1Scene';
 import { Phil1Lesson } from '@/components/lesson/cinematic/phil1Scene';
 import { Psych1Lesson } from '@/components/lesson/cinematic/psych1Scene';
 import { Growth1Lesson } from '@/components/lesson/cinematic/growth1Scene';
@@ -132,6 +133,7 @@ export const CINEMATIC: Record<string, React.ComponentType<{ lesson: Lesson }>> 
   'history-foundations-5': Hist5Lesson,
   'history-foundations-6': Hist6Lesson,
   'history-foundations-7': Hist7Lesson,
+  'history-caesar-1': Caesar1Lesson,
 };
 
 export default function LessonScreen() {

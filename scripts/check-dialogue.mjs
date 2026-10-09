@@ -211,6 +211,11 @@ for (const l of lessons) {
   // marked {/* extra: <what> */} and wears nothing, because a costume belongs to the cast.
   const pov = scene.match(/^\/\/ AT1: first person: (\w+)/m)?.[1] ?? null;
   const staged = !!pov || /^\/\/ AT2: silent extras/m.test(scene);
+  // AW3 — A STORY UNIT DRESSES ITS CAST IN ROLE: the plain one is Caesar, the top hat a
+  // pirate captain. There a figure (cast or extra) wears an outfit from garb.ts (OUTFITS.<x>)
+  // instead of the cast's own costume; the voice still belongs to the cast member (AP2).
+  const story = /^\/\/ AW: story$/m.test(src);
+  const inRole = (w) => story && /\bOUTFITS\.\w+\.head\b|\bOUTFITS\.\w+\.head\.filter\b|\b[A-Z_]+HEAD\b/.test(w);
   if (pov && !SPEAKERS.includes(pov)) fail('AT1', l.id, `is told in first person by "${pov}", who is not in the cast`);
   if (pov) onStage.add(pov);
   for (const f of figures) {
@@ -219,7 +224,7 @@ for (const l of lessons) {
     const extra = [...before.matchAll(/(cast|extra):\s*(\w+)/g)].pop();
     if (extra && extra[1] === 'extra') {
       if (!staged) fail('AT2', l.id, `the <Stickman> at line ${lineOf} is a silent extra in a lesson that is not a staged scene (no \`// AT2: silent extras\` header); cast only who speaks (AP13)`);
-      else if (!/\bwear=\{\[\]\}/.test(f[0])) fail('AT2', l.id, `the extra at line ${lineOf} must wear nothing (wear={[]}); a costume belongs to the cast`);
+      else if (!/\bwear=\{\[\]\}/.test(f[0]) && !inRole(f[0])) fail('AT2', l.id, `the extra at line ${lineOf} must wear nothing (wear={[]}); a costume belongs to the cast`);
       continue;
     }
     const mark = [...before.matchAll(/cast:\s*(\w+)/g)].pop();
@@ -230,6 +235,7 @@ for (const l of lessons) {
     const wear = f[0].match(/\bwear=\{([^}]*)\}/);
     const want = CAST[who].costume;
     if (!wear) fail('AP2', l.id, `${who} (line ${lineOf}) takes his costume from the wardrobe table; force it with wear=`);
+    else if (inRole(wear[1])) { /* AW3: dressed in role */ }
     else if (want === 'plain' ? wear[1].trim() !== '[]' : !new RegExp(`BY_ID\\.${want}\\.pieces`).test(wear[1])) {
       fail('AP2', l.id, `${who} (line ${lineOf}) must wear ${want === 'plain' ? 'nothing (wear={[]})' : `BY_ID.${want}.pieces`}, not ${wear[1].trim()}`);
     }

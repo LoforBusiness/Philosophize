@@ -12480,3 +12480,32 @@ Spec: `docs/superpowers/specs/2026-10-07-recap-lessons-design.md`. Brief for its
   place in layers: far (sky, hills, back wall), middle (buildings, columns, shelves), near
   (floor, the table, props). Still layers are baked pictures (AM13). Two settings or more,
   linked by a smooth change of place.
+
+## Group AW · A story unit: one real life, one real event, told in costume (2026-10-08)
+
+The owner, opening every road's second unit: *"the first unit is the foundation. Now I want
+to get more into specific things in each subject … a story of their life … the plain
+stickman portrays the person … the other stickmen dress up as other people … more
+story-like, less robotic … unique for each subject."*
+
+- **AW1 · One subject, one story, up to six lessons.** A road's second unit tells ONE true
+  story: a life (history: Julius Caesar), a company (business: Amazon), an experiment or
+  discovery (science: penicillin). It runs as many lessons as the story needs and never more
+  than six. Ids are `<road>-<story>-N` in a unit `<road>-<story>` appended after foundations.
+- **AW2 · The plain one plays the protagonist.** His vanity (AS3) becomes the person's. The
+  other cast members play the people around him, and their own characters (AS) still show
+  through the role. Voices stay with the cast member (AP2); only the costume changes.
+- **AW3 · Costumes are worn on the body now** (`garb.ts`, owner-approved sheet 2026-10-08,
+  `node scripts/sheet-garb.mjs`). A garment is light, filled cloth larger than the bones it
+  covers, with one ink outline shared by its bands, so it changes the silhouette rather than
+  vanishing into it. Head and hand pieces may carry their real colours (`Piece.fill`). The
+  player's `roles` prop puts each speaker's role head on the face beside the words.
+- **AW4 · A story, not a lecture.** The scene plays the event; the facts arrive inside it, in
+  the characters' mouths, at the moment they matter (a talent is "as much silver as a man can
+  carry" when the ransom is named). Every claim is from the sources, and the header names
+  them. A grave event is said plainly and never drawn graphically.
+- **AW5 · The bigger picture.** The band is 400 × 300 (`band={[214, 514]}`) as in AV6, every
+  setting a whole layered place, two or three settings a lesson.
+- **AW6 · Two questions, two different games**, each played on the stage (AU), and at least
+  one asks the reader to call what happens next before the story shows it.
+  `validate-cinematic` reads `// AW: story` in the script's header and allows up to 24 beats.

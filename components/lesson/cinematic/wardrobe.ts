@@ -75,6 +75,12 @@ export interface Piece {
    * Drawn LAST, over the ink it separates.
    */
   paper?: boolean;
+  /**
+   * A COLOURED piece (garb.ts, unit 2's costumes: a laurel leaf, a head wrap, a blade).
+   * Drawn in this colour with a thin ink edge, so it reads on the black head and on
+   * the paper alike. A ring with a fill is a ring of that colour.
+   */
+  fill?: string;
 }
 
 /** A named set of pieces. */

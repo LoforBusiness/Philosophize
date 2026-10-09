@@ -27,6 +27,9 @@ const HX = INNER / 2;
 const HY = INNER * 0.62;
 const HEAD_R = 20;
 
+/** Who a speaker is playing in a story lesson: their head pieces and the role's name. */
+export interface Role { head: Piece[]; label: string }
+
 function PieceView({ p }: { p: Piece }) {
   const w = p.w * S;
   const h = p.h * S;
@@ -41,20 +44,22 @@ function PieceView({ p }: { p: Piece }) {
         borderRadius: (p.r ?? 0) * S,
         transform: p.rot ? [{ rotate: `${p.rot}deg` }] : undefined,
         ...(p.ring
-          ? { borderWidth: Math.max(1, p.ring * S), borderColor: C.ink }
-          : { backgroundColor: p.paper ? C.paper : C.ink }),
+          ? { borderWidth: Math.max(1, p.ring * S), borderColor: p.fill ?? C.ink }
+          : p.fill
+            ? { backgroundColor: p.fill, borderWidth: 0.6, borderColor: C.ink }
+            : { backgroundColor: p.paper ? C.paper : C.ink }),
       }}
     />
   );
 }
 
-export default function SpeakerTag({ who }: { who: Speaker }) {
-  const pieces = (BY_ID[CAST[who].costume]?.pieces ?? []).filter((p) => p.at === 'head');
+export default function SpeakerTag({ who, role }: { who: Speaker; role?: Role }) {
+  const pieces = (role ? role.head : (BY_ID[CAST[who].costume]?.pieces ?? [])).filter((p) => p.at === 'head');
   const r = HEAD_R * S;
   return (
     <View
       accessible
-      accessibilityLabel={`${CAST[who].label} says`}
+      accessibilityLabel={`${role ? role.label : CAST[who].label} says`}
       nativeID="speaker-tag"
       style={{
         width: TAG,
@@ -79,11 +84,11 @@ export default function SpeakerTag({ who }: { who: Speaker }) {
  * speaker it returns the words and nothing else — no wrapper node — so every narrated
  * lesson's deck is exactly the tree it was before dialogue lessons existed.
  */
-export function SpokenBy({ who, children }: { who?: Speaker; children: React.ReactNode }) {
+export function SpokenBy({ who, role, children }: { who?: Speaker; role?: Role; children: React.ReactNode }) {
   if (!who) return <>{children}</>;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
-      <View style={{ marginTop: 1 }}><SpeakerTag who={who} /></View>
+      <View style={{ marginTop: 1 }}><SpeakerTag who={who} role={role} /></View>
       <View style={{ flex: 1 }}>{children}</View>
     </View>
   );

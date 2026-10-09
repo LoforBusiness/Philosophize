@@ -39,7 +39,8 @@ import SortBins from './SortBins';
 import OrderTiles from './OrderTiles';
 import OddOneOut from './OddOneOut';
 import NarrationText from './NarrationText';
-import { SpokenBy } from './SpeakerTag';
+import { SpokenBy, type Role } from './SpeakerTag';
+import type { Speaker } from './cast';
 import ThinkerPeek from './ThinkerPeek';
 import { LESSON_FOCUS } from '@/data/lessonFocus';
 import { swishTrack } from './gestures';
@@ -205,7 +206,7 @@ const VEIL_IN_MS = 280;
 
 export default function CinematicPlayer({
   lesson, beats, Scene, stageGone = (b) => !!b.summary, band = [BAND_T, BAND_B], walk, gesture, shots,
-  camera, ground = GROUND, finish, Chrome,
+  camera, ground = GROUND, finish, Chrome, roles,
 }: {
   lesson: Lesson;
   /**
@@ -316,6 +317,13 @@ export default function CinematicPlayer({
    * Answers belong in the scene.
    */
   Chrome?: SceneComponent;
+  /**
+   * WHO EACH SPEAKER IS PLAYING, when a lesson casts them in a story (unit 2: the plain
+   * one is Caesar, the top hat a pirate captain). The face beside the words then wears
+   * that role's head pieces — the laurel, the head wrap — so it matches the figure on
+   * the stage, and a screen reader hears the role's name.
+   */
+  roles?: Partial<Record<Speaker, Role>>;
 }) {
   // THE LESSON'S OWN STAGE PALETTE, for the two controls that draw objects
   // (`order` and `odd`). It is the same tone every scene in this branch is struck
@@ -1619,7 +1627,7 @@ export default function CinematicPlayer({
                     place is kept, so nothing reflows when it arrives. */}
                 {beat.text ? (
                   <OpeningVeil hidden={opening || voiceWait}>
-                  <SpokenBy who={beat.speaker}>
+                  <SpokenBy who={beat.speaker} role={beat.speaker ? roles?.[beat.speaker] : undefined}>
                   <NarrationText
                     text={beat.text}
                     lessonId={lesson.id}

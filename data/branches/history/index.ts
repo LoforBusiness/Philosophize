@@ -1,5 +1,6 @@
 import type { Branch } from '@/data/types';
-import units from './paths/foundations';
+import foundations from './paths/foundations';
+import caesar from './paths/caesar';
 
 // History & Politics's one road (data/subjects.ts, 2026-09-30). One unit, one lesson so far;
 // `more` puts a MORE COMING SOON sign at the end of it.
@@ -10,7 +11,7 @@ const historyBranch: Branch = {
   description: 'Power, people and how we got here.',
   icon: '🏛️',
   color: '#905748',
-  paths: units,
+  paths: [...foundations, ...caesar],
   more: true,
 };
 
