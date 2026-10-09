@@ -303,15 +303,25 @@ for (const file of files) {
 
   // Every name the repo declares as a worklet. A directive is by definition the
   // first statement of a body, so walk back from it to the declaration it opens.
+  //
+  // A NAME IS SAFE BY ITS OWN DECLARATION, NOT BY ANYBODY'S. This set used to be
+  // the only test, repo-wide, so business-foundations-7's plain `const S0 = (s) =>
+  // s / LINES[0]` passed because ANOTHER scene declares its own `S0` as a worklet —
+  // and the lesson went black on the phone the instant it started (2026-10-08). A
+  // function declared in the file being read is judged by that file's declaration
+  // (`workletIn`); only an imported name falls back to the repo-wide set.
   const isWorklet = new Set();
-  for (const src of srcOf.values()) {
+  const workletIn = new Map();
+  for (const [file, src] of srcOf) {
+    const own = new Set();
     let i = 0;
     while ((i = src.indexOf("'worklet'", i)) !== -1) {
       const head = src.slice(Math.max(0, i - 800), i);
       const decls = [...head.matchAll(/(?:const|let|function)\s+([A-Za-z_$][\w$]*)/g)];
-      if (decls.length) isWorklet.add(decls[decls.length - 1][1]);
+      if (decls.length) { isWorklet.add(decls[decls.length - 1][1]); own.add(decls[decls.length - 1][1]); }
       i += 9;
     }
+    workletIn.set(file, own);
   }
 
   /** The module a name is imported from, or null. Handles multi-line clauses. */
@@ -377,7 +387,9 @@ for (const file of files) {
         const name = m[1];
         const prev = body[m.index - 1];
         if (prev && /[.?\w$]/.test(prev)) continue;                 // a method, not a free name
-        if (local.has(name) || isWorklet.has(name) || isWorklet.has(exportedAs(src, name))) continue;
+        if (local.has(name)) continue;
+        const declaredHere = declaredIn(src, name) && !importedFrom(src, name);
+        if (declaredHere ? workletIn.get(file).has(name) : (isWorklet.has(name) || isWorklet.has(exportedAs(src, name)))) continue;
         if (/^(if|for|while|switch|return|typeof|catch|function|new|await|do|else)$/.test(name)) continue;
 
         const from = importedFrom(src, name);

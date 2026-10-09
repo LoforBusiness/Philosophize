@@ -122,7 +122,10 @@ const Q1_AT = Q1.indexOf(1);
 const Q2_AT = Q2.indexOf(1);
 const Q3_AT = Q3.indexOf(1);
 /** Seconds into beat 0 as a share of its span. */
-const S0 = (s: number) => s / LINES[0];
+const S0 = (s: number) => {
+  'worklet';
+  return s / LINES[0];
+};
 
 type Track = readonly (readonly number[])[];
 /** A hand's path across a line: [share of line, x in front of him (his own frame), stage y, weight]. */
