@@ -96,7 +96,8 @@ export interface Descartes1Beat extends BaseBeat {
    *   on the cot, blanket clutched ·
    * answer — the dream table fades; Descartes stands at the real table, one hand on the
    *   closed book of poems, chin up ·
-   * vow — the landlord, in a nightcap, leans in at the door with a lamp, unimpressed ·
+   * vow — the landlord, in a nightcap, steps out of the doorway with a lamp, unimpressed, and
+   *   goes back through it; the door shuts behind him (AW8) ·
    * after — the soldier holds up the little notebook, then sets it down on the table ·
    * rest — the room by night, the stove glowing, snow at the window, under the quotation.
    */
@@ -125,8 +126,10 @@ export interface Descartes1Beat extends BaseBeat {
 
 export const BEATS: Descartes1Beat[] = [
   {
-    bed: 'square',
-    sfx: [{ id: 'whoosh', at: 0.8, gain: 0.6 }, { id: 'crate', at: 2.6, gain: 0.6 }, { id: 'creak', at: 4.2, gain: 0.5 }, { id: 'crate', at: 5.2, gain: 0.6 }],
+    bed: 'wind',
+    music: 'mbachc',
+    // the logs hitched on the soldier's back, twice
+    sfx: [{ id: 'crate', at: 2.6, gain: 0.6 }, { id: 'crate', at: 5.2, gain: 0.55 }],
     voiceAfter: 6.0,
     act: 'march', place: 0,
     speaker: 'plain',
@@ -135,7 +138,7 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'crate', at: 0.6, gain: 0.6 }],
+    sfx: [{ id: 'crate', at: 0.6, gain: 0.55 }],
     act: 'quarters', place: 0,
     speaker: 'cap',
     text: 'The war stops for the snow, sir. They’ve found you a room in town with a big stove.',
@@ -143,8 +146,9 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    bed: 'room',
-    sfx: [{ id: 'oven', at: 0.4, gain: 0.6 }, { id: 'crate', at: 1.4, gain: 0.6 }],
+    bed: 'fire',
+    // the iron fire door opened; two logs pushed into the fire
+    sfx: [{ id: 'oven', at: 0.4, gain: 0.6 }, { id: 'plank', at: 1.35, gain: 0.55 }],
     act: 'stove', place: 1,
     speaker: 'tophat',
     text: 'My best room, and my best stove. The wood isn’t free, young man.',
@@ -167,7 +171,7 @@ export const BEATS: Descartes1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'book', at: 1.5, gain: 0.7 }, { id: 'paper', at: 2.6, gain: 0.6 }],
+    sfx: [{ id: 'book', at: 1.5, gain: 0.7 }, { id: 'pageturn', at: 2.5, gain: 0.6 }],
     act: 'books', place: 1,
     speaker: 'plain',
     text: 'I went to La Flèche, one of the best schools in Europe. All it gave me was a pile of doubts.',
@@ -182,7 +186,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 0.3, gain: 0.6 }, { id: 'pencil', at: 1.0, gain: 0.6 }],
+    // the sheet unrolled; two strokes ruled along the ruler
+    sfx: [{ id: 'paper', at: 0.2, gain: 0.6 }, { id: 'pencil', at: 0.96, gain: 0.55 }, { id: 'pencil', at: 1.8, gain: 0.5 }],
     act: 'plan', place: 1,
     speaker: 'plain',
     text: 'That’s the trouble with it. A town that one person plans is far neater than one a hundred builders patched.',
@@ -190,7 +195,7 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'book', at: 2.4, gain: 0.6 }],
+    sfx: [{ id: 'book', at: 2.3, gain: 0.6 }],
     act: 'house', place: 1,
     speaker: 'plain',
     text: 'So I’ll pull down my own beliefs, every one of them. Then I’ll build again from the ground up.',
@@ -198,7 +203,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'crate', at: 3.9, gain: 0.6 }],
+    // the wicker basket set down on the table
+    sfx: [{ id: 'box', at: 3.8, gain: 0.55 }],
     act: 'apples', place: 1,
     speaker: 'cap',
     text: 'I brought you some apples, sir. A few might have gone bad, sorry.',
@@ -230,8 +236,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 2.1,
   },
   {
-    bed: 'night',
-    sfx: [{ id: 'pencil', at: 0.4, gain: 0.6 }],
+    // writing as he paces; the notebook dropped on the table; down on the cot
+    sfx: [{ id: 'pencil', at: 0.4, gain: 0.55 }, { id: 'book', at: 3.0, gain: 0.5 }, { id: 'creak', at: 5.4, gain: 0.5 }],
     act: 'enthuse', place: 2,
     speaker: 'plain',
     text: 'The tenth of November, and I’ve found the foundations of a wonderful science. Write that down, history.',
@@ -239,7 +245,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'whoosh', at: 0.3, gain: 0.6 }, { id: 'whoosh', at: 1.4, gain: 0.5 }],
+    // the blanket as he lies down; the whirlwind rising
+    sfx: [{ id: 'whoosh', at: 0.2, gain: 0.55 }, { id: 'whoosh', at: 1.3, gain: 0.5 }],
     act: 'wind', place: 2,
     speaker: 'plain',
     text: 'Now I’m dreaming. A wind is spinning me round, and I can’t stand up straight.',
@@ -247,7 +254,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'crack', at: 0.2, gain: 0.7 }, { id: 'oven', at: 0.9, gain: 0.5 }],
+    // the bang; the stove's fire flares and throws its sparks
+    sfx: [{ id: 'crack', at: 0.2, gain: 0.7 }, { id: 'burner', at: 0.9, gain: 0.5 }],
     act: 'spark', place: 2,
     speaker: 'plain',
     text: 'A bang like thunder, and sparks all over the room. Am I awake, or still dreaming?',
@@ -264,7 +272,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.0,
   },
   {
-    sfx: [{ id: 'book', at: 2.3, gain: 0.6 }],
+    // after his line the room's door opens: the landlord is in the doorway with his lantern (AW8)
+    sfx: [{ id: 'door', at: 4.5, gain: 0.8 }],
     act: 'answer', place: 2,
     speaker: 'plain',
     text: 'My own path. I doubt everything, and then I rebuild it properly.',
@@ -272,7 +281,8 @@ export const BEATS: Descartes1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'creak', at: 0.3, gain: 0.5 }],
+    // he steps back into the doorway and the door shuts behind him (AW8)
+    sfx: [{ id: 'doorshut', at: 5.0, gain: 0.8 }],
     act: 'vow', place: 2,
     speaker: 'tophat',
     text: 'He also vowed a trip to the shrine at Loreto. Now, will everyone please go to sleep?',
@@ -280,7 +290,7 @@ export const BEATS: Descartes1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'paper', at: 2.6, gain: 0.6 }],
+    sfx: [{ id: 'pageturn', at: 2.55, gain: 0.55 }],
     act: 'after', place: 2,
     speaker: 'cap',
     text: 'The notebook got lost, sir. We know the dreams from a book about him, written seventy years later.',

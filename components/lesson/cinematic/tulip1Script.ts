@@ -63,8 +63,9 @@ import type { BaseBeat } from './cinematicKit';
 export interface Tulip1Beat extends BaseBeat {
   /**
    * What happens across this beat (the scene choreographs it):
-   * arrive — autumn 1593: Clusius walks in through the garden gate behind the cap, who
-   *   wheels a barrow stacked with crates packed in straw; leaves blow across the beds ·
+   * arrive — autumn 1593: the garden gate swings open and Clusius comes in through it (AW8),
+   *   down to the front walk; then the cap wheels in a barrow stacked with crates packed in
+   *   straw along the walk from the street; leaves blow across the beds ·
    * dig — Cluyt straightens up from a bed with his spade and leans on it, glaring at the
    *   crates ·
    * unpack — Clusius lifts the lid of a crate and holds up a brown bulb like a jewel ·
@@ -72,7 +73,7 @@ export interface Tulip1Beat extends BaseBeat {
    * envoy — Clusius taps a folded letter from his doublet, chin up ·
    * plant — Cluyt drops a bulb into a hole and pats the soil flat with the spade ·
    * bloom — spring 1594: the beds burst into rows of red, yellow and pink tulips; the cap
-   *   runs in from the gate, where hats bob over the wall ·
+   *   comes back in through the open gate (AW8), where hats bob over the wall ·
    * refuse — Clusius stands between the beds and the gate, arms folded ·
    * theft — night: the cap holds up a lantern by the wall; a ladder leans against it and
    *   the best bed is pocked with empty holes ·
@@ -116,7 +117,10 @@ export interface Tulip1Beat extends BaseBeat {
 export const BEATS: Tulip1Beat[] = [
   {
     bed: 'garden',
-    sfx: [{ id: 'wheel', at: 0.6, gain: 0.5 }, { id: 'creak', at: 2.2, gain: 0.6 }, { id: 'crate', at: 4.0, gain: 0.6 }, { id: 'paper', at: 5.2, gain: 0.5 }],
+    music: 'mblacksmith',
+    // the gate opening; the barrow rattling along the walk; set down; the straw tugged off
+    sfx: [{ id: 'door', at: 0, gain: 0.8 }, { id: 'trolley', at: 3.5, gain: 0.55 }, { id: 'trolley', at: 4.7, gain: 0.5 },
+      { id: 'crate', at: 6.3, gain: 0.6 }, { id: 'whoosh', at: 7.45, gain: 0.5 }],
     voiceAfter: 6.0,
     act: 'arrive', place: 0,
     speaker: 'plain',
@@ -132,7 +136,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'crate', at: 0.3, gain: 0.6 }],
+    // the crate's lid lifted on its hinge
+    sfx: [{ id: 'chest', at: 0.3, gain: 0.6 }],
     act: 'unpack', place: 0,
     speaker: 'plain',
     text: 'Tulip bulbs, from my garden in Vienna. They come from the Ottoman Empire, where they’ve been grown for generations.',
@@ -140,6 +145,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
+    // the label stick pushed into the soil
+    sfx: [{ id: 'pin', at: 2.95, gain: 0.55 }],
     act: 'label', place: 0,
     speaker: 'cap',
     text: 'How did they get from Turkey to Vienna, sir? I’ll write it on the label.',
@@ -147,7 +154,7 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 0.4, gain: 0.6 }],
+    sfx: [{ id: 'paper', at: 0.5, gain: 0.6 }],
     act: 'envoy', place: 0,
     speaker: 'plain',
     text: 'A friend of mine was the emperor’s ambassador to the Sultan. He saw them in Turkey and wrote home about them.',
@@ -155,7 +162,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'clay', at: 1.0, gain: 0.5 }],
+    // the bulb into its hole; the soil patted down with the spade
+    sfx: [{ id: 'clay', at: 1.95, gain: 0.5 }, { id: 'thud', at: 2.95, gain: 0.45 }],
     act: 'plant', place: 0,
     speaker: 'tophat',
     text: 'So I bury your foreign onions in October and wait until spring. Lovely.',
@@ -178,7 +186,7 @@ export const BEATS: Tulip1Beat[] = [
   },
   {
     bed: 'night',
-    sfx: [{ id: 'creak', at: 0.4, gain: 0.5 }],
+    sfx: [{ id: 'creak', at: 0.4, gain: 0.45 }],
     act: 'theft', place: 1,
     speaker: 'cap',
     text: 'Sir, come quick! Somebody climbed the wall last night and dug up the bulbs.',
@@ -193,7 +201,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'creak', at: 0.6, gain: 0.4 }],
+    // the ladder creaks under his hand
+    sfx: [{ id: 'creak', at: 1.7, gain: 0.45 }],
     act: 'shrug', place: 1,
     speaker: 'tophat',
     text: 'There’s a story going round that you asked so much, nobody could buy one. So they stole them instead.',
@@ -216,7 +225,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'clay', at: 0.5, gain: 0.5 }],
+    // two pushes of the spade into the bed
+    sfx: [{ id: 'clay', at: 2.1, gain: 0.5 }, { id: 'clay', at: 2.75, gain: 0.45 }],
     act: 'scarce', place: 2,
     speaker: 'tophat',
     text: 'That’s called scarcity. Nobody can break a tulip on purpose, so there are only ever a few.',
@@ -233,7 +243,6 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.0,
   },
   {
-    sfx: [{ id: 'clay', at: 0.3, gain: 0.6 }],
     act: 'reveal', place: 2,
     speaker: 'cap',
     text: 'Striped again, sir! So the stripes must live inside the bulb.',
@@ -241,6 +250,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
+    // the clay pot set back down on the bench
+    sfx: [{ id: 'plate', at: 6.5, gain: 0.5 }],
     act: 'virus', place: 2,
     speaker: 'tophat',
     text: 'They do. Three hundred years later, scientists found a virus, carried from plant to plant by tiny insects called aphids.',
@@ -264,6 +275,8 @@ export const BEATS: Tulip1Beat[] = [
     dur: 1.8,
   },
   {
+    // the velvet cloth laid out on the bench
+    sfx: [{ id: 'whoosh', at: 2.8, gain: 0.4 }],
     act: 'after', place: 2,
     speaker: 'tophat',
     text: 'They did, long after you died. In 1624, the owner of a striped bulb called Semper Augustus turned down three thousand guilders.',

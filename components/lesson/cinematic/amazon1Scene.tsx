@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useDerivedValue, useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import type { Lesson } from '@/data/types';
@@ -9,7 +9,7 @@ import Target from './Target';
 import LessonPicture from './LessonPicture';
 import { BEATS } from './amazon1Script';
 import {
-  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
+  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated, stand,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -116,9 +116,10 @@ const G = GROUND;
 
 /**
  * Seconds each beat's action is paced over (lib/narration/manifest.ts); b0, b1 and b15 are the
- * wait (`voiceAfter`: 6.0, 1.9, 1.9 s — the door is heard before the line, not under it) and the line together.
+ * wait (`voiceAfter`: 6.0, 2.4, 2.4 s — the door is heard opening and shutting before the line, not under it)
+ * and the line together.
  */
-const LINES = [10.69, 5.86, 6.43, 4.25, 0, 5.48, 5.23, 4.34, 4.69, 3.96, 6.13, 0, 4.9, 5.9, 5.92, 6.77, 4.6, 3.25, 3.05, 5.56, 4.36, 0, 0];
+const LINES = [10.69, 6.36, 6.43, 4.25, 0, 5.48, 5.23, 4.34, 4.69, 3.96, 6.13, 0, 4.9, 5.9, 5.92, 7.27, 4.6, 3.25, 3.05, 5.56, 4.36, 0, 0];
 
 const TALK = 167;
 const NOD = 263;
@@ -192,6 +193,20 @@ const SIGN = { x: 362, y: 362 };
 const DESK2 = { x: 196, y: 474 };
 const STACK_DOOR = { x: 324, y: 420 };
 const STOVE = { x: 29, y: 420 };
+
+// ── THE DOORWAYS (AW8) ──────────────────────────────────────────────────────
+// Somebody coming in or going out stands IN the opening, drawn behind the leaf and the
+// jambs: a second figure for that moment, clipped to the opening and laid in the room's
+// picture before the door, then handed over to the figure in the room on the frame his
+// feet cross the threshold (he is wholly inside the opening then, so nothing appears).
+/** The office door's opening (amazon1.mjs office(): the corridor 6–58 × 238–480, inside its frame). */
+const OFFICE_WAY = { x: 7.5, y: 239.5, w: 49, h: 250 };
+/** The garage's back door opening (garageFar(): 64–100 × 338–482). */
+const BACK_WAY = { x: 64, y: 338, w: 36, h: 148 };
+/** Where feet stand in the doorway, a step back from the room's floor. */
+const SILL = 476;
+/** A figure nobody can see: one bundle that never changes, which Stickman draws nothing of. */
+const HIDDEN: Bundle = pose(stand(0), -200, GROUND, K_FIG * 0.95, 1, 0);
 
 /** Shaw and Kaphan are dressed in role and wear nothing on the head (AW3). */
 const SHAW_HEAD = UNIT2_OUTFITS.bossSuit.head;
@@ -494,6 +509,7 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     let bCrouch = 0;
     let bOld = 0;
     const bSeat = place === 1;
+    let bIn = 0;
     // the pencil, from b0 at 5.0s to the end of b2
     const pencil = nv === CHART ? ss(4.74, 4.84) : nv === BOSS ? 1 : nv === LIST ? 1 - st(0.94, 0.99) : 0;
     if (nv === CHART) {
@@ -562,12 +578,17 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     }
     if (nv === LEAVE) {
       // down for the box, up with it, and out past Shaw through the door
+      // the box up and across to the door; the box against the glass and his weight into it as
+      // it gives, a step up into the doorway and away down the corridor, behind the jamb
       bCrouch = bump(0.04, 0.16, 0.2, 0.3);
-      bw = walkOf(bxs, 34, 0.28 * L, bds, b);
+      bw = walkOf(bxs, -18, 1.05, bds, b);
       bR = [[0.04, 8, 40, 0.4], [0.14, 16, 16, 1], [0.24, 14, 46, 1], [1, 14, 46, 1]];
       bL = [[0.04, 6, 40, 0.4], [0.14, 10, 18, 1], [0.24, 8, 48, 1], [1, 8, 48, 1]];
-      bo = 1 - st(0.88, 0.99);
-      if (bw.wd !== 0) bg = lerp(G, 488, clamp01((80 - bw.x) / 40));
+      bg = lerp(G, SILL, clamp01((64 - bw.x) / 26));
+      bIn = bw.x < 40 ? 1 : 0;
+      bLean = 0.12 * ss(3.3, 3.5) * (1 - ss(3.8, 4.05));
+      // gone down the corridor: nothing of him is left to draw
+      if (bw.x < -12) bo = 0;
     }
     // ── in the car: sat turned toward her, the laptop on his knees ──
     if (bSeat) {
@@ -679,7 +700,7 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const figB = keepHeld(heldB, bw.walking ? mixKeepLegs(prevB, sb, tr) : mixStance(prevB, sb, tr));
 
     // ══ SHAW (the office) ════════════════════════════════════════════════════
-    const S_X = [32, 32, 138, 138, 138, 138, 138, 156, 156];
+    const S_X = [34, 34, 138, 138, 138, 138, 138, 156, 156];
     const sIdx = nv < S_X.length ? nv : S_X.length - 1;
     const sxs = fresh ? S_X[sIdx] : carrySource(cv, 4, n, S_X[sIdx]);
     const sds = fresh ? 1 : carrySource(cv, 5, n, 1);
@@ -693,12 +714,17 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     let sNeck = 0;
     let sPerch = nv === REGRET ? 1 : 0;
     let coatOn = nv === BOSS ? 1 : 0;
-    let doorOpen = nv === BOSS ? bump(0.04, 0.12, 0.6, 0.75) : 0;
+    // the door: (b1) it opens on him standing behind its frosted glass, and swings shut once
+    // he is through; (b8) after his line he pulls it open, and it shuts behind Bezos
+    let doorOpen = nv === BOSS ? ss(0.35, 0.75) * (1 - ss(1.08, 1.38)) : 0;
+    let sIn = 0;
+    let sTurns: (readonly number[])[] = [[0, 1]];
     if (nv === BOSS) {
-      // in through the door, the coat over his arm, to the desk's end
-      sw = walkOf(sxs, 138, 0.42, 1, b);
-      so = ss(0.2, 0.5);
-      sg = lerp(486, G, clamp01((sw.x - 32) / 34));
+      // in the doorway as the door opens, the coat over his arm; a step down out of it, to the desk's end
+      sw = walkOf(sxs, 138, 0.62, 1, b);
+      so = ss(0, 0.3);
+      sg = lerp(SILL, G, clamp01((sw.x - 34) / 40));
+      sIn = sw.x < 44 ? 1 : 0;
       sR = [[0, 6, 40, 0.4], [0.7, 6, 40, 0.4], [0.8, 10, 52, 0.8], [0.92, 6, 40, 0.4]];
       sL = [[0, 10, 44, 1]];
       sNeck = 0.06 * bump(0.66, 0.74, 0.86, 0.94);
@@ -746,17 +772,20 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     if (nv === LEAVE) {
       // up off the desk, across to the door, the door swung open, a point through it
       sPerch = 1 - st(0.0, 0.06);
-      sw = walkOf(sxs, 84, 0.3, sds, b);
+      // a few steps after him, and a point at the door; Bezos shoulders it open with the box,
+      // and it swings shut on its closer behind him as the line ends
+      sw = walkOf(sxs, 104, 0.3, sds, b);
+      sTurns = [[0, -1]];
       sg = lerp(G, 494, clamp01((140 - sw.x) / 50));
-      doorOpen = st(0.4, 0.52);
-      sR = [[0, 8, 40, 0.4], [0.5, 10, 46, 0.6], [0.58, 28, 66, 1], [1, 28, 66, 1]];
-      sL = [[0, 4, 40, 0.4], [0.38, 6, 40, 0.4], [0.44, 20, 46, 1], [0.54, 16, 46, 1], [1, 16, 46, 1]];
+      doorOpen = ss(3.45, 3.85) * (1 - ss(4.52, 4.74));
+      sR = [[0, 8, 40, 0.4], [0.5, 10, 46, 0.6], [0.58, 28, 66, 1], [1.0, 28, 66, 1], [1.1, 8, 40, 0.4]];
+      sL = [[0, 4, 40, 0.4]];
       sNeck = -0.06 * st(0.58, 0.66);
     }
     if (sw.wd === 0 && Math.abs(sxs - S_X[sIdx]) > 2 && nv > BOSS) sw = walkOf(sxs, S_X[sIdx], 0, sds, b);
     if (sw.wd !== 0) sx = sw.x;
     const sxS = carry(cv, 4, n, sx, sx, 1);
-    const sd = carry(cv, 5, n, 0, faceOf(sds, [[0, 1]], b, L, sw), 1);
+    const sd = carry(cv, 5, n, 0, faceOf(sds, sTurns, b, L, sw), 1);
     const sgS = carry(cv, 6, n, sg, sg, tr);
     const sCode = sp(2) ? TALK : NOD;
     let ss0 = bodyOf(sw, sCode, t, b, 1);
@@ -901,11 +930,14 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     let kL: readonly Key[] | null = [[0, 4, 52, 0.8]];
     let kLean = 0;
     let kNeck = 0;
+    let kIn = 0;
     if (nv === ARRIVE) {
       // the door swings, he steps out of the dark, comes in, waves; a hand to his chest
-      kw = walkOf(kxs, 112, 0.62, 1, b);
-      ko = ss(0.24, 0.56);
-      kg = lerp(486, G, clamp01((kw.x - 82) / 26));
+      // behind the door as it opens, framed in it; a step down out of it into the garage
+      kw = walkOf(kxs, 112, 0.85, 1, b);
+      ko = 1;
+      kg = lerp(SILL, G, clamp01((kw.x - 82) / 18));
+      kIn = kw.x < 85 ? 1 : 0;
       kR = [[0, 6, 40, 0.4], [0.24, 6, 40, 0.4], [0.3, 16, 84, 1], [0.34, 22, 86, 1], [0.38, 14, 86, 1], [0.42, 20, 86, 1], [0.48, 12, 52, 1], [0.62, 6, 48, 0.6], [0.7, 4, 56, 1], [1, 4, 56, 1]];
       kNeck = -0.08 * bump(0.28, 0.34, 0.44, 0.5) + 0.1 * bump(0.72, 0.78, 0.9, 0.96);
     }
@@ -960,10 +992,18 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const bounce = place === 1 ? 0.7 * Math.sin(t * 7.1) + 0.45 * Math.sin(t * 3.3 + 1) : 0;
 
     // ── the bundles ──────────────────────────────────────────────────────────
-    const BB = pose(figB, bxS, bgS + bounce, K, bd, place === 3 ? 0 : bo);
-    const BS = pose(figS, sxS, sgS, K, sd, place === 0 ? so : 0);
-    const BM = pose(figM, mxS, mgS + bounce, K, md, mo);
-    const BK = pose(figK, kxS, kgS, K, kd, place === 2 ? ko : 0);
+    const bOn = place === 3 ? 0 : bo;
+    const sOn = place === 0 ? so : 0;
+    const kOn = place === 2 ? ko : 0;
+    // a figure in no place on screen is one still bundle, which Stickman draws nothing of (AW9)
+    const BB = bOn > 0 ? pose(figB, bxS, bgS + bounce, K, bd, bOn * (1 - bIn)) : HIDDEN;
+    const BS = sOn > 0 ? pose(figS, sxS, sgS, K, sd, sOn * (1 - sIn)) : HIDDEN;
+    const BM = mo > 0 ? pose(figM, mxS, mgS + bounce, K, md, mo) : HIDDEN;
+    const BK = kOn > 0 ? pose(figK, kxS, kgS, K, kd, kOn * (1 - kIn)) : HIDDEN;
+    // the same figures in a doorway, behind the door (AW8)
+    const BBd = bIn > 0 && bOn > 0 ? pose(figB, bxS, bgS, K, bd, bOn) : HIDDEN;
+    const BSd = sIn > 0 && sOn > 0 ? pose(figS, sxS, sgS, K, sd, sOn) : HIDDEN;
+    const BKd = kIn > 0 && kOn > 0 ? pose(figK, kxS, kgS, K, kd, kOn) : HIDDEN;
     const bRw = jointOf(BB, 'wrR');
     const bLw = jointOf(BB, 'wrL');
     const sLw = jointOf(BS, 'wrL');
@@ -1001,10 +1041,10 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const lift = nv === LEAVE ? st(0.16, 0.22) : 0;
     const box = {
       x: lerp(BOX_AT, (bRw.x + bLw.x) / 2, lift), y: lerp(G, (bRw.y + bLw.y) / 2 + 12, lift),
-      o: place === 0 ? (nv === LEAVE ? bo : 1) : 0,
+      o: place === 0 ? (nv === LEAVE ? bo : 1) : 0, cin: bIn,
     };
     // Shaw's coat: over his arm, then over the desk's corner
-    const coat = { x: lerp(152, sLw.x, coatOn), y: lerp(DESK_TOP - 2, sLw.y, coatOn), o: place === 0 && nv >= BOSS ? so : 0 };
+    const coat = { x: lerp(152, sLw.x, coatOn), y: lerp(DESK_TOP - 2, sLw.y, coatOn), o: place === 0 && nv >= BOSS ? so : 0, cin: sIn };
 
     // ── the road ──
     const scrollX = place === 1 ? (t * 40) % 400 : 0;
@@ -1028,7 +1068,8 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const cellRow = nv === TYPING ? Math.floor(st(0.1, 0.9) * 5) : nv === DRAFT ? 5 : nv > DRAFT ? 5 : 1;
 
     // ── the garage ──
-    const backDoor = nv === ARRIVE ? bump(0.0, 0.1, 0.6, 0.76) : 0;
+    // the back door opens on Kaphan standing in it, and swings shut once he is through
+    const backDoor = nv === ARRIVE ? ss(0.6, 0.9) * (1 - ss(1.15, 1.42)) : 0;
     // the door off the stack: leaning, lifted and turned flat, carried, laid down
     let dr = { x: STACK_DOOR.x, y: STACK_DOOR.y, r: -87, sy: 1, o: place === 2 ? 1 : 0, flat: 0 };
     if (nv === DOORS && doorHold > 0) {
@@ -1052,11 +1093,11 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     // the magic book in his left hand, the backpack on Kaphan's back
     const book2 = { x: bLw.x, y: bLw.y - 2, s: magic, o: place === 2 && nv >= CADABRA && nv < REST ? 1 : 0 };
     const kShB = jointOf(BK, 'shB');
-    const pack = { x: kShB.x, y: kShB.y + 2, d: kd, o: place === 2 && nv < REST ? ko : 0 };
+    const pack = { x: kShB.x, y: kShB.y + 2, d: kd, o: place === 2 && nv < REST ? ko : 0, cin: kIn };
     const night = place === 2 && nv >= REST ? 1 : 0;
 
     return {
-      BB, BS, BM, BK, t, dark, place, night,
+      BB, BS, BM, BK, BBd, BSd, BKd, t, dark, place, night,
       cam: { s: cs, x: 200 - ccx * cs, y: 364 - ccy * cs },
       pr, head, pen, rSoft, rCd, rBook, shelf, bk, box, coat, door: doorOpen,
       scrollX, dashX, spin, lap, atlas, rSea, rSf, rBoul, ahead, jolt, cellRow,
@@ -1069,6 +1110,9 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
   const DS = useDerivedValue<Bundle>(() => SCENE.value.BS);
   const DM = useDerivedValue<Bundle>(() => SCENE.value.BM);
   const DK = useDerivedValue<Bundle>(() => SCENE.value.BK);
+  const DBd = useDerivedValue<Bundle>(() => SCENE.value.BBd);
+  const DSd = useDerivedValue<Bundle>(() => SCENE.value.BSd);
+  const DKd = useDerivedValue<Bundle>(() => SCENE.value.BKd);
   const camSt = useAnimatedStyle(() => {
     const c = SCENE.value.cam;
     return { transform: [{ translateX: c.x }, { translateY: c.y }, { scale: c.s }] };
@@ -1089,6 +1133,15 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
           <Beacon S={SCENE} x={262} y={268} k={1} />
           <Plane S={SCENE} />
           <LessonPicture name="amazon1-office" />
+          {/* in the doorway: Shaw coming in (b1), Bezos going out (b8), behind the glass door */}
+          <Doorway r={OFFICE_WAY}>
+            {/* cast: tophat */}
+            <Stickman D={DSd} k={K} role="second" wear={SHAW_HEAD} garb={UNIT2_OUTFITS.bossSuit.garb?.bands} />
+            <Coat S={SCENE} door />
+            {/* cast: plain */}
+            <Stickman D={DBd} k={K} role="lead" wear={[]} garb={UNIT2_OUTFITS.bezos.garb?.bands} />
+            <CardBox S={SCENE} door />
+          </Doorway>
           <GlassDoor S={SCENE} />
           <View style={styles.deskShadow} />
           <LessonPicture name="amazon1-desk" />
@@ -1115,6 +1168,12 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
           <LessonPicture name="amazon1-garage-far" />
           <Rain S={SCENE} />
           <Animated.View style={[styles.world, nightOn]}><LessonPicture name="amazon1-garage-night" /></Animated.View>
+          {/* in the doorway: Kaphan coming in (b15), behind the back door */}
+          <Doorway r={BACK_WAY}>
+            {/* cast: cap */}
+            <Stickman D={DKd} k={K} role="crowd" wear={KAPHAN_HEAD} garb={UNIT2_OUTFITS.tshirt.garb?.bands} />
+            <Pack S={SCENE} door />
+          </Doorway>
           <BackDoor S={SCENE} />
           <View style={styles.benchShadow} />
           <LessonPicture name="amazon1-garage-mid" />
@@ -1165,14 +1224,15 @@ export default function Amazon1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
 
 /** A red beacon on a mast, blinking. */
 function Beacon({ S, x, y, k }: { S: SharedValue<any>; x: number; y: number; k: number }) {
-  const st = useAnimatedStyle(() => ({ opacity: Math.sin(S.value.t * 2.2 + k * 1.3) > 0.3 ? 1 : 0.15, transform: [{ translateX: x }, { translateY: y }] }));
+  const st = useAnimatedStyle(() => ({ opacity: S.value.place !== 0 || Math.sin(S.value.t * 2.2 + k * 1.3) > 0.3 ? 1 : 0.15, transform: [{ translateX: x }, { translateY: y }] }));
   return <Animated.View style={[styles.rider, st]}><View style={styles.beacon} /></Animated.View>;
 }
 /** A plane's light crossing the sky, slowly. */
 function Plane({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
-    const p = (S.value.t * 0.022) % 1;
-    return { opacity: Math.sin(S.value.t * 5) > 0 ? 1 : 0.4, transform: [{ translateX: 40 + 320 * p }, { translateY: 262 - 18 * p }] };
+    const t = S.value.place === 0 ? S.value.t : 0;
+    const p = (t * 0.022) % 1;
+    return { opacity: Math.sin(t * 5) > 0 ? 1 : 0.4, transform: [{ translateX: 40 + 320 * p }, { translateY: 262 - 18 * p }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.plane} /></Animated.View>;
 }
@@ -1183,7 +1243,7 @@ function GlassDoor({ S }: { S: SharedValue<any> }) {
 }
 /** The printer's head running back and forth across the slot while it prints. */
 function Printhead({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.head, transform: [{ translateX: 298 + 7 * (1 - Math.cos(S.value.t * 9)) }, { translateY: DESK_TOP - 12.5 }] }));
+  const st = useAnimatedStyle(() => ({ opacity: S.value.head, transform: [{ translateX: 298 + 7 * (1 - Math.cos(S.value.head > 0 ? S.value.t * 9 : 0)) }, { translateY: DESK_TOP - 12.5 }] }));
   return <Animated.View style={[styles.rider, st]}><View style={styles.printhead} /></Animated.View>;
 }
 /** The shelf's two rows of books, revealed from the left as it fills, on past the frame. */
@@ -1256,20 +1316,20 @@ function Printout({ S, held }: { S: SharedValue<any>; held: 0 | 1 }) {
   );
 }
 /** Shaw's overcoat: over his forearm, then hung over the desk's corner. */
-function Coat({ S }: { S: SharedValue<any> }) {
+function Coat({ S, door = false }: { S: SharedValue<any>; door?: boolean }) {
   const st = useAnimatedStyle(() => {
     const c = S.value.coat;
-    return { opacity: c.o, transform: [{ translateX: c.x }, { translateY: c.y }] };
+    return { opacity: c.o * (door ? c.cin : 1 - c.cin), transform: [{ translateX: c.x }, { translateY: c.y }] };
   });
   return <Animated.View style={[styles.rider, st]}><LessonPicture name="amazon1-coat" /></Animated.View>;
 }
 /** The cardboard box of his things: on the floor, then in his arms. */
-function CardBox({ S }: { S: SharedValue<any> }) {
+function CardBox({ S, door = false }: { S: SharedValue<any>; door?: boolean }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.box;
-    return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
+    return { opacity: v.o * (door ? v.cin : 1 - v.cin), transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
-  return <Animated.View nativeID="am1-box" style={[styles.rider, st]}><LessonPicture name="amazon1-box" /></Animated.View>;
+  return <Animated.View nativeID={door ? 'am1-box-door' : 'am1-box'} style={[styles.rider, st]}><LessonPicture name="amazon1-box" /></Animated.View>;
 }
 /** The yellow pencil in his right hand. */
 function Pencil({ S }: { S: SharedValue<any> }) {
@@ -1299,7 +1359,10 @@ function Ahead({ S }: { S: SharedValue<any> }) {
 }
 /** The Blazer: its inside (behind the people) or its near flank (in front), riding the bounce. */
 function Car({ S, part }: { S: SharedValue<any>; part: 'in' | 'out' }) {
-  const st = useAnimatedStyle(() => ({ transform: [{ translateY: 0.7 * Math.sin(S.value.t * 7.1) + 0.45 * Math.sin(S.value.t * 3.3 + 1) }] }));
+  const st = useAnimatedStyle(() => {
+    const t = S.value.place === 1 ? S.value.t : 0;
+    return { transform: [{ translateY: 0.7 * Math.sin(t * 7.1) + 0.45 * Math.sin(t * 3.3 + 1) }] };
+  });
   return <Animated.View style={[styles.world, st]}><LessonPicture name={part === 'in' ? 'amazon1-car-in' : 'amazon1-car-out'} /></Animated.View>;
 }
 function Wheel({ S, x }: { S: SharedValue<any>; x: number }) {
@@ -1398,7 +1461,7 @@ function Rain({ S }: { S: SharedValue<any> }) {
 }
 function Drop({ S, x, ph }: { S: SharedValue<any>; x: number; ph: number }) {
   const st = useAnimatedStyle(() => {
-    const f = (S.value.t * 0.7 + ph) % 1;
+    const f = ((S.value.place === 2 ? S.value.t : 0) * 0.7 + ph) % 1;
     return { opacity: Math.sin(Math.PI * f), transform: [{ translateX: x - 2 * f }, { translateY: 304 + 12 * f }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.drop} /></Animated.View>;
@@ -1411,7 +1474,7 @@ function BackDoor({ S }: { S: SharedValue<any> }) {
 /** The fire through the stove's round draught, flickering. */
 function StoveFire({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
-    const t = S.value.t;
+    const t = S.value.place === 2 ? S.value.t : 0;
     const f = 0.82 + 0.12 * Math.sin(t * 8.3) + 0.08 * Math.sin(t * 13.1 + 1);
     return { transform: [{ translateX: STOVE.x }, { translateY: STOVE.y }, { scale: f * (1 + 0.25 * S.value.night) }] };
   });
@@ -1483,9 +1546,9 @@ function Workstation({ S }: { S: SharedValue<any> }) {
 function Drill({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
     const d = S.value.drill;
-    return { opacity: d.o, transform: [{ translateX: d.x }, { translateY: d.y + 3 }, { rotate: `${2 * Math.sin(S.value.t * 60) * d.spin}deg` }] };
+    return { opacity: d.o, transform: [{ translateX: d.x }, { translateY: d.y + 3 }, { rotate: `${d.spin > 0 ? 2 * Math.sin(S.value.t * 60) * d.spin : 0}deg` }] };
   });
-  const dust = useAnimatedStyle(() => ({ opacity: S.value.drill.spin, transform: [{ translateY: -18 - 3 * Math.abs(Math.sin(S.value.t * 20)) }] }));
+  const dust = useAnimatedStyle(() => ({ opacity: S.value.drill.spin, transform: [{ translateY: -18 - 3 * Math.abs(Math.sin(S.value.drill.spin > 0 ? S.value.t * 20 : 0)) }] }));
   return (
     <Animated.View style={[styles.rider, st]}>
       <LessonPicture name="amazon1-drill" />
@@ -1503,12 +1566,21 @@ function MagicBook({ S }: { S: SharedValue<any> }) {
   return <Animated.View nativeID="am1-magicbook" style={[styles.rider, st]}><LessonPicture name="amazon1-book" /></Animated.View>;
 }
 /** Kaphan's backpack, on his back. */
-function Pack({ S }: { S: SharedValue<any> }) {
+function Pack({ S, door = false }: { S: SharedValue<any>; door?: boolean }) {
   const st = useAnimatedStyle(() => {
     const p = S.value.pack;
-    return { opacity: p.o, transform: [{ translateX: p.x }, { translateY: p.y }, { scaleX: p.d < 0 ? -1 : 1 }] };
+    return { opacity: p.o * (door ? p.cin : 1 - p.cin), transform: [{ translateX: p.x }, { translateY: p.y }, { scaleX: p.d < 0 ? -1 : 1 }] };
   });
   return <Animated.View style={[styles.rider, st]}><LessonPicture name="amazon1-backpack" /></Animated.View>;
+}
+
+/** A doorway's opening: what is drawn inside it is clipped to it (stage coordinates inside). */
+function Doorway({ r, children }: { r: { x: number; y: number; w: number; h: number }; children: ReactNode }) {
+  return (
+    <View style={[styles.doorClip, { left: r.x, top: r.y, width: r.w, height: r.h }]} pointerEvents="none">
+      <View style={[styles.world, { left: -r.x, top: -r.y }]}>{children}</View>
+    </View>
+  );
 }
 
 /** The dark under a cut, and on a step back. */
@@ -1592,6 +1664,7 @@ const styles = StyleSheet.create({
   carShadow: { position: 'absolute', left: 48, top: 497, width: 330, height: 7, borderRadius: 3.5, backgroundColor: SHADE, opacity: 0.55 },
   benchShadow: { position: 'absolute', left: 120, top: 497, width: 152, height: 5, borderRadius: 2.5, backgroundColor: SHADE, opacity: 0.45 },
   clear: { flexGrow: 1 },
+  doorClip: { position: 'absolute', overflow: 'hidden' },
 });
 
 // OWN CAMERA: targets checked in shot 2026-10-09 — STOCK THE SHELF (the software box, the CD and the book on

@@ -1,6 +1,6 @@
-import { useMemo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { View, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useDerivedValue, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { BONE_SRC, STR, pose, stand, type Bundle } from './rig';
 import { pillStyle } from './stageSkin';
 import type { Piece } from './wardrobe';
@@ -81,11 +81,69 @@ const NO_WEAR: Piece[] = [];
 /** No garment, shared, for the same reason as NO_WEAR. */
 const NO_GARB: Band[] = [];
 
-export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear, garb }: Props) {
+// ── a still figure is not redrawn (2026-10-09) ──────────────────────────────
+//
+// The owner: "the lessons are very laggy". Measured in a CPU-throttled browser, the
+// first story lesson of the science road restyled 248 figure elements on EVERY frame —
+// eight costumed figures, every bone, joint and band — while most of them stood
+// perfectly still: a scene derives each pose from the clock, so the bundle is a new
+// object every frame even when no number in it moved, and every style built from it
+// is new too. Reanimated skips a write only when a style hands back the SAME values
+// (shallowEqual, by reference), so nothing was ever skipped.
+//
+// So the figure keeps the last bundle it drew and goes on handing THAT back until a
+// joint really moves (STILL_EPS), and the styles it builds (the shadow, the garment
+// bands, the worn pieces) are kept on that bundle's record, so a still figure costs one
+// comparison a frame and writes nothing.
+const XF_KEYS = ['thighL', 'shinL', 'thighR', 'shinR', 'torso', 'uarmL', 'farmL', 'uarmR', 'farmR',
+  'kneeL', 'kneeR', 'ankL', 'ankR', 'elL', 'elR', 'wrL', 'wrR', 'shLd', 'shRd', 'pel', 'shB', 'head'];
+/** A hundredth of a unit (or of a degree): below a pixel at any scale a lesson draws. */
+const STILL_EPS = 0.15;
+function numOf(v: unknown): number {
+  'worklet';
+  return typeof v === 'number' ? v : parseFloat(String(v));
+}
+function xfSame(a: Record<string, unknown>[], b: Record<string, unknown>[]): boolean {
+  'worklet';
+  if (a === b) return true;
+  if (!a || !b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const p = a[i]; const q = b[i];
+    for (const key in q) if (Math.abs(numOf(p[key]) - numOf(q[key])) > STILL_EPS) return false;
+  }
+  return true;
+}
+function bundleSame(a: Bundle, b: Bundle): boolean {
+  'worklet';
+  if (a === b) return true;
+  if (a.opacity !== b.opacity || a.dir !== b.dir || a.scale !== b.scale) return false;
+  for (let i = 0; i < XF_KEYS.length; i++) {
+    const key = XF_KEYS[i];
+    if (!xfSame((a as any)[key], (b as any)[key])) return false;
+  }
+  return true;
+}
+/** An unused slot, one object for good, so it is never rewritten. */
+const HIDDEN = { opacity: 0, transform: [{ translateX: -9999 }, { translateY: -9999 }] };
+/** What a figure last drew: its bundle and the styles built from it. */
+interface Drawn { B: Bundle; s: Record<string, any> }
+
+function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear, garb }: Props) {
   // What he wears is exactly what the scene hands him; with nothing he is the bare
   // mascot, which is what the launch screen, the road and the welcome have always drawn.
-  const worn = wear ?? NO_WEAR;
-  const bands = garb ?? NO_GARB;
+  const worn = wear && wear.length ? wear : NO_WEAR;
+  const bands = garb && garb.length ? garb : NO_GARB;
+  const drawn = useSharedValue<Drawn | null>(null);
+  const E = useDerivedValue<Drawn>(() => {
+    const B = D.value;
+    const c = drawn.value;
+    // An invisible figure (a costume change keeps the other copy at opacity 0) is not
+    // redrawn at all until it shows again.
+    if (c && (bundleSame(c.B, B) || (c.B.opacity === 0 && B.opacity === 0))) return c;
+    const n: Drawn = { B, s: {} };
+    drawn.value = n;
+    return n;
+  });
   // Thicknesses are baked per figure. They never animate, so they stay in style.
   const S = useMemo(() => {
     const limb = STR.limb * k;
@@ -170,39 +228,40 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
     // under a sit. It fades as his feet part: a figure mid-stride is not standing on
     // one spot, and a full-strength pill under a stride reads as a puddle.
     pill: useAnimatedStyle(() => {
-      const B = D.value;
+      const c = E.value; if (c.s.pill) return c.s.pill; const B = c.B;
       const lx = B.ankL[0].translateX; const rx = B.ankR[0].translateX;
       const ly = B.ankL[1].translateY; const ry = B.ankR[1].translateY;
       const part = Math.min(1, Math.abs(lx - rx) / (26 * k));
-      return {
+      c.s.pill = {
         transform: [{ translateX: (lx + rx) / 2 }, { translateY: Math.max(ly, ry) }],
         opacity: 1 - 0.45 * part,
       };
+      return c.s.pill;
     }),
-    thighL: useAnimatedStyle(() => ({ transform: D.value.thighL })),
-    shinL: useAnimatedStyle(() => ({ transform: D.value.shinL })),
-    thighR: useAnimatedStyle(() => ({ transform: D.value.thighR })),
-    shinR: useAnimatedStyle(() => ({ transform: D.value.shinR })),
-    torso: useAnimatedStyle(() => ({ transform: D.value.torso })),
-    uarmL: useAnimatedStyle(() => ({ transform: D.value.uarmL })),
-    farmL: useAnimatedStyle(() => ({ transform: D.value.farmL })),
-    uarmR: useAnimatedStyle(() => ({ transform: D.value.uarmR })),
-    farmR: useAnimatedStyle(() => ({ transform: D.value.farmR })),
-    kneeL: useAnimatedStyle(() => ({ transform: D.value.kneeL })),
-    kneeR: useAnimatedStyle(() => ({ transform: D.value.kneeR })),
-    ankL: useAnimatedStyle(() => ({ transform: D.value.ankL })),
-    ankR: useAnimatedStyle(() => ({ transform: D.value.ankR })),
-    elL: useAnimatedStyle(() => ({ transform: D.value.elL })),
-    elR: useAnimatedStyle(() => ({ transform: D.value.elR })),
-    wrL: useAnimatedStyle(() => ({ transform: D.value.wrL })),
-    wrR: useAnimatedStyle(() => ({ transform: D.value.wrR })),
-    shLd: useAnimatedStyle(() => ({ transform: D.value.shLd })),
-    shRd: useAnimatedStyle(() => ({ transform: D.value.shRd })),
-    pel: useAnimatedStyle(() => ({ transform: D.value.pel })),
-    shB: useAnimatedStyle(() => ({ transform: D.value.shB })),
-    head: useAnimatedStyle(() => ({ transform: D.value.head })),
+    thighL: useAnimatedStyle(() => ({ transform: E.value.B.thighL })),
+    shinL: useAnimatedStyle(() => ({ transform: E.value.B.shinL })),
+    thighR: useAnimatedStyle(() => ({ transform: E.value.B.thighR })),
+    shinR: useAnimatedStyle(() => ({ transform: E.value.B.shinR })),
+    torso: useAnimatedStyle(() => ({ transform: E.value.B.torso })),
+    uarmL: useAnimatedStyle(() => ({ transform: E.value.B.uarmL })),
+    farmL: useAnimatedStyle(() => ({ transform: E.value.B.farmL })),
+    uarmR: useAnimatedStyle(() => ({ transform: E.value.B.uarmR })),
+    farmR: useAnimatedStyle(() => ({ transform: E.value.B.farmR })),
+    kneeL: useAnimatedStyle(() => ({ transform: E.value.B.kneeL })),
+    kneeR: useAnimatedStyle(() => ({ transform: E.value.B.kneeR })),
+    ankL: useAnimatedStyle(() => ({ transform: E.value.B.ankL })),
+    ankR: useAnimatedStyle(() => ({ transform: E.value.B.ankR })),
+    elL: useAnimatedStyle(() => ({ transform: E.value.B.elL })),
+    elR: useAnimatedStyle(() => ({ transform: E.value.B.elR })),
+    wrL: useAnimatedStyle(() => ({ transform: E.value.B.wrL })),
+    wrR: useAnimatedStyle(() => ({ transform: E.value.B.wrR })),
+    shLd: useAnimatedStyle(() => ({ transform: E.value.B.shLd })),
+    shRd: useAnimatedStyle(() => ({ transform: E.value.B.shRd })),
+    pel: useAnimatedStyle(() => ({ transform: E.value.B.pel })),
+    shB: useAnimatedStyle(() => ({ transform: E.value.B.shB })),
+    head: useAnimatedStyle(() => ({ transform: E.value.B.head })),
   };
-  const groupFade = useAnimatedStyle(() => ({ opacity: D.value.opacity }));
+  const groupFade = useAnimatedStyle(() => ({ opacity: E.value.B.opacity }));
 
   // ── the costume ───────────────────────────────────────────────────────────
   //
@@ -278,9 +337,11 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
     const len0 = garbStatic[i]?.len0 ?? 1;
     // eslint-disable-next-line react-hooks/rules-of-hooks -- GARB_SLOTS is constant
     return useAnimatedStyle(() => {
-      if (!b) return { opacity: 0, transform: [{ translateX: -9999 }, { translateY: -9999 }] };
-      const g = bandAt(D.value as unknown as Parameters<typeof bandAt>[0], k, b, 0);
-      return {
+      if (!b) return HIDDEN;
+      const c = E.value; const key = 'g' + i;
+      if (c.s[key]) return c.s[key];
+      const g = bandAt(c.B as unknown as Parameters<typeof bandAt>[0], k, b, 0);
+      return c.s[key] = {
         opacity: 1,
         transform: [
           { translateX: g.cx }, { translateY: g.cy },
@@ -309,8 +370,10 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
     const p = worn[i];
     // eslint-disable-next-line react-hooks/rules-of-hooks -- WORN_SLOTS is constant; see above
     return useAnimatedStyle(() => {
-      if (!p) return { opacity: 0, transform: [{ translateX: -9999 }, { translateY: -9999 }] };
-      const B = D.value;
+      if (!p) return HIDDEN;
+      const d = E.value; const key = 'w' + i;
+      if (d.s[key]) return d.s[key];
+      const B = d.B;
       const dir = B.dir < 0 ? -1 : 1;
       const hx = B.head[0].translateX; const hy = B.head[1].translateY;
       const sx = B.shB[0].translateX; const sy = B.shB[1].translateY;
@@ -325,7 +388,7 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
 
       const px = p.x * dir * k; const py = p.y * k;
       const c = Math.cos(rot); const s = Math.sin(rot);
-      return {
+      return d.s[key] = {
         opacity: 1,
         transform: [
           { translateX: ax + px * c - py * s },
@@ -414,3 +477,16 @@ export default function Stickman({ D, k, gloves = false, color = '#1A1A1A', wear
     </Animated.View>
   );
 }
+
+/** Two lists the same for drawing: the same list, or both empty (scenes write `wear={[]}`). */
+function sameList(a?: readonly unknown[], b?: readonly unknown[]): boolean {
+  return a === b || ((!a || a.length === 0) && (!b || b.length === 0));
+}
+
+// A FIGURE IS NOT REBUILT ON A TAP (2026-10-09). Every tap re-renders the scene, and with
+// it every figure: in the science story that was eight costumed figures, three times each,
+// about a hundred views and sixty animation hooks apiece — while nothing a figure is drawn
+// FROM had changed (its pose arrives on the UI thread through `D`). So a figure re-renders
+// only when what it wears or how big it is changes.
+export default memo(Stickman, (p, n) => p.D === n.D && p.k === n.k && p.gloves === n.gloves
+  && p.color === n.color && p.role === n.role && sameList(p.wear, n.wear) && sameList(p.garb, n.garb));

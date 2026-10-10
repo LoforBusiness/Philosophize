@@ -110,7 +110,9 @@ export interface Endur1Beat extends BaseBeat {
 export const BEATS: Endur1Beat[] = [
   {
     bed: 'river',
-    sfx: [{ id: 'creak', at: 0.8, gain: 0.6 }, { id: 'crate', at: 2.2, gain: 0.6 }, { id: 'paper', at: 3.6, gain: 0.6 }, { id: 'creak', at: 5.0, gain: 0.5 }],
+    music: 'mmorning',
+    // the deck boards under him; Crean's crate set down; the map pinned to its case
+    sfx: [{ id: 'creak', at: 0.8, gain: 0.5 }, { id: 'crate', at: 2.2, gain: 0.6 }, { id: 'pin', at: 3.6, gain: 0.6 }],
     voiceAfter: 6.0,
     act: 'quay', place: 0,
     speaker: 'plain',
@@ -150,7 +152,8 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'pencil', at: 0.8, gain: 0.6 }],
+    // the form written on the pad, then torn off it
+    sfx: [{ id: 'scribble', at: 0.7, gain: 0.5 }, { id: 'tear', at: 1.72, gain: 0.55 }],
     act: 'wire', place: 0,
     speaker: 'plain',
     text: 'Then I’ve wired the Admiralty. They can have the ship, the stores, and all of us.',
@@ -174,7 +177,8 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.0,
   },
   {
-    sfx: [{ id: 'paper', at: 1.3, gain: 0.7 }],
+    // the mooring line lifted off the bitt and thrown off
+    sfx: [{ id: 'rope', at: 1.0, gain: 0.55 }],
     act: 'proceed', place: 0,
     speaker: 'plain',
     text: 'One word from the Admiralty: Proceed. Even the Navy knows a national treasure when it sees one.',
@@ -182,7 +186,7 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
-    bed: 'beach',
+    bed: 'sea',
     sfx: [{ id: 'plank', at: 0.6, gain: 0.5 }],
     act: 'station', place: 1,
     speaker: 'cap',
@@ -206,7 +210,7 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'creak', at: 0.8, gain: 0.5 }],
+    sfx: [{ id: 'creak', at: 0.8, gain: 0.45 }],
     act: 'sail', place: 1,
     speaker: 'cap',
     text: 'Fifth of December, and we’re off. Twenty-eight men, sixty-nine dogs, and one very full deck.',
@@ -214,8 +218,9 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
-    bed: 'ship',
-    sfx: [{ id: 'creak', at: 0.6, gain: 0.6 }, { id: 'thud', at: 1.7, gain: 0.4 }],
+    bed: 'wind',
+    // her hull groaning in the ice; his boot against the ice
+    sfx: [{ id: 'creak', at: 0.6, gain: 0.5 }, { id: 'thud', at: 1.7, gain: 0.4 }],
     act: 'beset', place: 2,
     speaker: 'tophat',
     text: 'January, and she’s stuck fast. The ice closed round her overnight, a day’s sail from land.',
@@ -231,7 +236,8 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'crack', at: 0.77, gain: 0.5 }],
+    // two blows of the pick
+    sfx: [{ id: 'thud', at: 0.4, gain: 0.5 }, { id: 'thud', at: 1.18, gain: 0.45 }],
     act: 'chop', place: 2,
     speaker: 'plain',
     text: 'Two whole days of chopping. I don’t like to boast, but I was the best at it.',
@@ -239,6 +245,8 @@ export const BEATS: Endur1Beat[] = [
     dur: 1.8,
   },
   {
+    // his saw dropped on the ice
+    sfx: [{ id: 'can', at: 2.0, gain: 0.5 }],
     act: 'refreeze', place: 2,
     speaker: 'tophat',
     text: 'The path froze shut behind us. The pack runs to the sky in every direction, and drifts where the wind takes it.',

@@ -37,8 +37,15 @@ const fail = (s) => errs.push(s);
 
 // ── 1. free, and all there ──────────────────────────────────────────────────
 for (const [key, s] of Object.entries(SOURCES)) {
-  if (s.licence !== 'CC0 1.0') fail(`source ${key} (Freesound ${s.id}) is licensed "${s.licence}", not CC0 1.0`);
-  if (!/^https:\/\/freesound\.org\//.test(s.url ?? '')) fail(`source ${key} has no Freesound page to show its licence`);
+  // MUSIC (AT10) may also be a public-domain recording, and comes from Wikimedia Commons,
+  // where each file's page states its licence; every other sound is CC0 from Freesound
+  if (s.music) {
+    if (s.licence !== 'CC0 1.0' && s.licence !== 'Public domain') fail(`music source ${key} is licensed "${s.licence}", not public domain or CC0 1.0`);
+    if (!/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(s.url ?? '')) fail(`music source ${key} has no Commons page to show its licence`);
+  } else {
+    if (s.licence !== 'CC0 1.0') fail(`source ${key} (Freesound ${s.id}) is licensed "${s.licence}", not CC0 1.0`);
+    if (!/^https:\/\/freesound\.org\//.test(s.url ?? '')) fail(`source ${key} has no Freesound page to show its licence`);
+  }
   if (!fs.existsSync(path.join(ROOT, 'assets', 'sfx', 'src', `${s.id}.mp3`))) fail(`source ${key}: assets/sfx/src/${s.id}.mp3 is missing`);
 }
 const clipsSrc = fs.readFileSync(path.join(ROOT, 'lib', 'sfx', 'clips.ts'), 'utf8');
@@ -114,7 +121,11 @@ for (const [id, file] of Object.entries(LESSONS)) {
     if (b.bed !== undefined && b.bed !== null) {
       if (!table.has(b.bed)) fail(`${id} beat ${i}: bed "${b.bed}" is not a clip`);
       else if (!table.get(b.bed).bed) fail(`${id} beat ${i}: "${b.bed}" is an effect, not a loop, and cannot be a bed`);
+      else if (cutOf.get(b.bed)?.music) fail(`${id} beat ${i}: "${b.bed}" is music; music goes in \`music\`, never the bed (AT10)`);
     }
+    // MUSIC (AT10): its own layer, one of the music loops, never a bed or a cue
+    if (b.music !== undefined && b.music !== null && !cutOf.get(b.music)?.music) fail(`${id} beat ${i}: music "${b.music}" is not one of the music loops`);
+    for (const c of b.sfx ?? []) if (cutOf.get(c.id)?.music) fail(`${id} beat ${i}: "${c.id}" is music and cannot be a cue`);
     // a wait is filled by a sound that starts inside it: a `lead` cue, or one at a
     // number of seconds (a scene can spend the start of a beat on action, as getting
     // out of bed does, and its sound comes when the walk does)

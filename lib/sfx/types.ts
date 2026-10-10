@@ -13,7 +13,12 @@ export interface SfxProvider {
   play(id: SfxId, gain?: number): void;
   /** The background loop: faded in, swapped with a crossfade, or faded out (`null`). */
   bed(id: SfxId | null, gain?: number): void;
-  /** Hold the bed down while a line is being said, and let it back up after. */
+  /**
+   * The MUSIC loop (AT10): a second layer beside the bed, faded in, crossfaded or faded
+   * out (`null`) the same way, and held much further down while a line is said.
+   */
+  music(id: SfxId | null, gain?: number): void;
+  /** Hold the bed and the music down while a line is being said, and let them back up after. */
   duck(on: boolean): void;
   /**
    * Fade out every effect still sounding (never the bed). A reader who taps on while

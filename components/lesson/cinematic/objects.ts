@@ -912,6 +912,9 @@ export const NATURAL = {
   milgram1Cable: { base: '#2A2A2A', shade: '#1A1A1A', label: '#FAFAF7', what: 'a black electrical cable and plug' },
   milgram1Hand: { base: '#3A3430', shade: '#2A2420', label: '#FAFAF7', what: 'a clock’s hands' },
   milgram1Dim: { base: '#1E2226', shade: '#121518', label: '#FAFAF7', what: 'the lab with its lights turned down' },
+  milgram1Door: { base: '#7A5232', shade: '#5E3E25', label: '#FAFAF7', what: 'an oak office door' },
+  milgram1Doorway: { base: '#3A332D', shade: '#2A241F', label: '#FAFAF7', what: 'the dark corridor through an open door' },
+  milgram1Frost: { base: '#D9DCD4', shade: '#B9BCB4', label: '#1A1A1A', what: 'a frosted glass pane in a door' },
   // fleming1 colours:
   fleming1Glass: { base: '#D6E9EC', shade: '#AFCBD0', label: '#1A1A1A', what: 'a glass Petri dish seen side-on' },
   fleming1Agar: { base: '#EBD79A', shade: '#D9C27A', label: '#1A1A1A', what: 'agar jelly in a dish' },

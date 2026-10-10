@@ -9,7 +9,7 @@ import Target from './Target';
 import LessonPicture from './LessonPicture';
 import { BEATS } from './caesar1Script';
 import {
-  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
+  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated, stand,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -100,6 +100,8 @@ const K = K_FIG * 0.95;
 /** The hand paths were laid out for a figure 0.85 high; they grow with him. */
 const KS = K / 0.85;
 const G = GROUND;
+/** A figure nobody can see: one bundle that never changes, which Stickman draws nothing of (AW9). */
+const HIDDEN: Bundle = pose(stand(0), -200, GROUND, K_FIG * 0.95, 1, 0);
 
 /** Seconds each beat's action is paced over (lib/narration/manifest.ts); b0 is the wait (6.0s) and the line together. */
 const LINES = [11.22, 5.08, 5.16, 3.96, 4.7, 0, 6.47, 4.16, 5.23, 3.27, 3.94, 5.83, 2.01, 2.81, 3.71, 4.13, 3.87, 3.77, 0, 4.87, 5.24, 0, 0];
@@ -1007,8 +1009,8 @@ export default function Caesar1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
     const bC = pose(figC, cxS, cgS, K, cd, 1);
     const bH = pose(figH, hxS, hgS, K, hd0, 1);
     const bP = pose(figP, pxS, pgS, K, pd, 1);
-    const bE1 = pose(figE1, e1x, G, K, e1d, place === 0 ? 0 : 1);
-    const bB = pose(figB, bx, BOATMAN.g, K, -1, boatOn);
+    const bE1 = place === 0 ? HIDDEN : pose(figE1, e1x, G, K, e1d, 1);
+    const bB = boatOn > 0 ? pose(figB, bx, BOATMAN.g, K, -1, boatOn) : HIDDEN;
     const cRw = jointOf(bC, 'wrR');
     const cLw = jointOf(bC, 'wrL');
     const hRw = jointOf(bH, 'wrR');
@@ -1202,9 +1204,11 @@ export default function Caesar1Scene({ clock, bt, bi, i, qv, picked, onPick }: S
 
 /** A fair-weather cloud, drifting a little and back. */
 function Cloud({ S, x, y, s, k }: { S: SharedValue<any>; x: number; y: number; s: number; k: number }) {
-  const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: x + 9 * Math.sin(S.value.t * 0.05 + k * 1.7) }, { translateY: y }, { scale: s }],
-  }));
+  const st = useAnimatedStyle(() => {
+    // a cloud on the ship's side (k 0–2) or over the cove (k 3–4) drifts only while it is in view
+    const t = (k < 3 ? S.value.cam > -200 : S.value.cam <= -200) ? S.value.t : 0;
+    return { transform: [{ translateX: x + 9 * Math.sin(t * 0.05 + k * 1.7) }, { translateY: y }, { scale: s }] };
+  });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <View style={[styles.cloud, { left: -26, top: -6, width: 52, height: 12, borderRadius: 6 }]} />
@@ -1221,18 +1225,20 @@ function Glints({ S }: { S: SharedValue<any> }) {
 }
 function Glint({ S, x, y, ph }: { S: SharedValue<any>; x: number; y: number; ph: number }) {
   const st = useAnimatedStyle(() => {
-    const v = Math.sin(S.value.t * 0.9 + ph);
-    return { opacity: Math.max(0, v), transform: [{ translateX: x + 4 * Math.sin(S.value.t * 0.3 + ph) }, { translateY: y }, { scaleX: 0.6 + 0.4 * v }] };
+    const t = S.value.cam > -200 ? S.value.t : 0;
+    const v = Math.sin(t * 0.9 + ph);
+    return { opacity: Math.max(0, v), transform: [{ translateX: x + 4 * Math.sin(t * 0.3 + ph) }, { translateY: y }, { scaleX: 0.6 + 0.4 * v }] };
   });
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.glint} /></Animated.View>;
 }
 /** A gull gliding round, over the ship or over the cove. */
 function Gull({ S, k, base }: { S: SharedValue<any>; k: number; base: number }) {
   const st = useAnimatedStyle(() => {
-    const a = S.value.t * (k ? 0.21 : 0.26) + k * 2.2;
+    const t = (k ? S.value.cam <= -200 && S.value.night < 1 : S.value.cam > -200) ? S.value.t : 0;
+    const a = t * (k ? 0.21 : 0.26) + k * 2.2;
     const x = base + (k ? 220 : 250) + (k ? 70 : 80) * Math.cos(a);
     const y = (k ? 262 : 300) + 10 * Math.sin(a * 2);
-    const flap = 0.75 + 0.25 * Math.sin(S.value.t * (k ? 5 : 6));
+    const flap = 0.75 + 0.25 * Math.sin(t * (k ? 5 : 6));
     return { transform: [{ translateX: x }, { translateY: y }, { scaleX: Math.sin(a) > 0 ? -0.8 : 0.8 }, { scaleY: 0.8 * flap }] };
   });
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="caesar1-gull" /></Animated.View>;
@@ -1249,15 +1255,17 @@ function Ghost({ S }: { S: SharedValue<any> }) {
 }
 /** The pirate galley, sliding in alongside and riding the swell. */
 function Galley({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    transform: [{ translateX: S.value.galleyX }, { translateY: 0.9 * Math.sin(S.value.t * 0.9 + 1) }],
-  }));
+  const st = useAnimatedStyle(() => {
+    const t = S.value.cam > -200 ? S.value.t : 0;
+    return { transform: [{ translateX: S.value.galleyX }, { translateY: 0.9 * Math.sin(t * 0.9 + 1) }] };
+  });
   return <Animated.View nativeID="c1-galley" style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="caesar1-galley" /></Animated.View>;
 }
 /** Our sail, filling and easing in the wind — the cloth breathes out from the mast. */
 function Sail({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
-    const w = Math.sin(S.value.t * 0.7) * 0.6 + Math.sin(S.value.t * 0.43 + 1) * 0.4;
+    const t = S.value.cam > -200 ? S.value.t : 0;
+    const w = Math.sin(t * 0.7) * 0.6 + Math.sin(t * 0.43 + 1) * 0.4;
     return { opacity: S.value.sail, transform: [{ translateX: 8 }, { scaleX: 1 + 0.035 * w }, { translateX: -8 }] };
   });
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="caesar1-sail" /></Animated.View>;
@@ -1405,7 +1413,7 @@ function Blade({ S }: { S: SharedValue<any> }) {
 function Coin({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => ({
     opacity: S.value.coin > 0.05 ? 1 : 0,
-    transform: [{ translateX: S.value.coinAt.x }, { translateY: S.value.coinAt.y - 4 }, { scaleX: 0.5 + 0.5 * Math.abs(Math.cos(S.value.t * 3)) }],
+    transform: [{ translateX: S.value.coinAt.x }, { translateY: S.value.coinAt.y - 4 }, { scaleX: 0.5 + 0.5 * Math.abs(Math.cos(S.value.coin > 0.05 ? S.value.t * 3 : 0)) }],
   }));
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.coin} /></Animated.View>;
 }
@@ -1423,7 +1431,7 @@ function Fire({ S }: { S: SharedValue<any> }) {
 }
 function Flame({ S, dx, k }: { S: SharedValue<any>; dx: number; k: number }) {
   const st = useAnimatedStyle(() => {
-    const t = S.value.t;
+    const t = S.value.cam <= -200 ? S.value.t : 0;
     const f = 0.8 + 0.2 * Math.sin(t * (7 + k) + k * 2) + 0.1 * Math.sin(t * 13 + k);
     const big = 1 + 0.45 * S.value.night;
     return { transform: [{ translateX: FIRE.x + dx + 1.2 * Math.sin(t * 5 + k) }, { translateY: FIRE.y - 4 }, { scaleY: f * big * (k === 1 ? 1.25 : 1) }, { scaleX: big * 0.9 }] };
@@ -1437,7 +1445,8 @@ function Flame({ S, dx, k }: { S: SharedValue<any>; dx: number; k: number }) {
 }
 function Smoke({ S, k }: { S: SharedValue<any>; k: number }) {
   const st = useAnimatedStyle(() => {
-    const ph = (S.value.t * 0.35 + k / 3) % 1;
+    const t = S.value.cam <= -200 ? S.value.t : 0;
+    const ph = (t * 0.35 + k / 3) % 1;
     return {
       opacity: (1 - S.value.night) * 0.7 * Math.sin(Math.PI * ph),
       transform: [{ translateX: FIRE.x + 6 * Math.sin(ph * 4 + k) + 10 * ph }, { translateY: FIRE.y - 22 - 70 * ph }, { scale: 0.6 + 1.2 * ph }],
@@ -1473,10 +1482,10 @@ function Mat({ S }: { S: SharedValue<any> }) {
 }
 /** The ransom boat sculling in (world x). */
 function Boat({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    opacity: S.value.boat.o,
-    transform: [{ translateX: S.value.boat.x }, { translateY: S.value.boat.y + 0.8 * Math.sin(S.value.t * 1.1) }],
-  }));
+  const st = useAnimatedStyle(() => {
+    const t = S.value.boat.o > 0 ? S.value.t : 0;
+    return { opacity: S.value.boat.o, transform: [{ translateX: S.value.boat.x }, { translateY: S.value.boat.y + 0.8 * Math.sin(t * 1.1) }] };
+  });
   return (
     <Animated.View nativeID="c1-boat" style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.boatShadow} />
@@ -1494,10 +1503,10 @@ function BoatOar({ S }: { S: SharedValue<any> }) {
 }
 /** The Roman warship gliding in bow first, her torches burning (world x). */
 function Warship({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    opacity: S.value.night,
-    transform: [{ translateX: S.value.shipX }, { translateY: SHIP_BOW.y + 0.6 * Math.sin(S.value.t * 0.8) }],
-  }));
+  const st = useAnimatedStyle(() => {
+    const t = S.value.night > 0 ? S.value.t : 0;
+    return { opacity: S.value.night, transform: [{ translateX: S.value.shipX }, { translateY: SHIP_BOW.y + 0.6 * Math.sin(t * 0.8) }] };
+  });
   return (
     <Animated.View nativeID="c1-warship" style={[styles.rider, st]} pointerEvents="none">
       <LessonPicture name="caesar1-warship" />
@@ -1506,7 +1515,10 @@ function Warship({ S }: { S: SharedValue<any> }) {
   );
 }
 function Fleet({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ transform: [{ translateX: S.value.fleetX }, { translateY: FLEET_AT.y + 0.5 * Math.sin(S.value.t * 0.7 + 2) }] }));
+  const st = useAnimatedStyle(() => {
+    const t = S.value.night > 0 ? S.value.t : 0;
+    return { transform: [{ translateX: S.value.fleetX }, { translateY: FLEET_AT.y + 0.5 * Math.sin(t * 0.7 + 2) }] };
+  });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <LessonPicture name="caesar1-fleet" />
@@ -1516,7 +1528,7 @@ function Fleet({ S }: { S: SharedValue<any> }) {
 }
 function Torch({ S, x, y, k, small }: { S: SharedValue<any>; x: number; y: number; k: number; small?: boolean }) {
   const st = useAnimatedStyle(() => {
-    const t = S.value.t;
+    const t = S.value.night > 0 ? S.value.t : 0;
     const f = 0.85 + 0.15 * Math.sin(t * (9 + k) + k) + 0.08 * Math.sin(t * 17 + k * 2);
     return { transform: [{ translateX: x + Math.sin(t * 6 + k) * 0.8 }, { translateY: y }, { scaleY: f * (small ? 0.55 : 0.8) }, { scaleX: small ? 0.55 : 0.8 }] };
   });

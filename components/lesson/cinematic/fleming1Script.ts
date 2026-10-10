@@ -130,8 +130,8 @@ export interface Fleming1Beat extends BaseBeat {
 
 export const BEATS: Fleming1Beat[] = [
   {
-    bed: 'street',
-    sfx: [{ id: 'creak', at: 0.8, gain: 0.6 }, { id: 'crate', at: 2.5, gain: 0.5 }, { id: 'glass', at: 4.1, gain: 0.6 }, { id: 'glass', at: 5.5, gain: 0.5 }],
+    bed: 'room', music: 'msatie',
+    sfx: [{ id: 'door', at: 0.35, gain: 0.7 }, { id: 'crate', at: 2.6, gain: 0.5 }, { id: 'doorshut', at: 3.3, gain: 0.6 }, { id: 'glass', at: 4.4, gain: 0.6 }, { id: 'glasslid', at: 5.62, gain: 0.5 }, { id: 'door', at: 'tail', gain: 0.6 }],
     voiceAfter: 6.0,
     act: 'return', place: 0,
     speaker: 'plain',
@@ -140,7 +140,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'glass', at: 3.8, gain: 0.5 }],
+    sfx: [{ id: 'glasslid', at: 3.8, gain: 0.6 }, { id: 'doorshut', at: 'tail', gain: 0.55 }],
     act: 'help', place: 0,
     speaker: 'cap',
     text: 'Morning, Dr Fleming. Shall I help you clear this tower of glass dishes?',
@@ -148,6 +148,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'glasslid', at: 0.6, gain: 0.5 }, { id: 'cup', at: 6.45, gain: 0.5 }],
     act: 'agar', place: 0,
     speaker: 'plain',
     text: 'They’re culture plates, and it’s a system, not a mess. Each dish holds a thin layer of agar, a jelly made from seaweed.',
@@ -162,7 +163,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 2.0, gain: 0.6 }],
+    sfx: [{ id: 'book', at: 1.78, gain: 0.55 }, { id: 'book', at: 2.55, gain: 0.5 }],
     act: 'staph', place: 0,
     speaker: 'plain',
     text: 'Staphylococcus, the germ behind boils and infected wounds. I’m writing about it for a very important book.',
@@ -170,7 +171,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'drop', at: 2.1, gain: 0.5 }, { id: 'glass', at: 2.7, gain: 0.5 }],
+    sfx: [{ id: 'jar', at: 0.35, gain: 0.5 }, { id: 'drop', at: 2.05, gain: 0.6 }, { id: 'drop', at: 2.68, gain: 0.55 }],
     act: 'dunk', place: 0,
     speaker: 'cap',
     text: 'The old ones go in the cleaning fluid, then. Some of these have sat here for weeks.',
@@ -178,6 +179,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'drip', at: 0.45, gain: 0.6 }, { id: 'cup', at: 1.75, gain: 0.5 }],
     place: 0, plates: true,
     interact: {
       prompt: 'Three dishes sit on top of the pile. Which one makes Fleming stop and stare?',
@@ -187,6 +189,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'jar', at: 1.25, gain: 0.5 }],
     act: 'funny', place: 0,
     speaker: 'plain',
     text: 'That’s funny. There’s a fluffy mould at the edge, and the germs near it have gone see-through.',
@@ -208,6 +211,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'creak', at: 0.2, gain: 0.6 }],
     act: 'spore', place: 0,
     speaker: 'cap',
     text: 'Maybe a spore drifted up from the mould lab downstairs. Nobody knows for sure.',
@@ -215,8 +219,8 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    bed: 'room',
-    sfx: [{ id: 'water', at: 2.7, gain: 0.5 }],
+    bed: 'attic',
+    sfx: [{ id: 'jar', at: 0.4, gain: 0.5 }, { id: 'water', at: 2.65, gain: 0.55 }],
     act: 'flasks', place: 1,
     speaker: 'tophat',
     text: 'So now I grow your mould on meat broth, in every flask we own. The yellow broth below the mould is your mould juice.',
@@ -224,7 +228,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'plate', at: 3.1, gain: 0.6 }],
+    sfx: [{ id: 'cup', at: 0.75, gain: 0.5 }, { id: 'plate', at: 3.1, gain: 0.6 }],
     act: 'trench', place: 1,
     speaker: 'tophat',
     text: 'Now the test. A trench cut across a plate and filled with juice, and three germs streaked toward it.',
@@ -248,6 +252,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'drop', at: 2.95, gain: 0.5 }],
     act: 'mice', place: 1,
     speaker: 'plain',
     text: 'Watered down hundreds of times, the juice still kills Staphylococcus. A rabbit and a mouse got injections, and neither animal minded.',
@@ -255,7 +260,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'glass', at: 0.4, gain: 0.5 }],
+    sfx: [{ id: 'pageturn', at: 1.35, gain: 0.5 }, { id: 'pageturn', at: 2.9, gain: 0.45 }],
     act: 'fades', place: 1,
     speaker: 'tophat',
     text: 'And within weeks the juice loses its strength, and nobody here can make it pure. A medicine has to keep.',
@@ -272,7 +277,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'chair', at: 1.8, gain: 0.5 }],
+    sfx: [{ id: 'stopwatch', at: 1.1, gain: 0.7 }, { id: 'chair', at: 1.6, gain: 0.5 }],
     act: 'silence', place: 2,
     speaker: 'tophat',
     text: 'Not one. You spent the talk on using it to grow a germ people blamed for flu.',
@@ -280,7 +285,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'pencil', at: 1.6, gain: 0.6 }],
+    sfx: [{ id: 'chair', at: 0.4, gain: 0.4 }, { id: 'paper', at: 0.5, gain: 0.5 }, { id: 'scribble', at: 1.65, gain: 0.6 }],
     act: 'paper', place: 2,
     speaker: 'plain',
     text: 'Penicillin, after the mould. The name goes in a paper, and some genius will read the paper eventually.',
@@ -295,6 +300,7 @@ export const BEATS: Fleming1Beat[] = [
     dur: 2.1,
   },
   {
+    bed: 'room',
     act: 'rest', place: 0,
     quote: {
       id: 'lq-science-penicillin-1-1',

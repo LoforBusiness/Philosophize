@@ -61,7 +61,7 @@ export interface Band {
 }
 
 /** Outline weight, rig units. The limbs are 11, so 2 reads as a drawn edge, not a stroke. */
-export const GARB_LINE = 2;
+export const GARB_LINE = 1.6;
 
 /** As many bands as any garment may have — Stickman mounts a fixed number of slots (§17 rule 1). */
 export const GARB_SLOTS = 16;
@@ -169,11 +169,11 @@ export const CLOTH = {
  */
 const TOGA: Band[] = [
   // the body: chest, shoulders, skirt to mid-shin
-  { a: { j: 'shB', dy: -2 }, b: { j: 'pel' }, w: 27, fill: CLOTH.toga, r: 10 },
-  { a: { j: 'shL' }, b: { j: 'shR' }, w: 15, fill: CLOTH.toga, extA: 6, extB: 6 },
-  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeL' }, w: 22, fill: CLOTH.toga, extB: 12, r: 5 },
-  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeR' }, w: 22, fill: CLOTH.toga, extB: 12, r: 5 },
-  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeMid' }, w: 27, fill: CLOTH.toga, extB: 12, r: 5 },
+  { a: { j: 'shB', dy: -2 }, b: { j: 'pel' }, w: 23, fill: CLOTH.toga, r: 8 },
+  { a: { j: 'shL' }, b: { j: 'shR' }, w: 12, fill: CLOTH.toga, extA: 6, extB: 6 },
+  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeL' }, w: 18, fill: CLOTH.toga, extB: 12, r: 6 },
+  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeR' }, w: 18, fill: CLOTH.toga, extB: 12, r: 6 },
+  { a: { j: 'pel', dy: -4 }, b: { j: 'kneeMid' }, w: 23, fill: CLOTH.toga, extB: 12, r: 6 },
   // the swag: over the back shoulder, across the chest, to the front hip
   { a: { j: 'shB', dx: -11, dy: -3 }, b: { j: 'pel', dx: 12, dy: 5 }, w: 12, fill: CLOTH.togaShade, layer: 1, extA: 2, extB: 3, r: 6 },
   // its purple border, along the lower edge of the swag
@@ -185,11 +185,11 @@ const TOGA: Band[] = [
 /** A working tunic, belted: the pirates, the sailors, the soldiers in the ranks. */
 export function tunic(fill: string, shade: string, belt: string): Band[] {
   return [
-    { a: { j: 'shB', dy: -2 }, b: { j: 'pel' }, w: 24, fill, r: 8 },
-    { a: { j: 'shL' }, b: { j: 'shR' }, w: 12, fill, extA: 5, extB: 5 },
-    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeL' }, w: 18, fill, extB: -4, r: 4 },
-    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeR' }, w: 18, fill, extB: -4, r: 4 },
-    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeMid' }, w: 22, fill, extB: -3, r: 4 },
+    { a: { j: 'shB', dy: -2 }, b: { j: 'pel' }, w: 20, fill, r: 6 },
+    { a: { j: 'shL' }, b: { j: 'shR' }, w: 10, fill, extA: 5, extB: 5 },
+    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeL' }, w: 15, fill, extB: -4, r: 5 },
+    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeR' }, w: 15, fill, extB: -4, r: 5 },
+    { a: { j: 'pel', dy: -3 }, b: { j: 'kneeMid' }, w: 19, fill, extB: -3, r: 5 },
     // the belt — a sash knotted at the hip, its end hanging
     { a: { j: 'pel', dx: -12, dy: -4 }, b: { j: 'pel', dx: 12, dy: -4 }, w: 5, fill: belt, layer: 1, r: 2 },
     { a: { j: 'pel', dx: 9, dy: -3 }, b: { j: 'pel', dx: 12, dy: 10 }, w: 4, fill: belt, layer: 1 },
@@ -296,47 +296,60 @@ export const WEAR = {
   plume: '#F2EFE6', hatBrown: '#5B4330', peak: '#1E1F22', glass: '#D9ECEF', agar: '#E8D9A0',
 } as const;
 
+/**
+ * A TUBE of cloth from joint to joint (2026-10-09). The first parts were squared bands
+ * ending flush at the knee and elbow, 3–5 units wider than the limb and a different width
+ * either side, so every joint showed a notch and a step: the owner saw "bulky … bumpy"
+ * coats. A tube is a capsule centred ON each joint (its round end reaches w/2 past it), so
+ * two tubes meeting at a knee overlap in a circle and their one shared outline runs on
+ * smoothly, the way the bones themselves join. `endA`/`endB` add to that (negative stops
+ * short of the joint, for a cuff or a hem).
+ */
+export function tube(a: GPoint, b: GPoint, w: number, fill: string, layer: Band['layer'], endA = 0, endB = 0): Band {
+  return { a, b, w, fill, layer, extA: w / 2 + endA, extB: w / 2 + endB };
+}
+
 export function trousers(fill: string): Band[] {
   return [
-    { a: { j: 'hipL' }, b: { j: 'kneeL' }, w: 14, fill, layer: -1, extA: 2, r: 5 },
-    { a: { j: 'kneeL' }, b: { j: 'ankL' }, w: 12.5, fill, layer: -1, extB: -2, r: 5 },
-    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 6 }, w: 22, fill, r: 7 },
-    { a: { j: 'hipR' }, b: { j: 'kneeR' }, w: 14, fill, extA: 2, r: 5 },
-    { a: { j: 'kneeR' }, b: { j: 'ankR' }, w: 12.5, fill, extB: -2, r: 5 },
+    tube({ j: 'hipL' }, { j: 'kneeL' }, 12.5, fill, -1),
+    tube({ j: 'kneeL' }, { j: 'ankL' }, 12, fill, -1, 0, -7),
+    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 5 }, w: 19, fill, r: 6 },
+    tube({ j: 'hipR' }, { j: 'kneeR' }, 12.5, fill, 0),
+    tube({ j: 'kneeR' }, { j: 'ankR' }, 12, fill, 0, 0, -7),
   ];
 }
 /** Knee breeches: to the knee only, the stockinged shin left bare. */
 export function breeches(fill: string): Band[] {
   return [
-    { a: { j: 'hipL' }, b: { j: 'kneeL' }, w: 15, fill, layer: -1, extA: 2, extB: 2, r: 5 },
-    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 6 }, w: 23, fill, r: 7 },
-    { a: { j: 'hipR' }, b: { j: 'kneeR' }, w: 15, fill, extA: 2, extB: 2, r: 5 },
+    tube({ j: 'hipL' }, { j: 'kneeL' }, 13, fill, -1, 0, -1),
+    { a: { j: 'pel', dy: -3 }, b: { j: 'pel', dy: 5 }, w: 20, fill, r: 6 },
+    tube({ j: 'hipR' }, { j: 'kneeR' }, 13, fill, 0, 0, -1),
   ];
 }
 export function sleeves(fill: string, long = true): Band[] {
   const s: Band[] = [
-    { a: { j: 'shL' }, b: { j: 'elL' }, w: 12.5, fill, layer: -1, extA: 3, r: 5 },
-    { a: { j: 'shR' }, b: { j: 'elR' }, w: 12.5, fill, layer: 2, extA: 3, r: 5 },
+    tube({ j: 'shL' }, { j: 'elL' }, 12.5, fill, -1, -2, long ? 0 : -3),
+    tube({ j: 'shR' }, { j: 'elR' }, 12.5, fill, 2, -2, long ? 0 : -3),
   ];
   if (long) s.push(
-    { a: { j: 'elL' }, b: { j: 'wrL' }, w: 11.5, fill, layer: -1, extB: -3, r: 5 },
-    { a: { j: 'elR' }, b: { j: 'wrR' }, w: 11.5, fill, layer: 2, extB: -3, r: 5 },
+    tube({ j: 'elL' }, { j: 'wrL' }, 12, fill, -1, 0, -8),
+    tube({ j: 'elR' }, { j: 'wrR' }, 12, fill, 2, 0, -8),
   );
   return s;
 }
 /** A coat on the trunk; its skirt stops at the belt, the hip, mid-thigh or the knee. */
 export function coat(fill: string, skirt: 'none' | 'hip' | 'thigh' | 'knee'): Band[] {
   const b: Band[] = [
-    { a: { j: 'shB', dy: -2 }, b: { j: 'pel', dy: 2 }, w: 25, fill, r: 9 },
-    { a: { j: 'shL' }, b: { j: 'shR' }, w: 13, fill, extA: 5, extB: 5 },
+    { a: { j: 'shB', dy: -1 }, b: { j: 'pel', dy: 2 }, w: 20, fill, r: 6, extA: 2 },
+    tube({ j: 'shL' }, { j: 'shR' }, 11, fill, 0, -1, -1),
   ];
-  if (skirt === 'hip') b.push({ a: { j: 'pel', dy: -4 }, b: { j: 'pel', dy: 9 }, w: 26, fill, r: 6 });
+  if (skirt === 'hip') b.push({ a: { j: 'pel', dy: -4 }, b: { j: 'pel', dy: 8 }, w: 21, fill, r: 5 });
   if (skirt === 'thigh' || skirt === 'knee') {
     const e = skirt === 'knee' ? 3 : -7;
     b.push(
-      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeL' }, w: 19, fill, extB: e, r: 4 },
-      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeR' }, w: 19, fill, extB: e, r: 4 },
-      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeMid' }, w: 24, fill, extB: e, r: 4 },
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeL' }, w: 15, fill, extB: e, r: 4 },
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeR' }, w: 15, fill, extB: e, r: 4 },
+      { a: { j: 'pel', dy: -4 }, b: { j: 'kneeMid' }, w: 20, fill, extB: e, r: 4 },
     );
   }
   return b;

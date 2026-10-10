@@ -83,7 +83,8 @@ export interface Caesar1Beat extends BaseBeat {
 export const BEATS: Caesar1Beat[] = [
   {
     bed: 'ship',
-    sfx: [{ id: 'creak', at: 0.8, gain: 0.6 }, { id: 'paper', at: 2.4, gain: 0.6 }, { id: 'creak', at: 4.0, gain: 0.5 }, { id: 'paper', at: 5.2, gain: 0.6 }],
+    music: 'mcarnival',
+    sfx: [{ id: 'creak', at: 1.0, gain: 0.5 }, { id: 'paper', at: 2.4, gain: 0.6 }, { id: 'rope', at: 3.8, gain: 0.5 }],
     voiceAfter: 6.0,
     act: 'sail', place: 0,
     speaker: 'plain',
@@ -92,7 +93,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'thud', at: 1.4, gain: 0.7 }, { id: 'plank', at: 2.2, gain: 0.7 }],
+    sfx: [{ id: 'plank', at: 1.35, gain: 0.7 }, { id: 'crate', at: 2.12, gain: 0.7 }, { id: 'crate', at: 2.48, gain: 0.5 }],
     act: 'board', place: 0,
     speaker: 'tophat',
     text: 'Hands where I can see them! This ship belongs to the pirates of Cilicia now.',
@@ -115,7 +116,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'coin', at: 0.6, gain: 0.7 }],
+    sfx: [{ id: 'coinpile', at: 0.55, gain: 0.6 }, { id: 'coin', at: 4.25, gain: 0.6 }],
     act: 'talent', place: 0,
     speaker: 'cap',
     text: 'That’s a lot, sir. One talent is about as much silver as a man can carry.',
@@ -132,6 +133,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'chest', at: 2.15, gain: 0.7 }, { id: 'coinpile', at: 2.6, gain: 0.5 }],
     act: 'fifty', place: 0,
     speaker: 'plain',
     text: 'Fifty, because twenty’s an insult to my family. My friends will raise the silver from the cities on the coast.',
@@ -176,6 +178,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'clap', at: 0.5, gain: 0.7 }, { id: 'clap', at: 0.95, gain: 0.7 }],
     act: 'clap', place: 1,
     speaker: 'cap',
     text: 'I liked the part about the sea, sir.',
@@ -197,7 +200,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'oar', at: 0.2, gain: 0.6 }, { id: 'coin', at: 2.0, gain: 0.7 }, { id: 'coin', at: 3.2, gain: 0.6 }],
+    sfx: [{ id: 'oar', at: 0.2, gain: 0.6 }, { id: 'coinpile', at: 1.9, gain: 0.6 }, { id: 'coin', at: 3.18, gain: 0.6 }],
     act: 'ransom', place: 1,
     speaker: 'tophat',
     text: 'Fifty talents, all counted. Off you go, and try not to miss us.',
@@ -205,7 +208,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 2.1,
   },
   {
-    bed: 'night',
+    bed: 'sea',
     sfx: [{ id: 'oar', at: 1.6, gain: 0.6 }],
     act: 'fleet', place: 2,
     speaker: 'plain',
@@ -214,6 +217,7 @@ export const BEATS: Caesar1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'rope', at: 0.3, gain: 0.5 }],
     act: 'caught', place: 2,
     speaker: 'tophat',
     text: 'Take us to the governor, then. He’ll sell us and keep the silver for himself.',

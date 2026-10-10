@@ -118,7 +118,8 @@ export interface Amazon1Beat extends BaseBeat {
 export const BEATS: Amazon1Beat[] = [
   {
     bed: 'room',
-    sfx: [{ id: 'paper', at: 0.8, gain: 0.6 }, { id: 'tear', at: 2.2, gain: 0.6 }, { id: 'paper', at: 3.6, gain: 0.5 }, { id: 'pencil', at: 5.6, gain: 0.6 }],
+    music: 'mentertainer',
+    sfx: [{ id: 'typing', at: 0.15, gain: 0.55 }, { id: 'tear', at: 2.2, gain: 0.6 }, { id: 'paper', at: 3.55, gain: 0.5 }, { id: 'pencil', at: 5.3, gain: 0.55 }],
     voiceAfter: 6.0,
     act: 'chart', place: 0,
     speaker: 'plain',
@@ -127,8 +128,8 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'door', at: 0.2, gain: 0.5 }],
-    voiceAfter: 1.9,
+    sfx: [{ id: 'door', at: 0.0, gain: 0.6 }, { id: 'doorshut', at: 1.37, gain: 0.45 }],
+    voiceAfter: 2.4,
     act: 'boss', place: 0,
     speaker: 'tophat',
     text: 'It’s late, Bezos, and you’re grinning at a printout. Explain, or go home.',
@@ -136,7 +137,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'pin', at: 0.4, gain: 0.6 }, { id: 'pencil', at: 1.6, gain: 0.5 }],
+    sfx: [{ id: 'pin', at: 0.42, gain: 0.6 }, { id: 'pencil', at: 1.9, gain: 0.5 }],
     act: 'list', place: 0,
     speaker: 'plain',
     text: 'That’s how fast the web is growing, David, and nothing else grows like it. So I’ve made a list of twenty things to sell on it.',
@@ -160,7 +161,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.0,
   },
   {
-    sfx: [{ id: 'book', at: 0.3, gain: 0.7 }],
+    sfx: [{ id: 'book', at: 2.35, gain: 0.7 }],
     act: 'books', place: 0,
     speaker: 'plain',
     text: 'Books, of course. No bookshop can hold three million titles, but a website can list them all.',
@@ -168,6 +169,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'creak', at: 0.85, gain: 0.45 }, { id: 'knock', at: 1.65, gain: 0.4 }, { id: 'knock', at: 4.15, gain: 0.4 }],
     act: 'warn', place: 0,
     speaker: 'tophat',
     text: 'It’s a good idea, I’ll admit. It’s a better idea for someone who doesn’t already have a good job.',
@@ -175,6 +177,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 2.1,
   },
   {
+    sfx: [{ id: 'book', at: 0.5, gain: 0.6 }],
     act: 'regret', place: 0,
     speaker: 'plain',
     text: 'I pictured myself at eighty. I wouldn’t regret failing, but I’d regret never trying.',
@@ -182,7 +185,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'crate', at: 1.8, gain: 0.6 }],
+    sfx: [{ id: 'box', at: 0.8, gain: 0.7 }, { id: 'shed', at: 3.45, gain: 0.6 }, { id: 'doorshut', at: 'tail', gain: 0.45 }],
     act: 'leave', place: 0,
     speaker: 'tophat',
     text: 'You’ll walk out halfway through the year and lose your bonus. Shut the door on your way out.',
@@ -190,7 +193,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 2.1,
   },
   {
-    bed: 'street',
+    bed: 'wind',
     act: 'drive', place: 1,
     speaker: 'bun',
     text: 'Your dad’s old Blazer drives beautifully! Remind me where we’re going again?',
@@ -198,7 +201,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 0.5, gain: 0.6 }],
+    sfx: [{ id: 'paper', at: 0.55, gain: 0.5 }],
     act: 'plan', place: 1,
     speaker: 'plain',
     text: 'A city near the books, full of coders, in a small state. I chose it weeks ago, like a genius.',
@@ -215,7 +218,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.0,
   },
   {
-    sfx: [{ id: 'paper', at: 0.4, gain: 0.6 }],
+    sfx: [{ id: 'pageturn', at: 0.25, gain: 0.7 }],
     act: 'seattle', place: 1,
     speaker: 'plain',
     text: 'Seattle. The biggest book warehouse is a day away, and the whole town is full of programmers.',
@@ -223,6 +226,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'typing', at: 0.6, gain: 0.55 }],
     act: 'typing', place: 1,
     speaker: 'bun',
     text: 'You’ve been typing since Texas. Should I drive slower so the numbers don’t spill?',
@@ -230,6 +234,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'typing', at: 1.7, gain: 0.5 }],
     act: 'draft', place: 1,
     speaker: 'plain',
     text: 'It’s the business plan, and the numbers are holding on fine. One day, people will study this draft.',
@@ -237,9 +242,9 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    bed: 'attic',
-    sfx: [{ id: 'door', at: 0.2, gain: 0.5 }],
-    voiceAfter: 1.9,
+    bed: 'fire',
+    sfx: [{ id: 'door', at: 0.25, gain: 0.6 }, { id: 'doorshut', at: 1.42, gain: 0.45 }],
+    voiceAfter: 2.4,
     act: 'arrive', place: 2,
     speaker: 'cap',
     text: 'Hi, I’m Shel Kaphan. I’ve written software for years, and I’d love to help you build this.',
@@ -247,7 +252,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'plank', at: 0.6, gain: 0.7 }, { id: 'thud', at: 2.0, gain: 0.6 }],
+    sfx: [{ id: 'crate', at: 1.3, gain: 0.6 }, { id: 'plank', at: 3.92, gain: 0.7 }],
     act: 'doors', place: 2,
     speaker: 'plain',
     text: 'Welcome to head office. Desks cost too much, so we’re making ours out of doors.',
@@ -255,7 +260,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'creak', at: 0.8, gain: 0.5 }, { id: 'plank', at: 2.4, gain: 0.6 }],
+    sfx: [{ id: 'crank', at: 1.95, gain: 0.6 }, { id: 'knock', at: 2.4, gain: 0.5 }],
     act: 'drill', place: 2,
     speaker: 'cap',
     text: 'Good thinking, Jeff. I’ll hold it steady while you put the legs on.',
@@ -263,7 +268,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'pin', at: 1.0, gain: 0.6 }],
+    sfx: [{ id: 'creak', at: 0.65, gain: 0.45 }, { id: 'pin', at: 1.7, gain: 0.6 }],
     act: 'name', place: 2,
     speaker: 'bun',
     text: 'I love it in here! What’s the shop called, again?',
@@ -271,6 +276,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'creak', at: 0.25, gain: 0.4 }, { id: 'whoosh', at: 4.2, gain: 0.55 }],
     act: 'cadabra', place: 2,
     speaker: 'plain',
     text: 'Cadabra, as in abracadabra. You wish for a book, and it appears like magic.',
@@ -285,6 +291,7 @@ export const BEATS: Amazon1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'modem', at: 0.5, gain: 0.5 }],
     act: 'rest', place: 2,
     quote: {
       id: 'lq-business-amazon-1-1',

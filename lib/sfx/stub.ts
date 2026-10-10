@@ -6,6 +6,7 @@ export const stubSfx: SfxProvider = {
   prepare: () => {},
   play: () => {},
   bed: () => {},
+  music: () => {},
   duck: () => {},
   hush: () => {},
   release: () => {},

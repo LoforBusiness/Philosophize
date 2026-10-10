@@ -8862,6 +8862,15 @@ It is the first DIALOGUE lesson — LESSON_RULES group AP:
     "The Flower That Broke" (tulip1), personal-growth-endurance-1 "Proceed" (endur1), business-amazon-1
     (amazon1). Outfits in garb.ts UNIT2_OUTFITS (trousers, coats, sleeves; far-limb cloth layer −1,
     near-arm layer 2). Scaffold: scratchpad/make-story.mjs.
+  - **And the owner's first notes on them (2026-10-09), LESSON_RULES AW7–AW9, AT10–AT11.** Clothes are
+    TUBES centred on the joints (`tube()` in garb.ts), not squared bands, so a knee is not a
+    bump. A still figure writes nothing (`Stickman` keeps the pose it last drew; an invisible
+    one is skipped) and is memoised, so a tap rebuilds no figure: the stories went from 7–30%
+    dropped frames to 3–4% on `node scripts/perf-lesson.mjs` at 4× CPU (a recap is 2%).
+    Entrances come through the door (opens, figure framed in the doorway, steps out, door
+    shuts). Sixteen new clips, `door` a real door now, no clip over three times a lesson, and
+    MUSIC: a second loop beside the bed (`music` on a beat, `lib/sfx` `music()`), seven
+    public-domain or CC0 recordings from Wikimedia Commons, one per story.
 - **No letter is cut off, and every lesson's objects are drawings (2026-10-05).** *"the end
   of coin is slightly cut off … I've noticed this for other words."* Android's TextView clips
   its ink to its CONTENT box (inside padding, so padding cannot help), and Caveat draws up to

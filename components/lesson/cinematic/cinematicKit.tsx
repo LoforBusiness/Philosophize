@@ -642,6 +642,12 @@ export interface BaseBeat {
   sfx?: readonly SfxCue[];
   /** The background loop under this beat and the ones after it; `null` stops it (AT6). */
   bed?: SfxId | null;
+  /**
+   * The MUSIC under this beat and the ones after it (AT10): one of lib/sfx's `MUSIC`
+   * loops, a layer of its own beside the bed, held far down while a line is said; `null`
+   * stops it.
+   */
+  music?: SfxId | null;
   /** How long the line waits after the beat opens, for a `lead` sound to land (AT6). */
   voiceAfter?: number;
   /**

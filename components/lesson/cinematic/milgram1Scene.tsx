@@ -9,7 +9,7 @@ import Target from './Target';
 import LessonPicture from './LessonPicture';
 import { BEATS } from './milgram1Script';
 import {
-  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
+  U, WALK, BLANK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs, seated,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -139,6 +139,30 @@ const Q2N = Q2.indexOf(1);
 const SPK = BEATS.map((b) => (b.speaker === 'plain' ? 1 : b.speaker === 'tophat' ? 2 : b.speaker === 'cap' ? 3 : 0));
 /** The camera (the world's translation) on each beat: the office, the lab, the learner's room, the generator. */
 const CAM = BEATS.map((_, n) => (n < ARRIVE ? 0 : n < STRAP ? -640 : n === STRAP ? -400 : -810));
+/**
+ * THE TWO DOORS (AW8). The office door (frame 350–400, opening 354–398, sill 486) and the
+ * laboratory's entrance (frame 642–686, opening 646–682, sill 486) are in the back wall, so
+ * a figure coming in stands IN the opening first, back on its sill and a little smaller,
+ * drawn behind the near jamb (a strip cut from the picture's own frame), and steps forward
+ * out of it into the room over DOOR_STEP units of his walk. Each leaf is the scene's, hinged
+ * at its left edge.
+ */
+const OFFICE_DOOR = 376;
+const LAB_DOOR = 664;
+const DOOR_STEP = 16;
+/** How far into a doorway at `cx` a figure at `x` still stands (1 in it, 0 out in the room); `out` is the way he leaves it. */
+function inDoor(x: number, cx: number, out: number): number {
+  'worklet';
+  const u = ((x - cx) * out) / DOOR_STEP;
+  const c = u < 0 ? 0 : u > 1 ? 1 : u;
+  return 1 - c * c * (3 - 2 * c);
+}
+/** On camera at screen x (with room for a figure's reach either side). */
+function seen(xS: number): boolean {
+  'worklet';
+  return xS > -60 && xS < STAGE_W + 60;
+}
+
 /** Seconds into a cut at which the world is swapped, under the veil. */
 const CUT_S = 0.4;
 
@@ -149,7 +173,7 @@ const M_X = per((n) => (n <= QUESTION ? 118 : n <= ADVERT ? 106 : n === COAT ? 4
 const M_D = per((n) => (n <= QUESTION ? 1 : n === HOW ? -1 : n <= COAT ? 1 : -1));
 const M_SEAT = per((n) => (n <= QUESTION ? 1 : 0));
 /** The experimenter: the corridor (440), by the desk (268), at the cabinet (300); the lab (836), the learner's room (556), by the generator (1016). */
-const E_X = per((n) => (n <= ENTER ? 440 : n <= HOW ? 268 : n <= COAT ? 300 : n < STRAP ? 836 : n === STRAP ? 556 : n === TEST ? 896 : 1016));
+const E_X = per((n) => (n <= ENTER ? OFFICE_DOOR : n <= HOW ? 268 : n <= COAT ? 300 : n < STRAP ? 836 : n === STRAP ? 556 : n === TEST ? 896 : 1016));
 const E_D = per(() => -1);
 /** The volunteer: at the lab door (664), by the experimenter (780), in the doorway (668), at the generator (846). */
 const V_X = per((n) => (n <= ARRIVE ? 664 : n < STRAP ? 780 : n === STRAP ? 668 : 846));
@@ -161,7 +185,7 @@ const L_X = per((n) => (n <= PAY ? 1012 : n < STRAP ? 892 : 502));
 // is done — so the walk is from the carried place to the beat's own END.
 const M_END = per((n) => (n <= ENTER ? 118 : n <= HOW ? 106 : n <= COAT ? 46 : n < GUESS ? 1110 : 1076));
 const M_WS = per((n) => (n === QUESTION ? 0.27 : n === ADVERT || n === GUESS ? 0.4 : 0.02));
-const E_END = per((n) => (n === PAPER ? 440 : n <= QUESTION ? 268 : n <= COAT ? 300 : n < STRAP ? 836 : n === STRAP ? 556 : n === SAMPLE ? 896 : 1016));
+const E_END = per((n) => (n === PAPER ? OFFICE_DOOR : n <= QUESTION ? 268 : n <= COAT ? 300 : n < STRAP ? 836 : n === STRAP ? 556 : n === SAMPLE ? 896 : 1016));
 const E_WS = per((n) => (n === ENTER ? 0.01 : n === HOW ? 0.12 : n === TEST ? 0.08 : 0.02));
 const V_END = per((n) => (n < ARRIVE ? 664 : n < STRAP ? 780 : n === STRAP ? 668 : 846));
 const V_WS = per((n) => (n === ARRIVE ? 0.12 : 0.02));
@@ -376,12 +400,59 @@ function folded(s: Stance, x: number, g: number, d: number, w: number): Stance {
   return hand(r, x, g, d, -1, 9, 56, w);
 }
 
+/**
+ * SMOOTHNESS (AW9): the scene hands every prop its own PART, a derived value per key of
+ * SCENE, and a part whose value is the same as last frame is handed back as the very same
+ * object, so its setter sees no change and nothing that reads it runs. A thing at opacity 0
+ * is the same thing whatever else about it moved. The figures' bundles are left alone
+ * (Stickman compares them itself).
+ */
+function sameFlat(a: any, b: any): boolean {
+  'worklet';
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (a.o === 0 && b.o === 0) return true;
+  for (const key in b) if (a[key] !== b[key]) return false;
+  return true;
+}
+function steady(prev: Record<string, any> | null, keep: SharedValue<Record<string, any> | null>, next: Record<string, any>) {
+  'worklet';
+  if (prev) {
+    for (const key in next) {
+      const v = next[key];
+      if (v === null || typeof v !== 'object' || v.opacity !== undefined) continue;
+      if (sameFlat(prev[key], v)) next[key] = prev[key];
+    }
+  }
+  keep.value = next;
+  return next;
+}
+/** Every key SCENE hands the props and the stage (the figures read their own bundles). */
+const PART_KEYS = [
+  'cam', 'veil', 'dim', 'tOffice', 'tLab', 'tBooth', 'officeDoor', 'labDoor', 'jambE', 'jambV',
+  'paper', 'mug', 'chalk', 'advert', 'coat',
+  'vHat', 'eHat', 'money', 'vSlip', 'lSlip', 'rTT', 'rTL', 'rLL', 'q1',
+  'jar', 'strap', 'cover', 'group', 'labelO',
+  'vElectrode', 'sampleLamp', 'card', 'words', 'lampLit', 'first',
+  'pencil', 'note', 'r150', 'r300', 'r450', 'q2', 'runTo', 'runO',
+] as const;
+type Parts = Record<string, SharedValue<any>>;
+function usePart(S: SharedValue<any>, key: string) {
+  return useDerivedValue(() => S.value[key]);
+}
+function useParts(S: SharedValue<any>): Parts {
+  const out: Parts = {};
+  // PART_KEYS is a module constant, so this is the same list of hooks on every render
+  for (const key of PART_KEYS) out[key] = usePart(S, key); // eslint-disable-line react-hooks/rules-of-hooks
+  return out;
+}
+
 export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: SceneApi) {
   const heldM = useHeld();
   const heldE = useHeld();
   const heldV = useHeld();
   const heldL = useHeld();
-  const cv = useCarry(16);
+  const cv = useCarry(18);
+  const last = useSharedValue<Record<string, any> | null>(null);
   const on = useLinger(i);
   const pk = useSharedValue(0);
   useEffect(() => {
@@ -411,6 +482,11 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
     const bump = (a: number, m: number, z0: number, z1: number) => {
       'worklet';
       return hd(b, L, a, m, z0, z1);
+    };
+    /** A stage in SECONDS of this beat. */
+    const sec = (a: number, z: number) => {
+      'worklet';
+      return stage(b, 1, a, z);
     };
     const q = qv.value;
     const pc = pk.value;
@@ -816,10 +892,22 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
     const figL = keepHeld(heldL, lw.walking ? mixKeepLegs(prevL, sl, tr) : mixStance(prevL, sl, tr));
 
     // ── the bundles ──────────────────────────────────────────────────────────
-    const bM = pose(figM, mxS, G, K, md, 1);
-    const bE = pose(figE, exS, G, K, ed, 1);
-    const bV = pose(figV, vxS, G, K, vd, 1);
-    const bL = pose(figL, lxS, G, K, ld, 1);
+    // THE DOORS (AW8): the office door opens after Milgram's line (b0's tail) and the
+    // experimenter is there in it with his mug; it shuts behind him after HIS line (b1's tail).
+    // The lab's entrance stands open as the scene cuts in, the volunteer in it; it shuts
+    // behind him after his line (b6's tail).
+    const eIn = nv <= ENTER ? inDoor(ex, OFFICE_DOOR, -1) : 0;
+    const vIn = nv === ARRIVE ? inDoor(vx, LAB_DOOR, 1) : 0;
+    const eOnT = nv === PAPER ? sec(13.95, 14.25) : 1;
+    const eOn = carry(cv, 17, n, eOnT, eOnT, nv === ENTER && !back ? tr : 1);
+    const officeT = nv === PAPER ? sec(13.35, 14.05) : nv === ENTER ? 1 - st(0.985, 1.06) : 0;
+    const officeDoor = carry(cv, 16, n, officeT, officeT, nv === PAPER || back || cutBeat ? 1 : tr);
+    const labDoor = nv === ARRIVE ? 1 - st(0.985, 1.06) : 0;
+    // a figure the camera cannot see is not posed (AW9): BLANK never changes, so nothing redraws
+    const bM = seen(mxS) ? pose(figM, mxS, G, K, md, 1) : BLANK;
+    const bE = eOn > 0.001 && seen(exS) ? pose(figE, exS, G - 13 * eIn, K * (1 - 0.1 * eIn), ed, eOn) : BLANK;
+    const bV = seen(vxS) ? pose(figV, vxS, G - 13 * vIn, K * (1 - 0.1 * vIn), vd, 1) : BLANK;
+    const bL = seen(lxS) ? pose(figL, lxS, G, K, ld, 1) : BLANK;
     const mRw = jointOf(bM, 'wrR');
     const mLw = jointOf(bM, 'wrL');
     const eRw = jointOf(bE, 'wrR');
@@ -965,8 +1053,13 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
     const runO = called === 30 || rr < 0.6 ? 1 : (Math.sin(rr * 70) > 0 ? 1 : 0.2) * (1 - clamp01((rr - 0.6) / 0.3));
     const dim = nv === REST ? 0.5 * st(0.05, 0.4) : nv > REST ? 0.5 : 0;
 
-    return {
-      bM, bE, bV, bL, cam, t, veil, dim,
+    // the clocks of things that live in one room stop where the camera cannot see them
+    const tOffice = cam === 0 ? t : 0;
+    const tLab = cam === -640 || cam === -400 ? t : 0;
+    const tBooth = cam === -810 ? t : 0;
+    return steady(last.value, last, {
+      bM, bE, bV, bL, cam, veil, dim, tOffice, tLab, tBooth,
+      officeDoor, labDoor, jambE: eOn * eIn, jambV: vIn,
       paper, mug, chalk, advert,
       coat: { x: coatX, y: coatY, rot: coatR, o: nv <= ADVERT ? 1 : nv === COAT ? 1 - st(0, 0.05) : 0 },
       vHat, eHat, money, vSlip, lSlip, rTT, rTL, rLL, q1,
@@ -974,27 +1067,30 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
       vElectrode, sampleLamp, card, words, lampLit, first,
       pencil: { x: mRw.x, y: mRw.y, o: nv >= ARRIVE ? 1 : 0, rot: -30 * md },
       note, r150, r300, r450, q2, runTo, runO,
-    };
+    });
   });
+  const P = useParts(SCENE);
 
   const DM = useDerivedValue<Bundle>(() => SCENE.value.bM);
   const DE = useDerivedValue<Bundle>(() => SCENE.value.bE);
   const DV = useDerivedValue<Bundle>(() => SCENE.value.bV);
   const DL = useDerivedValue<Bundle>(() => SCENE.value.bL);
-  const world = useAnimatedStyle(() => ({ transform: [{ translateX: SCENE.value.cam }] }));
+  const camP = P.cam;
+  const world = useAnimatedStyle(() => ({ transform: [{ translateX: camP.value }] }));
 
   return (
     <View style={styles.scene}>
       {/* THE WORLD, far to near: the office (x 0–400) and the laboratory (x 400–1230) */}
       <Animated.View style={[styles.world, world]} pointerEvents="none">
         <LessonPicture name="milgram1-office-far" />
-        <Leaves S={SCENE} />
-        <ClockHands S={SCENE} at={CLOCK_O} r={10} />
-        <Chalk S={SCENE} />
+        <Leaves P={P} />
+        <ClockHands P={P} tk="tOffice" at={CLOCK_O} r={10} />
+        <Chalk P={P} />
         <LessonPicture name="milgram1-lab-far-a" />
         <LessonPicture name="milgram1-lab-far-b" />
-        <ClockHands S={SCENE} at={CLOCK_L} r={7.6} />
-        <Reels S={SCENE} />
+        <ClockHands P={P} tk="tLab" at={CLOCK_L} r={7.6} />
+        <Reels P={P} />
+        <Doors P={P} />
         <View style={styles.deskShadow} />
         <View style={styles.cabinetShadow} />
         <View style={styles.chairShadow} />
@@ -1003,46 +1099,48 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
         <LessonPicture name="milgram1-office-near" />
         <LessonPicture name="milgram1-lab-near-a" />
         <LessonPicture name="milgram1-lab-near-b" />
-        <Switches S={SCENE} />
-        <LampRun S={SCENE} />
-        <AnswerBox S={SCENE} />
+        <Switches P={P} />
+        <LampRun P={P} />
+        <AnswerBox P={P} />
         <View style={styles.plugAt}><View style={styles.plug} /><View style={styles.prongA} /><View style={styles.prongB} /></View>
-        <Pairs S={SCENE} />
+        <Pairs P={P} />
       </Animated.View>
-      <Advert S={SCENE} />
-      <Cover S={SCENE} />
-      <Hats S={SCENE} table={1} />
+      <Advert P={P} />
+      <Cover P={P} />
+      <Hats P={P} table={1} />
       {/* cast: tophat */}
       <Stickman D={DE} k={K} role="second" wear={EXPERIMENTER_HEAD} garb={i >= COAT ? UNIT2_OUTFITS.experimenter.garb?.bands : SHIRT_SLEEVES} />
-      <Coat S={SCENE} />
+      <Coat P={P} />
       {/* extra: learner */}
       <Stickman D={DL} k={K} role="crowd" wear={LEARNER_HEAD} garb={UNIT2_OUTFITS.learner.garb?.bands} />
-      <Strap S={SCENE} />
+      <Strap P={P} />
       {/* cast: cap */}
       <Stickman D={DV} k={K} role="crowd" wear={VOLUNTEER_HEAD} garb={UNIT2_OUTFITS.volunteer.garb?.bands} />
       {/* cast: plain */}
       <Stickman D={DM} k={K} role="lead" wear={i >= ARRIVE ? MILGRAM_HEAD : MILGRAM_DESK_HEAD} garb={MILGRAM.garb?.bands} />
+      {/* the near jambs of the two doors, over whoever is still standing IN a doorway (AW8) */}
+      <Animated.View style={[styles.world, world]} pointerEvents="none"><Jambs P={P} /></Animated.View>
       {/* things in hands */}
-      <Newspaper S={SCENE} />
-      <Mug S={SCENE} />
-      <Hats S={SCENE} table={0} />
-      <Money S={SCENE} />
-      <Slip S={SCENE} k="vSlip" />
-      <Slip S={SCENE} k="lSlip" />
-      <Jar S={SCENE} />
-      <Electrode S={SCENE} />
-      <Card S={SCENE} />
-      <Pencil S={SCENE} />
-      <Note S={SCENE} />
+      <Newspaper P={P} />
+      <Mug P={P} />
+      <Hats P={P} table={0} />
+      <Money P={P} />
+      <Slip P={P} k="vSlip" />
+      <Slip P={P} k="lSlip" />
+      <Jar P={P} />
+      <Electrode P={P} />
+      <Card P={P} />
+      <Pencil P={P} />
+      <Note P={P} />
       {/* the labels and the things to tap */}
-      <LabelPlate S={SCENE} />
-      <WordPlate S={SCENE} />
-      {on(Q1) ? <PairPlates S={SCENE} /> : null}
-      {on(Q2) ? <CallPlates S={SCENE} /> : null}
-      <Veil S={SCENE} k="dim" />
-      <Veil S={SCENE} k="veil" />
-      {on(Q1) ? <StageTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} qs={PAIR_Q} k="q1" /> : null}
-      {on(Q2) ? <StageTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} qs={CALL_Q} k="q2" /> : null}
+      <LabelPlate P={P} />
+      <WordPlate P={P} />
+      {on(Q1) ? <PairPlates P={P} /> : null}
+      {on(Q2) ? <CallPlates P={P} /> : null}
+      <Veil P={P} k="dim" />
+      <Veil P={P} k="veil" />
+      {on(Q1) ? <StageTargets picked={picked} onPick={onPick} live={Q1[i] === 1} P={P} qs={PAIR_Q} k="q1" /> : null}
+      {on(Q2) ? <StageTargets picked={picked} onPick={onPick} live={Q2[i] === 1} P={P} qs={CALL_Q} k="q2" /> : null}
     </View>
   );
 }
@@ -1051,16 +1149,17 @@ export default function Milgram1Scene({ clock, bt, bi, i, qv, picked, onPick }: 
 
 /** Maple leaves drifting down past the window, seen through the leading (world x). */
 const LEAF = [[8, 0, 0.9, 0], [30, 0.37, 1.1, 1], [52, 0.71, 0.8, 0], [66, 0.18, 1.0, 1]] as const;
-function Leaves({ S }: { S: SharedValue<any> }) {
+function Leaves({ P }: { P: Parts }) {
   return (
     <View style={styles.windowClip}>
-      {LEAF.map(([x, ph, sp, y], k) => <Leaf key={k} S={S} x={x} ph={ph} sp={sp} yellow={y} />)}
+      {LEAF.map(([x, ph, sp, y], k) => <Leaf key={k} P={P} x={x} ph={ph} sp={sp} yellow={y} />)}
     </View>
   );
 }
-function Leaf({ S, x, ph, sp, yellow }: { S: SharedValue<any>; x: number; ph: number; sp: number; yellow: number }) {
+function Leaf({ P, x, ph, sp, yellow }: { P: Parts; x: number; ph: number; sp: number; yellow: number }) {
+  const tOfficeP = P.tOffice;
   const st = useAnimatedStyle(() => {
-    const f = (S.value.t * 0.11 * sp + ph) % 1;
+    const f = (tOfficeP.value * 0.11 * sp + ph) % 1;
     return {
       transform: [{ translateX: x + 8 * Math.sin(f * 9 + ph * 6) }, { translateY: -6 + 132 * f }, { rotate: `${f * 540 + ph * 200}deg` }, { scaleX: Math.cos(f * 14) }],
     };
@@ -1068,10 +1167,11 @@ function Leaf({ S, x, ph, sp, yellow }: { S: SharedValue<any>; x: number; ph: nu
   return <Animated.View style={[styles.rider, st]}><View style={[styles.leaf, yellow ? styles.leafY : null]} /></Animated.View>;
 }
 /** A clock's hour, minute and second hands. */
-function ClockHands({ S, at: c, r }: { S: SharedValue<any>; at: { x: number; y: number }; r: number }) {
-  const sec = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${Math.floor(S.value.t) * 6}deg` }] }));
-  const min = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${130 + S.value.t * 0.1}deg` }] }));
-  const hr = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${100 + S.value.t * 0.008}deg` }] }));
+function ClockHands({ P, tk, at: c, r }: { P: Parts; tk: 'tOffice' | 'tLab'; at: { x: number; y: number }; r: number }) {
+  const t__P = P[tk];
+  const sec = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${Math.floor(t__P.value) * 6}deg` }] }));
+  const min = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${130 + t__P.value * 0.1}deg` }] }));
+  const hr = useAnimatedStyle(() => ({ transform: [{ translateX: c.x }, { translateY: c.y }, { rotate: `${100 + t__P.value * 0.008}deg` }] }));
   return (
     <>
       <Animated.View style={[styles.rider, hr]}><View style={[styles.hand, { top: -r * 0.55, height: r * 0.55, width: 1.6, left: -0.8 }]} /></Animated.View>
@@ -1081,11 +1181,12 @@ function ClockHands({ S, at: c, r }: { S: SharedValue<any>; at: { x: number; y: 
   );
 }
 /** The tape recorder's reels turning in the booth. */
-function Reels({ S }: { S: SharedValue<any> }) {
-  return <>{REELS.map((x, k) => <Reel key={k} S={S} x={x} k={k} />)}</>;
+function Reels({ P }: { P: Parts }) {
+  return <>{REELS.map((x, k) => <Reel key={k} P={P} x={x} k={k} />)}</>;
 }
-function Reel({ S, x, k }: { S: SharedValue<any>; x: number; k: number }) {
-  const st = useAnimatedStyle(() => ({ transform: [{ translateX: x }, { translateY: 437 }, { rotate: `${S.value.t * (k ? 70 : 52)}deg` }] }));
+function Reel({ P, x, k }: { P: Parts; x: number; k: number }) {
+  const tBoothP = P.tBooth;
+  const st = useAnimatedStyle(() => ({ transform: [{ translateX: x }, { translateY: 437 }, { rotate: `${tBoothP.value * (k ? 70 : 52)}deg` }] }));
   return (
     <Animated.View style={[styles.rider, st]}>
       <View style={styles.spokeA} />
@@ -1094,15 +1195,54 @@ function Reel({ S, x, k }: { S: SharedValue<any>; x: number; k: number }) {
   );
 }
 
+// ── the doors ────────────────────────────────────────────────────────────────
+
+/** The two doors' leaves over the dark beyond them, each hinged at its left edge (world x). */
+function Doors({ P }: { P: Parts }) {
+  const officeP = P.officeDoor;
+  const labP = P.labDoor;
+  const office = useAnimatedStyle(() => ({ transform: [{ translateX: 354 }, { translateY: 366 }, { scaleX: 1 - 0.8 * officeP.value }] }));
+  const lab = useAnimatedStyle(() => ({ transform: [{ translateX: 646 }, { translateY: 368 }, { scaleX: 1 - 0.8 * labP.value }] }));
+  return (
+    <>
+      <View style={[styles.doorway, { left: 354, top: 366, width: 44, height: 120 }]} />
+      <Animated.View style={[styles.rider, office]}>
+        <View style={styles.officeLeaf} />
+        <View style={styles.officePane} />
+        <View style={styles.officePanel} />
+        <View style={styles.officeKnob} />
+      </Animated.View>
+      <View style={[styles.doorway, { left: 646, top: 368, width: 36, height: 116 }]} />
+      <Animated.View style={[styles.rider, lab]}>
+        <View style={styles.labLeaf}><View style={styles.labLeafArt}><LessonPicture name="milgram1-lab-far-a" /></View></View>
+      </Animated.View>
+    </>
+  );
+}
+/** The near jamb of each door, cut from the picture's own frame (world x). */
+function Jambs({ P }: { P: Parts }) {
+  const eP = P.jambE;
+  const vP = P.jambV;
+  const office = useAnimatedStyle(() => ({ opacity: eP.value > 0.01 ? 1 : 0 }));
+  const lab = useAnimatedStyle(() => ({ opacity: vP.value > 0.01 ? 1 : 0 }));
+  return (
+    <>
+      <Animated.View style={[styles.jambOffice, office]}><View style={styles.jambOfficeArt}><LessonPicture name="milgram1-office-far" /></View></Animated.View>
+      <Animated.View style={[styles.jambLab, lab]}><View style={styles.jambLabArt}><LessonPicture name="milgram1-lab-far-a" /></View></Animated.View>
+    </>
+  );
+}
+
 // ── the office ───────────────────────────────────────────────────────────────
 
 const CHALK_LINES = ['ORDINARY', 'MAN?', 'ORDERS?'];
 /** The chalked question on the board, line by line as his hand crosses it (world x). */
-function Chalk({ S }: { S: SharedValue<any> }) {
-  return <>{CHALK_LINES.map((w, k) => <ChalkLine key={k} S={S} k={k} word={w} />)}</>;
+function Chalk({ P }: { P: Parts }) {
+  return <>{CHALK_LINES.map((w, k) => <ChalkLine key={k} P={P} k={k} word={w} />)}</>;
 }
-function ChalkLine({ S, k, word }: { S: SharedValue<any>; k: number; word: string }) {
-  const st = useAnimatedStyle(() => ({ width: 52 * S.value.chalk[k], opacity: S.value.chalk[k] > 0.01 ? 1 : 0 }));
+function ChalkLine({ P, k, word }: { P: Parts; k: number; word: string }) {
+  const chalkP = P.chalk;
+  const st = useAnimatedStyle(() => ({ width: 52 * chalkP.value[k], opacity: chalkP.value[k] > 0.01 ? 1 : 0 }));
   return (
     <Animated.View style={[styles.chalkClip, { top: BOARD.y[k] - 7 }, st]}>
       <Text style={styles.chalkText}>{word}</Text>
@@ -1110,39 +1250,44 @@ function ChalkLine({ S, k, word }: { S: SharedValue<any>; k: number; word: strin
   );
 }
 /** The newspaper, opened in his hands (screen space); on the desk after he drops it. */
-function Newspaper({ S }: { S: SharedValue<any> }) {
+function Newspaper({ P }: { P: Parts }) {
+  const paperP = P.paper;
   const st = useAnimatedStyle(() => {
-    const v = S.value.paper;
+    const v = paperP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { scaleX: v.sx }, { scaleY: v.sy }] };
   });
   return <Animated.View nativeID="m1-paper" style={[styles.rider, st]}><LessonPicture name="milgram1-paper" /></Animated.View>;
 }
 /** The mug of coffee, in his hand or on the desk, steaming. */
-function Mug({ S }: { S: SharedValue<any> }) {
+function Mug({ P }: { P: Parts }) {
+  const mugP = P.mug;
   const st = useAnimatedStyle(() => {
-    const v = S.value.mug;
+    const v = mugP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
   return (
     <Animated.View style={[styles.rider, st]}>
-      {[0, 1].map((k) => <Steam key={k} S={S} k={k} />)}
+      {[0, 1].map((k) => <Steam key={k} P={P} k={k} />)}
       <View style={styles.mugHandle} />
       <View style={styles.mugBody} />
       <View style={styles.mugCoffee} />
     </Animated.View>
   );
 }
-function Steam({ S, k }: { S: SharedValue<any>; k: number }) {
+function Steam({ P, k }: { P: Parts; k: number }) {
+  const mugP = P.mug;
+  const tOfficeP = P.tOffice;
   const st = useAnimatedStyle(() => {
-    const ph = (S.value.t * 0.4 + k / 2) % 1;
-    return { opacity: S.value.mug.steam * 0.8 * Math.sin(Math.PI * ph), transform: [{ translateX: 1.5 * Math.sin(ph * 6 + k) }, { translateY: -12 - 16 * ph }, { scale: 0.6 + ph }] };
+    const ph = (tOfficeP.value * 0.4 + k / 2) % 1;
+    return { opacity: mugP.value.steam * 0.8 * Math.sin(Math.PI * ph), transform: [{ translateX: 1.5 * Math.sin(ph * 6 + k) }, { translateY: -12 - 16 * ph }, { scale: 0.6 + ph }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.steam} /></Animated.View>;
 }
 /** The advert: in his hand, then pinned on the corkboard. */
-function Advert({ S }: { S: SharedValue<any> }) {
+function Advert({ P }: { P: Parts }) {
+  const advertP = P.advert;
   const st = useAnimatedStyle(() => {
-    const v = S.value.advert;
+    const v = advertP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { scale: v.s }] };
   });
   return (
@@ -1157,9 +1302,10 @@ function Advert({ S }: { S: SharedValue<any> }) {
   );
 }
 /** The grey lab coat: on its hook, in his hand, flying, on the experimenter's shoulder. */
-function Coat({ S }: { S: SharedValue<any> }) {
+function Coat({ P }: { P: Parts }) {
+  const coatP = P.coat;
   const st = useAnimatedStyle(() => {
-    const v = S.value.coat;
+    const v = coatP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${v.rot}deg` }] };
   });
   return <Animated.View nativeID="m1-coat" style={[styles.rider, st]}><LessonPicture name="milgram1-coat" /></Animated.View>;
@@ -1168,17 +1314,19 @@ function Coat({ S }: { S: SharedValue<any> }) {
 // ── the lab ──────────────────────────────────────────────────────────────────
 
 /** The hats: the volunteer's brown one and the experimenter's grey one, held or on the table. */
-function Hats({ S, table }: { S: SharedValue<any>; table: 0 | 1 }) {
+function Hats({ P, table }: { P: Parts; table: 0 | 1 }) {
+  const eHatP = P.eHat;
+  const vHatP = P.vHat;
   const v = useAnimatedStyle(() => {
-    const h = S.value.vHat;
+    const h = vHatP.value;
     return { opacity: h.o * (h.tb === table ? 1 : 0), transform: [{ translateX: h.x }, { translateY: h.y }, { rotate: `${h.rot}deg` }, { scaleX: h.sx }] };
   });
   const eUp = useAnimatedStyle(() => {
-    const h = S.value.eHat;
+    const h = eHatP.value;
     return { opacity: h.o * h.up * (h.tb === table ? 1 : 0), transform: [{ translateX: h.x }, { translateY: h.y }] };
   });
   const eDown = useAnimatedStyle(() => {
-    const h = S.value.eHat;
+    const h = eHatP.value;
     return { opacity: h.o * (1 - h.up) * (h.tb === table ? 1 : 0), transform: [{ translateX: h.x }, { translateY: h.y }, { rotate: `${h.rot}deg` }] };
   });
   return (
@@ -1190,32 +1338,35 @@ function Hats({ S, table }: { S: SharedValue<any>; table: 0 | 1 }) {
   );
 }
 /** Four dollar bills and two quarters fanned in his palm. */
-function Money({ S }: { S: SharedValue<any> }) {
+function Money({ P }: { P: Parts }) {
   return (
     <>
-      {[0, 1, 2, 3].map((k) => <Bill key={k} S={S} k={k} />)}
-      {[0, 1].map((k) => <Quarter key={`q${k}`} S={S} k={k} />)}
+      {[0, 1, 2, 3].map((k) => <Bill key={k} P={P} k={k} />)}
+      {[0, 1].map((k) => <Quarter key={`q${k}`} P={P} k={k} />)}
     </>
   );
 }
-function Bill({ S, k }: { S: SharedValue<any>; k: number }) {
+function Bill({ P, k }: { P: Parts; k: number }) {
+  const moneyP = P.money;
   const st = useAnimatedStyle(() => {
-    const v = S.value.money;
+    const v = moneyP.value;
     return { opacity: v.o * (v.bills > k ? 1 : 0), transform: [{ translateX: v.x }, { translateY: v.y - k * 1.2 }, { rotate: `${-14 + k * 9}deg` }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.bill} /></Animated.View>;
 }
-function Quarter({ S, k }: { S: SharedValue<any>; k: number }) {
+function Quarter({ P, k }: { P: Parts; k: number }) {
+  const moneyP = P.money;
   const st = useAnimatedStyle(() => {
-    const v = S.value.money;
+    const v = moneyP.value;
     return { opacity: v.o * (v.quarters > k ? 1 : 0), transform: [{ translateX: v.x - 2 + k * 4 }, { translateY: v.y - 6 }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.quarter} /></Animated.View>;
 }
 /** A slip of paper drawn from the hat: folded, then opened. */
-function Slip({ S, k }: { S: SharedValue<any>; k: 'vSlip' | 'lSlip' }) {
+function Slip({ P, k }: { P: Parts; k: 'vSlip' | 'lSlip' }) {
+  const kP = P[k];
   const st = useAnimatedStyle(() => {
-    const v = S.value[k];
+    const v = kP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { scaleX: 0.45 + 0.55 * v.open }] };
   });
   return (
@@ -1226,24 +1377,29 @@ function Slip({ S, k }: { S: SharedValue<any>; k: 'vSlip' | 'lSlip' }) {
   );
 }
 /** The three pairs of slips on the hat table (Q1): the right pair hops into the hat; a wrong one jumps and flops (world x). */
-function Pairs({ S }: { S: SharedValue<any> }) {
-  return <>{PAIRS.map((p) => <Pair key={p.id} S={S} id={p.id} x={p.x} />)}</>;
+function Pairs({ P }: { P: Parts }) {
+  return <>{PAIRS.map((p) => <Pair key={p.id} P={P} id={p.id} x={p.x} />)}</>;
 }
-function Pair({ S, id, x }: { S: SharedValue<any>; id: string; x: number }) {
+function Pair({ P, id, x }: { P: Parts; id: string; x: number }) {
+  const camP = P.cam;
+  const eHatP = P.eHat;
+  const q1P = P.q1;
+  const rLLP = P.rLL;
+  const rTLP = P.rTL;
+  const rTTP = P.rTT;
   const st = useAnimatedStyle(() => {
-    const v = S.value;
-    const r = id === 'tt' ? v.rTT : id === 'tl' ? v.rTL : v.rLL;
+    const r = id === 'tt' ? rTTP.value : id === 'tl' ? rTLP.value : rLLP.value;
     if (id === 'tt') {
       // into the hat in the experimenter's hand, held out at the table's end
       const f = clamp01(r * 1.4);
-      const hx = v.eHat.x - v.cam;
+      const hx = eHatP.value.x - camP.value;
       const tx = lerp(x, hx, f);
-      const ty = lerp(460, v.eHat.y - 2, f) - 40 * Math.sin(Math.PI * f);
-      return { opacity: v.q1 * (f < 0.98 ? 1 : 0), transform: [{ translateX: tx }, { translateY: ty }, { rotate: `${300 * f}deg` }, { scale: 1 - 0.5 * f }] };
+      const ty = lerp(460, eHatP.value.y - 2, f) - 40 * Math.sin(Math.PI * f);
+      return { opacity: q1P.value * (f < 0.98 ? 1 : 0), transform: [{ translateX: tx }, { translateY: ty }, { rotate: `${300 * f}deg` }, { scale: 1 - 0.5 * f }] };
     }
     const hop = r > 0 && r < 1 ? Math.abs(Math.sin(r * Math.PI * 2)) * (1 - r) * 12 : 0;
     return {
-      opacity: v.q1,
+      opacity: q1P.value,
       transform: [{ translateX: x + (r > 0 && r < 1 ? 2 * Math.sin(r * 30) * (1 - r) : 0) }, { translateY: 460 - hop }, { scaleY: r > 0 && r < 1 ? Math.cos(r * Math.PI * 4) : 1 }],
     };
   });
@@ -1255,17 +1411,19 @@ function Pair({ S, id, x }: { S: SharedValue<any>; id: string; x: number }) {
   );
 }
 /** The paste jar in his hand. */
-function Jar({ S }: { S: SharedValue<any> }) {
+function Jar({ P }: { P: Parts }) {
+  const jarP = P.jar;
   const st = useAnimatedStyle(() => {
-    const v = S.value.jar;
+    const v = jarP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.jar} /><View style={styles.jarLid} /></Animated.View>;
 }
 /** The leather strap buckled over Mr Wallace's forearm, the electrode beside it. */
-function Strap({ S }: { S: SharedValue<any> }) {
+function Strap({ P }: { P: Parts }) {
+  const strapP = P.strap;
   const st = useAnimatedStyle(() => {
-    const v = S.value.strap;
+    const v = strapP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
   return (
@@ -1277,17 +1435,19 @@ function Strap({ S }: { S: SharedValue<any> }) {
   );
 }
 /** The electrode band on the volunteer's own wrist (the 45-volt sample). */
-function Electrode({ S }: { S: SharedValue<any> }) {
+function Electrode({ P }: { P: Parts }) {
+  const vElectrodeP = P.vElectrode;
   const st = useAnimatedStyle(() => {
-    const v = S.value.vElectrode;
+    const v = vElectrodeP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.band} /></Animated.View>;
 }
 /** The grey cloth over the generator: pulled up and off, gathered on his arm, dropped on the chair. */
-function Cover({ S }: { S: SharedValue<any> }) {
+function Cover({ P }: { P: Parts }) {
+  const coverP = P.cover;
   const st = useAnimatedStyle(() => {
-    const v = S.value.cover;
+    const v = coverP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { scale: v.s }] };
   });
   return (
@@ -1297,34 +1457,37 @@ function Cover({ S }: { S: SharedValue<any> }) {
   );
 }
 /** Switch one thrown down, its lamp lit; the sample lamp; the called switches (Q2). World x. */
-function Switches({ S }: { S: SharedValue<any> }) {
+function Switches({ P }: { P: Parts }) {
   return (
     <>
-      <SwitchLamp S={S} k={1} />
-      <SwitchLamp S={S} k={3} />
-      {CALLS.map((c) => <SwitchLamp key={c.id} S={S} k={c.k} />)}
+      <SwitchLamp P={P} k={1} />
+      <SwitchLamp P={P} k={3} />
+      {CALLS.map((c) => <SwitchLamp key={c.id} P={P} k={c.k} />)}
     </>
   );
 }
-function SwitchLamp({ S, k }: { S: SharedValue<any>; k: number }) {
+function SwitchLamp({ P, k }: { P: Parts; k: number }) {
+  const firstP = P.first;
+  const r150P = P.r150;
+  const r300P = P.r300;
+  const r450P = P.r450;
+  const sampleLampP = P.sampleLamp;
   const x = SW(k);
   const lamp = useAnimatedStyle(() => {
-    const v = S.value;
     let lit = 0;
-    if (k === 1) lit = v.first;
-    if (k === 3) lit = v.sampleLamp;
-    if (k === 10) lit = v.r150 > 0 && v.r150 < 0.6 ? (Math.sin(v.r150 * 60) > 0 ? 1 : 0) : 0;
-    if (k === 20) lit = v.r300 > 0 && v.r300 < 0.6 ? (Math.sin(v.r300 * 60) > 0 ? 1 : 0) : 0;
-    if (k === 30) lit = v.r450 > 0.1 ? 1 : 0;
+    if (k === 1) lit = firstP.value;
+    if (k === 3) lit = sampleLampP.value;
+    if (k === 10) lit = r150P.value > 0 && r150P.value < 0.6 ? (Math.sin(r150P.value * 60) > 0 ? 1 : 0) : 0;
+    if (k === 20) lit = r300P.value > 0 && r300P.value < 0.6 ? (Math.sin(r300P.value * 60) > 0 ? 1 : 0) : 0;
+    if (k === 30) lit = r450P.value > 0.1 ? 1 : 0;
     return { opacity: lit };
   });
   const down = useAnimatedStyle(() => {
-    const v = S.value;
     let d = 0;
-    if (k === 1) d = v.first;
-    if (k === 10) d = v.r150 > 0 && v.r150 < 0.7 ? 1 : 0;
-    if (k === 20) d = v.r300 > 0 && v.r300 < 0.7 ? 1 : 0;
-    if (k === 30) d = v.r450 > 0.05 ? 1 : 0;
+    if (k === 1) d = firstP.value;
+    if (k === 10) d = r150P.value > 0 && r150P.value < 0.7 ? 1 : 0;
+    if (k === 20) d = r300P.value > 0 && r300P.value < 0.7 ? 1 : 0;
+    if (k === 30) d = r450P.value > 0.05 ? 1 : 0;
     return { opacity: d };
   });
   return (
@@ -1338,17 +1501,21 @@ function SwitchLamp({ S, k }: { S: SharedValue<any>; k: number }) {
 }
 /** Q2's reaction: the lamps light one by one along the row to the switch the reader called. World x. */
 const LAMPS = Array.from({ length: 30 }, (_, k) => k + 1);
-function LampRun({ S }: { S: SharedValue<any> }) {
-  return <>{LAMPS.map((k) => <RunLamp key={k} S={S} k={k} />)}</>;
+function LampRun({ P }: { P: Parts }) {
+  return <>{LAMPS.map((k) => <RunLamp key={k} P={P} k={k} />)}</>;
 }
-function RunLamp({ S, k }: { S: SharedValue<any>; k: number }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.runTo >= k - 0.01 ? S.value.runO : 0 }));
+function RunLamp({ P, k }: { P: Parts; k: number }) {
+  const runOP = P.runO;
+  const runToP = P.runTo;
+  const st = useAnimatedStyle(() => ({ opacity: runToP.value >= k - 0.01 ? runOP.value : 0 }));
   return <Animated.View style={[styles.lampLit, { left: SW(k) - 1.6, top: LAMP_Y - 1.9 }, st]} />;
 }
 /** The answer box on top of the generator: four lamps, the fourth lights for LAMP. World x. */
-function AnswerBox({ S }: { S: SharedValue<any> }) {
-  const lit = useAnimatedStyle(() => ({ opacity: S.value.lampLit }));
-  const card = useAnimatedStyle(() => ({ opacity: S.value.card.onTable }));
+function AnswerBox({ P }: { P: Parts }) {
+  const cardP = P.card;
+  const lampLitP = P.lampLit;
+  const lit = useAnimatedStyle(() => ({ opacity: lampLitP.value }));
+  const card = useAnimatedStyle(() => ({ opacity: cardP.value.onTable }));
   return (
     <>
       <View style={styles.answerBox} />
@@ -1359,9 +1526,10 @@ function AnswerBox({ S }: { S: SharedValue<any> }) {
   );
 }
 /** The word card in the volunteer's hand. */
-function Card({ S }: { S: SharedValue<any> }) {
+function Card({ P }: { P: Parts }) {
+  const cardP = P.card;
   const st = useAnimatedStyle(() => {
-    const v = S.value.card;
+    const v = cardP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }] };
   });
   return (
@@ -1373,17 +1541,19 @@ function Card({ S }: { S: SharedValue<any> }) {
   );
 }
 /** Milgram's pencil. */
-function Pencil({ S }: { S: SharedValue<any> }) {
+function Pencil({ P }: { P: Parts }) {
+  const pencilP = P.pencil;
   const st = useAnimatedStyle(() => {
-    const v = S.value.pencil;
+    const v = pencilP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${v.rot}deg` }] };
   });
   return <Animated.View style={[styles.rider, st]}><View style={styles.pencil} /><View style={styles.pencilTip} /></Animated.View>;
 }
 /** The note torn off the clipboard and stuck to the glass: 1 IN 1,000. */
-function Note({ S }: { S: SharedValue<any> }) {
+function Note({ P }: { P: Parts }) {
+  const noteP = P.note;
   const st = useAnimatedStyle(() => {
-    const v = S.value.note;
+    const v = noteP.value;
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${v.rot}deg` }, { scale: v.s }] };
   });
   return (
@@ -1398,24 +1568,28 @@ function Note({ S }: { S: SharedValue<any> }) {
 // ── the plates ───────────────────────────────────────────────────────────────
 
 /** The group under the volunteer's finger, read out above the generator (b13). */
-function LabelPlate({ S }: { S: SharedValue<any> }) {
-  const fade = useAnimatedStyle(() => ({ opacity: S.value.labelO }));
+function LabelPlate({ P }: { P: Parts }) {
+  const labelOP = P.labelO;
+  const fade = useAnimatedStyle(() => ({ opacity: labelOP.value }));
   return (
     <Animated.View style={[styles.world, fade]} pointerEvents="none">
       <View style={styles.labelPlate}>
-        {GROUPS.map((g, k) => <GroupWord key={k} S={S} k={k} word={g} />)}
+        {GROUPS.map((g, k) => <GroupWord key={k} P={P} k={k} word={g} />)}
       </View>
     </Animated.View>
   );
 }
-function GroupWord({ S, k, word }: { S: SharedValue<any>; k: number; word: string }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.group === k ? 1 : 0 }));
+function GroupWord({ P, k, word }: { P: Parts; k: number; word: string }) {
+  const groupP = P.group;
+  const st = useAnimatedStyle(() => ({ opacity: groupP.value === k ? 1 : 0 }));
   return <Animated.Text style={[styles.labelText, k >= 6 ? styles.danger : null, st]}>{word}</Animated.Text>;
 }
 /** The four answers over the answer box: SKY · INK · BOX · LAMP, the lit one struck amber. */
-function WordPlate({ S }: { S: SharedValue<any> }) {
-  const fade = useAnimatedStyle(() => ({ opacity: S.value.words }));
-  const lit = useAnimatedStyle(() => ({ opacity: S.value.lampLit }));
+function WordPlate({ P }: { P: Parts }) {
+  const lampLitP = P.lampLit;
+  const wordsP = P.words;
+  const fade = useAnimatedStyle(() => ({ opacity: wordsP.value }));
+  const lit = useAnimatedStyle(() => ({ opacity: lampLitP.value }));
   return (
     <Animated.View style={[styles.world, fade]} pointerEvents="none">
       <View style={styles.wordPlate}>
@@ -1426,8 +1600,9 @@ function WordPlate({ S }: { S: SharedValue<any> }) {
   );
 }
 /** Q1: the words on each pair of slips, over the hat table. */
-function PairPlates({ S }: { S: SharedValue<any> }) {
-  const fade = useAnimatedStyle(() => ({ opacity: S.value.q1 }));
+function PairPlates({ P }: { P: Parts }) {
+  const q1P = P.q1;
+  const fade = useAnimatedStyle(() => ({ opacity: q1P.value }));
   return (
     <Animated.View style={[styles.world, fade]} pointerEvents="none">
       {PAIRS.map((p) => (
@@ -1440,8 +1615,9 @@ function PairPlates({ S }: { S: SharedValue<any> }) {
   );
 }
 /** Q2: the three voltages, on the table's apron under their switches. */
-function CallPlates({ S }: { S: SharedValue<any> }) {
-  const fade = useAnimatedStyle(() => ({ opacity: S.value.q2 }));
+function CallPlates({ P }: { P: Parts }) {
+  const q2P = P.q2;
+  const fade = useAnimatedStyle(() => ({ opacity: q2P.value }));
   return (
     <Animated.View style={[styles.world, fade]} pointerEvents="none">
       {CALLS.map((c) => (
@@ -1453,8 +1629,9 @@ function CallPlates({ S }: { S: SharedValue<any> }) {
   );
 }
 /** The veil over a cut, and the lights going down at the end. */
-function Veil({ S, k }: { S: SharedValue<any>; k: 'veil' | 'dim' }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value[k] }));
+function Veil({ P, k }: { P: Parts; k: 'veil' | 'dim' }) {
+  const kP = P[k];
+  const st = useAnimatedStyle(() => ({ opacity: kP.value }));
   return <Animated.View style={[styles.veil, st]} pointerEvents="none" />;
 }
 
@@ -1463,11 +1640,12 @@ type Q = { id: string; left: number; top: number; w: number; h: number; r: numbe
 const PAIR_Q: Q[] = PAIRS.map((p) => ({ id: p.id, left: p.x - 24 - 640, top: 322, w: 48, h: 144, r: 5, correct: p.id === 'tt' }));
 /** CALL THE SWITCH: each box covers a switch, its lamp and its voltage plate (screen x, the generator shot). */
 const CALL_Q: Q[] = CALLS.map((c) => ({ id: c.id, left: SW(c.k) - 17 - 810, top: 380, w: 34, h: 108, r: 5, correct: c.id === 'v450' }));
-function StageTargets({ picked, onPick, live, S, qs, k }: {
-  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; S: SharedValue<any>; qs: Q[]; k: 'q1' | 'q2';
+function StageTargets({ picked, onPick, live, P, qs, k }: {
+  picked: string | null; onPick: (id: string, ok: boolean) => void; live: boolean; P: Parts; qs: Q[]; k: 'q1' | 'q2';
 }) {
   const answered = picked !== null || !live;
-  const fade = useAnimatedStyle(() => ({ opacity: S.value[k] }));
+  const kP = P[k];
+  const fade = useAnimatedStyle(() => ({ opacity: kP.value }));
   return (
     <Animated.View style={[StyleSheet.absoluteFill, fade]} pointerEvents="box-none">
       {qs.map((q) => (
@@ -1487,6 +1665,17 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   world: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  doorway: { position: 'absolute', backgroundColor: W.milgram1Doorway.base },
+  officeLeaf: { position: 'absolute', left: 0, top: 0, width: 44, height: 120, backgroundColor: W.milgram1Door.base, borderWidth: 0.8, borderColor: INK },
+  officePane: { position: 'absolute', left: 8, top: 10, width: 28, height: 36, backgroundColor: W.milgram1Frost.base, borderWidth: 0.6, borderColor: W.milgram1Door.shade },
+  officePanel: { position: 'absolute', left: 6, top: 56, width: 32, height: 56, borderWidth: 0.8, borderColor: W.milgram1Door.shade },
+  officeKnob: { position: 'absolute', left: 36, top: 64, width: 3.6, height: 3.6, borderRadius: 1.8, backgroundColor: W.milgram1Amber.shade, borderWidth: 0.4, borderColor: INK },
+  labLeaf: { position: 'absolute', left: 0, top: 0, width: 36, height: 116, overflow: 'hidden' },
+  labLeafArt: { position: 'absolute', left: -646, top: -368, width: 0, height: 0 },
+  jambOffice: { position: 'absolute', left: 349.4, top: 361, width: 5.2, height: 126, overflow: 'hidden' },
+  jambOfficeArt: { position: 'absolute', left: -349.4, top: -361, width: 0, height: 0 },
+  jambLab: { position: 'absolute', left: 681.4, top: 363, width: 5.2, height: 124, overflow: 'hidden' },
+  jambLabArt: { position: 'absolute', left: -681.4, top: -363, width: 0, height: 0 },
   veil: { position: 'absolute', left: 0, top: 214, width: STAGE_W, height: 300, backgroundColor: W.milgram1Dim.base },
   windowClip: { position: 'absolute', left: 180, top: 300, width: 72, height: 124, overflow: 'hidden' },
   leaf: { position: 'absolute', left: -2.6, top: -1.6, width: 5.2, height: 3.2, borderRadius: 1.6, backgroundColor: W.milgram1Leaf.base, borderWidth: 0.4, borderColor: W.milgram1Leaf.shade },

@@ -9,7 +9,7 @@ import Target from './Target';
 import LessonPicture from './LessonPicture';
 import { BEATS } from './tulip1Script';
 import {
-  U, WALK, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
+  U, WALK, WALK_SPEED, clamp01, ease01, lerp, mixStance, moveTr, pose, travelStance, mixKeepLegs,
   type Bundle, type Stance,
 } from './rig';
 import {
@@ -59,17 +59,21 @@ import { UNIT2_OUTFITS, WEAR, breeches, coat, sleeves, front, knitCap, dressed }
 //   bare, 256 striped); the PLANK on two crates by the gate (298–394, top 472) with the three
 //   flowering pots of Q2 (314 red, 346 striped, 378 yellow); the brass PRICE TAG.
 //
-//   b0   the gate creaks open (2.2s); the boy wheels the barrow in (wheel 0.6s), sets it
-//        down (crate 4.0s) and tugs the straw off the top crate (paper 5.2s); Clusius walks
-//        in behind him and turns to the garden: a hand out over the beds, then on his chest.
-//        Cluyt is bent over bed 1, two pushes of the spade; he looks up.
+//   b0   the gate swings open (door 0s, 0.35–1.15s); Clusius appears IN its opening, small
+//        and far, held inside it behind the leaf, steps out onto the back walk, goes along it
+//        past the end of bed 2 and down the gap to the front walk, turns and walks to his mark
+//        (AW8); then the boy wheels the barrow in along the walk from the street (trolley 3.5s),
+//        sets it down (crate 6.3s) and tugs the straw off the top crate (whoosh 7.45s).
+//        Clusius: a hand out over the beds, then on his chest. Cluyt is bent over bed 1, two
+//        pushes of the spade; he looks up.
 //   b1   Cluyt straightens, plants his spade and leans on it, glaring at the crates.
 //   b2   Clusius lifts the crate lid (crate 0.3s), holds up a brown bulb like a jewel, turns
 //        to show it to Cluyt.   b3  the boy walks to bed 2, kneels and pushes a label into it.
 //   b4   Clusius taps a folded letter out of his doublet, twice, chin up.
 //   b5   Cluyt drops a bulb into a hole in bed 1 (clay 1.0s) and pats the soil flat, twice.
-//   b6   the haze; spring: the beds flower, the tree is in leaf; the boy runs in from the
-//        gate and points back at the hats bobbing over the wall; a purse is waved.
+//   b6   the haze; spring: the beds flower, the tree is in leaf; the boy comes back in through
+//        the open gate the same way (AW8), points back at the hats bobbing over the wall; a
+//        purse is waved.
 //   b7   Clusius walks between the beds and the gate and folds his arms; the hats sink.
 //   b8   the dark; night: the boy holds his lantern up by the wall (creak 0.4s), Cluyt by the
 //        ladder, Clusius hurries in from the left.
@@ -134,22 +138,46 @@ const Q2 = BEATS.map((b) => (b.tags ? 1 : 0));
 const Q1N = Q1.indexOf(1);
 const Q2N = Q2.indexOf(1);
 const PLACE = BEATS.map((b) => b.place ?? 0);
+// What is mounted on which beat (AW9): a thing that cannot be seen is not built at all.
+const CORNER_ON = BEATS.map((_, n) => (n >= at('broken') ? 1 : 0));
+const AUTUMN_ON = BEATS.map((_, n) => (n <= at('bloom') ? 1 : 0));
+const LABEL_ON = BEATS.map((_, n) => (n >= at('label') && n <= at('broken') ? 1 : 0));
+const NIGHT_ON = BEATS.map((_, n) => (n >= at('theft') && n <= at('broken') ? 1 : 0));
 /** Who speaks each beat: 1 Clusius, 2 Cluyt, 3 the boy. */
 const SPK = BEATS.map((b) => (b.speaker === 'plain' ? 1 : b.speaker === 'tophat' ? 2 : b.speaker === 'cap' ? 3 : 0));
 
 const CUT_S = 0.4;
 const HX = 400;
 
+// ── THE GATE (AW8): the arched gate in the back wall (302–336, its foot on the back walk at
+// 452). Whoever comes in through it appears IN its opening, small and far, held inside it,
+// steps out onto the back walk, goes along it past the end of bed 2 (344) and comes down the
+// gap to the front walk. Each waypoint is [x, feet y, scale].
+type Way = readonly [number, number, number];
+const GATE = { x0: 302, x1: 336, top: 400, foot: 452 };
+const GATE_SC = 0.46;
+const GATE_IN: readonly Way[] = [[319, 452, GATE_SC], [321, 463, 0.56], [362, 465, 0.58], [362, 500, 1]];
+/** Clusius on from the gate in b0 (s); at its foot he turns and walks along to his mark. */
+const C_PATH_S = 1.25;
+const C_MARK = 290;
+/** The boy back in through the gate from the crowd in b6 (s). */
+const P_PATH_S = 0.45;
+/** When the gate swings open in b0 (the `door` cue at 0, its latch 0.37s in). */
+const GATE_OPEN = [0.35, 1.15] as const;
+/** The boy and the barrow come along the walk from the street once Clusius is down (b0, s). */
+const BOY_GO = 3.4;
+const BOY_LATE = 2.3;
+
 // ── where everybody is at the START of each beat (WORLD x; the corner is x + 400) ──
 const per = <T,>(f: (n: number) => T) => BEATS.map((_, n) => f(n));
-const C_X = per((n) => (n === ARRIVE ? 450 : n < BLOOM ? 290 : n === BLOOM || n === REFUSE ? 230 : n === THEFT ? -30
+const C_X = per((n) => (n === ARRIVE ? GATE_IN[0][0] : n < BLOOM ? 290 : n === BLOOM || n === REFUSE ? 230 : n === THEFT ? -30
   : n === HOLES ? 150 : n === SHRUG ? 206 : HX + 156));
-const C_D = [-1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1];
+const C_D = [1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1];
 const H_X = per((n) => (n < THEFT ? 56 : n <= SHRUG ? 262 : n <= SCARCE ? HX + 40 : HX + 100));
 const H_D = per((n) => (n === SHRUG ? -1 : 1));
-const P_X = per((n) => (n === ARRIVE ? 520 : n <= LABEL ? 378 : n < BLOOM ? 240 : n === BLOOM ? 440
+const P_X = per((n) => (n === ARRIVE ? 520 : n <= LABEL ? 378 : n < BLOOM ? 240 : n === BLOOM ? GATE_IN[0][0]
   : n < BROKEN ? 352 : n <= SCARCE ? HX + 92 : n === Q1N || n === REVEAL ? HX + 286 : HX + 276));
-const P_D = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1];
+const P_D = [-1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1];
 
 // ── things ──────────────────────────────────────────────────────────────────
 const WHEEL = 316;
@@ -303,6 +331,38 @@ function jointOf(w: Bundle, k: 'wrR' | 'wrL') {
   const v = w[k];
   return { x: v[0].translateX as number, y: v[1].translateY as number };
 }
+/**
+ * Where a figure is along a path of waypoints at time `b` (from `start`, at `speed` × the
+ * walk): its x, its feet's y, its scale, and a Walk whose stride is measured in the figure's
+ * own units, so a small far figure takes as many steps as a near one covering that ground.
+ */
+function pathAt(P: readonly Way[], start: number, b: number, speed: number) {
+  'worklet';
+  let tot = 0;
+  for (let k = 1; k < P.length; k += 1) tot += Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]) / ((P[k][2] + P[k - 1][2]) / 2);
+  const dur = tot / (WALK_SPEED * speed);
+  const lin = clamp01((b - start) / dur);
+  const e = ease01(lin);
+  let want = e * tot;
+  let x = P[P.length - 1][0];
+  let g = P[P.length - 1][1];
+  let sc = P[P.length - 1][2];
+  let seg = P.length - 2;
+  for (let k = 1; k < P.length; k += 1) {
+    const d = Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]) / ((P[k][2] + P[k - 1][2]) / 2);
+    if (want <= d || k === P.length - 1) {
+      const f = d > 0 ? clamp01(want / d) : 1;
+      x = lerp(P[k - 1][0], P[k][0], f);
+      g = lerp(P[k - 1][1], P[k][1], f);
+      sc = lerp(P[k - 1][2], P[k][2], f);
+      seg = k - 1;
+      break;
+    }
+    want -= d;
+  }
+  const w = { x, x0: 0, x1: tot, u: e, walking: b >= start && lin < 1, ws: start, we: start + dur, wd: 0 };
+  return { x, g, sc, seg, w, end: start + dur };
+}
 /** Kneeling on one knee, the body leant toward the work, the hands on their keys. */
 function kneelOf(s: Stance, kn: number, t: number, phase: number, R: readonly Key[] | null, L: readonly Key[] | null, u: number,
   x: number, d: number, lean: number): Stance {
@@ -320,7 +380,7 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
   const heldP = useHeld();
   const heldE1 = useHeld();
   const heldE2 = useHeld();
-  const cv = useCarry(15);
+  const cv = useCarry(21);
   const on = useLinger(i);
   const pk = useSharedValue(0);
   useEffect(() => {
@@ -389,7 +449,20 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     let cx = cxs;
     let cTurns: (readonly number[])[] = [[0, C_D[nv]]];
     let cKneel = 0;
-    if (nv === ARRIVE) cw = walkOf(cxs, 290, 2.6, cds, b);
+    // in through the gate (AW8): held inside its opening, small, then out and along the walks
+    let cg = G;
+    let cSc = 1;
+    let cIn = 0;
+    if (nv === ARRIVE) {
+      const pa = pathAt(GATE_IN, C_PATH_S, b, 1);
+      const foot = GATE_IN[3][0];
+      cw = b < pa.end + 0.05 ? pa.w : walkOf(foot, C_MARK, pa.end + TURN_S + 0.05, 1, b);
+      cx = b < pa.end + 0.05 ? pa.x : cw.x;
+      cg = pa.g;
+      cSc = pa.sc;
+      cIn = 1 - clamp01((b - C_PATH_S) / 0.32);
+      cTurns = [[0, 1]];
+    }
     if (nv === UNPACK) cTurns = [[0, -1], [0.04, 1], [0.6, -1]];
     if (nv === REFUSE) cw = walkOf(cxs, 300, 0.05 * L, cds, b);
     if (nv === THEFT && !pre) cw = walkOf(cxs, 150, 0.1 * L, 1, b);
@@ -402,6 +475,9 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     if (nv === VIRUS) cTurns = [[0, 1], [0.05, -1]];
     if (cw.wd !== 0) cx = cw.x;
     const cxS = carry(cv, 1, n, cx, cx, 1) + cam;
+    const cgS = carry(cv, 15, n, cg, cg, nv === ARRIVE ? 1 : tr);
+    const cScS = carry(cv, 16, n, cSc, cSc, nv === ARRIVE ? 1 : tr);
+    const cInS = carry(cv, 17, n, cIn, cIn, nv === ARRIVE ? 1 : tr);
     const cd = carry(cv, 2, n, 0, faceOf(cds, cTurns, b, L, cw), 1);
     const cCode = sp(1) ? TALK : NOD;
     let sc = bodyOf(cw, cCode, t, b, 0);
@@ -590,15 +666,25 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     let px = pxs;
     let pTurns: (readonly number[])[] = [[0, P_D[nv]]];
     let pKneel = 0;
-    if (nv === ARRIVE) pw = walkOf(pxs, 378, 0.4, -1, b);
+    let pg = G;
+    let pSc = 1;
+    let pIn = 0;
+    if (nv === ARRIVE) pw = walkOf(pxs, 378, BOY_GO, -1, b);
     if (nv === LABEL) {
       pw = walkOf(pxs, 240, 0.02 * L, -1, b);
       pKneel = st(0.62, 0.74);
     }
     if (nv === ENVOY) pKneel = 1 - st(0.78, 0.94);
-    if (nv === BLOOM && !pre) {
-      pw = walkOf(pxs, 352, 0.04 * L, -1, b);
-      pTurns = [[0, -1], [0.55, 1], [0.86, -1]];
+    if (nv === BLOOM) {
+      // back in through the gate from the crowd (AW8): held in its opening, then out and down
+      const pa = pathAt(GATE_IN, P_PATH_S, b, 1.25);
+      pw = pa.w;
+      px = pa.x;
+      pg = pa.g;
+      pSc = pa.sc;
+      pIn = 1 - clamp01((b - P_PATH_S) / 0.3);
+      // down from the gate he points back at the hats over the wall, then turns to them
+      pTurns = [[0, 1], [0.94, -1]];
     }
     if (nv === SCARCE) {
       pw = walkOf(pxs, HX + 286, 0.04 * L, 1, b);
@@ -609,6 +695,9 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     if (nv === LEGACY) pTurns = [[0, 1], [0.05, -1]];
     if (pw.wd !== 0) px = pw.x;
     const pxS = carry(cv, 5, n, px, px, 1) + cam;
+    const pgS = carry(cv, 18, n, pg, pg, nv === BLOOM ? 1 : tr);
+    const pScS = carry(cv, 19, n, pSc, pSc, nv === BLOOM ? 1 : tr);
+    const pInS = carry(cv, 20, n, pIn, pIn, nv === BLOOM ? 1 : tr);
     const pd = carry(cv, 6, n, 0, faceOf(pds, pTurns, b, L, pw), 1);
     const pCode = sp(3) ? TALK : NOD;
     let spp = bodyOf(pw, pCode, t, b, 2);
@@ -617,19 +706,19 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     let pLean = 0;
     let pNeck = 0;
     // the barrow: rolled in, its handles lifted, then set down (b0); where its grips are
-    const barrowRot = nv === ARRIVE ? -14 * (1 - stage(b, 1, 3.7, 4.05)) : 0;
+    const barrowRot = nv === ARRIVE ? -14 * (1 - stage(b, 1, 3.7 + BOY_LATE, 4.05 + BOY_LATE)) : 0;
     const wheelX = nv === ARRIVE ? Math.min(WHEEL + 140, px - 62) : WHEEL;
     const ra = (barrowRot * Math.PI) / 180;
     const gripX = wheelX + 50 * Math.cos(ra) + 21 * Math.sin(ra);
     const gripY = G + 50 * Math.sin(ra) - 21 * Math.cos(ra);
     if (nv === ARRIVE) {
-      const grip = 1 - stage(b, 1, 4.3, 4.6);
+      const grip = 1 - stage(b, 1, 4.3 + BOY_LATE, 4.6 + BOY_LATE);
       const glx = (pxS - gripX) / KS;
       const gly = (G - gripY) / KS;
-      const straw = hd(b, 1, 4.9, 5.2, 5.5, 5.9);
+      const straw = hd(b, 1, 4.9 + BOY_LATE, 5.2 + BOY_LATE, 5.5 + BOY_LATE, 5.9 + BOY_LATE);
       pR = [[0, glx + 14 * straw, gly + 13 * straw, Math.max(grip, straw)]];
       pL = [[0, glx - 2, gly + 1, grip]];
-      pLean = 0.22 * grip + 0.12 * hd(b, 1, 3.7, 4.0, 4.1, 4.4);
+      pLean = 0.22 * grip + 0.12 * hd(b, 1, 3.7 + BOY_LATE, 4.0 + BOY_LATE, 4.1 + BOY_LATE, 4.4 + BOY_LATE);
       pNeck = 0.06 - 0.1 * hd(b, 11.72, S0(6.2), S0(6.8), S0(10), S0(10.8));
     }
     if (nv === DIG) {
@@ -646,9 +735,9 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     if (nv === ENVOY) pNeck = 0.2 - 0.36 * bump(0.1, 0.2, 0.7, 0.8);
     if (nv === PLANT) pNeck = 0.06 * bump(0.3, 0.4, 0.8, 0.9);
     if (nv === BLOOM && !pre) {
-      // he points back at the hats over the wall, then turns again
-      pR = [[0.55, 8, 44, 0], [0.64, 26, 86, 1], [0.8, 26, 86, 1], [0.86, 8, 44, 0]];
-      pNeck = -0.12 * bump(0.6, 0.66, 0.8, 0.86);
+      // down from the gate, he turns and points back at the hats over the wall, then turns again
+      pR = [[0.7, 8, 44, 0], [0.76, 26, 86, 1], [0.88, 26, 86, 1], [0.94, 8, 44, 0]];
+      pNeck = -0.12 * bump(0.74, 0.78, 0.88, 0.92);
     }
     if (nv === REFUSE) pNeck = 0.12 * bump(0.6, 0.7, 0.9, 1);
     // by night: the lantern
@@ -715,18 +804,21 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const e1g = 470 - 8 * peek1 + 34 * Math.max(sinkA, qWrong) - 10 * qRight;
     const e2g = 470 - 7 * peek2 + 34 * Math.max(sinkA, qWrong) - 12 * qRight;
     const purse = Math.max(nv === BLOOM ? bump(0.5, 0.6, 0.85, 0.95) : 0, qRight);
-    let s1 = hLive(NOD, t, b, 3);
+    // over the wall only when there is a crowd; otherwise one still pose (AW9)
+    const tE = crowd ? t : 0;
+    const bE = crowd ? b : 0;
+    let s1 = hLive(NOD, tE, bE, 3);
     s1 = hand(s1, e1x, e1g, -1, 1, 14, 96, purse, KE);
     s1 = leanOf(s1, 0, -0.1 * peek1);
-    let s2 = hLive(NOD, t, b, 4);
+    let s2 = hLive(NOD, tE, bE, 4);
     s2 = leanOf(s2, 0.04 * peek2, -0.12 * peek2 - 0.1 * qRight);
     const figE1 = keepHeld(heldE1, mixStance(carryFrom(heldE1, n, s1), s1, tr));
     const figE2 = keepHeld(heldE2, mixStance(carryFrom(heldE2, n, s2), s2, tr));
 
     // ── the bundles ──────────────────────────────────────────────────────────
-    const bC = pose(figC, cxS, G, K, cd, 1);
+    const bC = pose(figC, cxS, cgS, K * cScS, cd, nv === ARRIVE && b < GATE_OPEN[0] - 0.05 ? 0 : 1);
     const bH = pose(figH, hxS, G, K, hd0, 1);
-    const bP = pose(figP, pxS, G, K, pd, 1);
+    const bP = pose(figP, pxS, pgS, K * pScS, pd, 1);
     const bE1 = pose(figE1, e1x, e1g, KE, -1, crowd);
     const bE2 = pose(figE2, e2x, e2g, KE, -1, crowd);
     const cRw = jointOf(bC, 'wrR');
@@ -738,7 +830,17 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const e1w = jointOf(bE1, 'wrR');
 
     // ── the gate, the seasons, the beds ──
-    const gateOpen = place === 0 ? (nv === ARRIVE ? stage(b, 1, 2.0, 2.8) : 1) : 0;
+    const gateOpen = place === 0 ? (nv === ARRIVE ? stage(b, 1, GATE_OPEN[0], GATE_OPEN[1]) : 1) : 0;
+    // the window that holds a figure inside the gate's opening, its left edge the swinging leaf's
+    const leafR = GATE.x0 + (GATE.x1 - GATE.x0) * (1 - 0.86 * gateOpen) + cam;
+    const clipOf = (inn: number) => {
+      'worklet';
+      const l = lerp(-100, leafR, inn);
+      const r = lerp(STAGE_W + 100, GATE.x1 + cam, inn);
+      const tp = lerp(0, GATE.top - 2, inn);
+      const bt2 = lerp(STAGE_H, GATE.foot + 1, inn);
+      return { l, t: tp, w: Math.max(0, r - l), h: Math.max(0, bt2 - tp) };
+    };
     const grow1 = nv === BLOOM ? st(0.0, 0.3) : nv > BLOOM ? 1 : 0;
     const grow2 = nv === BLOOM ? st(0.1, 0.42) : nv > BLOOM ? 1 : 0;
     // ── the barrow and its crate lid ──
@@ -827,6 +929,7 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
       cBulb, cBulbAt: cRw, letter, letterAt: cLw, soil, crumbs, soilAt: cRw, hBulb, spade, lantern,
       bed, aphid, aphidAt: hRw, rRed1, rBare1, rStr1, bloom1, sPot, r2Red, r2Str, r2Yel, price, velvet,
       purse, purseAt: e1w, leaves,
+      clipC: clipOf(cInS), clipP: clipOf(pInS),
       q1: carry(cv, 13, n, 0, Q1[n], tr),
       q2: carry(cv, 14, n, 0, Q2[n], tr),
     };
@@ -868,36 +971,61 @@ export default function Tulip1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
         <View style={styles.plankShadow} />
         <LessonPicture name="tulip1-plank" />
       </Animated.View>
-      <LightPool S={SCENE} />
-      <Leaves S={SCENE} />
-      <Label S={SCENE} />
-      <Barrow S={SCENE} />
-      <BedTulip S={SCENE} held={0} />
-      <Pot1 S={SCENE} k={0} />
-      <Pot1 S={SCENE} k={1} />
-      <Velvet S={SCENE} />
-      <Pot2 S={SCENE} k={0} />
-      <Pot2 S={SCENE} k={1} />
-      <Pot2 S={SCENE} k={2} />
+      {on(NIGHT_ON) ? <LightPool S={SCENE} /> : null}
+      {on(AUTUMN_ON) ? <Leaves S={SCENE} /> : null}
+      {on(LABEL_ON) ? <Label S={SCENE} /> : null}
+      {on(AUTUMN_ON) ? <Barrow S={SCENE} /> : null}
+      {on(CORNER_ON) ? <BedTulip S={SCENE} held={0} /> : null}
+      {on(CORNER_ON) ? <Pot1 S={SCENE} k={0} /> : null}
+      {on(CORNER_ON) ? <Pot1 S={SCENE} k={1} /> : null}
+      {on(CORNER_ON) ? <Velvet S={SCENE} /> : null}
+      {on(CORNER_ON) ? <Pot2 S={SCENE} k={0} /> : null}
+      {on(CORNER_ON) ? <Pot2 S={SCENE} k={1} /> : null}
+      {on(CORNER_ON) ? <Pot2 S={SCENE} k={2} /> : null}
       <Spade S={SCENE} />
       {/* cast: tophat */}
       <Stickman D={DH} k={K} role="second" wear={CLUYT_HEAD} garb={CLUYT.garb?.bands} />
-      <BedTulip S={SCENE} held={1} />
+      {on(CORNER_ON) ? <BedTulip S={SCENE} held={1} /> : null}
       <Aphid S={SCENE} />
       <HandBulb S={SCENE} />
-      {/* cast: plain */}
-      <Stickman D={DC} k={K} role="lead" wear={[]} garb={CLUSIUS.garb?.bands} />
+      <GateClip S={SCENE} k="clipC">
+        {/* cast: plain */}
+        <Stickman D={DC} k={K} role="lead" wear={[]} garb={CLUSIUS.garb?.bands} />
+      </GateClip>
       <ClusiusThings S={SCENE} />
-      {/* cast: cap */}
-      <Stickman D={DP} k={K} role="crowd" wear={BOY_HEAD} garb={BOY.garb?.bands} />
-      <Pot1 S={SCENE} k={2} />
-      <Lantern S={SCENE} />
-      <PriceTag S={SCENE} />
+      <GateClip S={SCENE} k="clipP">
+        {/* cast: cap */}
+        <Stickman D={DP} k={K} role="crowd" wear={BOY_HEAD} garb={BOY.garb?.bands} />
+      </GateClip>
+      {on(CORNER_ON) ? <Pot1 S={SCENE} k={2} /> : null}
+      {on(NIGHT_ON) ? <Lantern S={SCENE} /> : null}
+      {on(CORNER_ON) ? <PriceTag S={SCENE} /> : null}
       <Veil S={SCENE} k="haze" />
       <Veil S={SCENE} k="dark" />
       {on(Q1) ? <StageTargets picked={picked} onPick={onPick} live={Q1[i] === 1} S={SCENE} qs={POT_Q} k="q1" /> : null}
       {on(Q2) ? <StageTargets picked={picked} onPick={onPick} live={Q2[i] === 1} S={SCENE} qs={TAG_Q} k="q2" /> : null}
     </View>
+  );
+}
+
+/**
+ * A window onto the stage that holds a figure to the gate's opening while he stands in it
+ * (AW8), and opens to the whole stage once he is out. The inner layer is moved back by the
+ * window's corner, so the figure keeps stage x and y.
+ */
+function GateClip({ S, k, children }: { S: SharedValue<any>; k: 'clipC' | 'clipP'; children: React.ReactNode }) {
+  const outer = useAnimatedStyle(() => {
+    const c = S.value[k];
+    return { left: c.l, top: c.t, width: c.w, height: c.h };
+  });
+  const inner = useAnimatedStyle(() => {
+    const c = S.value[k];
+    return { transform: [{ translateX: -c.l }, { translateY: -c.t }] };
+  });
+  return (
+    <Animated.View style={[styles.clipBox, outer]} pointerEvents="none">
+      <Animated.View style={[styles.world, inner]} pointerEvents="none">{children}</Animated.View>
+    </Animated.View>
   );
 }
 
@@ -930,6 +1058,8 @@ function Leaves({ S }: { S: SharedValue<any> }) {
 }
 function Leaf({ S, y, ph, red }: { S: SharedValue<any>; y: number; ph: number; red: number }) {
   const st = useAnimatedStyle(() => {
+    // once the leaves are gone they hold still (AW9)
+    if (S.value.leaves === 0) return { opacity: 0, transform: [{ translateX: 420 }, { translateY: y }, { rotate: '0deg' }] };
     const f = (S.value.t * 0.11 + ph) % 1;
     return {
       opacity: S.value.leaves * (f < 0.92 ? 1 : 0),
@@ -982,7 +1112,8 @@ function Spade({ S }: { S: SharedValue<any> }) {
   });
   const shaft = useAnimatedStyle(() => {
     const v = S.value.spade;
-    return { height: Math.max(4, Math.hypot(v.tx - v.gx, v.ty - v.gy) - 6) };
+    // scaled from a 100-tall shaft about its top: a transform, not a height (no layout pass)
+    return { transform: [{ scaleY: Math.max(4, Math.hypot(v.tx - v.gx, v.ty - v.gy) - 6) / 100 }] };
   });
   const blade = useAnimatedStyle(() => {
     const v = S.value.spade;
@@ -1037,9 +1168,13 @@ function HandBulb({ S }: { S: SharedValue<any> }) {
 function Lantern({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.lantern;
+    if (v.o === 0) return { opacity: 0, transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }] };
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${3 * Math.sin(S.value.t * 1.3)}deg` }] };
   });
-  const flame = useAnimatedStyle(() => ({ transform: [{ scaleY: 0.8 + 0.2 * Math.sin(S.value.t * 9) + 0.08 * Math.sin(S.value.t * 17) }] }));
+  const flame = useAnimatedStyle(() => {
+    const t = S.value.lantern.o === 0 ? 0 : S.value.t;
+    return { transform: [{ scaleY: 0.8 + 0.2 * Math.sin(t * 9) + 0.08 * Math.sin(t * 17) }] };
+  });
   return (
     <Animated.View nativeID="t1-lantern" style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.lanternRing} />
@@ -1052,7 +1187,7 @@ function Lantern({ S }: { S: SharedValue<any> }) {
 }
 /** The lantern's light lying on the gravel under it (flat, one shape). */
 function LightPool({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: 0.32 * S.value.lantern.o, transform: [{ translateX: S.value.lantern.x }, { translateY: 498 }] }));
+  const st = useAnimatedStyle(() => ({ opacity: 0.32 * S.value.lantern.o, transform: [{ translateX: S.value.lantern.o === 0 ? 0 : S.value.lantern.x }, { translateY: 498 }] }));
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><View style={styles.pool} /></Animated.View>;
 }
 /** The broken tulip: in bed F, or dug up in Cluyt's hand with its bulb and two offsets. */
@@ -1080,10 +1215,10 @@ function Aphid({ S }: { S: SharedValue<any> }) {
 }
 /** A merchant's purse, waved over the wall. */
 function Purse({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({
-    opacity: S.value.purse > 0.3 ? 1 : 0,
-    transform: [{ translateX: S.value.purseAt.x }, { translateY: S.value.purseAt.y }, { rotate: `${10 * Math.sin(S.value.t * 4)}deg` }],
-  }));
+  const st = useAnimatedStyle(() => {
+    if (S.value.purse <= 0.3) return { opacity: 0, transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }] };
+    return { opacity: 1, transform: [{ translateX: S.value.purseAt.x }, { translateY: S.value.purseAt.y }, { rotate: `${10 * Math.sin(S.value.t * 4)}deg` }] };
+  });
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <View style={styles.purse} />
@@ -1140,7 +1275,7 @@ function Pot2({ S, k }: { S: SharedValue<any>; k: number }) {
     const v = S.value;
     const f = clamp01((v.r2Str - 0.6) / 0.4);
     const nod = k === 1 ? 6 * Math.sin(Math.PI * 2 * f) * (1 - f) : 0;
-    return { transform: [{ translateY: -15 }, { rotate: `${nod + 1.5 * Math.sin(v.t * 0.8 + k)}deg` }] };
+    return { transform: [{ translateY: -15 }, { rotate: `${nod + (v.place === 2 ? 1.5 * Math.sin(v.t * 0.8 + k) : 0)}deg` }] };
   });
   return (
     <Animated.View nativeID={`t1-pot2-${p.id}`} style={[styles.rider, st]} pointerEvents="none">
@@ -1153,6 +1288,7 @@ function Pot2({ S, k }: { S: SharedValue<any>; k: number }) {
 function PriceTag({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
     const v = S.value.price;
+    if (v.o === 0) return { opacity: 0, transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }] };
     return { opacity: v.o, transform: [{ translateX: v.x }, { translateY: v.y }, { rotate: `${v.swing}deg` }] };
   });
   return <Animated.View nativeID="t1-price" style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="tulip1-price" /></Animated.View>;
@@ -1196,6 +1332,7 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   world: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  clipBox: { position: 'absolute', overflow: 'hidden' },
   rowsAt: { position: 'absolute', left: 0, top: -486, width: 0, height: 0 },
   tagAt: { position: 'absolute', left: 0, top: -14, width: 0, height: 0 },
   haze: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.tulip1Haze.base },
@@ -1211,7 +1348,7 @@ const styles = StyleSheet.create({
   labelFace: { position: 'absolute', left: -5, top: -19, width: 10, height: 6, borderRadius: 1, backgroundColor: W.tulip1Paper.base, borderWidth: 0.6, borderColor: INK },
   labelInk: { position: 'absolute', left: -3.4, top: -16.6, width: 6.8, height: 0.8, backgroundColor: W.tulip1Wood.shade },
   spadeT: { position: 'absolute', left: -4, top: -1, width: 8, height: 2.4, borderRadius: 1.2, backgroundColor: W.tulip1Wood.shade },
-  spadeShaft: { position: 'absolute', left: -1.2, top: 0, width: 2.4, borderRadius: 1.2, backgroundColor: W.tulip1Wood.base },
+  spadeShaft: { position: 'absolute', left: -1.2, top: 0, width: 2.4, height: 100, borderRadius: 1.2, backgroundColor: W.tulip1Wood.base, transformOrigin: '50% 0%' },
   spadeBlade: { position: 'absolute', left: -4.4, top: 0, width: 8.8, height: 10, borderBottomLeftRadius: 2.4, borderBottomRightRadius: 2.4, backgroundColor: W.tulip1Iron.base, borderWidth: 0.6, borderColor: INK },
   letter: { position: 'absolute', left: -5, top: -3.5, width: 10, height: 7, borderRadius: 0.8, backgroundColor: W.tulip1Paper.base, borderWidth: 0.6, borderColor: INK },
   letterSeal: { position: 'absolute', left: -1.6, top: -1.4, width: 3.2, height: 3.2, borderRadius: 1.6, backgroundColor: W.tulip1Wax.base },

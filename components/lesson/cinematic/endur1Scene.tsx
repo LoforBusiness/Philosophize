@@ -62,8 +62,8 @@ import { UNIT2_OUTFITS, WEAR, dressed, trousers, coat, sleeves } from './garb';
 //   people stand on, the CHANNEL they cut ahead of her bow (0–184), the folding TABLE
 //   (290, top 474) with the LOG on its writing slope, two crates, a pick, two ice saws.
 //
-//   b0   (6.0s before the line) Shackleton walks to the map and pins it (creak 0.8,
-//        paper 3.6); Crean comes up the gangplank and sets a crate down by the stores
+//   b0   (6.0s before the line) Shackleton walks to the map and pins it (creak 0.8, pin
+//        3.6); Crean comes up the gangplank and sets a crate down by the stores
 //        (crate 2.2) and goes back for another; Shackleton steps off (creak 5.0), hands
 //        on hips, chin up; then his line, a hand to his chest, opened out.
 //   b1   Worsley steps to the map and drags one finger across it, coast to coast; sighs.
@@ -754,7 +754,9 @@ export default function Endur1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     const cOn = place === 2 || cxS < 420 ? 1 : 0;
 
     // ══ THE SEAMAN ON THE FLOE (silent) ══════════════════════════════════════
-    let se = hLive(NOD, t, b, 3);
+    // off the floe he is transparent: one still pose, nothing to write (AW9)
+    const onFloe = place === 2;
+    let se = onFloe ? hLive(NOD, t, b, 3) : hHold(NOD, 0, 3);
     let eR: readonly Key[] | null = [[0, 10, 60, 1]];
     let eL: readonly Key[] | null = [[0, 10, 44, 1]];
     let eLean = 0;
@@ -788,8 +790,8 @@ export default function Endur1Scene({ clock, bt, bi, i, qv, picked, onPick }: Sc
     }
     if (nv === HOME) eNeck = -0.1 * bump(0.6, 0.7, 0.86, 0.96);
     if (nv >= MOOD) { eSeat = nv === MOOD ? st(0.14, 0.34) : 1; eR = [[0, 12, 44, 1]]; eL = [[0, 10, 30, 0.8]]; }
-    se = keyed(se, eR, u, E_X, G, 1, 1);
-    se = keyed(se, eL, u, E_X, G, 1, -1);
+    se = keyed(se, eR, onFloe ? u : 0, E_X, G, 1, 1);
+    se = keyed(se, eL, onFloe ? u : 0, E_X, G, 1, -1);
     se = leanOf(se, eLean, eNeck);
     if (eSeat > 0) {
       let seat = seatOf(SEAT_E, 12);
@@ -1147,7 +1149,8 @@ function EnvelopeLabels({ S }: { S: SharedValue<any> }) {
 /** A husky looking out of its kennel door, its head lifting and turning at its own moment. */
 function Husky({ S, x, k }: { S: SharedValue<any>; x: number; k: number }) {
   const st = useAnimatedStyle(() => {
-    const t = S.value.t;
+    // away from Grytviken the dogs hold still (AW9)
+    const t = S.value.p1 === 1 ? S.value.t : 0;
     const look = Math.max(0, Math.sin(t * (0.5 + 0.13 * k) + k * 1.9));
     return { transform: [{ translateX: x }, { translateY: 484 - 1.6 * look }, { scaleX: Math.sin(t * 0.21 + k * 2) > 0 ? 1 : -1 }] };
   });
@@ -1222,6 +1225,8 @@ function Smoke({ S }: { S: SharedValue<any> }) {
 }
 function Puff({ S, k }: { S: SharedValue<any>; k: number }) {
   const st = useAnimatedStyle(() => {
+    // no fire in the stove yet: the puffs hold still (AW9)
+    if (S.value.smoke === 0) return { opacity: 0, transform: [{ translateX: STOVE.x }, { translateY: STOVE.y }, { scale: 1 }] };
     const ph = (S.value.t * 0.28 + k / 4) % 1;
     return {
       opacity: S.value.smoke * 0.85 * Math.sin(Math.PI * ph),

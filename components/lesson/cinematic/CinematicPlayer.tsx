@@ -165,6 +165,8 @@ export type SceneComponent = ComponentType<SceneApi>;
 
 /** The bed's level under the lesson (AT6), before it is held down for a line. */
 const BED_GAIN = 0.55;
+/** The music's level under the lesson (AT10), before it is held far down for a line. */
+const MUSIC_GAIN = 0.4;
 /** How long after a line's last word a `tail` sound comes in (AT6). */
 const TAIL_AFTER_S = 0.3;
 /**
@@ -461,7 +463,7 @@ export default function CinematicPlayer({
   // under everything, held down while a line is said, and follows `shown`, like the
   // voice. An answer tapped on the stage is heard too: the seal strikes on a right one,
   // a finger taps a wrong one (PICK_SFX).
-  const usesSfx = useMemo(() => beats.some((b) => !!b.sfx || b.bed !== undefined), [beats]);
+  const usesSfx = useMemo(() => beats.some((b) => !!b.sfx || b.bed !== undefined || b.music !== undefined), [beats]);
   const sfxOn = useUserDataStore((s) => s.settings.soundEffects !== false) && sounded && sfx.isSupported();
   useEffect(() => {
     if (!usesSfx) return;
@@ -469,6 +471,7 @@ export default function CinematicPlayer({
     for (const b of beats) {
       for (const c of b.sfx ?? []) ids.add(c.id);
       if (b.bed) ids.add(b.bed);
+      if (b.music) ids.add(b.music);
     }
     sfx.prepare([...ids]);
     return () => sfx.release();
@@ -1155,13 +1158,20 @@ export default function CinematicPlayer({
     if (!usesSfx) return;
     // whatever the last beat was still sounding went quiet when the beat changed (the
     // layout effect at `usesSfx`), before this one's line; turned off, everything stops
-    if (!sfxOn || done) { sfx.hush(); sfx.bed(null); return; }
+    if (!sfxOn || done) { sfx.hush(); sfx.bed(null); sfx.music(null); return; }
     let bedNow: SfxId | null = null;
     for (let k = shown; k >= 0; k -= 1) {
       const b = beats[k];
       if (b.bed !== undefined && plays(k)) { bedNow = b.bed; break; }
     }
     sfx.bed(bedNow, BED_GAIN);
+    // the music follows the beat on screen the same way (AT10)
+    let musicNow: SfxId | null = null;
+    for (let k = shown; k >= 0; k -= 1) {
+      const b = beats[k];
+      if (b.music !== undefined && plays(k)) { musicNow = b.music; break; }
+    }
+    sfx.music(musicNow, MUSIC_GAIN);
     if (guideOpen) return;
     const b = beats[shown];
     const line = narrated?.[shown];

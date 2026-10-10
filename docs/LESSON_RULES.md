@@ -12331,6 +12331,42 @@ scene's own `LINES`, and it moves when they do.
    moves with them, and the cues do not. `check:sfx` catches one past the end of its
    beat; only listening catches one inside it.
 
+### AT10 · Music: free, quiet, and held far down under every line (2026-10-09)
+
+> *"if there is ever a point that you can add free music or free instrumental music or
+> something like that where it's completely free to use, this would also be a good addition."*
+
+1. **Free means public domain or CC0, and nothing that asks for a credit.** The music is
+   recordings on Wikimedia Commons whose page says Public domain or CC0 (most are
+   Musopen's, released into the public domain), listed in `scripts/lib/sfxcuts.mjs` SOURCES
+   with `music: true` and the Commons page as the url. CC BY recordings are left out even
+   though they are free, because they need a credit the app has nowhere to print.
+   `check:sfx` holds the licence and the page.
+2. **It is a layer of its own.** A beat's `music` names one of `MUSIC` (lib/sfx/clips.ts) and
+   carries on under the beats after it, like the bed, which keeps playing beside it.
+   `null` stops it. A music loop is never a bed and never a cue.
+3. **It sits under the voices.** Cut to −31 LUFS, played at `MUSIC_GAIN` 0.4, and held down
+   to `MUSIC_DUCK` 0.3 of that while a line is said: a melody fights a voice in a way room
+   tone does not. A loud passage is not cut in (the Roman Carnival is taken from its quiet
+   cor anglais song, not the dance).
+4. **It fits the story's time and mood.** Fleming 1928, Satie; Descartes 1619, Bach's C
+   major prelude; Milgram, a sombre E-flat minor prelude; the tulip trade, Handel on a
+   harpsichord; Shackleton, Grieg's Morning; Amazon 1994, Joplin's own piano roll; Caesar,
+   Berlioz's Roman Carnival.
+
+### AT11 · Every sound is the sound of what is seen, and no clip is worn out (2026-10-09)
+
+> *"a lot of the sound effects are the same and are getting overused. I want different
+> sound effects that sound proper and sound like what is being looked at."*
+
+Counted across the seven first story lessons: `paper` was cued 26 times, `creak` 14,
+`crate` 12. A cue is the sound of the THING on the stage at that moment: a keyboard is
+`typing`, a quill is `quill`, a pencil is `pencil`, a page turned is `pageturn`, a lid off a
+dish is `glasslid`, a switch is `toggle`, a box is `box`, a gavel is `gavel`. No clip plays
+more than three times in a lesson, unless the same action is shown again. A door has its
+own two sounds: `door` (the handle, the latch and the swing, a real door opening) and
+`doorshut`.
+
 ### AT7 · A big set is baked: its still scenery is one picture
 
 > *"it is extremely laggy. The camera movement, the movement of different things … it needs
@@ -12519,3 +12555,25 @@ story-like, less robotic … unique for each subject."*
 - **AW6 · Two questions, two different games**, each played on the stage (AU), and at least
   one asks the reader to call what happens next before the story shows it.
   `validate-cinematic` reads `// AW: story` in the script's header and allows up to 24 beats.
+- **AW7 · Clothes fit (2026-10-09).** *"It's very bulky … everyone wearing really bulky
+  clothes like coats and it's bumpy. It needs to be more smooth and more like actual
+  clothes."* The first parts were squared bands ending flush at the knee and elbow, 3–5
+  units wider than the limb and a different width either side, so every joint showed a
+  notch and a step. A sleeve or a trouser leg is a TUBE now (`tube()` in garb.ts): a
+  capsule 1–2 units wider than the limb, centred on each joint so two tubes meet in a
+  circle and their shared outline runs on, as the bones do. A trunk is 20 wide, not 25;
+  the outline is 1.6, not 2.
+- **AW8 · Into a room, through its door.** *"When a stick man walks into a room through a
+  door, the door opens, but they just walk in from the side … it doesn't look like they're
+  actually walking in from the door."* The door opens first (and is heard: `door`), the
+  figure appears IN the doorway, framed by it and drawn behind the frame's near jamb, and
+  steps forward out of it into the room; the door then closes behind him (`doorshut`).
+  Nobody slides in from the edge of the stage past a door that has just opened.
+- **AW9 · As smooth as the foundations.** *"The lessons are very laggy … I always need all
+  the lessons very smooth and no lag."* Measured with `node scripts/perf-lesson.mjs <id>`
+  (frame times at 4× CPU), the stories dropped 7–30% of frames against the recaps' 2%,
+  because every limb and costume band of every figure was restyled on every frame, and
+  every figure was rebuilt by React on every tap. `Stickman` now keeps the pose it last
+  drew and writes nothing while it holds (a hundredth of a pixel is not a move, and an
+  invisible figure is not drawn), and it is memoised, so a tap rebuilds none of them. A
+  story lesson stays within a few points of the recaps on that probe.

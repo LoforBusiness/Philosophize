@@ -16,12 +16,20 @@ import type { SfxProvider } from './types';
 
 /** How far the bed comes down while a line is said, and how fast it moves. */
 const DUCK = 0.4;
+/**
+ * How far the MUSIC comes down under a line (AT10): much further than the bed, because
+ * a melody competes with a voice in a way room tone does not. Its gain is low to begin
+ * with (the player's MUSIC_GAIN), so under a line it is barely there.
+ */
+const MUSIC_DUCK = 0.3;
 const RAMP_MS = 450;
 const STEP_MS = 30;
 
 const players = new Map<SfxId, AudioPlayer>();
 let bedId: SfxId | null = null;
 let bedGain = 0;
+let musicId: SfxId | null = null;
+let musicGain = 0;
 let ducked = false;
 const ramps = new Map<AudioPlayer, ReturnType<typeof setInterval>>();
 let modeSet = false;
@@ -68,6 +76,7 @@ function ramp(p: AudioPlayer, to: number, done?: () => void) {
 }
 
 const bedLevel = () => bedGain * (ducked ? DUCK : 1);
+const musicLevel = () => musicGain * (ducked ? MUSIC_DUCK : 1);
 
 function prepare(ids: readonly SfxId[]) {
   ensureMode();
@@ -158,11 +167,36 @@ function bed(id: SfxId | null, gain = 0.5) {
   ramp(p, bedLevel());
 }
 
+/** The music loop: the bed's swap and fade, on a slot of its own (AT10). */
+function music(id: SfxId | null, gain = 0.3) {
+  ensureMode();
+  if (id === musicId) {
+    musicGain = gain;
+    const p = id ? players.get(id) : null;
+    if (p) ramp(p, musicLevel());
+    return;
+  }
+  const was = musicId ? players.get(musicId) : null;
+  if (was) ramp(was, 0, () => { try { was.pause(); } catch {} });
+  musicId = id;
+  musicGain = gain;
+  if (!id) return;
+  const p = playerOf(id);
+  if (!p) return;
+  try {
+    p.volume = 0;
+    p.play();
+  } catch {}
+  ramp(p, musicLevel());
+}
+
 function duck(on: boolean) {
   if (ducked === on) return;
   ducked = on;
   const p = bedId ? players.get(bedId) : null;
   if (p) ramp(p, bedLevel());
+  const m = musicId ? players.get(musicId) : null;
+  if (m) ramp(m, musicLevel());
 }
 
 function release() {
@@ -175,7 +209,8 @@ function release() {
   ready.clear();
   gen.clear();
   bedId = null;
+  musicId = null;
   ducked = false;
 }
 
-export const realSfx: SfxProvider = { isSupported: () => true, prepare, play, bed, duck, hush, release };
+export const realSfx: SfxProvider = { isSupported: () => true, prepare, play, bed, music, duck, hush, release };

@@ -104,6 +104,41 @@ export const SOURCES = {
   coinup: { id: 58919, by: 'electrosnail', title: 'coin-up.aif', url: 'https://freesound.org/people/electrosnail/sounds/58919/', licence: 'CC0 1.0' },
   windup: { id: 445966, by: 'Breviceps', title: 'Wind-up sound', url: 'https://freesound.org/people/Breviceps/sounds/445966/', licence: 'CC0 1.0' },
   thunder: { id: 193170, by: 'netaj', title: 'thunder', url: 'https://freesound.org/people/netaj/sounds/193170/', licence: 'CC0 1.0' },
+  // the unit-2 stories (2026-10-09): "a lot of the sound effects are the same and are
+  // getting overused … the door sound effect does not sound like a door"
+  doorOpen: { id: 15419, by: 'pagancow', title: 'dorm door opening.wav', url: 'https://freesound.org/people/pagancow/sounds/15419/', licence: 'CC0 1.0' },
+  doorShut: { id: 117614, by: 'soundmary', title: 'Door close.wav', url: 'https://freesound.org/people/soundmary/sounds/117614/', licence: 'CC0 1.0' },
+  typing: { id: 79388, by: 'j1987', title: 'keyboard_typing.wav', url: 'https://freesound.org/people/j1987/sounds/79388/', licence: 'CC0 1.0' },
+  quill: { id: 856167, by: 'brktkrgll', title: 'Ink Quill Writing on Parchment ASMR', url: 'https://freesound.org/people/brktkrgll/sounds/856167/', licence: 'CC0 1.0' },
+  fire: { id: 563766, by: 'florianreichelt', title: 'fire crackles', url: 'https://freesound.org/people/florianreichelt/sounds/563766/', licence: 'CC0 1.0' },
+  pageturn: { id: 136778, by: 'davidbain', title: 'Page Turn', url: 'https://freesound.org/people/davidbain/sounds/136778/', licence: 'CC0 1.0' },
+  box: { id: 95561, by: 'j1987', title: 'cardboardbox.wav', url: 'https://freesound.org/people/j1987/sounds/95561/', licence: 'CC0 1.0' },
+  packtape: { id: 151446, by: 'elle-trudgett', title: 'Ripping/unravelling packaging tape', url: 'https://freesound.org/people/elle-trudgett/sounds/151446/', licence: 'CC0 1.0' },
+  glasslid: { id: 435000, by: 'BillyPalmer', title: 'Glass lid off.wav', url: 'https://freesound.org/people/BillyPalmer/sounds/435000/', licence: 'CC0 1.0' },
+  toggle: { id: 257958, by: 'FillSoko', title: 'Light Switch ON / OFF', url: 'https://freesound.org/people/FillSoko/sounds/257958/', licence: 'CC0 1.0' },
+  breaker: { id: 131599, by: 'EchoCinematics', title: 'Kill Switch (Large Breaker Switch) .WAV', url: 'https://freesound.org/people/EchoCinematics/sounds/131599/', licence: 'CC0 1.0' },
+  ice: { id: 342546, by: 'timbreknight', title: 'Ice cracking', url: 'https://freesound.org/people/timbreknight/sounds/342546/', licence: 'CC0 1.0' },
+  wind: { id: 117136, by: 'cobratronik', title: 'Wind__Artic__Cold.wav', url: 'https://freesound.org/people/cobratronik/sounds/117136/', licence: 'CC0 1.0' },
+  gavel: { id: 173941, by: 'JohnsonBrandEditing', title: 'wood hammer, gavel, knock, pound, jury, court.mp3', url: 'https://freesound.org/people/JohnsonBrandEditing/sounds/173941/', licence: 'CC0 1.0' },
+  coinpile: { id: 118862, by: 'Eneasz', title: 'coin pile.wav', url: 'https://freesound.org/people/Eneasz/sounds/118862/', licence: 'CC0 1.0' },
+  tavern: { id: 326313, by: 'ivolipa', title: 'Tavern_Ambience_Inside_Laughter.WAV', url: 'https://freesound.org/people/ivolipa/sounds/326313/', licence: 'CC0 1.0' },
+  office: { id: 108695, by: 'DiArchangeli', title: 'Office Ambience.wav', url: 'https://freesound.org/people/DiArchangeli/sounds/108695/', licence: 'CC0 1.0' },
+  chest: { id: 271378, by: 'OverlookHotelRecords', title: 'Opening Antique Trunk - Latches and Opening.wav', url: 'https://freesound.org/people/OverlookHotelRecords/sounds/271378/', licence: 'CC0 1.0' },
+  rope: { id: 130364, by: 'harveyism', title: 'Slow Creaking Stereo.wav', url: 'https://freesound.org/people/harveyism/sounds/130364/', licence: 'CC0 1.0' },
+  modem: { id: 546450, by: 'wtermini', title: 'The Sound of dial-up Internet', url: 'https://freesound.org/people/wtermini/sounds/546450/', licence: 'CC0 1.0' },
+  scribble: { id: 82610, by: 'indigosierra', title: 'scribble.mp3', url: 'https://freesound.org/people/indigosierra/sounds/82610/', licence: 'CC0 1.0' },
+  sea: { id: 195892, by: 'miklovan', title: 'Boat on the Gulf of Finland', url: 'https://freesound.org/people/miklovan/sounds/195892/', licence: 'CC0 1.0' },
+  // MUSIC (2026-10-09): "free music or free instrumental music … completely free to use".
+  // Public-domain or CC0 recordings from Wikimedia Commons (most by Musopen, who put their
+  // recordings in the public domain), the licence read off each file's Commons page. The
+  // id is the file's name in assets/sfx/src.
+  satie: { id: 'satie', by: 'Erik Satie (Musopen)', title: 'Gymnopedie No. 1', url: 'https://commons.wikimedia.org/wiki/File:Erik_Satie_-_gymnopedies_-_la_1_ere._lent_et_douloureux.ogg', licence: 'Public domain', music: true },
+  bachc: { id: 'bachc', by: 'J. S. Bach', title: 'Well-Tempered Clavier I, Prelude No. 1 in C major', url: 'https://commons.wikimedia.org/wiki/File:JS_Bach_-_Well_Tempered_Clavier_-_Prelude_in_Fugue_No.1_in_C_major.ogg', licence: 'CC0 1.0', music: true },
+  bachebm: { id: 'bachebm', by: 'J. S. Bach (Musopen)', title: 'Well-Tempered Clavier I, Prelude No. 8 in E-flat minor', url: 'https://commons.wikimedia.org/wiki/File:Johann_Sebastian_Bach_-_book_i-_prelude_and_fugue_no._8_in_e_flat_minor,_bwv_853_-_prelude.ogg', licence: 'Public domain', music: true },
+  blacksmith: { id: 'blacksmith', by: 'G. F. Handel', title: 'Suite No. 5 in E major, The Harmonious Blacksmith', url: 'https://commons.wikimedia.org/wiki/File:Handel_-_Suites_for_Harpsichord_-_No.5_in_E_major_-_The_Harmonious_Blacksmith.ogg', licence: 'CC0 1.0', music: true },
+  morning: { id: 'morning', by: 'Edvard Grieg (Musopen)', title: 'Peer Gynt, Morning Mood', url: 'https://commons.wikimedia.org/wiki/File:Musopen_-_Morning.ogg', licence: 'Public domain', music: true },
+  entertainer: { id: 'entertainer', by: 'Scott Joplin (1902 piano roll)', title: 'The Entertainer', url: 'https://commons.wikimedia.org/wiki/File:Scott_Joplin_-_04_-_The_Entertainer_1902_piano_roll.mp3', licence: 'Public domain', music: true },
+  carnival: { id: 'carnival', by: 'Hector Berlioz (Musopen)', title: 'Roman Carnival Overture, Op. 9', url: 'https://commons.wikimedia.org/wiki/File:Hector_Berlioz_-_roman_carnival_overture,_op._9.ogg', licence: 'Public domain', music: true },
 };
 
 /**
@@ -118,7 +153,7 @@ export const CUTS = [
   { id: 'murmur', src: 'murmur', from: 0, len: 5.6, fadeOut: 1.0, loud: -22, onset: true },
   { id: 'gasp', src: 'gasp', from: 0, len: 3.8, fadeOut: 0.8, loud: -20, onset: true },
   { id: 'cheer', src: 'cheer', from: 0, len: 7.5, fadeOut: 2.0, loud: -20, onset: true },
-  { id: 'door', src: 'door', from: 0, len: 2.9, fadeOut: 0.7, loud: -22, onset: true },
+  { id: 'door', src: 'doorOpen', from: 0, len: 1.8, fadeOut: 0.3, loud: -23, onset: true },
   { id: 'steps', src: 'steps', from: 1.0, len: 2.6, fadeIn: 0.05, fadeOut: 0.5, loud: -26, onset: true },
   { id: 'pour', src: 'pour', from: 0, len: 8.3, fadeOut: 1.5, loud: -26, onset: true },
   { id: 'drip', src: 'drip', from: 0, len: 1.7, fadeOut: 0.3, loud: -26, onset: true },
@@ -214,5 +249,36 @@ export const CUTS = [
   { id: 'coinslot', src: 'coinup', from: 0, len: 0.85, fadeOut: 0.25, loud: -28, foley: true, onset: true },
   { id: 'crank', src: 'windup', from: 0, len: 0.75, fadeOut: 0.2, loud: -28, foley: true, onset: true },
   { id: 'thunder', src: 'thunder', from: 0, len: 5.0, fadeOut: 1.5, loud: -26, onset: true },
+  // the unit-2 stories (2026-10-09)
+  { id: 'doorshut', src: 'doorShut', from: 0, len: 1.2, fadeOut: 0.3, loud: -24, onset: true },
+  { id: 'typing', src: 'typing', from: 0, len: 2.4, fadeOut: 0.4, loud: -29, foley: true, onset: true, onsetDb: 10 },
+  { id: 'quill', src: 'quill', from: 0, len: 2.4, fadeOut: 0.5, loud: -29, foley: true, onset: true, onsetDb: 10 },
+  { id: 'fire', src: 'fire', from: 4, len: 30, loop: 2.5, loud: -33, bed: true, kbps: 96 },
+  { id: 'pageturn', src: 'pageturn', from: 0.3, len: 1.2, fadeOut: 0.3, loud: -29, foley: true, onset: true, onsetDb: 6 },
+  { id: 'box', src: 'box', from: 0, len: 1.4, fadeOut: 0.3, loud: -29, foley: true, onset: true, onsetDb: 8 },
+  { id: 'packtape', src: 'packtape', from: 0, len: 1.8, fadeOut: 0.4, loud: -29, foley: true, onset: true, onsetDb: 10 },
+  { id: 'glasslid', src: 'glasslid', from: 0, len: 1.2, fadeOut: 0.3, loud: -29, foley: true, onset: true, onsetDb: 8 },
+  { id: 'toggle', src: 'toggle', from: 0, len: 0.4, fadeOut: 0.1, loud: -28, foley: true, onset: true, onsetDb: 6 },
+  { id: 'breaker', src: 'breaker', from: 0, len: 1.4, fadeOut: 0.4, loud: -24, onset: true },
+  { id: 'ice', src: 'ice', from: 0, len: 3.0, fadeOut: 0.8, loud: -24, onset: true, onsetDb: 10 },
+  { id: 'wind', src: 'wind', from: 4, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  { id: 'gavel', src: 'gavel', from: 0, len: 1.0, fadeOut: 0.3, loud: -24, onset: true },
+  { id: 'coinpile', src: 'coinpile', from: 0, len: 1.8, fadeOut: 0.4, loud: -29, foley: true, onset: true, onsetDb: 8 },
+  { id: 'tavern', src: 'tavern', from: 2, len: 30, loop: 2.5, loud: -34, bed: true, kbps: 96 },
+  { id: 'office', src: 'office', from: 2, len: 30, loop: 2.5, loud: -34, bed: true, kbps: 96 },
+  { id: 'chest', src: 'chest', from: 0, len: 2.4, fadeOut: 0.4, loud: -29, foley: true, onset: true, onsetDb: 8 },
+  { id: 'rope', src: 'rope', from: 0, len: 2.0, fadeOut: 0.5, loud: -29, foley: true, onset: true, onsetDb: 10 },
+  { id: 'modem', src: 'modem', from: 0, len: 5.0, fadeOut: 0.8, loud: -26, onset: true },
+  { id: 'scribble', src: 'scribble', from: 0, len: 2.0, fadeOut: 0.4, loud: -29, foley: true, onset: true, onsetDb: 10 },
+  { id: 'sea', src: 'sea', from: 4, len: 30, loop: 2.5, loud: -32, bed: true, kbps: 96 },
+  // MUSIC: a quiet loop under the whole lesson, a layer of its own beside the bed, held
+  // far down under every line (lib/sfx `music`, LESSON_RULES AT10)
+  { id: 'msatie', src: 'satie', from: 0, len: 172, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mbachc', src: 'bachc', from: 0, len: 138, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mbachebm', src: 'bachebm', from: 0, len: 200, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mblacksmith', src: 'blacksmith', from: 0, len: 160, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mmorning', src: 'morning', from: 0, len: 125, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mentertainer', src: 'entertainer', from: 0, len: 148, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
+  { id: 'mcarnival', src: 'carnival', from: 20, len: 92, loop: 4, loud: -31, bed: true, music: true, kbps: 96 },
 ];
 

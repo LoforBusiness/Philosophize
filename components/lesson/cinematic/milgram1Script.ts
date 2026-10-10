@@ -117,8 +117,8 @@ export interface Milgram1Beat extends BaseBeat {
 
 export const BEATS: Milgram1Beat[] = [
   {
-    bed: 'room',
-    sfx: [{ id: 'paper', at: 1.0, gain: 0.6 }, { id: 'paper', at: 3.2, gain: 0.5 }, { id: 'creak', at: 4.6, gain: 0.4 }],
+    bed: 'office', music: 'mbachebm',
+    sfx: [{ id: 'pageturn', at: 1.0, gain: 0.6 }, { id: 'pageturn', at: 3.2, gain: 0.5 }, { id: 'chair', at: 4.6, gain: 0.45 }, { id: 'door', at: 'tail', gain: 0.65 }],
     voiceAfter: 6.0,
     act: 'paper', place: 0,
     speaker: 'plain',
@@ -127,7 +127,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'mug', at: 3.4, gain: 0.6 }],
+    sfx: [{ id: 'mug', at: 3.4, gain: 0.6 }, { id: 'doorshut', at: 'tail', gain: 0.55 }],
     act: 'enter', place: 0,
     speaker: 'tophat',
     text: 'Every man at that trial says the same thing. Did you call me in to read me the newspaper?',
@@ -135,7 +135,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'chalk', at: 1.95, gain: 0.6 }],
+    sfx: [{ id: 'paper', at: 0.4, gain: 0.5 }, { id: 'chalk', at: 1.95, gain: 0.6 }, { id: 'chalk', at: 3.25, gain: 0.5 }, { id: 'chalk', at: 4.25, gain: 0.55 }],
     act: 'question', place: 0,
     speaker: 'plain',
     text: 'I called you in for my brilliant question. Would an ordinary man hurt a stranger, just because someone in charge told him to?',
@@ -150,7 +150,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'pin', at: 1.7, gain: 0.7 }],
+    sfx: [{ id: 'pin', at: 1.7, gain: 0.7 }, { id: 'whoosh', at: 5.2, gain: 0.5 }],
     act: 'advert', place: 0,
     speaker: 'plain',
     text: 'I’ve put an advert in the New Haven paper. A study of memory, four dollars an hour, and you’ll run it in a grey lab coat.',
@@ -165,8 +165,8 @@ export const BEATS: Milgram1Beat[] = [
     dur: 2.1,
   },
   {
-    bed: 'museum',
-    sfx: [{ id: 'chair', at: 1.2, gain: 0.5 }],
+    bed: 'room',
+    sfx: [{ id: 'chair', at: 1.2, gain: 0.5 }, { id: 'doorshut', at: 'tail', gain: 0.55 }],
     act: 'arrive', place: 1,
     speaker: 'cap',
     text: 'Good afternoon, I’m here for the memory study. Do I keep the money, even if my memory’s no good?',
@@ -174,7 +174,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 0.4, gain: 0.5 }, { id: 'coin', at: 1.4, gain: 0.6 }, { id: 'coin', at: 1.9, gain: 0.5 }],
+    sfx: [{ id: 'cardflip', at: 0.45, gain: 0.5 }, { id: 'coin', at: 1.4, gain: 0.6 }, { id: 'coin', at: 1.9, gain: 0.5 }],
     act: 'pay', place: 1,
     speaker: 'tophat',
     text: 'It’s yours just for coming. Now, you and Mr Wallace each draw a slip from this hat.',
@@ -199,7 +199,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'tape', at: 2.6, gain: 0.5 }, { id: 'chair', at: 4.3, gain: 0.4 }],
+    sfx: [{ id: 'jarlid', at: 0.35, gain: 0.5 }, { id: 'coin', at: 2.75, gain: 0.45 }, { id: 'chair', at: 4.3, gain: 0.4 }],
     act: 'strap', place: 1,
     speaker: 'tophat',
     text: 'This paste stops any burns. The shocks can be very painful, but they cause no permanent tissue damage.',
@@ -207,7 +207,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'pencil', at: 0.8, gain: 0.5 }],
+    sfx: [{ id: 'knock', at: 0.85, gain: 0.5 }, { id: 'knock', at: 1.25, gain: 0.45 }],
     act: 'mirror', place: 1,
     speaker: 'plain',
     text: 'Mr Wallace is an accountant I hired to act. The wires to his chair go nowhere, so he’ll never feel a thing.',
@@ -215,7 +215,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'paper', at: 0.6, gain: 0.6 }],
+    sfx: [{ id: 'whoosh', at: 0.65, gain: 0.55 }],
     act: 'machine', place: 1,
     speaker: 'tophat',
     text: 'This is the shock generator. Thirty switches, from fifteen volts up to four hundred and fifty.',
@@ -230,7 +230,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'chalktap', at: 3.25, gain: 0.6 }],
+    sfx: [{ id: 'toggle', at: 3.25, gain: 0.7 }],
     act: 'sample', place: 1,
     speaker: 'tophat',
     text: 'Hold out your wrist. Here’s a real shock of forty-five volts, so you know what he’ll feel.',
@@ -246,6 +246,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
+    sfx: [{ id: 'toggle', at: 0.55, gain: 0.4 }],
     act: 'light', place: 1,
     speaker: 'tophat',
     text: 'The learner’s light says lamp, and that’s wrong. Say the voltage, then press the first switch.',
@@ -253,7 +254,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 2.1,
   },
   {
-    sfx: [{ id: 'chalktap', at: 1.4, gain: 0.6 }],
+    sfx: [{ id: 'toggle', at: 1.4, gain: 0.75 }],
     act: 'first', place: 1,
     speaker: 'cap',
     text: 'Fifteen volts. Sorry, Mr Wallace, I’m sure it’s only nerves.',
@@ -261,7 +262,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.8,
   },
   {
-    sfx: [{ id: 'pencil', at: 0.7, gain: 0.5 }],
+    sfx: [{ id: 'scribble', at: 0.7, gain: 0.55 }, { id: 'tear', at: 2.6, gain: 0.55 }],
     act: 'guess', place: 1,
     speaker: 'plain',
     text: 'Later, I’ll describe all this to thirty-nine psychiatrists. They’ll guess that one man in a thousand goes to the very end.',
@@ -278,6 +279,7 @@ export const BEATS: Milgram1Beat[] = [
     dur: 1.0,
   },
   {
+    sfx: [{ id: 'breaker', at: 0.15, gain: 0.6 }],
     act: 'rest', place: 1,
     quote: {
       id: 'lq-psychology-milgram-1-1',

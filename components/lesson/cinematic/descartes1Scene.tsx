@@ -89,11 +89,13 @@ import {
 //   b16  Q2 OPEN THE BOOK: the dream table, a dictionary, the book of poems and its three
 //        paper ribbons.
 //   b17  the dream fades; he gets up, crosses to the real table and lays a hand on the
-//        closed book of poems, chin up (2.3s).
-//   b18  the door creaks open (0.3s): the landlord in his nightcap leans in with a lantern
-//        and flaps a hand, twice: sleep.
-//   b19  the landlord withdraws and shuts the door; the soldier gets up, takes the notebook
-//        off the table (2.6s), holds it up, sets it down.     b20  at rest.
+//        closed book of poems, chin up (2.3s). After his line the door opens (4.5s, AW8):
+//        the landlord in his nightcap stands IN the doorway with a lantern, clipped to the
+//        opening and drawn a little smaller, revealed as the door swings back.
+//   b18  he steps forward out of the doorway into the room, flaps a hand, twice: sleep;
+//        then turns, walks back into the doorway, and the door shuts on him (5.0s).
+//   b19  the soldier gets up, takes the notebook off the table (2.6s), holds it up, sets it
+//        down. (Tapped through early, the landlord walks back to the door first.)  b20 rest.
 //
 // Every figure has its own phase (N22), faces whom he talks to, never walks backwards
 // (C18), and every hand that moves drags, lifts, rubs, rules, taps, tips, sweeps or points.
@@ -138,6 +140,14 @@ const Q2 = BEATS.map((b) => (b.book ? 1 : 0));
 const Q1N = Q1.indexOf(1);
 const Q2N = Q2.indexOf(1);
 const PLACE = BEATS.map((b) => b.place ?? 0);
+// What is mounted on which beat (AW9): a thing that cannot be seen is not built at all.
+const TOWN_ON = BEATS.map((_, n) => (PLACE[n] === 0 || n === at('stove') ? 1 : 0));
+const BASKET_ON = BEATS.map((_, n) => (n >= at('stove') && n <= at('grumble') ? 1 : 0));
+const APPLES_ON = BEATS.map((_, n) => (n >= at('apples') && n <= at('grumble') ? 1 : 0));
+const BOOKS_ON = BEATS.map((_, n) => (n >= at('books') && n <= at('house') ? 1 : 0));
+const PLAN_ON = BEATS.map((_, n) => (n === at('plan') || n === at('house') ? 1 : 0));
+const WIND_ON = BEATS.map((_, n) => (n === at('wind') || n === at('spark') ? 1 : 0));
+const SPARK_ON = BEATS.map((_, n) => (n === at('spark') ? 1 : 0));
 /** Who speaks each beat, as a number the worklet can read: 1 Descartes, 2 the landlord, 3 the soldier. */
 const SPK = BEATS.map((b) => (b.speaker === 'plain' ? 1 : b.speaker === 'tophat' ? 2 : b.speaker === 'cap' ? 3 : 0));
 
@@ -166,6 +176,17 @@ const BOOK_REST = HX + 232;
 const STRAY = { x: HX + 326, y: 496 };
 const DOOR_X = HX + 8;
 const DOOR_TOP = 336;
+/** The door's opening is DOOR_X … DOOR_X + DOOR_W (the panel is that wide, hinged at its left). */
+const DOOR_W = 48;
+/** The landlord standing in the doorway, and the mark he steps out to (AW8). */
+const DOOR_IN = HX + 35;
+const STEP_TO = HX + 76;
+/** How much smaller he is drawn inside the doorway, a step deeper than the room. */
+const DOOR_SC = 0.9;
+/** When the door opens after Descartes's line in b17 (the `door` cue is at 4.5s, its latch 0.37s in). */
+const OPEN_S = 4.85;
+/** When it shuts in b18 (the `doorshut` cue at 5.0s). */
+const SHUT_S = 5.0;
 const CHIMNEY = { x: 352, y: 282 };
 
 /** The apples: [dx, dy] in the basket (from its foot), where each rolls to on the table; k 6 rolls off the end. */
@@ -182,9 +203,9 @@ const C_D = per((n) => (n === PLAN || n === QUARTERS ? -1 : 1));
 const C_SEAT = per((n) => (n > SIT && n <= Q1N ? 1 : 0));
 const C_COT = per((n) => (n === WIND || n === Q2N || n === SPARK || n === ANSWER ? 1 : 0));
 /** The landlord: by the stove, at the door by night. */
-const H_X = per((n) => (n <= SIT ? HX + 326 : n <= GRUMBLE ? HX + 346 : n < VOW ? HX - 30 : HX + 34));
-const H_D = per((n) => (n === STOVE ? 1 : n === VOW ? 1 : -1));
-const H_ON = per((n) => (PLACE[n] === 1 || n === VOW || n === AFTER ? 1 : 0));
+const H_X = per((n) => (n <= SIT ? HX + 326 : n <= GRUMBLE ? HX + 346 : n < ANSWER ? HX - 30 : DOOR_IN));
+const H_D = per((n) => (n === STOVE ? 1 : n === ANSWER || n === VOW ? 1 : -1));
+const H_ON = per((n) => (PLACE[n] === 1 || n === ANSWER || n === VOW || n === AFTER ? 1 : 0));
 /** The soldier: the street, the stove, the window, the table, dozing by the bin, the table. */
 const P_X = per((n) => (n === MARCH ? -90 : n === QUARTERS ? 118 : n <= SIT ? HX + 284 : n <= APPLES ? HX + 84
   : n === Q1N ? HX + 248 : n <= GRUMBLE ? HX + 272 : n <= AFTER ? HX + 300 : HX + 252));
@@ -388,7 +409,7 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
   const heldH = useHeld();
   const heldP = useHeld();
   const heldE = useHeld();
-  const cv = useCarry(17);
+  const cv = useCarry(20);
   const on = useLinger(i);
   const pk = useSharedValue(0);
   useEffect(() => {
@@ -750,26 +771,54 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
       hLean = 0.78 * bump(0.08, 0.2, 0.3, 0.42) - 0.06 * bump(0.6, 0.68, 0.78, 0.86);
       hNeck = 0.3 * bump(0.08, 0.2, 0.3, 0.42) - 0.12 * bump(0.6, 0.68, 0.78, 0.86);
     }
+    // THE DOOR (AW8): how far it has swung open, how far he is held inside its opening
+    // (clipped to it, drawn smaller, a step deeper than the room), and his scale
+    let doorT = 0;
+    let inDoorT = 0;
+    let hScT = 1;
+    if (nv === ANSWER) {
+      // after Descartes's line the door swings open: the landlord is standing in the doorway
+      hO = b >= OPEN_S - 0.1 ? 1 : 0;
+      hR = [[0, 12, 80, 1]];
+      doorT = ss(OPEN_S, OPEN_S + 0.8);
+      inDoorT = 1;
+      hScT = DOOR_SC;
+    }
     if (nv === VOW) {
-      // in at the door with the lantern up; two flaps of the hand toward the cot: sleep
-      hO = st(0.06, 0.2);
+      // out of the doorway with the lantern up; two flaps of the hand toward the cot: sleep;
+      // then he turns, walks back into the doorway, and the door shuts on him
+      hO = 1 - ss(SHUT_S + 0.05, SHUT_S + 0.3);
+      hw = b < 3.6 ? walkOf(hxs, STEP_TO, 0.3, 1, b) : walkOf(STEP_TO, DOOR_IN, 4.05, 1, b);
+      // in the doorway he turns for one last look at them as the door shuts
+      hTurns = [[0, 1], [4.86 / L, 1]];
       hR = [[0, 12, 80, 1]];
       hL = [[0.5, 6, 44, 0], [0.6, 24, 62, 1], [0.72, 24, 50, 1], [0.84, 6, 44, 0]];
-      hLean = 0.22 * st(0.08, 0.24);
-      hNeck = 0.06 * st(0.08, 0.24);
+      hLean = 0.1 * bump(0.5, 0.58, 0.76, 0.84);
+      hNeck = 0.06 * bump(0.5, 0.58, 0.76, 0.84);
+      doorT = 1 - ss(SHUT_S + 0.03, SHUT_S + 0.4);
+      inDoorT = 1 - ss(0.4, 0.8) + ss(4.55, 4.9);
+      hScT = lerp(DOOR_SC, 1, ss(0.3, 0.95) - ss(4.4, 4.9));
     }
     if (nv === AFTER) {
-      hTurns = [[0, 1], [0.02, -1]];
-      hw = walkOf(hxs, HX - 30, 0.2, 1, b);
-      hO = 1 - ss(0.75, 1.0);
-      hR = [[0, 12, 80, 1], [0.2, 12, 70, 1]];
+      // tapped through before he was gone: he walks back to the doorway first, then it shuts
+      const away = carrySource(cv, 6, n, 0) > 0.01 && Math.abs(hxs - DOOR_IN) > 1;
+      hw = away ? walkOf(hxs, DOOR_IN, 0.05, hds, b) : STILL;
+      const we = away ? hw.we : 0;
+      hR = [[0, 12, 80, 1]];
+      hO = away ? 1 - ss(we + 0.1, we + 0.35) : 0;
+      doorT = away ? 1 - ss(we + 0.12, we + 0.5) : 0;
+      inDoorT = away ? ss(we - 0.35, we) : 1;
+      hScT = away ? lerp(1, DOOR_SC, ss(we - 0.35, we)) : DOOR_SC;
     }
     if (hw.wd === 0 && hO > 0.5 && Math.abs(hxs - H_NEXT[nv]) > 1) hw = walkOf(hxs, H_NEXT[nv], 0.05, hds, b);
     if (hw.wd !== 0) hx = hw.x;
     const hxS = carry(cv, 4, n, hx, hx, 1) + cam;
     const hd0 = carry(cv, 5, n, 0, faceOf(hds, hTurns, b, L, hw), 1);
     const hCode = sp(2) ? TALK : NOD;
-    let sh = bodyOf(hw, hCode, t, b, 1);
+    // out of sight (before the night's door opens) he holds one still pose: nothing to draw
+    const hHid = hO === 0 && carrySource(cv, 6, n, 0) < 0.001;
+    const tH = hHid ? 0 : t;
+    let sh = bodyOf(hw, hCode, tH, hHid ? 0 : b, 1);
     sh = keyed(sh, hR, u, hxS, G, hd0, 1);
     sh = keyed(sh, hL, u, hxS, G, hd0, -1);
     sh = leanOf(sh, hLean, hNeck);
@@ -778,9 +827,19 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
       sh = hand(sh, hxS, G, hd0, 1, 14, 92, up);
       sh = hand(sh, hxS, G, hd0, -1, 8, 88, up);
     }
-    const prevH = carryFrom(heldH, n, hHold(hCode, t, 1));
+    const prevH = carryFrom(heldH, n, hHold(hCode, tH, 1));
     const figH = keepHeld(heldH, hw.walking ? mixKeepLegs(prevH, sh, tr) : mixStance(prevH, sh, tr));
     const hOn = carry(cv, 6, n, hO, hO, tr);
+    const doorOpen = carry(cv, 17, n, doorT, doorT, tr);
+    const inDoor = carry(cv, 18, n, inDoorT, inDoorT, tr);
+    const hSc = carry(cv, 19, n, hScT, hScT, tr);
+    // the clip that holds him inside the doorway: the opening, its left edge the swinging panel's
+    const dL = DOOR_X + cam;
+    const panelR = dL + DOOR_W * (1 - 0.78 * doorOpen);
+    const clipL = lerp(-100, panelR, inDoor);
+    const clipR = lerp(STAGE_W + 100, dL + DOOR_W, inDoor);
+    const clipT = lerp(0, DOOR_TOP, inDoor);
+    const clipB = lerp(STAGE_H, G + 4, inDoor);
 
     // ══ THE SOLDIER ══════════════════════════════════════════════════════════
     const pxs = src(7, P_X);
@@ -885,7 +944,9 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
     const figP = keepHeld(heldP, pw.walking ? mixKeepLegs(prevP, spp, tr) : mixStance(prevP, spp, tr));
 
     // ══ THE SENTRY (silent; the town only) ═══════════════════════════════════
-    let se = hLive(NOD, t, b, 3);
+    // out of the town he is off camera and transparent: one still pose (AW9, AT7.4)
+    const inTown = place === 0;
+    let se = inTown ? hLive(NOD, t, b, 3) : hHold(NOD, 0, 3);
     let seR: readonly Key[] = [[0, 22, 40, 1]];
     let seL: readonly Key[] = [[0, 20, 42, 1]];
     let seNeck = 0;
@@ -900,14 +961,14 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
       seR = [[0, 22, 40, 1], [0.3, 24, 44, 1], [0.5, 20, 40, 1], [0.7, 22, 40, 1]];
       seNeck = 0.08 * bump(0.2, 0.3, 0.7, 0.8);
     }
-    se = keyed(se, seR, u, SENTRY_X + cam, G, 1, 1);
-    se = keyed(se, seL, u, SENTRY_X + cam, G, 1, -1);
+    se = keyed(se, seR, inTown ? u : 0, SENTRY_X + cam, G, 1, 1);
+    se = keyed(se, seL, inTown ? u : 0, SENTRY_X + cam, G, 1, -1);
     se = leanOf(se, 0.1, seNeck);
     const figE = keepHeld(heldE, mixStance(carryFrom(heldE, n, se), se, tr));
 
     // ── the bundles ──────────────────────────────────────────────────────────
     const bC = pose(figC, cxS, cgS, K, cd, 1);
-    const bH = pose(figH, hxS, G, K, hd0, hOn);
+    const bH = pose(figH, hxS, G, K * hSc, hd0, hOn);
     const bP = pose(figP, pxS, G, K, pd, 1);
     const bE = pose(figE, SENTRY_X + cam, G, K, 1, place === 0 ? 1 : 0);
     const cRw = jointOf(bC, 'wrR');
@@ -1106,8 +1167,7 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
     const blanket = (nv === SPARK && !pre) || nv === Q2N ? mid(cRw, cLw) : null;
     const candle = place === 2 ? tableOn : 0;
     // the door: open on the vow, shut again after
-    const doorOpen = nv === VOW ? st(0, 0.14) : nv === AFTER ? 1 - st(0.24, 0.34) : 0;
-    const lantern = nv === VOW || (nv === AFTER && hOn > 0.05) ? P(hRw.x, hRw.y, hOn) : HIDE;
+    const lantern = (nv === ANSWER || nv === VOW || nv === AFTER) && hOn > 0.01 ? P(hRw.x, hRw.y, hOn, 0, hSc, hSc) : HIDE;
     // the window's frost: rubbed clear in b6, and frosted over again by night
     const frostPane = nv < WINDOW ? 1 : nv === WINDOW ? 1 - st(0.12, 0.46) * 0.92 : place === 1 ? 0.08 : 0.6;
 
@@ -1118,6 +1178,7 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
       books, pack, plan, planLines, planLinesV, pencil, ruler,
       bas, apples, appleFlip, binHop,
       note, dreamIn, wash, wind, sparks, poems, tableOn, candle, doorOpen, lantern, frostPane,
+      clip: { l: clipL, t: clipT, w: Math.max(0, clipR - clipL), h: Math.max(0, clipB - clipT) },
       blanket: blanket ? P(blanket.x, blanket.y + 6, 1) : HIDE,
       windAt: cxS,
       rPath, rLove, rSeize, pageFlip: Q2[n] ? rPath : 0,
@@ -1141,10 +1202,11 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
       <Animated.View style={[styles.world, world]} pointerEvents="none">
         <LessonPicture name="descartes1-town-far" />
         <LessonPicture name="descartes1-town-mid" />
-        <Smoke S={SCENE} />
-        <Banner S={SCENE} />
+        {/* the town's moving things are mounted only while the town can be seen (AW9) */}
+        {on(TOWN_ON) ? <Smoke S={SCENE} /> : null}
+        {on(TOWN_ON) ? <Banner S={SCENE} /> : null}
         <View style={styles.cannonShadow} />
-        <Brazier S={SCENE} />
+        {on(TOWN_ON) ? <Brazier S={SCENE} /> : null}
         {/* the room by day, and by night laid over it */}
         <LessonPicture name="descartes1-room" />
         <Animated.View style={[styles.world, nightOn]}>
@@ -1167,31 +1229,34 @@ export default function Descartes1Scene({ clock, bt, bi, i, qv, picked, onPick }
         <Poems S={SCENE} />
         <DreamTable S={SCENE} />
       </Animated.View>
-      <Basket S={SCENE} />
-      <Books S={SCENE} />
-      <Plan S={SCENE} />
+      {on(BASKET_ON) ? <Basket S={SCENE} /> : null}
+      {on(BOOKS_ON) ? <Books S={SCENE} /> : null}
+      {on(PLAN_ON) ? <Plan S={SCENE} /> : null}
       <Prop S={SCENE} k="note"><View style={styles.notebook} /><View style={styles.notebookPage} /></Prop>
       {/* the hat lies on the table behind whoever stands in front of it */}
       <Hat S={SCENE} />
       {/* extra: sentry */}
-      <Stickman D={DE} k={K} role="crowd" wear={[]} garb={SOLDIER.garb?.bands} />
-      {/* cast: tophat */}
-      <Stickman D={DH} k={K} role="second" wear={i >= ENTHUSE ? NIGHTCAP_HEAD : LANDLORD_HEAD} garb={LANDLORD_GARB} />
+      {on(TOWN_ON) ? <Stickman D={DE} k={K} role="crowd" wear={[]} garb={SOLDIER.garb?.bands} /> : null}
+      {/* the landlord is held inside the doorway's opening while he stands in it (AW8) */}
+      <DoorClip S={SCENE}>
+        {/* cast: tophat */}
+        <Stickman D={DH} k={K} role="second" wear={i >= ENTHUSE ? NIGHTCAP_HEAD : LANDLORD_HEAD} garb={LANDLORD_GARB} />
+        <Prop S={SCENE} k="lantern"><LessonPicture name="descartes1-lantern" /></Prop>
+      </DoorClip>
       <Prop S={SCENE} k="log1"><LessonPicture name="descartes1-log" /></Prop>
       <Prop S={SCENE} k="log2"><LessonPicture name="descartes1-log" /></Prop>
-      <Prop S={SCENE} k="lantern"><LessonPicture name="descartes1-lantern" /></Prop>
       {/* cast: cap */}
       <Stickman D={DP} k={K} role="crowd" wear={SOLDIER_HEAD} garb={SOLDIER.garb?.bands} />
       <Prop S={SCENE} k="bundle"><LessonPicture name="descartes1-logs" /></Prop>
-      <Apples S={SCENE} />
+      {on(APPLES_ON) ? <Apples S={SCENE} /> : null}
       {/* cast: plain */}
       <Stickman D={DC} k={K} role="lead" wear={i < SIT ? DESCARTES_HEAD : []} garb={DESCARTES.garb?.bands} />
       <Prop S={SCENE} k="blanket"><View style={styles.blanket} /><View style={styles.blanketFold} /></Prop>
       <Prop S={SCENE} k="pencil"><View style={styles.pencil} /><View style={styles.pencilTip} /></Prop>
-      <Snow S={SCENE} />
+      {on(TOWN_ON) ? <Snow S={SCENE} /> : null}
       <Wash S={SCENE} />
-      <Wind S={SCENE} />
-      <Sparks S={SCENE} />
+      {on(WIND_ON) ? <Wind S={SCENE} /> : null}
+      {on(SPARK_ON) ? <Sparks S={SCENE} /> : null}
       {on(Q2) ? <Ribbons S={SCENE} /> : null}
       <Veil S={SCENE} k="haze" />
       <Veil S={SCENE} k="dark" />
@@ -1214,6 +1279,27 @@ function Prop({ S, k, children }: { S: SharedValue<any>; k: PropKey; children: R
   return <Animated.View style={[styles.rider, st]} pointerEvents="none">{children}</Animated.View>;
 }
 
+/**
+ * A window onto the stage that holds what is inside it to the doorway's opening while a
+ * figure stands in the doorway (AW8), and opens to the whole stage once he is out. The
+ * inner layer is moved back by the window's corner, so its children keep stage x and y.
+ */
+function DoorClip({ S, children }: { S: SharedValue<any>; children: React.ReactNode }) {
+  const outer = useAnimatedStyle(() => {
+    const c = S.value.clip;
+    return { left: c.l, top: c.t, width: c.w, height: c.h };
+  });
+  const inner = useAnimatedStyle(() => {
+    const c = S.value.clip;
+    return { transform: [{ translateX: -c.l }, { translateY: -c.t }] };
+  });
+  return (
+    <Animated.View style={[styles.clipBox, outer]} pointerEvents="none">
+      <Animated.View style={[styles.world, inner]} pointerEvents="none">{children}</Animated.View>
+    </Animated.View>
+  );
+}
+
 // ── the town ─────────────────────────────────────────────────────────────────
 
 /** Woodsmoke from the inn's chimney, three puffs rising and spreading. */
@@ -1222,6 +1308,8 @@ function Smoke({ S }: { S: SharedValue<any> }) {
 }
 function Puff({ S, k }: { S: SharedValue<any>; k: number }) {
   const st = useAnimatedStyle(() => {
+    // in the room the town is off camera: hold still (AW9)
+    if (S.value.town === 0) return { opacity: 0, transform: [{ translateX: CHIMNEY.x }, { translateY: CHIMNEY.y }, { scale: 1 }] };
     const ph = (S.value.t * 0.22 + k / 3) % 1;
     return {
       opacity: 0.75 * Math.sin(Math.PI * ph),
@@ -1233,7 +1321,7 @@ function Puff({ S, k }: { S: SharedValue<any>; k: number }) {
 /** The Bavarian banner on its pole, stirring in the wind. */
 function Banner({ S }: { S: SharedValue<any> }) {
   const st = useAnimatedStyle(() => {
-    const w = Math.sin(S.value.t * 1.3) * 0.6 + Math.sin(S.value.t * 0.7 + 1) * 0.4;
+    const w = S.value.town === 0 ? 0 : Math.sin(S.value.t * 1.3) * 0.6 + Math.sin(S.value.t * 0.7 + 1) * 0.4;
     return { transform: [{ translateX: 86.3 }, { translateY: 381 }, { scaleX: 0.9 + 0.08 * w }, { skewY: `${3 * w}deg` }] };
   });
   return <Animated.View style={[styles.rider, st]} pointerEvents="none"><LessonPicture name="descartes1-banner" /></Animated.View>;
@@ -1244,13 +1332,16 @@ function Brazier({ S }: { S: SharedValue<any> }) {
     <View style={[styles.at, { left: BRAZIER.x, top: BRAZIER.y }]} pointerEvents="none">
       <View style={styles.brazierLegs} />
       <View style={styles.brazierBowl} />
-      {[-4, 0, 4].map((dx, k) => <Flame key={k} S={S} x={dx} y={-19} k={k} s={0.7} />)}
+      {[-4, 0, 4].map((dx, k) => <Flame key={k} S={S} x={dx} y={-19} k={k} s={0.7} on="town" />)}
     </View>
   );
 }
-function Flame({ S, x, y, k, s }: { S: SharedValue<any>; x: number; y: number; k: number; s: number }) {
+function Flame({ S, x, y, k, s, on }: { S: SharedValue<any>; x: number; y: number; k: number; s: number; on: 'town' | 'stove' | 'candle' }) {
   const st = useAnimatedStyle(() => {
-    const t = S.value.t;
+    const v = S.value;
+    // a flame the camera cannot see holds still (AW9)
+    const live = on === 'town' ? v.town === 1 : on === 'stove' ? v.town === 0 && v.fireOpen > 0 : v.candle > 0;
+    const t = live ? v.t : 0;
     const f = 0.8 + 0.2 * Math.sin(t * (7 + k) + k * 2) + 0.1 * Math.sin(t * 13 + k);
     return { transform: [{ translateX: x + Math.sin(t * 5 + k) }, { translateY: y }, { scaleY: f * s }, { scaleX: s }] };
   });
@@ -1271,6 +1362,7 @@ function Snow({ S }: { S: SharedValue<any> }) {
 }
 function Flake({ S, f, k }: { S: SharedValue<any>; f: { x: number; ph: number; v: number; s: number }; k: number }) {
   const st = useAnimatedStyle(() => {
+    if (S.value.town === 0) return { opacity: 0, transform: [{ translateX: f.x }, { translateY: 214 }, { scale: f.s }] };
     const y = (f.ph * 300 + S.value.t * f.v) % 300;
     return {
       opacity: S.value.town,
@@ -1306,7 +1398,7 @@ function StoveFire({ S }: { S: SharedValue<any> }) {
       <Animated.View style={[styles.glowTiles, glow]} pointerEvents="none" />
       <Animated.View style={[styles.world, open]} pointerEvents="none">
         <LessonPicture name="descartes1-stove-open" />
-        {[-6, 0, 6].map((dx, k) => <Flame key={k} S={S} x={FIRE.x + dx} y={471} k={k} s={0.75} />)}
+        {[-6, 0, 6].map((dx, k) => <Flame key={k} S={S} x={FIRE.x + dx} y={471} k={k} s={0.75} on="stove" />)}
       </Animated.View>
     </>
   );
@@ -1328,7 +1420,7 @@ function Candle({ S }: { S: SharedValue<any> }) {
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
       <LessonPicture name="descartes1-candle" />
-      <Flame S={S} x={0} y={-19} k={4} s={0.5} />
+      <Flame S={S} x={0} y={-19} k={4} s={0.5} on="candle" />
     </Animated.View>
   );
 }
@@ -1343,7 +1435,7 @@ function Poems({ S }: { S: SharedValue<any> }) {
 }
 /** The third dream's table: the dictionary and the book of poems open on it. */
 function DreamTable({ S }: { S: SharedValue<any> }) {
-  const st = useAnimatedStyle(() => ({ opacity: S.value.dreamIn, transform: [{ translateX: TABLE_X }, { translateY: G - 2 * Math.sin(S.value.t * 1.1) }] }));
+  const st = useAnimatedStyle(() => ({ opacity: S.value.dreamIn, transform: [{ translateX: TABLE_X }, { translateY: G - (S.value.dreamIn > 0 ? 2 * Math.sin(S.value.t * 1.1) : 0) }] }));
   const page = useAnimatedStyle(() => ({
     opacity: S.value.pageFlip > 0.05 && S.value.pageFlip < 0.95 ? 1 : 0,
     transform: [{ translateX: -12 }, { translateY: -40 }, { scaleX: Math.cos(Math.PI * S.value.pageFlip) }],
@@ -1459,7 +1551,7 @@ function Wind({ S }: { S: SharedValue<any> }) {
 function Arc({ S, r, ph, v }: { S: SharedValue<any>; r: number; ph: number; v: number }) {
   const st = useAnimatedStyle(() => ({
     opacity: S.value.wind,
-    transform: [{ translateX: S.value.windAt }, { translateY: 444 }, { scaleY: 0.62 }, { rotate: `${(S.value.t * v * 140 + ph * 57) % 360}deg` }],
+    transform: [{ translateX: S.value.wind > 0 ? S.value.windAt : 0 }, { translateY: 444 }, { scaleY: 0.62 }, { rotate: `${S.value.wind > 0 ? (S.value.t * v * 140 + ph * 57) % 360 : 0}deg` }],
   }));
   return (
     <Animated.View style={[styles.rider, st]} pointerEvents="none">
@@ -1585,6 +1677,7 @@ const styles = StyleSheet.create({
   scene: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, transformOrigin: '0% 0%' },
   world: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H },
   rider: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
+  clipBox: { position: 'absolute', overflow: 'hidden' },
   at: { position: 'absolute', width: 0, height: 0 },
   haze: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.descartes1Snow.base },
   dark: { position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H, backgroundColor: W.descartes1Night.base },
