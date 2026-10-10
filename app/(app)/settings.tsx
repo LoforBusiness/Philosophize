@@ -924,12 +924,12 @@ function VersionLine() {
         onPress={() => {
           const n = taps + 1;
           setTaps(n);
-          if (n >= 7) unlockDev();
+          if (__DEV__ && n >= 7) unlockDev();
         }}
       >
         <Text style={styles.footNote}>
           Version {Application.nativeApplicationVersion ?? '1.0.0'} ({build})
-          {!devUnlocked && taps >= 3 ? `  ·  ${7 - taps} more` : ''}
+          {__DEV__ && !devUnlocked && taps >= 3 ? `  ·  ${7 - taps} more` : ''}
         </Text>
       </Pressable>
       {devUnlocked && (

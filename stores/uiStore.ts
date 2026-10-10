@@ -168,7 +168,10 @@ export const useUIStore = create<UIStore>((set) => ({
   setPromptUp: (v) => set({ promptUp: v }),
   paywallSource: 'locked_lesson',
   devUnlocked: __DEV__,
-  unlockDev: () => set({ devUnlocked: true }),
+  // DEVELOPMENT BUILDS ONLY (2026-10-10). The seven taps on Settings' version line
+  // used to open the lesson tester in the store app too, which opened every lesson
+  // without the Pass. In a release build this does nothing (check:access holds it).
+  unlockDev: () => { if (__DEV__) set({ devUnlocked: true }); },
   testLessonId: null,
   setTestLesson: (id) => set({ testLessonId: id }),
   openPaywall: (source = 'locked_lesson') => set({ paywallOpen: true, paywallSource: source }),

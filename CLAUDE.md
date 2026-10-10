@@ -136,7 +136,7 @@ Philosophize/
 │       ├── streak.tsx           # Hidden route — THE STREAK SCREEN: the mascot,
 │       │                        #   the reader's society (SocietyCard), the month (§7)
 │       ├── devlessons.tsx       # Hidden route — the lesson tester, open only after
-│       │                        #   seven taps on Settings' version line; records nothing
+│       │                        #   seven taps on Settings' version line, in a DEVELOPMENT build only (2026-10-10, check:access); records nothing
 │       └── intro.tsx            # Hidden route — THE PROFESSOR'S INTRO, then the
 │                                #   paywall for a free reader — OFF since 2026-09-30, `PROFESSOR_INTRO_ON` (§14)
 ├── components/

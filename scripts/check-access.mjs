@@ -138,5 +138,37 @@ for (const [li, done, startable, isPro, want] of cases) {
     'the lesson route still carries the latch', 'remove it and a trial ending ejects a reader mid-lesson');
 }
 
+// ── no way round the paywall in the store app (2026-10-10) ──────────────────
+//
+// A security check found two: seven taps on Settings' version line opened the
+// lesson tester for every user, and `?test=1` on a lesson link skipped the gate.
+// Both work only in a development build now, and these hold it. Comments are
+// stripped first, so a sentence explaining the rule cannot satisfy it.
+{
+  const bare = (f) => fs.readFileSync(path.join(REPO, f), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const store = bare('stores/uiStore.ts');
+  ok(/unlockDev:\s*\(\)\s*=>\s*\{\s*if\s*\(__DEV__\)/.test(store),
+    'the lesson tester can only be unlocked in a development build',
+    'uiStore.unlockDev must check __DEV__ before setting devUnlocked');
+  ok(/devUnlocked:\s*__DEV__/.test(store), 'and it starts locked in a release build',
+    'uiStore.devUnlocked must default to __DEV__');
+  const route = bare('app/(app)/branches/[branchSlug]/[pathSlug]/lesson/[lessonId].tsx');
+  const t = /const testing = ([^;]+);/.exec(route);
+  ok(!!t && /devUnlocked/.test(t[1]),
+    'a ?test=1 lesson link opens nothing unless the tester is unlocked',
+    t ? `testing is "${t[1]}"` : 'no testing flag found in the lesson route');
+  const settings = bare('app/(app)/settings.tsx');
+  ok(!/unlockDev\(\)/.test(settings.replace(/__DEV__\s*&&[^;]*unlockDev\(\)/g, '')),
+    'Settings counts the seven taps only in a development build',
+    'every unlockDev() call in settings.tsx must sit behind __DEV__');
+  // any other lesson route that reads a test param must go through the same gate
+  for (const f of ['app/(app)/branches/[branchSlug]/[pathSlug]/review.tsx']) {
+    if (!fs.existsSync(path.join(REPO, f))) continue;
+    const s = bare(f);
+    ok(!/test\s*===\s*'1'/.test(s) || /devUnlocked/.test(s), `${f} has no ungated test link`);
+  }
+}
+
 console.log(bad ? `\n${bad} problem(s).\n` : '\nthe gate is sound.\n');
 process.exit(bad ? 1 : 0);

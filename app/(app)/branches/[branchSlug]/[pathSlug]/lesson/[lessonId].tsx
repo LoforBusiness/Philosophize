@@ -161,7 +161,13 @@ export default function LessonScreen() {
   // under test, to null otherwise. So there is no state to leak: walking out of
   // a test run and into a real lesson clears it on the way in, and a real run
   // can never be silently swallowed.
-  const testing = test === '1';
+  //
+  // AND ONLY WHERE THE TESTER CAN BE OPENED AT ALL (2026-10-10): `?test=1` on a
+  // lesson link skipped the paywall for anyone who typed it. `devUnlocked` can only
+  // be true in a development build (uiStore.unlockDev), so in the store app the
+  // param is ignored and the lesson is gated like any other.
+  const devUnlocked = useUIStore((s) => s.devUnlocked);
+  const testing = test === '1' && devUnlocked;
   const setTestLesson = useUIStore((s) => s.setTestLesson);
   useEffect(() => {
     setTestLesson(testing ? lessonId : null);

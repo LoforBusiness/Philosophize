@@ -35,6 +35,7 @@ import UnitReview, { hasReview } from '@/components/lesson/cinematic/review/Unit
 import { exitLesson } from '@/components/lesson/exitLesson';
 import HardPaywall from '@/components/paywall/HardPaywall';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
+import { useUIStore } from '@/stores/uiStore';
 import { track } from '@/lib/posthog';
 
 export default function UnitReviewScreen() {
@@ -44,10 +45,12 @@ export default function UnitReviewScreen() {
   const ok = !!branch && !!unit && hasReview(unit.id);
   const [loading, setLoading] = useState(true);
   const isPro = useSubscriptionStore((s) => s.isPro);
+  const devUnlocked = useUIStore((s) => s.devUnlocked);
   // ONCE OPEN, OPEN FOR THE VISIT — the lesson route's latch, for the same reason:
   // a trial that ends mid-review must not throw the reader onto the paywall.
   const everOpen = useRef(false);
-  if (isPro || test === '1') everOpen.current = true;
+  // the tester's link opens it only where the tester can be unlocked: a development build (check:access)
+  if (isPro || (test === '1' && devUnlocked)) everOpen.current = true;
   const allowed = everOpen.current;
 
   useEffect(() => {
