@@ -24,12 +24,14 @@ for (const [id, p] of Object.entries(PLATES)) {
   else if (m[1] !== want) bad.push(`${id}: stale (made from ${m[1]}, the plate is now ${want})`);
 }
 // …and the roads' scenery layers (make:road-art): the same promise, for BranchWorld.
-const { roadStamp, PLACES } = await import('./make-road-art.mjs');
+const { roadStamp, PLACES, unitsOf } = await import('./make-road-art.mjs');
 const roadArt = fs.readFileSync(path.join(REPO, 'components/branch/roadArt.ts'), 'utf8');
-for (const place of PLACES) {
-  const key = `${place}:0`;
+// EVERY unit of every road, counted from the data: this checked unit 0 alone, so the story units
+// added on 2026-10-09 shipped unbaked and drew their scenery live (BranchWorld's SceneBack).
+for (const place of PLACES) for (let unit = 0; unit < unitsOf(place); unit++) {
+  const key = `${place}:${unit}`;
   const m = roadArt.match(new RegExp(`'${key}': '([0-9a-f]+)'`));
-  const want = roadStamp(place, 0);
+  const want = roadStamp(place, unit);
   if (!m) bad.push(`road ${key}: never baked (npm run make:road-art)`);
   else if (m[1] !== want) bad.push(`road ${key}: stale (baked from ${m[1]}, the scenery is now ${want}) — npm run make:road-art`);
 }

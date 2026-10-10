@@ -73,6 +73,10 @@ const WALK_LEAD_IN = 520;
 const SIGN_H = 172;
 /** The sign's pressable box: the board plus room for the NEW tab to stand off its corner. */
 const SIGN_BOX_W = 172;
+/** The most signs MarkerLayer ever holds (the camera's span, one behind and three ahead). */
+const SIGNS_MOUNTED = 5;
+/** How long after the road mounts the off-screen signs start joining: past the screen's rise. */
+const ARRIVE_MS = 450;
 
 export interface WorldLesson {
   id: string; title: string;
@@ -406,7 +410,8 @@ export default function BranchWorld({
         {figure}
       </Animated.View>
 
-      <MarkerLayerM camX={camX} markers={markers} lessons={lessons} at={busy ? -1 : at} m={vp.m} onTap={tapLesson} />
+      <MarkerLayerM camX={camX} markers={markers} lessons={lessons} at={busy ? -1 : at} m={vp.m} width={width}
+        arriveCam={camFor(markers[advanceTo ? advanceTo.from : current]?.x ?? 0)} onTap={tapLesson} />
     </View>
   );
 }
@@ -532,16 +537,54 @@ function GroundBand({ camX, chunk, place }: { camX: SharedValue<number>; chunk: 
  *
  * Only the five around the camera are mounted. That is not only cheaper, it is
  * complete: a sign you cannot see is a sign you cannot press.
+ *
+ * ── AND ON ARRIVAL, ONLY THE ONES ON SCREEN (2026-10-09) ────────────────────
+ *
+ *   "when a user clicks on a subject … there's a little lag … a little bit of glitch."
+ *
+ * Measured at 4× CPU, the five signs were half of the road's arrival: about 250 ms of
+ * the ~500 the screen blocked for, more than the scenery, the ground and the figure
+ * together. Only one of them (and a sliver of the one before) is on screen when the road
+ * opens; the other three wait off to the right for a walk that has not started. So the
+ * first render mounts the signs that cross the screen, and the rest join one a frame
+ * once the screen has arrived (ARRIVE_MS), nearest first — before WALK_LEAD_IN is out, so
+ * a walk that starts on arrival still finds its sign standing.
  */
-function MarkerLayer({ camX, markers, lessons, at, m, onTap }: {
+function MarkerLayer({ camX, markers, lessons, at, m, width, arriveCam, onTap }: {
   camX: SharedValue<number>; markers: Marker[]; lessons: WorldLesson[];
-  at: number; m: number; onTap: (i: number) => void;
+  at: number; m: number; width: number;
+  /** Where the camera stands on arrival. camX is only set after the first render. */
+  arriveCam: number;
+  onTap: (i: number) => void;
 }) {
   const st = useAnimatedStyle(() => ({ transform: [{ translateX: -camX.value }] }));
   const lo = Math.max(0, m - 1);
   const hi = Math.min(markers.length - 1, m + 3);
-  const shown: Marker[] = [];
-  for (let i = lo; i <= hi; i++) if (markers[i]) shown.push(markers[i]);
+  const all: Marker[] = [];
+  for (let i = lo; i <= hi; i++) if (markers[i]) all.push(markers[i]);
+  // How many off-screen signs have joined since the road arrived; Infinity once all have.
+  const [joined, setJoined] = useState(0);
+  const full = joined === Infinity;
+  useEffect(() => {
+    if (full) return;
+    let raf = 0;
+    const step = () => {
+      setJoined((n) => (n >= SIGNS_MOUNTED ? Infinity : n + 1));
+      raf = requestAnimationFrame(step);
+    };
+    const t = setTimeout(() => { raf = requestAnimationFrame(step); }, ARRIVE_MS);
+    return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+  }, [full]);
+  let shown = all;
+  if (!full) {
+    // A sign covers [x + SIGN_DX ± SIGN_BOX_W/2]; the screen is [cam, cam + width].
+    const cam = arriveCam;
+    const onScreen = (mk: Marker) => mk.x + SIGN_DX + SIGN_BOX_W / 2 > cam && mk.x + SIGN_DX - SIGN_BOX_W / 2 < cam + width;
+    const centre = cam + width / 2;
+    const off = all.filter((mk) => !onScreen(mk)).sort((a, b) => Math.abs(a.x - centre) - Math.abs(b.x - centre));
+    const keep = new Set([...all.filter(onScreen), ...off.slice(0, joined)]);
+    shown = all.filter((mk) => keep.has(mk));
+  }
   return (
     <Animated.View style={[StyleSheet.absoluteFill, st]}>
       {shown.map((mk) => {

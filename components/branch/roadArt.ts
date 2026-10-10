@@ -5,12 +5,19 @@ export const ROAD_SCALE = 2;
 
 export const ROAD_STAMP: Record<string, string> = {
   'philosophy:0': 'e4189763da9162d2',
+  'philosophy:1': 'cbb72f7ea8fbdaa3',
   'psychology:0': '81345d338064b985',
+  'psychology:1': '1ba8f9b304ef729e',
   'personal-growth:0': '1723bfd9324ad4e6',
+  'personal-growth:1': 'fb5b0106a8854a98',
   'business:0': 'd737f0974aca4f34',
+  'business:1': '73f1c35b3c5d3eaf',
   'economics:0': '926f39762fdd512e',
+  'economics:1': '2f80a7dabd3af019',
   'science:0': '746c846550c945dd',
+  'science:1': 'b2b37dea14291c4e',
   'history:0': 'f5c0ac9c8963c956',
+  'history:1': 'b75e146766e920e4',
 };
 
 export const ROAD_ART: Record<string, number[]> = {
@@ -23,6 +30,14 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/philosophy-0-5.png'),
     require('../../assets/images/road/philosophy-0-6.png'),
   ],
+  'philosophy:1': [
+    require('../../assets/images/road/philosophy-1-0.png'),
+    require('../../assets/images/road/philosophy-1-1.png'),
+    require('../../assets/images/road/philosophy-1-2.png'),
+    require('../../assets/images/road/philosophy-1-3.png'),
+    require('../../assets/images/road/philosophy-1-4.png'),
+    require('../../assets/images/road/philosophy-1-5.png'),
+  ],
   'psychology:0': [
     require('../../assets/images/road/psychology-0-0.png'),
     require('../../assets/images/road/psychology-0-1.png'),
@@ -30,6 +45,14 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/psychology-0-3.png'),
     require('../../assets/images/road/psychology-0-4.png'),
     require('../../assets/images/road/psychology-0-5.png'),
+  ],
+  'psychology:1': [
+    require('../../assets/images/road/psychology-1-0.png'),
+    require('../../assets/images/road/psychology-1-1.png'),
+    require('../../assets/images/road/psychology-1-2.png'),
+    require('../../assets/images/road/psychology-1-3.png'),
+    require('../../assets/images/road/psychology-1-4.png'),
+    require('../../assets/images/road/psychology-1-5.png'),
   ],
   'personal-growth:0': [
     require('../../assets/images/road/personal-growth-0-0.png'),
@@ -40,11 +63,25 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/personal-growth-0-5.png'),
     require('../../assets/images/road/personal-growth-0-6.png'),
   ],
+  'personal-growth:1': [
+    require('../../assets/images/road/personal-growth-1-0.png'),
+    require('../../assets/images/road/personal-growth-1-1.png'),
+    require('../../assets/images/road/personal-growth-1-2.png'),
+    require('../../assets/images/road/personal-growth-1-3.png'),
+    require('../../assets/images/road/personal-growth-1-4.png'),
+    require('../../assets/images/road/personal-growth-1-5.png'),
+  ],
   'business:0': [
     require('../../assets/images/road/business-0-0.png'),
     require('../../assets/images/road/business-0-1.png'),
     require('../../assets/images/road/business-0-2.png'),
     require('../../assets/images/road/business-0-3.png'),
+  ],
+  'business:1': [
+    require('../../assets/images/road/business-1-0.png'),
+    require('../../assets/images/road/business-1-1.png'),
+    require('../../assets/images/road/business-1-2.png'),
+    require('../../assets/images/road/business-1-3.png'),
   ],
   'economics:0': [
     require('../../assets/images/road/economics-0-0.png'),
@@ -55,6 +92,14 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/economics-0-5.png'),
     require('../../assets/images/road/economics-0-6.png'),
   ],
+  'economics:1': [
+    require('../../assets/images/road/economics-1-0.png'),
+    require('../../assets/images/road/economics-1-1.png'),
+    require('../../assets/images/road/economics-1-2.png'),
+    require('../../assets/images/road/economics-1-3.png'),
+    require('../../assets/images/road/economics-1-4.png'),
+    require('../../assets/images/road/economics-1-5.png'),
+  ],
   'science:0': [
     require('../../assets/images/road/science-0-0.png'),
     require('../../assets/images/road/science-0-1.png'),
@@ -62,6 +107,13 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/science-0-3.png'),
     require('../../assets/images/road/science-0-4.png'),
     require('../../assets/images/road/science-0-5.png'),
+  ],
+  'science:1': [
+    require('../../assets/images/road/science-1-0.png'),
+    require('../../assets/images/road/science-1-1.png'),
+    require('../../assets/images/road/science-1-2.png'),
+    require('../../assets/images/road/science-1-3.png'),
+    require('../../assets/images/road/science-1-4.png'),
   ],
   'history:0': [
     require('../../assets/images/road/history-0-0.png'),
@@ -72,6 +124,14 @@ export const ROAD_ART: Record<string, number[]> = {
     require('../../assets/images/road/history-0-5.png'),
     require('../../assets/images/road/history-0-6.png'),
   ],
+  'history:1': [
+    require('../../assets/images/road/history-1-0.png'),
+    require('../../assets/images/road/history-1-1.png'),
+    require('../../assets/images/road/history-1-2.png'),
+    require('../../assets/images/road/history-1-3.png'),
+    require('../../assets/images/road/history-1-4.png'),
+    require('../../assets/images/road/history-1-5.png'),
+  ],
 };
 
 /**
@@ -81,10 +141,17 @@ export const ROAD_ART: Record<string, number[]> = {
  */
 export const ROAD_LAYERS: Record<string, { k: number; top: number; h: number }[]> = {
   'philosophy:0': [{ k: 0.05, top: 83, h: 69 }, { k: 0.05, top: 191, h: 103 }, { k: 0.08, top: 253, h: 49 }, { k: 0.1, top: 146, h: 138 }, { k: 0.3, top: 252, h: 58 }, { k: 0.46, top: 174, h: 128 }, { k: 0.56, top: 282, h: 78 }],
+  'philosophy:1': [{ k: 0.05, top: 150, h: 144 }, { k: 0.08, top: 254, h: 48 }, { k: 0.1, top: 146, h: 138 }, { k: 0.3, top: 254, h: 56 }, { k: 0.46, top: 174, h: 128 }, { k: 0.56, top: 282, h: 78 }],
   'psychology:0': [{ k: 0.05, top: 174, h: 104 }, { k: 0.12, top: 248, h: 34 }, { k: 0.16, top: 236, h: 74 }, { k: 0.2, top: 260, h: 38 }, { k: 0.42, top: 168, h: 134 }, { k: 0.56, top: 282, h: 78 }],
+  'psychology:1': [{ k: 0.05, top: 164, h: 114 }, { k: 0.12, top: 241, h: 41 }, { k: 0.16, top: 234, h: 76 }, { k: 0.2, top: 260, h: 38 }, { k: 0.42, top: 168, h: 134 }, { k: 0.56, top: 283, h: 77 }],
   'personal-growth:0': [{ k: 0.05, top: 52, h: 100 }, { k: 0.04, top: 191, h: 101 }, { k: 0.06, top: 211, h: 91 }, { k: 0.09, top: 66, h: 220 }, { k: 0.26, top: 274, h: 36 }, { k: 0.44, top: 157, h: 145 }, { k: 0.56, top: 284, h: 76 }],
+  'personal-growth:1': [{ k: 0.04, top: 190, h: 102 }, { k: 0.06, top: 212, h: 90 }, { k: 0.09, top: 66, h: 220 }, { k: 0.26, top: 274, h: 36 }, { k: 0.44, top: 162, h: 140 }, { k: 0.56, top: 283, h: 77 }],
   'business:0': [{ k: 0.05, top: 172, h: 106 }, { k: 0.12, top: 136, h: 170 }, { k: 0.32, top: 170, h: 140 }, { k: 0.56, top: 282, h: 78 }],
+  'business:1': [{ k: 0.05, top: 155, h: 123 }, { k: 0.12, top: 127, h: 179 }, { k: 0.32, top: 191, h: 119 }, { k: 0.56, top: 282, h: 78 }],
   'economics:0': [{ k: 0.05, top: 65, h: 87 }, { k: 0.05, top: 183, h: 87 }, { k: 0.1, top: 186, h: 124 }, { k: 0.18, top: 258, h: 36 }, { k: 0.22, top: 222, h: 72 }, { k: 0.4, top: 141, h: 161 }, { k: 0.56, top: 283, h: 77 }],
+  'economics:1': [{ k: 0.05, top: 173, h: 97 }, { k: 0.1, top: 194, h: 116 }, { k: 0.18, top: 258, h: 36 }, { k: 0.22, top: 222, h: 72 }, { k: 0.4, top: 141, h: 161 }, { k: 0.56, top: 282, h: 78 }],
   'science:0': [{ k: 0.05, top: 78, h: 74 }, { k: 0.05, top: 175, h: 105 }, { k: 0.1, top: 116, h: 194 }, { k: 0.12, top: 207, h: 85 }, { k: 0.3, top: 183, h: 119 }, { k: 0.56, top: 284, h: 76 }],
+  'science:1': [{ k: 0.05, top: 154, h: 126 }, { k: 0.1, top: 116, h: 194 }, { k: 0.12, top: 207, h: 85 }, { k: 0.3, top: 183, h: 119 }, { k: 0.56, top: 285, h: 75 }],
   'history:0': [{ k: 0.05, top: 86, h: 66 }, { k: 0.05, top: 173, h: 115 }, { k: 0.06, top: 258, h: 52 }, { k: 0.09, top: 97, h: 183 }, { k: 0.26, top: 176, h: 122 }, { k: 0.46, top: 176, h: 126 }, { k: 0.56, top: 282, h: 78 }],
+  'history:1': [{ k: 0.05, top: 149, h: 139 }, { k: 0.06, top: 261, h: 49 }, { k: 0.09, top: 97, h: 183 }, { k: 0.26, top: 176, h: 122 }, { k: 0.46, top: 176, h: 126 }, { k: 0.56, top: 283, h: 77 }],
 };

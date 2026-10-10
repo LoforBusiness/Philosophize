@@ -5723,6 +5723,11 @@ native views on the frame the road opens, which is what made tapping a subject l
 `MAST_POSTER` from `make:posters` now, the road lays its baked scenery from `ROAD_LAYERS`
 without building any path in JS, and at 4× CPU the worst frame on arrival went 1.15s →
 0.28s (science) and 1.48s → 0.37s (business). `check:subjects` fails a live poster there.
+**And on 2026-10-09 the lag came back with the story units.** `make:road-art` baked unit 0
+alone and `check:plates` checked unit 0 alone, so every road's second unit drew its scenery
+as live `<Svg>` layers again. Both now cover every unit counted out of `data/branches/<road>/paths`.
+The five road signs were then half of what was left: the road mounts only the signs on screen
+when it opens and adds the rest one a frame after `ARRIVE_MS`, and `RoadSign` is memoised.
 
 A sign blends into TAP TO START as the figure arrives, and the road ends at a
 `ComingSoonBoard` (`Branch.more`). A journey from Home arrives behind the paper

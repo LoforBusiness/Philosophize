@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   cancelAnimation, Easing, interpolateColor, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
@@ -53,7 +53,7 @@ export const TITLE_LINE = 18;
 /** The most lines a title may take. */
 export const TITLE_LINES = 3;
 
-export default function RoadSign({
+function RoadSign({
   title, hue, label, icon, here, done, locked, isNew, needsPass = false,
 }: {
   title: string;
@@ -146,6 +146,13 @@ export default function RoadSign({
     </View>
   );
 }
+
+/**
+ * Rebuilt only when what it shows changes (2026-10-09). Every prop is a plain value, and
+ * the road screen re-renders on focus and on the camera's first reading, which redrew
+ * all five signs twice straight after the road opened for nothing.
+ */
+export default memo(RoadSign);
 
 /**
  * NEW, on the board's top-right corner. It lands once (a stamp coming down, like
